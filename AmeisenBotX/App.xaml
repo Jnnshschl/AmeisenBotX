@@ -1,0 +1,17 @@
+﻿<Application x:Class="AmeisenBotX.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:AmeisenBotX"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <Color x:Key="DarkBackground">#FF323232</Color>
+        <Color x:Key="DarkForeground">#FFFFFFFF</Color>
+        <Color x:Key="DarkBorder">#FF969696</Color>
+        <Color x:Key="DarkAccent1">#FFFF8000</Color>
+        <Color x:Key="DarkAccent2">#FFFF0000</Color>
+        <Color x:Key="PlayerHealthBar">#FF80FF00</Color>
+        <Color x:Key="PlayerManaBar">#FF00FFFF</Color>
+        <Color x:Key="PlayerExpBar">#FFFF8000</Color>
+        <Color x:Key="TextAccent">#FFFF0050</Color> 
+    </Application.Resources>
+</Application>
