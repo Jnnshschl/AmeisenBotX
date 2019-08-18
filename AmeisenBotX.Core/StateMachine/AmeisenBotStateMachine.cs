@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.States;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,7 +35,7 @@ namespace AmeisenBotX.Core.StateMachine
 
         public event StateMachineStateChange OnStateMachineStateChange;
 
-        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, CacheManager cacheManager)
+        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, CacheManager cacheManager, IPathfindingHandler pathfindingHandler)
         {
             Config = config;
             XMemory = xMemory;
@@ -52,8 +53,8 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
                 { AmeisenBotState.Idle, new StateIdle(this, config, objectManager, hookManager)},
-                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager)},
-                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager)},
+                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
+                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)}
             };
 

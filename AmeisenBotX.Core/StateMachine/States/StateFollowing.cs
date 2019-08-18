@@ -24,14 +24,14 @@ namespace AmeisenBotX.Core.StateMachine.States
         private WowPosition LastPosition { get; set; }
         private int TryCount { get; set; }
 
-        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
+        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler) : base(stateMachine)
         {
             TryCount = 0;
             Config = config;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
+            PathfindingHandler = pathfindingHandler;
             CurrentPath = new Queue<WowPosition>();
-            PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
         }
 
         public override void Enter()

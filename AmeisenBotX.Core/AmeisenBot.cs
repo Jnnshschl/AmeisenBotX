@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Pathfinding;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -21,6 +22,7 @@ namespace AmeisenBotX.Core
         public CharacterManager CharacterManager { get; set; }
         public HookManager HookManager { get; set; }
         public CacheManager CacheManager { get; set; }
+        public IPathfindingHandler PathfindingHandler { get; set; }
 
         public Process WowProcess { get; }
 
@@ -65,7 +67,8 @@ namespace AmeisenBotX.Core
             ObjectManager = new ObjectManager(XMemory, OffsetList, CacheManager);
             CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, CacheManager);
-            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, CacheManager);
+            PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
+            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, CacheManager, PathfindingHandler);
         }
 
         public void Start()

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -35,6 +36,31 @@ namespace AmeisenBotX.Core.Common
                 || unit.IsNotAttackable)
                 return false;
             return true;
+        }
+
+        public static bool IsMeeleeClass(WowClass wowClass)
+        {
+            switch (wowClass)
+            {
+                case WowClass.DeathKnight: return true;
+                case WowClass.Paladin: return true;
+                case WowClass.Rogue: return true;
+                case WowClass.Warrior: return true;
+
+                // special case, need to check for owl
+                case WowClass.Druid: return true;
+
+                // special case, need to check for enhancement
+                case WowClass.Shaman: return false;
+
+                // special case, need to check for survival
+                case WowClass.Hunter: return false;
+
+
+
+                default:
+                    return false;
+            }
         }
     }
 }
