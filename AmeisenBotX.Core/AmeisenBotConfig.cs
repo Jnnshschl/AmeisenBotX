@@ -32,6 +32,8 @@ namespace AmeisenBotX.Core
         public bool PermanentReactionCache { get; set; } = false;
         public string PermanentReactionCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}\\reaction_cache.json";
 
+        public bool ReleaseSpirit { get; set; } = false;
+
         public AmeisenBotConfig()
         {
         }

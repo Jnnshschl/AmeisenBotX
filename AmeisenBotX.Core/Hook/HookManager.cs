@@ -342,6 +342,17 @@ namespace AmeisenBotX.Core.Hook
             return returnBytes.ToArray();
         }
 
+        public bool IsGhost(string unit)
+        {
+            LuaDoString($"isGhost = UnitIsGhost(\"{unit}\");");
+            string result = GetLocalizedText("isGhost");
+
+            if (int.TryParse(result, out int isGhost))
+                return isGhost == 1;
+
+            return false;
+        }
+
         public void KickNpcsOutOfMammoth()
             => LuaDoString("for i = 1, 2 do EjectPassengerFromSeat(i) end");
 

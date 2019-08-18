@@ -19,6 +19,7 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr ClientConnection { get; } = new IntPtr(0xC79CE0);
         public IntPtr ComboPoints { get; } = new IntPtr(0xBD0845);
         public IntPtr ContinentName { get; } = new IntPtr(0xCE06D0);
+        public IntPtr CorpsePosition { get; } = new IntPtr(0xBD0A58);
         public IntPtr CurrentlyCastingSpellId { get; } = new IntPtr(0xA6C);
         public IntPtr CurrentlyChannelingSpellId { get; } = new IntPtr(0xA80);
         public IntPtr CurrentObjectManager { get; } = new IntPtr(0x2ED0);

@@ -6,6 +6,8 @@
         StartWow,
         Login,
         Idle,
+        Dead,
+        Ghost,
         Following,
         Attacking,
         Healing,

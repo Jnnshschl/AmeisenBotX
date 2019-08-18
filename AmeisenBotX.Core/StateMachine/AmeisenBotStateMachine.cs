@@ -24,6 +24,7 @@ namespace AmeisenBotX.Core.StateMachine
         private AmeisenBotConfig Config { get; }
 
         private DateTime LastObjectUpdate { get; set; }
+        private DateTime LastGhostCheck { get; set; }
 
         private Dictionary<AmeisenBotState, State> States { get; }
 
@@ -45,6 +46,7 @@ namespace AmeisenBotX.Core.StateMachine
             CacheManager = cacheManager;
 
             LastObjectUpdate = DateTime.Now;
+            LastGhostCheck = DateTime.Now;
 
             States = new Dictionary<AmeisenBotState, State>()
             {
@@ -53,6 +55,8 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
                 { AmeisenBotState.Idle, new StateIdle(this, config, objectManager, hookManager)},
+                { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager)},
+                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
                 { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)}
@@ -64,6 +68,9 @@ namespace AmeisenBotX.Core.StateMachine
 
         public void Execute()
         {
+            if (XMemory.Process != null && XMemory.Process.HasExited)
+                SetState(AmeisenBotState.None);
+
             if (ObjectManager != null)
             {
                 if (!ObjectManager.IsWorldLoaded)
@@ -71,6 +78,19 @@ namespace AmeisenBotX.Core.StateMachine
 
                 if (ObjectManager.Player != null)
                 {
+                    if (ObjectManager.Player.IsDead)
+                        SetState(AmeisenBotState.Dead);
+                    else
+                    {
+                        if (LastGhostCheck + TimeSpan.FromSeconds(1) < DateTime.Now)
+                        {
+                            bool isGhost = HookManager.IsGhost("player");
+                            LastGhostCheck = DateTime.Now;
+
+                            if (isGhost) SetState(AmeisenBotState.Ghost);
+                        }
+                    }
+
                     if (ObjectManager.Player.IsInCombat)
                         SetState(HandleCombatSituation());
                 }

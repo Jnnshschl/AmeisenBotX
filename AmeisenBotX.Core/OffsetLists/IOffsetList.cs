@@ -19,6 +19,7 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr ClientConnection { get; }
         IntPtr ComboPoints { get; }
         IntPtr ContinentName { get; }
+        IntPtr CorpsePosition { get; }
         IntPtr CurrentlyCastingSpellId { get; }
         IntPtr CurrentlyChannelingSpellId { get; }
         IntPtr CurrentObjectManager { get; }

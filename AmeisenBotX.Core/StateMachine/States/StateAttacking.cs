@@ -64,12 +64,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         // keep close to target
                         double distance = ObjectManager.Player.Position.GetDistance(target.Position);
-                        if (distance > 2)
+                        if (distance > 3.2)
                         {
-                            List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
-                            if (path.Count > 0)
-                                foreach (WowPosition pos in path)
-                                    CurrentPath.Enqueue(pos);
+                            BuildNewPath(target);
                         }
                     }
                     else
@@ -78,6 +75,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
                 }
             }
+        }
+
+        private void BuildNewPath(WowUnit target)
+        {
+            List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
+            if (path.Count > 0)
+                foreach (WowPosition pos in path)
+                    CurrentPath.Enqueue(pos);
         }
 
         private void HandleMovement()

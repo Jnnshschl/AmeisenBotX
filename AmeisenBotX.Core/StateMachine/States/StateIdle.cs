@@ -31,9 +31,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (AmeisenBotStateMachine.XMemory.Process.HasExited)
-                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
-
             if (IsUnitToFollowThere())
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Following);
         }
