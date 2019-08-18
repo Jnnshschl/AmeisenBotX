@@ -46,6 +46,7 @@ namespace AmeisenBotX
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            AmeisenBot.Stop();
             SaveConfig();
         }
 

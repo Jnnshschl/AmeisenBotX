@@ -1,4 +1,6 @@
-﻿namespace AmeisenBotX.Core
+﻿using System;
+
+namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
@@ -23,6 +25,12 @@
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
         public int NameshServerPort { get; set; } = 47110;
+
+        public bool PermanentNameCache { get; set; } = false;
+        public string PermanentNameCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}\\name_cache.json";
+
+        public bool PermanentReactionCache { get; set; } = false;
+        public string PermanentReactionCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}\\reaction_cache.json";
 
         public AmeisenBotConfig()
         {

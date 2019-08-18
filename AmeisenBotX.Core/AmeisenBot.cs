@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core
             XMemory = new XMemory();
             OffsetList = new OffsetList335a();
 
-            CacheManager = new CacheManager();
+            CacheManager = new CacheManager(config);
             ObjectManager = new ObjectManager(XMemory, OffsetList, CacheManager);
             CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, CacheManager);
@@ -71,6 +71,13 @@ namespace AmeisenBotX.Core
         public void Start()
         {
             StateMachineTimer.Start();
+            CacheManager.LoadFromFile();
+        }
+
+        public void Stop()
+        {
+            StateMachineTimer.Stop();
+            CacheManager.SaveToFile();
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)
