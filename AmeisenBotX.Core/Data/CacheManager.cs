@@ -25,26 +25,37 @@ namespace AmeisenBotX.Core.Data
         {
             if (Config.PermanentNameCache
                 && File.Exists(Config.PermanentNameCachePath))
-                NameCache = JsonConvert.DeserializeObject<Dictionary<ulong, string>>(File.ReadAllText(Config.PermanentNameCachePath));
+            {
+                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Config.PermanentNameCachePath));
+                foreach(dynamic item in parsed)
+                {
+                    NameCache.Add((ulong)item.Key, (string)item.Value);
+                }
+            }
             if (Config.PermanentReactionCache
                 && File.Exists(Config.PermanentReactionCachePath))
-                ReactionCache = JsonConvert.DeserializeObject<Dictionary<(int, int), WowUnitReaction>>(File.ReadAllText(Config.PermanentReactionCachePath));
+            {
+                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Config.PermanentReactionCachePath));
+                foreach (dynamic item in parsed)
+                {
+                    ReactionCache.Add(((int, int))item.Key, (WowUnitReaction)item.Value);
+                }
+            }
         }
 
         internal void SaveToFile()
         {
             if (Config.PermanentNameCache)
-            {
-                if (!Directory.Exists(Path.GetDirectoryName(Config.PermanentNameCachePath)))
-                    Directory.CreateDirectory(Path.GetDirectoryName(Config.PermanentNameCachePath));
-                File.WriteAllText(Config.PermanentNameCachePath, JsonConvert.SerializeObject(NameCache.OrderBy(e => e.Key), Formatting.Indented));
-            }
+                CheckForPermanentCaching(Config.PermanentNameCachePath, NameCache.OrderBy(e => e.Key));
             if (Config.PermanentReactionCache)
-            {
-                if (!Directory.Exists(Path.GetDirectoryName(Config.PermanentReactionCachePath)))
-                    Directory.CreateDirectory(Path.GetDirectoryName(Config.PermanentReactionCachePath));
-                File.WriteAllText(Config.PermanentReactionCachePath, JsonConvert.SerializeObject(ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2), Formatting.Indented));
-            }
+                CheckForPermanentCaching(Config.PermanentReactionCachePath, ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
+        }
+
+        private void CheckForPermanentCaching(string path, object objToSave)
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.WriteAllText(path, JsonConvert.SerializeObject(objToSave, Formatting.Indented));
         }
     }
 }
