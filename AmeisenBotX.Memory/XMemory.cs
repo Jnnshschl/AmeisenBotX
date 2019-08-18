@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Memory.Win32;
+using Fasm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +19,8 @@ namespace AmeisenBotX.Memory
 
         private Dictionary<Type, int> SizeCache { get; }
 
+        public ManagedFasm Fasm { get; private set; }
+
         public XMemory()
         {
             SizeCache = new Dictionary<Type, int>();
@@ -27,6 +30,7 @@ namespace AmeisenBotX.Memory
         {
             Process = wowProcess;
             ProcessHandle = OpenProcess(ProcessAccessFlags.All, false, wowProcess.Id);
+            Fasm = new ManagedFasm(ProcessHandle);
         }
 
         private int SizeOf(Type type)
@@ -63,6 +67,20 @@ namespace AmeisenBotX.Memory
             catch { }
 
             value = 0;
+            return false;
+        }
+
+        public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
+        {
+            byte[] readBuffer = new byte[size];
+
+            if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
+            {
+                bytes = readBuffer;
+                return true;
+            }
+
+            bytes = new byte[size];
             return false;
         }
 
@@ -134,6 +152,9 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
+        public bool WriteBytes(IntPtr address, byte[] bytes)
+            => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
+
         public bool ReadStruct<T>(IntPtr address, out T value)
         {
             int size = Marshal.SizeOf(typeof(T));
@@ -157,9 +178,48 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        public bool Read(object staticClass)
+        public bool FreeMemory(IntPtr address)
         {
-            throw new NotImplementedException();
+            try { return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release); }
+            catch { return false; }
+        }
+
+        public bool AllocateMemory(uint size, out IntPtr address)
+        {
+            try
+            {
+                address = VirtualAllocEx(
+                    ProcessHandle,
+                    IntPtr.Zero,
+                    size,
+                    AllocationType.Commit,
+                    MemoryProtection.ExecuteReadWrite
+                );
+            }
+            catch
+            {
+                address = IntPtr.Zero;
+                return false;
+            }
+
+            return address != IntPtr.Zero;
+        }
+
+        public unsafe bool ReadByte(IntPtr address, out byte buffer)
+        {
+            byte[] readBuffer = new byte[1];
+
+            if (ReadProcessMemory(ProcessHandle, address, readBuffer, 1, out _))
+            {
+                fixed (byte* ptr = readBuffer)
+                {
+                    buffer = * ptr;
+                    return true;
+                }
+            }
+
+            buffer = 0x0;
+            return false;
         }
     }
 }

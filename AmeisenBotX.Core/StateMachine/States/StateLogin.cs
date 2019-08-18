@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.LoginHandler;
+﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.LoginHandler;
 using AmeisenBotX.Core.OffsetLists;
 using System;
 using System.Collections.Generic;
@@ -10,12 +11,16 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateLogin : State
     {
-        private ILoginHandler LoginHandler { get; set; }
+        private ILoginHandler LoginHandler { get; }
         private AmeisenBotConfig Config { get; }
+        private IOffsetList OffsetList { get; }
+        private CharacterManager CharacterManager { get; }
 
-        public StateLogin(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList) : base(stateMachine)
+        public StateLogin(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, CharacterManager characterManager) : base(stateMachine)
         {
             Config = config;
+            OffsetList = offsetList;
+            CharacterManager = characterManager;
             LoginHandler = new DefaultLoginHandler(AmeisenBotStateMachine.XMemory, offsetList);
         }
 
@@ -26,9 +31,13 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if(LoginHandler.Login(AmeisenBotStateMachine.XMemory.Process, Config.Username, Config.Password, Config.CharacterSlot))
+            if (LoginHandler.Login(AmeisenBotStateMachine.XMemory.Process, Config.Username, Config.Password, Config.CharacterSlot))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                if (AmeisenBotStateMachine.XMemory.Read(OffsetList.ChatOpened, out byte isChatOpened)
+                    && isChatOpened == 0x1)
+                    CharacterManager.SendKey(new IntPtr(0x0D)); // send enter to close the chat
+                else
+                    AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.LoginHandler;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
@@ -19,6 +20,7 @@ namespace AmeisenBotX.Core
         public AmeisenBotStateMachine StateMachine { get; set; }
         public ObjectManager ObjectManager { get; set; }
         public CharacterManager CharacterManager { get; set; }
+        public HookManager HookManager { get; set; }
 
         public Process WowProcess { get; }
 
@@ -60,7 +62,8 @@ namespace AmeisenBotX.Core
 
             ObjectManager = new ObjectManager(XMemory, OffsetList);
             CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager);
-            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager);
+            HookManager = new HookManager(XMemory, OffsetList, ObjectManager);
+            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager);
         }
 
         public void Start()

@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="fasmdll_managed">
+      <HintPath>..\packages\fasmdll_managed.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -58,6 +62,7 @@
     <Compile Include="Data\Objects\WowObject\WowPlayer.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnit.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitFlags.cs" />
+    <Compile Include="Hook\HookManager.cs" />
     <Compile Include="LoginHandler\DefaultLoginHandler.cs" />
     <Compile Include="LoginHandler\ILoginHandler.cs" />
     <Compile Include="OffsetLists\OffsetList335a.cs" />

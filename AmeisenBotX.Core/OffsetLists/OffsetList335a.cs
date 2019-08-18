@@ -10,6 +10,7 @@ namespace AmeisenBotX.Core.OffsetLists
     {
         public IntPtr AccountName { get; } = new IntPtr(0xB6AA40);
         public IntPtr CharacterSlotSelected { get; } = new IntPtr(0xAC436C);
+        public IntPtr ChatOpened { get; } = new IntPtr(0xD41660);
         public IntPtr Class { get; } = new IntPtr(0xC79E89);
         public IntPtr ClickToMoveAction { get; } = new IntPtr(0xCA11D8 + 0x1C);
         public IntPtr ClickToMoveDistance { get; } = new IntPtr(0xCA11D8 + 0xC);
@@ -44,6 +45,7 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x240);
         public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8);
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);
+        public IntPtr EndSceneStaticDevice { get; } = new IntPtr(0xC5DF88);
         public IntPtr ErrorMessage { get; } = new IntPtr(0xBCFB90);
         public IntPtr FirstObject { get; } = new IntPtr(0xAC);
         public IntPtr FunctionGetActivePlayerObject { get; } = new IntPtr(0x4038F0);
@@ -76,7 +78,6 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr RaidGroupStart { get; } = new IntPtr(0xBF8258);
         public IntPtr RaidLeader { get; } = new IntPtr(0xBD1990);
         public IntPtr RealmName { get; } = new IntPtr(0xC79B9E);
-        public IntPtr StaticEndSceneDevice { get; } = new IntPtr(0xC5DF88);
         public IntPtr TargetGuid { get; } = new IntPtr(0xBD07B0);
         public IntPtr TickCount { get; } = new IntPtr(0xB499A4);
         public IntPtr WowBuild { get; } = new IntPtr(0xA30BE6);

@@ -108,7 +108,6 @@ namespace AmeisenBotX.Core.LoginHandler
 
                 result = XMemory.ReadString(OffsetList.GameState, Encoding.ASCII, out gameState, 10);
             } while (result && gameState == "login");
-            SendKeyToProcess(0x0D);
         }
 
         private void HandleCharSelect(int characterSlot)

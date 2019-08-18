@@ -45,6 +45,8 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump() => SendKey(new IntPtr(0x20)); // 0x20 = Spacebar (VK_SPACE)
 
+        public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
+
         public void SendKey(IntPtr vKey, int minDelay = 20, int maxDelay = 40)
         {
             IntPtr windowHandle = XMemory.Process.MainWindowHandle;

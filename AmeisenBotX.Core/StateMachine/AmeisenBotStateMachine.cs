@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.States;
 using AmeisenBotX.Memory;
@@ -18,6 +19,8 @@ namespace AmeisenBotX.Core.StateMachine
 
         internal XMemory XMemory { get; }
         private ObjectManager ObjectManager { get; }
+        private CharacterManager CharacterManager { get; }
+        private HookManager HookManager { get; }
         private AmeisenBotConfig Config { get; }
 
         private DateTime LastObjectUpdate { get; set; }
@@ -30,10 +33,12 @@ namespace AmeisenBotX.Core.StateMachine
         public delegate void StateMachineStateChange();
         public event StateMachineStateChange OnStateMachineStateChange;
 
-        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager)
+        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             XMemory = xMemory;
             ObjectManager = objectManager;
+            CharacterManager = characterManager;
+            HookManager = hookManager;
             Config = config;
 
             LastObjectUpdate = DateTime.Now;
@@ -42,9 +47,9 @@ namespace AmeisenBotX.Core.StateMachine
             {
                 { AmeisenBotState.None, new StateNone(this, config)},
                 { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory)},
-                { AmeisenBotState.Login, new StateLogin(this, config, offsetList)},
+                { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
-                { AmeisenBotState.Idle, new StateIdle(this, config, objectManager)},
+                { AmeisenBotState.Idle, new StateIdle(this, config, objectManager, hookManager)},
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager)}
             };
 
@@ -54,8 +59,17 @@ namespace AmeisenBotX.Core.StateMachine
 
         public void Execute()
         {
-            if (!ObjectManager.IsWorldLoaded)
-                SetState(AmeisenBotState.LoadingScreen);
+            if (ObjectManager != null)
+            {
+                if (!ObjectManager.IsWorldLoaded)
+                    SetState(AmeisenBotState.LoadingScreen);
+
+                if (ObjectManager.Player != null)
+                {
+                    if (ObjectManager.Player.IsInCombat)
+                        SetState(HandleCombatSituation());
+                }
+            }
 
             if (LastObjectUpdate - TimeSpan.FromMilliseconds(Config.ObjectUpdateMs) < DateTime.Now
                 && CurrentState.Key != AmeisenBotState.None
@@ -68,7 +82,13 @@ namespace AmeisenBotX.Core.StateMachine
             }
 
             CurrentState.Value.Execute();
+            CharacterManager.AntiAfk();
             OnStateMachineTick?.Invoke();
+        }
+
+        private AmeisenBotState HandleCombatSituation()
+        {
+            return AmeisenBotState.Attacking;
         }
 
         internal void SetState(AmeisenBotState state)

@@ -11,6 +11,7 @@ namespace AmeisenBotX.Core.OffsetLists
     {
         IntPtr AccountName { get; }
         IntPtr CharacterSlotSelected { get; }
+        IntPtr ChatOpened { get; }
         IntPtr Class { get; }
         IntPtr ClickToMoveAction { get; }
         IntPtr ClickToMoveDistance { get; }
@@ -39,6 +40,7 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr DescriptorUnitFlagsDynamic { get; }
         IntPtr EndSceneOffset { get; }
         IntPtr EndSceneOffsetDevice { get; }
+        IntPtr EndSceneStaticDevice { get; }
         IntPtr ErrorMessage { get; }
         IntPtr FirstObject { get; }
         IntPtr FunctionGetActivePlayerObject { get; }
@@ -71,7 +73,6 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr RaidGroupStart { get; }
         IntPtr RaidLeader { get; }
         IntPtr RealmName { get; }
-        IntPtr StaticEndSceneDevice { get; }
         IntPtr TargetGuid { get; }
         IntPtr TickCount { get; }
         IntPtr WowBuild { get; }

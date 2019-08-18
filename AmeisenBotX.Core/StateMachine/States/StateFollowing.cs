@@ -44,11 +44,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (Config.FollowSpecificCharacter)
             {
                 PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
-
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
-                if (PlayerToFollow != null // if the Unit is out of range, skip it
-                    && UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
+                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
 
             }
 
@@ -56,26 +52,30 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (PlayerToFollow == null && Config.FollowGroupLeader)
             {
                 PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
-
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
-                if (PlayerToFollow != null // if the Unit is out of range, skip it
-                    && UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
+                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
             }
 
             // check the group members
             if (PlayerToFollow == null && Config.FollowGroupMembers)
             {
                 PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
-
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
-                if (PlayerToFollow != null // if the Unit is out of range, skip it
-                    && UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
+                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
             }
 
             if (PlayerToFollow == null)
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+        }
+
+        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
+        {
+            if (PlayerToFollow != null)
+            {
+                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                if (UnitIsOutOfRange(distance))
+                    PlayerToFollow = null;
+            }
+
+            return PlayerToFollow;
         }
 
         private bool UnitIsOutOfRange(double distance)
