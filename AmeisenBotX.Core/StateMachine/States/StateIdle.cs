@@ -47,25 +47,28 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            if (Config.FollowSpecificCharacter)
+            List<WowPlayer> wowPlayers = ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
+            if (wowPlayers.Count > 0)
             {
-                PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
-                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                if (Config.FollowSpecificCharacter)
+                {
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
+                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                }
 
-            }
+                // check the group/raid leader
+                if (PlayerToFollow == null && Config.FollowGroupLeader)
+                {
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
+                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                }
 
-            // check the group/raid leader
-            if (PlayerToFollow == null && Config.FollowGroupLeader)
-            {
-                PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
-                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
-            }
-
-            // check the group members
-            if (PlayerToFollow == null && Config.FollowGroupMembers)
-            {
-                PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
-                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                // check the group members
+                if (PlayerToFollow == null && Config.FollowGroupMembers)
+                {
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
+                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                }
             }
 
             return PlayerToFollow != null;

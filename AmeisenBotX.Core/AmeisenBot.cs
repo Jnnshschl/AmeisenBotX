@@ -21,6 +21,7 @@ namespace AmeisenBotX.Core
         public ObjectManager ObjectManager { get; set; }
         public CharacterManager CharacterManager { get; set; }
         public HookManager HookManager { get; set; }
+        public CacheManager CacheManager { get; set; }
 
         public Process WowProcess { get; }
 
@@ -60,10 +61,11 @@ namespace AmeisenBotX.Core
             XMemory = new XMemory();
             OffsetList = new OffsetList335a();
 
-            ObjectManager = new ObjectManager(XMemory, OffsetList);
+            CacheManager = new CacheManager();
+            ObjectManager = new ObjectManager(XMemory, OffsetList, CacheManager);
             CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager);
-            HookManager = new HookManager(XMemory, OffsetList, ObjectManager);
-            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager);
+            HookManager = new HookManager(XMemory, OffsetList, ObjectManager, CacheManager);
+            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, CacheManager);
         }
 
         public void Start()

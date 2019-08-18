@@ -86,12 +86,27 @@
                 </Label.Foreground>
             </Label>
         </WrapPanel>
-        <Rectangle HorizontalAlignment="Left" Margin="122,0,0,0" Width="1">
+        <Rectangle HorizontalAlignment="Left" Margin="140,0,0,0" Width="1">
             <Rectangle.Fill>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}"/>
             </Rectangle.Fill>
         </Rectangle>
-        <Label x:Name="labelDebug" Content="None" HorizontalAlignment="Left" Margin="123,0,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+        <Label x:Name="labelDebug" Content="None" HorizontalAlignment="Left" Margin="146,0,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
+            </Label.Foreground>
+        </Label>
+        <Label x:Name="labelCurrentLevel" Content="lvl. 0 " HorizontalAlignment="Left" Margin="4,92,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
+            </Label.Foreground>
+        </Label>
+        <Label x:Name="labelCurrentRace" Content="Race" HorizontalAlignment="Left" Margin="4,110,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
+            </Label.Foreground>
+        </Label>
+        <Label x:Name="labelCurrentClass" Content="Class" HorizontalAlignment="Left" Margin="4,128,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
             </Label.Foreground>

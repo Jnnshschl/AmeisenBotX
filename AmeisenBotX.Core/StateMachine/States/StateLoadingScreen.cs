@@ -26,6 +26,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+            ObjectManager.RefreshIsWorldLoaded();
             if (ObjectManager.IsWorldLoaded)
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
         }

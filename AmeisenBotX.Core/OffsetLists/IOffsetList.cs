@@ -32,9 +32,15 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr DescriptorFactionTemplate { get; }
         IntPtr DescriptorHealth { get; }
         IntPtr DescriptorLevel { get; }
+        IntPtr DescriptorMana { get; }
         IntPtr DescriptorMaxEnergy { get; }
         IntPtr DescriptorMaxExp { get; }
         IntPtr DescriptorMaxHealth { get; }
+        IntPtr DescriptorMaxMana { get; }
+        IntPtr DescriptorMaxRage { get; }
+        IntPtr DescriptorMaxRuneenergy { get; }
+        IntPtr DescriptorRage { get; }
+        IntPtr DescriptorRuneenergy { get; }
         IntPtr DescriptorTargetGuid { get; }
         IntPtr DescriptorUnitFlags { get; }
         IntPtr DescriptorUnitFlagsDynamic { get; }
@@ -50,6 +56,7 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr FunctionSendMovementPacket { get; }
         IntPtr FunctionSetTarget { get; }
         IntPtr GameState { get; }
+        IntPtr IsAutoAttacking { get; }
         IntPtr IsWorldLoaded { get; }
         IntPtr LastTargetGuid { get; }
         IntPtr MapId { get; }
@@ -80,6 +87,6 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr WowObjectGuid { get; }
         IntPtr WowObjectType { get; }
         IntPtr WowUnitPosition { get; }
-        IntPtr ZoneId { get; } 
+        IntPtr ZoneId { get; }
     }
 }

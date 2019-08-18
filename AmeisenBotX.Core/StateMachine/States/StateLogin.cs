@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.LoginHandler;
 using AmeisenBotX.Core.OffsetLists;
 using System;
@@ -35,7 +36,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 if (AmeisenBotStateMachine.XMemory.Read(OffsetList.ChatOpened, out byte isChatOpened)
                     && isChatOpened == 0x1)
-                    CharacterManager.SendKey(new IntPtr(0x0D)); // send enter to close the chat
+                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr(0x0D)); // send enter to close the chat
                 else
                     AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }

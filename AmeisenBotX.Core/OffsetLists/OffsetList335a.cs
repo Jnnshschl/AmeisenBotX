@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr DescriptorMaxRage { get; } = new IntPtr(0x88);
         public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x80);
         public IntPtr DescriptorRage { get; } = new IntPtr(0x68);
-        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x70);
+        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x7C);
         public IntPtr DescriptorTargetGuid { get; } = new IntPtr(0x48);
         public IntPtr DescriptorUnitFlags { get; } = new IntPtr(0xEC);
         public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x240);
@@ -55,6 +55,7 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr FunctionSendMovementPacket { get; } = new IntPtr(0x7413F0);
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
+        public IntPtr IsAutoAttacking { get; } = new IntPtr(0xA20);
         public IntPtr IsWorldLoaded { get; } = new IntPtr(0xBEBA40);
         public IntPtr LastTargetGuid { get; } = new IntPtr(0xBD07B8);
         public IntPtr MapId { get; } = new IntPtr(0xAB63BC);

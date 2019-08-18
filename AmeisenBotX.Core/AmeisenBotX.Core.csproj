@@ -53,8 +53,12 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\ClickToMoveType.cs" />
+    <Compile Include="Common\BotMath.cs" />
+    <Compile Include="Common\BotUtils.cs" />
+    <Compile Include="Data\CacheManager.cs" />
     <Compile Include="Data\ObjectManager.cs" />
     <Compile Include="Data\Objects\WowClass.cs" />
+    <Compile Include="Data\Objects\WowObject\WowUnitReaction.cs" />
     <Compile Include="Data\Objects\WowRace.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitDynamicFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowObject.cs" />

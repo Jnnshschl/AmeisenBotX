@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,13 @@ namespace AmeisenBotX.Core.StateMachine.States
         private AmeisenBotConfig Config { get; }
 
         private ObjectManager ObjectManager { get; }
+        private CharacterManager CharacterManager { get; }
 
-        public StateHealing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager) : base(stateMachine)
+        public StateHealing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
+            CharacterManager = characterManager;
         }
 
         public override void Enter()

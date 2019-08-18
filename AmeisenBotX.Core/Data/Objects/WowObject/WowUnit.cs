@@ -22,6 +22,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public int Energy { get; set; }
         public int MaxEnergy { get; set; }
 
+        public int Mana { get; set; }
+        public int MaxMana { get; set; }
+
+        public int Rage { get; set; }
+        public int MaxRage { get; set; }
+
+        public int Runeenergy { get; set; }
+        public int MaxRuneenergy { get; set; }
+
         public WowPosition Position { get; set; }
         public float Rotation { get; set; }
 
@@ -32,6 +41,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int CurrentlyCastingSpellId { get; set; }
         public int CurrentlyChannelingSpellId { get; set; }
+
+        public bool IsAutoAttacking { get; set; }
 
         public bool IsInCombat => UnitFlags[(int)WowUnitFlags.Combat];
         public bool IsSitting => UnitFlags[(int)WowUnitFlags.Sitting];

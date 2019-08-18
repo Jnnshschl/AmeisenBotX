@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.OffsetLists;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,6 @@ namespace AmeisenBotX.Core.LoginHandler
 {
     public class DefaultLoginHandler : ILoginHandler
     {
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
-
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
         private XMemory XMemory { get; }
         private IOffsetList OffsetList { get; }
 
@@ -75,12 +69,12 @@ namespace AmeisenBotX.Core.LoginHandler
         {
             foreach (char c in username)
             {
-                SendKeyToProcess(c, char.IsUpper(c));
+                BotUtils.SendKeyShift(XMemory.Process.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
                 Thread.Sleep(10);
             }
 
             Thread.Sleep(100);
-            SendKeyToProcess(0x09);
+            BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x09));
             Thread.Sleep(100);
 
             bool firstTime = true;
@@ -91,17 +85,17 @@ namespace AmeisenBotX.Core.LoginHandler
             {
                 if (!firstTime)
                 {
-                    SendKeyToProcess(0x0D);
+                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
                 }
 
                 foreach (char c in password)
                 {
-                    SendKeyToProcess(c, char.IsUpper(c));
+                    BotUtils.SendKeyShift(XMemory.Process.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
                     Thread.Sleep(10);
                 }
 
                 Thread.Sleep(500);
-                SendKeyToProcess(0x0D);
+                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
                 Thread.Sleep(3000);
 
                 firstTime = false;
@@ -117,38 +111,12 @@ namespace AmeisenBotX.Core.LoginHandler
                 bool failed = false;
                 while (!failed && currentSlot != characterSlot)
                 {
-                    SendKeyToProcess(0x28);
+                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x28));
                     Thread.Sleep(200);
                     failed = XMemory.ReadInt(OffsetList.CharacterSlotSelected, out currentSlot);
                 }
 
-                SendKeyToProcess(0x0D);
-            }
-        }
-
-        private void SendKeyToProcess(int c)
-        {
-            IntPtr windowHandle = XMemory.Process.MainWindowHandle;
-
-            SendMessage(windowHandle, 0x0100, new IntPtr(c), new IntPtr(0));
-            Thread.Sleep(new Random().Next(20, 40));
-            SendMessage(windowHandle, 0x0101, new IntPtr(c), new IntPtr(0));
-        }
-
-        private void SendKeyToProcess(int c, bool shift)
-        {
-            IntPtr windowHandle = XMemory.Process.MainWindowHandle;
-
-            if (shift)
-            {
-                PostMessage(windowHandle, 0x0100, new IntPtr(0x10), new IntPtr(0));
-            }
-
-            PostMessage(windowHandle, 0x0102, new IntPtr(c), new IntPtr(0));
-
-            if (shift)
-            {
-                PostMessage(windowHandle, 0x0101, new IntPtr(0x10), new IntPtr(0));
+                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
             }
         }
     }

@@ -21,6 +21,7 @@ namespace AmeisenBotX.Core.StateMachine
         private ObjectManager ObjectManager { get; }
         private CharacterManager CharacterManager { get; }
         private HookManager HookManager { get; }
+        private CacheManager CacheManager { get; }
         private AmeisenBotConfig Config { get; }
 
         private DateTime LastObjectUpdate { get; set; }
@@ -33,13 +34,14 @@ namespace AmeisenBotX.Core.StateMachine
         public delegate void StateMachineStateChange();
         public event StateMachineStateChange OnStateMachineStateChange;
 
-        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, CacheManager cacheManager)
         {
+            Config = config;
             XMemory = xMemory;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
-            Config = config;
+            CacheManager = cacheManager;
 
             LastObjectUpdate = DateTime.Now;
 
@@ -50,7 +52,9 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
                 { AmeisenBotState.Idle, new StateIdle(this, config, objectManager, hookManager)},
-                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager)}
+                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager)},
+                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager)},
+                { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)}
             };
 
             CurrentState = States.First();

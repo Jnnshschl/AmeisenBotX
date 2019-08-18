@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
@@ -14,8 +15,6 @@ namespace AmeisenBotX.Core.Character
 {
     public class CharacterManager
     {
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         private XMemory XMemory { get; }
         private IOffsetList OffsetList { get; }
@@ -34,7 +33,7 @@ namespace AmeisenBotX.Core.Character
         public void MoveToPosition(WowPosition pos)
         {
             if(FirstMove)
-                SendKey(new IntPtr(0x2));
+                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x2));
 
             XMemory.Write(OffsetList.ClickToMoveX, pos.X);
             XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
@@ -43,17 +42,8 @@ namespace AmeisenBotX.Core.Character
             XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
         }
 
-        public void Jump() => SendKey(new IntPtr(0x20)); // 0x20 = Spacebar (VK_SPACE)
+        public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x20)); // 0x20 = Spacebar (VK_SPACE)
 
         public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
-
-        public void SendKey(IntPtr vKey, int minDelay = 20, int maxDelay = 40)
-        {
-            IntPtr windowHandle = XMemory.Process.MainWindowHandle;
-
-            SendMessage(windowHandle, 0x100, vKey, new IntPtr(0));
-            Thread.Sleep(new Random().Next(minDelay, maxDelay)); // make it look more human-like :^)
-            SendMessage(windowHandle, 0x101, vKey, new IntPtr(0));
-        }
     }
 }

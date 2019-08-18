@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using Newtonsoft.Json;
 using System;
@@ -62,8 +63,7 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                labelCurrentState.Content = AmeisenBot.StateMachine.CurrentState.Key;
-                labelCurrentTickTime.Content = AmeisenBot.CurrentExecutionMs;
+                labelCurrentState.Content = $"<{AmeisenBot.StateMachine.CurrentState.Key}>";
             });
         }
 
@@ -73,19 +73,46 @@ namespace AmeisenBotX
             {
                 labelPlayerName.Content = AmeisenBot.ObjectManager.Player.Name;
 
+                labelCurrentLevel.Content = $"lvl. {AmeisenBot.ObjectManager.Player.Level}";
+                labelCurrentRace.Content = AmeisenBot.ObjectManager.Player.Race;
+                labelCurrentClass.Content = AmeisenBot.ObjectManager.Player.Class;
+
                 progressbarHealth.Maximum = AmeisenBot.ObjectManager.Player.MaxHealth;
                 progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;
 
-                progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxEnergy;
-                progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Energy;
+                switch (AmeisenBot.ObjectManager.Player.Class)
+                {
+                    case WowClass.DeathKnight:
+                        progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxRuneenergy;
+                        progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Runeenergy;
+                        break;
+
+                    case WowClass.Warrior:
+                        progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxRage;
+                        progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Rage;
+                        break;
+
+                    case WowClass.Rogue:
+                        progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxEnergy;
+                        progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Energy;
+                        break;
+
+                    default:
+                        progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxEnergy;
+                        progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Energy;
+                        break;
+                }
 
                 progressbarExp.Maximum = AmeisenBot.ObjectManager.Player.MaxExp;
                 progressbarExp.Value = AmeisenBot.ObjectManager.Player.Exp;
 
-                labelCurrentTickTime.Content = AmeisenBot.CurrentExecutionMs;
+                double executionMs = AmeisenBot.CurrentExecutionMs;
+                if (double.IsNaN(executionMs)) executionMs = 0;
+                labelCurrentTickTime.Content = executionMs;
+
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
 
-                labelDebug.Content = JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player.Position, Formatting.Indented);
+                //labelDebug.Content = JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player, Formatting.Indented);
             });
         }
 

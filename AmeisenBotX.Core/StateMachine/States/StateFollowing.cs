@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding;
@@ -41,25 +42,28 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            if (Config.FollowSpecificCharacter)
+            List<WowPlayer> wowPlayers = ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
+            if (wowPlayers.Count > 0)
             {
-                PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
-                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                if (Config.FollowSpecificCharacter)
+                {
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
+                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                }
 
-            }
+                // check the group/raid leader
+                if (PlayerToFollow == null && Config.FollowGroupLeader)
+                {
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
+                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                }
 
-            // check the group/raid leader
-            if (PlayerToFollow == null && Config.FollowGroupLeader)
-            {
-                PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
-                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
-            }
-
-            // check the group members
-            if (PlayerToFollow == null && Config.FollowGroupMembers)
-            {
-                PlayerToFollow = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
-                PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                // check the group members
+                if (PlayerToFollow == null && Config.FollowGroupMembers)
+                {
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
+                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                }
             }
 
             if (PlayerToFollow == null)
@@ -97,8 +101,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 WowPosition pos = CurrentPath.Peek();
                 distance = pos.GetDistance2D(ObjectManager.Player.Position);
-                if (distance <= 2 
-                    || distance > Config.MaxFollowDistance 
+                if (distance <= 2
+                    || distance > Config.MaxFollowDistance
                     || TryCount > 5)
                 {
                     CurrentPath.Dequeue();
@@ -107,7 +111,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 else
                 {
                     CharacterManager.MoveToPosition(pos);
-                    
+
                     if (distTraveled != 0 && distTraveled < 0.08)
                         TryCount++;
 
@@ -117,7 +121,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                         CurrentPath.Clear();
 
                     // jump if the node is higher than us
-                    if(pos.Z - ObjectManager.Player.Position.Z > 1.2 
+                    if (pos.Z - ObjectManager.Player.Position.Z > 1.2
                         && distance < 3)
                         CharacterManager.Jump();
                 }
@@ -125,7 +129,8 @@ namespace AmeisenBotX.Core.StateMachine.States
                 if (distTraveled != 0
                     && distTraveled < 0.08)
                 {
-                    CharacterManager.SendKey(new IntPtr(0x26), 150, 250);
+                    // go forward
+                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr(0x26), 500, 750);
                     CharacterManager.Jump();
                 }
 
