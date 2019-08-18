@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Memory.Win32
 {
@@ -29,7 +25,6 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, int dwSize, AllocationType dwFreeType);
-
 
         [Flags]
         public enum ProcessAccessFlags : uint

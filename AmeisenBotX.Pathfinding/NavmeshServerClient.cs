@@ -1,13 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace AmeisenBotX.Pathfinding
@@ -100,7 +97,6 @@ namespace AmeisenBotX.Pathfinding
                 return false;
             }
         }
-
 
         public bool IsInLineOfSight(WowPosition start, WowPosition end, int mapId)
         {

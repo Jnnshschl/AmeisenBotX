@@ -8,10 +8,8 @@ using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook
 {
@@ -415,7 +413,6 @@ namespace AmeisenBotX.Core.Hook
             if (IsWoWHooked) { DisposeHook(); }
             else
             {
-
                 if (XMemory.ReadBytes(EndsceneAddress, 5, out byte[] bytes))
                     originalEndsceneBytes = bytes;
 

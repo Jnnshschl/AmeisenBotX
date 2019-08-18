@@ -1,13 +1,10 @@
-﻿using AmeisenBotX.Memory.Win32;
-using Fasm;
+﻿using Fasm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
 namespace AmeisenBotX.Memory
@@ -213,7 +210,7 @@ namespace AmeisenBotX.Memory
             {
                 fixed (byte* ptr = readBuffer)
                 {
-                    buffer = * ptr;
+                    buffer = *ptr;
                     return true;
                 }
             }

@@ -1,11 +1,8 @@
 ﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
@@ -33,7 +30,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         public override void Execute()
-        {            
+        {
             if (AmeisenBotStateMachine.XMemory.Process.HasExited)
                 AmeisenBotStateMachine.SetState(AmeisenBotState.None);
 
@@ -91,7 +88,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

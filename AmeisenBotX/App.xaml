@@ -12,6 +12,6 @@
         <Color x:Key="PlayerHealthBar">#FF80FF00</Color>
         <Color x:Key="PlayerManaBar">#FF00FFFF</Color>
         <Color x:Key="PlayerExpBar">#FFFF8000</Color>
-        <Color x:Key="TextAccent">#FFFF0050</Color> 
+        <Color x:Key="TextAccent">#FFFF0050</Color>
     </Application.Resources>
 </Application>

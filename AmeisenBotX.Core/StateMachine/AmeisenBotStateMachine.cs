@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine
 {
@@ -29,9 +27,11 @@ namespace AmeisenBotX.Core.StateMachine
         private Dictionary<AmeisenBotState, State> States { get; }
 
         public delegate void StateMachineTick();
+
         public event StateMachineTick OnStateMachineTick;
 
         public delegate void StateMachineStateChange();
+
         public event StateMachineStateChange OnStateMachineStateChange;
 
         public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, CacheManager cacheManager)

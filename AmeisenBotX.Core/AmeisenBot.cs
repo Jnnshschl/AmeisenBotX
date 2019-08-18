@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.LoginHandler;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Memory;
@@ -39,6 +38,7 @@ namespace AmeisenBotX.Core
             }
             private set { currentExecutionMs = value; }
         }
+
         private int CurrentExecutionCount { get; set; }
 
         private XMemory XMemory { get; }

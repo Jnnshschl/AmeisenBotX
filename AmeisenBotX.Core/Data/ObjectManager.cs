@@ -6,9 +6,7 @@ using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Data
 {
@@ -45,6 +43,7 @@ namespace AmeisenBotX.Core.Data
         public WowPlayer Player { get; private set; }
 
         public delegate void ObjectUpdateComplete(List<WowObject> wowObjects);
+
         public event ObjectUpdateComplete OnObjectUpdateComplete;
 
         public ObjectManager(XMemory xMemory, IOffsetList offsetList, CacheManager cacheManager)

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AmeisenBotX.Core
+﻿namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
@@ -32,7 +26,6 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotConfig()
         {
-
         }
     }
 }

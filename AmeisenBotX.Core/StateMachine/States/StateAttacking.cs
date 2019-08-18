@@ -3,15 +3,12 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    class StateAttacking : State
+    internal class StateAttacking : State
     {
         private AmeisenBotConfig Config { get; }
 
@@ -29,7 +26,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
-
         }
 
         public override void Execute()
@@ -67,7 +63,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

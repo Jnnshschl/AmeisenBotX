@@ -6,12 +6,10 @@ using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    class StateFollowing : State
+    internal class StateFollowing : State
     {
         private AmeisenBotConfig Config { get; }
 
@@ -148,7 +146,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

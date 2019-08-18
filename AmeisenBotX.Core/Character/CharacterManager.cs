@@ -4,18 +4,11 @@ using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Character
 {
     public class CharacterManager
     {
-
         private XMemory XMemory { get; }
         private IOffsetList OffsetList { get; }
         private ObjectManager ObjectManager { get; }
@@ -32,7 +25,7 @@ namespace AmeisenBotX.Core.Character
 
         public void MoveToPosition(WowPosition pos)
         {
-            if(FirstMove)
+            if (FirstMove)
                 BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x2));
 
             XMemory.Write(OffsetList.ClickToMoveX, pos.X);

@@ -1,9 +1,4 @@
 ﻿using AmeisenBotX.Core.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
@@ -21,7 +16,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
-
         }
 
         public override void Execute()
@@ -33,7 +27,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

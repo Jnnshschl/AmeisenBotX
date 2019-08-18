@@ -1,11 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Common
 {
@@ -16,7 +12,7 @@ namespace AmeisenBotX.Core.Common
 
         [return: MarshalAs(UnmanagedType.Bool)]
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         public static void SendKey(IntPtr windowHandle, IntPtr vKey, int minDelay = 20, int maxDelay = 40)
         {

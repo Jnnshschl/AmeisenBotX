@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Pathfinding
 {
@@ -16,6 +12,7 @@ namespace AmeisenBotX.Pathfinding
             => Math.Sqrt(((X - b.X) * (X - b.X))
                        + ((Y - b.Y) * (Y - b.Y))
                        + ((Z - b.Z) * (Z - b.Z)));
+
         public double GetDistance2D(WowPosition b)
             => Math.Sqrt(Math.Pow(X - b.X, 2) + Math.Pow(Y - b.Y, 2));
     }
