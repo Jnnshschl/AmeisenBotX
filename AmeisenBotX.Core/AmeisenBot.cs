@@ -86,6 +86,10 @@ namespace AmeisenBotX.Core
             CacheManager.LoadFromFile();
 
             EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
+            EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
+            EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
+            EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
+            //EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
         }
 
         public void Stop()
@@ -141,8 +145,20 @@ namespace AmeisenBotX.Core
 
         #region WowEvents
         private void OnPartyInvitation(long timestamp, List<string> args)
+            => HookManager.AcceptPartyInvite();
+
+        private void OnSummonRequest(long timestamp, List<string> args)
+            => HookManager.AcceptSummon();
+
+        private void OnResurrectRequest(long timestamp, List<string> args)
+            => HookManager.AcceptResurrect();
+
+        private void OnReadyCheck(long timestamp, List<string> args)
+            => HookManager.CofirmReadyCheck(true);
+
+        private void OnCombatLog(long timestamp, List<string> args)
         {
-            HookManager.AcceptPartyInvite();
+            // analyze the combat log
         }
         #endregion
     }
