@@ -12,6 +12,10 @@ namespace AmeisenBotX.Core
         public string Password { get; set; } = "";
         public int CharacterSlot { get; set; } = 0;
 
+        public string BotDataPath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
+        public bool SaveWowWindowPosition { get; set; } = false;
+        public bool SaveBotWindowPosition { get; set; } = false;
+
         public double StateMachineTickMs { get; set; } = 50;
         public double ObjectUpdateMs { get; set; } = 250;
 
@@ -27,15 +31,13 @@ namespace AmeisenBotX.Core
         public int NameshServerPort { get; set; } = 47110;
 
         public bool PermanentNameCache { get; set; } = false;
-        public string PermanentNameCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}\\name_cache.json";
+        public string PermanentNameCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}name_cache.json";
 
         public bool PermanentReactionCache { get; set; } = false;
-        public string PermanentReactionCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}\\reaction_cache.json";
+        public string PermanentReactionCachePath { get; set; } = $"{AppDomain.CurrentDomain.BaseDirectory}reaction_cache.json";
 
         public bool ReleaseSpirit { get; set; } = false;
 
-        public AmeisenBotConfig()
-        {
-        }
+        public AmeisenBotConfig() { }
     }
 }

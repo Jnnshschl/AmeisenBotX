@@ -1,38 +1,60 @@
 ﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Memory;
+using AmeisenBotX.Memory.Win32;
+using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
         private AmeisenBotConfig Config { get; }
+        private IOffsetList OffsetList { get; }
         private ObjectManager ObjectManager { get; }
         private HookManager HookManager { get; }
+        private EventHookManager EventHookManager { get; }
 
-        private bool NeedToSetupHook { get; set; }
-
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookManager) : base(stateMachine)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
         {
             Config = config;
+            OffsetList = offsetList;
             ObjectManager = objectManager;
             HookManager = hookManager;
-            NeedToSetupHook = true;
+            EventHookManager = eventHookManager;
         }
 
         public override void Enter()
         {
-            if (NeedToSetupHook)
-                if (HookManager.SetupEndsceneHook())
-                    NeedToSetupHook = false;
+            AmeisenBotStateMachine.XMemory.ReadString(OffsetList.PlayerName, Encoding.ASCII, out string playerName);
+            AmeisenBotStateMachine.PlayerName = playerName;
+
+            // first start
+            if (!HookManager.IsWoWHooked)
+            {
+                HookManager.SetupEndsceneHook();
+                EventHookManager.Start();
+
+                if (Config.SaveWowWindowPosition) LoadWowWindowPosition();
+                if (Config.SaveBotWindowPosition) LoadBotWindowPosition();
+            }
         }
 
         public override void Execute()
         {
             if (IsUnitToFollowThere())
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Following);
+        }
+
+        public override void Exit()
+        {
         }
 
         public bool IsUnitToFollowThere()
@@ -83,8 +105,32 @@ namespace AmeisenBotX.Core.StateMachine.States
         private bool UnitIsOutOfRange(double distance)
            => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
 
-        public override void Exit()
+        private void LoadWowWindowPosition()
         {
+            string filepath = Path.Combine(Config.BotDataPath, $"wowpos_{AmeisenBotStateMachine.PlayerName}.json");
+            if (File.Exists(filepath))
+            {
+                try
+                {
+                    Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
+                    XMemory.SetWindowPosition(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, rect);
+                }
+                catch { }
+            }
+        }
+
+        private void LoadBotWindowPosition()
+        {
+            string filepath = Path.Combine(Config.BotDataPath, $"botpos_{AmeisenBotStateMachine.PlayerName}.json");
+            if (File.Exists(filepath))
+            {
+                try
+                {
+                    Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
+                    XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, rect);
+                }
+                catch { }
+            }
         }
     }
 }

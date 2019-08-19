@@ -66,6 +66,8 @@
     <Compile Include="Data\Objects\WowObject\WowPlayer.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnit.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitFlags.cs" />
+    <Compile Include="Event\EventHookManager.cs" />
+    <Compile Include="Event\Objects\RawEvent.cs" />
     <Compile Include="Hook\HookManager.cs" />
     <Compile Include="LoginHandler\DefaultLoginHandler.cs" />
     <Compile Include="LoginHandler\ILoginHandler.cs" />

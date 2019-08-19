@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Win32\Rect.cs" />
     <Compile Include="Win32\Win32Imports.cs" />
     <Compile Include="XMemory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

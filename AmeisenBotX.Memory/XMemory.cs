@@ -1,4 +1,5 @@
-﻿using Fasm;
+﻿using AmeisenBotX.Memory.Win32;
+using Fasm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -217,6 +218,31 @@ namespace AmeisenBotX.Memory
 
             buffer = 0x0;
             return false;
+        }
+
+        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
+        {
+            if (rect.Left > 0
+                && rect.Right > 0
+                && rect.Top > 0
+                && rect.Bottom > 0)
+            {
+                MoveWindow(
+                    windowHandle,
+                    rect.Left,
+                    rect.Top,
+                    rect.Right - rect.Left,
+                    rect.Bottom - rect.Top,
+                    true
+                );
+            }
+        }
+
+        public static Rect GetWindowPosition(IntPtr windowHandle)
+        {
+            Rect rect = new Rect();
+            GetWindowRect(windowHandle, ref rect);
+            return rect;
         }
     }
 }

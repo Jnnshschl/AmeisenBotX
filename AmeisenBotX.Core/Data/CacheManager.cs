@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Data
             if (Config.PermanentNameCache
                 && File.Exists(Config.PermanentNameCachePath))
             {
-                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Config.PermanentNameCachePath));
+                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath)));
                 foreach(dynamic item in parsed)
                 {
                     NameCache.Add((ulong)item.Key, (string)item.Value);
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Data
             if (Config.PermanentReactionCache
                 && File.Exists(Config.PermanentReactionCachePath))
             {
-                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Config.PermanentReactionCachePath));
+                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath)));
                 foreach (dynamic item in parsed)
                 {
                     ReactionCache.Add(((int, int))item.Key, (WowUnitReaction)item.Value);
@@ -46,16 +46,20 @@ namespace AmeisenBotX.Core.Data
         internal void SaveToFile()
         {
             if (Config.PermanentNameCache)
-                CheckForPermanentCaching(Config.PermanentNameCachePath, NameCache.OrderBy(e => e.Key));
+                CheckForPermanentCaching(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath), NameCache.OrderBy(e => e.Key));
             if (Config.PermanentReactionCache)
-                CheckForPermanentCaching(Config.PermanentReactionCachePath, ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
+                CheckForPermanentCaching(Path.Combine(Config.BotDataPath,Config.PermanentReactionCachePath), ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
         }
 
         private void CheckForPermanentCaching(string path, object objToSave)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllText(path, JsonConvert.SerializeObject(objToSave, Formatting.Indented));
+            try
+            {
+                if (!Directory.Exists(Path.GetDirectoryName(path)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                File.WriteAllText(path, JsonConvert.SerializeObject(objToSave, Formatting.Indented));
+            }
+            catch { }
         }
     }
 }

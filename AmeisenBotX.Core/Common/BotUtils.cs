@@ -38,6 +38,20 @@ namespace AmeisenBotX.Core.Common
             return true;
         }
 
+        public static string BigValueToString(double value)
+        {
+            if (value >= 100000000)
+            {
+                return $"{(int)value / 1000000}M";
+            }
+            else if (value >= 100000)
+            {
+                return $"{(int)value / 1000}K";
+            }
+
+            return $"{value}";
+        }
+
         public static bool IsMeeleeClass(WowClass wowClass)
         {
             switch (wowClass)

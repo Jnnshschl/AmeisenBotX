@@ -547,7 +547,7 @@ namespace AmeisenBotX.Core.Hook
             return true;
         }
 
-        private void DisposeHook()
+        public void DisposeHook()
         {
             if (IsWoWHooked)
             {

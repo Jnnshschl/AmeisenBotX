@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.States;
@@ -20,33 +21,47 @@ namespace AmeisenBotX.Core.StateMachine
         private ObjectManager ObjectManager { get; }
         private CharacterManager CharacterManager { get; }
         private HookManager HookManager { get; }
+        private EventHookManager EventHookManager { get; }
         private CacheManager CacheManager { get; }
         private AmeisenBotConfig Config { get; }
 
         private DateTime LastObjectUpdate { get; set; }
         private DateTime LastGhostCheck { get; set; }
+        private DateTime LastEventPull { get; set; }
 
         private Dictionary<AmeisenBotState, State> States { get; }
 
-        public delegate void StateMachineTick();
+        public string PlayerName { get; internal set; }
 
+        public delegate void StateMachineTick();
         public event StateMachineTick OnStateMachineTick;
 
         public delegate void StateMachineStateChange();
-
         public event StateMachineStateChange OnStateMachineStateChange;
 
-        public AmeisenBotStateMachine(Process wowProcess, AmeisenBotConfig config, XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, CacheManager cacheManager, IPathfindingHandler pathfindingHandler)
+        public AmeisenBotStateMachine(
+            Process wowProcess,
+            AmeisenBotConfig config,
+            XMemory xMemory,
+            IOffsetList offsetList,
+            ObjectManager objectManager,
+            CharacterManager characterManager,
+            HookManager hookManager,
+            EventHookManager eventHookManager,
+            CacheManager cacheManager,
+            IPathfindingHandler pathfindingHandler)
         {
             Config = config;
             XMemory = xMemory;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+            EventHookManager = eventHookManager;
             CacheManager = cacheManager;
 
             LastObjectUpdate = DateTime.Now;
             LastGhostCheck = DateTime.Now;
+            LastEventPull = DateTime.Now;
 
             States = new Dictionary<AmeisenBotState, State>()
             {
@@ -54,7 +69,7 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory)},
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
-                { AmeisenBotState.Idle, new StateIdle(this, config, objectManager, hookManager)},
+                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, hookManager, eventHookManager)},
                 { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager)},
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
@@ -71,6 +86,8 @@ namespace AmeisenBotX.Core.StateMachine
             if (XMemory.Process != null && XMemory.Process.HasExited)
                 SetState(AmeisenBotState.None);
 
+            HandleEventPull();
+
             if (ObjectManager != null)
             {
                 if (!ObjectManager.IsWorldLoaded)
@@ -78,24 +95,24 @@ namespace AmeisenBotX.Core.StateMachine
 
                 if (ObjectManager.Player != null)
                 {
-                    if (ObjectManager.Player.IsDead)
-                        SetState(AmeisenBotState.Dead);
-                    else
-                    {
-                        if (LastGhostCheck + TimeSpan.FromSeconds(1) < DateTime.Now)
-                        {
-                            bool isGhost = HookManager.IsGhost("player");
-                            LastGhostCheck = DateTime.Now;
-
-                            if (isGhost) SetState(AmeisenBotState.Ghost);
-                        }
-                    }
+                    HandlePlayerDeadOrGhostState();
 
                     if (ObjectManager.Player.IsInCombat)
                         SetState(HandleCombatSituation());
                 }
             }
 
+            HandleObjectUpdates();
+
+            CurrentState.Value.Execute();
+            CharacterManager.AntiAfk();
+
+            // used for ui updates
+            OnStateMachineTick?.Invoke();
+        }
+
+        private void HandleObjectUpdates()
+        {
             if (LastObjectUpdate - TimeSpan.FromMilliseconds(Config.ObjectUpdateMs) < DateTime.Now
                 && CurrentState.Key != AmeisenBotState.None
                 && CurrentState.Key != AmeisenBotState.StartWow
@@ -105,10 +122,32 @@ namespace AmeisenBotX.Core.StateMachine
                 ObjectManager.UpdateWowObjects();
                 LastObjectUpdate = DateTime.Now;
             }
+        }
 
-            CurrentState.Value.Execute();
-            CharacterManager.AntiAfk();
-            OnStateMachineTick?.Invoke();
+        private void HandlePlayerDeadOrGhostState()
+        {
+            if (ObjectManager.Player.IsDead)
+                SetState(AmeisenBotState.Dead);
+            else
+            {
+                if (LastGhostCheck + TimeSpan.FromSeconds(3) < DateTime.Now)
+                {
+                    bool isGhost = HookManager.IsGhost("player");
+                    LastGhostCheck = DateTime.Now;
+
+                    if (isGhost) SetState(AmeisenBotState.Ghost);
+                }
+            }
+        }
+
+        private void HandleEventPull()
+        {
+            if (EventHookManager.IsSetUp
+                && LastEventPull + TimeSpan.FromSeconds(1) < DateTime.Now)
+            {
+                EventHookManager.ReadEvents();
+                LastEventPull = DateTime.Now;
+            }
         }
 
         private AmeisenBotState HandleCombatSituation()

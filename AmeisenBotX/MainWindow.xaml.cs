@@ -20,6 +20,8 @@ namespace AmeisenBotX
         private readonly string configPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
         private AmeisenBot AmeisenBot { get; }
 
+        private DateTime LastStateMachineTick { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,6 +33,8 @@ namespace AmeisenBotX
 
             AmeisenBot.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChange += OnStateMachineStateChange;
+
+            LastStateMachineTick = DateTime.Now;
         }
 
         private AmeisenBotConfig LoadConfig()
@@ -97,9 +101,14 @@ namespace AmeisenBotX
                 progressbarExp.Maximum = AmeisenBot.ObjectManager.Player.MaxExp;
                 progressbarExp.Value = AmeisenBot.ObjectManager.Player.Exp;
 
-                double executionMs = AmeisenBot.CurrentExecutionMs;
-                if (double.IsNaN(executionMs)) executionMs = 0;
-                labelCurrentTickTime.Content = executionMs;
+                if (LastStateMachineTick + TimeSpan.FromSeconds(1) < DateTime.Now)
+                {
+                    double executionMs = AmeisenBot.CurrentExecutionMs;
+                    if (double.IsNaN(executionMs)) executionMs = 0;
+                    labelCurrentTickTime.Content = executionMs;
+
+                    LastStateMachineTick = DateTime.Now;
+                }
 
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
 
