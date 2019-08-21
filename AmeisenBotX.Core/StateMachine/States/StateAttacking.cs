@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private CharacterManager CharacterManager { get; }
         private IPathfindingHandler PathfindingHandler { get; }
 
+        private ICombatClass CombatClass { get; }
+
         private Queue<WowPosition> CurrentPath { get; set; }
         public WowPosition LastPosition { get; private set; }
         private int TryCount { get; set; }
@@ -34,6 +37,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             PathfindingHandler = pathfindingHandler;
             CurrentPath = new Queue<WowPosition>();
+
+            CombatClass = new WarriorArms(objectManager, characterManager, hookManager);
         }
 
         public override void Enter()
@@ -54,13 +59,13 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                if (CurrentPath.Count > 0)
-                    HandleMovement();
+                //if (CurrentPath.Count > 0)
+                    //HandleMovement();
 
                 if (SelectTarget(out WowUnit target)
                     && target != null)
                 {
-                    if (CurrentPath.Count == 0 && IsMelee)
+                    /*if (CurrentPath.Count == 0 && IsMelee)
                     {
                         // keep close to target
                         double distance = ObjectManager.Player.Position.GetDistance(target.Position);
@@ -72,7 +77,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                     else
                     {
                         // keep distance to target
-                    }
+                    }*/
+
+                    CombatClass.Execute();
                 }
             }
         }
