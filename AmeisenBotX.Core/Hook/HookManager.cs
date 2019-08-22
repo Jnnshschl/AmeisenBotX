@@ -203,10 +203,12 @@ namespace AmeisenBotX.Core.Hook
 
         public double GetSpellCooldown(string spellName)
         {
-            LuaDoString($"start,duration,enabled = GetSpellCooldown(\"{spellName}\");cdLeft = (start + duration - GetTime()) * 1000;");
-            if (double.TryParse(GetLocalizedText("cdLeft"), out double value))
+            LuaDoString($"start,duration,enabled = GetSpellCooldown(\"{spellName}\");cdLeft = (start + duration - GetTime());");
+            string result = GetLocalizedText("cdLeft").Replace(".", ",");
+            if (double.TryParse(result, out double value))
             {
-                return value;
+                value = Math.Round(value, 0);
+                return value > 0 ? value : 0;
             }
             return -1;
         }

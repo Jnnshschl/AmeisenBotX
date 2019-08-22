@@ -103,6 +103,8 @@ namespace AmeisenBotX.Core.Data
                 WowObjectType wowObjectType = (WowObjectType)objectType;
                 switch (wowObjectType)
                 {
+                    case WowObjectType.Gameobject: WowObjects.Add(ReadWowGameobject(activeObject, wowObjectType)); break;
+                    case WowObjectType.Dynobject: WowObjects.Add(ReadWowDynobject(activeObject, wowObjectType)); break;
                     case WowObjectType.Unit: WowObjects.Add(ReadWowUnit(activeObject, wowObjectType)); break;
                     case WowObjectType.Player: WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType)); break;
 
@@ -133,6 +135,50 @@ namespace AmeisenBotX.Core.Data
                     DescriptorAddress = descriptorAddress,
                     Guid = guid,
                     Type = wowObjectType
+                };
+            }
+            return null;
+        }
+
+        private WowGameobject ReadWowGameobject(IntPtr activeObject, WowObjectType wowObjectType)
+        {
+            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
+
+            if (wowObject != null)
+            {
+                return new WowGameobject()
+                {
+                    BaseAddress = activeObject,
+                    DescriptorAddress = wowObject.DescriptorAddress,
+                    Guid = wowObject.Guid,
+                    Type = wowObjectType,
+                };
+            }
+            return null;
+        }
+
+        private WowDynobject ReadWowDynobject(IntPtr activeObject, WowObjectType wowObjectType)
+        {
+            WowGameobject wowObject = ReadWowGameobject(activeObject, wowObjectType);
+
+            if (wowObject != null
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectCasterGuid.ToInt32()), out ulong casterGuid)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectSpellId.ToInt32()), out int spellId)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectRadius.ToInt32()), out float radius)
+                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowGameobjectPosition.ToInt32()), out WowPosition wowPosition)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectFacing.ToInt32()), out float facing))
+            {
+                return new WowDynobject()
+                {
+                    BaseAddress = activeObject,
+                    DescriptorAddress = wowObject.DescriptorAddress,
+                    Guid = wowObject.Guid,
+                    Type = wowObjectType,
+                    CasterGuid = casterGuid,
+                    SpellId = spellId,
+                    Radius = radius,
+                    Position = wowPosition,
+                    Facing = facing
                 };
             }
             return null;
