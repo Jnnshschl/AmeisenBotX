@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private bool IsMelee { get; set; }
 
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, ICombatClass combatClass) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
@@ -37,8 +37,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             PathfindingHandler = pathfindingHandler;
             CurrentPath = new Queue<WowPosition>();
-
-            CombatClass = new WarriorArms(objectManager, characterManager, hookManager);
+            CombatClass = combatClass;
         }
 
         public override void Enter()
@@ -59,27 +58,35 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                //if (CurrentPath.Count > 0)
-                    //HandleMovement();
+                if (CombatClass == null)
+                {
+                    if (CurrentPath.Count > 0)
+                        HandleMovement();
+                }
 
                 if (SelectTarget(out WowUnit target)
-                    && target != null)
+                && target != null)
                 {
-                    /*if (CurrentPath.Count == 0 && IsMelee)
+                    if (CombatClass == null)
                     {
-                        // keep close to target
-                        double distance = ObjectManager.Player.Position.GetDistance(target.Position);
-                        if (distance > 3.2)
+                        if (CurrentPath.Count == 0 && IsMelee)
                         {
-                            BuildNewPath(target);
+                            // keep close to target
+                            double distance = ObjectManager.Player.Position.GetDistance(target.Position);
+                            if (distance > 3.2)
+                            {
+                                BuildNewPath(target);
+                            }
+                        }
+                        else
+                        {
+                            // keep distance to target
                         }
                     }
                     else
                     {
-                        // keep distance to target
-                    }*/
-
-                    CombatClass.Execute();
+                        CombatClass.Execute();
+                    }
                 }
             }
         }

@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
+using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Pathfinding;
@@ -29,7 +30,7 @@ namespace AmeisenBotX.Core
         public EventHookManager EventHookManager { get; set; }
         public CacheManager CacheManager { get; set; }
         public IPathfindingHandler PathfindingHandler { get; set; }
-
+        public ICombatClass CombatClass { get; set; }
         public Process WowProcess { get; }
 
         public IOffsetList OffsetList { get; }
@@ -75,7 +76,19 @@ namespace AmeisenBotX.Core
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, CacheManager);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
-            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, CacheManager, PathfindingHandler);
+
+            switch(Config.CombatClassName.ToUpper())
+            {
+                case "WARRIORARMS":
+                    CombatClass = new WarriorArms(ObjectManager, CharacterManager, HookManager);
+                    break;
+
+                default:
+                    CombatClass = null;
+                    break;
+            }
+
+            StateMachine = new AmeisenBotStateMachine(WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, CacheManager, PathfindingHandler, CombatClass);
 
             if (!Directory.Exists(Config.BotDataPath)) Directory.CreateDirectory(Config.BotDataPath);
         }

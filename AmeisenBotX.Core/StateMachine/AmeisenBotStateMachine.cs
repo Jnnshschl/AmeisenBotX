@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Core.StateMachine.States;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
@@ -49,7 +50,8 @@ namespace AmeisenBotX.Core.StateMachine
             HookManager hookManager,
             EventHookManager eventHookManager,
             CacheManager cacheManager,
-            IPathfindingHandler pathfindingHandler)
+            IPathfindingHandler pathfindingHandler,
+            ICombatClass combatClass)
         {
             Config = config;
             XMemory = xMemory;
@@ -73,7 +75,7 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager)},
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
-                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler)},
+                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, combatClass)},
                 { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)}
             };
 

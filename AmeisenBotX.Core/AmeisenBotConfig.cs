@@ -38,6 +38,8 @@ namespace AmeisenBotX.Core
 
         public bool ReleaseSpirit { get; set; } = false;
 
+        public string CombatClassName { get; set; } = "ClassSpec";
+
         public AmeisenBotConfig() { }
     }
 }
