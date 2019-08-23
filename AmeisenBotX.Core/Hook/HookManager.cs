@@ -18,15 +18,20 @@ namespace AmeisenBotX.Core.Hook
         public byte[] originalEndsceneBytes;
         private const int ENDSCENE_HOOK_OFFSET = 0x2;
 
+        public HookManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CacheManager cacheManager)
+        {
+            XMemory = xMemory;
+            OffsetList = offsetList;
+            ObjectManager = objectManager;
+            CacheManager = cacheManager;
+        }
+
         public IntPtr CodecaveForCheck { get; private set; }
         public IntPtr CodecaveForExecution { get; private set; }
         public IntPtr CodeToExecuteAddress { get; private set; }
         public IntPtr EndsceneAddress { get; private set; }
         public IntPtr EndsceneReturnAddress { get; private set; }
-        public IntPtr ReturnValueAddress { get; private set; }
-
         public bool IsInjectionUsed { get; private set; }
-
         public bool IsWoWHooked
         {
             get
@@ -38,19 +43,11 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public IntPtr ReturnValueAddress { get; private set; }
         private CacheManager CacheManager { get; }
         private ObjectManager ObjectManager { get; }
         private IOffsetList OffsetList { get; }
         private XMemory XMemory { get; }
-
-        public HookManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CacheManager cacheManager)
-        {
-            XMemory = xMemory;
-            OffsetList = offsetList;
-            ObjectManager = objectManager;
-            CacheManager = cacheManager;
-        }
-
         public void AcceptPartyInvite()
         {
             LuaDoString("AcceptGroup();");
@@ -101,6 +98,34 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString($"ConfirmReadyCheck({isReady});");
         }
 
+        public void DisposeHook()
+        {
+            if (IsWoWHooked)
+            {
+                XMemory.WriteBytes(EndsceneAddress, originalEndsceneBytes);
+
+                if (CodecaveForCheck != null)
+                {
+                    XMemory.FreeMemory(CodecaveForCheck);
+                }
+
+                if (CodecaveForExecution != null)
+                {
+                    XMemory.FreeMemory(CodecaveForExecution);
+                }
+
+                if (CodeToExecuteAddress != null)
+                {
+                    XMemory.FreeMemory(CodeToExecuteAddress);
+                }
+
+                if (ReturnValueAddress != null)
+                {
+                    XMemory.FreeMemory(ReturnValueAddress);
+                }
+            }
+        }
+
         public void FaceUnit(WowPlayer player, WowPosition positionToFace)
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
@@ -142,29 +167,6 @@ namespace AmeisenBotX.Core.Hook
 
             return resultLowered;
         }
-
-        public (string, int) GetUnitCastingInfo(WowLuaUnit luaunit)
-        {
-            string cmd = $"abCastingInfo = \"none,0\"; abSpellName, x, x, x, x, abSpellEndTime = UnitCastingInfo(\"{luaunit.ToString()}\"); abDuration = ((abSpellEndTime/1000) - GetTime()) * 1000; abCastingInfo = abSpellName..\",\"..abDuration;";
-            LuaDoString(cmd);
-            string str = GetLocalizedText("abCastingInfo");
-
-            if (double.TryParse(str.Split(',')[1], out double timeRemaining))
-                return (str.Split(',')[0], (int)Math.Round(timeRemaining, 0));
-            return ("", -1);
-        }
-
-        public void RepairAllItems()
-            => LuaDoString("RepairAllItems();");
-
-        public void TargetLuaUnit(WowLuaUnit unit)
-           => LuaDoString($"TargetUnit(\"{unit.ToString()}\");");
-
-        public void SellAllGrayItems()
-            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) print(\"Sold: \"..n) end end end print(\"Total: \"..GetCoinText(p))");
-
-        public void LootEveryThing()
-            => LuaDoString("abLootCount=GetNumLootItems();for i = abLootCount,1,-1 do LootSlot(i); ConfirmLootSlot(i); end");
 
         public List<string> GetDebuffs(string luaunitName)
         {
@@ -234,6 +236,17 @@ namespace AmeisenBotX.Core.Hook
                 return value > 0 ? value : 0;
             }
             return -1;
+        }
+
+        public (string, int) GetUnitCastingInfo(WowLuaUnit luaunit)
+        {
+            string cmd = $"abCastingInfo = \"none,0\"; abSpellName, x, x, x, x, abSpellEndTime = UnitCastingInfo(\"{luaunit.ToString()}\"); abDuration = ((abSpellEndTime/1000) - GetTime()) * 1000; abCastingInfo = abSpellName..\",\"..abDuration;";
+            LuaDoString(cmd);
+            string str = GetLocalizedText("abCastingInfo");
+
+            if (double.TryParse(str.Split(',')[1], out double timeRemaining))
+                return (str.Split(',')[0], (int)Math.Round(timeRemaining, 0));
+            return ("", -1);
         }
 
         public WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
@@ -432,6 +445,9 @@ namespace AmeisenBotX.Core.Hook
             InjectAndExecute(asm, false);
         }
 
+        public void SellAllGrayItems()
+            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) print(\"Sold: \"..n) end end end print(\"Total: \"..GetCoinText(p))");
+
         public void SendChatMessage(string message)
             => LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
 
@@ -534,6 +550,9 @@ namespace AmeisenBotX.Core.Hook
             InjectAndExecute(asm, false);
         }
 
+        public void TargetLuaUnit(WowLuaUnit unit)
+            => LuaDoString($"TargetUnit(\"{unit.ToString()}\");");
+
         public void TargetNearestEnemy() => SendChatMessage("/targetenemy [harm][nodead]");
 
         public void WriteCtmValues(WowPosition targetPosition, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float distance = 1.5f)
@@ -571,35 +590,6 @@ namespace AmeisenBotX.Core.Hook
 
             return true;
         }
-
-        public void DisposeHook()
-        {
-            if (IsWoWHooked)
-            {
-                XMemory.WriteBytes(EndsceneAddress, originalEndsceneBytes);
-
-                if (CodecaveForCheck != null)
-                {
-                    XMemory.FreeMemory(CodecaveForCheck);
-                }
-
-                if (CodecaveForExecution != null)
-                {
-                    XMemory.FreeMemory(CodecaveForExecution);
-                }
-
-                if (CodeToExecuteAddress != null)
-                {
-                    XMemory.FreeMemory(CodeToExecuteAddress);
-                }
-
-                if (ReturnValueAddress != null)
-                {
-                    XMemory.FreeMemory(ReturnValueAddress);
-                }
-            }
-        }
-
         private IntPtr GetEndScene()
         {
             if (XMemory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
