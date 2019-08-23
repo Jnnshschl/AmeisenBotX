@@ -52,11 +52,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             double distance = ObjectManager.Player.Position.GetDistance(target.Position);
             double healthpercent = ((double)target.Health / (double)target.MaxHealth) * 100;
             double healthpercentme = ((double)ObjectManager.Player.Health / (double)ObjectManager.Player.MaxHealth) * 100.0;
+            (string, int) castinginfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
 
             if (HookManager.GetSpellCooldown("Enraged Regeneration") <= 0 
                 && rage >= 15 && healthpercentme <= 40)
             {
                 HookManager.CastSpell("Enraged Regeneration");
+            }
+
+            if (HookManager.GetSpellCooldown("Retaliation") <= 0
+            && healthpercentme <= 40)
+            {
+                HookManager.CastSpell("Retaliation");
             }
 
             if (HookManager.GetSpellCooldown("Intimidating Shout") <= 0 
@@ -65,10 +72,28 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Intimidating Shout");
             }
 
+            if (HookManager.GetSpellCooldown("Intimidating Shout") <= 0
+            && rage >= 25 && castinginfo.Item2 > 1)
+            {
+                HookManager.CastSpell("Intimidating Shout");
+            }
+
+            if (HookManager.GetSpellCooldown("Bloodrage") <= 0
+            && rage <= 20 && healthpercentme >= 10)
+            {
+                HookManager.CastSpell("Bloodrage");
+            }
+
             if (HookManager.GetSpellCooldown("charge") <= 0 
                 && distance > 8 && distance < 25)
             {
                 HookManager.CastSpell("charge");
+            }
+
+            if (HookManager.GetSpellCooldown("Intercept") <= 0
+                && distance > 8 && distance < 25 && rage >= 10)
+            {
+                HookManager.CastSpell("Intercept");
             }
 
             if (HookManager.GetSpellCooldown("Bladestorm") <= 0
@@ -83,16 +108,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Mortal Strike");
             }
 
-            if (HookManager.GetSpellCooldown("Pummel") <= 0
-            && rage >= 10 && distance < 3)
-            {
-                HookManager.CastSpell("Pummel");
-            }
-
             if (HeroicStrikeLastUsed + TimeSpan.FromSeconds(6) < DateTime.Now
                 && rage >= 12 && distance < 3)
             {
                 HookManager.CastSpell("Heroic Strike");
+                HeroicStrikeLastUsed = DateTime.Now;
+            }
+
+            if (HeroicStrikeLastUsed + TimeSpan.FromSeconds(6) < DateTime.Now
+            && rage >= 15 && distance < 3)
+            {
+                HookManager.CastSpell("Slam");
+                HeroicStrikeLastUsed = DateTime.Now;
+            }
+
+            if (HeroicStrikeLastUsed + TimeSpan.FromSeconds(30) < DateTime.Now
+            && rage >= 10 && distance < 3)
+            {
+                HookManager.CastSpell("Rend");
                 HeroicStrikeLastUsed = DateTime.Now;
             }
 
@@ -117,6 +150,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             && distance <= 30 && distance >= 10)
             {
                 HookManager.CastSpell("Heroic Throw");
+            }
+
+            if (HookManager.GetSpellCooldown("Shattering Throw") <= 0
+            && distance <= 30 && distance >= 10 && rage >= 25)
+            {
+                HookManager.CastSpell("Shattering Throw");
             }
 
         }
