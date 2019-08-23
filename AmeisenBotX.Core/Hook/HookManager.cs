@@ -143,6 +143,29 @@ namespace AmeisenBotX.Core.Hook
             return resultLowered;
         }
 
+        public (string, int) GetUnitCastingInfo(WowLuaUnit luaunit)
+        {
+            string cmd = $"abCastingInfo = \"none,0\"; abSpellName, x, x, x, x, abSpellEndTime = UnitCastingInfo(\"{luaunit.ToString()}\"); abDuration = ((abSpellEndTime/1000) - GetTime()) * 1000; abCastingInfo = abSpellName..\",\"..abDuration;";
+            LuaDoString(cmd);
+            string str = GetLocalizedText("abCastingInfo");
+
+            if (double.TryParse(str.Split(',')[1], out double timeRemaining))
+                return (str.Split(',')[0], (int)Math.Round(timeRemaining, 0));
+            return ("", -1);
+        }
+
+        public void RepairAllItems()
+            => LuaDoString("RepairAllItems();");
+
+        public void TargetLuaUnit(WowLuaUnit unit)
+           => LuaDoString($"TargetUnit(\"{unit.ToString()}\");");
+
+        public void SellAllGrayItems()
+            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) print(\"Sold: \"..n) end end end print(\"Total: \"..GetCoinText(p))");
+
+        public void LootEveryThing()
+            => LuaDoString("abLootCount=GetNumLootItems();for i = abLootCount,1,-1 do LootSlot(i); ConfirmLootSlot(i); end");
+
         public List<string> GetDebuffs(string luaunitName)
         {
             List<string> resultLowered = new List<string>();

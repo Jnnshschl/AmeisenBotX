@@ -113,7 +113,7 @@ namespace AmeisenBotX
 
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
 
-                labelDebug.Content = $"{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.WowObjects.OfType<WowDynobject>(), Formatting.Indented)}\n{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player.Position,Formatting.Indented)}";
+                //labelDebug.Content = $"{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.WowObjects.OfType<WowDynobject>(), Formatting.Indented)}\n{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player.Position,Formatting.Indented)}";
             });
         }
 
