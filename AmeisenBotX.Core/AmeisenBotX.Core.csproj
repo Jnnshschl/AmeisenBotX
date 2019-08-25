@@ -60,10 +60,14 @@
     <Compile Include="Data\Objects\HerbNode.cs" />
     <Compile Include="Data\Objects\OreNode.cs" />
     <Compile Include="Data\Objects\WowClass.cs" />
+    <Compile Include="Data\Objects\WowObject\WowCorpse.cs" />
+    <Compile Include="Data\Objects\WowObject\WowCorpseFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowDynobject.cs" />
     <Compile Include="Data\Objects\WowObject\WowGameobject.cs" />
+    <Compile Include="Data\Objects\WowObject\WowGameobjectFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowGameobjectType.cs" />
     <Compile Include="Data\Objects\WowObject\WowLuaUnit.cs" />
+    <Compile Include="Data\Objects\WowObject\WowUnitNpcFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitReaction.cs" />
     <Compile Include="Data\Objects\WowRace.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitDynamicFlags.cs" />

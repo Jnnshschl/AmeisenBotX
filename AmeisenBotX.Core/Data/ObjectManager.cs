@@ -14,37 +14,7 @@ namespace AmeisenBotX.Core.Data
     {
         private readonly object QueryLock = new object();
 
-        private XMemory XMemory { get; }
-        private CacheManager CacheManager { get; }
-        private IOffsetList OffsetList { get; }
-
         private List<WowObject> wowObjects;
-
-        public List<WowObject> WowObjects
-        {
-            get { lock (QueryLock) { return wowObjects; } }
-            set { lock (QueryLock) { wowObjects = value; } }
-        }
-
-        public ulong PlayerGuid { get; private set; }
-        public ulong TargetGuid { get; private set; }
-        public ulong LastTargetGuid { get; private set; }
-        public ulong PetGuid { get; private set; }
-        public ulong PartyleaderGuid { get; private set; }
-        public List<ulong> PartymemberGuids { get; private set; }
-
-        public IntPtr PlayerBase { get; private set; }
-
-        public bool IsWorldLoaded { get; private set; }
-
-        public int MapId { get; private set; }
-        public int ZoneId { get; private set; }
-
-        public WowPlayer Player { get; private set; }
-
-        public delegate void ObjectUpdateComplete(List<WowObject> wowObjects);
-
-        public event ObjectUpdateComplete OnObjectUpdateComplete;
 
         public ObjectManager(XMemory xMemory, IOffsetList offsetList, CacheManager cacheManager)
         {
@@ -58,128 +28,147 @@ namespace AmeisenBotX.Core.Data
             EnableClickToMove();
         }
 
-        private void EnableClickToMove()
+        public delegate void ObjectUpdateComplete(List<WowObject> wowObjects);
+
+        public event ObjectUpdateComplete OnObjectUpdateComplete;
+
+        public bool IsWorldLoaded { get; private set; }
+        public ulong LastTargetGuid { get; private set; }
+        public int MapId { get; private set; }
+        public ulong PartyleaderGuid { get; private set; }
+        public List<ulong> PartymemberGuids { get; private set; }
+        public ulong PetGuid { get; private set; }
+        public WowPlayer Player { get; private set; }
+        public IntPtr PlayerBase { get; private set; }
+        public ulong PlayerGuid { get; private set; }
+        public ulong TargetGuid { get; private set; }
+
+        public List<WowObject> WowObjects
         {
-            if (XMemory.Read(OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
-                && XMemory.Read(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), out int ctmEnabled))
-            {
-                if (ctmEnabled != 1) XMemory.Write(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), 1);
-            }
+            get { lock (QueryLock) { return wowObjects; } }
+            set { lock (QueryLock) { wowObjects = value; } }
         }
 
-        public bool RefreshIsWorldLoaded()
+        public int ZoneId { get; private set; }
+        private CacheManager CacheManager { get; }
+        private IOffsetList OffsetList { get; }
+        private XMemory XMemory { get; }
+
+        public ulong ReadPartyLeaderGuid()
         {
-            if (XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            ulong partyleaderGuid;
+            if (XMemory.Read(OffsetList.RaidLeader, out partyleaderGuid))
             {
-                IsWorldLoaded = isWorldLoaded == 1;
-                return IsWorldLoaded;
-            }
-            return false;
-        }
-
-        public void UpdateWowObjects()
-        {
-            if (!XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
-            {
-                IsWorldLoaded = isWorldLoaded == 1;
-                return;
-            }
-
-            if (XMemory.Read(OffsetList.PlayerGuid, out ulong playerGuid)) PlayerGuid = playerGuid;
-            if (XMemory.Read(OffsetList.TargetGuid, out ulong targetGuid)) TargetGuid = targetGuid;
-            if (XMemory.Read(OffsetList.TargetGuid, out ulong lastTargetGuid)) LastTargetGuid = lastTargetGuid;
-            if (XMemory.Read(OffsetList.PetGuid, out ulong petGuid)) PetGuid = petGuid;
-            if (XMemory.Read(OffsetList.TargetGuid, out IntPtr playerbase)) PlayerBase = playerbase;
-
-            WowObjects = new List<WowObject>();
-            XMemory.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
-            XMemory.Read(IntPtr.Add(clientConnection, OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
-
-            XMemory.Read(IntPtr.Add(currentObjectManager, OffsetList.FirstObject.ToInt32()), out IntPtr activeObject);
-            XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectType.ToInt32()), out int objectType);
-
-            while (isWorldLoaded == 1 && (objectType <= 7 && objectType > 0))
-            {
-                WowObjectType wowObjectType = (WowObjectType)objectType;
-                switch (wowObjectType)
+                if (partyleaderGuid == 0
+                    && XMemory.Read(OffsetList.PartyLeader, out partyleaderGuid))
                 {
-                    case WowObjectType.Gameobject: WowObjects.Add(ReadWowGameobject(activeObject, wowObjectType)); break;
-                    case WowObjectType.Dynobject: WowObjects.Add(ReadWowDynobject(activeObject, wowObjectType)); break;
-                    case WowObjectType.Unit: WowObjects.Add(ReadWowUnit(activeObject, wowObjectType)); break;
-                    case WowObjectType.Player: WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType)); break;
-
-                    default: WowObjects.Add(ReadWowObject(activeObject, wowObjectType)); break;
                 }
-
-                XMemory.Read(IntPtr.Add(activeObject, OffsetList.NextObject.ToInt32()), out activeObject);
-                XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectType.ToInt32()), out objectType);
             }
+            return partyleaderGuid;
+        }
 
-            PartyleaderGuid = ReadPartyLeaderGuid();
-            PartymemberGuids = ReadPartymemberGuids();
+        public List<ulong> ReadPartymemberGuids()
+        {
+            List<ulong> partymemberGuids = new List<ulong>();
 
-            if (XMemory.Read(OffsetList.MapId, out int mapId)) MapId = mapId;
-            if (XMemory.Read(OffsetList.ZoneId, out int zoneId)) ZoneId = zoneId;
+            if (XMemory.Read(OffsetList.PartyPlayer1, out ulong partyMember1)
+                && XMemory.Read(OffsetList.PartyPlayer2, out ulong partyMember2)
+                && XMemory.Read(OffsetList.PartyPlayer3, out ulong partyMember3)
+                && XMemory.Read(OffsetList.PartyPlayer4, out ulong partyMember4))
+            {
+                partymemberGuids.Add(partyMember1);
+                partymemberGuids.Add(partyMember2);
+                partymemberGuids.Add(partyMember3);
+                partymemberGuids.Add(partyMember4);
 
-            OnObjectUpdateComplete?.Invoke(WowObjects);
+                // try to add raidmembers
+                for (uint p = 0; p < 40; p++)
+                {
+                    try
+                    {
+                        IntPtr address = IntPtr.Add(OffsetList.RaidGroupStart, (int)(p * OffsetList.RaidGroupPlayer.ToInt32()));
+                        if (XMemory.Read(address, out ulong guid))
+                        {
+                            if (!partymemberGuids.Contains(guid))
+                            {
+                                partymemberGuids.Add(guid);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            return partymemberGuids;
         }
 
         public WowObject ReadWowObject(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.None)
         {
             if (XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
-                && XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectGuid.ToInt32()), out ulong guid))
+                && XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectGuid.ToInt32()), out ulong guid)
+                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowObjectPosition.ToInt32()), out WowPosition wowPosition))
             {
                 return new WowObject()
                 {
                     BaseAddress = activeObject,
                     DescriptorAddress = descriptorAddress,
                     Guid = guid,
-                    Type = wowObjectType
+                    Type = wowObjectType,
+                    Position = wowPosition
                 };
             }
             return null;
         }
 
-        private WowGameobject ReadWowGameobject(IntPtr activeObject, WowObjectType wowObjectType)
+        public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Player)
         {
-            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
+            WowUnit wowUnit = ReadWowUnit(activeObject, wowObjectType);
 
-            if (wowObject != null)
+            if (wowUnit != null)
             {
-                return new WowGameobject()
+                WowPlayer player = new WowPlayer()
                 {
                     BaseAddress = activeObject,
-                    DescriptorAddress = wowObject.DescriptorAddress,
-                    Guid = wowObject.Guid,
+                    DescriptorAddress = wowUnit.DescriptorAddress,
+                    Guid = wowUnit.Guid,
                     Type = wowObjectType,
+                    Name = ReadPlayerName(wowUnit.Guid),
+                    TargetGuid = wowUnit.TargetGuid,
+                    Position = wowUnit.Position,
+                    Rotation = wowUnit.Rotation,
+                    FactionTemplate = wowUnit.FactionTemplate,
+                    UnitFlags = wowUnit.UnitFlags,
+                    UnitFlagsDynamic = wowUnit.UnitFlagsDynamic,
+                    Health = wowUnit.Health,
+                    MaxHealth = wowUnit.MaxHealth,
+                    Mana = wowUnit.Mana,
+                    MaxMana = wowUnit.MaxMana,
+                    Energy = wowUnit.Energy,
+                    MaxEnergy = wowUnit.MaxEnergy,
+                    Rage = wowUnit.Rage,
+                    MaxRage = wowUnit.MaxRage,
+                    Runeenergy = wowUnit.Runeenergy,
+                    MaxRuneenergy = wowUnit.MaxRuneenergy,
+                    Level = wowUnit.Level,
+                    IsAutoAttacking = wowUnit.IsAutoAttacking,
+                    CurrentlyCastingSpellId = wowUnit.CurrentlyCastingSpellId,
+                    CurrentlyChannelingSpellId = wowUnit.CurrentlyChannelingSpellId
                 };
-            }
-            return null;
-        }
 
-        private WowDynobject ReadWowDynobject(IntPtr activeObject, WowObjectType wowObjectType)
-        {
-            WowGameobject wowObject = ReadWowGameobject(activeObject, wowObjectType);
-
-            if (wowObject != null
-                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectCasterGuid.ToInt32()), out ulong casterGuid)
-                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectSpellId.ToInt32()), out int spellId)
-                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectRadius.ToInt32()), out float radius)
-                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowGameobjectPosition.ToInt32()), out WowPosition wowPosition)
-                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectFacing.ToInt32()), out float facing))
-            {
-                return new WowDynobject()
+                if (PlayerGuid != 0 && wowUnit.Guid == PlayerGuid)
                 {
-                    BaseAddress = activeObject,
-                    DescriptorAddress = wowObject.DescriptorAddress,
-                    Guid = wowObject.Guid,
-                    Type = wowObjectType,
-                    CasterGuid = casterGuid,
-                    SpellId = spellId,
-                    Radius = radius,
-                    Position = wowPosition,
-                    Facing = facing
-                };
+                    if (XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorExp.ToInt32()), out int exp)
+                        && XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp)
+                        && XMemory.Read(OffsetList.Race, out byte pRace)
+                        && XMemory.Read(OffsetList.Class, out byte pClass))
+                    {
+                        player.Exp = exp;
+                        player.MaxExp = maxExp;
+                        player.Race = (WowRace)pRace;
+                        player.Class = (WowClass)pClass;
+                    }
+                    Player = player;
+                }
+                return player;
             }
             return null;
         }
@@ -242,58 +231,70 @@ namespace AmeisenBotX.Core.Data
             return null;
         }
 
-        public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Player)
+        public bool RefreshIsWorldLoaded()
         {
-            WowUnit wowUnit = ReadWowUnit(activeObject, wowObjectType);
-
-            if (wowUnit != null)
+            if (XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
             {
-                WowPlayer player = new WowPlayer()
-                {
-                    BaseAddress = activeObject,
-                    DescriptorAddress = wowUnit.DescriptorAddress,
-                    Guid = wowUnit.Guid,
-                    Type = wowObjectType,
-                    Name = ReadPlayerName(wowUnit.Guid),
-                    TargetGuid = wowUnit.TargetGuid,
-                    Position = wowUnit.Position,
-                    Rotation = wowUnit.Rotation,
-                    FactionTemplate = wowUnit.FactionTemplate,
-                    UnitFlags = wowUnit.UnitFlags,
-                    UnitFlagsDynamic = wowUnit.UnitFlagsDynamic,
-                    Health = wowUnit.Health,
-                    MaxHealth = wowUnit.MaxHealth,
-                    Mana = wowUnit.Mana,
-                    MaxMana = wowUnit.MaxMana,
-                    Energy = wowUnit.Energy,
-                    MaxEnergy = wowUnit.MaxEnergy,
-                    Rage = wowUnit.Rage,
-                    MaxRage = wowUnit.MaxRage,
-                    Runeenergy = wowUnit.Runeenergy,
-                    MaxRuneenergy = wowUnit.MaxRuneenergy,
-                    Level = wowUnit.Level,
-                    IsAutoAttacking = wowUnit.IsAutoAttacking,
-                    CurrentlyCastingSpellId = wowUnit.CurrentlyCastingSpellId,
-                    CurrentlyChannelingSpellId = wowUnit.CurrentlyChannelingSpellId
-                };
-
-                if (PlayerGuid != 0 && wowUnit.Guid == PlayerGuid)
-                {
-                    if (XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorExp.ToInt32()), out int exp)
-                        && XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp)
-                        && XMemory.Read(OffsetList.Race, out byte pRace)
-                        && XMemory.Read(OffsetList.Class, out byte pClass))
-                    {
-                        player.Exp = exp;
-                        player.MaxExp = maxExp;
-                        player.Race = (WowRace)pRace;
-                        player.Class = (WowClass)pClass;
-                    }
-                    Player = player;
-                }
-                return player;
+                IsWorldLoaded = isWorldLoaded == 1;
+                return IsWorldLoaded;
             }
-            return null;
+            return false;
+        }
+
+        public void UpdateWowObjects()
+        {
+            if (!XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            {
+                IsWorldLoaded = isWorldLoaded == 1;
+                return;
+            }
+
+            if (XMemory.Read(OffsetList.PlayerGuid, out ulong playerGuid)) PlayerGuid = playerGuid;
+            if (XMemory.Read(OffsetList.TargetGuid, out ulong targetGuid)) TargetGuid = targetGuid;
+            if (XMemory.Read(OffsetList.TargetGuid, out ulong lastTargetGuid)) LastTargetGuid = lastTargetGuid;
+            if (XMemory.Read(OffsetList.PetGuid, out ulong petGuid)) PetGuid = petGuid;
+            if (XMemory.Read(OffsetList.TargetGuid, out IntPtr playerbase)) PlayerBase = playerbase;
+
+            WowObjects = new List<WowObject>();
+            XMemory.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
+            XMemory.Read(IntPtr.Add(clientConnection, OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
+
+            XMemory.Read(IntPtr.Add(currentObjectManager, OffsetList.FirstObject.ToInt32()), out IntPtr activeObject);
+            XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectType.ToInt32()), out int objectType);
+
+            while (isWorldLoaded == 1 && (objectType <= 7 && objectType > 0))
+            {
+                WowObjectType wowObjectType = (WowObjectType)objectType;
+                switch (wowObjectType)
+                {
+                    case WowObjectType.Gameobject: WowObjects.Add(ReadWowGameobject(activeObject, wowObjectType)); break;
+                    case WowObjectType.Dynobject: WowObjects.Add(ReadWowDynobject(activeObject, wowObjectType)); break;
+                    case WowObjectType.Unit: WowObjects.Add(ReadWowUnit(activeObject, wowObjectType)); break;
+                    case WowObjectType.Player: WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType)); break;
+
+                    default: WowObjects.Add(ReadWowObject(activeObject, wowObjectType)); break;
+                }
+
+                XMemory.Read(IntPtr.Add(activeObject, OffsetList.NextObject.ToInt32()), out activeObject);
+                XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectType.ToInt32()), out objectType);
+            }
+
+            PartyleaderGuid = ReadPartyLeaderGuid();
+            PartymemberGuids = ReadPartymemberGuids();
+
+            if (XMemory.Read(OffsetList.MapId, out int mapId)) MapId = mapId;
+            if (XMemory.Read(OffsetList.ZoneId, out int zoneId)) ZoneId = zoneId;
+
+            OnObjectUpdateComplete?.Invoke(WowObjects);
+        }
+
+        private void EnableClickToMove()
+        {
+            if (XMemory.Read(OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
+                && XMemory.Read(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), out int ctmEnabled))
+            {
+                if (ctmEnabled != 1) XMemory.Write(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), 1);
+            }
         }
 
         private string ReadPlayerName(ulong guid)
@@ -343,51 +344,70 @@ namespace AmeisenBotX.Core.Data
             catch { return "unknown"; }
         }
 
-        public List<ulong> ReadPartymemberGuids()
+        private WowDynobject ReadWowDynobject(IntPtr activeObject, WowObjectType wowObjectType)
         {
-            List<ulong> partymemberGuids = new List<ulong>();
+            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
 
-            if (XMemory.Read(OffsetList.PartyPlayer1, out ulong partyMember1)
-                && XMemory.Read(OffsetList.PartyPlayer2, out ulong partyMember2)
-                && XMemory.Read(OffsetList.PartyPlayer3, out ulong partyMember3)
-                && XMemory.Read(OffsetList.PartyPlayer4, out ulong partyMember4))
+            // Debug code used to find position offsets
+            /*List<float> x = new List<float>();
+            int offset = 0;
+
+            float rx;
+            do
             {
-                partymemberGuids.Add(partyMember1);
-                partymemberGuids.Add(partyMember2);
-                partymemberGuids.Add(partyMember3);
-                partymemberGuids.Add(partyMember4);
+                offset += 4;
+                if (XMemory.Read(IntPtr.Add(activeObject, offset), out rx))
+                    if (rx != float.NaN)
+                        x.Add(rx);
+                    else
+                        rx = 0f;
+            } while (offset < 2400);*/
 
-                // try to add raidmembers
-                for (uint p = 0; p < 40; p++)
+            if (wowObject != null
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectCasterGuid.ToInt32()), out ulong casterGuid)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectSpellId.ToInt32()), out int spellId)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectRadius.ToInt32()), out float radius)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectFacing.ToInt32()), out float facing))
+            {
+                return new WowDynobject()
                 {
-                    try
-                    {
-                        IntPtr address = IntPtr.Add(OffsetList.RaidGroupStart, (int)(p * OffsetList.RaidGroupPlayer.ToInt32()));
-                        if (XMemory.Read(address, out ulong guid))
-                        {
-                            if (!partymemberGuids.Contains(guid))
-                            {
-                                partymemberGuids.Add(guid);
-                            }
-                        }
-                    }
-                    catch { }
-                }
+                    BaseAddress = activeObject,
+                    DescriptorAddress = wowObject.DescriptorAddress,
+                    Guid = wowObject.Guid,
+                    Position = wowObject.Position,
+                    Type = wowObjectType,
+                    CasterGuid = casterGuid,
+                    SpellId = spellId,
+                    Radius = radius,
+                    Facing = facing
+                };
             }
-            return partymemberGuids;
+            return null;
         }
 
-        public ulong ReadPartyLeaderGuid()
+        private WowGameobject ReadWowGameobject(IntPtr activeObject, WowObjectType wowObjectType)
         {
-            ulong partyleaderGuid;
-            if (XMemory.Read(OffsetList.RaidLeader, out partyleaderGuid))
+            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
+
+            if (wowObject != null
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowGameobjectType.ToInt32()), out WowGameobjectType gameobjectType)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowGameobjectLevel.ToInt32()), out int level)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowGameobjectDisplayId.ToInt32()), out int displayId)
+                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowGameobjectPosition.ToInt32()), out WowPosition wowPosition))
             {
-                if (partyleaderGuid == 0
-                    && XMemory.Read(OffsetList.PartyLeader, out partyleaderGuid))
+                return new WowGameobject()
                 {
-                }
+                    BaseAddress = activeObject,
+                    DescriptorAddress = wowObject.DescriptorAddress,
+                    Guid = wowObject.Guid,
+                    Position = wowPosition,
+                    Type = wowObjectType,
+                    DisplayId = displayId,
+                    Level = level,
+                    GameobjectType = gameobjectType,
+                };
             }
-            return partyleaderGuid;
+            return null;
         }
     }
 }

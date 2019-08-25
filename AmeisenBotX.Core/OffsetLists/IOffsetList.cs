@@ -81,11 +81,16 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr WowBuild { get; }
         IntPtr WowDynobjectCasterGuid { get; }
         IntPtr WowDynobjectFacing { get; }
-        IntPtr WowGameobjectPosition { get; }
+        IntPtr WowDynobjectPosition { get; }
         IntPtr WowDynobjectRadius { get; }
         IntPtr WowDynobjectSpellId { get; }
+        IntPtr WowGameobjectDisplayId { get; }
+        IntPtr WowGameobjectLevel { get; }
+        IntPtr WowGameobjectPosition { get; }
+        IntPtr WowGameobjectType { get; }
         IntPtr WowObjectDescriptor { get; }
         IntPtr WowObjectGuid { get; }
+        IntPtr WowObjectPosition { get; }
         IntPtr WowObjectType { get; }
         IntPtr WowUnitPosition { get; }
         IntPtr ZoneId { get; }

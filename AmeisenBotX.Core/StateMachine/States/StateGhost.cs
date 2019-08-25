@@ -3,29 +3,14 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateGhost : State
     {
-        private AmeisenBotConfig Config { get; }
-        private ObjectManager ObjectManager { get; }
-        private CharacterManager CharacterManager { get; }
-        private HookManager HookManager { get; }
-        private IOffsetList OffsetList { get; }
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private Queue<WowPosition> CurrentPath { get; set; }
-        private WowPosition LastPosition { get; set; }
-        private int TryCount { get; set; }
-
         public StateGhost(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler) : base(stateMachine)
         {
             Config = config;
@@ -36,6 +21,16 @@ namespace AmeisenBotX.Core.StateMachine.States
             PathfindingHandler = pathfindingHandler;
             CurrentPath = new Queue<WowPosition>();
         }
+
+        private CharacterManager CharacterManager { get; }
+        private AmeisenBotConfig Config { get; }
+        private Queue<WowPosition> CurrentPath { get; set; }
+        private HookManager HookManager { get; }
+        private WowPosition LastPosition { get; set; }
+        private ObjectManager ObjectManager { get; }
+        private IOffsetList OffsetList { get; }
+        private IPathfindingHandler PathfindingHandler { get; }
+        private int TryCount { get; set; }
 
         public override void Enter()
         {
@@ -48,7 +43,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (ObjectManager.Player.Health > 1)
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
 
-            if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out WowPosition corpsePosition) 
+            if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out WowPosition corpsePosition)
                 && ObjectManager.Player.Position.GetDistance(corpsePosition) > 5)
             {
                 if (CurrentPath.Count == 0)
@@ -102,17 +97,16 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
         }
 
+        public override void Exit()
+        {
+        }
+
         private void BuildNewPath(WowPosition corpsePosition)
         {
             List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, corpsePosition);
             if (path.Count > 0)
                 foreach (WowPosition pos in path)
                     CurrentPath.Enqueue(pos);
-        }
-
-        public override void Exit()
-        {
-
         }
     }
 }

@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -16,12 +15,7 @@ namespace AmeisenBotX
     /// </summary>
     public partial class MainWindow : Window
     {
-        public AmeisenBotConfig Config { get; private set; }
-
         private readonly string configPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
-        private AmeisenBot AmeisenBot { get; }
-
-        private DateTime LastStateMachineTick { get; set; }
 
         public MainWindow()
         {
@@ -38,30 +32,15 @@ namespace AmeisenBotX
             LastStateMachineTick = DateTime.Now;
         }
 
+        public AmeisenBotConfig Config { get; private set; }
+        private AmeisenBot AmeisenBot { get; }
+
+        private DateTime LastStateMachineTick { get; set; }
+
+        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
+
         private AmeisenBotConfig LoadConfig()
-            => JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(configPath));
-
-        private AmeisenBotConfig SaveConfig()
-        {
-            if (Config == null) Config = new AmeisenBotConfig();
-
-            File.WriteAllText(configPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
-            return Config;
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            AmeisenBot.Stop();
-            SaveConfig();
-        }
-
-        private void OnStateMachineStateChange()
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                labelCurrentState.Content = $"<{AmeisenBot.StateMachine.CurrentState.Key}>";
-            });
-        }
+                    => JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(configPath));
 
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
@@ -117,13 +96,33 @@ namespace AmeisenBotX
             });
         }
 
-        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
+        private void OnStateMachineStateChange()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                labelCurrentState.Content = $"<{AmeisenBot.StateMachine.CurrentState.Key}>";
+            });
+        }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+        private AmeisenBotConfig SaveConfig()
+        {
+            if (Config == null) Config = new AmeisenBotConfig();
+
+            File.WriteAllText(configPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
+            return Config;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            AmeisenBot.Stop();
+            SaveConfig();
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             AmeisenBot.Start();
         }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Pathfinding;
+using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
@@ -7,6 +8,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public IntPtr BaseAddress { get; set; }
         public IntPtr DescriptorAddress { get; set; }
         public ulong Guid { get; set; }
+        public WowPosition Position { get; set; }
         public WowObjectType Type { get; set; }
     }
 }

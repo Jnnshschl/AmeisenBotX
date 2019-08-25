@@ -16,30 +16,6 @@ namespace AmeisenBotX.Core.StateMachine
 {
     public class AmeisenBotStateMachine
     {
-        public KeyValuePair<AmeisenBotState, State> CurrentState { get; private set; }
-
-        internal XMemory XMemory { get; }
-        private ObjectManager ObjectManager { get; }
-        private CharacterManager CharacterManager { get; }
-        private HookManager HookManager { get; }
-        private EventHookManager EventHookManager { get; }
-        private CacheManager CacheManager { get; }
-        private AmeisenBotConfig Config { get; }
-
-        private DateTime LastObjectUpdate { get; set; }
-        private DateTime LastGhostCheck { get; set; }
-        private DateTime LastEventPull { get; set; }
-
-        private Dictionary<AmeisenBotState, State> States { get; }
-
-        public string PlayerName { get; internal set; }
-
-        public delegate void StateMachineTick();
-        public event StateMachineTick OnStateMachineTick;
-
-        public delegate void StateMachineStateChange();
-        public event StateMachineStateChange OnStateMachineStateChange;
-
         public AmeisenBotStateMachine(
             Process wowProcess,
             AmeisenBotConfig config,
@@ -83,6 +59,29 @@ namespace AmeisenBotX.Core.StateMachine
             CurrentState.Value.Enter();
         }
 
+        public delegate void StateMachineStateChange();
+
+        public delegate void StateMachineTick();
+
+        public event StateMachineStateChange OnStateMachineStateChange;
+
+        public event StateMachineTick OnStateMachineTick;
+
+        public KeyValuePair<AmeisenBotState, State> CurrentState { get; private set; }
+
+        public string PlayerName { get; internal set; }
+        internal XMemory XMemory { get; }
+        private CacheManager CacheManager { get; }
+        private CharacterManager CharacterManager { get; }
+        private AmeisenBotConfig Config { get; }
+        private EventHookManager EventHookManager { get; }
+        private HookManager HookManager { get; }
+        private DateTime LastEventPull { get; set; }
+        private DateTime LastGhostCheck { get; set; }
+        private DateTime LastObjectUpdate { get; set; }
+        private ObjectManager ObjectManager { get; }
+        private Dictionary<AmeisenBotState, State> States { get; }
+
         public void Execute()
         {
             if (XMemory.Process != null && XMemory.Process.HasExited)
@@ -113,6 +112,32 @@ namespace AmeisenBotX.Core.StateMachine
             OnStateMachineTick?.Invoke();
         }
 
+        internal void SetState(AmeisenBotState state)
+        {
+            if (CurrentState.Key == state) return; // we are already in this state
+
+            CurrentState.Value.Exit();
+            CurrentState = States.First(s => s.Key == state);
+            CurrentState.Value.Enter();
+
+            OnStateMachineStateChange?.Invoke();
+        }
+
+        private AmeisenBotState HandleCombatSituation()
+        {
+            return AmeisenBotState.Attacking;
+        }
+
+        private void HandleEventPull()
+        {
+            if (EventHookManager.IsSetUp
+                && LastEventPull + TimeSpan.FromSeconds(1) < DateTime.Now)
+            {
+                EventHookManager.ReadEvents();
+                LastEventPull = DateTime.Now;
+            }
+        }
+
         private void HandleObjectUpdates()
         {
             if (LastObjectUpdate - TimeSpan.FromMilliseconds(Config.ObjectUpdateMs) < DateTime.Now
@@ -140,32 +165,6 @@ namespace AmeisenBotX.Core.StateMachine
                     if (isGhost) SetState(AmeisenBotState.Ghost);
                 }
             }
-        }
-
-        private void HandleEventPull()
-        {
-            if (EventHookManager.IsSetUp
-                && LastEventPull + TimeSpan.FromSeconds(1) < DateTime.Now)
-            {
-                EventHookManager.ReadEvents();
-                LastEventPull = DateTime.Now;
-            }
-        }
-
-        private AmeisenBotState HandleCombatSituation()
-        {
-            return AmeisenBotState.Attacking;
-        }
-
-        internal void SetState(AmeisenBotState state)
-        {
-            if (CurrentState.Key == state) return; // we are already in this state
-
-            CurrentState.Value.Exit();
-            CurrentState = States.First(s => s.Key == state);
-            CurrentState.Value.Enter();
-
-            OnStateMachineStateChange?.Invoke();
         }
     }
 }

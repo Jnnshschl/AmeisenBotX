@@ -1,19 +1,10 @@
 ﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Hook;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateDead : State
     {
-        private AmeisenBotConfig Config { get; }
-        private ObjectManager ObjectManager { get; }
-        private HookManager HookManager { get; }
-
         public StateDead(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookManager) : base(stateMachine)
         {
             Config = config;
@@ -21,9 +12,12 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
         }
 
+        private AmeisenBotConfig Config { get; }
+        private HookManager HookManager { get; }
+        private ObjectManager ObjectManager { get; }
+
         public override void Enter()
         {
-
         }
 
         public override void Execute()
@@ -38,7 +32,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

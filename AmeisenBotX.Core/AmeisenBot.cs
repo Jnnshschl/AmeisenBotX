@@ -21,39 +21,7 @@ namespace AmeisenBotX.Core
 {
     public class AmeisenBot
     {
-        public AmeisenBotConfig Config { get; }
-
-        public AmeisenBotStateMachine StateMachine { get; set; }
-        public ObjectManager ObjectManager { get; set; }
-        public CharacterManager CharacterManager { get; set; }
-        public HookManager HookManager { get; set; }
-        public EventHookManager EventHookManager { get; set; }
-        public CacheManager CacheManager { get; set; }
-        public IPathfindingHandler PathfindingHandler { get; set; }
-        public ICombatClass CombatClass { get; set; }
-        public Process WowProcess { get; }
-
-        public IOffsetList OffsetList { get; }
-
         private double currentExecutionMs;
-
-        public double CurrentExecutionMs
-        {
-            get
-            {
-                double avgTickTime = Math.Round(currentExecutionMs / CurrentExecutionCount, 2);
-                CurrentExecutionCount = 0;
-                return avgTickTime;
-            }
-            private set { currentExecutionMs = value; }
-        }
-
-        private int CurrentExecutionCount { get; set; }
-
-        private XMemory XMemory { get; }
-
-        private Timer StateMachineTimer { get; }
-
         private int stateMachineTimerBusy;
 
         public AmeisenBot(AmeisenBotConfig config)
@@ -77,7 +45,7 @@ namespace AmeisenBotX.Core
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
 
-            switch(Config.CombatClassName.ToUpper())
+            switch (Config.CombatClassName.ToUpper())
             {
                 case "WARRIORARMS":
                     CombatClass = new WarriorArms(ObjectManager, CharacterManager, HookManager);
@@ -92,6 +60,34 @@ namespace AmeisenBotX.Core
 
             if (!Directory.Exists(Config.BotDataPath)) Directory.CreateDirectory(Config.BotDataPath);
         }
+
+        public CacheManager CacheManager { get; set; }
+        public CharacterManager CharacterManager { get; set; }
+        public ICombatClass CombatClass { get; set; }
+        public AmeisenBotConfig Config { get; }
+
+        public double CurrentExecutionMs
+        {
+            get
+            {
+                double avgTickTime = Math.Round(currentExecutionMs / CurrentExecutionCount, 2);
+                CurrentExecutionCount = 0;
+                return avgTickTime;
+            }
+            private set { currentExecutionMs = value; }
+        }
+
+        public EventHookManager EventHookManager { get; set; }
+        public HookManager HookManager { get; set; }
+        public ObjectManager ObjectManager { get; set; }
+        public IOffsetList OffsetList { get; }
+        public IPathfindingHandler PathfindingHandler { get; set; }
+        public AmeisenBotStateMachine StateMachine { get; set; }
+        public Process WowProcess { get; }
+        private int CurrentExecutionCount { get; set; }
+
+        private Timer StateMachineTimer { get; }
+        private XMemory XMemory { get; }
 
         public void Start()
         {
@@ -117,6 +113,28 @@ namespace AmeisenBotX.Core
             if (Config.SaveBotWindowPosition) SaveBotWindowPosition();
         }
 
+        private void SaveBotWindowPosition()
+        {
+            string filepath = Path.Combine(Config.BotDataPath, $"botpos_{ObjectManager.Player.Name}.json");
+            try
+            {
+                Rect rect = XMemory.GetWindowPosition(Process.GetCurrentProcess().MainWindowHandle);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
+            }
+            catch { }
+        }
+
+        private void SaveWowWindowPosition()
+        {
+            string filepath = Path.Combine(Config.BotDataPath, $"wowpos_{ObjectManager.Player.Name}.json");
+            try
+            {
+                Rect rect = XMemory.GetWindowPosition(XMemory.Process.MainWindowHandle);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
+            }
+            catch { }
+        }
+
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)
         {
             if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1) return;
@@ -134,45 +152,25 @@ namespace AmeisenBotX.Core
             }
         }
 
-        private void SaveWowWindowPosition()
-        {
-            string filepath = Path.Combine(Config.BotDataPath, $"wowpos_{ObjectManager.Player.Name}.json");
-            try
-            {
-                Rect rect = XMemory.GetWindowPosition(XMemory.Process.MainWindowHandle);
-                File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
-            }
-            catch { }
-        }
-
-        private void SaveBotWindowPosition()
-        {
-            string filepath = Path.Combine(Config.BotDataPath, $"botpos_{ObjectManager.Player.Name}.json");
-            try
-            {
-                Rect rect = XMemory.GetWindowPosition(Process.GetCurrentProcess().MainWindowHandle);
-                File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
-            }
-            catch { }
-        }
-
         #region WowEvents
-        private void OnPartyInvitation(long timestamp, List<string> args)
-            => HookManager.AcceptPartyInvite();
-
-        private void OnSummonRequest(long timestamp, List<string> args)
-            => HookManager.AcceptSummon();
-
-        private void OnResurrectRequest(long timestamp, List<string> args)
-            => HookManager.AcceptResurrect();
-
-        private void OnReadyCheck(long timestamp, List<string> args)
-            => HookManager.CofirmReadyCheck(true);
 
         private void OnCombatLog(long timestamp, List<string> args)
         {
             // analyze the combat log
         }
-        #endregion
+
+        private void OnPartyInvitation(long timestamp, List<string> args)
+                    => HookManager.AcceptPartyInvite();
+
+        private void OnReadyCheck(long timestamp, List<string> args)
+            => HookManager.CofirmReadyCheck(true);
+
+        private void OnResurrectRequest(long timestamp, List<string> args)
+            => HookManager.AcceptResurrect();
+
+        private void OnSummonRequest(long timestamp, List<string> args)
+                            => HookManager.AcceptSummon();
+
+        #endregion WowEvents
     }
 }

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,11 +8,6 @@ namespace AmeisenBotX.Core.Data
 {
     public class CacheManager
     {
-        private AmeisenBotConfig Config { get; }
-
-        public Dictionary<ulong, string> NameCache { get; private set; }
-        public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
-
         public CacheManager(AmeisenBotConfig config)
         {
             Config = config;
@@ -21,13 +15,17 @@ namespace AmeisenBotX.Core.Data
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
         }
 
+        public Dictionary<ulong, string> NameCache { get; private set; }
+        public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
+        private AmeisenBotConfig Config { get; }
+
         internal void LoadFromFile()
         {
             if (Config.PermanentNameCache
                 && File.Exists(Config.PermanentNameCachePath))
             {
                 dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath)));
-                foreach(dynamic item in parsed)
+                foreach (dynamic item in parsed)
                 {
                     NameCache.Add((ulong)item.Key, (string)item.Value);
                 }
@@ -48,7 +46,7 @@ namespace AmeisenBotX.Core.Data
             if (Config.PermanentNameCache)
                 CheckForPermanentCaching(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath), NameCache.OrderBy(e => e.Key));
             if (Config.PermanentReactionCache)
-                CheckForPermanentCaching(Path.Combine(Config.BotDataPath,Config.PermanentReactionCachePath), ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
+                CheckForPermanentCaching(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath), ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
         }
 
         private void CheckForPermanentCaching(string path, object objToSave)

@@ -5,17 +5,17 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateHealing : State
     {
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-        private CharacterManager CharacterManager { get; }
-
         public StateHealing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
         }
+
+        private CharacterManager CharacterManager { get; }
+        private AmeisenBotConfig Config { get; }
+
+        private ObjectManager ObjectManager { get; }
 
         public override void Enter()
         {

@@ -2,12 +2,12 @@
 {
     public abstract class State
     {
-        internal AmeisenBotStateMachine AmeisenBotStateMachine { get; }
-
         public State(AmeisenBotStateMachine stateMachine)
         {
             AmeisenBotStateMachine = stateMachine;
         }
+
+        internal AmeisenBotStateMachine AmeisenBotStateMachine { get; }
 
         public abstract void Enter();
 

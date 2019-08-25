@@ -2,26 +2,14 @@
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.States;
 using AmeisenBotX.Pathfinding;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class WarriorArms : ICombatClass
     {
-        private ObjectManager ObjectManager { get; }
-        private CharacterManager CharacterManager { get; }
-        private HookManager HookManager { get; }
-
-        private WowPosition LastPosition { get; set; }
-
-        private DateTime HeroicStrikeLastUsed { get; set; }
-
         public WarriorArms(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
@@ -29,9 +17,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             HookManager = hookManager;
         }
 
+        private CharacterManager CharacterManager { get; }
+        private DateTime HeroicStrikeLastUsed { get; set; }
+        private HookManager HookManager { get; }
+        private WowPosition LastPosition { get; set; }
+        private ObjectManager ObjectManager { get; }
+
         public void Execute()
         {
-
             ulong targetGuid = ObjectManager.TargetGuid;
             WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
             if (target != null)
@@ -54,7 +47,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             double healthpercentme = ((double)ObjectManager.Player.Health / (double)ObjectManager.Player.MaxHealth) * 100.0;
             (string, int) castinginfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
 
-            if (HookManager.GetSpellCooldown("Enraged Regeneration") <= 0 
+            if (HookManager.GetSpellCooldown("Enraged Regeneration") <= 0
                 && rage >= 15 && healthpercentme <= 40)
             {
                 HookManager.CastSpell("Enraged Regeneration");
@@ -66,7 +59,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Retaliation");
             }
 
-            if (HookManager.GetSpellCooldown("Intimidating Shout") <= 0 
+            if (HookManager.GetSpellCooldown("Intimidating Shout") <= 0
                 && rage >= 25 && healthpercentme <= 40)
             {
                 HookManager.CastSpell("Intimidating Shout");
@@ -84,7 +77,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Bloodrage");
             }
 
-            if (HookManager.GetSpellCooldown("charge") <= 0 
+            if (HookManager.GetSpellCooldown("charge") <= 0
                 && distance > 8 && distance < 25)
             {
                 HookManager.CastSpell("charge");
@@ -102,7 +95,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Bladestorm");
             }
 
-            if (HookManager.GetSpellCooldown("Mortal Strike") <= 0 
+            if (HookManager.GetSpellCooldown("Mortal Strike") <= 0
                 && rage >= 30 && distance < 3)
             {
                 HookManager.CastSpell("Mortal Strike");
@@ -157,14 +150,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.CastSpell("Shattering Throw");
             }
-
         }
 
         private void HandleMovement(WowUnit target)
         {
             double distanceTravel = ObjectManager.Player.Position.GetDistance(LastPosition);
             CharacterManager.MoveToPosition(target.Position);
-            if(distanceTravel < 0.001 && distanceTravel > 0)
+            if (distanceTravel < 0.001 && distanceTravel > 0)
             {
                 CharacterManager.Jump();
             }

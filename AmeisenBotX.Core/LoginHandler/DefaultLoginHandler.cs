@@ -10,14 +10,14 @@ namespace AmeisenBotX.Core.LoginHandler
 {
     public class DefaultLoginHandler : ILoginHandler
     {
-        private XMemory XMemory { get; }
-        private IOffsetList OffsetList { get; }
-
         public DefaultLoginHandler(XMemory xMemory, IOffsetList offsetList)
         {
             XMemory = xMemory;
             OffsetList = offsetList;
         }
+
+        private IOffsetList OffsetList { get; }
+        private XMemory XMemory { get; }
 
         public bool Login(Process wowProcess, string username, string password, int characterSlot)
         {
@@ -61,6 +61,22 @@ namespace AmeisenBotX.Core.LoginHandler
             return false;
         }
 
+        private void HandleCharSelect(int characterSlot)
+        {
+            if (XMemory.ReadInt(OffsetList.CharacterSlotSelected, out int currentSlot))
+            {
+                bool failed = false;
+                while (!failed && currentSlot != characterSlot)
+                {
+                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x28));
+                    Thread.Sleep(200);
+                    failed = XMemory.ReadInt(OffsetList.CharacterSlotSelected, out currentSlot);
+                }
+
+                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
+            }
+        }
+
         private void HandleLogin(string username, string password)
         {
             foreach (char c in username)
@@ -98,22 +114,6 @@ namespace AmeisenBotX.Core.LoginHandler
 
                 result = XMemory.ReadString(OffsetList.GameState, Encoding.ASCII, out gameState, 10);
             } while (result && gameState == "login");
-        }
-
-        private void HandleCharSelect(int characterSlot)
-        {
-            if (XMemory.ReadInt(OffsetList.CharacterSlotSelected, out int currentSlot))
-            {
-                bool failed = false;
-                while (!failed && currentSlot != characterSlot)
-                {
-                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x28));
-                    Thread.Sleep(200);
-                    failed = XMemory.ReadInt(OffsetList.CharacterSlotSelected, out currentSlot);
-                }
-
-                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
-            }
         }
     }
 }

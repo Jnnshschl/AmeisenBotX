@@ -12,16 +12,61 @@ namespace AmeisenBotX.Memory
 {
     public class XMemory
     {
+        public XMemory()
+        {
+            SizeCache = new Dictionary<Type, int>();
+        }
+
+        public ManagedFasm Fasm { get; private set; }
         public Process Process { get; private set; }
         public IntPtr ProcessHandle { get; private set; }
 
         private Dictionary<Type, int> SizeCache { get; }
 
-        public ManagedFasm Fasm { get; private set; }
-
-        public XMemory()
+        public static Rect GetWindowPosition(IntPtr windowHandle)
         {
-            SizeCache = new Dictionary<Type, int>();
+            Rect rect = new Rect();
+            GetWindowRect(windowHandle, ref rect);
+            return rect;
+        }
+
+        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
+        {
+            if (rect.Left > 0
+                && rect.Right > 0
+                && rect.Top > 0
+                && rect.Bottom > 0)
+            {
+                MoveWindow(
+                    windowHandle,
+                    rect.Left,
+                    rect.Top,
+                    rect.Right - rect.Left,
+                    rect.Bottom - rect.Top,
+                    true
+                );
+            }
+        }
+
+        public bool AllocateMemory(uint size, out IntPtr address)
+        {
+            try
+            {
+                address = VirtualAllocEx(
+                    ProcessHandle,
+                    IntPtr.Zero,
+                    size,
+                    AllocationType.Commit,
+                    MemoryProtection.ExecuteReadWrite
+                );
+            }
+            catch
+            {
+                address = IntPtr.Zero;
+                return false;
+            }
+
+            return address != IntPtr.Zero;
         }
 
         public void Attach(Process wowProcess)
@@ -31,20 +76,63 @@ namespace AmeisenBotX.Memory
             Fasm = new ManagedFasm(ProcessHandle);
         }
 
-        private int SizeOf(Type type)
+        public bool FreeMemory(IntPtr address)
         {
-            if (!SizeCache.ContainsKey(type))
+            try { return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release); }
+            catch { return false; }
+        }
+
+        public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
+        {
+            int size = sizeof(T);
+            byte[] readBuffer = new byte[size];
+
+            try
             {
-                DynamicMethod dm = new DynamicMethod("SizeOf", typeof(int), new Type[] { });
-                ILGenerator il = dm.GetILGenerator();
-
-                il.Emit(OpCodes.Sizeof, type);
-                il.Emit(OpCodes.Ret);
-
-                int size = (int)dm.Invoke(null, null);
-                SizeCache.Add(type, size);
+                if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
+                {
+                    fixed (byte* ptr = readBuffer)
+                    {
+                        value = *(T*)ptr;
+                        return true;
+                    }
+                }
             }
-            return SizeCache[type];
+            catch { }
+
+            value = default;
+            return false;
+        }
+
+        public unsafe bool ReadByte(IntPtr address, out byte buffer)
+        {
+            byte[] readBuffer = new byte[1];
+
+            if (ReadProcessMemory(ProcessHandle, address, readBuffer, 1, out _))
+            {
+                fixed (byte* ptr = readBuffer)
+                {
+                    buffer = *ptr;
+                    return true;
+                }
+            }
+
+            buffer = 0x0;
+            return false;
+        }
+
+        public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
+        {
+            byte[] readBuffer = new byte[size];
+
+            if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
+            {
+                bytes = readBuffer;
+                return true;
+            }
+
+            bytes = new byte[size];
+            return false;
         }
 
         public unsafe bool ReadInt(IntPtr address, out int value)
@@ -65,20 +153,6 @@ namespace AmeisenBotX.Memory
             catch { }
 
             value = 0;
-            return false;
-        }
-
-        public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
-        {
-            byte[] readBuffer = new byte[size];
-
-            if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
-            {
-                bytes = readBuffer;
-                return true;
-            }
-
-            bytes = new byte[size];
             return false;
         }
 
@@ -110,49 +184,6 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        public bool Write<T>(IntPtr address, T value, int size = 0)
-        {
-            if (size == 0)
-            {
-                size = SizeOf(typeof(T));
-            }
-
-            IntPtr writeBuffer = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(value, writeBuffer, false);
-
-            bool result = WriteProcessMemory(ProcessHandle, address, writeBuffer, size, out _);
-
-            Marshal.DestroyStructure(writeBuffer, typeof(T));
-            Marshal.FreeHGlobal(writeBuffer);
-
-            return result;
-        }
-
-        public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
-        {
-            int size = sizeof(T);
-            byte[] readBuffer = new byte[size];
-
-            try
-            {
-                if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
-                {
-                    fixed (byte* ptr = readBuffer)
-                    {
-                        value = *(T*)ptr;
-                        return true;
-                    }
-                }
-            }
-            catch { }
-
-            value = default;
-            return false;
-        }
-
-        public bool WriteBytes(IntPtr address, byte[] bytes)
-            => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
-
         public bool ReadStruct<T>(IntPtr address, out T value)
         {
             int size = Marshal.SizeOf(typeof(T));
@@ -176,73 +207,41 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        public bool FreeMemory(IntPtr address)
+        public bool Write<T>(IntPtr address, T value, int size = 0)
         {
-            try { return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release); }
-            catch { return false; }
-        }
-
-        public bool AllocateMemory(uint size, out IntPtr address)
-        {
-            try
+            if (size == 0)
             {
-                address = VirtualAllocEx(
-                    ProcessHandle,
-                    IntPtr.Zero,
-                    size,
-                    AllocationType.Commit,
-                    MemoryProtection.ExecuteReadWrite
-                );
-            }
-            catch
-            {
-                address = IntPtr.Zero;
-                return false;
+                size = SizeOf(typeof(T));
             }
 
-            return address != IntPtr.Zero;
+            IntPtr writeBuffer = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(value, writeBuffer, false);
+
+            bool result = WriteProcessMemory(ProcessHandle, address, writeBuffer, size, out _);
+
+            Marshal.DestroyStructure(writeBuffer, typeof(T));
+            Marshal.FreeHGlobal(writeBuffer);
+
+            return result;
         }
 
-        public unsafe bool ReadByte(IntPtr address, out byte buffer)
-        {
-            byte[] readBuffer = new byte[1];
+        public bool WriteBytes(IntPtr address, byte[] bytes)
+            => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
 
-            if (ReadProcessMemory(ProcessHandle, address, readBuffer, 1, out _))
+        private int SizeOf(Type type)
+        {
+            if (!SizeCache.ContainsKey(type))
             {
-                fixed (byte* ptr = readBuffer)
-                {
-                    buffer = *ptr;
-                    return true;
-                }
+                DynamicMethod dm = new DynamicMethod("SizeOf", typeof(int), new Type[] { });
+                ILGenerator il = dm.GetILGenerator();
+
+                il.Emit(OpCodes.Sizeof, type);
+                il.Emit(OpCodes.Ret);
+
+                int size = (int)dm.Invoke(null, null);
+                SizeCache.Add(type, size);
             }
-
-            buffer = 0x0;
-            return false;
-        }
-
-        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
-        {
-            if (rect.Left > 0
-                && rect.Right > 0
-                && rect.Top > 0
-                && rect.Bottom > 0)
-            {
-                MoveWindow(
-                    windowHandle,
-                    rect.Left,
-                    rect.Top,
-                    rect.Right - rect.Left,
-                    rect.Bottom - rect.Top,
-                    true
-                );
-            }
-        }
-
-        public static Rect GetWindowPosition(IntPtr windowHandle)
-        {
-            Rect rect = new Rect();
-            GetWindowRect(windowHandle, ref rect);
-            return rect;
+            return SizeCache[type];
         }
     }
 }

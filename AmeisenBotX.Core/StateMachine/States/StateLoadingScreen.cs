@@ -4,15 +4,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateLoadingScreen : State
     {
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-
         public StateLoadingScreen(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
         }
+
+        private AmeisenBotConfig Config { get; }
+
+        private ObjectManager ObjectManager { get; }
 
         public override void Enter()
         {

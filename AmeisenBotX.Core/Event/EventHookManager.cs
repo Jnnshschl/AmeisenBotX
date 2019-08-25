@@ -1,27 +1,13 @@
 ﻿using AmeisenBotX.Core.Event.Objects;
 using AmeisenBotX.Core.Hook;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Event
 {
     public class EventHookManager
     {
-        public delegate void OnEventFired(long timestamp, List<string> args);
-
-        public Dictionary<string, OnEventFired> EventDictionary { get; }
-
-        public Queue<(string, OnEventFired)> SubscribeQueue { get; }
-        public Queue<string> UnsubscribeQueue { get; }
-
-        public bool IsSetUp { get; private set; }
-
-        private HookManager HookManager { get; }
-
         public EventHookManager(HookManager hookManager)
         {
             EventDictionary = new Dictionary<string, OnEventFired>();
@@ -31,20 +17,14 @@ namespace AmeisenBotX.Core.Event
             IsSetUp = false;
         }
 
-        public void Start()
-        {
-            if (!IsSetUp)
-            {
-                IsSetUp = true;
-                SetupEventHook();
-            }
-        }
+        public delegate void OnEventFired(long timestamp, List<string> args);
 
-        public void Stop()
-        {
-            HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
-            HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
-        }
+        public Dictionary<string, OnEventFired> EventDictionary { get; }
+
+        public bool IsSetUp { get; private set; }
+        public Queue<(string, OnEventFired)> SubscribeQueue { get; }
+        public Queue<string> UnsubscribeQueue { get; }
+        private HookManager HookManager { get; }
 
         public void ReadEvents()
         {
@@ -91,6 +71,31 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
+        public void Start()
+        {
+            if (!IsSetUp)
+            {
+                IsSetUp = true;
+                SetupEventHook();
+            }
+        }
+
+        public void Stop()
+        {
+            HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
+            HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
+        }
+
+        public void Subscribe(string eventName, OnEventFired onEventFired)
+        {
+            SubscribeQueue.Enqueue((eventName, onEventFired));
+        }
+
+        public void Unsubscribe(string eventName)
+        {
+            UnsubscribeQueue.Enqueue((eventName));
+        }
+
         private void HandleSubEventQueue()
         {
             try
@@ -117,16 +122,6 @@ namespace AmeisenBotX.Core.Event
                 }
             }
             catch { }
-        }
-
-        public void Subscribe(string eventName, OnEventFired onEventFired)
-        {
-            SubscribeQueue.Enqueue((eventName, onEventFired));
-        }
-
-        public void Unsubscribe(string eventName)
-        {
-            UnsubscribeQueue.Enqueue((eventName));
         }
 
         private void SetupEventHook()

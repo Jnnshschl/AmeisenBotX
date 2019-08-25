@@ -9,12 +9,6 @@ namespace AmeisenBotX.Core.Character
 {
     public class CharacterManager
     {
-        private XMemory XMemory { get; }
-        private IOffsetList OffsetList { get; }
-        private ObjectManager ObjectManager { get; }
-
-        private bool FirstMove { get; set; }
-
         public CharacterManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager)
         {
             FirstMove = true;
@@ -22,6 +16,15 @@ namespace AmeisenBotX.Core.Character
             OffsetList = offsetList;
             ObjectManager = objectManager;
         }
+
+        private bool FirstMove { get; set; }
+        private ObjectManager ObjectManager { get; }
+        private IOffsetList OffsetList { get; }
+        private XMemory XMemory { get; }
+
+        public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
+
+        public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x20));
 
         public void MoveToPosition(WowPosition pos)
         {
@@ -35,8 +38,6 @@ namespace AmeisenBotX.Core.Character
             XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
         }
 
-        public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x20)); // 0x20 = Spacebar (VK_SPACE)
-
-        public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
+        // 0x20 = Spacebar (VK_SPACE)
     }
 }

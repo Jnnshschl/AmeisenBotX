@@ -11,13 +11,6 @@ namespace AmeisenBotX.Pathfinding
 {
     public class NavmeshServerClient : IPathfindingHandler
     {
-        public IPAddress Ip { get; }
-        public int Port { get; }
-        public TcpClient TcpClient { get; }
-        public bool IsConnected { get; private set; }
-
-        private Timer ConnectionWatchdog { get; }
-
         public NavmeshServerClient(string ip, int port)
         {
             Ip = IPAddress.Parse(ip);
@@ -29,24 +22,16 @@ namespace AmeisenBotX.Pathfinding
             ConnectionWatchdog.Start();
         }
 
-        private void CConnectionWatchdog(object sender, ElapsedEventArgs e)
-        {
-            if (!TcpClient.Connected)
-            {
-                try
-                {
-                    TcpClient.Connect(Ip, Port);
-                }
-                catch
-                {
-                    // Server not running
-                }
-            }
+        public IPAddress Ip { get; }
+        public bool IsConnected { get; private set; }
+        public int Port { get; }
+        public TcpClient TcpClient { get; }
+        private Timer ConnectionWatchdog { get; }
 
-            if (TcpClient?.Client != null)
-            {
-                IsConnected = TcpClient.Connected;
-            }
+        public void Disconnect()
+        {
+            ConnectionWatchdog.Stop();
+            TcpClient.Close();
         }
 
         public List<WowPosition> GetPath(int mapId, WowPosition start, WowPosition end)
@@ -76,6 +61,11 @@ namespace AmeisenBotX.Pathfinding
             }
         }
 
+        public bool IsInLineOfSight(WowPosition start, WowPosition end, int mapId)
+        {
+            return GetPath(mapId, start, end).Count == 1;
+        }
+
         private static bool IsValidJson(string strInput)
         {
             strInput = strInput.Trim();
@@ -98,15 +88,24 @@ namespace AmeisenBotX.Pathfinding
             }
         }
 
-        public bool IsInLineOfSight(WowPosition start, WowPosition end, int mapId)
+        private void CConnectionWatchdog(object sender, ElapsedEventArgs e)
         {
-            return GetPath(mapId, start, end).Count == 1;
-        }
+            if (!TcpClient.Connected)
+            {
+                try
+                {
+                    TcpClient.Connect(Ip, Port);
+                }
+                catch
+                {
+                    // Server not running
+                }
+            }
 
-        public void Disconnect()
-        {
-            ConnectionWatchdog.Stop();
-            TcpClient.Close();
+            if (TcpClient?.Client != null)
+            {
+                IsConnected = TcpClient.Connected;
+            }
         }
     }
 }

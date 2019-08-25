@@ -8,11 +8,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateLogin : State
     {
-        private ILoginHandler LoginHandler { get; }
-        private AmeisenBotConfig Config { get; }
-        private IOffsetList OffsetList { get; }
-        private CharacterManager CharacterManager { get; }
-
         public StateLogin(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, CharacterManager characterManager) : base(stateMachine)
         {
             Config = config;
@@ -20,6 +15,11 @@ namespace AmeisenBotX.Core.StateMachine.States
             CharacterManager = characterManager;
             LoginHandler = new DefaultLoginHandler(AmeisenBotStateMachine.XMemory, offsetList);
         }
+
+        private CharacterManager CharacterManager { get; }
+        private AmeisenBotConfig Config { get; }
+        private ILoginHandler LoginHandler { get; }
+        private IOffsetList OffsetList { get; }
 
         public override void Enter()
         {

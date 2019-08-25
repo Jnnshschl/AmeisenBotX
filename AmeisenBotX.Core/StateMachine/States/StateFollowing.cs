@@ -11,19 +11,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateFollowing : State
     {
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-        private CharacterManager CharacterManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private WowPlayer PlayerToFollow { get; set; }
-
-        private Queue<WowPosition> CurrentPath { get; set; }
-        private WowPosition LastPosition { get; set; }
-        private int TryCount { get; set; }
-
         public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler) : base(stateMachine)
         {
             TryCount = 0;
@@ -33,6 +20,17 @@ namespace AmeisenBotX.Core.StateMachine.States
             PathfindingHandler = pathfindingHandler;
             CurrentPath = new Queue<WowPosition>();
         }
+
+        private CharacterManager CharacterManager { get; }
+        private AmeisenBotConfig Config { get; }
+
+        private Queue<WowPosition> CurrentPath { get; set; }
+        private WowPosition LastPosition { get; set; }
+        private ObjectManager ObjectManager { get; }
+        private IPathfindingHandler PathfindingHandler { get; }
+
+        private WowPlayer PlayerToFollow { get; set; }
+        private int TryCount { get; set; }
 
         public override void Enter()
         {
@@ -67,21 +65,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (PlayerToFollow == null)
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
         }
-
-        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
-        {
-            if (PlayerToFollow != null)
-            {
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
-                if (UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
-            }
-
-            return PlayerToFollow;
-        }
-
-        private bool UnitIsOutOfRange(double distance)
-           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
 
         public override void Execute()
         {
@@ -136,6 +119,10 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
         }
 
+        public override void Exit()
+        {
+        }
+
         private void BuildNewPath()
         {
             List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, PlayerToFollow.Position);
@@ -144,8 +131,19 @@ namespace AmeisenBotX.Core.StateMachine.States
                     CurrentPath.Enqueue(pos);
         }
 
-        public override void Exit()
+        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
         {
+            if (PlayerToFollow != null)
+            {
+                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                if (UnitIsOutOfRange(distance))
+                    PlayerToFollow = null;
+            }
+
+            return PlayerToFollow;
         }
+
+        private bool UnitIsOutOfRange(double distance)
+           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
     }
 }

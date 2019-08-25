@@ -16,12 +16,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
-        private AmeisenBotConfig Config { get; }
-        private IOffsetList OffsetList { get; }
-        private ObjectManager ObjectManager { get; }
-        private HookManager HookManager { get; }
-        private EventHookManager EventHookManager { get; }
-
         public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
         {
             Config = config;
@@ -30,6 +24,12 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             EventHookManager = eventHookManager;
         }
+
+        private AmeisenBotConfig Config { get; }
+        private EventHookManager EventHookManager { get; }
+        private HookManager HookManager { get; }
+        private ObjectManager ObjectManager { get; }
+        private IOffsetList OffsetList { get; }
 
         public override void Enter()
         {
@@ -90,20 +90,19 @@ namespace AmeisenBotX.Core.StateMachine.States
             return PlayerToFollow != null;
         }
 
-        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
+        private void LoadBotWindowPosition()
         {
-            if (PlayerToFollow != null)
+            string filepath = Path.Combine(Config.BotDataPath, $"botpos_{AmeisenBotStateMachine.PlayerName}.json");
+            if (File.Exists(filepath))
             {
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
-                if (UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
+                try
+                {
+                    Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
+                    XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, rect);
+                }
+                catch { }
             }
-
-            return PlayerToFollow;
         }
-
-        private bool UnitIsOutOfRange(double distance)
-           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
 
         private void LoadWowWindowPosition()
         {
@@ -119,18 +118,19 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
         }
 
-        private void LoadBotWindowPosition()
+        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
         {
-            string filepath = Path.Combine(Config.BotDataPath, $"botpos_{AmeisenBotStateMachine.PlayerName}.json");
-            if (File.Exists(filepath))
+            if (PlayerToFollow != null)
             {
-                try
-                {
-                    Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
-                    XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, rect);
-                }
-                catch { }
+                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                if (UnitIsOutOfRange(distance))
+                    PlayerToFollow = null;
             }
+
+            return PlayerToFollow;
         }
+
+        private bool UnitIsOutOfRange(double distance)
+           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
     }
 }

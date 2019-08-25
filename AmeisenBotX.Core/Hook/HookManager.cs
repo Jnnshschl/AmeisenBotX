@@ -32,6 +32,7 @@ namespace AmeisenBotX.Core.Hook
         public IntPtr EndsceneAddress { get; private set; }
         public IntPtr EndsceneReturnAddress { get; private set; }
         public bool IsInjectionUsed { get; private set; }
+
         public bool IsWoWHooked
         {
             get
@@ -48,6 +49,7 @@ namespace AmeisenBotX.Core.Hook
         private ObjectManager ObjectManager { get; }
         private IOffsetList OffsetList { get; }
         private XMemory XMemory { get; }
+
         public void AcceptPartyInvite()
         {
             LuaDoString("AcceptGroup();");
@@ -590,6 +592,7 @@ namespace AmeisenBotX.Core.Hook
 
             return true;
         }
+
         private IntPtr GetEndScene()
         {
             if (XMemory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)

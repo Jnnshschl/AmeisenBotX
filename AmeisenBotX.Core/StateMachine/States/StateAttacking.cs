@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
@@ -14,21 +13,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateAttacking : State
     {
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-        private HookManager HookManager { get; }
-        private CharacterManager CharacterManager { get; }
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private ICombatClass CombatClass { get; }
-
-        private Queue<WowPosition> CurrentPath { get; set; }
-        public WowPosition LastPosition { get; private set; }
-        private int TryCount { get; set; }
-
-        private bool IsMelee { get; set; }
-
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, ICombatClass combatClass) : base(stateMachine)
         {
             Config = config;
@@ -39,6 +23,18 @@ namespace AmeisenBotX.Core.StateMachine.States
             CurrentPath = new Queue<WowPosition>();
             CombatClass = combatClass;
         }
+
+        public WowPosition LastPosition { get; private set; }
+        private CharacterManager CharacterManager { get; }
+        private ICombatClass CombatClass { get; }
+        private AmeisenBotConfig Config { get; }
+
+        private Queue<WowPosition> CurrentPath { get; set; }
+        private HookManager HookManager { get; }
+        private bool IsMelee { get; set; }
+        private ObjectManager ObjectManager { get; }
+        private IPathfindingHandler PathfindingHandler { get; }
+        private int TryCount { get; set; }
 
         public override void Enter()
         {
@@ -89,6 +85,10 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
                 }
             }
+        }
+
+        public override void Exit()
+        {
         }
 
         private void BuildNewPath(WowUnit target)
@@ -165,10 +165,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             target = null;
             return false;
-        }
-
-        public override void Exit()
-        {
         }
     }
 }

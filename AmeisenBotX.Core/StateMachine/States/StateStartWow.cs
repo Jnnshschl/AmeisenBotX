@@ -6,16 +6,16 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateStartWow : State
     {
-        private AmeisenBotConfig Config { get; }
-        private Process WowProcess { get; set; }
-        private XMemory XMemory { get; }
-
         public StateStartWow(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, Process wowProcess, XMemory xMemory) : base(stateMachine)
         {
             Config = config;
             WowProcess = wowProcess;
             XMemory = xMemory;
         }
+
+        private AmeisenBotConfig Config { get; }
+        private Process WowProcess { get; set; }
+        private XMemory XMemory { get; }
 
         public override void Enter()
         {

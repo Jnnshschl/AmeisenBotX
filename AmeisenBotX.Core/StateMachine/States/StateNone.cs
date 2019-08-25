@@ -2,13 +2,13 @@
 {
     public class StateNone : State
     {
-        private AmeisenBotConfig Config { get; }
-        private AmeisenBotState EntryState { get; set; }
-
         public StateNone(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config) : base(stateMachine)
         {
             Config = config;
         }
+
+        private AmeisenBotConfig Config { get; }
+        private AmeisenBotState EntryState { get; set; }
 
         public override void Enter()
         {
