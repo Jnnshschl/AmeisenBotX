@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
 
             if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out WowPosition corpsePosition)
-                && ObjectManager.Player.Position.GetDistance(corpsePosition) > 5)
+                && ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
             {
                 if (CurrentPath.Count == 0)
                 {
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     double distance = pos.GetDistance2D(ObjectManager.Player.Position);
                     double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
 
-                    if (distance <= 2
+                    if (distance <= (ObjectManager.Player.IsMounted ? 14 : 4)
                         || TryCount > 5)
                     {
                         CurrentPath.Dequeue();

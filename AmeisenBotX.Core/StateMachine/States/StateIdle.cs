@@ -16,8 +16,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
+        private string BotDataPath { get; }
+
+        public StateIdle(string botDataPath, AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
         {
+            BotDataPath = botDataPath;
             Config = config;
             OffsetList = offsetList;
             ObjectManager = objectManager;
@@ -41,9 +44,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 HookManager.SetupEndsceneHook();
                 EventHookManager.Start();
-
-                if (Config.SaveWowWindowPosition) LoadWowWindowPosition();
-                if (Config.SaveBotWindowPosition) LoadBotWindowPosition();
             }
         }
 
@@ -88,34 +88,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             return PlayerToFollow != null;
-        }
-
-        private void LoadBotWindowPosition()
-        {
-            string filepath = Path.Combine(Config.BotDataPath, $"botpos_{AmeisenBotStateMachine.PlayerName}.json");
-            if (File.Exists(filepath))
-            {
-                try
-                {
-                    Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
-                    XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, rect);
-                }
-                catch { }
-            }
-        }
-
-        private void LoadWowWindowPosition()
-        {
-            string filepath = Path.Combine(Config.BotDataPath, $"wowpos_{AmeisenBotStateMachine.PlayerName}.json");
-            if (File.Exists(filepath))
-            {
-                try
-                {
-                    Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
-                    XMemory.SetWindowPosition(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, rect);
-                }
-                catch { }
-            }
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)

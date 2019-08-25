@@ -1,0 +1,30 @@
+﻿<Window x:Class="AmeisenBotX.LoadConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AmeisenBotX"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="60" Width="360" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Window.BorderBrush>
+        <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+    </Window.BorderBrush>
+    <Window.Background>
+        <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+    </Window.Background>
+    <Grid>
+        <ComboBox x:Name="comboboxSelectedConfig" Margin="10,10,55,10" FontFamily="Segoe UI Semibold" SelectionChanged="ComboboxSelectedConfig_SelectionChanged" FontSize="16"/>
+        <Button x:Name="buttonClose" Content="X" Margin="0,10,10,10" HorizontalAlignment="Right" Width="40" FontFamily="Unispace" FontSize="16" Click="ButtonClose_Click">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkAccent1}"/>
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}"/>
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}"/>
+            </Button.Background>
+        </Button>
+
+    </Grid>
+</Window>

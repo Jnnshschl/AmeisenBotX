@@ -8,8 +8,14 @@ namespace AmeisenBotX.Core.Data
 {
     public class CacheManager
     {
-        public CacheManager(AmeisenBotConfig config)
+        private string BotDataPath { get; }
+
+        public string PlayerName { get; }
+
+        public CacheManager(string botDataPath, string playername, AmeisenBotConfig config)
         {
+            BotDataPath = botDataPath;
+            PlayerName = playername;
             Config = config;
             NameCache = new Dictionary<ulong, string>();
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
@@ -22,18 +28,18 @@ namespace AmeisenBotX.Core.Data
         internal void LoadFromFile()
         {
             if (Config.PermanentNameCache
-                && File.Exists(Config.PermanentNameCachePath))
+                && File.Exists(Path.Combine(BotDataPath, PlayerName, "name_cache.json")))
             {
-                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath)));
+                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BotDataPath, PlayerName, "name_cache.json")));
                 foreach (dynamic item in parsed)
                 {
                     NameCache.Add((ulong)item.Key, (string)item.Value);
                 }
             }
             if (Config.PermanentReactionCache
-                && File.Exists(Config.PermanentReactionCachePath))
+                && File.Exists(Path.Combine(BotDataPath, PlayerName, "reaction_cache.json")))
             {
-                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath)));
+                dynamic parsed = JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BotDataPath, PlayerName, "reaction_cache.json")));
                 foreach (dynamic item in parsed)
                 {
                     ReactionCache.Add(((int, int))item.Key, (WowUnitReaction)item.Value);
@@ -41,12 +47,12 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        internal void SaveToFile()
+        internal void SaveToFile(string CharacterName)
         {
             if (Config.PermanentNameCache)
-                CheckForPermanentCaching(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath), NameCache.OrderBy(e => e.Key));
+                CheckForPermanentCaching(Path.Combine(BotDataPath, PlayerName, "name_cache.json"), NameCache.OrderBy(e => e.Key));
             if (Config.PermanentReactionCache)
-                CheckForPermanentCaching(Path.Combine(Config.BotDataPath, Config.PermanentReactionCachePath), ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
+                CheckForPermanentCaching(Path.Combine(BotDataPath, PlayerName, "reaction_cache.json"), ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
         }
 
         private void CheckForPermanentCaching(string path, object objToSave)

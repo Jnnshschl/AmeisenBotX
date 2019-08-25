@@ -15,16 +15,17 @@ namespace AmeisenBotX
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly string configPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+
+        public readonly string BotDataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
+        public string ConfigPath { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            if (File.Exists(configPath)) Config = LoadConfig();
-            else Config = SaveConfig(); // create a default config
-
-            AmeisenBot = new AmeisenBot(Config);
+            Config = LoadConfig();
+            string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
+            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config);
 
             AmeisenBot.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChange += OnStateMachineStateChange;
@@ -40,7 +41,25 @@ namespace AmeisenBotX
         private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
 
         private AmeisenBotConfig LoadConfig()
-                    => JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(configPath));
+        {
+            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(BotDataPath);
+            loadConfigWindow.ShowDialog();
+
+            if (loadConfigWindow.ConfigToLoad.Length > 0)
+            {
+                AmeisenBotConfig config;
+                if (File.Exists(loadConfigWindow.ConfigToLoad))
+                    config = JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(loadConfigWindow.ConfigToLoad));
+                else
+                    config = new AmeisenBotConfig();
+
+                ConfigPath = loadConfigWindow.ConfigToLoad;
+                return config;
+            }
+            else
+                Close();
+            return null;
+        }
 
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
@@ -104,12 +123,10 @@ namespace AmeisenBotX
             });
         }
 
-        private AmeisenBotConfig SaveConfig()
+        private void SaveConfig()
         {
-            if (Config == null) Config = new AmeisenBotConfig();
-
-            File.WriteAllText(configPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
-            return Config;
+            if (ConfigPath != null && Config != null)
+                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

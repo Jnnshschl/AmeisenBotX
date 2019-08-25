@@ -18,7 +18,10 @@ namespace AmeisenBotX.Core.StateMachine
 {
     public class AmeisenBotStateMachine
     {
+        public string BotDataPath { get; }
+
         public AmeisenBotStateMachine(
+            string botDataPath,
             Process wowProcess,
             AmeisenBotConfig config,
             XMemory xMemory,
@@ -31,6 +34,7 @@ namespace AmeisenBotX.Core.StateMachine
             IPathfindingHandler pathfindingHandler,
             ICombatClass combatClass)
         {
+            BotDataPath = botDataPath;
             Config = config;
             XMemory = xMemory;
             ObjectManager = objectManager;
@@ -49,7 +53,7 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory)},
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
-                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, hookManager, eventHookManager)},
+                { AmeisenBotState.Idle, new StateIdle(botDataPath,this, config, offsetList, objectManager, hookManager, eventHookManager)},
                 { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager)},
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
