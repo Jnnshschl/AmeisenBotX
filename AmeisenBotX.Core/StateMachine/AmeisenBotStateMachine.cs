@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
@@ -52,7 +54,8 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler)},
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
                 { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, combatClass)},
-                { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)}
+                { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)},
+                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler)}
             };
 
             CurrentState = States.First();
@@ -97,6 +100,11 @@ namespace AmeisenBotX.Core.StateMachine
                 if (ObjectManager.Player != null)
                 {
                     HandlePlayerDeadOrGhostState();
+
+                    // TODO: Handle friendly spells
+                    if (Config.AutoDodgeAoeSpells
+                        && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
+                        SetState(AmeisenBotState.InsideAoeDamage);
 
                     if (ObjectManager.Player.IsInCombat)
                         SetState(HandleCombatSituation());

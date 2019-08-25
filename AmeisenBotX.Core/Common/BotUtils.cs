@@ -1,6 +1,9 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Pathfinding;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -60,6 +63,9 @@ namespace AmeisenBotX.Core.Common
             Thread.Sleep(new Random().Next(minDelay, maxDelay)); // make it look more human-like :^)
             SendMessage(windowHandle, 0x101, vKey, new IntPtr(0));
         }
+
+        public static bool IsPositionInsideAoeSpell(WowPosition position, List<WowDynobject> wowDynobjects)
+            => wowDynobjects.Any(e => e.Position.GetDistance2D(position) < e.Radius + 1); // keep 1m distance to aoe effect
 
         public static void SendKeyShift(IntPtr windowHandle, IntPtr vKey, bool shift)
         {

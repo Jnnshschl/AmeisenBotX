@@ -11,6 +11,7 @@
         Following,
         Attacking,
         Healing,
-        LoadingScreen
+        LoadingScreen,
+        InsideAoeDamage
     }
 }
