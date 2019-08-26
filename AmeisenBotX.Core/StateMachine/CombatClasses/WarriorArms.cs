@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             (string, int) castinginfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
 
             if (HookManager.GetSpellCooldown("Enraged Regeneration") <= 0
-                && rage >= 15 && healthpercentme <= 40)
+                && rage >= 15 && healthpercentme <= 50)
             {
                 HookManager.CastSpell("Enraged Regeneration");
             }
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             if (HookManager.GetSpellCooldown("Intimidating Shout") <= 0
-                && rage >= 25 && healthpercentme <= 40)
+                && rage >= 25 && healthpercentme <= 50)
             {
                 HookManager.CastSpell("Intimidating Shout");
             }
@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             if (HookManager.GetSpellCooldown("Bloodrage") <= 0
-            && rage <= 20 && healthpercentme >= 10)
+            && rage <= 20 && healthpercentme >= 15)
             {
                 HookManager.CastSpell("Bloodrage");
             }
