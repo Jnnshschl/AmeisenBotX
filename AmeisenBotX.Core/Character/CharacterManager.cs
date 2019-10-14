@@ -18,18 +18,23 @@ namespace AmeisenBotX.Core.Character
         }
 
         private bool FirstMove { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
         private IOffsetList OffsetList { get; }
+
         private XMemory XMemory { get; }
 
         public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
 
         public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x20));
 
-        public void MoveToPosition(WowPosition pos)
+        public void MoveToPosition(Vector3 pos)
         {
             if (FirstMove)
+            {
                 BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x2));
+            }
 
             XMemory.Write(OffsetList.ClickToMoveX, pos.X);
             XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
@@ -37,7 +42,5 @@ namespace AmeisenBotX.Core.Character
             XMemory.Write(OffsetList.ClickToMoveDistance, 1.5f);
             XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
         }
-
-        // 0x20 = Spacebar (VK_SPACE)
     }
 }

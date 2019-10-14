@@ -13,6 +13,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private CharacterManager CharacterManager { get; }
+
         private AmeisenBotConfig Config { get; }
 
         private ObjectManager ObjectManager { get; }

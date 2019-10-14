@@ -13,7 +13,9 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private AmeisenBotConfig Config { get; }
+
         private HookManager HookManager { get; }
+
         private ObjectManager ObjectManager { get; }
 
         public override void Enter()
@@ -23,11 +25,17 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Execute()
         {
             if (ObjectManager.Player.IsDead)
+            {
                 HookManager.ReleaseSpirit();
+            }
             else if (HookManager.IsGhost("player"))
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Ghost);
+            }
             else
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
         }
 
         public override void Exit()

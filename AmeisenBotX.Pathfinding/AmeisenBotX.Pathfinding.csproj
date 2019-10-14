@@ -49,7 +49,7 @@
     <Compile Include="NavmeshServerClient.cs" />
     <Compile Include="PathRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WowPosition.cs" />
+    <Compile Include="Vector3.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

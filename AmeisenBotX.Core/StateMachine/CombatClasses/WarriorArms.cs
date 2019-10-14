@@ -18,9 +18,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         }
 
         private CharacterManager CharacterManager { get; }
+
         private DateTime HeroicStrikeLastUsed { get; set; }
+
         private HookManager HookManager { get; }
-        private WowPosition LastPosition { get; set; }
+
+        private Vector3 LastPosition { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
         public void Execute()
@@ -156,10 +160,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             double distanceTravel = ObjectManager.Player.Position.GetDistance(LastPosition);
             CharacterManager.MoveToPosition(target.Position);
+
             if (distanceTravel < 0.001 && distanceTravel > 0)
             {
                 CharacterManager.Jump();
             }
+
             LastPosition = ObjectManager.Player.Position;
         }
     }

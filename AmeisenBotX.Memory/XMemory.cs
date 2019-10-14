@@ -1,11 +1,11 @@
-﻿using AmeisenBotX.Memory.Win32;
-using Fasm;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
+using AmeisenBotX.Memory.Win32;
+using Fasm;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
 namespace AmeisenBotX.Memory
@@ -18,7 +18,9 @@ namespace AmeisenBotX.Memory
         }
 
         public ManagedFasm Fasm { get; private set; }
+
         public Process Process { get; private set; }
+
         public IntPtr ProcessHandle { get; private set; }
 
         private Dictionary<Type, int> SizeCache { get; }
@@ -37,14 +39,7 @@ namespace AmeisenBotX.Memory
                 && rect.Top > 0
                 && rect.Bottom > 0)
             {
-                MoveWindow(
-                    windowHandle,
-                    rect.Left,
-                    rect.Top,
-                    rect.Right - rect.Left,
-                    rect.Bottom - rect.Top,
-                    true
-                );
+                MoveWindow(windowHandle, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, true);
             }
         }
 
@@ -52,18 +47,11 @@ namespace AmeisenBotX.Memory
         {
             try
             {
-                address = VirtualAllocEx(
-                    ProcessHandle,
-                    IntPtr.Zero,
-                    size,
-                    AllocationType.Commit,
-                    MemoryProtection.ExecuteReadWrite
-                );
+                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
             }
             catch
             {
                 address = IntPtr.Zero;
-                return false;
             }
 
             return address != IntPtr.Zero;
@@ -78,8 +66,14 @@ namespace AmeisenBotX.Memory
 
         public bool FreeMemory(IntPtr address)
         {
-            try { return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release); }
-            catch { return false; }
+            try
+            {
+                return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
@@ -98,7 +92,10 @@ namespace AmeisenBotX.Memory
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored lel
+            }
 
             value = default;
             return false;
@@ -150,7 +147,10 @@ namespace AmeisenBotX.Memory
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored lel
+            }
 
             value = 0;
             return false;
@@ -169,7 +169,9 @@ namespace AmeisenBotX.Memory
                     foreach (byte b in readBuffer)
                     {
                         if (b == 0b0)
+                        {
                             break;
+                        }
 
                         stringBytes.Add(b);
                     }
@@ -178,9 +180,12 @@ namespace AmeisenBotX.Memory
                     return true;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored lel
+            }
 
-            value = "";
+            value = string.Empty;
             return false;
         }
 
@@ -197,7 +202,10 @@ namespace AmeisenBotX.Memory
                     return true;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored lel
+            }
             finally
             {
                 Marshal.FreeHGlobal(readBuffer);
@@ -241,6 +249,7 @@ namespace AmeisenBotX.Memory
                 int size = (int)dm.Invoke(null, null);
                 SizeCache.Add(type, size);
             }
+
             return SizeCache[type];
         }
     }

@@ -8,6 +8,7 @@
         }
 
         private AmeisenBotConfig Config { get; }
+
         private AmeisenBotState EntryState { get; set; }
 
         public override void Enter()
@@ -21,7 +22,9 @@
                 EntryState = AmeisenBotState.Login;
             }
             else
+            {
                 EntryState = AmeisenBotState.Idle;
+            }
         }
 
         public override void Execute()

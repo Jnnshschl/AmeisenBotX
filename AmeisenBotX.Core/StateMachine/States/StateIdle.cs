@@ -16,8 +16,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
-        private string BotDataPath { get; }
-
         public StateIdle(string botDataPath, AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
         {
             BotDataPath = botDataPath;
@@ -28,10 +26,16 @@ namespace AmeisenBotX.Core.StateMachine.States
             EventHookManager = eventHookManager;
         }
 
+        private string BotDataPath { get; }
+
         private AmeisenBotConfig Config { get; }
+
         private EventHookManager EventHookManager { get; }
+
         private HookManager HookManager { get; }
+
         private ObjectManager ObjectManager { get; }
+
         private IOffsetList OffsetList { get; }
 
         public override void Enter()
@@ -50,7 +54,9 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Execute()
         {
             if (IsUnitToFollowThere())
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Following);
+            }
         }
 
         public override void Exit()
@@ -59,7 +65,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public bool IsUnitToFollowThere()
         {
-            WowPlayer PlayerToFollow = null;
+            WowPlayer playerToFollow = null;
 
             // TODO: make this crap less redundant
             // check the specific character
@@ -68,38 +74,40 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
-                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
+                    playerToFollow = SkipIfOutOfRange(playerToFollow);
                 }
 
                 // check the group/raid leader
-                if (PlayerToFollow == null && Config.FollowGroupLeader)
+                if (playerToFollow == null && Config.FollowGroupLeader)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
-                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
+                    playerToFollow = SkipIfOutOfRange(playerToFollow);
                 }
 
                 // check the group members
-                if (PlayerToFollow == null && Config.FollowGroupMembers)
+                if (playerToFollow == null && Config.FollowGroupMembers)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
-                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                    playerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
+                    playerToFollow = SkipIfOutOfRange(playerToFollow);
                 }
             }
 
-            return PlayerToFollow != null;
+            return playerToFollow != null;
         }
 
-        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
+        private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
         {
-            if (PlayerToFollow != null)
+            if (playerToFollow != null)
             {
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                double distance = playerToFollow.Position.GetDistance(ObjectManager.Player.Position);
                 if (UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
+                {
+                    playerToFollow = null;
+                }
             }
 
-            return PlayerToFollow;
+            return playerToFollow;
         }
 
         private bool UnitIsOutOfRange(double distance)

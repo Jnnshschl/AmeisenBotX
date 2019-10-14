@@ -4,6 +4,6 @@ namespace AmeisenBotX.Pathfinding
 {
     public interface IPathfindingHandler
     {
-        List<WowPosition> GetPath(int mapId, WowPosition start, WowPosition end);
+        List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end);
     }
 }

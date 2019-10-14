@@ -1,12 +1,12 @@
-﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using AmeisenBotX.Core;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.WowObject;
+using Newtonsoft.Json;
 
 namespace AmeisenBotX
 {
@@ -15,25 +15,30 @@ namespace AmeisenBotX
     /// </summary>
     public partial class MainWindow : Window
     {
-
         public readonly string BotDataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
-        public string ConfigPath { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
 
             Config = LoadConfig();
-            string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
-            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config);
 
-            AmeisenBot.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
-            AmeisenBot.StateMachine.OnStateMachineStateChange += OnStateMachineStateChange;
+            if (Config != null)
+            {
+                string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
+                AmeisenBot = new AmeisenBot(BotDataPath, playername, Config);
 
-            LastStateMachineTick = DateTime.Now;
+                AmeisenBot.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
+                AmeisenBot.StateMachine.OnStateMachineStateChange += OnStateMachineStateChange;
+
+                LastStateMachineTick = DateTime.Now;
+            }
         }
 
+        public string ConfigPath { get; private set; }
+
         public AmeisenBotConfig Config { get; private set; }
+
         private AmeisenBot AmeisenBot { get; }
 
         private DateTime LastStateMachineTick { get; set; }
@@ -49,15 +54,22 @@ namespace AmeisenBotX
             {
                 AmeisenBotConfig config;
                 if (File.Exists(loadConfigWindow.ConfigToLoad))
+                {
                     config = JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(loadConfigWindow.ConfigToLoad));
+                }
                 else
+                {
                     config = new AmeisenBotConfig();
+                }
 
                 ConfigPath = loadConfigWindow.ConfigToLoad;
                 return config;
             }
             else
+            {
                 Close();
+            }
+
             return null;
         }
 
@@ -103,7 +115,11 @@ namespace AmeisenBotX
                 if (LastStateMachineTick + TimeSpan.FromSeconds(1) < DateTime.Now)
                 {
                     double executionMs = AmeisenBot.CurrentExecutionMs;
-                    if (double.IsNaN(executionMs)) executionMs = 0;
+                    if (double.IsNaN(executionMs))
+                    {
+                        executionMs = 0;
+                    }
+
                     labelCurrentTickTime.Content = executionMs;
 
                     LastStateMachineTick = DateTime.Now;
@@ -111,7 +127,7 @@ namespace AmeisenBotX
 
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
 
-                //labelDebug.Content = $"{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.WowObjects.OfType<WowDynobject>(), Formatting.Indented)}\n{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player.Position,Formatting.Indented)}";
+                //// labelDebug.Content = $"{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.WowObjects.OfType<WowDynobject>(), Formatting.Indented)}\n{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player.Position,Formatting.Indented)}";
             });
         }
 
@@ -125,13 +141,15 @@ namespace AmeisenBotX
 
         private void SaveConfig()
         {
-            if (ConfigPath != null && Config != null)
+            if (!string.IsNullOrEmpty(ConfigPath) && Config != null)
+            {
                 File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            AmeisenBot.Stop();
+            AmeisenBot?.Stop();
             SaveConfig();
         }
 

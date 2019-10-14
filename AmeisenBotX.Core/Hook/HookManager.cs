@@ -15,7 +15,6 @@ namespace AmeisenBotX.Core.Hook
 {
     public class HookManager
     {
-        public byte[] originalEndsceneBytes;
         private const int ENDSCENE_HOOK_OFFSET = 0x2;
 
         public HookManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CacheManager cacheManager)
@@ -26,11 +25,18 @@ namespace AmeisenBotX.Core.Hook
             CacheManager = cacheManager;
         }
 
+        public byte[] OriginalEndsceneBytes { get; private set; }
+
         public IntPtr CodecaveForCheck { get; private set; }
+
         public IntPtr CodecaveForExecution { get; private set; }
+
         public IntPtr CodeToExecuteAddress { get; private set; }
+
         public IntPtr EndsceneAddress { get; private set; }
+
         public IntPtr EndsceneReturnAddress { get; private set; }
+
         public bool IsInjectionUsed { get; private set; }
 
         public bool IsWoWHooked
@@ -38,16 +44,24 @@ namespace AmeisenBotX.Core.Hook
             get
             {
                 if (XMemory.ReadBytes(EndsceneAddress, 1, out byte[] c))
+                {
                     return c[0] == 0xE9;
+                }
                 else
+                {
                     return false;
+                }
             }
         }
 
         public IntPtr ReturnValueAddress { get; private set; }
+
         private CacheManager CacheManager { get; }
+
         private ObjectManager ObjectManager { get; }
+
         private IOffsetList OffsetList { get; }
+
         private XMemory XMemory { get; }
 
         public void AcceptPartyInvite()
@@ -104,7 +118,7 @@ namespace AmeisenBotX.Core.Hook
         {
             if (IsWoWHooked)
             {
-                XMemory.WriteBytes(EndsceneAddress, originalEndsceneBytes);
+                XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
 
                 if (CodecaveForCheck != null)
                 {
@@ -128,7 +142,7 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public void FaceUnit(WowPlayer player, WowPosition positionToFace)
+        public void FaceUnit(WowPlayer player, Vector3 positionToFace)
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
             XMemory.Write(IntPtr.Add(player.BaseAddress, OffsetList.PlayerRotation.ToInt32()), angle);
@@ -208,7 +222,9 @@ namespace AmeisenBotX.Core.Hook
                     XMemory.WriteBytes(memAlloc, bytes);
 
                     if (memAlloc == IntPtr.Zero)
-                        return "";
+                    {
+                        return string.Empty;
+                    }
 
                     string[] asmLocalText = new string[]
                 {
@@ -225,18 +241,21 @@ namespace AmeisenBotX.Core.Hook
                     return result;
                 }
             }
-            return "";
+
+            return string.Empty;
         }
 
         public double GetSpellCooldown(string spellName)
         {
             LuaDoString($"start,duration,enabled = GetSpellCooldown(\"{spellName}\");cdLeft = (start + duration - GetTime());");
             string result = GetLocalizedText("cdLeft").Replace(".", ",");
+
             if (double.TryParse(result, out double value))
             {
                 value = Math.Round(value, 0);
                 return value > 0 ? value : 0;
             }
+
             return -1;
         }
 
@@ -247,8 +266,11 @@ namespace AmeisenBotX.Core.Hook
             string str = GetLocalizedText("abCastingInfo");
 
             if (double.TryParse(str.Split(',')[1], out double timeRemaining))
+            {
                 return (str.Split(',')[0], (int)Math.Round(timeRemaining, 0));
-            return ("", -1);
+            }
+
+            return (string.Empty, -1);
         }
 
         public WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
@@ -256,7 +278,9 @@ namespace AmeisenBotX.Core.Hook
             WowUnitReaction reaction = WowUnitReaction.Unknown;
 
             if (CacheManager.ReactionCache.ContainsKey((wowUnitA.FactionTemplate, wowUnitB.FactionTemplate)))
+            {
                 return CacheManager.ReactionCache[(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate)];
+            }
 
             // integer to save the reaction
             XMemory.AllocateMemory(4, out IntPtr memAlloc);
@@ -273,16 +297,27 @@ namespace AmeisenBotX.Core.Hook
 
             // we need this, to be very accurate, otherwise wow will crash
             if (XMemory.ReadStruct(IntPtr.Add(wowUnitA.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsA))
+            {
                 wowUnitA.UnitFlags = unitFlagsA;
+            }
             else
+            {
                 return reaction;
+            }
 
             if (XMemory.ReadStruct(IntPtr.Add(wowUnitB.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsB))
+            {
                 wowUnitB.UnitFlags = unitFlagsB;
+            }
             else
+            {
                 return reaction;
+            }
 
-            if (wowUnitA.IsDead || wowUnitB.IsDead) return reaction;
+            if (wowUnitA.IsDead || wowUnitB.IsDead)
+            {
+                return reaction;
+            }
 
             try
             {
@@ -304,11 +339,14 @@ namespace AmeisenBotX.Core.Hook
             List<byte> returnBytes = new List<byte>();
 
             if (!ObjectManager.IsWorldLoaded)
+            {
                 return returnBytes.ToArray();
+            }
 
             try
             {
                 int timeoutCounter = 0;
+
                 // wait for the code to be executed
                 while (IsInjectionUsed)
                 {
@@ -322,8 +360,10 @@ namespace AmeisenBotX.Core.Hook
                 }
 
                 IsInjectionUsed = true;
+
                 // preparing to inject the given ASM
                 XMemory.Fasm.Clear();
+
                 // add all lines
                 foreach (string s in asm)
                 {
@@ -332,10 +372,12 @@ namespace AmeisenBotX.Core.Hook
 
                 // now there is code to be executed
                 XMemory.Write(CodeToExecuteAddress, 1);
+
                 // inject it
                 XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
 
                 timeoutCounter = 0;
+
                 // wait for the code to be executed
                 while (XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
                 {
@@ -352,13 +394,12 @@ namespace AmeisenBotX.Core.Hook
                 // if we want to read the return value do it otherwise we're done
                 if (readReturnBytes)
                 {
-                    byte buffer;
                     try
                     {
                         XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
 
                         // read all parameter-bytes until we the buffer is 0
-                        XMemory.ReadByte(dwAddress, out buffer);
+                        XMemory.ReadByte(dwAddress, out byte buffer);
                         while (buffer != 0)
                         {
                             returnBytes.Add(buffer);
@@ -370,6 +411,7 @@ namespace AmeisenBotX.Core.Hook
                     {
                     }
                 }
+
                 IsInjectionUsed = false;
             }
             catch
@@ -388,7 +430,9 @@ namespace AmeisenBotX.Core.Hook
             string result = GetLocalizedText("isGhost");
 
             if (int.TryParse(result, out int isGhost))
+            {
                 return isGhost == 1;
+            }
 
             return false;
         }
@@ -409,7 +453,9 @@ namespace AmeisenBotX.Core.Hook
                     XMemory.WriteBytes(memAlloc, bytes);
 
                     if (memAlloc == IntPtr.Zero)
+                    {
                         return;
+                    }
 
                     string[] asm = new string[]
                     {
@@ -428,11 +474,14 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public void ReleaseSpirit() => LuaDoString("RepopMe();");
+        public void ReleaseSpirit()
+            => LuaDoString("RepopMe();");
 
-        public void RepairAllItems() => LuaDoString("RepairAllItems();");
+        public void RepairAllItems()
+            => LuaDoString("RepairAllItems();");
 
-        public void RetrieveCorpse() => LuaDoString("RetrieveCorpse();");
+        public void RetrieveCorpse()
+            => LuaDoString("RetrieveCorpse();");
 
         public void RightClickUnit(WowUnit wowUnit)
         {
@@ -464,16 +513,24 @@ namespace AmeisenBotX.Core.Hook
             EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, 0x5);
 
             // if WoW is already hooked, unhook it
-            if (IsWoWHooked) { DisposeHook(); }
+            if (IsWoWHooked)
+            {
+                DisposeHook();
+            }
             else
             {
                 if (XMemory.ReadBytes(EndsceneAddress, 5, out byte[] bytes))
-                    originalEndsceneBytes = bytes;
+                {
+                    OriginalEndsceneBytes = bytes;
+                }
 
                 if (!AllocateCodeCaves())
+                {
                     return false;
+                }
 
                 XMemory.Fasm.Clear();
+
                 // save registers
                 XMemory.Fasm.AddLine("PUSHFD");
                 XMemory.Fasm.AddLine("PUSHAD");
@@ -505,6 +562,7 @@ namespace AmeisenBotX.Core.Hook
 
                 // inject the instructions into our codecave
                 XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32());
+
                 // ---------------------------------------------------
                 // End of the code that checks if there is asm to be
                 // executed on our hook
@@ -515,12 +573,13 @@ namespace AmeisenBotX.Core.Hook
 
                 // do the original EndScene stuff after we restored the registers
                 // and insert it after our code
-                XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), originalEndsceneBytes);
+                XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), OriginalEndsceneBytes);
 
                 // return to original function after we're done with our stuff
                 XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}");
                 XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32() + (uint)asmLenght + 5);
                 XMemory.Fasm.Clear();
+
                 // ---------------------------------------------------
                 // End of doing the original stuff and returning to
                 // the original instruction
@@ -529,10 +588,11 @@ namespace AmeisenBotX.Core.Hook
                 // modify original EndScene instructions to start the hook
                 XMemory.Fasm.AddLine($"JMP {CodecaveForCheck.ToInt32()}");
                 XMemory.Fasm.Inject((uint)EndsceneAddress.ToInt32());
-                // we should've hooked WoW now
 
+                // we should've hooked WoW now
                 return true;
             }
+
             return false;
         }
 
@@ -555,9 +615,10 @@ namespace AmeisenBotX.Core.Hook
         public void TargetLuaUnit(WowLuaUnit unit)
             => LuaDoString($"TargetUnit(\"{unit.ToString()}\");");
 
-        public void TargetNearestEnemy() => SendChatMessage("/targetenemy [harm][nodead]");
+        public void TargetNearestEnemy()
+            => SendChatMessage("/targetenemy [harm][nodead]");
 
-        public void WriteCtmValues(WowPosition targetPosition, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float distance = 1.5f)
+        public void WriteCtmValues(Vector3 targetPosition, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float distance = 1.5f)
         {
             XMemory.Write(OffsetList.ClickToMoveX, targetPosition.X);
             XMemory.Write(OffsetList.ClickToMoveY, targetPosition.Y);
@@ -570,24 +631,36 @@ namespace AmeisenBotX.Core.Hook
         {
             // integer to check if there is code waiting to be executed
             if (!XMemory.AllocateMemory(4, out IntPtr codeToExecuteAddress))
+            {
                 return false;
+            }
+
             CodeToExecuteAddress = codeToExecuteAddress;
             XMemory.Write(CodeToExecuteAddress, 0);
 
             // integer to save the address of the return value
             if (!XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
+            {
                 return false;
+            }
+
             ReturnValueAddress = returnValueAddress;
             XMemory.Write(ReturnValueAddress, 0);
 
             // codecave to check if we need to execute something
             if (!XMemory.AllocateMemory(128, out IntPtr codecaveForCheck))
+            {
                 return false;
+            }
+
             CodecaveForCheck = codecaveForCheck;
 
             // codecave for the code we wa't to execute
             if (!XMemory.AllocateMemory(2048, out IntPtr codecaveForExecution))
+            {
                 return false;
+            }
+
             CodecaveForExecution = codecaveForExecution;
 
             return true;
@@ -599,9 +672,13 @@ namespace AmeisenBotX.Core.Hook
                 && XMemory.Read(IntPtr.Add(pDevice, OffsetList.EndSceneOffsetDevice.ToInt32()), out IntPtr pEnd)
                 && XMemory.Read(pEnd, out IntPtr pScene)
                 && XMemory.Read(IntPtr.Add(pScene, OffsetList.EndSceneOffset.ToInt32()), out IntPtr pEndscene))
+            {
                 return pEndscene;
+            }
             else
+            {
                 return IntPtr.Zero;
+            }
         }
     }
 }

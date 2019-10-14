@@ -19,17 +19,25 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             OffsetList = offsetList;
             PathfindingHandler = pathfindingHandler;
-            CurrentPath = new Queue<WowPosition>();
+            CurrentPath = new Queue<Vector3>();
         }
 
         private CharacterManager CharacterManager { get; }
+
         private AmeisenBotConfig Config { get; }
-        private Queue<WowPosition> CurrentPath { get; set; }
+
+        private Queue<Vector3> CurrentPath { get; set; }
+
         private HookManager HookManager { get; }
-        private WowPosition LastPosition { get; set; }
+
+        private Vector3 LastPosition { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
         private IOffsetList OffsetList { get; }
+
         private IPathfindingHandler PathfindingHandler { get; }
+
         private int TryCount { get; set; }
 
         public override void Enter()
@@ -41,9 +49,11 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Execute()
         {
             if (ObjectManager.Player.Health > 1)
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
 
-            if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out WowPosition corpsePosition)
+            if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out Vector3 corpsePosition)
                 && ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
             {
                 if (CurrentPath.Count == 0)
@@ -52,7 +62,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
                 else
                 {
-                    WowPosition pos = CurrentPath.Peek();
+                    Vector3 pos = CurrentPath.Peek();
                     double distance = pos.GetDistance2D(ObjectManager.Player.Position);
                     double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
 
@@ -67,17 +77,23 @@ namespace AmeisenBotX.Core.StateMachine.States
                         CharacterManager.MoveToPosition(pos);
 
                         if (distTraveled != 0 && distTraveled < 0.08)
+                        {
                             TryCount++;
+                        }
 
                         // if the thing is too far away, drop the whole Path
                         if (pos.Z - ObjectManager.Player.Position.Z > 2
                             && distance > 2)
+                        {
                             CurrentPath.Clear();
+                        }
 
                         // jump if the node is higher than us
                         if (pos.Z - ObjectManager.Player.Position.Z > 1.2
                             && distance < 3)
+                        {
                             CharacterManager.Jump();
+                        }
                     }
 
                     if (distTraveled != 0
@@ -101,12 +117,16 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
         }
 
-        private void BuildNewPath(WowPosition corpsePosition)
+        private void BuildNewPath(Vector3 corpsePosition)
         {
-            List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, corpsePosition);
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, corpsePosition);
             if (path.Count > 0)
-                foreach (WowPosition pos in path)
+            {
+                foreach (Vector3 pos in path)
+                {
                     CurrentPath.Enqueue(pos);
+                }
+            }
         }
     }
 }

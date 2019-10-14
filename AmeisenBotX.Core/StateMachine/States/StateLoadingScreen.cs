@@ -22,7 +22,9 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             ObjectManager.RefreshIsWorldLoaded();
             if (ObjectManager.IsWorldLoaded)
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
         }
 
         public override void Exit()

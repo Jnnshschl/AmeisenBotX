@@ -17,8 +17,11 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private CharacterManager CharacterManager { get; }
+
         private AmeisenBotConfig Config { get; }
+
         private ILoginHandler LoginHandler { get; }
+
         private IOffsetList OffsetList { get; }
 
         public override void Enter()
@@ -31,9 +34,14 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 if (AmeisenBotStateMachine.XMemory.Read(OffsetList.ChatOpened, out byte isChatOpened)
                     && isChatOpened == 0x1)
-                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr(0x0D)); // send enter to close the chat
+                {
+                    // send enter to close the chat lmao
+                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
+                }
                 else
+                {
                     AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                }
             }
         }
 

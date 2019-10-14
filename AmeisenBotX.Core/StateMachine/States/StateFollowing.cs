@@ -18,18 +18,23 @@ namespace AmeisenBotX.Core.StateMachine.States
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             PathfindingHandler = pathfindingHandler;
-            CurrentPath = new Queue<WowPosition>();
+            CurrentPath = new Queue<Vector3>();
         }
 
         private CharacterManager CharacterManager { get; }
+
         private AmeisenBotConfig Config { get; }
 
-        private Queue<WowPosition> CurrentPath { get; set; }
-        private WowPosition LastPosition { get; set; }
+        private Queue<Vector3> CurrentPath { get; set; }
+
+        private Vector3 LastPosition { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
         private IPathfindingHandler PathfindingHandler { get; }
 
         private WowPlayer PlayerToFollow { get; set; }
+
         private int TryCount { get; set; }
 
         public override void Enter()
@@ -63,14 +68,18 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             if (PlayerToFollow == null)
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
         }
 
         public override void Execute()
         {
             double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
 
             double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
 
@@ -80,7 +89,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                WowPosition pos = CurrentPath.Peek();
+                Vector3 pos = CurrentPath.Peek();
                 distance = pos.GetDistance2D(ObjectManager.Player.Position);
                 if (distance <= 2
                     || distance > Config.MaxFollowDistance
@@ -94,17 +103,23 @@ namespace AmeisenBotX.Core.StateMachine.States
                     CharacterManager.MoveToPosition(pos);
 
                     if (distTraveled != 0 && distTraveled < 0.08)
+                    {
                         TryCount++;
+                    }
 
                     // if the thing is too far away, drop the whole Path
                     if (pos.Z - ObjectManager.Player.Position.Z > 2
                         && distance > 2)
+                    {
                         CurrentPath.Clear();
+                    }
 
                     // jump if the node is higher than us
                     if (pos.Z - ObjectManager.Player.Position.Z > 1.2
                         && distance < 3)
+                    {
                         CharacterManager.Jump();
+                    }
                 }
 
                 if (distTraveled != 0
@@ -125,22 +140,28 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void BuildNewPath()
         {
-            List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, PlayerToFollow.Position);
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, PlayerToFollow.Position);
             if (path.Count > 0)
-                foreach (WowPosition pos in path)
+            {
+                foreach (Vector3 pos in path)
+                {
                     CurrentPath.Enqueue(pos);
+                }
+            }
         }
 
-        private WowPlayer SkipIfOutOfRange(WowPlayer PlayerToFollow)
+        private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
         {
-            if (PlayerToFollow != null)
+            if (playerToFollow != null)
             {
-                double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                double distance = playerToFollow.Position.GetDistance(ObjectManager.Player.Position);
                 if (UnitIsOutOfRange(distance))
-                    PlayerToFollow = null;
+                {
+                    playerToFollow = null;
+                }
             }
 
-            return PlayerToFollow;
+            return playerToFollow;
         }
 
         private bool UnitIsOutOfRange(double distance)

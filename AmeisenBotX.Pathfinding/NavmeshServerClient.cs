@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Timers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace AmeisenBotX.Pathfinding
 {
@@ -23,9 +23,13 @@ namespace AmeisenBotX.Pathfinding
         }
 
         public IPAddress Ip { get; }
+
         public bool IsConnected { get; private set; }
+
         public int Port { get; }
+
         public TcpClient TcpClient { get; }
+
         private Timer ConnectionWatchdog { get; }
 
         public void Disconnect()
@@ -34,34 +38,35 @@ namespace AmeisenBotX.Pathfinding
             TcpClient.Close();
         }
 
-        public List<WowPosition> GetPath(int mapId, WowPosition start, WowPosition end)
+        public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
             if (!TcpClient.Connected)
             {
-                return new List<WowPosition>();
+                return new List<Vector3>();
             }
 
-            StreamReader sReader = new StreamReader(TcpClient.GetStream(), Encoding.ASCII);
-            StreamWriter sWriter = new StreamWriter(TcpClient.GetStream(), Encoding.ASCII);
-
-            string pathRequest = JsonConvert.SerializeObject(new PathRequest(mapId, start, end));
-
-            sWriter.WriteLine(pathRequest + " &gt;");
-            sWriter.Flush();
-
-            string pathJson = sReader.ReadLine().Replace("&gt;", "");
-
-            if (IsValidJson(pathJson))
+            using (StreamReader reader = new StreamReader(TcpClient.GetStream(), Encoding.ASCII))
+            using (StreamWriter writer = new StreamWriter(TcpClient.GetStream(), Encoding.ASCII))
             {
-                return JsonConvert.DeserializeObject<List<WowPosition>>(pathJson.Trim());
-            }
-            else
-            {
-                return new List<WowPosition>();
+                string pathRequest = JsonConvert.SerializeObject(new PathRequest(start, end, mapId));
+
+                writer.WriteLine(pathRequest + " &gt;");
+                writer.Flush();
+
+                string pathJson = reader.ReadLine().Replace("&gt;", string.Empty);
+
+                if (IsValidJson(pathJson))
+                {
+                    return JsonConvert.DeserializeObject<List<Vector3>>(pathJson.Trim());
+                }
+                else
+                {
+                    return new List<Vector3>();
+                }
             }
         }
 
-        public bool IsInLineOfSight(WowPosition start, WowPosition end, int mapId)
+        public bool IsInLineOfSight(Vector3 start, Vector3 end, int mapId)
         {
             return GetPath(mapId, start, end).Count == 1;
         }
@@ -69,8 +74,8 @@ namespace AmeisenBotX.Pathfinding
         private static bool IsValidJson(string strInput)
         {
             strInput = strInput.Trim();
-            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) ||
-                (strInput.StartsWith("[") && strInput.EndsWith("]")))
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) 
+                || (strInput.StartsWith("[") && strInput.EndsWith("]")))
             {
                 try
                 {
@@ -79,13 +84,11 @@ namespace AmeisenBotX.Pathfinding
                 }
                 catch
                 {
-                    return false;
+                    // ignored
                 }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private void CConnectionWatchdog(object sender, ElapsedEventArgs e)
@@ -98,7 +101,7 @@ namespace AmeisenBotX.Pathfinding
                 }
                 catch
                 {
-                    // Server not running
+                    // server is maybe not running or whatever
                 }
             }
 

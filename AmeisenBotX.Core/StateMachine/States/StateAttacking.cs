@@ -20,20 +20,28 @@ namespace AmeisenBotX.Core.StateMachine.States
             CharacterManager = characterManager;
             HookManager = hookManager;
             PathfindingHandler = pathfindingHandler;
-            CurrentPath = new Queue<WowPosition>();
+            CurrentPath = new Queue<Vector3>();
             CombatClass = combatClass;
         }
 
-        public WowPosition LastPosition { get; private set; }
+        public Vector3 LastPosition { get; private set; }
+
         private CharacterManager CharacterManager { get; }
+
         private ICombatClass CombatClass { get; }
+
         private AmeisenBotConfig Config { get; }
 
-        private Queue<WowPosition> CurrentPath { get; set; }
+        private Queue<Vector3> CurrentPath { get; set; }
+
         private HookManager HookManager { get; }
+
         private bool IsMelee { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
         private IPathfindingHandler PathfindingHandler { get; }
+
         private int TryCount { get; set; }
 
         public override void Enter()
@@ -57,7 +65,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                 if (CombatClass == null)
                 {
                     if (CurrentPath.Count > 0)
+                    {
                         HandleMovement();
+                    }
                 }
 
                 if (SelectTarget(out WowUnit target)
@@ -93,15 +103,19 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void BuildNewPath(WowUnit target)
         {
-            List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
             if (path.Count > 0)
-                foreach (WowPosition pos in path)
+            {
+                foreach (Vector3 pos in path)
+                {
                     CurrentPath.Enqueue(pos);
+                }
+            }
         }
 
         private void HandleMovement()
         {
-            WowPosition pos = CurrentPath.Peek();
+            Vector3 pos = CurrentPath.Peek();
             double distance = pos.GetDistance2D(ObjectManager.Player.Position);
             double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
 
@@ -116,17 +130,23 @@ namespace AmeisenBotX.Core.StateMachine.States
                 CharacterManager.MoveToPosition(pos);
 
                 if (distTraveled != 0 && distTraveled < 0.08)
+                {
                     TryCount++;
+                }
 
                 // if the thing is too far away, drop the whole Path
                 if (pos.Z - ObjectManager.Player.Position.Z > 2
                     && distance > 2)
+                {
                     CurrentPath.Clear();
+                }
 
                 // jump if the node is higher than us
                 if (pos.Z - ObjectManager.Player.Position.Z > 1.2
                     && distance < 3)
+                {
                     CharacterManager.Jump();
+                }
             }
 
             if (distTraveled != 0
@@ -142,10 +162,10 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private bool SelectTarget(out WowUnit target)
         {
-            List<WowUnit> WowUnits = ObjectManager.WowObjects.OfType<WowUnit>().ToList();
-            if (WowUnits.Count > 0)
+            List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().ToList();
+            if (wowUnits.Count > 0)
             {
-                target = WowUnits.FirstOrDefault(t => t.Guid == ObjectManager.TargetGuid);
+                target = wowUnits.FirstOrDefault(t => t.Guid == ObjectManager.TargetGuid);
                 bool validUnit = BotUtils.IsValidUnit(target);
 
                 if (validUnit && target.IsInCombat)
@@ -154,6 +174,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         HookManager.StartAutoAttack();
                     }
+
                     return true;
                 }
                 else

@@ -18,8 +18,6 @@ namespace AmeisenBotX.Core.StateMachine
 {
     public class AmeisenBotStateMachine
     {
-        public string BotDataPath { get; }
-
         public AmeisenBotStateMachine(
             string botDataPath,
             Process wowProcess,
@@ -49,17 +47,17 @@ namespace AmeisenBotX.Core.StateMachine
 
             States = new Dictionary<AmeisenBotState, State>()
             {
-                { AmeisenBotState.None, new StateNone(this, config)},
-                { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory)},
-                { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager)},
-                { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager)},
-                { AmeisenBotState.Idle, new StateIdle(botDataPath,this, config, offsetList, objectManager, hookManager, eventHookManager)},
-                { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager)},
-                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler)},
-                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler)},
-                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, combatClass)},
-                { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager)},
-                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler)}
+                { AmeisenBotState.None, new StateNone(this, config) },
+                { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
+                { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager) },
+                { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager) },
+                { AmeisenBotState.Idle, new StateIdle(botDataPath, this, config, offsetList, objectManager, hookManager, eventHookManager) },
+                { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager) },
+                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler) },
+                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler) },
+                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, combatClass) },
+                { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager) },
+                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler) }
             };
 
             CurrentState = States.First();
@@ -74,32 +72,49 @@ namespace AmeisenBotX.Core.StateMachine
 
         public event StateMachineTick OnStateMachineTick;
 
+        public string BotDataPath { get; }
+
         public KeyValuePair<AmeisenBotState, State> CurrentState { get; private set; }
 
         public string PlayerName { get; internal set; }
+
         internal XMemory XMemory { get; }
+
         private CacheManager CacheManager { get; }
+
         private CharacterManager CharacterManager { get; }
+
         private AmeisenBotConfig Config { get; }
+
         private EventHookManager EventHookManager { get; }
+
         private HookManager HookManager { get; }
+
         private DateTime LastEventPull { get; set; }
+
         private DateTime LastGhostCheck { get; set; }
+
         private DateTime LastObjectUpdate { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
         private Dictionary<AmeisenBotState, State> States { get; }
 
         public void Execute()
         {
             if (XMemory.Process != null && XMemory.Process.HasExited)
+            {
                 SetState(AmeisenBotState.None);
+            }
 
             HandleEventPull();
 
             if (ObjectManager != null)
             {
                 if (!ObjectManager.IsWorldLoaded)
+                {
                     SetState(AmeisenBotState.LoadingScreen);
+                }
 
                 if (ObjectManager.Player != null)
                 {
@@ -108,10 +123,14 @@ namespace AmeisenBotX.Core.StateMachine
                     // TODO: Handle friendly spells
                     if (Config.AutoDodgeAoeSpells
                         && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
+                    {
                         SetState(AmeisenBotState.InsideAoeDamage);
+                    }
 
                     if (ObjectManager.Player.IsInCombat)
+                    {
                         SetState(HandleCombatSituation());
+                    }
                 }
             }
 
@@ -126,7 +145,11 @@ namespace AmeisenBotX.Core.StateMachine
 
         internal void SetState(AmeisenBotState state)
         {
-            if (CurrentState.Key == state) return; // we are already in this state
+            if (CurrentState.Key == state)
+            {
+                // we are already in this state
+                return;
+            }
 
             CurrentState.Value.Exit();
             CurrentState = States.First(s => s.Key == state);
@@ -166,7 +189,9 @@ namespace AmeisenBotX.Core.StateMachine
         private void HandlePlayerDeadOrGhostState()
         {
             if (ObjectManager.Player.IsDead)
+            {
                 SetState(AmeisenBotState.Dead);
+            }
             else
             {
                 if (LastGhostCheck + TimeSpan.FromSeconds(3) < DateTime.Now)
@@ -174,7 +199,10 @@ namespace AmeisenBotX.Core.StateMachine
                     bool isGhost = HookManager.IsGhost("player");
                     LastGhostCheck = DateTime.Now;
 
-                    if (isGhost) SetState(AmeisenBotState.Ghost);
+                    if (isGhost)
+                    {
+                        SetState(AmeisenBotState.Ghost);
+                    }
                 }
             }
         }

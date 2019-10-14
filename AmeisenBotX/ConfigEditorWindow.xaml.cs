@@ -1,18 +1,7 @@
-﻿using AmeisenBotX.Core;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using AmeisenBotX.Core;
+using Microsoft.Win32;
 
 namespace AmeisenBotX
 {
@@ -21,13 +10,14 @@ namespace AmeisenBotX
     /// </summary>
     public partial class ConfigEditorWindow : Window
     {
-        public string ConfigName { get; private set; }
-        public AmeisenBotConfig Config { get; private set; }
-
         public ConfigEditorWindow()
         {
             InitializeComponent();
         }
+
+        public string ConfigName { get; private set; }
+
+        public AmeisenBotConfig Config { get; private set; }
 
         private void ButtonOkay_Click(object sender, RoutedEventArgs e)
         {
@@ -64,7 +54,7 @@ namespace AmeisenBotX
         private void CheckboxAutoStartWow_Unchecked(object sender, RoutedEventArgs e)
         {
             textboxWowPath.IsEnabled = false;
-            textboxWowPath.Text = "";
+            textboxWowPath.Text = string.Empty;
             buttonOpenWowExe.IsEnabled = false;
         }
 
@@ -76,7 +66,7 @@ namespace AmeisenBotX
         private void CheckboxFollowSpecificCharacter_Unchecked(object sender, RoutedEventArgs e)
         {
             textboxFollowSpecificCharacterName.IsEnabled = false;
-            textboxFollowSpecificCharacterName.Text = "";
+            textboxFollowSpecificCharacterName.Text = string.Empty;
         }
 
         private void ButtonAbort_Click(object sender, RoutedEventArgs e)

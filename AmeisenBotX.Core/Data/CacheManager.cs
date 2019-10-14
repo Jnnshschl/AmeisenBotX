@@ -8,10 +8,6 @@ namespace AmeisenBotX.Core.Data
 {
     public class CacheManager
     {
-        private string BotDataPath { get; }
-
-        public string PlayerName { get; }
-
         public CacheManager(string botDataPath, string playername, AmeisenBotConfig config)
         {
             BotDataPath = botDataPath;
@@ -21,9 +17,15 @@ namespace AmeisenBotX.Core.Data
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
         }
 
+        public string PlayerName { get; }
+
         public Dictionary<ulong, string> NameCache { get; private set; }
+
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
+
         private AmeisenBotConfig Config { get; }
+
+        private string BotDataPath { get; }
 
         internal void LoadFromFile()
         {
@@ -36,6 +38,7 @@ namespace AmeisenBotX.Core.Data
                     NameCache.Add((ulong)item.Key, (string)item.Value);
                 }
             }
+
             if (Config.PermanentReactionCache
                 && File.Exists(Path.Combine(BotDataPath, PlayerName, "reaction_cache.json")))
             {
@@ -47,12 +50,17 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        internal void SaveToFile(string CharacterName)
+        internal void SaveToFile(string characterName)
         {
             if (Config.PermanentNameCache)
+            {
                 CheckForPermanentCaching(Path.Combine(BotDataPath, PlayerName, "name_cache.json"), NameCache.OrderBy(e => e.Key));
+            }
+
             if (Config.PermanentReactionCache)
+            {
                 CheckForPermanentCaching(Path.Combine(BotDataPath, PlayerName, "reaction_cache.json"), ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2));
+            }
         }
 
         private void CheckForPermanentCaching(string path, object objToSave)
@@ -60,10 +68,15 @@ namespace AmeisenBotX.Core.Data
             try
             {
                 if (!Directory.Exists(Path.GetDirectoryName(path)))
+                {
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
+                }
+
                 File.WriteAllText(path, JsonConvert.SerializeObject(objToSave, Formatting.Indented));
             }
-            catch { }
+            catch
+            {
+            }
         }
     }
 }

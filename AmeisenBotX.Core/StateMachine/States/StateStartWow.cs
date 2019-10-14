@@ -14,7 +14,9 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private AmeisenBotConfig Config { get; }
+
         private Process WowProcess { get; set; }
+
         private XMemory XMemory { get; }
 
         public override void Enter()
@@ -35,9 +37,13 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             if (Config.AutoLogin)
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Login);
+            }
             else
+            {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
         }
 
         public override void Exit()

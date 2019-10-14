@@ -21,16 +21,21 @@ namespace AmeisenBotX.Core.StateMachine.States
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             PathfindingHandler = pathfindingHandler;
-            CurrentPath = new Queue<WowPosition>();
+            CurrentPath = new Queue<Vector3>();
         }
 
-        public WowPosition LastPosition { get; private set; }
+        public Vector3 LastPosition { get; private set; }
+
         private CharacterManager CharacterManager { get; }
+
         private AmeisenBotConfig Config { get; }
 
-        private Queue<WowPosition> CurrentPath { get; set; }
+        private Queue<Vector3> CurrentPath { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
         private IPathfindingHandler PathfindingHandler { get; }
+
         private int TryCount { get; set; }
 
         public override void Enter()
@@ -57,7 +62,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                WowPosition targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
+                Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
 
                 double distance = ObjectManager.Player.Position.GetDistance(targetPosition);
                 if (distance > 3.2)
@@ -71,19 +76,19 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
         }
 
-        private WowPosition FindPositionOutsideOfAoeSpell(WowPosition aoePosition, float aoeRadius)
+        private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)
         {
             double angleX = ObjectManager.Player.Position.X - aoePosition.X;
             double angleY = ObjectManager.Player.Position.Y - aoePosition.Y;
 
             double angle = Math.Atan2(angleX, angleY);
 
-            double distanceToMove = (aoeRadius - ObjectManager.Player.Position.GetDistance2D(aoePosition)) + 1; // 1m distance additionally
+            double distanceToMove = aoeRadius - ObjectManager.Player.Position.GetDistance2D(aoePosition) + 1; // 1m distance additionally
 
-            double x = ObjectManager.Player.Position.X + Math.Cos(angle) * distanceToMove;
-            double y = ObjectManager.Player.Position.Y + Math.Sin(angle) * distanceToMove;
+            double x = ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
+            double y = ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);
 
-            WowPosition destination = new WowPosition()
+            Vector3 destination = new Vector3()
             {
                 X = Convert.ToSingle(x),
                 Y = Convert.ToSingle(y),
@@ -93,17 +98,21 @@ namespace AmeisenBotX.Core.StateMachine.States
             return destination;
         }
 
-        private void BuildNewPath(WowPosition targetPosition)
+        private void BuildNewPath(Vector3 targetPosition)
         {
-            List<WowPosition> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, targetPosition);
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, targetPosition);
             if (path.Count > 0)
-                foreach (WowPosition pos in path)
+            {
+                foreach (Vector3 pos in path)
+                {
                     CurrentPath.Enqueue(pos);
+                }
+            }
         }
 
         private void HandleMovement()
         {
-            WowPosition pos = CurrentPath.Peek();
+            Vector3 pos = CurrentPath.Peek();
             double distance = pos.GetDistance2D(ObjectManager.Player.Position);
             double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
 
@@ -118,17 +127,23 @@ namespace AmeisenBotX.Core.StateMachine.States
                 CharacterManager.MoveToPosition(pos);
 
                 if (distTraveled != 0 && distTraveled < 0.08)
+                {
                     TryCount++;
+                }
 
                 // if the thing is too far away, drop the whole Path
                 if (pos.Z - ObjectManager.Player.Position.Z > 2
                     && distance > 2)
+                {
                     CurrentPath.Clear();
+                }
 
                 // jump if the node is higher than us
                 if (pos.Z - ObjectManager.Player.Position.Z > 1.2
                     && distance < 3)
+                {
                     CharacterManager.Jump();
+                }
             }
 
             if (distTraveled != 0

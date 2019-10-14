@@ -17,6 +17,7 @@ namespace AmeisenBotX.Core.LoginHandler
         }
 
         private IOffsetList OffsetList { get; }
+
         private XMemory XMemory { get; }
 
         public bool Login(Process wowProcess, string username, string password, int characterSlot)
@@ -28,7 +29,9 @@ namespace AmeisenBotX.Core.LoginHandler
                 while (!XMemory.Process.HasExited && isWorldLoaded == 0)
                 {
                     if (count == 7)
+                    {
                         return false;
+                    }
 
                     if (XMemory.ReadString(OffsetList.GameState, Encoding.ASCII, out string gameState, 10))
                     {
@@ -49,7 +52,9 @@ namespace AmeisenBotX.Core.LoginHandler
                         }
                     }
                     else
+                    {
                         count++;
+                    }
 
                     XMemory.ReadInt(OffsetList.IsWorldLoaded, out isWorldLoaded);
                     Thread.Sleep(2000);

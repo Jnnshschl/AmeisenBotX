@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Data
 {
     public class ObjectManager
     {
-        private readonly object QueryLock = new object();
+        private readonly object queryLock = new object();
 
         private List<WowObject> wowObjects;
 
@@ -33,38 +33,66 @@ namespace AmeisenBotX.Core.Data
         public event ObjectUpdateComplete OnObjectUpdateComplete;
 
         public bool IsWorldLoaded { get; private set; }
+
         public ulong LastTargetGuid { get; private set; }
+
         public int MapId { get; private set; }
+
         public ulong PartyleaderGuid { get; private set; }
+
         public List<ulong> PartymemberGuids { get; private set; }
+
         public ulong PetGuid { get; private set; }
+
         public WowPlayer Player { get; private set; }
+
         public IntPtr PlayerBase { get; private set; }
+
         public ulong PlayerGuid { get; private set; }
+
         public ulong TargetGuid { get; private set; }
 
         public List<WowObject> WowObjects
         {
-            get { lock (QueryLock) { return wowObjects; } }
-            set { lock (QueryLock) { wowObjects = value; } }
+            get
+            {
+                lock (queryLock)
+                {
+                    return wowObjects;
+                }
+            }
+
+            set
+            {
+                lock (queryLock)
+                {
+                    wowObjects = value;
+                }
+            }
         }
 
         public int ZoneId { get; private set; }
+
         private CacheManager CacheManager { get; }
+
         private IOffsetList OffsetList { get; }
+
         private XMemory XMemory { get; }
 
         public ulong ReadPartyLeaderGuid()
         {
-            ulong partyleaderGuid;
-            if (XMemory.Read(OffsetList.RaidLeader, out partyleaderGuid))
+            if (XMemory.Read(OffsetList.RaidLeader, out ulong partyleaderGuid))
             {
                 if (partyleaderGuid == 0
                     && XMemory.Read(OffsetList.PartyLeader, out partyleaderGuid))
                 {
+                    return partyleaderGuid;
                 }
+
+                return partyleaderGuid;
             }
-            return partyleaderGuid;
+
+            return 0;
         }
 
         public List<ulong> ReadPartymemberGuids()
@@ -95,9 +123,12 @@ namespace AmeisenBotX.Core.Data
                             }
                         }
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                 }
             }
+
             return partymemberGuids;
         }
 
@@ -105,7 +136,7 @@ namespace AmeisenBotX.Core.Data
         {
             if (XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.WowObjectGuid.ToInt32()), out ulong guid)
-                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowObjectPosition.ToInt32()), out WowPosition wowPosition))
+                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowObjectPosition.ToInt32()), out Vector3 wowPosition))
             {
                 return new WowObject()
                 {
@@ -116,6 +147,7 @@ namespace AmeisenBotX.Core.Data
                     Position = wowPosition
                 };
             }
+
             return null;
         }
 
@@ -166,10 +198,13 @@ namespace AmeisenBotX.Core.Data
                         player.Race = (WowRace)pRace;
                         player.Class = (WowClass)pClass;
                     }
+
                     Player = player;
                 }
+
                 return player;
             }
+
             return null;
         }
 
@@ -179,7 +214,7 @@ namespace AmeisenBotX.Core.Data
 
             if (wowObject != null
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorTargetGuid.ToInt32()), out ulong targetGuid)
-                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowUnitPosition.ToInt32()), out WowPosition wowPosition)
+                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowUnitPosition.ToInt32()), out Vector3 wowPosition)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.PlayerRotation.ToInt32()), out float rotation)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.IsAutoAttacking.ToInt32()), out int isAutoAttacking)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorFactionTemplate.ToInt32()), out int factionTemplate)
@@ -194,7 +229,7 @@ namespace AmeisenBotX.Core.Data
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorEnergy.ToInt32()), out int energy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxEnergy.ToInt32()), out int maxEnergy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorRuneenergy.ToInt32()), out int runeenergy)
-                //&& XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxRuneenergy.ToInt32()), out int maxRuneenergy)
+                //// && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxRuneenergy.ToInt32()), out int maxRuneenergy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorLevel.ToInt32()), out int level)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.CurrentlyCastingSpellId.ToInt32()), out int currentlyCastingSpellId)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int currentlyChannelingSpellId))
@@ -228,6 +263,7 @@ namespace AmeisenBotX.Core.Data
                     CurrentlyChannelingSpellId = currentlyChannelingSpellId
                 };
             }
+
             return null;
         }
 
@@ -238,6 +274,7 @@ namespace AmeisenBotX.Core.Data
                 IsWorldLoaded = isWorldLoaded == 1;
                 return IsWorldLoaded;
             }
+
             return false;
         }
 
@@ -249,11 +286,30 @@ namespace AmeisenBotX.Core.Data
                 return;
             }
 
-            if (XMemory.Read(OffsetList.PlayerGuid, out ulong playerGuid)) PlayerGuid = playerGuid;
-            if (XMemory.Read(OffsetList.TargetGuid, out ulong targetGuid)) TargetGuid = targetGuid;
-            if (XMemory.Read(OffsetList.TargetGuid, out ulong lastTargetGuid)) LastTargetGuid = lastTargetGuid;
-            if (XMemory.Read(OffsetList.PetGuid, out ulong petGuid)) PetGuid = petGuid;
-            if (XMemory.Read(OffsetList.TargetGuid, out IntPtr playerbase)) PlayerBase = playerbase;
+            if (XMemory.Read(OffsetList.PlayerGuid, out ulong playerGuid))
+            {
+                PlayerGuid = playerGuid;
+            }
+
+            if (XMemory.Read(OffsetList.TargetGuid, out ulong targetGuid))
+            {
+                TargetGuid = targetGuid;
+            }
+
+            if (XMemory.Read(OffsetList.TargetGuid, out ulong lastTargetGuid))
+            {
+                LastTargetGuid = lastTargetGuid;
+            }
+
+            if (XMemory.Read(OffsetList.PetGuid, out ulong petGuid))
+            {
+                PetGuid = petGuid;
+            }
+
+            if (XMemory.Read(OffsetList.TargetGuid, out IntPtr playerbase))
+            {
+                PlayerBase = playerbase;
+            }
 
             WowObjects = new List<WowObject>();
             XMemory.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
@@ -267,12 +323,24 @@ namespace AmeisenBotX.Core.Data
                 WowObjectType wowObjectType = (WowObjectType)objectType;
                 switch (wowObjectType)
                 {
-                    case WowObjectType.Gameobject: WowObjects.Add(ReadWowGameobject(activeObject, wowObjectType)); break;
-                    case WowObjectType.Dynobject: WowObjects.Add(ReadWowDynobject(activeObject, wowObjectType)); break;
-                    case WowObjectType.Unit: WowObjects.Add(ReadWowUnit(activeObject, wowObjectType)); break;
-                    case WowObjectType.Player: WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType)); break;
+                    case WowObjectType.Gameobject:
+                        WowObjects.Add(ReadWowGameobject(activeObject, wowObjectType));
+                        break;
 
-                    default: WowObjects.Add(ReadWowObject(activeObject, wowObjectType)); break;
+                    case WowObjectType.Dynobject:
+                        WowObjects.Add(ReadWowDynobject(activeObject, wowObjectType));
+                        break;
+
+                    case WowObjectType.Unit:
+                        WowObjects.Add(ReadWowUnit(activeObject, wowObjectType));
+                        break;
+
+                    case WowObjectType.Player:
+                        WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType));
+                        break;
+
+                    default: WowObjects.Add(ReadWowObject(activeObject, wowObjectType)); 
+                        break;
                 }
 
                 XMemory.Read(IntPtr.Add(activeObject, OffsetList.NextObject.ToInt32()), out activeObject);
@@ -282,8 +350,15 @@ namespace AmeisenBotX.Core.Data
             PartyleaderGuid = ReadPartyLeaderGuid();
             PartymemberGuids = ReadPartymemberGuids();
 
-            if (XMemory.Read(OffsetList.MapId, out int mapId)) MapId = mapId;
-            if (XMemory.Read(OffsetList.ZoneId, out int zoneId)) ZoneId = zoneId;
+            if (XMemory.Read(OffsetList.MapId, out int mapId))
+            {
+                MapId = mapId;
+            }
+
+            if (XMemory.Read(OffsetList.ZoneId, out int zoneId))
+            {
+                ZoneId = zoneId;
+            }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);
         }
@@ -293,13 +368,19 @@ namespace AmeisenBotX.Core.Data
             if (XMemory.Read(OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
                 && XMemory.Read(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), out int ctmEnabled))
             {
-                if (ctmEnabled != 1) XMemory.Write(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), 1);
+                if (ctmEnabled != 1)
+                {
+                    XMemory.Write(IntPtr.Add(ctmPointer, OffsetList.ClickToMoveEnabled.ToInt32()), 1);
+                }
             }
         }
 
         private string ReadPlayerName(ulong guid)
         {
-            if (CacheManager.NameCache.ContainsKey(guid)) return CacheManager.NameCache[guid];
+            if (CacheManager.NameCache.ContainsKey(guid))
+            {
+                return CacheManager.NameCache[guid];
+            }
 
             uint shortGuid;
             uint offset;
@@ -313,55 +394,65 @@ namespace AmeisenBotX.Core.Data
             XMemory.Read(new IntPtr(playerBase + offset + 8), out uint current);
             XMemory.Read(new IntPtr(playerBase + offset), out offset);
 
-            if ((current & 0x1) == 0x1) { return ""; }
+            if ((current & 0x1) == 0x1)
+            {
+                return string.Empty;
+            }
+
             XMemory.Read(new IntPtr(current), out uint testGuid);
 
             while (testGuid != shortGuid)
             {
                 XMemory.Read(new IntPtr(current + offset + 4), out current);
 
-                if ((current & 0x1) == 0x1) { return ""; }
+                if ((current & 0x1) == 0x1)
+                {
+                    return string.Empty;
+                }
+
                 XMemory.Read(new IntPtr(current), out testGuid);
             }
 
             XMemory.ReadString(IntPtr.Add(new IntPtr(current), OffsetList.NameString.ToInt32()), Encoding.ASCII, out string name, 12);
-            if (name.Length > 0) CacheManager.NameCache.Add(guid, name);
+
+            if (name.Length > 0)
+            {
+                CacheManager.NameCache.Add(guid, name);
+            }
+
             return name;
         }
 
         private string ReadUnitName(IntPtr activeObject, ulong guid)
         {
-            if (CacheManager.NameCache.ContainsKey(guid)) return CacheManager.NameCache[guid];
+            if (CacheManager.NameCache.ContainsKey(guid))
+            {
+                return CacheManager.NameCache[guid];
+            }
+
             try
             {
                 XMemory.Read(IntPtr.Add(activeObject, 0x964), out uint objName);
                 XMemory.Read(IntPtr.Add(new IntPtr(objName), 0x05C), out objName);
 
                 XMemory.ReadString(new IntPtr(objName), Encoding.ASCII, out string name, 32);
-                if (name.Length > 0) CacheManager.NameCache.Add(guid, name);
+
+                if (name.Length > 0)
+                {
+                    CacheManager.NameCache.Add(guid, name);
+                }
+
                 return name;
             }
-            catch { return "unknown"; }
+            catch
+            {
+                return "unknown";
+            }
         }
 
         private WowDynobject ReadWowDynobject(IntPtr activeObject, WowObjectType wowObjectType)
         {
             WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
-
-            // Debug code used to find position offsets
-            /*List<float> x = new List<float>();
-            int offset = 0;
-
-            float rx;
-            do
-            {
-                offset += 4;
-                if (XMemory.Read(IntPtr.Add(activeObject, offset), out rx))
-                    if (rx != float.NaN)
-                        x.Add(rx);
-                    else
-                        rx = 0f;
-            } while (offset < 2400);*/
 
             if (wowObject != null
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowDynobjectCasterGuid.ToInt32()), out ulong casterGuid)
@@ -382,6 +473,7 @@ namespace AmeisenBotX.Core.Data
                     Facing = facing
                 };
             }
+
             return null;
         }
 
@@ -393,7 +485,7 @@ namespace AmeisenBotX.Core.Data
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowGameobjectType.ToInt32()), out WowGameobjectType gameobjectType)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowGameobjectLevel.ToInt32()), out int level)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.WowGameobjectDisplayId.ToInt32()), out int displayId)
-                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowGameobjectPosition.ToInt32()), out WowPosition wowPosition))
+                && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowGameobjectPosition.ToInt32()), out Vector3 wowPosition))
             {
                 return new WowGameobject()
                 {
@@ -407,6 +499,7 @@ namespace AmeisenBotX.Core.Data
                     GameobjectType = gameobjectType,
                 };
             }
+
             return null;
         }
     }

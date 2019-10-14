@@ -22,8 +22,11 @@ namespace AmeisenBotX.Core.Event
         public Dictionary<string, OnEventFired> EventDictionary { get; }
 
         public bool IsSetUp { get; private set; }
+
         public Queue<(string, OnEventFired)> SubscribeQueue { get; }
+
         public Queue<string> UnsubscribeQueue { get; }
+
         private HookManager HookManager { get; }
 
         public void ReadEvents()
@@ -93,7 +96,7 @@ namespace AmeisenBotX.Core.Event
 
         public void Unsubscribe(string eventName)
         {
-            UnsubscribeQueue.Enqueue((eventName));
+            UnsubscribeQueue.Enqueue(eventName);
         }
 
         private void HandleSubEventQueue()
@@ -107,7 +110,9 @@ namespace AmeisenBotX.Core.Event
                     EventDictionary.Add(queueElement.Item1, queueElement.Item2);
                 }
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         private void HandleUnsubEventQueue()
@@ -121,7 +126,9 @@ namespace AmeisenBotX.Core.Event
                     EventDictionary.Remove(queueElement);
                 }
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         private void SetupEventHook()
