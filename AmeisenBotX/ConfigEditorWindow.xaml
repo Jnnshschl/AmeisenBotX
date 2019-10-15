@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
         Title="MainWindow" Height="400" Width="460
-        " WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        " WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Icon="icon.ico">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
