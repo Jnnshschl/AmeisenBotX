@@ -58,9 +58,9 @@ namespace AmeisenBotX.Core.Event
                     {
                         foreach (RawEvent rawEvent in finalEvents)
                         {
-                            if (EventDictionary.ContainsKey(rawEvent.@event))
+                            if (EventDictionary.ContainsKey(rawEvent.EventName))
                             {
-                                EventDictionary[rawEvent.@event].Invoke(rawEvent.time, rawEvent.args);
+                                EventDictionary[rawEvent.EventName].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
                             }
                         }
                     }

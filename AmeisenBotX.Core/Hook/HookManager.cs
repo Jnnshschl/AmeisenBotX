@@ -259,6 +259,11 @@ namespace AmeisenBotX.Core.Hook
             return -1;
         }
 
+        /// <summary>
+        /// Check if the WowLuaUnit is casting or channeling a spell
+        /// </summary>
+        /// <param name="luaunit">player, target, party1...</param>
+        /// <returns>(Spellname, duration)</returns>
         public (string, int) GetUnitCastingInfo(WowLuaUnit luaunit)
         {
             string cmd = $"abCastingInfo = \"none,0\"; abSpellName, x, x, x, x, abSpellEndTime = UnitCastingInfo(\"{luaunit.ToString()}\"); abDuration = ((abSpellEndTime/1000) - GetTime()) * 1000; abCastingInfo = abSpellName..\",\"..abDuration;";

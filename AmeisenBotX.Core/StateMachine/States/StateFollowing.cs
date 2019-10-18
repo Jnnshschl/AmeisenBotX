@@ -1,9 +1,8 @@
 ﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Pathfinding;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,23 +10,18 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateFollowing : State
     {
-        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler) : base(stateMachine)
+        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
         {
-            TryCount = 0;
             Config = config;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             PathfindingHandler = pathfindingHandler;
-            CurrentPath = new Queue<Vector3>();
+            MovementEngine = movementEngine;
         }
 
         private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
-
-        private Queue<Vector3> CurrentPath { get; set; }
-
-        private Vector3 LastPosition { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
@@ -35,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private WowPlayer PlayerToFollow { get; set; }
 
-        private int TryCount { get; set; }
+        private IMovementEngine MovementEngine { get; set; }
 
         public override void Enter()
         {
@@ -81,56 +75,16 @@ namespace AmeisenBotX.Core.StateMachine.States
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
 
-            double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
-
-            if (CurrentPath.Count == 0)
+            if (MovementEngine.CurrentPath == null)
             {
                 BuildNewPath();
             }
             else
             {
-                Vector3 pos = CurrentPath.Peek();
-                distance = pos.GetDistance2D(ObjectManager.Player.Position);
-                if (distance <= 2
-                    || distance > Config.MaxFollowDistance
-                    || TryCount > 5)
+                if (MovementEngine.GetNextStep(ObjectManager.Player.Position, out Vector3 positionToGoTo))
                 {
-                    CurrentPath.Dequeue();
-                    TryCount = 0;
+                    CharacterManager.MoveToPosition(positionToGoTo);
                 }
-                else
-                {
-                    CharacterManager.MoveToPosition(pos);
-
-                    if (distTraveled != 0 && distTraveled < 0.08)
-                    {
-                        TryCount++;
-                    }
-
-                    // if the thing is too far away, drop the whole Path
-                    if (pos.Z - ObjectManager.Player.Position.Z > 2
-                        && distance > 2)
-                    {
-                        CurrentPath.Clear();
-                    }
-
-                    // jump if the node is higher than us
-                    if (pos.Z - ObjectManager.Player.Position.Z > 1.2
-                        && distance < 3)
-                    {
-                        CharacterManager.Jump();
-                    }
-                }
-
-                if (distTraveled != 0
-                    && distTraveled < 0.08)
-                {
-                    // go forward
-                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr(0x26), 500, 750);
-                    CharacterManager.Jump();
-                }
-
-                LastPosition = ObjectManager.Player.Position;
             }
         }
 
@@ -141,13 +95,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private void BuildNewPath()
         {
             List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, PlayerToFollow.Position);
-            if (path.Count > 0)
-            {
-                foreach (Vector3 pos in path)
-                {
-                    CurrentPath.Enqueue(pos);
-                }
-            }
+            MovementEngine.LoadPath(path);
+            MovementEngine.PostProcessPath();
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)

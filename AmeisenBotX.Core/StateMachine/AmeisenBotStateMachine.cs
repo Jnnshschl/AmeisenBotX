@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Core.StateMachine.States;
@@ -30,6 +31,7 @@ namespace AmeisenBotX.Core.StateMachine
             EventHookManager eventHookManager,
             CacheManager cacheManager,
             IPathfindingHandler pathfindingHandler,
+            IMovementEngine movementEngine,
             ICombatClass combatClass)
         {
             BotDataPath = botDataPath;
@@ -53,11 +55,11 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, config, objectManager) },
                 { AmeisenBotState.Idle, new StateIdle(botDataPath, this, config, offsetList, objectManager, hookManager, eventHookManager) },
                 { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager) },
-                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler) },
-                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler) },
-                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, combatClass) },
+                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
+                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
+                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, combatClass) },
                 { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager) },
-                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler) }
+                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) }
             };
 
             CurrentState = States.First();
@@ -119,8 +121,7 @@ namespace AmeisenBotX.Core.StateMachine
                 if (ObjectManager.Player != null)
                 {
                     HandlePlayerDeadOrGhostState();
-
-                    // TODO: Handle friendly spells
+                    
                     if (Config.AutoDodgeAoeSpells
                         && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
                     {

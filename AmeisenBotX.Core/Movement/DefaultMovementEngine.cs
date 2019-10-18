@@ -13,9 +13,15 @@ namespace AmeisenBotX.Core.Movement
             {
                 settings = new MovementSettings();
             }
+
+            Settings = settings;
         }
 
         public Queue<Vector3> CurrentPath { get; private set; }
+        
+        public Vector3 LastWaypoint { get; private set; }
+
+        public MovementSettings Settings { get; private set; }
 
         public bool GetNextStep(Vector3 currentPosition, out Vector3 positionToGoTo)
         {
@@ -24,7 +30,20 @@ namespace AmeisenBotX.Core.Movement
                 throw new ArgumentNullException("CurrentPath", "You need to set a Path using LoadPath(...);");
             }
 
-            positionToGoTo = new Vector3(0, 0, 0);
+            Vector3 currentWaypoint = CurrentPath.Peek();
+            if (currentPosition.GetDistance(currentWaypoint) <= Settings.WaypointCheckThreshold)
+            {
+                LastWaypoint = CurrentPath.Dequeue();
+            }
+
+            if (CurrentPath.Count > 0)
+            {
+                positionToGoTo = CurrentPath.Peek();
+                return true;
+            }
+
+            Reset();
+            positionToGoTo = default;
             return false;
         }
 
@@ -39,12 +58,13 @@ namespace AmeisenBotX.Core.Movement
 
         public void PostProcessPath()
         {
-
+            // wont do anything here
         }
 
         public void Reset()
         {
             CurrentPath = null;
+            LastWaypoint = default;
         }
     }
 }

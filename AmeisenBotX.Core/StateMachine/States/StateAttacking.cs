@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
 using System;
@@ -13,26 +14,22 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateAttacking : State
     {
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, ICombatClass combatClass) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, ICombatClass combatClass) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
             PathfindingHandler = pathfindingHandler;
-            CurrentPath = new Queue<Vector3>();
+            MovementEngine = movementEngine;
             CombatClass = combatClass;
         }
-
-        public Vector3 LastPosition { get; private set; }
 
         private CharacterManager CharacterManager { get; }
 
         private ICombatClass CombatClass { get; }
 
         private AmeisenBotConfig Config { get; }
-
-        private Queue<Vector3> CurrentPath { get; set; }
 
         private HookManager HookManager { get; }
 
@@ -42,13 +39,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IPathfindingHandler PathfindingHandler { get; }
 
-        private int TryCount { get; set; }
+        private IMovementEngine MovementEngine { get; set; }
 
         public override void Enter()
         {
             IsMelee = BotUtils.IsMeeleeClass(ObjectManager.Player.Class);
-            CurrentPath.Clear();
-            TryCount = 0;
         }
 
         public override void Execute()
@@ -62,36 +57,25 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                if (CombatClass == null)
+                if (MovementEngine.CurrentPath != null
+                    && MovementEngine.GetNextStep(ObjectManager.Player.Position, out Vector3 positionToGoTo))
                 {
-                    if (CurrentPath.Count > 0)
-                    {
-                        HandleMovement();
-                    }
+                    CharacterManager.MoveToPosition(positionToGoTo);
                 }
 
                 if (SelectTarget(out WowUnit target)
                 && target != null)
                 {
-                    if (CombatClass == null)
+                    if (CombatClass.HandlesMovement)
                     {
-                        if (CurrentPath.Count == 0 && IsMelee)
-                        {
-                            // keep close to target
-                            double distance = ObjectManager.Player.Position.GetDistance(target.Position);
-                            if (distance > 3.2)
-                            {
-                                BuildNewPath(target);
-                            }
-                        }
-                        else
-                        {
-                            // keep distance to target
-                        }
+                        // we wont do anything movement related
+                        // if the CombatClass takes care of it
+                        CombatClass.Execute();
                     }
                     else
                     {
-                        CombatClass.Execute();
+                        // otherwise the MovementEngine will be used
+                        HandleMovement(target);
                     }
                 }
             }
@@ -101,63 +85,28 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
         }
 
-        private void BuildNewPath(WowUnit target)
+        private void HandleMovement(WowUnit target)
         {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
-            if (path.Count > 0)
+            if (MovementEngine.CurrentPath == null && IsMelee)
             {
-                foreach (Vector3 pos in path)
+                // keep close to target
+                double distance = ObjectManager.Player.Position.GetDistance(target.Position);
+                if (distance > 3.0)
                 {
-                    CurrentPath.Enqueue(pos);
+                    BuildNewPath(target);
                 }
-            }
-        }
-
-        private void HandleMovement()
-        {
-            Vector3 pos = CurrentPath.Peek();
-            double distance = pos.GetDistance2D(ObjectManager.Player.Position);
-            double distTraveled = LastPosition.GetDistance2D(ObjectManager.Player.Position);
-
-            if (distance <= 3
-                || TryCount > 5)
-            {
-                CurrentPath.Dequeue();
-                TryCount = 0;
             }
             else
             {
-                CharacterManager.MoveToPosition(pos);
-
-                if (distTraveled != 0 && distTraveled < 0.08)
-                {
-                    TryCount++;
-                }
-
-                // if the thing is too far away, drop the whole Path
-                if (pos.Z - ObjectManager.Player.Position.Z > 2
-                    && distance > 2)
-                {
-                    CurrentPath.Clear();
-                }
-
-                // jump if the node is higher than us
-                if (pos.Z - ObjectManager.Player.Position.Z > 1.2
-                    && distance < 3)
-                {
-                    CharacterManager.Jump();
-                }
+                // keep distance to target
+                // TODO: implement a IMovementEngine for ranged classes
             }
+        }
 
-            if (distTraveled != 0
-                && distTraveled < 0.08)
-            {
-                // go forward
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr(0x26), 500, 750);
-                CharacterManager.Jump();
-            }
-
-            LastPosition = ObjectManager.Player.Position;
+        private void BuildNewPath(WowUnit target)
+        {
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
+            MovementEngine.LoadPath(path);
         }
 
         private bool SelectTarget(out WowUnit target)
@@ -166,21 +115,14 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (wowUnits.Count > 0)
             {
                 target = wowUnits.FirstOrDefault(t => t.Guid == ObjectManager.TargetGuid);
-                bool validUnit = BotUtils.IsValidUnit(target);
-
-                if (validUnit && target.IsInCombat)
+                if (BotUtils.IsValidUnit(target) && target.IsInCombat)
                 {
-                    if (!ObjectManager.Player.IsAutoAttacking)
-                    {
-                        HookManager.StartAutoAttack();
-                    }
-
                     return true;
                 }
                 else
                 {
                     // find a new target
-                    HookManager.TargetNearestEnemy();
+                    //// HookManager.TargetNearestEnemy();
                 }
             }
 

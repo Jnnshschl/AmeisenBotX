@@ -2,6 +2,8 @@
 {
     public interface ICombatClass
     {
+        bool HandlesMovement { get; }
+
         void Execute();
     }
 }

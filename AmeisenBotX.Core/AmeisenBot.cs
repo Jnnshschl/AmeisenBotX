@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
@@ -48,6 +49,7 @@ namespace AmeisenBotX.Core
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, CacheManager);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
+            MovemenEngine = new DefaultMovementEngine();
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -65,7 +67,7 @@ namespace AmeisenBotX.Core
                     break;
             }
 
-            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, CacheManager, PathfindingHandler, CombatClass);
+            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, CacheManager, PathfindingHandler, MovemenEngine, CombatClass);
 
             StateMachine.OnStateMachineStateChange += HandlePositionLoad;
         }
@@ -91,6 +93,8 @@ namespace AmeisenBotX.Core
         public IOffsetList OffsetList { get; }
 
         public IPathfindingHandler PathfindingHandler { get; set; }
+
+        public DefaultMovementEngine MovemenEngine { get; set; }
 
         public AmeisenBotStateMachine StateMachine { get; set; }
 

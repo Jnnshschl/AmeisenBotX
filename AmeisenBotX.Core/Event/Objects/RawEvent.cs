@@ -1,13 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Event.Objects
 {
-    public struct RawEvent
+    public class RawEvent
     {
-        public string @event;
+        [JsonProperty("event")]
+        public string EventName { get; set; }
 
-        public List<string> args;
+        [JsonProperty("args")]
+        public List<string> Arguments { get; set; }
 
-        public long time;
+        [JsonProperty("time")]
+        public long Timestamp { get; set; }
     }
 }

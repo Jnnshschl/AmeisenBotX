@@ -31,6 +31,8 @@ namespace AmeisenBotX.Core.Character
 
         public void MoveToPosition(Vector3 pos)
         {
+            // if we dont do this, ClickToMove wont work
+            // TODO: find better way to fix initial CTM bug
             if (FirstMove)
             {
                 BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x2));

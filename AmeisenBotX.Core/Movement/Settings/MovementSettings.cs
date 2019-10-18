@@ -8,5 +8,6 @@ namespace AmeisenBotX.Core.Movement.Settings
 {
     public class MovementSettings
     {
+        public double WaypointCheckThreshold { get; set; } = 3.0;
     }
 }
