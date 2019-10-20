@@ -57,9 +57,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
                 else
                 {
-                    if (MovementEngine.GetNextStep(ObjectManager.Player.Position, out Vector3 positionToGoTo))
+                    if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                     {
                         CharacterManager.MoveToPosition(positionToGoTo);
+
+                        if (needToJump)
+                        {
+                            CharacterManager.Jump();
+                        }
                     }
                 }
             }

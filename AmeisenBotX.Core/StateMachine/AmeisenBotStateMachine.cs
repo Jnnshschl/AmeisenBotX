@@ -121,16 +121,16 @@ namespace AmeisenBotX.Core.StateMachine
                 if (ObjectManager.Player != null)
                 {
                     HandlePlayerDeadOrGhostState();
-                    
+
                     if (Config.AutoDodgeAoeSpells
                         && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
                     {
                         SetState(AmeisenBotState.InsideAoeDamage);
                     }
 
-                    if (ObjectManager.Player.IsInCombat)
+                    if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
                     {
-                        SetState(HandleCombatSituation());
+                        SetState(AmeisenBotState.Attacking);
                     }
                 }
             }
@@ -159,10 +159,8 @@ namespace AmeisenBotX.Core.StateMachine
             OnStateMachineStateChange?.Invoke();
         }
 
-        private AmeisenBotState HandleCombatSituation()
-        {
-            return AmeisenBotState.Attacking;
-        }
+        private bool IsAnyPartymemberInCombat()
+            => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.IsInCombat);
 
         private void HandleEventPull()
         {

@@ -50,9 +50,9 @@ namespace AmeisenBotX.Core.Common
 
         public static bool IsValidUnit(WowUnit unit)
         {
-            return unit == null
-                || unit.Health <= 0
-                || unit.IsNotAttackable;
+            return unit != null 
+                && unit.Health > 0
+                && !unit.IsNotAttackable;
         }
 
         public static void SendKey(IntPtr windowHandle, IntPtr key, int minDelay = 20, int maxDelay = 40)

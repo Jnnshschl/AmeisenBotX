@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
 
-        public double ObjectUpdateMs { get; set; } = 250;
+        public double ObjectUpdateMs { get; set; } = 100;
 
         public string Password { get; set; } = string.Empty;
 
@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public double StateMachineTickMs { get; set; } = 50;
+        public double StateMachineTickMs { get; set; } = 25;
 
         public string Username { get; set; } = string.Empty;
     }

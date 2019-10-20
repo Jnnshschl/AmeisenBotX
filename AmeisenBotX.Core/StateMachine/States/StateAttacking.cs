@@ -58,15 +58,19 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
 
                 if (MovementEngine.CurrentPath != null
-                    && MovementEngine.GetNextStep(ObjectManager.Player.Position, out Vector3 positionToGoTo))
+                    && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                 {
                     CharacterManager.MoveToPosition(positionToGoTo);
+                    if (needToJump)
+                    {
+                        CharacterManager.Jump();
+                    }
                 }
 
                 if (SelectTarget(out WowUnit target)
                 && target != null)
                 {
-                    if (CombatClass.HandlesMovement)
+                    if (CombatClass != null && CombatClass.HandlesMovement)
                     {
                         // we wont do anything movement related
                         // if the CombatClass takes care of it
@@ -121,8 +125,12 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
                 else
                 {
-                    // find a new target
-                    //// HookManager.TargetNearestEnemy();
+                    // find a new target from group
+                    target = ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).FirstOrDefault(r => r.IsInCombat);
+                    if (BotUtils.IsValidUnit(target) && target.IsInCombat)
+                    {
+                        return true;
+                    }
                 }
             }
 

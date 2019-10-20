@@ -12,6 +12,7 @@
         Attacking,
         Healing,
         LoadingScreen,
-        InsideAoeDamage
+        InsideAoeDamage,
+        Unstuck
     }
 }

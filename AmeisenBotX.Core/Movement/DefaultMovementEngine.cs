@@ -1,4 +1,6 @@
-﻿using AmeisenBotX.Core.Movement.Settings;
+﻿using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
@@ -18,32 +20,57 @@ namespace AmeisenBotX.Core.Movement
         }
 
         public Queue<Vector3> CurrentPath { get; private set; }
-        
+
         public Vector3 LastWaypoint { get; private set; }
+
+        public int TryCount { get; private set; }
+
+        public int UnstuckTryCount { get; private set; } = 1;
 
         public MovementSettings Settings { get; private set; }
 
-        public bool GetNextStep(Vector3 currentPosition, out Vector3 positionToGoTo)
+        public MovementEngineState EngineState { get; private set; }
+
+        public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump)
         {
-            if (CurrentPath == null)
+            double distanceTraveled = currentPosition.GetDistance(LastWaypoint);
+            positionToGoTo = LastWaypoint;
+            needToJump = false;
+
+            if (!(currentPosition.X == 0 && currentPosition.Y == 0 && currentPosition.Z == 0))
             {
-                throw new ArgumentNullException("CurrentPath", "You need to set a Path using LoadPath(...);");
+                LastWaypoint = currentPosition;
             }
 
-            Vector3 currentWaypoint = CurrentPath.Peek();
-            if (currentPosition.GetDistance(currentWaypoint) <= Settings.WaypointCheckThreshold)
+            if (TryCount < Settings.MaxTries)
             {
-                LastWaypoint = CurrentPath.Dequeue();
-            }
+                if (CurrentPath.Count > 0)
+                {
+                    Vector3 currentWaypoint = CurrentPath.Peek();
+                    double distance = currentPosition.GetDistance(currentWaypoint);
 
-            if (CurrentPath.Count > 0)
-            {
-                positionToGoTo = CurrentPath.Peek();
-                return true;
+                    if (distance <= Settings.WaypointCheckThreshold)
+                    {
+                        CurrentPath.Dequeue();
+                    }
+
+                    if (distanceTraveled > 0 && EngineState == MovementEngineState.NORMAL)
+                    {
+                        TryCount = 0;
+                    }
+
+                    needToJump = NeedToJumpOrUnstuck(currentPosition, currentRotation, distanceTraveled);
+
+                    if (CurrentPath.Count > 0)
+                    {
+                        positionToGoTo = CurrentPath.Peek();
+                    }
+
+                    return true;
+                }
             }
 
             Reset();
-            positionToGoTo = default;
             return false;
         }
 
@@ -63,8 +90,58 @@ namespace AmeisenBotX.Core.Movement
 
         public void Reset()
         {
-            CurrentPath = null;
-            LastWaypoint = default;
+            EngineState = MovementEngineState.NORMAL;
+            CurrentPath = new Queue<Vector3>();
+            LastWaypoint = new Vector3(0, 0, 0);
+            UnstuckTryCount = 1;
+        }
+
+        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
+        {
+            if (distanceTraveled > 0)
+            {
+                if (EngineState == MovementEngineState.UNSTUCKING)
+                {
+                    Reset();
+                }
+
+                if (distanceTraveled < 0.2)
+                {
+                    // we ran against something
+                    return true;
+                }
+            }
+            else
+            {
+                TryCount++;
+
+                // we are stuck
+                if (EngineState == MovementEngineState.NORMAL && TryCount >= Settings.MaxTries)
+                {
+                    CurrentPath = new Queue<Vector3>();
+                    CurrentPath.Enqueue(CalculatePositionBehindMe(currentPosition, currentRotation));
+                    EngineState = MovementEngineState.UNSTUCKING;
+                    TryCount = 0;
+                    UnstuckTryCount++;
+                }
+            }
+
+            return false;
+        }
+
+        private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)
+        {
+            double x = currentPosition.X + (Math.Cos(currentRotation + Math.PI) * (6 * UnstuckTryCount));
+            double y = currentPosition.Y + (Math.Sin(currentRotation + Math.PI) * (6 * UnstuckTryCount));
+
+            Vector3 destination = new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = currentPosition.Z
+            };
+
+            return destination;
         }
     }
 }
