@@ -103,7 +103,6 @@
     <Compile Include="Data\Objects\WowObject\WowUnitFlags.cs" />
     <Compile Include="Data\Persistence\Objects\InMemoryBotCache.cs" />
     <Compile Include="Data\Persistence\Objects\IAmeisenBotCache.cs" />
-    <Compile Include="Data\Persistence\PersistenceManager.cs" />
     <Compile Include="Event\EventHookManager.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
     <Compile Include="Hook\HookManager.cs" />

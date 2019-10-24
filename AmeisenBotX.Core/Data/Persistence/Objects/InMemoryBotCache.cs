@@ -11,12 +11,12 @@ namespace AmeisenBotX.Core.Data.Persistence.Objects
     {
         public InMemoryBotCache(string path)
         {
-            Path = path;
+            FilePath = path;
             NameCache = new Dictionary<ulong, string>();
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
         }
 
-        public string Path { get; }
+        public string FilePath { get; }
 
         public Dictionary<ulong, string> NameCache { get; private set; }
 
@@ -24,7 +24,12 @@ namespace AmeisenBotX.Core.Data.Persistence.Objects
 
         public void Save()
         {
-            using (Stream stream = File.Open(Path, FileMode.Create))
+            if (!Directory.Exists(Path.GetDirectoryName(FilePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+            }
+
+            using (Stream stream = File.Open(FilePath, FileMode.Create))
             {
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
                 binaryFormatter.Serialize(stream, this);
@@ -33,13 +38,21 @@ namespace AmeisenBotX.Core.Data.Persistence.Objects
 
         public void Load()
         {
-            using (Stream stream = File.Open(Path, FileMode.Open))
+            if (!Directory.Exists(Path.GetDirectoryName(FilePath)))
             {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+            }
 
-                NameCache = loadedCache.NameCache;
-                ReactionCache = loadedCache.ReactionCache;
+            if (File.Exists(FilePath))
+            {
+                using (Stream stream = File.Open(FilePath, FileMode.Open))
+                {
+                    BinaryFormatter binaryFormatter = new BinaryFormatter();
+                    InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
+
+                    NameCache = loadedCache.NameCache;
+                    ReactionCache = loadedCache.ReactionCache;
+                }
             }
         }
 
@@ -59,7 +72,7 @@ namespace AmeisenBotX.Core.Data.Persistence.Objects
         {
             if (!NameCache.ContainsKey(guid))
             {
-                NameCache.Add(guid,name);
+                NameCache.Add(guid, name);
             }
         }
 

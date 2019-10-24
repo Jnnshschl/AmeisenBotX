@@ -417,12 +417,12 @@ namespace AmeisenBotX.Core.Data
 
             XMemory.ReadString(IntPtr.Add(new IntPtr(current), OffsetList.NameString.ToInt32()), Encoding.ASCII, out string name, 12);
 
-            if (cachedName.Length > 0)
+            if (name.Length > 0)
             {
                 BotCache.CacheName(guid, name);
             }
 
-            return cachedName;
+            return name;
         }
 
         private string ReadUnitName(IntPtr activeObject, ulong guid)

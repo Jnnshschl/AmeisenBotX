@@ -17,10 +17,7 @@ namespace AmeisenBotX.Core.Movement
             }
 
             Settings = settings;
-        }
 
-        public DefaultMovementEngine()
-        {
             Reset();
         }
 
@@ -63,7 +60,7 @@ namespace AmeisenBotX.Core.Movement
 
             LastPosition = currentPosition;
             positionToGoTo = newPosition;
-            return false;
+            return true;
         }
 
         public void LoadPath(List<Vector3> path)
