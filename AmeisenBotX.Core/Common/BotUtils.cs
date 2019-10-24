@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

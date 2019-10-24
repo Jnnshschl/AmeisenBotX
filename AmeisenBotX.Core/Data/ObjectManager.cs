@@ -1,8 +1,10 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Persistence.Objects;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -16,14 +18,14 @@ namespace AmeisenBotX.Core.Data
 
         private List<WowObject> wowObjects;
 
-        public ObjectManager(XMemory xMemory, IOffsetList offsetList, CacheManager cacheManager)
+        public ObjectManager(XMemory xMemory, IOffsetList offsetList, IAmeisenBotCache botCache)
         {
             IsWorldLoaded = true;
 
             WowObjects = new List<WowObject>();
             XMemory = xMemory;
             OffsetList = offsetList;
-            CacheManager = cacheManager;
+            BotCache = botCache;
 
             EnableClickToMove();
         }
@@ -73,7 +75,7 @@ namespace AmeisenBotX.Core.Data
 
         public int ZoneId { get; private set; }
 
-        private CacheManager CacheManager { get; }
+        private IAmeisenBotCache BotCache { get; }
 
         private IOffsetList OffsetList { get; }
 
@@ -377,9 +379,9 @@ namespace AmeisenBotX.Core.Data
 
         private string ReadPlayerName(ulong guid)
         {
-            if (CacheManager.NameCache.ContainsKey(guid))
+            if (BotCache.TryGetName(guid, out string cachedName))
             {
-                return CacheManager.NameCache[guid];
+                return cachedName;
             }
 
             uint shortGuid;
@@ -415,19 +417,19 @@ namespace AmeisenBotX.Core.Data
 
             XMemory.ReadString(IntPtr.Add(new IntPtr(current), OffsetList.NameString.ToInt32()), Encoding.ASCII, out string name, 12);
 
-            if (name.Length > 0)
+            if (cachedName.Length > 0)
             {
-                CacheManager.NameCache.Add(guid, name);
+                BotCache.CacheName(guid, name);
             }
 
-            return name;
+            return cachedName;
         }
 
         private string ReadUnitName(IntPtr activeObject, ulong guid)
         {
-            if (CacheManager.NameCache.ContainsKey(guid))
+            if (BotCache.TryGetName(guid,out string cachedName))
             {
-                return CacheManager.NameCache[guid];
+                return cachedName;
             }
 
             try
@@ -439,7 +441,7 @@ namespace AmeisenBotX.Core.Data
 
                 if (name.Length > 0)
                 {
-                    CacheManager.NameCache.Add(guid, name);
+                    BotCache.CacheName(guid, name);
                 }
 
                 return name;

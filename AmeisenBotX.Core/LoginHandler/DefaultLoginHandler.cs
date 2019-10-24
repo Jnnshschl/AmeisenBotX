@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.LoginHandler
 
                 Thread.Sleep(500);
                 BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
 
                 firstTime = false;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Pathfinding
+namespace AmeisenBotX.Pathfinding.Objects
 {
     public struct Vector3
     {
@@ -11,11 +11,19 @@ namespace AmeisenBotX.Pathfinding
             Z = z;
         }
 
+        public static Vector3 Zero { get; } = new Vector3(0, 0, 0);
+
         public float X { get; set; }
 
         public float Y { get; set; }
 
         public float Z { get; set; }
+
+        public static Vector3 operator +(Vector3 a, Vector3 b)
+            => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+
+        public static Vector3 operator -(Vector3 a, Vector3 b)
+            => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
 
         public static bool operator ==(Vector3 left, Vector3 right)
         {

@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 

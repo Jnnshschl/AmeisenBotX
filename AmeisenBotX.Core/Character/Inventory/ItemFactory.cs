@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Pathfinding
+namespace AmeisenBotX.Core.Character.Inventory
 {
-    [Flags]
-    public enum PathRequestFlags
+    public static class ItemFactory
     {
-        None = 0,
-        ChaikinCurve = 1 << 0
     }
 }

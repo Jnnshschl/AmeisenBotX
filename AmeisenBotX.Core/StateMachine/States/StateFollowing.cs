@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
 

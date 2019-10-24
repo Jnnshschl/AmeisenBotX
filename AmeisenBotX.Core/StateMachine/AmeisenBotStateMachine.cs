@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Persistence.Objects;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
@@ -29,7 +30,7 @@ namespace AmeisenBotX.Core.StateMachine
             CharacterManager characterManager,
             HookManager hookManager,
             EventHookManager eventHookManager,
-            CacheManager cacheManager,
+            IAmeisenBotCache botCache,
             IPathfindingHandler pathfindingHandler,
             IMovementEngine movementEngine,
             ICombatClass combatClass)
@@ -41,7 +42,7 @@ namespace AmeisenBotX.Core.StateMachine
             CharacterManager = characterManager;
             HookManager = hookManager;
             EventHookManager = eventHookManager;
-            CacheManager = cacheManager;
+            BotCache = botCache;
 
             LastObjectUpdate = DateTime.Now;
             LastGhostCheck = DateTime.Now;
@@ -82,7 +83,7 @@ namespace AmeisenBotX.Core.StateMachine
 
         internal XMemory XMemory { get; }
 
-        private CacheManager CacheManager { get; }
+        private IAmeisenBotCache BotCache { get; }
 
         private CharacterManager CharacterManager { get; }
 

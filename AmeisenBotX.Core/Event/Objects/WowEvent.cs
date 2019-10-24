@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Event.Objects
 {
-    public class RawEvent
+    public class WowEvent
     {
         [JsonProperty("event")]
         public string EventName { get; set; }

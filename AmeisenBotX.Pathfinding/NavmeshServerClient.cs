@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Timers;
+using AmeisenBotX.Pathfinding.Enums;
+using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

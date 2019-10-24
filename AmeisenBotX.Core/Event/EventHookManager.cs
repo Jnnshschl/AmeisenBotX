@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Event.Objects;
 using AmeisenBotX.Core.Hook;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -40,13 +41,13 @@ namespace AmeisenBotX.Core.Event
                 HookManager.LuaDoString("abEventJson='['for a,b in pairs(abEventTable)do abEventJson=abEventJson..'{'for c,d in pairs(b)do if type(d)==\"table\"then abEventJson=abEventJson..'\"args\": ['for e,f in pairs(d)do abEventJson=abEventJson..'\"'..f..'\"'if e<=table.getn(d)then abEventJson=abEventJson..','end end;abEventJson=abEventJson..']}'if a<table.getn(abEventTable)then abEventJson=abEventJson..','end else if type(d)==\"string\"then abEventJson=abEventJson..'\"event\": \"'..d..'\",'else abEventJson=abEventJson..'\"time\": \"'..d..'\",'end end end end;abEventJson=abEventJson..']'abEventTable={}");
                 string eventJson = HookManager.GetLocalizedText("abEventJson");
 
-                List<RawEvent> rawEvents = new List<RawEvent>();
+                List<WowEvent> rawEvents = new List<WowEvent>();
                 try
                 {
-                    List<RawEvent> finalEvents = new List<RawEvent>();
-                    rawEvents = JsonConvert.DeserializeObject<List<RawEvent>>(eventJson);
+                    List<WowEvent> finalEvents = new List<WowEvent>();
+                    rawEvents = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson);
 
-                    foreach (RawEvent rawEvent in rawEvents)
+                    foreach (WowEvent rawEvent in rawEvents)
                     {
                         if (!finalEvents.Contains(rawEvent))
                         {
@@ -56,7 +57,7 @@ namespace AmeisenBotX.Core.Event
 
                     if (finalEvents.Count > 0)
                     {
-                        foreach (RawEvent rawEvent in finalEvents)
+                        foreach (WowEvent rawEvent in finalEvents)
                         {
                             if (EventDictionary.ContainsKey(rawEvent.EventName))
                             {
@@ -141,6 +142,11 @@ namespace AmeisenBotX.Core.Event
             luaStuff.Append("if abFrame:GetScript(\"OnEvent\") == nil then ");
             luaStuff.Append("abFrame:SetScript(\"OnEvent\", abEventHandler) end");
             HookManager.LuaDoString(luaStuff.ToString());
+        }
+
+        internal void Subscribe(string v, object onConfirmDeleteItem)
+        {
+            throw new NotImplementedException();
         }
     }
 }

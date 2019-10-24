@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Persistence.Objects;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
@@ -43,10 +45,10 @@ namespace AmeisenBotX.Core
             XMemory = new XMemory();
             OffsetList = new OffsetList335a();
 
-            CacheManager = new CacheManager(BotDataPath, playername, config);
-            ObjectManager = new ObjectManager(XMemory, OffsetList, CacheManager);
+            BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, playername, $"{playername}Cache.bin"));
+            ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
             CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager);
-            HookManager = new HookManager(XMemory, OffsetList, ObjectManager, CacheManager);
+            HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             MovemenEngine = new DefaultMovementEngine();
@@ -67,7 +69,7 @@ namespace AmeisenBotX.Core
                     break;
             }
 
-            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, CacheManager, PathfindingHandler, MovemenEngine, CombatClass);
+            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, BotCache, PathfindingHandler, MovemenEngine, CombatClass);
 
             StateMachine.OnStateMachineStateChange += HandlePositionLoad;
         }
@@ -76,7 +78,7 @@ namespace AmeisenBotX.Core
 
         public string PlayerName { get; }
 
-        public CacheManager CacheManager { get; set; }
+        public IAmeisenBotCache BotCache { get; set; }
 
         public CharacterManager CharacterManager { get; set; }
 
@@ -124,13 +126,29 @@ namespace AmeisenBotX.Core
         public void Start()
         {
             StateMachineTimer.Start();
-            CacheManager.LoadFromFile();
+            BotCache.Load();
 
             EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
             EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
             EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
+            EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
+            EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
+            EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
+
+            //// EventHookManager.Subscribe("ITEM_PUSH", OnNewItemReceived);
+            //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
             //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
+        }
+
+        private void OnLootWindowOpened(long timestamp, List<string> args)
+        {
+            HookManager.LootEveryThing();
+        }
+
+        private void OnConfirmBindOnPickup(long timestamp, List<string> args)
+        {
+            HookManager.CofirmBop();
         }
 
         public void Stop()
@@ -142,7 +160,6 @@ namespace AmeisenBotX.Core
 
             if (ObjectManager.Player?.Name.Length > 0)
             {
-                CacheManager.SaveToFile(ObjectManager.Player.Name);
                 if (Config.SaveWowWindowPosition)
                 {
                     SaveWowWindowPosition();
@@ -153,6 +170,8 @@ namespace AmeisenBotX.Core
                     SaveBotWindowPosition();
                 }
             }
+
+            BotCache.Save();
         }
 
         private void HandlePositionLoad()

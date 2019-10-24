@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject

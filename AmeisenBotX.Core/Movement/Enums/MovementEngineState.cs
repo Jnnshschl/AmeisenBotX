@@ -8,7 +8,9 @@ namespace AmeisenBotX.Core.Movement.Enums
 {
     public enum MovementEngineState
     {
-        NORMAL,
+        IDLE,
+        MOVING_NORMAL,
+        MOVING_MOUNTED,
         UNSTUCKING
     }
 }

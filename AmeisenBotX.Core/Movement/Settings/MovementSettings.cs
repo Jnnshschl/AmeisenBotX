@@ -8,8 +8,8 @@ namespace AmeisenBotX.Core.Movement.Settings
 {
     public class MovementSettings
     {
-        public double WaypointCheckThreshold { get; set; } = 5.0;
+        public double WaypointDoneThreshold { get; set; } = 4.0;
 
-        public int MaxTries { get; internal set; } = 32;
+        public float MaxVelocity { get; set; } = 6.0f;
     }
 }

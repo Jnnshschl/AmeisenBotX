@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

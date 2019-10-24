@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AmeisenBotX.Pathfinding.Objects;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Pathfinding
 {

@@ -1,10 +1,12 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Persistence.Objects;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -17,12 +19,12 @@ namespace AmeisenBotX.Core.Hook
     {
         private const int ENDSCENE_HOOK_OFFSET = 0x2;
 
-        public HookManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, CacheManager cacheManager)
+        public HookManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, IAmeisenBotCache botCache)
         {
             XMemory = xMemory;
             OffsetList = offsetList;
             ObjectManager = objectManager;
-            CacheManager = cacheManager;
+            BotCache = botCache;
         }
 
         public byte[] OriginalEndsceneBytes { get; private set; }
@@ -56,7 +58,7 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr ReturnValueAddress { get; private set; }
 
-        private CacheManager CacheManager { get; }
+        private IAmeisenBotCache BotCache { get; }
 
         private ObjectManager ObjectManager { get; }
 
@@ -282,9 +284,9 @@ namespace AmeisenBotX.Core.Hook
         {
             WowUnitReaction reaction = WowUnitReaction.Unknown;
 
-            if (CacheManager.ReactionCache.ContainsKey((wowUnitA.FactionTemplate, wowUnitB.FactionTemplate)))
+            if (BotCache.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
             {
-                return CacheManager.ReactionCache[(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate)];
+                return cachedReaction;
             }
 
             // integer to save the reaction
@@ -329,7 +331,7 @@ namespace AmeisenBotX.Core.Hook
                 InjectAndExecute(asm, true);
                 XMemory.Read(memAlloc, out reaction);
 
-                CacheManager.ReactionCache.Add((wowUnitA.FactionTemplate, wowUnitB.FactionTemplate), reaction);
+                BotCache.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
             }
             finally
             {
@@ -477,6 +479,31 @@ namespace AmeisenBotX.Core.Hook
                     XMemory.FreeMemory(memAlloc);
                 }
             }
+        }
+
+        /// <summary>
+        /// Roll something on a dropped item
+        /// </summary>
+        /// <param name="frameNumber">The Item to roll on, if there is only one drop it will be always 1, if multiple it will increase</param>
+        /// <param name="rollType">Need, Greed or Pass</param>
+        public void RollOnItem(int frameNumber, RollType rollType)
+        {
+            switch (rollType)
+            {
+                case RollType.Need:
+                    SendChatMessage($"/click GroupLootFrame{frameNumber}RollButton");
+                    break;
+
+                case RollType.Greed:
+                    SendChatMessage($"/click GroupLootFrame{frameNumber}GreedButton");
+                    break;
+
+                case RollType.Pass:
+                    SendChatMessage($"/click GroupLootFrame{frameNumber}PassButton");
+                    break;
+            }
+
+            SendChatMessage("/click StaticPopup1Button1");
         }
 
         public void ReleaseSpirit()
