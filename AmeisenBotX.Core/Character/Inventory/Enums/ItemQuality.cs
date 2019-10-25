@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Enums
     {
         Unique = -1,
         Poor,
-        Comman,
+        Common,
         Uncomman,
         Rare,
         Epic,

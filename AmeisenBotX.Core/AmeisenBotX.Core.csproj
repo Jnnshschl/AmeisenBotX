@@ -56,6 +56,8 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\ClickToMoveType.cs" />
+    <Compile Include="Character\Comparators\ItemLevelComparator.cs" />
+    <Compile Include="Character\Comparators\IWowItemComparator.cs" />
     <Compile Include="Character\Inventory\CharacterEquipment.cs" />
     <Compile Include="Character\Inventory\CharacterInventory.cs" />
     <Compile Include="Character\Inventory\Enums\ArmorType.cs" />
@@ -63,6 +65,7 @@
     <Compile Include="Character\Inventory\Enums\ItemQuality.cs" />
     <Compile Include="Character\Inventory\Enums\WeaponType.cs" />
     <Compile Include="Character\Inventory\ItemFactory.cs" />
+    <Compile Include="Character\Inventory\Objects\IWowItem.cs" />
     <Compile Include="Character\Inventory\Objects\WowArmor.cs" />
     <Compile Include="Character\Inventory\Objects\WowBasicItem.cs" />
     <Compile Include="Character\Inventory\Objects\WowConsumable.cs" />

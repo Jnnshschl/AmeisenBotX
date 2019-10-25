@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
-    public class WowBasicItem
+    public class WowBasicItem : IWowItem
     {
         [JsonProperty("id")]
         public int Id { get; set; }

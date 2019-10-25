@@ -1,9 +1,9 @@
 ﻿namespace AmeisenBotX.Core.Data.Enums
 {
-    public enum RollType
+    public enum RollType : int
     {
-        Need,
-        Greed,
-        Pass
+        Pass = 0,
+        Need = 1,
+        Greed = 2,
     }
 }

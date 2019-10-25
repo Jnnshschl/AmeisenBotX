@@ -1,6 +1,9 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Inventory;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Persistence.Objects;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
@@ -47,8 +50,8 @@ namespace AmeisenBotX.Core
 
             BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, playername, $"{playername}Cache.bin"));
             ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
-            CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
+            CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager, HookManager);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             MovemenEngine = new DefaultMovementEngine();
@@ -135,10 +138,40 @@ namespace AmeisenBotX.Core
             EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
             EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
             EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
+            EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
+            EventHookManager.Subscribe("ITEM_PUSH", OnNewItemReceived);
 
-            //// EventHookManager.Subscribe("ITEM_PUSH", OnNewItemReceived);
             //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
             //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
+        }
+
+        private void OnNewItemReceived(long timestamp, List<string> args)
+        {
+            if (int.TryParse(args[0], out int bagSlotId))
+            {
+                string json = HookManager.GetItemBySlot(bagSlotId);
+                WowBasicItem item = ItemFactory.ParseItem(json);
+                item = ItemFactory.BuildSpecificItem(item);
+            }
+        }
+
+        private void OnLootRollStarted(long timestamp, List<string> args)
+        {
+            if (int.TryParse(args[0], out int rollId))
+            {
+                string itemName = HookManager.GetRollItemName(rollId);
+                string json = HookManager.GetItemByName(itemName);
+                WowBasicItem item = ItemFactory.ParseItem(json);
+                item = ItemFactory.BuildSpecificItem(item);
+
+                if (CharacterManager.DoINeedThatItem(item))
+                {
+                    HookManager.RollOnItem(rollId, RollType.Need);
+                    return;
+                }
+            }
+
+            HookManager.RollOnItem(rollId, RollType.Greed);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)

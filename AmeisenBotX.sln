@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28714.193
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmeisenBotX", "AmeisenBotX\AmeisenBotX.csproj", "{0F842010-2DE5-4660-9352-4D63959B29DF}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmeisenBotX.Memory", "AmeisenBotX.Memory\AmeisenBotX.Memory.csproj", "{FF4DC905-1E4E-44A5-A5A7-C65E5CDA1E9A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmeisenBotX.Pathfinding", "AmeisenBotX.Pathfinding\AmeisenBotX.Pathfinding.csproj", "{BA329AA1-E3DA-42A1-87B4-3A695919767F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmeisenBotX.Test", "AmeisenBotX.Test\AmeisenBotX.Test.csproj", "{C06165D9-25E4-4904-9CE7-691CE41C10D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{BA329AA1-E3DA-42A1-87B4-3A695919767F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA329AA1-E3DA-42A1-87B4-3A695919767F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA329AA1-E3DA-42A1-87B4-3A695919767F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C06165D9-25E4-4904-9CE7-691CE41C10D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C06165D9-25E4-4904-9CE7-691CE41C10D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C06165D9-25E4-4904-9CE7-691CE41C10D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C06165D9-25E4-4904-9CE7-691CE41C10D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
