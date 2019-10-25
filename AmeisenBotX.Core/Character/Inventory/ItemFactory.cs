@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Inventory
@@ -13,7 +15,15 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public static List<WowBasicItem> ParseItemList(string json)
         {
-            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json);
+            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
+            {
+                Error = HandleDeserializationError
+            });
+        }
+
+        private static void HandleDeserializationError(object sender, ErrorEventArgs e)
+        {
+            e.ErrorContext.Handled = true;
         }
 
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)

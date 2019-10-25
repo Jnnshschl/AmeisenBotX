@@ -9,27 +9,25 @@
 
         private AmeisenBotConfig Config { get; }
 
-        private AmeisenBotState EntryState { get; set; }
-
         public override void Enter()
         {
             if (Config.AutostartWow)
             {
-                EntryState = AmeisenBotState.StartWow;
+                AmeisenBotStateMachine.SetState(AmeisenBotState.StartWow);
             }
             else if (Config.AutoLogin)
             {
-                EntryState = AmeisenBotState.Login;
+                AmeisenBotStateMachine.SetState(AmeisenBotState.Login);
             }
             else
             {
-                EntryState = AmeisenBotState.Idle;
+                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
         }
 
         public override void Execute()
         {
-            AmeisenBotStateMachine.SetState(EntryState);
+
         }
 
         public override void Exit()

@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                if (MovementEngine.CurrentPath == null)
+                if (MovementEngine.CurrentPath?.Count == 0)
                 {
                     Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
 

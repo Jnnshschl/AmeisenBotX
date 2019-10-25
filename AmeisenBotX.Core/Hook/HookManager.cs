@@ -510,7 +510,7 @@ namespace AmeisenBotX.Core.Hook
         /// <param name="rollType">Need, Greed or Pass</param>
         public void RollOnItem(int rollId, RollType rollType)
         {
-            SendChatMessage($"RollOnLoot({rollId}, {(int)rollType});");
+            LuaDoString($"RollOnLoot({rollId}, {(int)rollType});");
             SendChatMessage("/click StaticPopup1Button1");
         }
 

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
@@ -16,17 +17,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
-        public StateIdle(string botDataPath, AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
         {
-            BotDataPath = botDataPath;
             Config = config;
             OffsetList = offsetList;
             ObjectManager = objectManager;
             HookManager = hookManager;
             EventHookManager = eventHookManager;
+            CharacterManager = characterManager;
         }
-
-        private string BotDataPath { get; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -35,6 +34,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private HookManager HookManager { get; }
 
         private ObjectManager ObjectManager { get; }
+
+        private CharacterManager CharacterManager { get; }
 
         private IOffsetList OffsetList { get; }
 
@@ -48,6 +49,9 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 HookManager.SetupEndsceneHook();
                 EventHookManager.Start();
+
+                CharacterManager.Equipment.Update();
+                CharacterManager.Inventory.Update();
             }
         }
 

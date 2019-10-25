@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         public string ItemLink { get; set; }
 
         [JsonProperty("equiplocation")]
-        public EquipmentSlot EquipLocation { get; set; }
+        public EquipmentSlot EquipLocation { get; set; } = EquipmentSlot.NOT_EQUIPABLE;
 
         [JsonProperty("quality")]
         public ItemQuality ItemQuality { get; set; }

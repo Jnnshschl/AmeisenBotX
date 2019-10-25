@@ -78,15 +78,15 @@ namespace AmeisenBotX.Core.Character
             return false;
 
             // WIP
-            if ((item.GetType() == typeof(WowArmor) && IsAbleToUseArmor((WowArmor)item))
-                || (item.GetType() == typeof(WowWeapon) && IsAbleToUseWeapon((WowWeapon)item)))
-            {
-                return Comparator.IsBetter(null, item);
-            }
-            else
-            {
-                return false;
-            }
+            //// if ((item.GetType() == typeof(WowArmor) && IsAbleToUseArmor((WowArmor)item))
+            ////     || (item.GetType() == typeof(WowWeapon) && IsAbleToUseWeapon((WowWeapon)item)))
+            //// {
+            ////     return Comparator.IsBetter(null, item);
+            //// }
+            //// else
+            //// {
+            ////     return false;
+            //// }
         }
     }
 }

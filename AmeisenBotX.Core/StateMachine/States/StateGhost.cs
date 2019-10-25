@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out Vector3 corpsePosition)
                 && ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
             {
-                if (MovementEngine.CurrentPath == null)
+                if (MovementEngine.CurrentPath?.Count == 0)
                 {
                     BuildNewPath(corpsePosition);
                 }

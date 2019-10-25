@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
 
-            if (MovementEngine.CurrentPath == null || MovementEngine.CurrentPath.Count == 0)
+            if (MovementEngine.CurrentPath?.Count == 0)
             {
                 BuildNewPath();
             }

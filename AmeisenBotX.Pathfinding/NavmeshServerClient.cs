@@ -53,7 +53,7 @@ namespace AmeisenBotX.Pathfinding
                 {
                     try
                     {
-                        string pathRequest = JsonConvert.SerializeObject(new PathRequest(start, end, mapId, PathRequestFlags.ChaikinCurve));
+                        string pathRequest = JsonConvert.SerializeObject(new PathRequest(start, end, mapId, PathRequestFlags.None));
 
                         Writer.WriteLine(pathRequest + " &gt;");
                         Writer.Flush();

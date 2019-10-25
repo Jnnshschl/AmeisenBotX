@@ -38,10 +38,24 @@ namespace AmeisenBotX.Core.Movement
                 return false;
             }
 
-            if (SelectedWaypoint == Vector3.Zero
-                || currentPosition.GetDistance(SelectedWaypoint) < Settings.WaypointDoneThreshold)
+            double distance = currentPosition.GetDistance(SelectedWaypoint);
+
+            if(SelectedWaypoint != Vector3.Zero && distance > 1024)
             {
-                SelectedWaypoint = CurrentPath.Dequeue();
+                Reset();
+                positionToGoTo = Vector3.Zero;
+                needToJump = false;
+                return false;
+            }
+
+            if (SelectedWaypoint == Vector3.Zero
+                || distance < Settings.WaypointDoneThreshold)
+            {
+                do
+                {
+                    SelectedWaypoint = CurrentPath.Dequeue();
+                    distance = currentPosition.GetDistance(SelectedWaypoint);
+                } while (distance < 3.2 && CurrentPath.Count > 0);
             }
 
             Vector3 force = Vector3.Zero;
