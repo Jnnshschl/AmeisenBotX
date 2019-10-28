@@ -19,7 +19,7 @@ Currently supported versions:
 
 ## Configuration
 
-```
+```json
 // use the auto start/restart feature
 AutostartWow = false;
 PathToWowExe = string.Empty;
@@ -55,7 +55,7 @@ ObjectUpdateMs = 100;
 StateMachineTickMs = 50;
 
 // increase performance by caching names and reactions
-// highly reccomended to set this to true
+// highly recommended to set this to true
 PermanentNameCache = true;
 PermanentReactionCache = true;
 
