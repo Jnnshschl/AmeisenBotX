@@ -50,8 +50,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 HookManager.SetupEndsceneHook();
                 EventHookManager.Start();
 
-                CharacterManager.Equipment.Update();
-                CharacterManager.Inventory.Update();
+                CharacterManager.UpdateAll();
             }
         }
 

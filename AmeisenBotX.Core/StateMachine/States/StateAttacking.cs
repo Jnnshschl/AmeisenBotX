@@ -41,8 +41,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IMovementEngine MovementEngine { get; set; }
 
-        private WowUnit SelectedTarget { get; set; }
-
         private WowUnit CurrentTarget => ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.Player.TargetGuid);
 
         public override void Enter()
@@ -55,28 +53,29 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (ObjectManager != null
                 && ObjectManager.Player != null)
             {
-                if (!ObjectManager.Player.IsInCombat)
+                if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat())
                 {
                     AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
                     return;
                 }
 
                 // Select a new target if our current target is invalid
-                if (!CombatClass.HandlesTargetSelection 
-                    && !BotUtils.IsValidUnit(CurrentTarget) 
+                if ((CombatClass == null || !CombatClass.HandlesTargetSelection)
+                    && !BotUtils.IsValidUnit(CurrentTarget)
+                    && (CurrentTarget == null || CurrentTarget.IsInCombat)
+                    && HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly
                     && SelectTargetToAttack(out WowUnit target))
                 {
                     HookManager.TargetGuid(target.Guid);
-                    SelectedTarget = target;
                 }
 
-                if (SelectedTarget != null)
+                if (CurrentTarget != null)
                 {
                     if (CombatClass == null || !CombatClass.HandlesMovement)
                     {
                         // use the default MovementEngine to move if 
                         // the CombatClass doesnt handle Movement
-                        HandleMovement(SelectedTarget);
+                        HandleMovement(CurrentTarget);
                     }
 
                     if (CombatClass != null)

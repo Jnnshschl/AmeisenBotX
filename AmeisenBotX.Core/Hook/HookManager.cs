@@ -319,6 +319,11 @@ namespace AmeisenBotX.Core.Hook
         {
             WowUnitReaction reaction = WowUnitReaction.Unknown;
 
+            if(wowUnitA == null || wowUnitB == null)
+            {
+                return reaction;
+            }
+
             if (BotCache.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
             {
                 return cachedReaction;

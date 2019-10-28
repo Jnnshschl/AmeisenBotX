@@ -160,7 +160,7 @@ namespace AmeisenBotX.Core.StateMachine
             OnStateMachineStateChange?.Invoke();
         }
 
-        private bool IsAnyPartymemberInCombat()
+        internal bool IsAnyPartymemberInCombat()
             => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.IsInCombat);
 
         private void HandleEventPull()

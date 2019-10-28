@@ -27,6 +27,13 @@ namespace AmeisenBotX.Core.Character
             Equipment = new CharacterEquipment(hookManager);
             SpellBook = new SpellBook(hookManager);
             Comparator = new ItemLevelComparator();
+        }
+
+        public void UpdateAll()
+        {
+            Inventory.Update();
+            Equipment.Update();
+            SpellBook.Update();
             UpdateMoney();
         }
 
