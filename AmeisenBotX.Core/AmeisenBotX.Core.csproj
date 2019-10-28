@@ -58,6 +58,7 @@
     <Compile Include="Character\ClickToMoveType.cs" />
     <Compile Include="Character\Comparators\ItemLevelComparator.cs" />
     <Compile Include="Character\Comparators\IWowItemComparator.cs" />
+    <Compile Include="Character\InputSimulator.cs" />
     <Compile Include="Character\Inventory\CharacterEquipment.cs" />
     <Compile Include="Character\Inventory\CharacterInventory.cs" />
     <Compile Include="Character\Inventory\Enums\ArmorType.cs" />
@@ -81,6 +82,13 @@
     <Compile Include="Character\Inventory\Objects\WowRecipe.cs" />
     <Compile Include="Character\Inventory\Objects\WowTradegood.cs" />
     <Compile Include="Character\Inventory\Objects\WowWeapon.cs" />
+    <Compile Include="Character\Spells\Enums\Spellschools.cs" />
+    <Compile Include="Character\Spells\Objects\Spell.cs" />
+    <Compile Include="Character\Spells\SpellBook.cs" />
+    <Compile Include="Character\Stats\DamageStats.cs" />
+    <Compile Include="Character\Stats\PrimaryStats.cs" />
+    <Compile Include="Character\Stats\Resistances.cs" />
+    <Compile Include="Character\Stats\SecondaryStats.cs" />
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Data\Enums\RollType.cs" />
@@ -104,8 +112,8 @@
     <Compile Include="Data\Objects\WowObject\WowPlayer.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnit.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitFlags.cs" />
-    <Compile Include="Data\Persistence\Objects\InMemoryBotCache.cs" />
-    <Compile Include="Data\Persistence\Objects\IAmeisenBotCache.cs" />
+    <Compile Include="Data\Persistence\InMemoryBotCache.cs" />
+    <Compile Include="Data\Persistence\IAmeisenBotCache.cs" />
     <Compile Include="Event\EventHookManager.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
     <Compile Include="Hook\HookManager.cs" />
@@ -148,5 +156,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

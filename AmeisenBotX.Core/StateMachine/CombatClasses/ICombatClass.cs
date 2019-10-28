@@ -4,6 +4,8 @@
     {
         bool HandlesMovement { get; }
 
+        bool HandlesTargetSelection { get; }
+
         void Execute();
     }
 }

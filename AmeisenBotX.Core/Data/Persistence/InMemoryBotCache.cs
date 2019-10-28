@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace AmeisenBotX.Core.Data.Persistence.Objects
+namespace AmeisenBotX.Core.Data.Persistence
 {
     [Serializable]
     public class InMemoryBotCache : IAmeisenBotCache

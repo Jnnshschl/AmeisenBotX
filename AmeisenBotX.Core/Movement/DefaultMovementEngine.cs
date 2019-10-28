@@ -61,10 +61,10 @@ namespace AmeisenBotX.Core.Movement
             Vector3 force = Vector3.Zero;
 
             Vector3 waypointForce = SelectedWaypoint - currentPosition;
-            force += waypointForce;
-            
+            force += BotMath.CapVector3(waypointForce, Settings.MaxVelocity);
+
             //// Vector3 obstacleForce = Vector3.Zero;
-            //// force += obstacleForce;
+            //// force -= BotMath.CapVector3(obstacleForce, Settings.MaxVelocity);
 
             Vector3 velocity = BotMath.CapVector3(force, Settings.MaxVelocity);
             Vector3 newPosition = currentPosition + velocity;

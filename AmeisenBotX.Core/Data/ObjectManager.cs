@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Data.Persistence.Objects;
+using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;

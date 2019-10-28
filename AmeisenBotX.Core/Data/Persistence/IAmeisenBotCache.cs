@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 
-namespace AmeisenBotX.Core.Data.Persistence.Objects
+namespace AmeisenBotX.Core.Data.Persistence
 {
     public interface IAmeisenBotCache
     {

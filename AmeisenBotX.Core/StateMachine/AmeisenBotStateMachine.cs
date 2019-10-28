@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Data.Persistence.Objects;
+using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;

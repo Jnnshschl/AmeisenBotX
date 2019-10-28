@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Linq;
@@ -19,6 +18,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         }
 
         public bool HandlesMovement => true;
+
+        public bool HandlesTargetSelection => false;
 
         private CharacterManager CharacterManager { get; }
 

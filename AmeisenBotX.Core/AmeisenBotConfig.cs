@@ -38,9 +38,9 @@ namespace AmeisenBotX.Core
 
         public string PathToWowExe { get; set; } = string.Empty;
 
-        public bool PermanentNameCache { get; set; } = false;
+        public bool PermanentNameCache { get; set; } = true;
 
-        public bool PermanentReactionCache { get; set; } = false;
+        public bool PermanentReactionCache { get; set; } = true;
 
         public bool ReleaseSpirit { get; set; } = false;
 
@@ -50,8 +50,10 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public double StateMachineTickMs { get; set; } = 25;
+        public double StateMachineTickMs { get; set; } = 50;
 
         public string Username { get; set; } = string.Empty;
+
+        public bool UseClickToMove { get; set; } = true;
     }
 }

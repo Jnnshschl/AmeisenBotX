@@ -4,7 +4,7 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Persistence.Objects;
+using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core
             BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, playername, $"{playername}Cache.bin"));
             ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
-            CharacterManager = new CharacterManager(XMemory, OffsetList, ObjectManager, HookManager);
+            CharacterManager = new CharacterManager(XMemory, config, OffsetList, ObjectManager, HookManager);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             MovemenEngine = new DefaultMovementEngine();
