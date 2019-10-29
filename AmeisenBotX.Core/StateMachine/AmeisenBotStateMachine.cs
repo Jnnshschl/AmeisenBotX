@@ -110,14 +110,14 @@ namespace AmeisenBotX.Core.StateMachine
                 SetState(AmeisenBotState.None);
             }
 
-            HandleEventPull();
-
             if (ObjectManager != null)
             {
                 if (!ObjectManager.IsWorldLoaded)
                 {
                     SetState(AmeisenBotState.LoadingScreen);
                 }
+
+                HandleEventPull();
 
                 if (ObjectManager.Player != null)
                 {

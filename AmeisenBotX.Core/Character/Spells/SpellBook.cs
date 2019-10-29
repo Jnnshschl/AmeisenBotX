@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Hook;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Spells

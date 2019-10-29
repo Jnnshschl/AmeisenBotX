@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Hook
         {
             string command = "abotSpellResult='['tabCount=GetNumSpellTabs()for a=1,tabCount do tabName,tabTexture,tabOffset,numEntries=GetSpellTabInfo(a)for b=tabOffset+1,tabOffset+numEntries do abSpellName,abSpellRank=GetSpellName(b,\"BOOKTYPE_SPELL\")if abSpellName then abName,abRank,_,abCosts,_,_,abCastTime,abMinRange,abMaxRange=GetSpellInfo(abSpellName,abSpellRank)abotSpellResult=abotSpellResult..'{'..'\"spellbookName\": \"'..tostring(tabName or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring(abSpellName or 0)..'\",'..'\"rank\": \"'..tostring(abRank or 0)..'\",'..'\"castTime\": \"'..tostring(abCastTime or 0)..'\",'..'\"minRange\": \"'..tostring(abMinRange or 0)..'\",'..'\"maxRange\": \"'..tostring(abMaxRange or 0)..'\",'..'\"costs\": \"'..tostring(abCosts or 0)..'\"'..'}'if a<tabCount or b<tabOffset+numEntries then abotSpellResult=abotSpellResult..','end end end end;abotSpellResult=abotSpellResult..']'";
             LuaDoString(command);
-            return GetLocalizedText(command);
+            return GetLocalizedText("abotSpellResult");
         }
 
         public double GetSpellCooldown(string spellName)
@@ -713,7 +713,7 @@ namespace AmeisenBotX.Core.Hook
 
             CodecaveForCheck = codecaveForCheck;
 
-            // codecave for the code we wa't to execute
+            // codecave for the code we wan't to execute
             if (!XMemory.AllocateMemory(2048, out IntPtr codecaveForExecution))
             {
                 return false;
