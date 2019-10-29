@@ -33,8 +33,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private HookManager HookManager { get; }
 
-        private bool IsMelee { get; set; }
-
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
@@ -45,7 +43,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
-            IsMelee = BotUtils.IsMeeleeClass(ObjectManager.Player.Class);
         }
 
         public override void Execute()
@@ -76,6 +73,11 @@ namespace AmeisenBotX.Core.StateMachine.States
                         // use the default MovementEngine to move if 
                         // the CombatClass doesnt handle Movement
                         HandleMovement(CurrentTarget);
+
+                        if (BotMath.GetFacingAngle(ObjectManager.Player.Position, CurrentTarget.Position) > 0.3)
+                        {
+                            HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
+                        }
                     }
 
                     if (CombatClass != null)
@@ -99,7 +101,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void HandleMovement(WowUnit target)
         {
-            if (MovementEngine.CurrentPath?.Count == 0 && IsMelee)
+            if (MovementEngine.CurrentPath?.Count == 0)
             {
                 // keep close to target
                 double distance = ObjectManager.Player.Position.GetDistance(target.Position);
@@ -107,11 +109,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                 {
                     BuildNewPath(target);
                 }
-            }
-            else if (MovementEngine.CurrentPath?.Count == 0 && !IsMelee)
-            {
-                // keep distance to target
-                // TODO: implement a IMovementEngine for ranged classes
             }
             else
             {
