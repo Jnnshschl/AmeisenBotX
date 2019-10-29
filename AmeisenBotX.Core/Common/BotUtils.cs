@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Core.Common.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,26 @@ namespace AmeisenBotX.Core.Common
 {
     public class BotUtils
     {
+        private const uint WM_KEYDOWN = 0x100;
+        private const uint WM_KEYUP = 0x101;
+        private const uint WM_KEYPRESS = 0x101;
+
+        private const uint WM_MOUSEMOVE = 0x200;
+        private const uint WM_LBUTTONDOWN = 0x201;
+        private const uint WM_LBUTTONUP = 0x202;
+        private const uint WM_LBUTTONDBLCLK = 0x203;
+        private const uint WM_RBUTTONDOWN = 0x204;
+        private const uint WM_RBUTTONUP = 0x205;
+        private const uint WM_RBUTTONDBLCLK = 0x206;
+
+        private const uint MK_CONTROL = 0x8;
+        private const uint MK_LBUTTON = 0x1;
+        private const uint MK_MBUTTON = 0x10;
+        private const uint MK_RBUTTON = 0x2;
+        private const uint MK_SHIFT = 0x4;
+        private const uint MK_XBUTTON1 = 0x20;
+        private const uint MK_XBUTTON2 = 0x40;
+
         public static string BigValueToString(double value)
         {
             if (value >= 100000000)
@@ -26,41 +46,43 @@ namespace AmeisenBotX.Core.Common
             return $"{value}";
         }
 
-        public static bool IsMeeleeClass(WowClass wowClass)
-        {
-            switch (wowClass)
-            {
-                case WowClass.DeathKnight: return true;
-                case WowClass.Paladin: return true;
-                case WowClass.Rogue: return true;
-                case WowClass.Warrior: return true;
-
-                // special case, need to check for owl
-                case WowClass.Druid: return true;
-
-                // special case, need to check for enhancement
-                case WowClass.Shaman: return false;
-
-                // special case, need to check for survival
-                case WowClass.Hunter: return false;
-
-                default:
-                    return false;
-            }
-        }
-
         public static bool IsValidUnit(WowUnit unit)
         {
-            return unit != null 
+            return unit != null
                 && unit.Health > 0
                 && !unit.IsNotAttackable;
         }
 
         public static void SendKey(IntPtr windowHandle, IntPtr key, int minDelay = 20, int maxDelay = 40)
         {
-            SendMessage(windowHandle, 0x100, key, new IntPtr(0));
+            SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
             Thread.Sleep(new Random().Next(minDelay, maxDelay));
-            SendMessage(windowHandle, 0x101, key, new IntPtr(0));
+            SendMessage(windowHandle, WM_KEYUP, key, new IntPtr(0));
+        }
+
+        public static void HoldKey(IntPtr windowHandle, IntPtr key)
+        {
+            SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
+        }
+
+        public static void RealeaseKey(IntPtr windowHandle, IntPtr key)
+        {
+            SendMessage(windowHandle, WM_KEYUP, key, new IntPtr(0));
+        }
+
+        public static void SendMouseMovement(IntPtr windowHandle, short x, short y)
+        {
+            SendMessage(windowHandle, WM_MOUSEMOVE, IntPtr.Zero, MakeLParam(x,y));
+        }
+
+        public static void SendMouseMovementHoldLeft(IntPtr windowHandle, short x, short y)
+        {
+            SendMessage(windowHandle, WM_MOUSEMOVE, new IntPtr(WM_LBUTTONDOWN), MakeLParam(x, y));
+        }
+
+        public static void SendMouseMovementHoldRight(IntPtr windowHandle, short x, short y)
+        {
+            SendMessage(windowHandle, WM_MOUSEMOVE, new IntPtr(WM_RBUTTONDOWN), MakeLParam(x, y));
         }
 
         public static bool IsPositionInsideAoeSpell(Vector3 position, List<WowDynobject> wowDynobjects)
@@ -70,14 +92,14 @@ namespace AmeisenBotX.Core.Common
         {
             if (shift)
             {
-                PostMessage(windowHandle, 0x0100, new IntPtr(0x10), new IntPtr(0));
+                PostMessage(windowHandle, WM_KEYDOWN, new IntPtr((int)VirtualKeys.VK_SHIFT), new IntPtr(0));
             }
 
-            PostMessage(windowHandle, 0x0102, key, new IntPtr(0));
+            PostMessage(windowHandle, WM_KEYPRESS, key, new IntPtr(0));
 
             if (shift)
             {
-                PostMessage(windowHandle, 0x0101, new IntPtr(0x10), new IntPtr(0));
+                PostMessage(windowHandle, WM_KEYUP, new IntPtr((int)VirtualKeys.VK_SHIFT), new IntPtr(0));
             }
         }
 
@@ -86,6 +108,11 @@ namespace AmeisenBotX.Core.Common
         private static extern bool PostMessage(IntPtr windowHandle, uint msg, IntPtr param, IntPtr parameter);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr windowHandle, int msg, IntPtr param, IntPtr parameter);
+        private static extern IntPtr SendMessage(IntPtr windowHandle, uint msg, IntPtr param, IntPtr parameter);
+
+        private static IntPtr MakeLParam(int p, int p2)
+        {
+            return new IntPtr((p2 << 16) | (p & 0xFFFF));
+        }
     }
 }

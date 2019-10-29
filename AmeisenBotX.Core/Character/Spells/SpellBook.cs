@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Hook;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Character.Spells
 {
@@ -30,5 +31,8 @@ namespace AmeisenBotX.Core.Character.Spells
                 Spells = new List<Spell>();
             }
         }
+
+        public bool IsSpellKnown(string spellname)
+            => Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -150,6 +150,18 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        private bool IsRuneReady(int runeId)
+        {
+            if (XMemory.ReadByte(OffsetList.Runes, out byte runeStatus))
+            {
+                return ((1 << runeId) & runeStatus) != 0;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public void FaceUnit(WowPlayer player, Vector3 positionToFace)
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
@@ -319,7 +331,7 @@ namespace AmeisenBotX.Core.Hook
         {
             WowUnitReaction reaction = WowUnitReaction.Unknown;
 
-            if(wowUnitA == null || wowUnitB == null)
+            if (wowUnitA == null || wowUnitB == null)
             {
                 return reaction;
             }
