@@ -12,6 +12,8 @@ using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Core.StateMachine.States;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Pathfinding;
@@ -33,21 +35,33 @@ namespace AmeisenBotX.Core
 
         public AmeisenBot(string botDataPath, string playername, AmeisenBotConfig config)
         {
-            BotDataPath = botDataPath;
+            AmeisenLogger.Instance.ChangeLogFolder(Path.Combine(botDataPath, playername, "log/"));
+            AmeisenLogger.Instance.ActiveLogLevel = LogLevel.Verbose;
+            AmeisenLogger.Instance.Start();
+            AmeisenLogger.Instance.Log("AmeisenBot starting...", LogLevel.Master);
+
+            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            AmeisenLogger.Instance.Log($"version: {version}", LogLevel.Master);
+
+            Config = config;
+
             PlayerName = playername;
+            AmeisenLogger.Instance.Log($"Playername: {botDataPath}", LogLevel.Master);
+
+            BotDataPath = botDataPath;
+            AmeisenLogger.Instance.Log($"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
             CurrentExecutionMs = 0;
             CurrentExecutionCount = 0;
-
             stateMachineTimerBusy = 0;
 
             StateMachineTimer = new Timer(config.StateMachineTickMs);
             StateMachineTimer.Elapsed += StateMachineTimerTick;
 
-            Config = config;
-            XMemory = new XMemory();
             OffsetList = new OffsetList335a();
+            AmeisenLogger.Instance.Log($"Using OffsetList: {OffsetList.GetType().ToString()}", LogLevel.Master);
 
+            XMemory = new XMemory();
             BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, playername, $"{playername}Cache.bin"));
             ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
@@ -59,8 +73,10 @@ namespace AmeisenBotX.Core
             if (!Directory.Exists(BotDataPath))
             {
                 Directory.CreateDirectory(BotDataPath);
+                AmeisenLogger.Instance.Log($"Creating folder {botDataPath}", LogLevel.Verbose);
             }
 
+            AmeisenLogger.Instance.Log($"Loading CombatClass: {Config.CombatClassName}", LogLevel.Verbose);
             switch (Config.CombatClassName.ToUpper())
             {
                 case "WARRIORARMS":
@@ -147,6 +163,8 @@ namespace AmeisenBotX.Core
 
         private void OnNewItemReceived(long timestamp, List<string> args)
         {
+            AmeisenLogger.Instance.Log($"Event OnNewItemReceived: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
             if (int.TryParse(args[0], out int bagSlotId))
             {
                 string json = HookManager.GetItemBySlot(bagSlotId);
@@ -157,6 +175,8 @@ namespace AmeisenBotX.Core
 
         private void OnLootRollStarted(long timestamp, List<string> args)
         {
+            AmeisenLogger.Instance.Log($"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
             if (int.TryParse(args[0], out int rollId))
             {
                 string itemName = HookManager.GetRollItemName(rollId);
@@ -176,11 +196,13 @@ namespace AmeisenBotX.Core
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
+            AmeisenLogger.Instance.Log($"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.LootEveryThing();
         }
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
+            AmeisenLogger.Instance.Log($"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.CofirmBop();
         }
 
@@ -205,6 +227,9 @@ namespace AmeisenBotX.Core
             }
 
             BotCache.Save();
+
+            AmeisenLogger.Instance.Log($"Stopping AmeisenBot...", LogLevel.Master);
+            AmeisenLogger.Instance.Stop();
         }
 
         private void HandlePositionLoad()
@@ -232,11 +257,15 @@ namespace AmeisenBotX.Core
                 {
                     try
                     {
-                        Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
+                        string rawRect = File.ReadAllText(filepath);
+                        Rect rect = JsonConvert.DeserializeObject<Rect>(rawRect);
+
                         XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, rect);
+                        AmeisenLogger.Instance.Log($"Loaded bot window position: {rawRect}", LogLevel.Verbose);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        AmeisenLogger.Instance.Log($"Failed to set bot window position:\n{e.ToString()}", LogLevel.Error);
                     }
                 }
             }
@@ -251,11 +280,15 @@ namespace AmeisenBotX.Core
                 {
                     try
                     {
-                        Rect rect = JsonConvert.DeserializeObject<Rect>(File.ReadAllText(filepath));
+                        string rawRect = File.ReadAllText(filepath);
+                        Rect rect = JsonConvert.DeserializeObject<Rect>(rawRect);
+
                         XMemory.SetWindowPosition(XMemory.Process.MainWindowHandle, rect);
+                        AmeisenLogger.Instance.Log($"Loaded wow window position: {rawRect}", LogLevel.Verbose);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        AmeisenLogger.Instance.Log($"Failed to set wow window position:\n{e.ToString()}", LogLevel.Error);
                     }
                 }
             }
@@ -269,8 +302,9 @@ namespace AmeisenBotX.Core
                 Rect rect = XMemory.GetWindowPosition(Process.GetCurrentProcess().MainWindowHandle);
                 File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed to save bot window position:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
@@ -282,8 +316,9 @@ namespace AmeisenBotX.Core
                 Rect rect = XMemory.GetWindowPosition(XMemory.Process.MainWindowHandle);
                 File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed to save wow window position:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
@@ -314,15 +349,27 @@ namespace AmeisenBotX.Core
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
-            => HookManager.AcceptPartyInvite();
+        {
+            AmeisenLogger.Instance.Log($"Event OnPartyInvitation: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            HookManager.AcceptPartyInvite();
+        }
 
         private void OnReadyCheck(long timestamp, List<string> args)
-            => HookManager.CofirmReadyCheck(true);
+        {
+            AmeisenLogger.Instance.Log($"Event OnReadyCheck: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            HookManager.CofirmReadyCheck(true);
+        }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
-            => HookManager.AcceptResurrect();
+        {
+            AmeisenLogger.Instance.Log($"Event OnResurrectRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            HookManager.AcceptResurrect();
+        }
 
         private void OnSummonRequest(long timestamp, List<string> args)
-            => HookManager.AcceptSummon();
+        {
+            AmeisenLogger.Instance.Log($"Event OnSummonRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            HookManager.AcceptSummon();
+        }
     }
 }

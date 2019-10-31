@@ -10,8 +10,6 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr ChatOpened { get; }
 
-        IntPtr Class { get; }
-
         IntPtr ClickToMoveAction { get; }
 
         IntPtr ClickToMoveDistance { get; }
@@ -141,8 +139,6 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr PlayerName { get; }
 
         IntPtr PlayerRotation { get; }
-
-        IntPtr Race { get; }
 
         IntPtr RaidGroupPlayer { get; }
 

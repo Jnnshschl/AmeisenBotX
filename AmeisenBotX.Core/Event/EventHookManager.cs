@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Event.Objects;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -77,6 +79,7 @@ namespace AmeisenBotX.Core.Event
 
         public void Start()
         {
+            AmeisenLogger.Instance.Log($"Starting EventHookManager...", LogLevel.Verbose);
             if (!IsSetUp)
             {
                 IsSetUp = true;
@@ -86,17 +89,20 @@ namespace AmeisenBotX.Core.Event
 
         public void Stop()
         {
+            AmeisenLogger.Instance.Log($"Stopping EventHookManager...", LogLevel.Verbose);
             HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
             HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
         }
 
         public void Subscribe(string eventName, OnEventFired onEventFired)
         {
+            AmeisenLogger.Instance.Log($"Subscribing to event: {eventName}", LogLevel.Verbose);
             SubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
         public void Unsubscribe(string eventName)
         {
+            AmeisenLogger.Instance.Log($"Unsubscribing from event: {eventName}", LogLevel.Verbose);
             UnsubscribeQueue.Enqueue(eventName);
         }
 
@@ -111,8 +117,9 @@ namespace AmeisenBotX.Core.Event
                     EventDictionary.Add(queueElement.Item1, queueElement.Item2);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed subscribe to event:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
@@ -120,20 +127,23 @@ namespace AmeisenBotX.Core.Event
         {
             try
             {
-                if (IsSetUp && SubscribeQueue.Count > 0)
+                if (IsSetUp && UnsubscribeQueue.Count > 0)
                 {
                     string queueElement = UnsubscribeQueue.Dequeue();
                     HookManager.LuaDoString($"abFrame:UnregisterEvent(\"{queueElement}\");");
                     EventDictionary.Remove(queueElement);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed unsubscribe from event:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
         private void SetupEventHook()
         {
+            AmeisenLogger.Instance.Log($"Setting up the EventHookManager...", LogLevel.Verbose);
+
             StringBuilder luaStuff = new StringBuilder();
             luaStuff.Append("abFrame = CreateFrame(\"FRAME\", \"AbotEventFrame\") ");
             luaStuff.Append("abEventTable = {} ");
@@ -142,11 +152,6 @@ namespace AmeisenBotX.Core.Event
             luaStuff.Append("if abFrame:GetScript(\"OnEvent\") == nil then ");
             luaStuff.Append("abFrame:SetScript(\"OnEvent\", abEventHandler) end");
             HookManager.LuaDoString(luaStuff.ToString());
-        }
-
-        internal void Subscribe(string v, object onConfirmDeleteItem)
-        {
-            throw new NotImplementedException();
         }
     }
 }

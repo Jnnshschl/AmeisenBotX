@@ -10,8 +10,6 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr ChatOpened { get; } = new IntPtr(0xD41660);
 
-        public IntPtr Class { get; } = new IntPtr(0xC79E89);
-
         public IntPtr ClickToMoveAction { get; } = new IntPtr(0xCA11D8 + 0x1C);
 
         public IntPtr ClickToMoveDistance { get; } = new IntPtr(0xCA11D8 + 0xC);
@@ -141,8 +139,6 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr PlayerName { get; } = new IntPtr(0xC79D18);
 
         public IntPtr PlayerRotation { get; } = new IntPtr(0x7A8);
-
-        public IntPtr Race { get; } = new IntPtr(0xC79E88);
 
         public IntPtr RaidGroupPlayer { get; } = new IntPtr(0x50);
 

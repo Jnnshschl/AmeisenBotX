@@ -51,11 +51,11 @@ namespace AmeisenBotX.Core.Movement
             if (SelectedWaypoint == Vector3.Zero
                 || distance < Settings.WaypointDoneThreshold)
             {
-                do
-                {
+                //do
+                //{
                     SelectedWaypoint = CurrentPath.Dequeue();
                     distance = currentPosition.GetDistance(SelectedWaypoint);
-                } while (distance < 3.2 && CurrentPath.Count > 0);
+                //} while (distance < 3 && CurrentPath.Count > 0);
             }
 
             Vector3 force = Vector3.Zero;

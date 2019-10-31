@@ -8,6 +8,8 @@ using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
@@ -20,7 +22,6 @@ namespace AmeisenBotX.Core.Character
     {
         public CharacterManager(XMemory xMemory, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, HookManager hookManager)
         {
-            FirstMove = true;
             XMemory = xMemory;
             OffsetList = offsetList;
             ObjectManager = objectManager;
@@ -37,6 +38,8 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateAll()
         {
+            AmeisenLogger.Instance.Log($"Updating full character...", LogLevel.Verbose);
+
             Inventory.Update();
             Equipment.Update();
             SpellBook.Update();
@@ -52,8 +55,6 @@ namespace AmeisenBotX.Core.Character
             }
         }
         private Dictionary<VirtualKeys, bool> KeyMap { get; set; }
-
-        private bool FirstMove { get; set; }
 
         private AmeisenBotConfig Config { get; }
 

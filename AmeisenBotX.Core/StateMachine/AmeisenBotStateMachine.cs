@@ -9,6 +9,8 @@ using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Core.StateMachine.States;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
 using System;
@@ -35,6 +37,8 @@ namespace AmeisenBotX.Core.StateMachine
             IMovementEngine movementEngine,
             ICombatClass combatClass)
         {
+            AmeisenLogger.Instance.Log("Starting AmeisenBotStateMachine...", LogLevel.Verbose);
+
             BotDataPath = botDataPath;
             Config = config;
             XMemory = xMemory;
@@ -107,6 +111,7 @@ namespace AmeisenBotX.Core.StateMachine
         {
             if (XMemory.Process != null && XMemory.Process.HasExited)
             {
+                AmeisenLogger.Instance.Log("WoW crashed...", LogLevel.Verbose);
                 SetState(AmeisenBotState.None);
             }
 

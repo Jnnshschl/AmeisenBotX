@@ -13,7 +13,7 @@
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
     <Grid>
-        <Label x:Name="labelPlayerName" Content="BotName" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" FontSize="20" Margin="4,0,0,0">
+        <Label x:Name="labelPlayerName" Content="BotName" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="4,-4,0,0">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -107,6 +107,11 @@
             </Label.Foreground>
         </Label>
         <Label x:Name="labelCurrentClass" Content="Class" HorizontalAlignment="Left" Margin="4,128,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
+        <Label x:Name="labelCurrentPowerType" Content="PowerType" HorizontalAlignment="Left" Margin="4,146,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>

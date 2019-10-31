@@ -81,8 +81,9 @@ namespace AmeisenBotX
                 labelPlayerName.Content = AmeisenBot.ObjectManager.Player.Name;
 
                 labelCurrentLevel.Content = $"lvl. {AmeisenBot.ObjectManager.Player.Level}";
-                labelCurrentRace.Content = AmeisenBot.ObjectManager.Player.Race;
+                labelCurrentRace.Content = $"{AmeisenBot.ObjectManager.Player.Race} {AmeisenBot.ObjectManager.Player.Gender}";
                 labelCurrentClass.Content = AmeisenBot.ObjectManager.Player.Class;
+                labelCurrentPowerType.Content = AmeisenBot.ObjectManager.Player.PowerType;
 
                 progressbarHealth.Maximum = AmeisenBot.ObjectManager.Player.MaxHealth;
                 progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;

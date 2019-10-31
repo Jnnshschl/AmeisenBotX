@@ -146,6 +146,10 @@
     <Compile Include="StateMachine\States\StateStartWow.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
+      <Project>{AFE27893-225B-4F90-9CFD-87DB2EE0D7DF}</Project>
+      <Name>AmeisenBotX.Logging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj">
       <Project>{FF4DC905-1E4E-44A5-A5A7-C65E5CDA1E9A}</Project>
       <Name>AmeisenBotX.Memory</Name>

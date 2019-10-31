@@ -5,8 +5,11 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding.Objects;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -39,12 +42,6 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr EndsceneAddress { get; private set; }
 
-        internal string GetMoney()
-        {
-            LuaDoString("abMoney = GetMoney();");
-            return GetLocalizedText("abMoney");
-        }
-
         public IntPtr EndsceneReturnAddress { get; private set; }
 
         public bool IsInjectionUsed { get; private set; }
@@ -73,6 +70,12 @@ namespace AmeisenBotX.Core.Hook
         private IOffsetList OffsetList { get; }
 
         private XMemory XMemory { get; }
+
+        public string GetMoney()
+        {
+            LuaDoString("abMoney = GetMoney();");
+            return GetLocalizedText("abMoney");
+        }
 
         public void AcceptPartyInvite()
         {
@@ -103,6 +106,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void CastSpell(string name, bool castOnSelf = false)
         {
+            AmeisenLogger.Instance.Log($"Casting spell with name: {name}", LogLevel.Verbose);
+
             if (castOnSelf)
             {
                 LuaDoString($"CastSpellByName(\"{name}\", true);");
@@ -113,8 +118,10 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public void CastSpeelById(int spellId)
+        public void CastSpellById(int spellId)
         {
+            AmeisenLogger.Instance.Log($"Casting spell with id: {spellId}", LogLevel.Verbose);
+
             if (spellId > 0)
             {
                 string[] asmLocalText = new string[]
@@ -146,6 +153,7 @@ namespace AmeisenBotX.Core.Hook
         {
             if (IsWoWHooked)
             {
+                AmeisenLogger.Instance.Log("Disposing EnsceneHook...", LogLevel.Verbose);
                 XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
 
                 if (CodecaveForCheck != null)
@@ -276,6 +284,8 @@ namespace AmeisenBotX.Core.Hook
 
         public string GetLocalizedText(string variable)
         {
+            AmeisenLogger.Instance.Log($"GetLocalizedText: {variable}...", LogLevel.Verbose);
+
             if (variable.Length > 0)
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(variable);
@@ -415,6 +425,8 @@ namespace AmeisenBotX.Core.Hook
 
         public byte[] InjectAndExecute(string[] asm, bool readReturnBytes)
         {
+            AmeisenLogger.Instance.Log($"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
+            
             List<byte> returnBytes = new List<byte>();
 
             if (!ObjectManager.IsWorldLoaded)
@@ -449,11 +461,13 @@ namespace AmeisenBotX.Core.Hook
                     XMemory.Fasm.AddLine(s);
                 }
 
+                // inject it
+                XMemory.SuspendMainThread();
+                XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
+                XMemory.ResumeMainThread();
+
                 // now there is code to be executed
                 XMemory.Write(CodeToExecuteAddress, 1);
-
-                // inject it
-                XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
 
                 timeoutCounter = 0;
 
@@ -486,18 +500,21 @@ namespace AmeisenBotX.Core.Hook
                             XMemory.ReadByte(dwAddress, out buffer);
                         }
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        AmeisenLogger.Instance.Log($"Failed to read return bytes:\n{e.ToString()}", LogLevel.Error);
                     }
                 }
 
                 IsInjectionUsed = false;
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed to inject:\n{e.ToString()}", LogLevel.Error);
                 // now there is no more code to be executed
                 XMemory.Write(CodeToExecuteAddress, 0);
                 IsInjectionUsed = false;
+                XMemory.ResumeMainThread();
             }
 
             return returnBytes.ToArray();
@@ -524,6 +541,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void LuaDoString(string command)
         {
+            AmeisenLogger.Instance.Log($"LuaDoString: {command}...", LogLevel.Verbose);
+
             if (command.Length > 0)
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(command);
@@ -594,6 +613,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool SetupEndsceneHook()
         {
+            AmeisenLogger.Instance.Log("Setting up the EndsceneHook...", LogLevel.Verbose);
             EndsceneAddress = GetEndScene();
 
             // first thing thats 5 bytes big is here
@@ -601,6 +621,8 @@ namespace AmeisenBotX.Core.Hook
             // our JMP instruction (JMP (1 byte) + Address (4 byte))
             EndsceneAddress = IntPtr.Add(EndsceneAddress, ENDSCENE_HOOK_OFFSET);
             EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, 0x5);
+
+            AmeisenLogger.Instance.Log($"Endscene is at: {EndsceneAddress.ToString("X")}", LogLevel.Verbose);
 
             // if WoW is already hooked, unhook it
             if (IsWoWHooked)
@@ -675,6 +697,7 @@ namespace AmeisenBotX.Core.Hook
                 // do the original EndScene stuff after we restored the registers
                 // and insert it after our code
                 XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), OriginalEndsceneBytes);
+                AmeisenLogger.Instance.Log($"EndsceneHook OriginalEndsceneBytes: {JsonConvert.SerializeObject(OriginalEndsceneBytes)}", LogLevel.Verbose);
 
                 // return to original function after we're done with our stuff
                 XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}");
@@ -689,6 +712,8 @@ namespace AmeisenBotX.Core.Hook
                 // modify original EndScene instructions to start the hook
                 XMemory.Fasm.AddLine($"JMP {CodecaveForCheck.ToInt32()}");
                 XMemory.Fasm.Inject((uint)EndsceneAddress.ToInt32());
+
+                AmeisenLogger.Instance.Log("EndsceneHook Successful...", LogLevel.Verbose);
 
                 // we should've hooked WoW now
                 return true;
@@ -719,6 +744,12 @@ namespace AmeisenBotX.Core.Hook
         public void TargetNearestEnemy()
             => SendChatMessage("/targetenemy [harm][nodead]");
 
+        public void ClearTarget()
+            => SendChatMessage("/clearttarget");
+
+        public void ClearTargetIfDead()
+            => SendChatMessage("/clearttarget [dead]");
+
         public void WriteCtmValues(Vector3 targetPosition, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float distance = 1.5f)
         {
             XMemory.Write(OffsetList.ClickToMoveX, targetPosition.X);
@@ -728,18 +759,10 @@ namespace AmeisenBotX.Core.Hook
             XMemory.Write(OffsetList.ClickToMoveAction, clickToMoveType);
         }
 
-        public void SuspendMainWowThread()
-        {
-            XMemory.SuspendMainThread();
-        }
-
-        public void ResumeMainWowThread()
-        {
-            XMemory.ResumeMainThread();
-        }
-
         private bool AllocateCodeCaves()
         {
+            AmeisenLogger.Instance.Log("Allocating Codecaves for the EndsceneHook...", LogLevel.Verbose);
+
             // integer to check if there is code waiting to be executed
             if (!XMemory.AllocateMemory(4, out IntPtr codeToExecuteAddress))
             {
@@ -748,6 +771,7 @@ namespace AmeisenBotX.Core.Hook
 
             CodeToExecuteAddress = codeToExecuteAddress;
             XMemory.Write(CodeToExecuteAddress, 0);
+            AmeisenLogger.Instance.Log($"EndsceneHook CodeToExecuteAddress: {codeToExecuteAddress.ToString("X")}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
             if (!XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
@@ -757,6 +781,7 @@ namespace AmeisenBotX.Core.Hook
 
             ReturnValueAddress = returnValueAddress;
             XMemory.Write(ReturnValueAddress, 0);
+            AmeisenLogger.Instance.Log($"EndsceneHook ReturnValueAddress: {returnValueAddress.ToString("X")}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
             if (!XMemory.AllocateMemory(128, out IntPtr codecaveForCheck))
@@ -765,6 +790,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             CodecaveForCheck = codecaveForCheck;
+            AmeisenLogger.Instance.Log($"EndsceneHook CodecaveForCheck: {codecaveForCheck.ToString("X")}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
             if (!XMemory.AllocateMemory(2048, out IntPtr codecaveForExecution))
@@ -773,6 +799,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             CodecaveForExecution = codecaveForExecution;
+            AmeisenLogger.Instance.Log($"EndsceneHook CodecaveForExecution: {codecaveForExecution.ToString("X")}", LogLevel.Verbose);
 
             return true;
         }

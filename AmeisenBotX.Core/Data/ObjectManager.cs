@@ -184,6 +184,10 @@ namespace AmeisenBotX.Core.Data
                     Runeenergy = wowUnit.Runeenergy,
                     MaxRuneenergy = wowUnit.MaxRuneenergy,
                     Level = wowUnit.Level,
+                    Race = wowUnit.Race,
+                    Class = wowUnit.Class,
+                    Gender = wowUnit.Gender,
+                    PowerType = wowUnit.PowerType,
                     IsAutoAttacking = wowUnit.IsAutoAttacking,
                     CurrentlyCastingSpellId = wowUnit.CurrentlyCastingSpellId,
                     CurrentlyChannelingSpellId = wowUnit.CurrentlyChannelingSpellId
@@ -192,14 +196,10 @@ namespace AmeisenBotX.Core.Data
                 if (PlayerGuid != 0 && wowUnit.Guid == PlayerGuid)
                 {
                     if (XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorExp.ToInt32()), out int exp)
-                        && XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp)
-                        && XMemory.Read(OffsetList.Race, out byte pRace)
-                        && XMemory.Read(OffsetList.Class, out byte pClass))
+                        && XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp))
                     {
                         player.Exp = exp;
                         player.MaxExp = maxExp;
-                        player.Race = (WowRace)pRace;
-                        player.Class = (WowClass)pClass;
                     }
 
                     Player = player;

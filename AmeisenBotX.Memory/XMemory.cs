@@ -280,7 +280,7 @@ namespace AmeisenBotX.Memory
 
         private bool OpenMainThread()
         {
-            if (MainThreadHandle == null && MainThreadHandle != IntPtr.Zero)
+            if (MainThreadHandle == IntPtr.Zero)
             {
                 ProcessThread mainThread = GetMainThread();
                 MainThreadHandle = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)mainThread.Id);
