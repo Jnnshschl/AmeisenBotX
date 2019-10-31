@@ -1,7 +1,8 @@
-﻿namespace AmeisenBotX.Core.Data.Objects
+﻿namespace AmeisenBotX.Core.Data.Enums
 {
     public enum WowRace : int
     {
+        Unknown = -1,
         Human = 1,
         Orc = 2,
         Dwarf = 3,

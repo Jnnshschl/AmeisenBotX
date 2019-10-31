@@ -1,11 +1,11 @@
-﻿using System;
+﻿using AmeisenBotX.Memory.Win32;
+using Fasm;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
-using AmeisenBotX.Memory.Win32;
-using Fasm;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
 namespace AmeisenBotX.Memory
@@ -17,13 +17,55 @@ namespace AmeisenBotX.Memory
             SizeCache = new Dictionary<Type, int>();
         }
 
+        ~XMemory()
+        {
+            CloseHandle(MainThreadHandle);
+        }
+
         public ManagedFasm Fasm { get; private set; }
 
         public Process Process { get; private set; }
 
         public IntPtr ProcessHandle { get; private set; }
 
+        public IntPtr MainThreadHandle { get; private set; }
+
         private Dictionary<Type, int> SizeCache { get; }
+
+        public ProcessThread GetMainThread()
+        {
+            if (Process.MainWindowHandle == null)
+            {
+                return null;
+            }
+
+            int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
+            foreach (ProcessThread processThread in Process.Threads)
+            {
+                if (processThread.Id == id)
+                {
+                    return processThread;
+                }
+            }
+
+            return null;
+        }
+
+        public void SuspendMainThread()
+        {
+            if (OpenMainThread())
+            {
+                SuspendThread(MainThreadHandle);
+            }
+        }
+
+        public void ResumeMainThread()
+        {
+            if (OpenMainThread())
+            {
+                ResumeThread(MainThreadHandle);
+            }
+        }
 
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
@@ -235,6 +277,18 @@ namespace AmeisenBotX.Memory
 
         public bool WriteBytes(IntPtr address, byte[] bytes)
             => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
+
+        private bool OpenMainThread()
+        {
+            if (MainThreadHandle == null && MainThreadHandle != IntPtr.Zero)
+            {
+                ProcessThread mainThread = GetMainThread();
+                MainThreadHandle = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)mainThread.Id);
+                return MainThreadHandle != null && MainThreadHandle != IntPtr.Zero;
+            }
+
+            return true;
+        }
 
         private int SizeOf(Type type)
         {

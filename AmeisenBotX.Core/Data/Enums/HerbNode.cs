@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.Objects
+﻿namespace AmeisenBotX.Core.Data.Enums
 {
     public enum HerbNodes : int
     {

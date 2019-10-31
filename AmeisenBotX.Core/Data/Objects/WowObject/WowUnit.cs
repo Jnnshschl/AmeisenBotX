@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using AmeisenBotX.Core.Data.Enums;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
@@ -89,5 +90,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public BitVector32 UnitFlags { get; set; }
 
         public BitVector32 UnitFlagsDynamic { get; set; }
+
+        public WowRace Race { get; set; }
+
+        public WowClass Class { get; set; }
+
+        public WowGender Gender { get; set; }
+
+        public WowPowertype PowerType { get; set; }
     }
 }

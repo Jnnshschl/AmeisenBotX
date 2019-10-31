@@ -92,10 +92,12 @@
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />
     <Compile Include="Data\Enums\RollType.cs" />
+    <Compile Include="Data\Enums\WowGender.cs" />
+    <Compile Include="Data\Enums\WowPowertype.cs" />
     <Compile Include="Data\ObjectManager.cs" />
-    <Compile Include="Data\Objects\HerbNode.cs" />
-    <Compile Include="Data\Objects\OreNode.cs" />
-    <Compile Include="Data\Objects\WowClass.cs" />
+    <Compile Include="Data\Enums\HerbNode.cs" />
+    <Compile Include="Data\Enums\OreNode.cs" />
+    <Compile Include="Data\Enums\WowClass.cs" />
     <Compile Include="Data\Objects\WowObject\WowCorpse.cs" />
     <Compile Include="Data\Objects\WowObject\WowCorpseFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowDynobject.cs" />
@@ -105,7 +107,7 @@
     <Compile Include="Data\Objects\WowObject\WowLuaUnit.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitNpcFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitReaction.cs" />
-    <Compile Include="Data\Objects\WowRace.cs" />
+    <Compile Include="Data\Enums\WowRace.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnitDynamicFlags.cs" />
     <Compile Include="Data\Objects\WowObject\WowObject.cs" />
     <Compile Include="Data\Objects\WowObject\WowObjectType.cs" />

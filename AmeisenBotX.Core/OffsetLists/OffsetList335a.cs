@@ -64,17 +64,19 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr DescriptorMaxRage { get; } = new IntPtr(0x88);
 
-        public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x80);
+        public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x88);
 
         public IntPtr DescriptorRage { get; } = new IntPtr(0x68);
 
-        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x7C);
+        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x68);
 
         public IntPtr DescriptorTargetGuid { get; } = new IntPtr(0x48);
 
         public IntPtr DescriptorUnitFlags { get; } = new IntPtr(0xEC);
 
         public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x240);
+
+        public IntPtr DescriptorInfoFlags { get; } = new IntPtr(0x5C);
 
         public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8);
 
@@ -85,6 +87,8 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr ErrorMessage { get; } = new IntPtr(0xBCFB90);
 
         public IntPtr FirstObject { get; } = new IntPtr(0xAC);
+
+        public IntPtr FunctionCastSpellById { get; } = new IntPtr(0x80DA40);
 
         public IntPtr FunctionGetActivePlayerObject { get; } = new IntPtr(0x4038F0);
 

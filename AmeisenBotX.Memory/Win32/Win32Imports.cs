@@ -53,6 +53,32 @@ namespace AmeisenBotX.Memory.Win32
             Synchronize = 0x00100000
         }
 
+        [Flags]
+        public enum ThreadAccess : int
+        {
+            TERMINATE = (0x0001),
+            SUSPEND_RESUME = (0x0002),
+            GET_CONTEXT = (0x0008),
+            SET_CONTEXT = (0x0010),
+            SET_INFORMATION = (0x0020),
+            QUERY_INFORMATION = (0x0040),
+            SET_THREAD_TOKEN = (0x0080),
+            IMPERSONATE = (0x0100),
+            DIRECT_IMPERSONATION = (0x0200)
+        }
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr OpenThread(ThreadAccess threadAccess, bool inheritHandle, uint threadId);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint SuspendThread(IntPtr threadHandle);
+
+        [DllImport("kernel32.dll")]
+        public static extern int ResumeThread(IntPtr threadHandle);
+
+        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr threadHandle);
+
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
 
@@ -79,5 +105,8 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool WriteProcessMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
     }
 }

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.OffsetLists;
@@ -231,8 +232,9 @@ namespace AmeisenBotX.Core.Data
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorEnergy.ToInt32()), out int energy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxEnergy.ToInt32()), out int maxEnergy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorRuneenergy.ToInt32()), out int runeenergy)
-                //// && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxRuneenergy.ToInt32()), out int maxRuneenergy)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxRuneenergy.ToInt32()), out int maxRuneenergy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorLevel.ToInt32()), out int level)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorInfoFlags.ToInt32()), out int infoFlags)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.CurrentlyCastingSpellId.ToInt32()), out int currentlyCastingSpellId)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int currentlyChannelingSpellId))
             {
@@ -260,6 +262,10 @@ namespace AmeisenBotX.Core.Data
                     Runeenergy = runeenergy,
                     MaxRuneenergy = 100,
                     Level = level,
+                    Race = Enum.IsDefined(typeof(WowRace), (WowRace)((infoFlags >> 0) & 0xFF)) ? (WowRace)((infoFlags >> 0) & 0xFF) : WowRace.Unknown,
+                    Class = Enum.IsDefined(typeof(WowClass), (WowClass)((infoFlags >> 8) & 0xFF)) ? (WowClass)((infoFlags >> 8) & 0xFF) : WowClass.Unknown,
+                    Gender = Enum.IsDefined(typeof(WowGender), (WowGender)((infoFlags >> 16) & 0xFF)) ? (WowGender)((infoFlags >> 16) & 0xFF) : WowGender.Unknown,
+                    PowerType = Enum.IsDefined(typeof(WowPowertype), (WowPowertype)((infoFlags >> 24) & 0xFF)) ? (WowPowertype)((infoFlags >> 24) & 0xFF) : WowPowertype.Unknown,
                     IsAutoAttacking = isAutoAttacking == 1,
                     CurrentlyCastingSpellId = currentlyCastingSpellId,
                     CurrentlyChannelingSpellId = currentlyChannelingSpellId

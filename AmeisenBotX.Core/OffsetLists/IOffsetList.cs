@@ -76,6 +76,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr DescriptorUnitFlagsDynamic { get; }
 
+        IntPtr DescriptorInfoFlags { get; }
+
         IntPtr EndSceneOffset { get; }
 
         IntPtr EndSceneOffsetDevice { get; }
@@ -87,6 +89,8 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr FirstObject { get; }
 
         IntPtr FunctionGetActivePlayerObject { get; }
+
+        IntPtr FunctionCastSpellById { get; }
 
         IntPtr FunctionGetLocalizedText { get; }
 

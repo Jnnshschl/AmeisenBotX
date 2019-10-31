@@ -10,6 +10,8 @@ using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -108,6 +110,24 @@ namespace AmeisenBotX.Core.Hook
             else
             {
                 LuaDoString($"CastSpellByName(\"{name}\");");
+            }
+        }
+
+        public void CastSpeelById(int spellId)
+        {
+            if (spellId > 0)
+            {
+                string[] asmLocalText = new string[]
+                {
+                    "PUSH 0",
+                    "PUSH 0",
+                    "PUSH 0",
+                    $"PUSH {spellId}",
+                    $"CALL 0x{OffsetList.FunctionCastSpellById.ToString("X")}",
+                    "ADD ESP, 0x10",
+                };
+
+                InjectAndExecute(asmLocalText, true);
             }
         }
 
@@ -269,14 +289,14 @@ namespace AmeisenBotX.Core.Hook
                     }
 
                     string[] asmLocalText = new string[]
-                {
-                    $"CALL 0x{OffsetList.FunctionGetActivePlayerObject.ToString("X")}",
-                    "MOV ECX, EAX",
-                    "PUSH -1",
-                    $"PUSH 0x{memAlloc.ToString("X")}",
-                    $"CALL 0x{OffsetList.FunctionGetLocalizedText.ToString("X")}",
-                    "RETN",
-                };
+                    {
+                        $"CALL 0x{OffsetList.FunctionGetActivePlayerObject.ToString("X")}",
+                        "MOV ECX, EAX",
+                        "PUSH -1",
+                        $"PUSH 0x{memAlloc.ToString("X")}",
+                        $"CALL 0x{OffsetList.FunctionGetLocalizedText.ToString("X")}",
+                        "RETN",
+                    };
 
                     string result = Encoding.UTF8.GetString(InjectAndExecute(asmLocalText, true));
                     XMemory.FreeMemory(memAlloc);
@@ -610,6 +630,17 @@ namespace AmeisenBotX.Core.Hook
                 XMemory.Fasm.AddLine("TEST EBX, 1");
                 XMemory.Fasm.AddLine("JE @out");
 
+                // set register back to zero
+                XMemory.Fasm.AddLine("XOR EBX, EBX");
+
+                // check for world to be loaded
+                // we dont want to execute code in
+                // the loadingscreen, cause that
+                // mostly results in crashes
+                XMemory.Fasm.AddLine($"MOV EBX, [{OffsetList.IsWorldLoaded.ToInt32()}]");
+                XMemory.Fasm.AddLine("TEST EBX, 1");
+                XMemory.Fasm.AddLine("JE @out");
+
                 // execute our stuff and get return address
                 XMemory.Fasm.AddLine($"MOV EDX, {CodecaveForExecution.ToInt32()}");
                 XMemory.Fasm.AddLine("CALL EDX");
@@ -697,6 +728,16 @@ namespace AmeisenBotX.Core.Hook
             XMemory.Write(OffsetList.ClickToMoveAction, clickToMoveType);
         }
 
+        public void SuspendMainWowThread()
+        {
+            XMemory.SuspendMainThread();
+        }
+
+        public void ResumeMainWowThread()
+        {
+            XMemory.ResumeMainThread();
+        }
+
         private bool AllocateCodeCaves()
         {
             // integer to check if there is code waiting to be executed
@@ -708,7 +749,7 @@ namespace AmeisenBotX.Core.Hook
             CodeToExecuteAddress = codeToExecuteAddress;
             XMemory.Write(CodeToExecuteAddress, 0);
 
-            // integer to save the address of the return value
+            // integer to save the pointer to the return value
             if (!XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
             {
                 return false;
@@ -717,7 +758,7 @@ namespace AmeisenBotX.Core.Hook
             ReturnValueAddress = returnValueAddress;
             XMemory.Write(ReturnValueAddress, 0);
 
-            // codecave to check if we need to execute something
+            // codecave to check wether we need to execute something
             if (!XMemory.AllocateMemory(128, out IntPtr codecaveForCheck))
             {
                 return false;
