@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Common
     {
         private const uint WM_KEYDOWN = 0x100;
         private const uint WM_KEYUP = 0x101;
-        private const uint WM_KEYPRESS = 0x101;
+        private const uint WM_KEYPRESS = 0x102;
 
         private const uint WM_MOUSEMOVE = 0x200;
         private const uint WM_LBUTTONDOWN = 0x201;

@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using AmeisenBotX.Core;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using Newtonsoft.Json;
