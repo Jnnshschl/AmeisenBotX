@@ -1,0 +1,42 @@
+﻿<Window x:Class="AmeisenBotX.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AmeisenBotX"
+        mc:Ignorable="d"
+        Title="Settings" Height="240" Width="420" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Window.BorderBrush>
+        <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+    </Window.BorderBrush>
+    <Window.Background>
+        <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+    </Window.Background>
+    <Grid>
+        <WrapPanel x:Name="mainWrapPanel">
+
+        </WrapPanel>
+        <Button x:Name="buttonExit" Margin="0,0,0,0" Click="ButtonExit_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Content="X">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+            </Button.Background>
+        </Button>
+        <Button x:Name="buttonSave" Margin="0,0,20.333,0" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Content="💾" FontSize="10" Click="ButtonSave_Click">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+            </Button.Background>
+        </Button>
+    </Grid>
+</Window>

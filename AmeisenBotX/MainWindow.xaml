@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="MainWindow" Height="240" Width="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico">
+        Title="AmeisenBot" Height="240" Width="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -23,7 +23,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonExit" Content="X" Margin="0,0,1,0" Click="ButtonExit_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana">
+        <Button x:Name="buttonExit" Content="X" Margin="0,0,0,0" Click="ButtonExit_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
@@ -55,7 +55,7 @@
         </ProgressBar>
         <ProgressBar x:Name="progressbarExp" HorizontalAlignment="Left" Height="10" Margin="10,77,0,0" VerticalAlignment="Top" Width="100" BorderThickness="1,0,0,1">
             <ProgressBar.Foreground>
-                <SolidColorBrush Color="{DynamicResource PlayerExpBar}" />
+                <SolidColorBrush Color="#FFB232B2" />
             </ProgressBar.Foreground>
             <ProgressBar.BorderBrush>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
@@ -116,5 +116,16 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
+        <Button x:Name="buttonSettings" Content="⚒" Margin="0,0,20,0" Click="ButtonSettings_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+            </Button.Background>
+        </Button>
     </Grid>
 </Window>
