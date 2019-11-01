@@ -64,12 +64,10 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly)
+                if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) == WowUnitReaction.Friendly)
                 {
                     HookManager.ClearTarget();
                 }
-
-                HookManager.ClearTargetIfDead();
 
                 // Select a new target if our current target is invalid
                 if (((CombatClass == null
@@ -79,11 +77,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                     || !CurrentTarget.IsInCombat)
                     && SelectTargetToAttack(out WowUnit target))
                 {
-                    if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly)
-                    {
-                        HookManager.ClearTarget();
-                    }
-
                     HookManager.TargetGuid(target.Guid);
                 }
 
