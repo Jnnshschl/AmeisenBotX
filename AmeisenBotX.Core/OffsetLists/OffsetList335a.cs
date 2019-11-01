@@ -154,11 +154,11 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr RealmName { get; } = new IntPtr(0xC79B9E);
 
-        public IntPtr Runes { get; } = new IntPtr(0x824388);
+        public IntPtr Runes { get; } = new IntPtr(0xC24388);
 
-        public IntPtr RuneType { get; } = new IntPtr(0x824304);
+        public IntPtr RuneType { get; } = new IntPtr(0xC24304);
 
-        public IntPtr RuneCooldown { get; } = new IntPtr(0x824364);
+        public IntPtr RuneCooldown { get; } = new IntPtr(0xC24364);
 
         public IntPtr TargetGuid { get; } = new IntPtr(0xBD07B0);
 
