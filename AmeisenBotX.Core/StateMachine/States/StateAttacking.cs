@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                HookManager.ClearTargetIfDead();
+                //HookManager.ClearTargetIfDead();
 
                 // Select a new target if our current target is invalid
                 if ((CombatClass == null || !CombatClass.HandlesTargetSelection)
