@@ -64,11 +64,11 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr DescriptorMaxRage { get; } = new IntPtr(0x88);
 
-        public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x88);
+        public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x9C);
 
         public IntPtr DescriptorRage { get; } = new IntPtr(0x68);
 
-        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x68);
+        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x7C);
 
         public IntPtr DescriptorTargetGuid { get; } = new IntPtr(0x48);
 

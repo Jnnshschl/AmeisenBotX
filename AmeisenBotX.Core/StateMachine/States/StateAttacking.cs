@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (ObjectManager.Player.Position.GetDistance(target.Position) < 3.0)
             {
-                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(500))
+                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(10000))
                 {
                     // HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
                     CharacterManager.Face(target.Position, target.Guid);
@@ -184,6 +184,16 @@ namespace AmeisenBotX.Core.StateMachine.States
                     if (BotUtils.IsValidUnit(target) && target.IsInCombat)
                     {
                         return true;
+                    }
+                    else
+                    {
+                        HookManager.TargetNearestEnemy();
+                        target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.Player.Guid);
+
+                        if (BotUtils.IsValidUnit(target) && target.IsInCombat)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

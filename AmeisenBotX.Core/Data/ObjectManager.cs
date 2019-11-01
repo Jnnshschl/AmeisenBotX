@@ -259,8 +259,8 @@ namespace AmeisenBotX.Core.Data
                     MaxEnergy = maxEnergy,
                     Rage = rage / 10,
                     MaxRage = maxRage / 10,
-                    Runeenergy = runeenergy,
-                    MaxRuneenergy = 100,
+                    Runeenergy = runeenergy / 10,
+                    MaxRuneenergy = maxRuneenergy / 10,
                     Level = level,
                     Race = Enum.IsDefined(typeof(WowRace), (WowRace)((infoFlags >> 0) & 0xFF)) ? (WowRace)((infoFlags >> 0) & 0xFF) : WowRace.Unknown,
                     Class = Enum.IsDefined(typeof(WowClass), (WowClass)((infoFlags >> 8) & 0xFF)) ? (WowClass)((infoFlags >> 8) & 0xFF) : WowClass.Unknown,
@@ -347,7 +347,8 @@ namespace AmeisenBotX.Core.Data
                         WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType));
                         break;
 
-                    default: WowObjects.Add(ReadWowObject(activeObject, wowObjectType)); 
+                    default:
+                        WowObjects.Add(ReadWowObject(activeObject, wowObjectType));
                         break;
                 }
 
@@ -433,7 +434,7 @@ namespace AmeisenBotX.Core.Data
 
         private string ReadUnitName(IntPtr activeObject, ulong guid)
         {
-            if (BotCache.TryGetName(guid,out string cachedName))
+            if (BotCache.TryGetName(guid, out string cachedName))
             {
                 return cachedName;
             }
