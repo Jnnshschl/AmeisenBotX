@@ -14,7 +14,9 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         string ItemLink { get; }
 
-        EquipmentSlot EquipLocation { get; }
+        string EquipLocation { get; }
+
+        EquipmentSlot EquipSlot { get; }
 
         ItemQuality ItemQuality { get; }
 

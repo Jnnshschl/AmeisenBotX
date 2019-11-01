@@ -20,8 +20,8 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         [JsonProperty("link")]
         public string ItemLink { get; set; }
 
-        [JsonProperty("equiplocation")]
-        public EquipmentSlot EquipLocation { get; set; } = EquipmentSlot.NOT_EQUIPABLE;
+        [JsonProperty("equipslot")]
+        public EquipmentSlot EquipSlot { get; set; } = EquipmentSlot.NOT_EQUIPABLE;
 
         [JsonProperty("quality")]
         public ItemQuality ItemQuality { get; set; }
@@ -46,5 +46,8 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         [JsonProperty("maxDurability")]
         public int MaxDurability { get; set; }
+
+        [JsonProperty("equiplocation")]
+        public string EquipLocation { get; set; }
     }
 }

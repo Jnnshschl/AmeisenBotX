@@ -61,19 +61,28 @@ namespace AmeisenBotX.Core.Event
                     {
                         foreach (WowEvent rawEvent in finalEvents)
                         {
-                            if (EventDictionary.ContainsKey(rawEvent.EventName))
+                            try
                             {
-                                EventDictionary[rawEvent.EventName].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
+                                if (EventDictionary.ContainsKey(rawEvent.EventName))
+                                {
+                                    EventDictionary[rawEvent.EventName].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                AmeisenLogger.Instance.Log($"Failed to invoke {rawEvent.EventName}:\n{e.ToString()}", LogLevel.Error);
                             }
                         }
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    AmeisenLogger.Instance.Log($"Failed to parse events:\n{e.ToString()}", LogLevel.Error);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed to read events:\n{e.ToString()}", LogLevel.Error);
             }
         }
 

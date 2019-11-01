@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -155,22 +156,20 @@ namespace AmeisenBotX.Core
             EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
             EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
             EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
-            EventHookManager.Subscribe("ITEM_PUSH", OnNewItemReceived);
+            EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
 
             //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
             //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
         }
 
-        private void OnNewItemReceived(long timestamp, List<string> args)
+        private void OnBagChanged(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnNewItemReceived: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
-            if (int.TryParse(args[0], out int bagSlotId))
-            {
-                string json = HookManager.GetItemBySlot(bagSlotId);
-                WowBasicItem item = ItemFactory.ParseItem(json);
-                item = ItemFactory.BuildSpecificItem(item);
-            }
+            AmeisenLogger.Instance.Log($"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            XMemory.Write(OffsetList.CvarMaxFps, 100);
+            CharacterManager.Inventory.Update();
+            CharacterManager.Equipment.Update();
+            CharacterManager.UpdateCharacterGear();
+            XMemory.Write(OffsetList.CvarMaxFps, Config.MaxFps);
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)
@@ -179,13 +178,14 @@ namespace AmeisenBotX.Core
 
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemName = HookManager.GetRollItemName(rollId);
+                string itemName = HookManager.GetLootRollItemLink(rollId);
                 string json = HookManager.GetItemByName(itemName);
                 WowBasicItem item = ItemFactory.ParseItem(json);
                 item = ItemFactory.BuildSpecificItem(item);
 
-                if (CharacterManager.DoINeedThatItem(item))
+                if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                 {
+                    AmeisenLogger.Instance.Log($"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
                     HookManager.RollOnItem(rollId, RollType.Need);
                     return;
                 }

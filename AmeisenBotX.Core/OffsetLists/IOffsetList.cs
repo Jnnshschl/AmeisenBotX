@@ -42,6 +42,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr CurrentObjectManager { get; }
 
+        IntPtr CvarMaxFps { get; }
+
         IntPtr DescriptorEnergy { get; }
 
         IntPtr DescriptorExp { get; }

@@ -1,9 +1,12 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,8 +37,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IMovementEngine MovementEngine { get; set; }
 
+        private int TryCount { get; set; }
+
         public override void Enter()
         {
+            MovementEngine.CurrentPath.Clear();
             PlayerToFollow = null;
 
             // TODO: make this crap less redundant
@@ -68,6 +74,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
+
+            TryCount = 0;
         }
 
         public override void Execute()
@@ -78,10 +86,11 @@ namespace AmeisenBotX.Core.StateMachine.States
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
 
-            if (MovementEngine.CurrentPath?.Count == 0 || CurrentMovementTarget.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance)
+            if (MovementEngine.CurrentPath?.Count == 0 || CurrentMovementTarget.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance || TryCount == 5)
             {
                 CurrentMovementTarget = PlayerToFollow.Position;
                 BuildNewPath();
+                TryCount = 0;
             }
             else
             {
@@ -92,6 +101,10 @@ namespace AmeisenBotX.Core.StateMachine.States
                     if (needToJump)
                     {
                         CharacterManager.Jump();
+
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 200, 500);
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 200, 500);
+                        TryCount++;
                     }
                 }
             }
@@ -99,6 +112,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
+            MovementEngine.CurrentPath.Clear();
         }
 
         private void BuildNewPath()

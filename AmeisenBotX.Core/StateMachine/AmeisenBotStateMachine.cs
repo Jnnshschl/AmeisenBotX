@@ -128,15 +128,18 @@ namespace AmeisenBotX.Core.StateMachine
                 {
                     HandlePlayerDeadOrGhostState();
 
-                    if (Config.AutoDodgeAoeSpells
-                        && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
+                    if (CurrentState.Key != AmeisenBotState.Dead && CurrentState.Key != AmeisenBotState.Ghost)
                     {
-                        SetState(AmeisenBotState.InsideAoeDamage);
-                    }
+                        if (Config.AutoDodgeAoeSpells
+                            && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
+                        {
+                            SetState(AmeisenBotState.InsideAoeDamage);
+                        }
 
-                    if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
-                    {
-                        SetState(AmeisenBotState.Attacking);
+                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
+                        {
+                            SetState(AmeisenBotState.Attacking);
+                        }
                     }
                 }
             }
@@ -199,7 +202,7 @@ namespace AmeisenBotX.Core.StateMachine
             }
             else
             {
-                if (LastGhostCheck + TimeSpan.FromSeconds(3) < DateTime.Now)
+                if (LastGhostCheck + TimeSpan.FromSeconds(8) < DateTime.Now)
                 {
                     bool isGhost = HookManager.IsGhost("player");
                     LastGhostCheck = DateTime.Now;

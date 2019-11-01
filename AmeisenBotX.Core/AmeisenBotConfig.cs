@@ -30,6 +30,8 @@ namespace AmeisenBotX.Core
 
         public int MinFollowDistance { get; set; } = 6;
 
+        public int MaxFps { get; set; } = 20;
+
         public int NameshServerPort { get; set; } = 47110;
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";

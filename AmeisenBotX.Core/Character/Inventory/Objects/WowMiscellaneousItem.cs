@@ -9,7 +9,7 @@
             Subtype = wowBasicItem.Subtype;
             Name = wowBasicItem.Name;
             ItemLink = wowBasicItem.ItemLink;
-            EquipLocation = wowBasicItem.EquipLocation;
+            EquipSlot = wowBasicItem.EquipSlot;
             ItemQuality = wowBasicItem.ItemQuality;
             ItemLevel = wowBasicItem.ItemLevel;
             RequiredLevel = wowBasicItem.RequiredLevel;
@@ -18,6 +18,7 @@
             MaxStack = wowBasicItem.MaxStack;
             Durability = wowBasicItem.Durability;
             MaxDurability = wowBasicItem.MaxDurability;
+            EquipLocation = wowBasicItem.EquipLocation;
         }
     }
 }

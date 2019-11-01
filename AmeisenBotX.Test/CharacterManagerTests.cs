@@ -105,7 +105,7 @@ namespace AmeisenBotX.Test
             Assert.AreEqual(64, item.RequiredLevel);
             Assert.AreEqual("NONE", item.Subtype);
             Assert.AreEqual(1, item.MaxStack);
-            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item.EquipLocation);
+            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item.EquipSlot);
             Assert.AreEqual(650, item.Price);
         }
 
@@ -124,9 +124,9 @@ namespace AmeisenBotX.Test
             Assert.IsInstanceOfType(item1, typeof(WowArmor));
             Assert.IsInstanceOfType(item2, typeof(WowWeapon));
 
-            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item0.EquipLocation);
-            Assert.AreEqual(EquipmentSlot.INVSLOT_CHEST, item1.EquipLocation);
-            Assert.AreEqual(EquipmentSlot.INVSLOT_RANGED, item2.EquipLocation);
+            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item0.EquipSlot);
+            Assert.AreEqual(EquipmentSlot.INVSLOT_CHEST, item1.EquipSlot);
+            Assert.AreEqual(EquipmentSlot.INVSLOT_RANGED, item2.EquipSlot);
 
             Assert.AreEqual(ArmorType.CLOTH, ((WowArmor)item1).ArmorType);
             Assert.AreEqual(WeaponType.GUNS, ((WowWeapon)item2).WeaponType);

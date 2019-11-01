@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
@@ -38,8 +39,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IMovementEngine MovementEngine { get; set; }
 
+        private int TryCount { get; set; }
+
         public override void Enter()
         {
+            MovementEngine.CurrentPath.Clear();
+            TryCount = 0;
         }
 
         public override void Execute()
@@ -52,9 +57,10 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out Vector3 corpsePosition)
                 && ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
             {
-                if (MovementEngine.CurrentPath?.Count == 0)
+                if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
                 {
                     BuildNewPath(corpsePosition);
+                    TryCount = 0;
                 }
                 else
                 {
@@ -65,6 +71,10 @@ namespace AmeisenBotX.Core.StateMachine.States
                         if (needToJump)
                         {
                             CharacterManager.Jump();
+
+                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 200, 500);
+                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 200, 500);
+                            TryCount++;
                         }
                     }
                 }
@@ -77,6 +87,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
+            MovementEngine.CurrentPath.Clear();
         }
 
         private void BuildNewPath(Vector3 corpsePosition)

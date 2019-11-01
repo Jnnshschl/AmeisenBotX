@@ -49,6 +49,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (!HookManager.IsWoWHooked)
             {
                 HookManager.SetupEndsceneHook();
+                HookManager.SetMaxFps((byte)Config.MaxFps);
 
                 EventHookManager.Start();
 

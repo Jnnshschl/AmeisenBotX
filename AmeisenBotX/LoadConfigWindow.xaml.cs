@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -36,6 +37,17 @@ namespace AmeisenBotX
             }
 
             comboboxSelectedConfig.Items.Add("New Config");
+
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1)
+            {
+                string botnameParam = args[1];
+
+                if (comboboxSelectedConfig.Items.Contains(botnameParam))
+                {
+                    comboboxSelectedConfig.SelectedItem = botnameParam;
+                }
+            }
         }
 
         private void ComboboxSelectedConfig_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
             Subtype = wowBasicItem.Subtype;
             Name = wowBasicItem.Name;
             ItemLink = wowBasicItem.ItemLink;
-            EquipLocation = wowBasicItem.EquipLocation;
+            EquipSlot = wowBasicItem.EquipSlot;
             ItemQuality = wowBasicItem.ItemQuality;
             ItemLevel = wowBasicItem.ItemLevel;
             RequiredLevel = wowBasicItem.RequiredLevel;
@@ -23,6 +23,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
             MaxStack = wowBasicItem.MaxStack;
             Durability = wowBasicItem.Durability;
             MaxDurability = wowBasicItem.MaxDurability;
+            EquipLocation = wowBasicItem.EquipLocation;
             ArmorType = Enum.TryParse(Subtype.ToUpper(), out ArmorType armorType) ? armorType : ArmorType.MISCELLANEOUS;
         }
     }

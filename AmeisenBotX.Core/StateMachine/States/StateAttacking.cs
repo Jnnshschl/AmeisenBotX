@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
@@ -7,6 +8,7 @@ using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,8 +43,14 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private WowUnit CurrentTarget => ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.Player.TargetGuid);
 
+        private DateTime LastRotationCheck { get; set; }
+
+        private int TryCount { get; set; }
+
         public override void Enter()
         {
+            HookManager.ClearTarget();
+            MovementEngine.CurrentPath.Clear();
         }
 
         public override void Execute()
@@ -56,13 +64,19 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
+                HookManager.ClearTargetIfDead();
+
                 // Select a new target if our current target is invalid
                 if ((CombatClass == null || !CombatClass.HandlesTargetSelection)
                     && !BotUtils.IsValidUnit(CurrentTarget)
                     && (CurrentTarget == null || CurrentTarget.IsInCombat)
-                    && HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly
                     && SelectTargetToAttack(out WowUnit target))
                 {
+                    if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly)
+                    {
+                        HookManager.ClearTarget();
+                    }
+
                     HookManager.TargetGuid(target.Guid);
                 }
 
@@ -73,11 +87,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                         // use the default MovementEngine to move if 
                         // the CombatClass doesnt handle Movement
                         HandleMovement(CurrentTarget);
-
-                        if (BotMath.GetFacingAngle(ObjectManager.Player.Position, CurrentTarget.Position) > 0.3)
-                        {
-                            HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
-                        }
                     }
 
                     if (CombatClass != null)
@@ -97,29 +106,42 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
+            MovementEngine.CurrentPath.Clear();
+            HookManager.ClearTarget();
         }
 
         private void HandleMovement(WowUnit target)
         {
-            if (MovementEngine.CurrentPath?.Count == 0)
+            if (ObjectManager.Player.Position.GetDistance(target.Position) < 3.0)
             {
-                // keep close to target
-                double distance = ObjectManager.Player.Position.GetDistance(target.Position);
-                if (distance > 3.0)
+                if (DateTime.Now - LastRotationCheck > TimeSpan.FromSeconds(1))
                 {
-                    BuildNewPath(target);
+                    // HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
+                    CharacterManager.Face(target.Position, target.Guid);
+                    LastRotationCheck = DateTime.Now;
                 }
+
+                return;
+            }
+
+            if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
+            {
+                BuildNewPath(target);
             }
             else
             {
-                if (MovementEngine.CurrentPath != null
+                if (MovementEngine.CurrentPath?.Count > 0
                     && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                 {
-                    CharacterManager.MoveToPosition(positionToGoTo);
+                    CharacterManager.MoveToPosition(positionToGoTo, 6.28f);
 
                     if (needToJump)
                     {
                         CharacterManager.Jump();
+
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 200, 500);
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 200, 500);
+                        TryCount++;
                     }
                 }
             }
@@ -133,7 +155,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private bool SelectTargetToAttack(out WowUnit target)
         {
-            List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().ToList();
+            List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly).ToList();
             if (wowUnits.Count > 0)
             {
                 target = wowUnits.FirstOrDefault(t => t.Guid == ObjectManager.TargetGuid);
@@ -144,9 +166,11 @@ namespace AmeisenBotX.Core.StateMachine.States
                 else
                 {
                     // find a new target from group
-                    target = ObjectManager.WowObjects.OfType<WowPlayer>()
+                    ulong targetGuid = ObjectManager.WowObjects.OfType<WowPlayer>()
                         .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-                        .FirstOrDefault(r => r.IsInCombat);
+                        .FirstOrDefault(r => r.IsInCombat).TargetGuid;
+
+                    target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == targetGuid);
 
                     if (BotUtils.IsValidUnit(target) && target.IsInCombat)
                     {

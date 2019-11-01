@@ -55,7 +55,7 @@
         </ProgressBar>
         <ProgressBar x:Name="progressbarExp" HorizontalAlignment="Left" Height="10" Margin="10,77,0,0" VerticalAlignment="Top" Width="100" BorderThickness="1,0,0,1">
             <ProgressBar.Foreground>
-                <SolidColorBrush Color="#FFB232B2" />
+                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
             </ProgressBar.Foreground>
             <ProgressBar.BorderBrush>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />

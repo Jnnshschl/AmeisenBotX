@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
@@ -59,6 +60,11 @@ namespace AmeisenBotX.Core.Hook
                     return false;
                 }
             }
+        }
+
+        public void SetMaxFps(byte maxFps)
+        {
+            XMemory.Write(OffsetList.CvarMaxFps, maxFps);
         }
 
         public void ClickOnTerrain(Vector3 position)
@@ -216,7 +222,7 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        private bool IsRuneReady(int runeId)
+        public bool IsRuneReady(int runeId)
         {
             if (XMemory.ReadByte(OffsetList.Runes, out byte runeStatus))
             {
@@ -226,6 +232,28 @@ namespace AmeisenBotX.Core.Hook
             {
                 return false;
             }
+        }
+
+        public List<string> GetSkills()
+        {
+            LuaDoString("abSkillList=\"\"abSkillCount=GetNumSkillLines()for a=1,abSkillCount do local b,c=GetSkillLineInfo(a)if not c then abSkillList=abSkillList..b;if a<abSkillCount then abSkillList=abSkillList..\"; \"end end end");
+
+            try
+            {
+                return new List<string>(GetLocalizedText("abSkillList").Split(';'));
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        public bool IsSpellKnown(int spellId, bool isPetSpell = false)
+        {
+            LuaDoString($"abIsSpellKnown = IsSpellKnown({spellId}, {isPetSpell});");
+            string rawValue = GetLocalizedText("abIsSpellKnown");
+
+            return bool.TryParse(rawValue, out bool result) ? result : false;
         }
 
         public void FaceUnit(WowPlayer player, Vector3 positionToFace)
@@ -270,15 +298,35 @@ namespace AmeisenBotX.Core.Hook
             return resultLowered;
         }
 
+        public void ReplaceItem(IWowItem currentItem, IWowItem newItem)
+        {
+            if (currentItem == null)
+            {
+                LuaDoString($"EquipItemByName(\"{newItem.Name}\");");
+            }
+            else
+            {
+                LuaDoString($"EquipItemByName(\"{newItem.Name}\", {(int)currentItem.EquipSlot});");
+            }
+
+            CofirmBop();
+        }
+
         public string GetRollItemName(int rollId)
         {
             LuaDoString($"_, abRollItemName = GetLootRollItemInfo({rollId});");
             return GetLocalizedText("abRollItemName");
         }
 
+        public string GetLootRollItemLink(int rollId)
+        {
+            LuaDoString($"abRollItemLink = GetLootRollItemLink({rollId});");
+            return GetLocalizedText("abRollItemLink");
+        }
+
         public string GetItemBySlot(int itemslot)
         {
-            string command = $"abotItemSlot={itemslot};abotItemInfoResult='noItem';abId=GetInventoryItemID('player',abotItemSlot);abCount=GetInventoryItemCount('player',abotItemSlot);abQuality=GetInventoryItemQuality('player',abotItemSlot);abCurrentDurability,abMaxDurability=GetInventoryItemDurability(abotItemSlot);abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',abotItemSlot);abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(GetInventoryItemLink('player',abotItemSlot));abotItemInfoResult='{{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';";
+            string command = $"abotItemSlot={itemslot};abotItemInfoResult='noItem';abId=GetInventoryItemID('player',abotItemSlot);abCount=GetInventoryItemCount('player',abotItemSlot);abQuality=GetInventoryItemQuality('player',abotItemSlot);abCurrentDurability,abMaxDurability=GetInventoryItemDurability(abotItemSlot);abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',abotItemSlot);abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(GetInventoryItemLink('player',abotItemSlot));abotItemInfoResult='{{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equipslot\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';";
 
             LuaDoString(command);
             return GetLocalizedText("abotItemInfoResult");

@@ -195,5 +195,7 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr WowUnitPosition { get; } = new IntPtr(0x798);
 
         public IntPtr ZoneId { get; } = new IntPtr(0xAF4E48);
+
+        public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
     }
 }
