@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     HookManager.TargetGuid(target.Guid);
                 }
 
-                if (CurrentTarget.IsDead)
+                if (CurrentTarget == null || CurrentTarget.IsDead)
                 {
                     HookManager.ClearTarget();
                     return;

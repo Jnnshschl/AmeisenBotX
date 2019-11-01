@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Movement
                 return false;
             }
 
-            double distance = currentPosition.GetDistance(SelectedWaypoint);
+            double distance = currentPosition.GetDistance2D(SelectedWaypoint);
 
             if(SelectedWaypoint != Vector3.Zero && distance > 1024)
             {
