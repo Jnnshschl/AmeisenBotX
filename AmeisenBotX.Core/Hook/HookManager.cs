@@ -831,10 +831,10 @@ namespace AmeisenBotX.Core.Hook
             => SendChatMessage("/targetenemy [harm][nodead]");
 
         public void ClearTarget()
-            => SendChatMessage("/clearttarget");
+            => SendChatMessage("/cleartarget");
 
         public void ClearTargetIfDead()
-            => SendChatMessage("/clearttarget [dead]");
+            => SendChatMessage("/cleartarget [dead]");
 
         public void WriteCtmValues(Vector3 targetPosition, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float distance = 1.5f)
         {

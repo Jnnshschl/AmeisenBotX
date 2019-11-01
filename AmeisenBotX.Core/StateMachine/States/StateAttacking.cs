@@ -64,12 +64,19 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                //HookManager.ClearTargetIfDead();
+                if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly)
+                {
+                    HookManager.ClearTarget();
+                }
+
+                HookManager.ClearTargetIfDead();
 
                 // Select a new target if our current target is invalid
-                if ((CombatClass == null || !CombatClass.HandlesTargetSelection)
-                    && !BotUtils.IsValidUnit(CurrentTarget)
-                    && (CurrentTarget == null || CurrentTarget.IsInCombat)
+                if (((CombatClass == null
+                    || !CombatClass.HandlesTargetSelection)
+                    || !BotUtils.IsValidUnit(CurrentTarget)
+                    || CurrentTarget == null
+                    || !CurrentTarget.IsInCombat)
                     && SelectTargetToAttack(out WowUnit target))
                 {
                     if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) != WowUnitReaction.Friendly)
@@ -78,6 +85,12 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
 
                     HookManager.TargetGuid(target.Guid);
+                }
+
+                if (CurrentTarget.IsDead)
+                {
+                    HookManager.ClearTarget();
+                    return;
                 }
 
                 if (CurrentTarget != null)
