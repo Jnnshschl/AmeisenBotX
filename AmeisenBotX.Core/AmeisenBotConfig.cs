@@ -14,6 +14,8 @@ namespace AmeisenBotX.Core
 
         public bool AutostartWow { get; set; } = false;
 
+        public bool AutocloseWow { get; set; } = false;
+
         public int CharacterSlot { get; set; } = 0;
 
         public string CombatClassName { get; set; } = "ClassSpec";

@@ -20,6 +20,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             MovementEngine = movementEngine;
         }
 
+        public Vector3 CurrentMovementTarget { get; private set; }
+
         private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
@@ -76,8 +78,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
 
-            if (MovementEngine.CurrentPath?.Count == 0)
+            if (MovementEngine.CurrentPath?.Count == 0 || CurrentMovementTarget.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance)
             {
+                CurrentMovementTarget = PlayerToFollow.Position;
                 BuildNewPath();
             }
             else

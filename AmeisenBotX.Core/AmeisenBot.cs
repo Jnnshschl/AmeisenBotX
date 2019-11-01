@@ -33,9 +33,9 @@ namespace AmeisenBotX.Core
         private double currentExecutionMs;
         private int stateMachineTimerBusy;
 
-        public AmeisenBot(string botDataPath, string playername, AmeisenBotConfig config)
+        public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config)
         {
-            AmeisenLogger.Instance.ChangeLogFolder(Path.Combine(botDataPath, playername, "log/"));
+            AmeisenLogger.Instance.ChangeLogFolder(Path.Combine(botDataPath, accountName, "log/"));
             AmeisenLogger.Instance.ActiveLogLevel = LogLevel.Verbose;
             AmeisenLogger.Instance.Start();
             AmeisenLogger.Instance.Log("AmeisenBot starting...", LogLevel.Master);
@@ -45,8 +45,8 @@ namespace AmeisenBotX.Core
 
             Config = config;
 
-            PlayerName = playername;
-            AmeisenLogger.Instance.Log($"Playername: {botDataPath}", LogLevel.Master);
+            AccountName = accountName;
+            AmeisenLogger.Instance.Log($"AccountName: {botDataPath}", LogLevel.Master);
 
             BotDataPath = botDataPath;
             AmeisenLogger.Instance.Log($"BotDataPath: {botDataPath}", LogLevel.Verbose);
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log($"Using OffsetList: {OffsetList.GetType().ToString()}", LogLevel.Master);
 
             XMemory = new XMemory();
-            BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, playername, $"{playername}Cache.bin"));
+            BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, accountName, "cache.bin"));
             ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
             CharacterManager = new CharacterManager(XMemory, config, OffsetList, ObjectManager, HookManager);
@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core
 
         public string BotDataPath { get; }
 
-        public string PlayerName { get; }
+        public string AccountName { get; }
 
         public IAmeisenBotCache BotCache { get; set; }
 
@@ -228,6 +228,11 @@ namespace AmeisenBotX.Core
 
             BotCache.Save();
 
+            if (Config.AutocloseWow)
+            {
+                XMemory.Process.Close();
+            }
+
             AmeisenLogger.Instance.Log($"Stopping AmeisenBot...", LogLevel.Master);
             AmeisenLogger.Instance.Stop();
         }
@@ -250,9 +255,9 @@ namespace AmeisenBotX.Core
 
         private void LoadBotWindowPosition()
         {
-            if (PlayerName.Length > 0)
+            if (AccountName.Length > 0)
             {
-                string filepath = Path.Combine(BotDataPath, PlayerName, $"botpos.json");
+                string filepath = Path.Combine(BotDataPath, AccountName, $"botpos.json");
                 if (File.Exists(filepath))
                 {
                     try
@@ -273,9 +278,9 @@ namespace AmeisenBotX.Core
 
         private void LoadWowWindowPosition()
         {
-            if (PlayerName.Length > 0)
+            if (AccountName.Length > 0)
             {
-                string filepath = Path.Combine(BotDataPath, PlayerName, $"wowpos.json");
+                string filepath = Path.Combine(BotDataPath, AccountName, $"wowpos.json");
                 if (File.Exists(filepath))
                 {
                     try
@@ -298,7 +303,7 @@ namespace AmeisenBotX.Core
         {
             try
             {
-                string filepath = Path.Combine(BotDataPath, PlayerName, $"botpos.json");
+                string filepath = Path.Combine(BotDataPath, AccountName, $"botpos.json");
                 Rect rect = XMemory.GetWindowPosition(Process.GetCurrentProcess().MainWindowHandle);
                 File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
             }
@@ -312,7 +317,7 @@ namespace AmeisenBotX.Core
         {
             try
             {
-                string filepath = Path.Combine(BotDataPath, PlayerName, $"wowpos.json");
+                string filepath = Path.Combine(BotDataPath, AccountName, $"wowpos.json");
                 Rect rect = XMemory.GetWindowPosition(XMemory.Process.MainWindowHandle);
                 File.WriteAllText(filepath, JsonConvert.SerializeObject(rect));
             }
