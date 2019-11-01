@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
+using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,6 +49,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (!HookManager.IsWoWHooked)
             {
                 HookManager.SetupEndsceneHook();
+
                 EventHookManager.Start();
 
                 CharacterManager.UpdateAll();

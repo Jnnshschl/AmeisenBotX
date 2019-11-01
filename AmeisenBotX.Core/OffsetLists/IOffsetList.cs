@@ -18,6 +18,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr ClickToMoveGuid { get; }
 
+        IntPtr ClickToMoveTurnSpeed { get; }
+
         IntPtr ClickToMovePointer { get; }
 
         IntPtr ClickToMoveX { get; }
@@ -99,6 +101,10 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr FunctionSendMovementPacket { get; }
 
         IntPtr FunctionSetTarget { get; }
+
+        IntPtr FunctionHandleTerrainClick { get; }
+
+        IntPtr FunctionClickToMove { get; }
 
         IntPtr GameState { get; }
 

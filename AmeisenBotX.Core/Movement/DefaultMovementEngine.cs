@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Movement
                 //do
                 //{
                     SelectedWaypoint = CurrentPath.Dequeue();
-                    distance = currentPosition.GetDistance(SelectedWaypoint);
+                    //distance = currentPosition.GetDistance(SelectedWaypoint);
                 //} while (distance < 3 && CurrentPath.Count > 0);
             }
 

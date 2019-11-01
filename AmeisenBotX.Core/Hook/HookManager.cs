@@ -61,6 +61,44 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void ClickOnTerrain(Vector3 position)
+        {
+            if (XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            {
+                XMemory.Write(codeCaveVector3, position);
+
+                string[] asm = new string[]
+                {
+                    $"PUSH {codeCaveVector3.ToInt32()}",
+                    $"CALL 0x{OffsetList.FunctionHandleTerrainClick.ToString("X")}",
+                    "ADD ESP, 0x4",
+                    "RETN",
+                };
+
+                InjectAndExecute(asm, false);
+                XMemory.FreeMemory(codeCaveVector3);
+            }
+        }
+
+        public void ClickToMove(IntPtr playerBase, Vector3 position)
+        {
+            if (XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            {
+                XMemory.Write(codeCaveVector3, position);
+
+                string[] asm = new string[]
+                {
+                    $"PUSH {codeCaveVector3.ToInt32()}",
+                    $"MOV ECX, {playerBase.ToInt32()}",
+                    $"CALL 0x{OffsetList.FunctionClickToMove.ToString("X")}",
+                    "RETN",
+                };
+
+                InjectAndExecute(asm, false);
+                XMemory.FreeMemory(codeCaveVector3);
+            }
+        }
+
         public IntPtr ReturnValueAddress { get; private set; }
 
         private IAmeisenBotCache BotCache { get; }
@@ -134,7 +172,7 @@ namespace AmeisenBotX.Core.Hook
                     "ADD ESP, 0x10",
                 };
 
-                InjectAndExecute(asmLocalText, true);
+                InjectAndExecute(asmLocalText, false);
             }
         }
 
@@ -426,7 +464,7 @@ namespace AmeisenBotX.Core.Hook
         public byte[] InjectAndExecute(string[] asm, bool readReturnBytes)
         {
             AmeisenLogger.Instance.Log($"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
-            
+
             List<byte> returnBytes = new List<byte>();
 
             if (!ObjectManager.IsWorldLoaded)

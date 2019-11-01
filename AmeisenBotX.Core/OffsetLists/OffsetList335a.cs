@@ -18,6 +18,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr ClickToMoveGuid { get; } = new IntPtr(0xCA11D8 + 0x20);
 
+        public IntPtr ClickToMoveTurnSpeed { get; } = new IntPtr(0xCA11D8 + 0x4);
+
         public IntPtr ClickToMovePointer { get; } = new IntPtr(0xBD08F4);
 
         public IntPtr ClickToMoveX { get; } = new IntPtr(0xCA11D8 + 0x8C);
@@ -99,6 +101,10 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr FunctionSendMovementPacket { get; } = new IntPtr(0x7413F0);
 
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
+
+        public IntPtr FunctionHandleTerrainClick { get; } = new IntPtr(0x80C340);
+
+        public IntPtr FunctionClickToMove { get; } = new IntPtr(0x727400);
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 
