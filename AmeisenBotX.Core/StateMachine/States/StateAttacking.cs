@@ -49,8 +49,9 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
-            HookManager.ClearTarget();
             MovementEngine.CurrentPath.Clear();
+            MovementEngine.Reset();
+            HookManager.ClearTarget();
         }
 
         public override void Execute()
@@ -78,6 +79,8 @@ namespace AmeisenBotX.Core.StateMachine.States
                     && SelectTargetToAttack(out WowUnit target))
                 {
                     HookManager.TargetGuid(target.Guid);
+                    ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
                 }
 
                 if (CurrentTarget == null || CurrentTarget.IsDead)
@@ -112,6 +115,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
             MovementEngine.CurrentPath.Clear();
             HookManager.ClearTarget();
         }
@@ -164,37 +168,39 @@ namespace AmeisenBotX.Core.StateMachine.States
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly).ToList();
             if (wowUnits.Count > 0)
             {
-                target = wowUnits.FirstOrDefault(t => t.Guid == ObjectManager.TargetGuid);
+                target = wowUnits.FirstOrDefault(t => t.IsInCombat);
                 if (BotUtils.IsValidUnit(target) && target.IsInCombat)
                 {
                     return true;
                 }
                 else
                 {
-                    // find a new target from group
-                    WowPlayer partytarget = ObjectManager.WowObjects.OfType<WowPlayer>()
-                        .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-                        .FirstOrDefault(r => r.IsInCombat);
+                    if (ObjectManager.PartymemberGuids.Count > 0)
+                    {
+                        // find a new target from group
+                        WowPlayer partytarget = ObjectManager.WowObjects.OfType<WowPlayer>()
+                            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
+                            .FirstOrDefault(r => r.IsInCombat);
 
-                    if (partytarget != null)
-                    {
-                        target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == partytarget.Guid);
-                    }
-
-                    if (BotUtils.IsValidUnit(target) && target.IsInCombat)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        HookManager.TargetNearestEnemy();
-                        target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.Player.Guid);
+                        if (partytarget != null)
+                        {
+                            target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == partytarget.Guid);
+                        }
 
                         if (BotUtils.IsValidUnit(target) && target.IsInCombat)
                         {
                             return true;
                         }
                     }
+
+                    HookManager.TargetNearestEnemy();
+                    target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.Player.Guid);
+
+                    if (BotUtils.IsValidUnit(target) && target.IsInCombat)
+                    {
+                        return true;
+                    }
+
                 }
             }
 

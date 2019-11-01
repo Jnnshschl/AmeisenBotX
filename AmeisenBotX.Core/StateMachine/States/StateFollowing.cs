@@ -42,6 +42,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Enter()
         {
             MovementEngine.CurrentPath.Clear();
+            MovementEngine.Reset();
             PlayerToFollow = null;
 
             // TODO: make this crap less redundant
@@ -113,6 +114,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Exit()
         {
             MovementEngine.CurrentPath.Clear();
+            MovementEngine.Reset();
         }
 
         private void BuildNewPath()
