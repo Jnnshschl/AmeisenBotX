@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (ObjectManager.Player.Position.GetDistance(target.Position) < 3.0)
             {
-                if (DateTime.Now - LastRotationCheck > TimeSpan.FromSeconds(1))
+                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(500))
                 {
                     // HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
                     CharacterManager.Face(target.Position, target.Guid);
@@ -172,11 +172,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                 else
                 {
                     // find a new target from group
-                    ulong targetGuid = ObjectManager.WowObjects.OfType<WowPlayer>()
+                    WowPlayer partytarget = ObjectManager.WowObjects.OfType<WowPlayer>()
                         .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-                        .FirstOrDefault(r => r.IsInCombat).TargetGuid;
+                        .FirstOrDefault(r => r.IsInCombat);
 
-                    target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == targetGuid);
+                    if (partytarget != null)
+                    {
+                        target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == partytarget.Guid);
+                    }
 
                     if (BotUtils.IsValidUnit(target) && target.IsInCombat)
                     {
