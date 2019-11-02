@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class MageFrost : ICombatClass
+    public class MageFire : ICombatClass
     {
         private readonly int buffCheckTime = 30;
 
-        public MageFrost(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;

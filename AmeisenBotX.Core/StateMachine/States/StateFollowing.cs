@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
 
-            if (MovementEngine.CurrentPath?.Count == 0 || CurrentMovementTarget.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance || TryCount == 5)
+            if (MovementEngine.CurrentPath?.Count == 0 || CurrentMovementTarget.GetDistance2D(PlayerToFollow.Position) > Config.MinFollowDistance || TryCount == 5)
             {
                 CurrentMovementTarget = PlayerToFollow.Position;
                 BuildNewPath();
