@@ -90,11 +90,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void OutOfCombatExecute()
         {
             double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPosition);
-            if(!Dancing && distanceTraveled < 0.001)
+            if(distanceTraveled < 0.001)
             {
-                HookManager.SendChatMessage("/dance");
-                Dancing = true;
-            } else
+                if(!Dancing)
+                {
+                    HookManager.SendChatMessage("/dance");
+                    Dancing = true;
+                }
+            } 
+            else
             {
                 Dancing = false;
             }
@@ -363,6 +367,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
                     MovementEngine.LoadPath(path);
+                    CharacterManager.Jump();
                 }
                 else
                 {
