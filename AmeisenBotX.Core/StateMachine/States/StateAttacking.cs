@@ -65,51 +65,50 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) == WowUnitReaction.Friendly)
+                if (CombatClass == null || !CombatClass.HandlesTargetSelection)
                 {
-                    HookManager.ClearTarget();
-                }
-
-                // Select a new target if our current target is invalid
-                if (((CombatClass == null
-                    || !CombatClass.HandlesTargetSelection)
-                    || !BotUtils.IsValidUnit(CurrentTarget)
-                    || CurrentTarget == null
-                    || !CurrentTarget.IsInCombat)
-                    && SelectTargetToAttack(out WowUnit target))
-                {
-                    HookManager.TargetGuid(target.Guid);
-                    ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
-                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-                }
-
-                if (CurrentTarget == null || CurrentTarget.IsDead)
-                {
-                    HookManager.ClearTarget();
-                    return;
-                }
-
-                if (CurrentTarget != null)
-                {
-                    if (CombatClass == null || !CombatClass.HandlesMovement)
+                    if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) == WowUnitReaction.Friendly)
                     {
-                        // use the default MovementEngine to move if 
-                        // the CombatClass doesnt handle Movement
-                        HandleMovement(CurrentTarget);
+                        HookManager.ClearTarget();
                     }
 
-                    if (CombatClass != null)
+                    // Select a new target if our current target is invalid
+                    if ((!BotUtils.IsValidUnit(CurrentTarget)
+                        || CurrentTarget == null
+                        || !CurrentTarget.IsInCombat)
+                        && SelectTargetToAttack(out WowUnit target))
                     {
-                        CombatClass.Execute();
+                        HookManager.TargetGuid(target.Guid);
+                        ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                        ObjectManager.UpdateObject(target.Type, target.BaseAddress);
                     }
-                    else
+
+                    if (CurrentTarget == null || CurrentTarget.IsDead)
                     {
-                        if (!ObjectManager.Player.IsAutoAttacking)
-                        {
-                            HookManager.StartAutoAttack();
-                        }
+                        HookManager.ClearTarget();
+                        return;
                     }
                 }
+
+                if (CombatClass == null || !CombatClass.HandlesMovement)
+                {
+                    // use the default MovementEngine to move if 
+                    // the CombatClass doesnt handle Movement
+                    HandleMovement(CurrentTarget);
+                }
+
+                if (CombatClass != null)
+                {
+                    CombatClass.Execute();
+                }
+                else
+                {
+                    if (!ObjectManager.Player.IsAutoAttacking)
+                    {
+                        HookManager.StartAutoAttack();
+                    }
+                }
+
             }
         }
 
@@ -117,7 +116,11 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             MovementEngine.Reset();
             MovementEngine.CurrentPath.Clear();
-            HookManager.ClearTarget();
+
+            if (CombatClass == null || !CombatClass.HandlesTargetSelection)
+            {
+                HookManager.ClearTarget();
+            }
         }
 
         private void HandleMovement(WowUnit target)
