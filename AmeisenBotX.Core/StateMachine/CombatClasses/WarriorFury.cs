@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool HandlesMovement => true;
 
-        public bool HandlesTargetSelection => false;
+        public bool HandlesTargetSelection => true;
         public bool Jumped { get; set; }
 
         private CharacterManager CharacterManager { get; }
@@ -90,12 +90,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
+            int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
             AmeisenLogger.Instance.Log(JsonConvert.SerializeObject(wowUnits));
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
+                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 31 && unit.Health < targetHealth)
                 {
                     target = unit;
+                    targetHealth = unit.Health;
                     HookManager.TargetGuid(target.Guid);
                     newTargetFound = true;
                 }
@@ -117,7 +119,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             List<string> Debuffs = HookManager.GetDebuffs(WowLuaUnit.Target.ToString());
             List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
             bool stanceChanged = false;
-            HookManager.StartAutoAttack();
 
             // special
             if (Buffs.Any(e => e.Contains("slam")) && playerRage >= 15 && distanceToTarget < 3)
