@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool HandlesMovement => true;
 
-        public bool HandlesTargetSelection => true;
+        public bool HandlesTargetSelection => false;
         public bool Jumped { get; set; }
 
         private CharacterManager CharacterManager { get; }
@@ -99,6 +99,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     HookManager.TargetGuid(target.Guid);
                     newTargetFound = true;
                 }
+            }
+            if(!newTargetFound)
+            {
+                HookManager.ClearTarget();
             }
             return newTargetFound;
         }
