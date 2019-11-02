@@ -61,7 +61,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             ulong targetGuid = ObjectManager.TargetGuid;
             WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
-            if (SearchNewTarget(ref target))
+            SearchNewTarget(ref target);
+            if (target != null)
             {
                 // make sure we're auto attacking
                 if (!ObjectManager.Player.IsAutoAttacking)
