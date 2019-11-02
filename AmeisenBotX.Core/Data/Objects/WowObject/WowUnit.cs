@@ -15,6 +15,16 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Health { get; set; }
 
+        public double HealthPercentage => ReturnPercentage(Health, MaxHealth);
+
+        public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
+
+        public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
+
+        public double RagePercentage => ReturnPercentage(Rage, MaxRage);
+
+        public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
+
         public bool IsAutoAttacking { get; set; }
 
         public bool IsConfused => UnitFlags[(int)WowUnitFlags.Confused];
@@ -98,5 +108,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public WowGender Gender { get; set; }
 
         public WowPowertype PowerType { get; set; }
+
+        private double ReturnPercentage(int value, int max)
+        {
+            if (value == 0 || max == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return (double)value / (double)max * 100.0;
+            }
+        }
     }
 }

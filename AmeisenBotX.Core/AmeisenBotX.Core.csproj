@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="fasmdll_managed, Version=1.0.5080.15965, Culture=neutral, processorArchitecture=x86">
@@ -129,7 +129,11 @@
     <Compile Include="OffsetLists\IOffsetList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\AmeisenBotStateMachine.cs" />
+<<<<<<< HEAD
     <Compile Include="StateMachine\CombatClasses\DeathKnightBlood.cs" />
+=======
+    <Compile Include="StateMachine\CombatClasses\PaladinHoly.cs" />
+>>>>>>> a6bb8dd9699425a83fba650878954d16c9200007
     <Compile Include="StateMachine\CombatClasses\ICombatClass.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
     <Compile Include="StateMachine\States\AmeisenBotState.cs" />
@@ -145,6 +149,7 @@
     <Compile Include="StateMachine\States\StateLogin.cs" />
     <Compile Include="StateMachine\States\StateNone.cs" />
     <Compile Include="StateMachine\States\StateStartWow.cs" />
+    <Compile Include="StateMachine\CombatClasses\WarriorFury.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
