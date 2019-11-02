@@ -84,6 +84,10 @@ namespace AmeisenBotX.Core
                     CombatClass = new WarriorArms(ObjectManager, CharacterManager, HookManager);
                     break;
 
+                case "PALADINHOLY":
+                    CombatClass = new PaladinHoly(ObjectManager, CharacterManager, HookManager);
+                    break;
+
                 default:
                     CombatClass = null;
                     break;
