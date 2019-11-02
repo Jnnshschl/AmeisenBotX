@@ -56,15 +56,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat())
+            {
+                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                return;
+            }
+
             if (ObjectManager != null
                 && ObjectManager.Player != null)
             {
-                if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat())
-                {
-                    AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
-                    return;
-                }
-
                 if (CombatClass == null || !CombatClass.HandlesTargetSelection)
                 {
                     if (HookManager.GetUnitReaction(ObjectManager.Player, CurrentTarget) == WowUnitReaction.Friendly)
@@ -108,7 +108,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                         HookManager.StartAutoAttack();
                     }
                 }
-
             }
         }
 
@@ -152,8 +151,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         CharacterManager.Jump();
 
-                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 200, 500);
-                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 200, 500);
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
+                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
                         TryCount++;
                     }
                 }

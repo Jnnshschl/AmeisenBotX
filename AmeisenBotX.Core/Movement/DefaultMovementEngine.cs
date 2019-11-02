@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Movement
                 {
                     SelectedWaypoint = CurrentPath.Dequeue();
                     distance = currentPosition.GetDistance(SelectedWaypoint);
-                } while (distance < 3 && CurrentPath.Count > 0);
+                } while (distance < 5 && CurrentPath.Count > 0);
             }
 
             Vector3 force = Vector3.Zero;
@@ -71,6 +71,11 @@ namespace AmeisenBotX.Core.Movement
 
             double distanceTraveled = currentPosition.GetDistance(LastPosition);
             needToJump = distanceTraveled > 0 && distanceTraveled < 0.05;
+
+            if (needToJump)
+            {
+                SelectedWaypoint = CurrentPath.Dequeue();
+            }
 
             LastPosition = currentPosition;
             positionToGoTo = newPosition;

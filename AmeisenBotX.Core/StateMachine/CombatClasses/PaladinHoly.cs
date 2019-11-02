@@ -22,6 +22,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string layOnHands = "Lay on Hands";
         private readonly string blessingOfWisdom = "Blessing of Wisdom";
 
+        private readonly int buffCheckTime = 30;
+
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
@@ -41,6 +43,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
+
+        private DateTime LastBuffCheck { get; set; }
 
         private CharacterManager CharacterManager { get; }
 
@@ -104,25 +108,32 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         && HasEnoughMana(keyValuePair.Value)
                         && !IsOnCooldown(keyValuePair.Value))
                     {
-                        HookManager.CastSpell(holyLightSpell);
+                        HookManager.CastSpell(keyValuePair.Value);
                         break;
                     }
                 }
             }
             else
             {
-                
+                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+                {
+                    HandleBuffing();
+                }
             }
         }
 
         public void OutOfCombatExecute()
         {
-            HandleBuffing();
+            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+            {
+                HandleBuffing();
+            }
         }
 
         private void HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+            HookManager.TargetGuid(ObjectManager.PlayerGuid);
 
             if (IsSpellKnown(devotionAuraSpell)
                 && !myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
@@ -139,6 +150,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell(blessingOfWisdom);
                 return;
             }
+
+            LastBuffCheck = DateTime.Now;
         }
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
@@ -160,7 +173,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         }
 
         private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells.FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
+            => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
 
         private bool IsSpellKnown(string spellName)
             => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
