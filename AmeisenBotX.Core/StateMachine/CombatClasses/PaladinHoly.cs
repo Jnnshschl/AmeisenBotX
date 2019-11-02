@@ -111,29 +111,34 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
-                List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
-
-                if (IsSpellKnown(devotionAuraSpell)
-                    && !myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
-                    && !IsOnCooldown(devotionAuraSpell))
-                {
-                    HookManager.CastSpell(devotionAuraSpell);
-                    return;
-                }
-
-                if (IsSpellKnown(blessingOfWisdom)
-                    && !myBuffs.Any(e => e.Equals(blessingOfWisdom, StringComparison.OrdinalIgnoreCase))
-                    && !IsOnCooldown(blessingOfWisdom))
-                {
-                    HookManager.CastSpell(blessingOfWisdom);
-                    return;
-                }
+                
             }
         }
 
         public void OutOfCombatExecute()
         {
+            HandleBuffing();
+        }
 
+        private void HandleBuffing()
+        {
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+
+            if (IsSpellKnown(devotionAuraSpell)
+                && !myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(devotionAuraSpell))
+            {
+                HookManager.CastSpell(devotionAuraSpell);
+                return;
+            }
+
+            if (IsSpellKnown(blessingOfWisdom)
+                && !myBuffs.Any(e => e.Equals(blessingOfWisdom, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(blessingOfWisdom))
+            {
+                HookManager.CastSpell(blessingOfWisdom);
+                return;
+            }
         }
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)

@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager) },
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, xMemory, config, objectManager) },
-                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager) },
+                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass) },
                 { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager) },
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
