@@ -78,31 +78,17 @@ namespace AmeisenBotX.Core
             }
 
             AmeisenLogger.Instance.Log($"Loading CombatClass: {Config.CombatClassName}", LogLevel.Verbose);
-            switch (Config.CombatClassName.ToUpper())
+            CombatClass = (Config.CombatClassName.ToUpper()) switch
             {
-                case "WARRIORARMS":
-                    CombatClass = new WarriorArms(ObjectManager, CharacterManager, HookManager);
-                    break;
-
-                case "DEATHKNIGHTBLOOD":
-                    CombatClass = new DeathKnightBlood(ObjectManager, CharacterManager, HookManager);
-                    break;
-
-                case "WARRIORFURY":
-                    CombatClass = new WarriorFury(ObjectManager, CharacterManager, HookManager,PathfindingHandler, MovemenEngine);
-                    break;
-
-                case "PALADINHOLY":
-                    CombatClass = new PaladinHoly(ObjectManager, CharacterManager, HookManager);
-                    break;                
-
-                default:
-                    CombatClass = null;
-                    break;
-            }
+                "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager),
+                "DEATHKNIGHTBLOOD" => new DeathKnightBlood(ObjectManager, CharacterManager, HookManager),
+                "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
+                "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
+                "MAGEFROST" => new MageFrost(ObjectManager, CharacterManager, HookManager),
+                _ => null,
+            };
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, BotCache, PathfindingHandler, MovemenEngine, CombatClass);
-
             StateMachine.OnStateMachineStateChange += HandlePositionLoad;
         }
 
