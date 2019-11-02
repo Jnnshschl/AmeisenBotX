@@ -131,6 +131,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
+        public void OutOfCombatExecute()
+        {
+
+        }
+
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {
             IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();

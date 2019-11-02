@@ -7,5 +7,7 @@
         bool HandlesTargetSelection { get; }
 
         void Execute();
+
+        void OutOfCombatExecute();
     }
 }

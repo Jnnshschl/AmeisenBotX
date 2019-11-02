@@ -86,6 +86,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
+        public void OutOfCombatExecute()
+        {
+
+        }
+
         private bool SearchNewTarget (ref WowUnit? target)
         {
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();

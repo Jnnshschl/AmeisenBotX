@@ -48,6 +48,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
+        public void OutOfCombatExecute()
+        {
+
+        }
+
         private void HandleAttacking(WowUnit target)
         {
             double playerRunePower = ObjectManager.Player.Runeenergy;

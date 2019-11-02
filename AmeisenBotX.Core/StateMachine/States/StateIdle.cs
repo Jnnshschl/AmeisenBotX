@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Pathfinding.Objects;
@@ -18,7 +19,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, EventHookManager eventHookManager) : base(stateMachine)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, EventHookManager eventHookManager, ICombatClass combatClass) : base(stateMachine)
         {
             Config = config;
             OffsetList = offsetList;
@@ -26,6 +27,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             EventHookManager = eventHookManager;
             CharacterManager = characterManager;
+            CombatClass = combatClass;
         }
 
         private AmeisenBotConfig Config { get; }
@@ -39,6 +41,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private CharacterManager CharacterManager { get; }
 
         private IOffsetList OffsetList { get; }
+
+        private ICombatClass CombatClass { get; }
 
         public override void Enter()
         {
@@ -63,6 +67,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Following);
             }
+
+            CombatClass?.OutOfCombatExecute();
         }
 
         public override void Exit()
