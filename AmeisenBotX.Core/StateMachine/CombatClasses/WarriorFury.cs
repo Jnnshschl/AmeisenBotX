@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             AmeisenLogger.Instance.Log(JsonConvert.SerializeObject(wowUnits));
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 31 && unit.Health < targetHealth)
+                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 100 && unit.Health < targetHealth)
                 {
                     if(!inCombat || unit.IsInCombat)
                     {
