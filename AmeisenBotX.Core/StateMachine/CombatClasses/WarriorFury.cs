@@ -51,6 +51,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private DateTime LastCharge { get; set; }
         private DateTime LastThirst { get; set; }
         private bool Berserk { get; set; }
+        private bool Dancing { get; set; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
 
@@ -88,7 +89,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-
+            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPosition);
+            if(!Dancing && distanceTraveled < 0.001)
+            {
+                HookManager.SendChatMessage("/dance");
+                Dancing = true;
+            } else
+            {
+                Dancing = false;
+            }
         }
 
         private bool SearchNewTarget (ref WowUnit? target)
