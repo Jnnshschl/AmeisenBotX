@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             ulong targetGuid = ObjectManager.TargetGuid;
             WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
-            SearchNewTarget(ref target);
+            SearchNewTarget(ref target, false);
             if (target != null)
             {
                 // make sure we're auto attacking
@@ -74,7 +74,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HandleAttacking(target);
                 if (target.IsDead)
                 {
-                    if(SearchNewTarget(ref target))
+                    ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                    if (SearchNewTarget(ref target, leaderGuid == ObjectManager.PlayerGuid))
                     {
                         HandleMovement(target);
                         HandleAttacking(target);
@@ -93,7 +94,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPosition);
             if(distanceTraveled < 0.001)
             {
-                if(!Dancing)
+                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                WowUnit target = null;
+                if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
+                {
+                    HandleMovement(target);
+                    HandleAttacking(target);
+                }
+                else if(!Dancing)
                 {
                     HookManager.SendChatMessage("/dance");
                     Dancing = true;
@@ -105,7 +113,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
-        private bool SearchNewTarget (ref WowUnit? target)
+        private bool SearchNewTarget (ref WowUnit? target, bool grinding)
         {
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
@@ -116,7 +124,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 100)
                 {
-                    if((!inCombat && (unit.Health < targetHealth || unit.IsInCombat)) || (inCombat && unit.IsInCombat && unit.Health < targetHealth))
+                    if((!inCombat && (unit.Health < targetHealth || unit.IsInCombat)) || (inCombat && unit.IsInCombat && unit.Health < targetHealth) || (grinding && unit.Health < targetHealth))
                     {
                         target = unit;
                         targetHealth = unit.Health;
@@ -129,9 +137,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if(target == null || target.IsDead)
             {
                 HookManager.ClearTarget();
-                /*ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
                 WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
-                HandleMovement(leader);*/
+                HandleMovement(leader);
 
             }
             return newTargetFound;
