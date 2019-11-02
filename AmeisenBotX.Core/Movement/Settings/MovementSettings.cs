@@ -2,8 +2,8 @@
 {
     public class MovementSettings
     {
-        public double WaypointDoneThreshold { get; set; } = 5;
+        public double WaypointDoneThreshold { get; set; } = 7;
 
-        public float MaxVelocity { get; set; } = 5.0f;
+        public float MaxVelocity { get; set; } = 9.0f;
     }
 }

@@ -14,10 +14,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
     {
         private readonly string devotionAuraSpell = "Devotion Aura";
         private readonly string divinePleaSpell = "Divine Plea";
+        private readonly string divineFavorSpell = "Divine Favor";
+        private readonly string divineIlluminationSpell = "Divine Illumination";
         private readonly string holyShockSpell = "Holy Shock";
         private readonly string holyLightSpell = "Holy Light";
         private readonly string flashOfLight = "Flash of Light";
         private readonly string layOnHands = "Lay on Hands";
+        private readonly string blessingOfWisdom = "Blessing of Wisdom";
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
@@ -31,7 +34,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 { 0, flashOfLight},
                 { 2000, holyShockSpell},
-                { 6000, holyLightSpell}
+                { 10000, holyLightSpell}
             };
         }
 
@@ -77,6 +80,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     return;
                 }
 
+                if (target.HealthPercentage < 50
+                   && IsSpellKnown(divineFavorSpell)
+                   && !IsOnCooldown(divineFavorSpell))
+                {
+                    HookManager.CastSpell(divineFavorSpell);
+                }
+
+                if (ObjectManager.Player.ManaPercentage < 50
+                   && ObjectManager.Player.ManaPercentage > 20
+                   && IsSpellKnown(divineIlluminationSpell)
+                   && !IsOnCooldown(divineIlluminationSpell))
+                {
+                    HookManager.CastSpell(divineIlluminationSpell);
+                }
+
                 double healthDifference = target.MaxHealth - target.Health;
                 List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
@@ -96,10 +114,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
 
                 if (IsSpellKnown(devotionAuraSpell)
-                    && !myBuffs.Any(e => e.Equals(devotionAuraSpell))
+                    && !myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
                     && !IsOnCooldown(devotionAuraSpell))
                 {
                     HookManager.CastSpell(devotionAuraSpell);
+                    return;
+                }
+
+                if (IsSpellKnown(blessingOfWisdom)
+                    && !myBuffs.Any(e => e.Equals(blessingOfWisdom, StringComparison.OrdinalIgnoreCase))
+                    && !IsOnCooldown(blessingOfWisdom))
+                {
+                    HookManager.CastSpell(blessingOfWisdom);
                     return;
                 }
             }
@@ -108,7 +134,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {
             IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
 
             groupPlayers.Add(ObjectManager.Player);
 
