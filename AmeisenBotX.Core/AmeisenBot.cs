@@ -83,12 +83,19 @@ namespace AmeisenBotX.Core
                 case "WARRIORARMS":
                     CombatClass = new WarriorArms(ObjectManager, CharacterManager, HookManager);
                     break;
+
+                case "DEATHKNIGHTBLOOD":
+                    CombatClass = new DeathKnightBlood(ObjectManager, CharacterManager, HookManager);
+                    break;
+
                 case "WARRIORFURY":
                     CombatClass = new WarriorFury(ObjectManager, CharacterManager, HookManager,PathfindingHandler, MovemenEngine);
                     break;
+
                 case "PALADINHOLY":
                     CombatClass = new PaladinHoly(ObjectManager, CharacterManager, HookManager);
                     break;                
+
                 default:
                     CombatClass = null;
                     break;
