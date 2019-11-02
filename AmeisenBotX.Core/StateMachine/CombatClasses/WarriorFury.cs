@@ -109,18 +109,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
+            bool inCombat = target == null ? false : target.IsInCombat;
             AmeisenLogger.Instance.Log(JsonConvert.SerializeObject(wowUnits));
             foreach (WowUnit unit in wowUnits)
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 31 && unit.Health < targetHealth)
                 {
-                    target = unit;
-                    targetHealth = unit.Health;
-                    HookManager.TargetGuid(target.Guid);
-                    newTargetFound = true;
+                    if(!inCombat || unit.IsInCombat)
+                    {
+                        target = unit;
+                        targetHealth = unit.Health;
+                        HookManager.TargetGuid(target.Guid);
+                        newTargetFound = true;
+                        inCombat = unit.IsInCombat;
+                    }
                 }
             }
-            if(!newTargetFound)
+            if(target == null || target.IsDead)
             {
                 HookManager.ClearTarget();
                 ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
@@ -143,7 +148,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             bool stanceChanged = false;
 
             // special
-            if (Buffs.Any(e => e.Contains("slam")) && playerRage >= 15 && distanceToTarget < 3)
+            if (Buffs.Any(e => e.Contains("slam")) && playerRage >= 15 && distanceToTarget < 4)
             {
                 HookManager.CastSpell("Slam");
                 playerRage -= 15;
@@ -318,7 +323,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     stanceChanged = true;
                 }
                 // debuffs
-                if (playerHealthPercent < 21 && DateTime.Now.Subtract(LastThirst).TotalSeconds > 7 && distanceToTarget < 3)
+                if (playerHealthPercent < 21 && DateTime.Now.Subtract(LastThirst).TotalSeconds > 7 && distanceToTarget < 4)
                 {
                     if(playerRage >= 20)
                     {
@@ -329,7 +334,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         playerRage -= 20;
                     }
                 }
-                else if (DateTime.Now.Subtract(LastHamstring).TotalSeconds > 14 && playerRage >= 10 && distanceToTarget < 3)
+                else if (DateTime.Now.Subtract(LastHamstring).TotalSeconds > 14 && playerRage >= 10 && distanceToTarget < 4)
                 {
                     // alle 15 sec
                     HookManager.CastSpell("Hamstring");
