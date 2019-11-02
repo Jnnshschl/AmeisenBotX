@@ -84,6 +84,10 @@ namespace AmeisenBotX.Core
                     CombatClass = new WarriorArms(ObjectManager, CharacterManager, HookManager);
                     break;
 
+                case "WARRIORFURY":
+                    CombatClass = new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine);
+                    break;
+
                 default:
                     CombatClass = null;
                     break;
