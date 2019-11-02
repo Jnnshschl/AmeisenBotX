@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 double healthDifference = target.MaxHealth - target.Health;
                 List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
-                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry)
+                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                 {
                     if (IsSpellKnown(keyValuePair.Value)
                         && HasEnoughMana(keyValuePair.Value)
