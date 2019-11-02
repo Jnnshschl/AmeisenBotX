@@ -105,6 +105,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if(!newTargetFound)
             {
                 HookManager.ClearTarget();
+                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
+                HandleMovement(leader);
+
             }
             return newTargetFound;
         }
