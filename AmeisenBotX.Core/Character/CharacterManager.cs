@@ -175,7 +175,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveDistance, 1.0f);
                 XMemory.Write(OffsetList.ClickToMoveGuid, playerGuid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Stop);
-                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
+                // BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
             }
             else
             {

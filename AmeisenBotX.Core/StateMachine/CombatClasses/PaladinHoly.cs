@@ -56,13 +56,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
-            WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target == null || target.IsDead || target.Health == 1)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
             if (IsSpellKnown(divinePleaSpell)
                 && ObjectManager.Player.ManaPercentage < 80
                 && !IsOnCooldown(divinePleaSpell))
@@ -76,12 +69,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HandleTargetSelection(playersThatNeedHealing);
                 ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
 
-                target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-                if (target == null || target.IsDead || target.Health == 1)
-                {
-                    HookManager.TargetGuid(ObjectManager.PlayerGuid);
-                }
+                WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
                 ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
@@ -124,8 +112,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-
                 if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
                 {
                     HandleBuffing();

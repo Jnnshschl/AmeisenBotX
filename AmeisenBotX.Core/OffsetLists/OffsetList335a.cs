@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr ClickToMoveZ { get; } = new IntPtr(0xCA11D8 + 0x94);
 
+        public IntPtr ClickToMovePendingMovement { get; } = new IntPtr(0xCA1200);
+
         public IntPtr ClientConnection { get; } = new IntPtr(0xC79CE0);
 
         public IntPtr ComboPoints { get; } = new IntPtr(0xBD0845);

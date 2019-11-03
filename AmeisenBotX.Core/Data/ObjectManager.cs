@@ -235,7 +235,7 @@ namespace AmeisenBotX.Core.Data
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxRuneenergy.ToInt32()), out int maxRuneenergy)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorLevel.ToInt32()), out int level)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorInfoFlags.ToInt32()), out int infoFlags)
-                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.CurrentlyCastingSpellId.ToInt32()), out int currentlyCastingSpellId)
+                && XMemory.Read(IntPtr.Add(activeObject, OffsetList.CurrentlyCastingSpellId.ToInt32()), out int currentlyCastingSpellId)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int currentlyChannelingSpellId))
             {
                 return new WowUnit()

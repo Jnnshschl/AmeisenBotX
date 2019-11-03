@@ -61,7 +61,6 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             MovementEngine.CurrentPath.Clear();
             MovementEngine.Reset();
-            NeedToStopMovement = false;
         }
 
         public override void Execute()
@@ -96,7 +95,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                     if (CurrentTarget == null || CurrentTarget.IsDead)
                     {
                         HookManager.ClearTarget();
-                        return;
                     }
                 }
 
@@ -134,13 +132,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void HandleMovement(WowUnit target)
         {
-            if (DateTime.Now - LastCastingCheck > TimeSpan.FromMilliseconds(1000))
-            {
-                (string, int) castingInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Player);
-                IsCasting = castingInfo.Item1.Length > 0 && castingInfo.Item2 > 0;
-                LastCastingCheck = DateTime.Now;
-            }
-
             // we don't want to move when we are casting/channeling something either
             if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
@@ -148,9 +139,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                 LastRotationCheck = DateTime.Now;
             }
 
+            if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            {
+                return;
+            }
+
             // if we are close enough, face the target and start attacking
             double distance = ObjectManager.Player.Position.GetDistance(target.Position);
-            if (distance < DistanceToTarget)
+            if (distance <= DistanceToTarget)
             {
                 // do we need to stop movement
                 if (NeedToStopMovement)
@@ -160,59 +156,54 @@ namespace AmeisenBotX.Core.StateMachine.States
                         || (int)ctmPosition.Y != (int)ObjectManager.Player.Position.Y
                         || (int)ctmPosition.Z != (int)ObjectManager.Player.Position.Z)
                     {
-                        CharacterManager.StopMovement(ObjectManager.Player.Position, ObjectManager.Player.Guid);
+                        CharacterManager.StopMovement(ctmPosition, ObjectManager.Player.Guid);
                         NeedToStopMovement = false;
+
+                        return;
                     }
                 }
-
-                return;
             }
             else
             {
-                // move away
-            }
-
-            if (target != null
-                && target.Guid != 0
-                && target.Health > 1
-                && !target.IsDead)
-            {
-                if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
+                if (target.Guid == ObjectManager.PlayerGuid
+                    && target != null
+                    && target.Guid != 0
+                    && target.Health > 1
+                    && !target.IsDead)
                 {
-                    BuildNewPath(target);
-                }
-                else
-                {
-                    if (MovementEngine.CurrentPath?.Count > 0
-                        && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
                     {
-                        CharacterManager.MoveToPosition(positionToGoTo, 6.28f);
-                        NeedToStopMovement = true;
-
-                        if (needToJump)
+                        BuildNewPath(target);
+                    }
+                    else
+                    {
+                        if (MovementEngine.CurrentPath?.Count > 0
+                            && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                         {
-                            CharacterManager.Jump();
+                            CharacterManager.MoveToPosition(positionToGoTo, 6.28f);
+                            NeedToStopMovement = true;
 
-                            Random rnd = new Random();
-                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
-
-                            if (rnd.Next(10) >= 5)
+                            if (needToJump)
                             {
-                                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
-                            }
-                            else
-                            {
-                                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
-                            }
+                                CharacterManager.Jump();
 
-                            TryCount++;
+                                Random rnd = new Random();
+                                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
+
+                                if (rnd.Next(10) >= 5)
+                                {
+                                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
+                                }
+                                else
+                                {
+                                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
+                                }
+
+                                TryCount++;
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
         }
 

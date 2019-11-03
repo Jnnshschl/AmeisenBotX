@@ -67,6 +67,16 @@ namespace AmeisenBotX.Core.Hook
             XMemory.Write(OffsetList.CvarMaxFps, maxFps);
         }
 
+        public bool IsClickToMovePending()
+        {
+            if(XMemory.Read(OffsetList.ClickToMovePendingMovement, out byte ctmPending))
+            {
+                return ctmPending > 0;
+            }
+
+            return false;
+        }
+
         public void ClickOnTerrain(Vector3 position)
         {
             if (XMemory.AllocateMemory(20, out IntPtr codeCaveVector3))

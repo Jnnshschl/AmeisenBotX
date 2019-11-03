@@ -99,7 +99,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (target == null)
             {
-                return;
+                HookManager.TargetNearestEnemy();
+                HookManager.StartAutoAttack();
             }
 
             double distanceToTarget = target.Position.GetDistance2D(ObjectManager.Player.Position);

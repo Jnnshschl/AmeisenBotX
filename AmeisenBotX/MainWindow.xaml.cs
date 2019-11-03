@@ -195,7 +195,7 @@ namespace AmeisenBotX
 
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
 
-                //// labelDebug.Content = $"{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.WowObjects.OfType<WowDynobject>(), Formatting.Indented)}\n{JsonConvert.SerializeObject(AmeisenBot.ObjectManager.Player.Position,Formatting.Indented)}";
+                labelDebug.Content = $"CastingSpellID: {AmeisenBot.ObjectManager.Player.CurrentlyCastingSpellId}\nCachannelingSpellID: {AmeisenBot.ObjectManager.Player.CurrentlyChannelingSpellId}\nBaseAddress: 0x{AmeisenBot.ObjectManager.Player.BaseAddress.ToString("X")}\nDescriptorAddress: 0x{AmeisenBot.ObjectManager.Player.DescriptorAddress.ToString("X")}";
             });
         }
 
