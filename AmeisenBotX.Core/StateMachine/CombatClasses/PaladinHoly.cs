@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             };
         }
 
-        public bool HandlesMovement => true;
+        public bool HandlesMovement => false;
 
         public bool HandlesTargetSelection => true;
 
@@ -56,6 +56,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
+            WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
+
+            if (target == null || target.IsDead || target.Health == 1)
+            {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            }
+
             if (IsSpellKnown(divinePleaSpell)
                 && ObjectManager.Player.ManaPercentage < 80
                 && !IsOnCooldown(divinePleaSpell))
@@ -69,11 +76,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HandleTargetSelection(playersThatNeedHealing);
                 ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
 
-                WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
+                target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
-                if (target == null)
+                if (target == null || target.IsDead || target.Health == 1)
                 {
-                    return;
+                    HookManager.TargetGuid(ObjectManager.PlayerGuid);
                 }
 
                 ObjectManager.UpdateObject(target.Type, target.BaseAddress);
@@ -117,6 +124,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+
                 if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
                 {
                     HandleBuffing();
@@ -159,7 +168,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {
             IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
 
             groupPlayers.Add(ObjectManager.Player);
 
@@ -171,7 +180,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
-            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
+            WowUnit target = possibleTargets.OrderBy(e => e.HealthPercentage).First();
+
+            if (target != null)
+            {
+                HookManager.TargetGuid(target.Guid);
+            }
         }
 
         private bool HasEnoughMana(string spellName)

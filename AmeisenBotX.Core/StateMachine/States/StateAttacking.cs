@@ -49,6 +49,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private DateTime LastCastingCheck { get; set; }
 
+        private bool NeedToStopMovement { get; set; }
+
         private bool IsCasting { get; set; }
 
         private int TryCount { get; set; }
@@ -59,7 +61,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             MovementEngine.CurrentPath.Clear();
             MovementEngine.Reset();
-            HookManager.ClearTarget();
+            NeedToStopMovement = false;
         }
 
         public override void Execute()
@@ -140,70 +142,77 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             // we don't want to move when we are casting/channeling something either
-            if (IsCasting)
+            if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
-                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
-                {
-                    CharacterManager.Face(target.Position, target.Guid);
-                    LastRotationCheck = DateTime.Now;
-                }
-
-                return;
+                CharacterManager.Face(target.Position, target.Guid);
+                LastRotationCheck = DateTime.Now;
             }
 
             // if we are close enough, face the target and start attacking
-            if (ObjectManager.Player.Position.GetDistance(target.Position) < DistanceToTarget)
+            double distance = ObjectManager.Player.Position.GetDistance(target.Position);
+            if (distance < DistanceToTarget)
             {
-                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
+                // do we need to stop movement
+                if (NeedToStopMovement)
                 {
-                    // HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
-
-                    // do we need to stop movement
                     if (CharacterManager.GetCurrentClickToMovePoint(out Vector3 ctmPosition)
                         && (int)ctmPosition.X != (int)ObjectManager.Player.Position.Z
                         || (int)ctmPosition.Y != (int)ObjectManager.Player.Position.Y
                         || (int)ctmPosition.Z != (int)ObjectManager.Player.Position.Z)
                     {
                         CharacterManager.StopMovement(ObjectManager.Player.Position, ObjectManager.Player.Guid);
+                        NeedToStopMovement = false;
                     }
-
-                    CharacterManager.Face(target.Position, target.Guid);
-                    LastRotationCheck = DateTime.Now;
                 }
 
                 return;
             }
-
-            if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
+            else
             {
-                BuildNewPath(target);
+                // move away
+            }
+
+            if (target != null
+                && target.Guid != 0
+                && target.Health > 1
+                && !target.IsDead)
+            {
+                if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
+                {
+                    BuildNewPath(target);
+                }
+                else
+                {
+                    if (MovementEngine.CurrentPath?.Count > 0
+                        && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    {
+                        CharacterManager.MoveToPosition(positionToGoTo, 6.28f);
+                        NeedToStopMovement = true;
+
+                        if (needToJump)
+                        {
+                            CharacterManager.Jump();
+
+                            Random rnd = new Random();
+                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
+
+                            if (rnd.Next(10) >= 5)
+                            {
+                                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
+                            }
+                            else
+                            {
+                                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
+                            }
+
+                            TryCount++;
+                        }
+                    }
+                }
             }
             else
             {
-                if (MovementEngine.CurrentPath?.Count > 0
-                    && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
-                {
-                    CharacterManager.MoveToPosition(positionToGoTo, 6.28f);
-
-                    if (needToJump)
-                    {
-                        CharacterManager.Jump();
-
-                        Random rnd = new Random();
-                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
-
-                        if (rnd.Next(10) >= 5)
-                        {
-                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
-                        }
-                        else
-                        {
-                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
-                        }
-
-                        TryCount++;
-                    }
-                }
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
         }
 

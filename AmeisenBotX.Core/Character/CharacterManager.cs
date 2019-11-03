@@ -212,7 +212,7 @@ namespace AmeisenBotX.Core.Character
                         {
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
-                                HookManager.ReplaceItem(equippedItem, item);
+                                HookManager.ReplaceItem(null, item);
                                 break;
                             }
                         }
