@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core
                 "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
                 "PALADINPROTECTION" => new PaladinProtection(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
-                "HUNTERBEASTMASTERY" => new MageFire(ObjectManager, CharacterManager, HookManager),
+                "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager),
                 _ => null,
             };
 

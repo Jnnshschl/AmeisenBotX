@@ -25,6 +25,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             PathfindingHandler = pathfindingHandler;
             MovementEngine = movementEngine;
             CombatClass = combatClass;
+
+            DistanceToTarget = combatClass == null || combatClass.IsMelee ? 3.0 : 25.0;
         }
 
         private CharacterManager CharacterManager { get; }
@@ -46,6 +48,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private DateTime LastRotationCheck { get; set; }
 
         private int TryCount { get; set; }
+
+        public double DistanceToTarget { get; private set; }
 
         public override void Enter()
         {
@@ -124,11 +128,35 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void HandleMovement(WowUnit target)
         {
-            if (ObjectManager.Player.Position.GetDistance(target.Position) < 3.0)
+            // we don't want to move when we are casting/channeling something either
+            if (ObjectManager.Player.CurrentlyCastingSpellId != 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId != 0)
             {
-                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(10000))
+                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
+                {
+                    CharacterManager.Face(target.Position, target.Guid);
+                    LastRotationCheck = DateTime.Now;
+                }
+
+                return;
+            }
+
+            // if we are close enough, face the target and start attacking
+            if (ObjectManager.Player.Position.GetDistance(target.Position) < DistanceToTarget)
+            {
+                if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
                 {
                     // HookManager.FaceUnit(ObjectManager.Player, CurrentTarget.Position);
+
+                    // do we need to stop movement
+                    if (CharacterManager.GetCurrentClickToMovePoint(out Vector3 ctmPosition)
+                        && (int)ctmPosition.X != (int)ObjectManager.Player.Position.Z
+                        || (int)ctmPosition.Y != (int)ObjectManager.Player.Position.Y
+                        || (int)ctmPosition.Z != (int)ObjectManager.Player.Position.Z)
+                    {
+                        CharacterManager.StopMovement(ObjectManager.Player.Position, ObjectManager.Player.Guid);
+                    }
+
                     CharacterManager.Face(target.Position, target.Guid);
                     LastRotationCheck = DateTime.Now;
                 }
@@ -190,9 +218,12 @@ namespace AmeisenBotX.Core.StateMachine.States
                     if (ObjectManager.PartymemberGuids.Count > 0)
                     {
                         // find a new target from group
-                        WowPlayer partytarget = ObjectManager.WowObjects.OfType<WowPlayer>()
-                            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-                            .FirstOrDefault(r => r.IsInCombat);
+                        WowUnit partytarget = (WowUnit)ObjectManager.WowObjects
+                            .FirstOrDefault(a => a.Guid ==
+                                ObjectManager.WowObjects.OfType<WowPlayer>()
+                                    .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
+                                    .Where(e => HookManager.GetUnitReaction(ObjectManager.Player, (WowUnit)ObjectManager.WowObjects.FirstOrDefault(r => r.Guid == e.TargetGuid)) != WowUnitReaction.Friendly)
+                                    .FirstOrDefault(r => r.IsInCombat).TargetGuid);
 
                         if (partytarget != null)
                         {

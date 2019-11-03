@@ -145,12 +145,11 @@ namespace AmeisenBotX.Core.StateMachine
             }
 
             HandleObjectUpdates();
-
-            CurrentState.Value.Execute();
             CharacterManager.AntiAfk();
 
             // used for ui updates
             OnStateMachineTick?.Invoke();
+            CurrentState.Value.Execute();
         }
 
         internal void SetState(AmeisenBotState state)

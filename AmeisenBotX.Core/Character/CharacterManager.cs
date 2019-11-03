@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Character
 
         public void Face(Vector3 pos, ulong guid, float turnSpeed = 6.28f)
         {
-            if(pos == Vector3.Zero)
+            if (pos == Vector3.Zero)
             {
                 return;
             }
@@ -164,12 +164,38 @@ namespace AmeisenBotX.Core.Character
             }
         }
 
-        public void StopMovement()
+        public void StopMovement(Vector3 playerPosition, ulong playerGuid)
         {
-            foreach (KeyValuePair<VirtualKeys, bool> keyValuePair in KeyMap.Where(e => e.Value == true))
+            if (Config.UseClickToMove)
             {
-                BotUtils.RealeaseKey(XMemory.Process.MainWindowHandle, new IntPtr((int)keyValuePair.Key));
+                XMemory.Write(OffsetList.ClickToMoveX, playerPosition.X);
+                XMemory.Write(OffsetList.ClickToMoveY, playerPosition.Y);
+                XMemory.Write(OffsetList.ClickToMoveZ, playerPosition.Z);
+                XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 6.28);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 1.0f);
+                XMemory.Write(OffsetList.ClickToMoveGuid, playerGuid);
+                XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Stop);
+                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
             }
+            else
+            {
+                foreach (KeyValuePair<VirtualKeys, bool> keyValuePair in KeyMap.Where(e => e.Value == true))
+                {
+                    BotUtils.RealeaseKey(XMemory.Process.MainWindowHandle, new IntPtr((int)keyValuePair.Key));
+                }
+            }
+        }
+
+        public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
+        {
+            if (XMemory.Read(OffsetList.ClickToMoveX, out Vector3 currentCtmPos))
+            {
+                currentCtmPosition = currentCtmPos;
+                return true;
+            }
+
+            currentCtmPosition = Vector3.Zero;
+            return false;
         }
 
         public void UpdateCharacterGear()

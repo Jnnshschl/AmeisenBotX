@@ -69,9 +69,10 @@ namespace AmeisenBotX.Core.Hook
 
         public void ClickOnTerrain(Vector3 position)
         {
-            if (XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            if (XMemory.AllocateMemory(20, out IntPtr codeCaveVector3))
             {
-                XMemory.Write(codeCaveVector3, position);
+                XMemory.Write<ulong>(codeCaveVector3, 0);
+                XMemory.Write(IntPtr.Add(codeCaveVector3, 0x8), position);
 
                 string[] asm = new string[]
                 {
