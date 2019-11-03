@@ -14,9 +14,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class PaladinTank : ICombatClass
+    public class PaladinProtection : ICombatClass
     {
-        public PaladinTank(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public PaladinProtection(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -29,6 +29,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
+
+        public bool IsMelee => true;
+
         public bool Jumped { get; set; }
 
         private CharacterManager CharacterManager { get; }

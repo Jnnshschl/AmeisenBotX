@@ -6,6 +6,8 @@
 
         bool HandlesTargetSelection { get; }
 
+        bool IsMelee { get; }
+
         void Execute();
 
         void OutOfCombatExecute();

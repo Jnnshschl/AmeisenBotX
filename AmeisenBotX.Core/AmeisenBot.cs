@@ -84,8 +84,9 @@ namespace AmeisenBotX.Core
                 "DEATHKNIGHTBLOOD" => new DeathKnightBlood(ObjectManager, CharacterManager, HookManager),
                 "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
-                "PALADINTANK" => new PaladinTank(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
+                "PALADINPROTECTION" => new PaladinProtection(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
+                "HUNTERBEASTMASTERY" => new MageFire(ObjectManager, CharacterManager, HookManager),
                 _ => null,
             };
 

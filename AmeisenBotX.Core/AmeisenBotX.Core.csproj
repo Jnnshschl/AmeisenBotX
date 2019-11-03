@@ -130,10 +130,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\AmeisenBotStateMachine.cs" />
     <Compile Include="StateMachine\CombatClasses\DeathKnightBlood.cs" />
+    <Compile Include="StateMachine\CombatClasses\HunterBeastmastery.cs" />
     <Compile Include="StateMachine\CombatClasses\MageFire.cs" />
     <Compile Include="StateMachine\CombatClasses\PaladinHoly.cs" />
     <Compile Include="StateMachine\CombatClasses\ICombatClass.cs" />
-    <Compile Include="StateMachine\CombatClasses\PaladinTank.cs" />
+    <Compile Include="StateMachine\CombatClasses\PaladinProtection.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
     <Compile Include="StateMachine\States\AmeisenBotState.cs" />
     <Compile Include="StateMachine\States\State.cs" />

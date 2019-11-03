@@ -44,6 +44,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool HandlesTargetSelection => true;
 
+        public bool IsMelee => false;
+
         private DateTime LastBuffCheck { get; set; }
 
         private CharacterManager CharacterManager { get; }

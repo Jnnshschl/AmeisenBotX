@@ -22,6 +22,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool HandlesTargetSelection => false;
 
+        public bool IsMelee => true;
+
         private CharacterManager CharacterManager { get; }
 
         private DateTime HeroicStrikeLastUsed { get; set; }

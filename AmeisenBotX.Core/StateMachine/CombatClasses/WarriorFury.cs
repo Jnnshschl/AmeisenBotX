@@ -30,6 +30,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
+
+        public bool IsMelee => true;
+
         public bool Jumped { get; set; }
 
         private CharacterManager CharacterManager { get; }
