@@ -53,6 +53,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private IPathfindingHandler PathfindingHandler { get; set; }
 
         private DefaultMovementEngine MovementEngine { get; set; }
+        private DateTime LastGCD { get; set; }
+        private double GCDTime { get; set; }
+
+        private bool IsGCD()
+        {
+            return DateTime.Now.Subtract(LastGCD).TotalSeconds > GCDTime;
+        }
+        private void SetGCD(double GCDinSec)
+        {
+            GCDTime = GCDinSec;
+            LastGCD = DateTime.Now;
+        }
 
         public void Execute()
         {
@@ -157,6 +169,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleAttacking(WowUnit target)
         {
+            if(IsGCD())
+            {
+                return;
+            }
             double playerMana = ObjectManager.Player.Mana;
             double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100.0;
@@ -173,6 +189,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if (!Buffs.Any(e => e.Contains("ury")))
             {
                 HookManager.CastSpell("Righteous Fury");
+                SetGCD(1.5);
+                return;
             }
             if (!Buffs.Any(e => e.Contains("ighteousness")))
             {
@@ -182,6 +200,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.CastSpell("Divine Sacrifice");
                 LastSacrifice = DateTime.Now;
+                SetGCD(1.5);
+                return;
             }
 
             // distance attack
@@ -193,6 +213,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     LastAvenger = DateTime.Now;
                     HookManager.SendChatMessage("/s and i'm like.. bam!");
                     playerMana -= 1027;
+                    SetGCD(1.5);
+                    return;
                 }
             }
             else
@@ -206,40 +228,72 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         LastHammer = DateTime.Now;
                         HookManager.SendChatMessage("/s STOP! hammertime!");
                         playerMana -= 117;
+                        SetGCD(1.5);
+                        return;
                     }
                 }
             }
 
+            // support members
+            int lowHealth = 2147483647;
+            WowUnit lowMember = null;
+            foreach (ulong memberGuid in ObjectManager.PartymemberGuids)
+            {
+                WowUnit member = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == memberGuid);
+                if (member != null && member.Health < lowHealth)
+                {
+                    lowHealth = member.Health;
+                    lowMember = member;
+                }
+            }
+            if(lowMember != null)
+            {
+                HookManager.TargetGuid(lowMember.Guid);
+                if(lowMember.IsDazed || lowMember.IsConfused || lowMember.IsFleeing || lowMember.IsSilenced)
+                {
+                    if (playerMana >= 276)
+                    {
+                        HookManager.CastSpell("Blessing of Sanctuary");
+                        playerMana -= 276;
+                        SetGCD(1.5);
+                        return;
+                    }
+                    if (playerMana >= 236)
+                    {
+                        HookManager.CastSpell("Hand of Freedom");
+                        playerMana -= 236;
+                        SetGCD(1.5);
+                        return;
+                    }
+                }
+                if (lowMember.HealthPercentage < 20 && playerMana >= 117)
+                {
+                    HookManager.CastSpell("Divine Shield");
+                    LastDivineShield = DateTime.Now;
+                    playerMana -= 117;
+                    SetGCD(1.5);
+                    return;
+                }
+                else if (lowMember.HealthPercentage < 50 && playerMana >= 117)
+                {
+                    HookManager.CastSpell("Divine Protection");
+                    LastProtection = DateTime.Now;
+                    playerMana -= 117;
+                }
+            }
+
             // self-casts
-            HookManager.ClearTarget();
             if (DateTime.Now.Subtract(LastHolyShield).TotalSeconds > 8 && playerMana >= 395)
             {
+                HookManager.ClearTarget();
                 HookManager.CastSpell("Holy Shield");
                 LastHolyShield = DateTime.Now;
                 playerMana -= 395;
+                SetGCD(1.5);
+                return;
             }
-            if (!Buffs.Any(e => e.Contains("lessing")) && playerMana >= 276)
-            {
-                HookManager.CastSpell("Blessing of Sanctuary");
-                playerMana -= 276;
-            }
-            if (!Buffs.Any(e => e.Contains("reedom")) && playerMana >= 236)
-            {
-                HookManager.CastSpell("Hand of Freedom");
-                playerMana -= 236;
-            }
-            if (playerHealthPercent < 20 && DateTime.Now.Subtract(LastDivineShield).TotalSeconds > 240 && playerMana >= 117)
-            {
-                HookManager.CastSpell("Divine Shield");
-                LastDivineShield = DateTime.Now;
-                playerMana -= 117;
-            }
-            else if (playerHealthPercent < 50 && DateTime.Now.Subtract(LastProtection).TotalSeconds > 120 && playerMana >= 117)
-            {
-                HookManager.CastSpell("Divine Protection");
-                LastProtection = DateTime.Now;
-                playerMana -= 117;
-            }
+
+            // back to attack
             HookManager.TargetGuid(target.Guid);
             if (!ObjectManager.Player.IsAutoAttacking)
             {

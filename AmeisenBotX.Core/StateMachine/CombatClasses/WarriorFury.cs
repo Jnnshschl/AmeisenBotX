@@ -55,6 +55,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private DateTime LastThirst { get; set; }
         private bool Berserk { get; set; }
         private bool Dancing { get; set; }
+        private DateTime LastGCD { get; set; }
+        private double GCDTime { get; set; }
+
+        private bool IsGCD()
+        {
+            return DateTime.Now.Subtract(LastGCD).TotalSeconds > GCDTime;
+        }
+        private void SetGCD(double GCDinSec)
+        {
+            GCDTime = GCDinSec;
+            LastGCD = DateTime.Now;
+        }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
 
@@ -153,6 +165,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleAttacking(WowUnit target)
         {
+            if (IsGCD())
+            {
+                return;
+            }
             double playerRage = ObjectManager.Player.Rage;
             double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100.0;
@@ -167,6 +183,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.CastSpell("Slam");
                 playerRage -= 15;
+                SetGCD(1.5);
+                return;
             }
 
             // buffs
@@ -175,6 +193,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 // alle 20.1 sec
                 HookManager.CastSpell("Berserker Rage");
                 LastRage = DateTime.Now;
+                SetGCD(1.5);
+                return;
             }
             if (DateTime.Now.Subtract(LastReckless).TotalSeconds > 201)
             {
@@ -183,6 +203,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     HookManager.CastSpell("Recklessness");
                     LastReckless = DateTime.Now;
+                    SetGCD(1.5);
+                    return;
                 }
                 else
                 {
@@ -204,6 +226,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Battle Shout");
                 LastShout = DateTime.Now;
                 playerRage -= 10;
+                SetGCD(1.5);
+                return;
             }
             if (DateTime.Now.Subtract(LastWish).TotalSeconds > 120.6 && playerRage >= 10)
             {
@@ -211,6 +235,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell("Death Wish");
                 LastWish = DateTime.Now;
                 playerRage -= 10;
+                SetGCD(1.5);
+                return;
             }
 
             // distance attacks
@@ -229,6 +255,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 LastIntercept = DateTime.Now;
                                 HookManager.SendChatMessage("/s gotcha!");
                                 playerRage -= 10;
+                                SetGCD(1.5);
+                                return;
                             }
                             else
                             {
@@ -277,6 +305,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                             LastShatter = DateTime.Now;
                             HookManager.SendChatMessage("/s and i'm like.. bam!");
                             playerRage -= 25;
+                            SetGCD(1.5);
+                            return;
                         }
                     }
                     else if (DateTime.Now.Subtract(LastHero).TotalSeconds > 60)
@@ -285,6 +315,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         HookManager.CastSpell("Heroic Throw");
                         LastHero = DateTime.Now;
                         HookManager.SendChatMessage("/s drive by shootin, baby!");
+                        SetGCD(1.5);
+                        return;
                     }
                 }
                 else
@@ -347,6 +379,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         LastThirst = DateTime.Now;
                         HookManager.SendChatMessage("oooh shit");
                         playerRage -= 20;
+                        SetGCD(1.5);
+                        return;
                     }
                 }
                 else if (DateTime.Now.Subtract(LastHamstring).TotalSeconds > 15 && playerRage >= 10 && distanceToTarget < 4)
@@ -355,6 +389,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     HookManager.CastSpell("Hamstring");
                     LastHamstring = DateTime.Now;
                     playerRage -= 10;
+                    SetGCD(1.5);
+                    return;
                 } // attacks
                 else if(targetHealthPercent < 21)
                 {
@@ -362,6 +398,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         HookManager.CastSpell("Execute");
                         playerRage -= 10;
+                        SetGCD(1.5);
+                        return;
                     }
                 }
                 else
