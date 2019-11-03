@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Event
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log($"Failed to parse events:\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log($"Failed to parse events:\neventJson: {eventJson}\n{e.ToString()}", LogLevel.Error);
                 }
             }
             catch (Exception e)
