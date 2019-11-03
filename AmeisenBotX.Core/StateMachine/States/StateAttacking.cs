@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         private void HandleMovement(WowUnit target)
         {
             // we don't want to move when we are casting/channeling something either
-            if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
+            if (target != null && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
                 CharacterManager.Face(target.Position, target.Guid);
                 LastRotationCheck = DateTime.Now;

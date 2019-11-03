@@ -69,9 +69,9 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsClickToMovePending()
         {
-            if(XMemory.Read(OffsetList.ClickToMovePendingMovement, out byte ctmPending))
+            if (XMemory.Read(OffsetList.ClickToMovePendingMovement, out byte ctmPending))
             {
-                return ctmPending > 0;
+                return ctmPending == 2;
             }
 
             return false;

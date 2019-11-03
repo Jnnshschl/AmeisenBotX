@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 3.14f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 4.5f)
         {
             if (pos == Vector3.Zero)
             {
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
                 XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
                 XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 3.0f);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 4.0f);
                 XMemory.Write(OffsetList.ClickToMoveGuid, ObjectManager.PlayerGuid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
             }
@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
                 XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
                 XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 1.0f);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 3.0f);
                 XMemory.Write(OffsetList.ClickToMoveGuid, guid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
             }
@@ -172,7 +172,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveY, playerPosition.Y);
                 XMemory.Write(OffsetList.ClickToMoveZ, playerPosition.Z);
                 XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 6.28);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 1.0f);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 3.0f);
                 XMemory.Write(OffsetList.ClickToMoveGuid, playerGuid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Stop);
                 // BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
