@@ -132,6 +132,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void HandleMovement(WowUnit target)
         {
+            if (target == null)
+            {
+                return;
+            }
+
             // we don't want to move when we are casting/channeling something either
             if (target != null && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
