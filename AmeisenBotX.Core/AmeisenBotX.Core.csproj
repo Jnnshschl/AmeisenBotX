@@ -135,6 +135,7 @@
     <Compile Include="StateMachine\CombatClasses\PaladinHoly.cs" />
     <Compile Include="StateMachine\CombatClasses\ICombatClass.cs" />
     <Compile Include="StateMachine\CombatClasses\PaladinProtection.cs" />
+    <Compile Include="StateMachine\CombatClasses\PriestHoly.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
     <Compile Include="StateMachine\States\AmeisenBotState.cs" />
     <Compile Include="StateMachine\States\State.cs" />

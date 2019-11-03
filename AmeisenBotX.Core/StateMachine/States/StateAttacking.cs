@@ -47,6 +47,10 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private DateTime LastRotationCheck { get; set; }
 
+        private DateTime LastCastingCheck { get; set; }
+
+        private bool IsCasting { get; set; }
+
         private int TryCount { get; set; }
 
         public double DistanceToTarget { get; private set; }
@@ -128,9 +132,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void HandleMovement(WowUnit target)
         {
+            if (DateTime.Now - LastCastingCheck > TimeSpan.FromMilliseconds(1000))
+            {
+                (string, int) castingInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Player);
+                IsCasting = castingInfo.Item1.Length > 0 && castingInfo.Item2 > 0;
+                LastCastingCheck = DateTime.Now;
+            }
+
             // we don't want to move when we are casting/channeling something either
-            if (ObjectManager.Player.CurrentlyCastingSpellId != 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId != 0)
+            if (IsCasting)
             {
                 if (DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
                 {
