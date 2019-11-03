@@ -133,6 +133,7 @@
     <Compile Include="StateMachine\CombatClasses\MageFire.cs" />
     <Compile Include="StateMachine\CombatClasses\PaladinHoly.cs" />
     <Compile Include="StateMachine\CombatClasses\ICombatClass.cs" />
+    <Compile Include="StateMachine\CombatClasses\PaladinTank.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
     <Compile Include="StateMachine\States\AmeisenBotState.cs" />
     <Compile Include="StateMachine\States\State.cs" />

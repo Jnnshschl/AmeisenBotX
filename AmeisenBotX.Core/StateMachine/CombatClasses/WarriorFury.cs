@@ -138,8 +138,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.ClearTarget();
                 ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
-                WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
-                HandleMovement(leader);
+                if(leaderGuid != ObjectManager.PlayerGuid)
+                {
+                    WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
+                    HandleMovement(leader);
+                }
 
             }
             return newTargetFound;
@@ -164,13 +167,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             // buffs
-            if (DateTime.Now.Subtract(LastRage).TotalSeconds > 19.1)
+            if (DateTime.Now.Subtract(LastRage).TotalSeconds > 20.1)
             {
                 // alle 20.1 sec
                 HookManager.CastSpell("Berserker Rage");
                 LastRage = DateTime.Now;
             }
-            if (DateTime.Now.Subtract(LastReckless).TotalSeconds > 200)
+            if (DateTime.Now.Subtract(LastReckless).TotalSeconds > 201)
             {
                 // alle 3.35 min
                 if(Berserk)
@@ -192,14 +195,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     }
                 }
             }
-            if (DateTime.Now.Subtract(LastShout).TotalSeconds > 119 && playerRage >= 10)
+            if (DateTime.Now.Subtract(LastShout).TotalSeconds > 120 && playerRage >= 10)
             {
                 // alle 2 min
                 HookManager.CastSpell("Battle Shout");
                 LastShout = DateTime.Now;
                 playerRage -= 10;
             }
-            if (DateTime.Now.Subtract(LastWish).TotalSeconds > 119.6 && playerRage >= 10)
+            if (DateTime.Now.Subtract(LastWish).TotalSeconds > 120.6 && playerRage >= 10)
             {
                 // alle 2.01 min
                 HookManager.CastSpell("Death Wish");
@@ -214,7 +217,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     if (distanceToTarget < 25)
                     {
-                        if (DateTime.Now.Subtract(LastIntercept).TotalSeconds > 29 && playerRage >= 10)
+                        if (DateTime.Now.Subtract(LastIntercept).TotalSeconds > 30 && playerRage >= 10)
                         {
                             // alle 30 sec
                             if (Berserk)
@@ -244,7 +247,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                             }
                         }
                     }
-                    else if (DateTime.Now.Subtract(LastShatter).TotalSeconds > 299 && playerRage >= 25)
+                    else if (DateTime.Now.Subtract(LastShatter).TotalSeconds > 300 && playerRage >= 25)
                     {
                         // alle 5 min
                         if (Berserk)
@@ -273,7 +276,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                             playerRage -= 25;
                         }
                     }
-                    else if (DateTime.Now.Subtract(LastHero).TotalSeconds > 59)
+                    else if (DateTime.Now.Subtract(LastHero).TotalSeconds > 60)
                     {
                         // alle 1 min
                         HookManager.CastSpell("Heroic Throw");
@@ -286,7 +289,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     // not in combat
                     if(distanceToTarget < 25)
                     {
-                        if(DateTime.Now.Subtract(LastCharge).TotalSeconds > 14)
+                        if(DateTime.Now.Subtract(LastCharge).TotalSeconds > 15)
                         {
                             // alle 15 sec
                             if (Berserk)
@@ -332,7 +335,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     stanceChanged = true;
                 }
                 // debuffs
-                if (playerHealthPercent < 21 && DateTime.Now.Subtract(LastThirst).TotalSeconds > 7 && distanceToTarget < 4)
+                if (playerHealthPercent < 21 && DateTime.Now.Subtract(LastThirst).TotalSeconds > 8 && distanceToTarget < 4)
                 {
                     if(playerRage >= 20)
                     {
@@ -343,7 +346,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         playerRage -= 20;
                     }
                 }
-                else if (DateTime.Now.Subtract(LastHamstring).TotalSeconds > 14 && playerRage >= 10 && distanceToTarget < 4)
+                else if (DateTime.Now.Subtract(LastHamstring).TotalSeconds > 15 && playerRage >= 10 && distanceToTarget < 4)
                 {
                     // alle 15 sec
                     HookManager.CastSpell("Hamstring");
