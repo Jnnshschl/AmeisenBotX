@@ -64,8 +64,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (target == null || target.IsDead || target.Health == 1)
             {
-                HookManager.ClearTarget();
-                return;
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
@@ -127,6 +126,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+
                 if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
                 {
                     HandleBuffing();

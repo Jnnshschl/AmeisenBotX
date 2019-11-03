@@ -60,8 +60,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (target == null || target.IsDead || target.Health == 1)
             {
-                HookManager.ClearTarget();
-                return;
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
             if (IsSpellKnown(divinePleaSpell)
@@ -123,6 +122,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+
                 if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
                 {
                     HandleBuffing();
