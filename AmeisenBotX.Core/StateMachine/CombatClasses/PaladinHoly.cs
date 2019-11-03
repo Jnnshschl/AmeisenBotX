@@ -76,9 +76,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HandleTargetSelection(playersThatNeedHealing);
                 ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
 
+                target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
+
                 if (target == null || target.IsDead || target.Health == 1)
                 {
-                    return;
+                    HookManager.TargetGuid(ObjectManager.PlayerGuid);
                 }
 
                 ObjectManager.UpdateObject(target.Type, target.BaseAddress);
