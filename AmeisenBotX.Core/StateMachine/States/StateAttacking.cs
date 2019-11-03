@@ -170,7 +170,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                if (target.Guid == ObjectManager.PlayerGuid
+                if (target.Guid != ObjectManager.PlayerGuid
                     && target != null
                     && target.Guid != 0
                     && target.Health > 1
