@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool IsGCD()
         {
-            return DateTime.Now.Subtract(LastGCD).TotalSeconds > GCDTime;
+            return DateTime.Now.Subtract(LastGCD).TotalSeconds < GCDTime;
         }
         private void SetGCD(double GCDinSec)
         {
@@ -87,20 +87,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 HandleMovement(target);
                 HandleAttacking(target);
-                if (target.IsDead)
-                {
-                    ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
-                    if (SearchNewTarget(ref target, leaderGuid == ObjectManager.PlayerGuid))
-                    {
-                        HandleMovement(target);
-                        HandleAttacking(target);
-                    }
-                    else
-                    {
-                        HookManager.SendChatMessage("yeah, baby!");
-                        HookManager.SendChatMessage("/dance");
-                    }
-                }
             }
         }
 
@@ -134,12 +120,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
-            AmeisenLogger.Instance.Log(JsonConvert.SerializeObject(wowUnits));
             foreach (WowUnit unit in wowUnits)
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 100)
                 {
-                    if((!inCombat && (unit.Health < targetHealth || unit.IsInCombat)) || (inCombat && unit.IsInCombat && unit.Health < targetHealth) || (grinding && unit.Health < targetHealth))
+                    if((unit.IsInCombat && unit.Health < targetHealth) || !inCombat && grinding && (target == null || target.IsDead) && unit.Health < targetHealth)
                     {
                         target = unit;
                         targetHealth = unit.Health;
@@ -165,10 +150,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleAttacking(WowUnit target)
         {
-            if (IsGCD())
-            {
-                return;
-            }
+            bool gcdWaiting = IsGCD();
             double playerRage = ObjectManager.Player.Rage;
             double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100.0;
@@ -179,7 +161,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             bool stanceChanged = false;
 
             // special
-            if (Buffs.Any(e => e.Contains("slam")) && playerRage >= 15 && distanceToTarget < 4)
+            if (!gcdWaiting && Buffs.Any(e => e.Contains("slam")) && playerRage >= 15 && distanceToTarget < 4)
             {
                 HookManager.CastSpell("Slam");
                 playerRage -= 15;
@@ -188,7 +170,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             // buffs
-            if (DateTime.Now.Subtract(LastRage).TotalSeconds > 20.1)
+            if (!gcdWaiting && DateTime.Now.Subtract(LastRage).TotalSeconds > 20.1)
             {
                 // alle 20.1 sec
                 HookManager.CastSpell("Berserker Rage");
@@ -196,7 +178,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 SetGCD(1.5);
                 return;
             }
-            if (DateTime.Now.Subtract(LastReckless).TotalSeconds > 201)
+            if (!gcdWaiting && DateTime.Now.Subtract(LastReckless).TotalSeconds > 201)
             {
                 // alle 3.35 min
                 if(Berserk)
@@ -220,7 +202,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     }
                 }
             }
-            if (DateTime.Now.Subtract(LastShout).TotalSeconds > 120 && playerRage >= 10)
+            if (!gcdWaiting && DateTime.Now.Subtract(LastShout).TotalSeconds > 120 && playerRage >= 10)
             {
                 // alle 2 min
                 HookManager.CastSpell("Battle Shout");
@@ -229,7 +211,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 SetGCD(1.5);
                 return;
             }
-            if (DateTime.Now.Subtract(LastWish).TotalSeconds > 120.6 && playerRage >= 10)
+            if (!gcdWaiting && DateTime.Now.Subtract(LastWish).TotalSeconds > 120.6 && playerRage >= 10)
             {
                 // alle 2.01 min
                 HookManager.CastSpell("Death Wish");
@@ -242,7 +224,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             // distance attacks
             if (distanceToTarget > 10 && distanceToTarget < 30)
             {
-                if (ObjectManager.Player.IsInCombat)
+                if (!gcdWaiting && ObjectManager.Player.IsInCombat)
                 {
                     if (distanceToTarget < 25)
                     {
@@ -322,7 +304,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 else
                 {
                     // not in combat
-                    if(distanceToTarget < 25)
+                    if(distanceToTarget < 25 && !ObjectManager.Player.IsInCombat)
                     {
                         if(DateTime.Now.Subtract(LastCharge).TotalSeconds > 15)
                         {
@@ -370,20 +352,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     stanceChanged = true;
                 }
                 // debuffs
-                if (playerHealthPercent < 21 && DateTime.Now.Subtract(LastThirst).TotalSeconds > 8 && distanceToTarget < 4)
+                if (!gcdWaiting && playerHealthPercent < 21 && DateTime.Now.Subtract(LastThirst).TotalSeconds > 8 && distanceToTarget < 4)
                 {
-                    if(playerRage >= 20)
+                    HookManager.SendChatMessage("/healme");
+                    if (playerRage >= 20)
                     {
                         // alle 8 sec
                         HookManager.CastSpell("Bloodthirst");
                         LastThirst = DateTime.Now;
-                        HookManager.SendChatMessage("oooh shit");
+                        HookManager.SendChatMessage("/s oooh shit");
                         playerRage -= 20;
                         SetGCD(1.5);
                         return;
                     }
                 }
-                else if (DateTime.Now.Subtract(LastHamstring).TotalSeconds > 15 && playerRage >= 10 && distanceToTarget < 4)
+                else if (!gcdWaiting && DateTime.Now.Subtract(LastHamstring).TotalSeconds > 15 && playerRage >= 10 && distanceToTarget < 4)
                 {
                     // alle 15 sec
                     HookManager.CastSpell("Hamstring");
@@ -392,7 +375,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     SetGCD(1.5);
                     return;
                 } // attacks
-                else if(targetHealthPercent < 21)
+                else if(!gcdWaiting && targetHealthPercent < 21)
                 {
                     if (playerRage >= 10)
                     {
@@ -410,6 +393,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         playerRage -= 12;
                     }
                 }
+            }
+
+            // back to attack
+            if (!ObjectManager.Player.IsAutoAttacking)
+            {
+                HookManager.StartAutoAttack();
             }
 
         }
