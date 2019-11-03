@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
                 XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
                 XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 4.0f);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 2.5f);
                 XMemory.Write(OffsetList.ClickToMoveGuid, ObjectManager.PlayerGuid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
             }
