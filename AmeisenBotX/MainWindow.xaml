@@ -18,7 +18,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentState" Content="None" HorizontalAlignment="Left" Margin="182,92,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+        <Label x:Name="labelCurrentState" Content="None" HorizontalAlignment="Left" Margin="4,190,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -137,17 +137,22 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Label x:Name="labelCurrentHealth" Content="10000/10000" HorizontalAlignment="Left" Margin="4,28,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+        <Label x:Name="labelCurrentHealth" Content="0/0" HorizontalAlignment="Left" Margin="4,28,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentHealth_Copy" Content="10000/10000" HorizontalAlignment="Left" Margin="4,50,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+        <Label x:Name="labelCurrentSecondary" Content="0/0" HorizontalAlignment="Left" Margin="4,50,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentHealth_Copy1" Content="10000/10000" HorizontalAlignment="Left" Margin="4,72,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+        <Label x:Name="labelCurrentExp" Content="0/0" HorizontalAlignment="Left" Margin="4,72,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
+        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="4,159,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>

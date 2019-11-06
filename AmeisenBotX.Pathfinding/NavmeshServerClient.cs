@@ -101,10 +101,9 @@ namespace AmeisenBotX.Pathfinding
 
             private void CConnectionWatchdog(object sender, ElapsedEventArgs e)
             {
-                if (!TcpClient.Connected)
+                if (TcpClient == null || !TcpClient.Connected)
                 {
                     TcpClient?.Close();
-                    TcpClient = new TcpClient();
 
                     try
                     {
