@@ -57,9 +57,9 @@ namespace AmeisenBotX.Core.LoginHandler
                     }
 
                     XMemory.ReadInt(OffsetList.IsWorldLoaded, out isWorldLoaded);
-                    Thread.Sleep(4000);
                 }
 
+                XMemory.Process.WaitForInputIdle();
                 return true;
             }
 

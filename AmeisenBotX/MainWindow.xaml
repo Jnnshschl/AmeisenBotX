@@ -18,7 +18,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentState" Content="None" HorizontalAlignment="Left" Margin="4,190,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+        <Label x:Name="labelCurrentState" Content="None" HorizontalAlignment="Left" Margin="0,198,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -45,7 +45,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </ProgressBar.Background>
         </ProgressBar>
-        <ProgressBar x:Name="progressbarSecondary" HorizontalAlignment="Left" Height="10" Margin="10,66,0,0" VerticalAlignment="Top" Width="100" BorderThickness="1,0,0,1" Foreground="Cyan" Value="50">
+        <ProgressBar x:Name="progressbarSecondary" HorizontalAlignment="Left" Height="10" Margin="10,68,0,0" VerticalAlignment="Top" Width="100" BorderThickness="1,0,0,1" Foreground="Cyan" Value="50">
             <ProgressBar.BorderBrush>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </ProgressBar.BorderBrush>
@@ -53,7 +53,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </ProgressBar.Background>
         </ProgressBar>
-        <ProgressBar x:Name="progressbarExp" HorizontalAlignment="Left" Height="10" Margin="10,88,0,0" VerticalAlignment="Top" Width="100" BorderThickness="1,0,0,1" Value="50">
+        <ProgressBar x:Name="progressbarExp" HorizontalAlignment="Left" Height="10" Margin="10,92,0,0" VerticalAlignment="Top" Width="100" BorderThickness="1,0,0,1" Value="50">
             <ProgressBar.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
             </ProgressBar.Foreground>
@@ -96,7 +96,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentLevel" Content="lvl. 0 " HorizontalAlignment="Left" Margin="4,98,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+        <Label x:Name="labelCurrentLevel" Content="lvl. 0 " HorizontalAlignment="Left" Margin="4,100,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -122,7 +122,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </Button.Background>
         </Button>
-        <Rectangle HorizontalAlignment="Left" Margin="0,0,0,22" Width="140" Height="1" VerticalAlignment="Bottom">
+        <Rectangle HorizontalAlignment="Left" Margin="0,0,0,37.333" Width="140" Height="1" VerticalAlignment="Bottom">
             <Rectangle.Fill>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
@@ -137,7 +137,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Label x:Name="labelCurrentHealth" Content="0/0" HorizontalAlignment="Left" Margin="4,28,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+        <Label x:Name="labelCurrentHealth" Content="0/0" HorizontalAlignment="Left" Margin="4,26,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -147,12 +147,12 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentExp" Content="0/0" HorizontalAlignment="Left" Margin="4,72,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+        <Label x:Name="labelCurrentExp" Content="0/0" HorizontalAlignment="Left" Margin="4,74,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="4,159,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="4,163,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
