@@ -7,9 +7,6 @@ namespace AmeisenBotX.Core.Character.Stats
         [JsonProperty("agility")]
         public double Agility { get; set; }
 
-        [JsonProperty("armor")]
-        public double Armor { get; set; }
-
         [JsonProperty("attackpower")]
         public double Attackpower { get; set; }
 

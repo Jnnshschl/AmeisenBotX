@@ -323,10 +323,12 @@ namespace AmeisenBotX.Core.Hook
             CofirmBop();
         }
 
-        public string GetRollItemName(int rollId)
+        public string GetItemStats(string itemLink)
         {
-            LuaDoString($"_, abRollItemName = GetLootRollItemInfo({rollId});");
-            return GetLocalizedText("abRollItemName");
+            string command = $"abotItemLink=\"{itemLink}\"abotItemStatsResult=''stats={{}}abStats=GetItemStats(abotItemLink,stats)abotItemStatsResult='{{'..'\"stamina\": \"'..tostring(stats[\"ITEM_MOD_STAMINA_SHORT\"]or 0)..'\",'..'\"agility\": \"'..tostring(stats[\"ITEM_MOD_AGILITY_SHORT\"]or 0)..'\",'..'\"strenght\": \"'..tostring(stats[\"ITEM_MOD_STRENGHT_SHORT\"]or 0)..'\",'..'\"intellect\": \"'..tostring(stats[\"ITEM_MOD_INTELLECT_SHORT\"]or 0)..'\",'..'\"spirit\": \"'..tostring(stats[\"ITEM_MOD_SPIRIT_SHORT\"]or 0)..'\",'..'\"attackpower\": \"'..tostring(stats[\"ITEM_MOD_ATTACK_POWER_SHORT\"]or 0)..'\",'..'\"spellpower\": \"'..tostring(stats[\"ITEM_MOD_SPELL_POWER_SHORT\"]or 0)..'\",'..'\"mana\": \"'..tostring(stats[\"ITEM_MOD_MANA_SHORT\"]or 0)..'\"'..'}}'";
+
+            LuaDoString(command);
+            return GetLocalizedText("abotItemStatsResult");
         }
 
         public string GetLootRollItemLink(int rollId)
@@ -343,7 +345,7 @@ namespace AmeisenBotX.Core.Hook
             return GetLocalizedText("abotItemInfoResult");
         }
 
-        public string GetItemByName(string itemName)
+        public string GetItemByNameOrLink(string itemName)
         {
             string command = $"abotItemName=\"{itemName}\";abotItemInfoResult='noItem';abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemName);abotItemInfoResult='{{'..'\"id\": \"0\",'..'\"count\": \"1\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"0\",'..'\"maxDurability\": \"0\",'..'\"cooldownStart\": \"0\",'..'\"cooldownEnd\": \"0\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';";
 
@@ -914,6 +916,21 @@ namespace AmeisenBotX.Core.Hook
             {
                 return IntPtr.Zero;
             }
+        }
+
+        public string GetInventoryItems()
+        {
+            string command = "abotInventoryResult='['for a=0,4 do containerSlots=GetContainerNumSlots(a)for b=1,containerSlots do abItemLink=GetContainerItemLink(a,b)if abItemLink then abCurrentDurability,abMaxDurability=GetContainerItemDurability(a,b)abCooldownStart,abCooldownEnd=GetContainerItemCooldown(a,b)abIcon,abItemCount,abLocked,abQuality,abReadable,abLootable,abItemLink,isFiltered=GetContainerItemInfo(a,b)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abItemLink)abotInventoryResult=abotInventoryResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abItemCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": \"'..tostring(abCooldownEnd or 0)..'\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"lootable\": \"'..tostring(abLootable or 0)..'\",'..'\"readable\": \"'..tostring(abReadable or 0)..'\",'..'\"link\": \"'..tostring(abItemLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'\"bagid\": \"'..tostring(a or 0)..'\"'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..'}'if b<containerSlots then abotInventoryResult=abotInventoryResult..','end end end end;abotInventoryResult=abotInventoryResult..']'";
+            LuaDoString(command);
+
+            return GetLocalizedText("abotInventoryResult");
+        }
+
+        public string GetEquipmentItems()
+        {
+            string command = "abotItemInfoResult='['for a=0,23 do abId=GetInventoryItemID('player',a)abCount=GetInventoryItemCount('player',a)abCurrentDurability,abMaxDurability=GetInventoryItemDurability(a)abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',a)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(GetInventoryItemLink('player',a))abotItemInfoResult=abotItemInfoResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(a or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}'if abotItemInfoResult<23 then abotItemInfoResult=abotItemInfoResult..\",\"end end;abotItemInfoResult=abotItemInfoResult..']'";
+            LuaDoString(command);
+            return GetLocalizedText("abotItemInfoResult");
         }
     }
 }

@@ -36,9 +36,7 @@ namespace AmeisenBotX.Core
 
         public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config)
         {
-            AmeisenLogger.Instance.ChangeLogFolder(Path.Combine(botDataPath, accountName, "log/"));
-            AmeisenLogger.Instance.ActiveLogLevel = LogLevel.Verbose;
-            AmeisenLogger.Instance.Start();
+            SetupLogging(botDataPath, accountName);
             AmeisenLogger.Instance.Log("AmeisenBot starting...", LogLevel.Master);
 
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -95,6 +93,13 @@ namespace AmeisenBotX.Core
             StateMachine.OnStateMachineStateChange += HandlePositionLoad;
         }
 
+        private static void SetupLogging(string botDataPath, string accountName)
+        {
+            AmeisenLogger.Instance.ChangeLogFolder(Path.Combine(botDataPath, accountName, "log/"));
+            AmeisenLogger.Instance.ActiveLogLevel = LogLevel.Verbose;
+            AmeisenLogger.Instance.Start();
+        }
+
         public string BotDataPath { get; }
 
         public string AccountName { get; }
@@ -148,7 +153,11 @@ namespace AmeisenBotX.Core
         {
             StateMachineTimer.Start();
             BotCache.Load();
+            SubscribeToWowEvents();
+        }
 
+        private void SubscribeToWowEvents()
+        {
             EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
             EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
@@ -161,50 +170,6 @@ namespace AmeisenBotX.Core
 
             //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
             //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
-        }
-
-        private void OnBagChanged(long timestamp, List<string> args)
-        {
-            AmeisenLogger.Instance.Log($"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            XMemory.Write(OffsetList.CvarMaxFps, 100);
-            CharacterManager.Inventory.Update();
-            CharacterManager.Equipment.Update();
-            CharacterManager.UpdateCharacterGear();
-            XMemory.Write(OffsetList.CvarMaxFps, Config.MaxFps);
-        }
-
-        private void OnLootRollStarted(long timestamp, List<string> args)
-        {
-            AmeisenLogger.Instance.Log($"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
-            if (int.TryParse(args[0], out int rollId))
-            {
-                string itemName = HookManager.GetLootRollItemLink(rollId);
-                string json = HookManager.GetItemByName(itemName);
-                WowBasicItem item = ItemFactory.ParseItem(json);
-                item = ItemFactory.BuildSpecificItem(item);
-
-                if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                {
-                    AmeisenLogger.Instance.Log($"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
-                    HookManager.RollOnItem(rollId, RollType.Need);
-                    return;
-                }
-            }
-
-            HookManager.RollOnItem(rollId, RollType.Greed);
-        }
-
-        private void OnLootWindowOpened(long timestamp, List<string> args)
-        {
-            AmeisenLogger.Instance.Log($"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.LootEveryThing();
-        }
-
-        private void OnConfirmBindOnPickup(long timestamp, List<string> args)
-        {
-            AmeisenLogger.Instance.Log($"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.CofirmBop();
         }
 
         public void Stop()
@@ -376,6 +341,52 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.Instance.Log($"Event OnSummonRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.AcceptSummon();
+        }
+
+        private void OnBagChanged(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            XMemory.Write(OffsetList.CvarMaxFps, 200);
+
+            CharacterManager.Inventory.Update();
+            CharacterManager.UpdateCharacterGear();
+            CharacterManager.Equipment.Update();
+
+            XMemory.Write(OffsetList.CvarMaxFps, Config.MaxFps);
+        }
+
+        private void OnLootRollStarted(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
+            if (int.TryParse(args[0], out int rollId))
+            {
+                string itemName = HookManager.GetLootRollItemLink(rollId);
+                string json = HookManager.GetItemByNameOrLink(itemName);
+                WowBasicItem item = ItemFactory.ParseItem(json);
+                item = ItemFactory.BuildSpecificItem(item);
+
+                if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                {
+                    AmeisenLogger.Instance.Log($"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
+                    HookManager.RollOnItem(rollId, RollType.Need);
+                    return;
+                }
+            }
+
+            HookManager.RollOnItem(rollId, RollType.Greed);
+        }
+
+        private void OnLootWindowOpened(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            HookManager.LootEveryThing();
+        }
+
+        private void OnConfirmBindOnPickup(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            HookManager.CofirmBop();
         }
     }
 }

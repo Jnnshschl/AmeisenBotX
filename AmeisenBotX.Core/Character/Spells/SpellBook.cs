@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,13 +23,15 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
+            string rawSpells = HookManager.GetSpells();
+
             try
             {
-                string rawSpells = HookManager.GetSpells();
                 Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells);
             }
-            catch
+            catch (Exception e)
             {
+                AmeisenLogger.Instance.Log($"Failed to parse Spells JSON:\n{rawSpells}\n{e.ToString()}", LogLevel.Error);
                 Spells = new List<Spell>();
             }
         }

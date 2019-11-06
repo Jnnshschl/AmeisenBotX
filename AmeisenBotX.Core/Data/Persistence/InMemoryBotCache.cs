@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,11 +30,9 @@ namespace AmeisenBotX.Core.Data.Persistence
                 Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
             }
 
-            using (Stream stream = File.Open(FilePath, FileMode.Create))
-            {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                binaryFormatter.Serialize(stream, this);
-            }
+            using Stream stream = File.Open(FilePath, FileMode.Create);
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            binaryFormatter.Serialize(stream, this);
         }
 
         public void Load()
@@ -45,14 +44,12 @@ namespace AmeisenBotX.Core.Data.Persistence
 
             if (File.Exists(FilePath))
             {
-                using (Stream stream = File.Open(FilePath, FileMode.Open))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
+                using Stream stream = File.Open(FilePath, FileMode.Open);
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
 
-                    NameCache = loadedCache.NameCache;
-                    ReactionCache = loadedCache.ReactionCache;
-                }
+                NameCache = loadedCache.NameCache;
+                ReactionCache = loadedCache.ReactionCache;
             }
         }
 
