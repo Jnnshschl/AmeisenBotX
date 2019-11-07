@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
@@ -72,7 +71,7 @@ namespace AmeisenBotX.Core.Common
 
         public static void SendMouseMovement(IntPtr windowHandle, short x, short y)
         {
-            SendMessage(windowHandle, WM_MOUSEMOVE, IntPtr.Zero, MakeLParam(x,y));
+            SendMessage(windowHandle, WM_MOUSEMOVE, IntPtr.Zero, MakeLParam(x, y));
         }
 
         public static void SendMouseMovementHoldLeft(IntPtr windowHandle, short x, short y)

@@ -47,11 +47,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private DateTime LastRotationCheck { get; set; }
 
-        private DateTime LastCastingCheck { get; set; }
-
         private bool NeedToStopMovement { get; set; }
-
-        private bool IsCasting { get; set; }
 
         private int TryCount { get; set; }
 
@@ -59,6 +55,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
+            AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
+
             MovementEngine.CurrentPath.Clear();
             MovementEngine.Reset();
         }
@@ -100,7 +98,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
                 if (CombatClass == null || !CombatClass.HandlesMovement)
                 {
-                    // use the default MovementEngine to move if 
+                    // use the default MovementEngine to move if
                     // the CombatClass doesnt handle Movement
                     HandleMovement(CurrentTarget);
                 }
@@ -121,6 +119,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
+            AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
+
             MovementEngine.Reset();
             MovementEngine.CurrentPath.Clear();
 
@@ -258,7 +258,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         return true;
                     }
-
                 }
             }
 

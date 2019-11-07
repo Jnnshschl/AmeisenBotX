@@ -32,6 +32,24 @@ namespace AmeisenBotX.Memory
 
         private Dictionary<Type, int> SizeCache { get; }
 
+        public static Rect GetWindowPosition(IntPtr windowHandle)
+        {
+            Rect rect = new Rect();
+            GetWindowRect(windowHandle, ref rect);
+            return rect;
+        }
+
+        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
+        {
+            if (rect.Left > 0
+                && rect.Right > 0
+                && rect.Top > 0
+                && rect.Bottom > 0)
+            {
+                MoveWindow(windowHandle, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, true);
+            }
+        }
+
         public ProcessThread GetMainThread()
         {
             if (Process.MainWindowHandle == null)
@@ -64,24 +82,6 @@ namespace AmeisenBotX.Memory
             if (OpenMainThread())
             {
                 ResumeThread(MainThreadHandle);
-            }
-        }
-
-        public static Rect GetWindowPosition(IntPtr windowHandle)
-        {
-            Rect rect = new Rect();
-            GetWindowRect(windowHandle, ref rect);
-            return rect;
-        }
-
-        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
-        {
-            if (rect.Left > 0
-                && rect.Right > 0
-                && rect.Top > 0
-                && rect.Bottom > 0)
-            {
-                MoveWindow(windowHandle, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, true);
             }
         }
 

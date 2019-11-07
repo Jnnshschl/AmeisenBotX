@@ -37,31 +37,6 @@ namespace AmeisenBotX.Core.Character
             Skills = new List<string>();
         }
 
-        public void UpdateAll()
-        {
-            AmeisenLogger.Instance.Log($"Updating full character...", LogLevel.Verbose);
-
-            Inventory.Update();
-            Equipment.Update();
-            SpellBook.Update();
-            UpdateSkills();
-            UpdateMoney();
-        }
-
-        private void UpdateSkills()
-        {
-            Skills = HookManager.GetSkills();
-        }
-
-        private void UpdateMoney()
-        {
-            string rawMoney = HookManager.GetMoney();
-            if (int.TryParse(rawMoney, out int money))
-            {
-                Money = money;
-            }
-        }
-
         private Dictionary<VirtualKeys, bool> KeyMap { get; set; }
 
         private AmeisenBotConfig Config { get; }
@@ -89,6 +64,17 @@ namespace AmeisenBotX.Core.Character
         public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
 
         public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
+
+        public void UpdateAll()
+        {
+            AmeisenLogger.Instance.Log($"Updating full character...", LogLevel.Verbose);
+
+            Inventory.Update();
+            Equipment.Update();
+            SpellBook.Update();
+            UpdateSkills();
+            UpdateMoney();
+        }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 4.5f)
         {
@@ -132,7 +118,6 @@ namespace AmeisenBotX.Core.Character
             }
             else
             {
-
             }
         }
 
@@ -175,7 +160,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveDistance, 3.0f);
                 XMemory.Write(OffsetList.ClickToMoveGuid, playerGuid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Stop);
-                // BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
+                //// BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
             }
             else
             {
@@ -227,109 +212,53 @@ namespace AmeisenBotX.Core.Character
 
         public bool IsAbleToUseArmor(WowArmor item)
         {
-            switch (item.ArmorType)
+            return item.ArmorType switch
             {
-                case ArmorType.PLATE:
-                    return Skills.Any(e => e.Contains("Plate Mail") || e.Contains("Plattenpanzer"));
-
-                case ArmorType.MAIL:
-                    return Skills.Any(e => e.Contains("Mail") || e.Contains("Panzer"));
-
-                case ArmorType.LEATHER:
-                    return Skills.Any(e => e.Contains("Leather") || e.Contains("Leder"));
-
-                case ArmorType.CLOTH:
-                    return Skills.Any(e => e.Contains("Cloth") || e.Contains("Stoff"));
-
-                case ArmorType.TOTEMS:
-                    return Skills.Any(e => e.Contains("Totem") || e.Contains("Totem"));
-
-                case ArmorType.LIBRAMS:
-                    return Skills.Any(e => e.Contains("Libram") || e.Contains("Buchband"));
-
-                case ArmorType.IDOLS:
-                    return Skills.Any(e => e.Contains("Idol") || e.Contains("Götzen"));
-
-                case ArmorType.SIGILS:
-                    return Skills.Any(e => e.Contains("Sigil") || e.Contains("Siegel"));
-
-                case ArmorType.SHIEDLS:
-                    return Skills.Any(e => e.Contains("Shield") || e.Contains("Schild"));
-
-                case ArmorType.MISCELLANEOUS:
-                    return true;
-
-                default:
-                    return false;
-            }
+                ArmorType.PLATE => Skills.Any(e => e.Contains("Plate Mail") || e.Contains("Plattenpanzer")),
+                ArmorType.MAIL => Skills.Any(e => e.Contains("Mail") || e.Contains("Panzer")),
+                ArmorType.LEATHER => Skills.Any(e => e.Contains("Leather") || e.Contains("Leder")),
+                ArmorType.CLOTH => Skills.Any(e => e.Contains("Cloth") || e.Contains("Stoff")),
+                ArmorType.TOTEMS => Skills.Any(e => e.Contains("Totem") || e.Contains("Totem")),
+                ArmorType.LIBRAMS => Skills.Any(e => e.Contains("Libram") || e.Contains("Buchband")),
+                ArmorType.IDOLS => Skills.Any(e => e.Contains("Idol") || e.Contains("Götzen")),
+                ArmorType.SIGILS => Skills.Any(e => e.Contains("Sigil") || e.Contains("Siegel")),
+                ArmorType.SHIEDLS => Skills.Any(e => e.Contains("Shield") || e.Contains("Schild")),
+                ArmorType.MISCELLANEOUS => true,
+                _ => false,
+            };
         }
 
         public bool IsAbleToUseWeapon(WowWeapon item)
         {
-            switch (item.WeaponType)
+            return item.WeaponType switch
             {
-                case WeaponType.BOWS:
-                    return Skills.Any(e => e.Contains("Bows") || e.Contains("Bogen"));
-
-                case WeaponType.CROSSBOWS:
-                    return Skills.Any(e => e.Contains("Crossbows") || e.Contains("Armbrüste"));
-
-                case WeaponType.GUNS:
-                    return Skills.Any(e => e.Contains("Guns") || e.Contains("Schusswaffen"));
-
-                case WeaponType.WANDS:
-                    return Skills.Any(e => e.Contains("Wands") || e.Contains("Zauberstäbe"));
-
-                case WeaponType.THROWN:
-                    return Skills.Any(e => e.Contains("Thrown") || e.Contains("Wurfwaffe"));
-
-                case WeaponType.ONEHANDED_AXES:
-                    return Skills.Any(e => e.Contains("One-Handed Axes") || e.Contains("Einhandäxte"));
-
-                case WeaponType.TWOHANDED_AXES:
-                    return Skills.Any(e => e.Contains("Two-Handed Axes") || e.Contains("Zweihandäxte"));
-
-                case WeaponType.ONEHANDED_MACES:
-                    return Skills.Any(e => e.Contains("One-Handed Maces") || e.Contains("Einhandstreitkolben"));
-
-                case WeaponType.TWOHANDED_MACES:
-                    return Skills.Any(e => e.Contains("Two-Handed Maces") || e.Contains("Zweihandstreitkolben"));
-
-                case WeaponType.ONEHANDED_SWORDS:
-                    return Skills.Any(e => e.Contains("One-Handed Swords") || e.Contains("Einhandschwerter"));
-
-                case WeaponType.TWOHANDED_SWORDS:
-                    return Skills.Any(e => e.Contains("Two-Handed Swords") || e.Contains("Zweihandschwerter"));
-
-                case WeaponType.DAGGERS:
-                    return Skills.Any(e => e.Contains("Daggers") || e.Contains("Dolche"));
-
-                case WeaponType.FIST_WEAPONS:
-                    return Skills.Any(e => e.Contains("Fist Weapons") || e.Contains("Faustwaffen"));
-
-                case WeaponType.POLEARMS:
-                    return Skills.Any(e => e.Contains("Polearms") || e.Contains("Stangenwaffen"));
-
-                case WeaponType.STAVES:
-                    return Skills.Any(e => e.Contains("Staves") || e.Contains("Stäbe"));
-
-                case WeaponType.FISHING_POLES:
-                    return true;
-
-                case WeaponType.MISCELLANEOUS:
-                    return true;
-
-                default:
-                    return false;
-            }
+                WeaponType.BOWS => Skills.Any(e => e.Contains("Bows") || e.Contains("Bogen")),
+                WeaponType.CROSSBOWS => Skills.Any(e => e.Contains("Crossbows") || e.Contains("Armbrüste")),
+                WeaponType.GUNS => Skills.Any(e => e.Contains("Guns") || e.Contains("Schusswaffen")),
+                WeaponType.WANDS => Skills.Any(e => e.Contains("Wands") || e.Contains("Zauberstäbe")),
+                WeaponType.THROWN => Skills.Any(e => e.Contains("Thrown") || e.Contains("Wurfwaffe")),
+                WeaponType.ONEHANDED_AXES => Skills.Any(e => e.Contains("One-Handed Axes") || e.Contains("Einhandäxte")),
+                WeaponType.TWOHANDED_AXES => Skills.Any(e => e.Contains("Two-Handed Axes") || e.Contains("Zweihandäxte")),
+                WeaponType.ONEHANDED_MACES => Skills.Any(e => e.Contains("One-Handed Maces") || e.Contains("Einhandstreitkolben")),
+                WeaponType.TWOHANDED_MACES => Skills.Any(e => e.Contains("Two-Handed Maces") || e.Contains("Zweihandstreitkolben")),
+                WeaponType.ONEHANDED_SWORDS => Skills.Any(e => e.Contains("One-Handed Swords") || e.Contains("Einhandschwerter")),
+                WeaponType.TWOHANDED_SWORDS => Skills.Any(e => e.Contains("Two-Handed Swords") || e.Contains("Zweihandschwerter")),
+                WeaponType.DAGGERS => Skills.Any(e => e.Contains("Daggers") || e.Contains("Dolche")),
+                WeaponType.FIST_WEAPONS => Skills.Any(e => e.Contains("Fist Weapons") || e.Contains("Faustwaffen")),
+                WeaponType.POLEARMS => Skills.Any(e => e.Contains("Polearms") || e.Contains("Stangenwaffen")),
+                WeaponType.STAVES => Skills.Any(e => e.Contains("Staves") || e.Contains("Stäbe")),
+                WeaponType.FISHING_POLES => true,
+                WeaponType.MISCELLANEOUS => true,
+                _ => false,
+            };
         }
 
         public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)
         {
             itemToReplace = null;
 
-            if ((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
-                || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item)))
+            if (((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
+                || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item))))
             {
                 if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out int expectedItemCount))
                 {
@@ -356,6 +285,20 @@ namespace AmeisenBotX.Core.Character
             return false;
         }
 
+        private void UpdateSkills()
+        {
+            Skills = HookManager.GetSkills();
+        }
+
+        private void UpdateMoney()
+        {
+            string rawMoney = HookManager.GetMoney();
+            if (int.TryParse(rawMoney, out int money))
+            {
+                Money = money;
+            }
+        }
+
         private bool GetMatchingItem(IWowItem item, out IWowItem matchingItem)
         {
             matchingItem = null;
@@ -380,289 +323,112 @@ namespace AmeisenBotX.Core.Character
 
             switch (equiplocation)
             {
-                case "INVTYPE_AMMO":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_AMMO, out IWowItem ammoItem))
-                    {
-                        matchedItems.Add(ammoItem);
-                    }
-                    break;
-
-                case "INVTYPE_HEAD":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_HEAD, out IWowItem headItem))
-                    {
-                        matchedItems.Add(headItem);
-                    }
-                    break;
-
-                case "INVTYPE_NECK":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_NECK, out IWowItem neckItem))
-                    {
-                        matchedItems.Add(neckItem);
-                    }
-                    break;
-
-                case "INVTYPE_SHOULDER":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_SHOULDER, out IWowItem shoulderItem))
-                    {
-                        matchedItems.Add(shoulderItem);
-                    }
-                    break;
-
-                case "INVTYPE_BODY":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_SHIRT, out IWowItem bodyItem))
-                    {
-                        matchedItems.Add(bodyItem);
-                    }
-                    break;
-
-                case "INVTYPE_ROBE":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_CHEST, out IWowItem robeItem))
-                    {
-                        matchedItems.Add(robeItem);
-                    }
-                    break;
-
-                case "INVTYPE_CHEST":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_CHEST, out IWowItem chestItem))
-                    {
-                        matchedItems.Add(chestItem);
-                    }
-                    break;
-
-                case "INVTYPE_WAIST":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_WAIST, out IWowItem waistItem))
-                    {
-                        matchedItems.Add(waistItem);
-                    }
-                    break;
-
-                case "INVTYPE_LEGS":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_LEGS, out IWowItem legItem))
-                    {
-                        matchedItems.Add(legItem);
-                    }
-                    break;
-
-                case "INVTYPE_FEET":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_FEET, out IWowItem feetItem))
-                    {
-                        matchedItems.Add(feetItem);
-                    }
-                    break;
-
-                case "INVTYPE_WRIST":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_WRIST, out IWowItem wristItem))
-                    {
-                        matchedItems.Add(wristItem);
-                    }
-                    break;
-
-                case "INVTYPE_HAND":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_HANDS, out IWowItem handItem))
-                    {
-                        matchedItems.Add(handItem);
-                    }
-                    break;
-
-                case "INVTYPE_FINGER":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_RING1, out IWowItem fingerItem1))
-                    {
-                        matchedItems.Add(fingerItem1);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_RING2, out IWowItem fingerItem2))
-                    {
-                        matchedItems.Add(fingerItem2);
-                    }
-
-                    expectedItemCount = 2;
-                    break;
-
-                case "INVTYPE_CLOAK":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_BACK, out IWowItem cloakItem))
-                    {
-                        matchedItems.Add(cloakItem);
-                    }
-                    break;
-
-                case "INVTYPE_TRINKET":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_TRINKET1, out IWowItem trinketItem1))
-                    {
-                        matchedItems.Add(trinketItem1);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_TRINKET2, out IWowItem trinketItem2))
-                    {
-                        matchedItems.Add(trinketItem2);
-                    }
-
-                    expectedItemCount = 2;
-                    break;
-
-                case "INVTYPE_WEAPON":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandweaponItem))
-                    {
-                        matchedItems.Add(mainhandweaponItem);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_OFFHAND, out IWowItem offhandweaponItem))
-                    {
-                        matchedItems.Add(offhandweaponItem);
-                    }
-                    break;
-
-                case "INVTYPE_SHIELD":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_OFFHAND, out IWowItem shieldItem))
-                    {
-                        matchedItems.Add(shieldItem);
-                    }
-                    break;
-
-                case "INVTYPE_2HWEAPON":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem twohandweaponItem))
-                    {
-                        matchedItems.Add(twohandweaponItem);
-                    }
-                    break;
-
-                case "INVTYPE_WEAPONMAINHAND":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem))
-                    {
-                        matchedItems.Add(mainhandItem);
-                    }
-                    break;
-
-                case "INVTYPE_WEAPONOFFHAND":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_OFFHAND, out IWowItem offhandItem))
-                    {
-                        matchedItems.Add(offhandItem);
-                    }
-                    break;
-
-                case "INVTYPE_HOLDABLE":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_OFFHAND, out IWowItem holdableItem))
-                    {
-                        matchedItems.Add(holdableItem);
-                    }
-                    break;
-
-                case "INVTYPE_RANGED":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_RANGED, out IWowItem rangeItem))
-                    {
-                        matchedItems.Add(rangeItem);
-                    }
-                    break;
-
-                case "INVTYPE_THROWN":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_RANGED, out IWowItem thrownItem))
-                    {
-                        matchedItems.Add(thrownItem);
-                    }
-                    break;
-
-                case "INVTYPE_RANGEDRIGHT":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_RANGED, out IWowItem rangedrightItem))
-                    {
-                        matchedItems.Add(rangedrightItem);
-                    }
-                    break;
-
-                case "INVTYPE_RELIC":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_RANGED, out IWowItem relicItem))
-                    {
-                        matchedItems.Add(relicItem);
-                    }
-                    break;
-
-                case "INVTYPE_TABARD":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_TABARD, out IWowItem tabardItem))
-                    {
-                        matchedItems.Add(tabardItem);
-                    }
-                    break;
-
-                case "INVTYPE_BAG":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_1, out IWowItem bagitem1))
-                    {
-                        matchedItems.Add(bagitem1);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_2, out IWowItem bagitem2))
-                    {
-                        matchedItems.Add(bagitem2);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_3, out IWowItem bagitem3))
-                    {
-                        matchedItems.Add(bagitem3);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_4, out IWowItem bagitem4))
-                    {
-                        matchedItems.Add(bagitem4);
-                    }
-
-                    expectedItemCount = 4;
-                    break;
-
-                case "INVTYPE_QUIVER":
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_1, out IWowItem quiverItem1))
-                    {
-                        matchedItems.Add(quiverItem1);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_2, out IWowItem quiverItem2))
-                    {
-                        matchedItems.Add(quiverItem2);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_3, out IWowItem quiverItem3))
-                    {
-                        matchedItems.Add(quiverItem3);
-                    }
-
-                    if (Equipment.Equipment.TryGetValue(EquipmentSlot.CONTAINER_BAG_4, out IWowItem quiverItem4))
-                    {
-                        matchedItems.Add(quiverItem4);
-                    }
-
-                    expectedItemCount = 4;
-                    break;
+                case "INVTYPE_AMMO": TryAddItem(EquipmentSlot.INVSLOT_AMMO, matchedItems); break;
+                case "INVTYPE_HEAD": TryAddItem(EquipmentSlot.INVSLOT_HEAD, matchedItems); break;
+                case "INVTYPE_NECK": TryAddItem(EquipmentSlot.INVSLOT_NECK, matchedItems); break;
+                case "INVTYPE_SHOULDER": TryAddItem(EquipmentSlot.INVSLOT_SHOULDER, matchedItems); break;
+                case "INVTYPE_BODY": TryAddItem(EquipmentSlot.INVSLOT_SHIRT, matchedItems); break;
+                case "INVTYPE_ROBE": TryAddItem(EquipmentSlot.INVSLOT_CHEST, matchedItems); break;
+                case "INVTYPE_CHEST": TryAddItem(EquipmentSlot.INVSLOT_CHEST, matchedItems); break;
+                case "INVTYPE_WAIST": TryAddItem(EquipmentSlot.INVSLOT_WAIST, matchedItems); break;
+                case "INVTYPE_LEGS": TryAddItem(EquipmentSlot.INVSLOT_LEGS, matchedItems); break;
+                case "INVTYPE_FEET": TryAddItem(EquipmentSlot.INVSLOT_FEET, matchedItems); break;
+                case "INVTYPE_WRIST": TryAddItem(EquipmentSlot.INVSLOT_WRIST, matchedItems); break;
+                case "INVTYPE_HAND": TryAddItem(EquipmentSlot.INVSLOT_HANDS, matchedItems); break;
+                case "INVTYPE_FINGER": TryAddRings(matchedItems, ref expectedItemCount); break;
+                case "INVTYPE_CLOAK": TryAddItem(EquipmentSlot.INVSLOT_BACK, matchedItems); break;
+                case "INVTYPE_TRINKET": TryAddTrinkets(matchedItems, ref expectedItemCount); break;
+                case "INVTYPE_WEAPON": TryAddWeapons(matchedItems, ref expectedItemCount); break;
+                case "INVTYPE_SHIELD": TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
+                case "INVTYPE_2HWEAPON": TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems); break;
+                case "INVTYPE_WEAPONMAINHAND": TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems); break;
+                case "INVTYPE_WEAPONOFFHAND": TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
+                case "INVTYPE_HOLDABLE": TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
+                case "INVTYPE_RANGED": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_THROWN": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_RANGEDRIGHT": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_RELIC": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_TABARD": TryAddItem(EquipmentSlot.INVSLOT_TABARD, matchedItems); break;
+                case "INVTYPE_BAG": TryAddAllBags(matchedItems, ref expectedItemCount); break;
+                case "INVTYPE_QUIVER": TryAddAllBags(matchedItems, ref expectedItemCount); break;
+                default: break;
             }
 
             return true;
         }
 
+        private void TryAddWeapons(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems);
+            TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems);
+
+            expectedItemCount = 2;
+        }
+
+        private void TryAddTrinkets(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.INVSLOT_TRINKET1, matchedItems);
+            TryAddItem(EquipmentSlot.INVSLOT_TRINKET2, matchedItems);
+
+            expectedItemCount = 2;
+        }
+
+        private void TryAddRings(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.INVSLOT_RING1, matchedItems);
+            TryAddItem(EquipmentSlot.INVSLOT_RING2, matchedItems);
+
+            expectedItemCount = 2;
+        }
+
+        private void TryAddAllBags(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_1, matchedItems);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_2, matchedItems);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_3, matchedItems);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_4, matchedItems);
+
+            expectedItemCount = 4;
+        }
+
+        private void TryAddItem(EquipmentSlot slot, List<IWowItem> matchedItems)
+        {
+            if (Equipment.Equipment.TryGetValue(slot, out IWowItem ammoItem))
+            {
+                matchedItems.Add(ammoItem);
+            }
+        }
+
         private string SlotToEquipLocation(int slot)
         {
-            switch (slot)
+            return slot switch
             {
-                case 0: return "INVTYPE_AMMO";
-                case 1: return "INVTYPE_HEAD";
-                case 2: return "INVTYPE_NECK";
-                case 3: return "INVTYPE_SHOULDER";
-                case 4: return "INVTYPE_BODY";
-                case 5: return "INVTYPE_CHEST|INVTYPE_ROBE";
-                case 6: return "INVTYPE_WAIST";
-                case 7: return "INVTYPE_LEGS";
-                case 8: return "INVTYPE_FEET";
-                case 9: return "INVTYPE_WRIST";
-                case 10: return "INVTYPE_HAND";
-                case 11: return "INVTYPE_FINGER";
-                case 12: return "INVTYPE_FINGER";
-                case 13: return "INVTYPE_TRINKET";
-                case 14: return "INVTYPE_TRINKET";
-                case 15: return "INVTYPE_CLOAK";
-                case 16: return "INVTYPE_2HWEAPON|INVTYPE_WEAPON|INVTYPE_WEAPONMAINHAND";
-                case 17: return "INVTYPE_SHIELD|INVTYPE_WEAPONOFFHAND|INVTYPE_HOLDABLE";
-                case 18: return "INVTYPE_RANGED|INVTYPE_THROWN|INVTYPE_RANGEDRIGHT|INVTYPE_RELIC";
-                case 19: return "INVTYPE_TABARD";
-                case 20: return "INVTYPE_BAG|INVTYPE_QUIVER";
-                case 21: return "INVTYPE_BAG|INVTYPE_QUIVER";
-                case 22: return "INVTYPE_BAG|INVTYPE_QUIVER";
-                case 23: return "INVTYPE_BAG|INVTYPE_QUIVER";
-                default: return "none";
-            }
+                0 => "INVTYPE_AMMO",
+                1 => "INVTYPE_HEAD",
+                2 => "INVTYPE_NECK",
+                3 => "INVTYPE_SHOULDER",
+                4 => "INVTYPE_BODY",
+                5 => "INVTYPE_CHEST|INVTYPE_ROBE",
+                6 => "INVTYPE_WAIST",
+                7 => "INVTYPE_LEGS",
+                8 => "INVTYPE_FEET",
+                9 => "INVTYPE_WRIST",
+                10 => "INVTYPE_HAND",
+                11 => "INVTYPE_FINGER",
+                12 => "INVTYPE_FINGER",
+                13 => "INVTYPE_TRINKET",
+                14 => "INVTYPE_TRINKET",
+                15 => "INVTYPE_CLOAK",
+                16 => "INVTYPE_2HWEAPON|INVTYPE_WEAPON|INVTYPE_WEAPONMAINHAND",
+                17 => "INVTYPE_SHIELD|INVTYPE_WEAPONOFFHAND|INVTYPE_HOLDABLE",
+                18 => "INVTYPE_RANGED|INVTYPE_THROWN|INVTYPE_RANGEDRIGHT|INVTYPE_RELIC",
+                19 => "INVTYPE_TABARD",
+                20 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                21 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                22 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                23 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                _ => "none",
+            };
         }
 
         private void HandleInputSimulationMovement(Vector3 positionToMoveTo)

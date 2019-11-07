@@ -5,8 +5,6 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public class WowWeapon : WowBasicItem
     {
-        public WeaponType WeaponType { get; set; }
-
         public WowWeapon(WowBasicItem wowBasicItem) : base()
         {
             Id = wowBasicItem.Id;
@@ -24,7 +22,9 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
             Durability = wowBasicItem.Durability;
             MaxDurability = wowBasicItem.MaxDurability;
             EquipLocation = wowBasicItem.EquipLocation;
-            WeaponType = Enum.TryParse(Subtype.ToUpper().Replace("-", "").Replace(" ", "_"), out WeaponType armorType) ? armorType : WeaponType.MISCELLANEOUS;
+            WeaponType = Enum.TryParse(Subtype.ToUpper().Replace("-", string.Empty).Replace(" ", "_"), out WeaponType armorType) ? armorType : WeaponType.MISCELLANEOUS;
         }
+
+        public WeaponType WeaponType { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
@@ -49,5 +50,8 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         [JsonProperty("equiplocation")]
         public string EquipLocation { get; set; }
+
+        [JsonProperty("stats")]
+        public Dictionary<string, int> Stats { get; set; }
     }
 }

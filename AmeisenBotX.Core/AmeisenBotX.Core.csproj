@@ -84,10 +84,6 @@
     <Compile Include="Character\Spells\Enums\Spellschools.cs" />
     <Compile Include="Character\Spells\Objects\Spell.cs" />
     <Compile Include="Character\Spells\SpellBook.cs" />
-    <Compile Include="Character\Stats\DamageStats.cs" />
-    <Compile Include="Character\Stats\PrimaryStats.cs" />
-    <Compile Include="Character\Stats\Resistances.cs" />
-    <Compile Include="Character\Stats\SecondaryStats.cs" />
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />

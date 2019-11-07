@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 

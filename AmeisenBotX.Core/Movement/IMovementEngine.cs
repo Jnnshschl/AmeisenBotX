@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
+﻿using AmeisenBotX.Pathfinding.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement
@@ -23,9 +22,9 @@ namespace AmeisenBotX.Core.Movement
 
         /// <summary>
         /// (OPTIONAL) This Method may be used to optimize the given
-        /// Path but it don't has to. Read the specialized 
+        /// Path but it don't has to. Read the specialized
         /// documentation of your class to find out what it does.
-        /// 
+        ///
         /// Example of optimizations:
         /// - Make the Path Smooth
         /// - Optimize sharp corners of the Path

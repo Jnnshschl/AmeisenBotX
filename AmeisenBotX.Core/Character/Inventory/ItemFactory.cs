@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Inventory

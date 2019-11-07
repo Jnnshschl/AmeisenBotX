@@ -1,7 +1,7 @@
-﻿using System.Windows;
-using System.Windows.Input;
-using AmeisenBotX.Core;
+﻿using AmeisenBotX.Core;
 using Microsoft.Win32;
+using System.Windows;
+using System.Windows.Input;
 
 namespace AmeisenBotX
 {

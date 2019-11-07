@@ -5,8 +5,6 @@ using AmeisenBotX.Core.Hook;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
@@ -24,8 +22,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private readonly int buffCheckTime = 30;
 
-        private Dictionary<int, string> SpellUsageHealDict { get; }
-
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
@@ -34,9 +30,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, flashOfLight},
-                { 2000, holyShockSpell},
-                { 10000, holyLightSpell}
+                { 0, flashOfLight },
+                { 2000, holyShockSpell },
+                { 10000, holyLightSpell }
             };
         }
 
@@ -53,6 +49,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private HookManager HookManager { get; }
 
         private ObjectManager ObjectManager { get; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public void Execute()
         {

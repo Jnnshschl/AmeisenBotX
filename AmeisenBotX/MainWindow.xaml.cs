@@ -1,15 +1,14 @@
-﻿using System;
+﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using AmeisenBotX.Core;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using Newtonsoft.Json;
 
 namespace AmeisenBotX
 {

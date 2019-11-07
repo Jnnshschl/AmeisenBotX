@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AmeisenBotX.Core
+﻿namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
@@ -31,6 +29,8 @@ namespace AmeisenBotX.Core
         public int MinFollowDistance { get; set; } = 6;
 
         public int MaxFps { get; set; } = 20;
+
+        public int MaxFpsCombat { get; set; } = 30;
 
         public int NameshServerPort { get; set; } = 47110;
 

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
@@ -34,5 +35,6 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         int MaxDurability { get; }
 
+        Dictionary<string, int> Stats { get; }
     }
 }

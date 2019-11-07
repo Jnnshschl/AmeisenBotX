@@ -14,8 +14,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -61,6 +59,16 @@ namespace AmeisenBotX.Core.Hook
                 }
             }
         }
+
+        public IntPtr ReturnValueAddress { get; private set; }
+
+        private IAmeisenBotCache BotCache { get; }
+
+        private ObjectManager ObjectManager { get; }
+
+        private IOffsetList OffsetList { get; }
+
+        private XMemory XMemory { get; }
 
         public void SetMaxFps(byte maxFps)
         {
@@ -115,16 +123,6 @@ namespace AmeisenBotX.Core.Hook
                 XMemory.FreeMemory(codeCaveVector3);
             }
         }
-
-        public IntPtr ReturnValueAddress { get; private set; }
-
-        private IAmeisenBotCache BotCache { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IOffsetList OffsetList { get; }
-
-        private XMemory XMemory { get; }
 
         public string GetMoney()
         {
@@ -610,6 +608,7 @@ namespace AmeisenBotX.Core.Hook
             catch (Exception e)
             {
                 AmeisenLogger.Instance.Log($"Failed to inject:\n{e.ToString()}", LogLevel.Error);
+
                 // now there is no more code to be executed
                 XMemory.Write(CodeToExecuteAddress, 0);
                 IsInjectionUsed = false;
@@ -920,7 +919,7 @@ namespace AmeisenBotX.Core.Hook
 
         public string GetInventoryItems()
         {
-            string command = "abotInventoryResult='['for a=0,4 do containerSlots=GetContainerNumSlots(a)for b=1,containerSlots do abItemLink=GetContainerItemLink(a,b)if abItemLink then abCurrentDurability,abMaxDurability=GetContainerItemDurability(a,b)abCooldownStart,abCooldownEnd=GetContainerItemCooldown(a,b)abIcon,abItemCount,abLocked,abQuality,abReadable,abLootable,abItemLink,isFiltered=GetContainerItemInfo(a,b)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abItemLink)abotInventoryResult=abotInventoryResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abItemCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": \"'..tostring(abCooldownEnd or 0)..'\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"lootable\": \"'..tostring(abLootable or 0)..'\",'..'\"readable\": \"'..tostring(abReadable or 0)..'\",'..'\"link\": \"'..tostring(abItemLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\",'..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..'}'if b<containerSlots then abotInventoryResult=abotInventoryResult..','end end end end;abotInventoryResult=abotInventoryResult..']'";
+            string command = "abotInventoryResult=\"[\"for a=0,4 do containerSlots=GetContainerNumSlots(a)for b=1,containerSlots do abId=GetContainerItemID(a,b)if string.len(tostring(abId or\"\"))>0 then abItemLink=GetContainerItemLink(a,b)abCurrentDurability,abMaxDurability=GetContainerItemDurability(a,b)abCooldownStart,abCooldownEnd=GetContainerItemCooldown(a,b)abIcon,abItemCount,abLocked,abQuality,abReadable,abLootable,abItemLink,isFiltered=GetContainerItemInfo(a,b)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abItemLink)stats={}abStats=GetItemStats(abotItemLink,stats)statsResult={}for c,d in pairs(stats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;abotInventoryResult=abotInventoryResult..\"{\"..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abItemCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": \"'..tostring(abCooldownEnd or 0)..'\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"lootable\": \"'..tostring(abLootable or 0)..'\",'..'\"readable\": \"'..tostring(abReadable or 0)..'\",'..'\"link\": \"'..tostring(abItemLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..\"}\"if b<containerSlots then abotInventoryResult=abotInventoryResult..\",\"end end end end;abotInventoryResult=abotInventoryResult..\"]\"";
             LuaDoString(command);
 
             return GetLocalizedText("abotInventoryResult");
@@ -928,9 +927,9 @@ namespace AmeisenBotX.Core.Hook
 
         public string GetEquipmentItems()
         {
-            string command = "abotItemInfoResult='['for a=0,23 do abId=GetInventoryItemID('player',a)if (string.len(tostring(abId or \"\")) > 0) then abotItemLink=GetInventoryItemLink('player',a)abCount=GetInventoryItemCount('player',a)abCurrentDurability,abMaxDurability=GetInventoryItemDurability(a)abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',a)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemLink)abotItemInfoResult=abotItemInfoResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(a or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}'if a<23 then abotItemInfoResult=abotItemInfoResult..\",\"end end end;abotItemInfoResult=abotItemInfoResult..']'";
+            string command = "abotEquipmentResult=\"[\"for a=0,23 do abId=GetInventoryItemID(\"player\",a)if string.len(tostring(abId or\"\"))>0 then abotItemLink=GetInventoryItemLink(\"player\",a)abCount=GetInventoryItemCount(\"player\",a)abCurrentDurability,abMaxDurability=GetInventoryItemDurability(a)abCooldownStart,abCooldownEnd=GetInventoryItemCooldown(\"player\",a)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemLink)stats={}abStats=GetItemStats(abotItemLink,stats)statsResult={}for b,c in pairs(stats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",b,c))end;abotEquipmentResult=abotEquipmentResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(a or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}'if a<23 then abotEquipmentResult=abotEquipmentResult..\",\"end end end;abotEquipmentResult=abotEquipmentResult..\"]\"";
             LuaDoString(command);
-            return GetLocalizedText("abotItemInfoResult");
+            return GetLocalizedText("abotEquipmentResult");
         }
     }
 }

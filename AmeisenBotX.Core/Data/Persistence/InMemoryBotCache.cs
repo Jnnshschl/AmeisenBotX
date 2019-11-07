@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +12,7 @@ namespace AmeisenBotX.Core.Data.Persistence
         public InMemoryBotCache(string path)
         {
             FilePath = path;
-            NameCache = new Dictionary<ulong, string>();
-            ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
+            Clear();
         }
 
         public string FilePath { get; }
@@ -22,6 +20,12 @@ namespace AmeisenBotX.Core.Data.Persistence
         public Dictionary<ulong, string> NameCache { get; private set; }
 
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
+
+        public void Clear()
+        {
+            NameCache = new Dictionary<ulong, string>();
+            ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
+        }
 
         public void Save()
         {

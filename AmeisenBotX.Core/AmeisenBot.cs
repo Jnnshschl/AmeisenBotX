@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Persistence;
@@ -22,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -167,6 +165,7 @@ namespace AmeisenBotX.Core
             EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
             EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
+            EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
 
             //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
             //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
@@ -346,13 +345,16 @@ namespace AmeisenBotX.Core
         private void OnBagChanged(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log($"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            XMemory.Write(OffsetList.CvarMaxFps, 200);
 
             CharacterManager.Inventory.Update();
             CharacterManager.UpdateCharacterGear();
             CharacterManager.Equipment.Update();
+        }
 
-            XMemory.Write(OffsetList.CvarMaxFps, Config.MaxFps);
+        private void OnEquipmentChanged(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnEquipmentChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            CharacterManager.Equipment.Update();
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)
