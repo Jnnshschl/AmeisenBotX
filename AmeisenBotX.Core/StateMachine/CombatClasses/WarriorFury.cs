@@ -467,7 +467,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if(hasTargetMoved)
                 {
                     Console.WriteLine("pursue target");
-                    CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                    Vector3 toGo;
+                    if (distanceToTarget > 99)
+                    {
+                        float u = (float)(3 / distanceToTarget);
+                        toGo = new Vector3((1 - u) * LastPlayerPosition.X + u * LastTargetPosition.X, (1 - u) * LastPlayerPosition.Y + u * LastTargetPosition.Y, (1 - u) * LastPlayerPosition.Z + u * LastTargetPosition.Z);
+                    } else
+                    {
+                        toGo = PosInFrontOfUnit;
+                    }
+                    CharacterManager.MoveToPosition(toGo);
                     isRunningRoute = false;
                 }
                 else if (computeNewRoute)
@@ -491,9 +500,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
                 if (isRunningRoute)
                 {
-                    if(LastPlayerPosition.GetDistance(PosInFrontOfUnit) > 0.5)
+                    double distanceToPos = LastPlayerPosition.GetDistance(PosInFrontOfUnit);
+                    if (distanceToPos > 3.0)
                     {
-                        CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                        Console.WriteLine("follow route");
+                        Vector3 toGo;
+                        if (distanceToPos > 99)
+                        {
+                            float u = (float)(3 / distanceToPos);
+                            toGo = new Vector3((1 - u) * LastPlayerPosition.X + u * PosInFrontOfUnit.X, (1 - u) * LastPlayerPosition.Y + u * PosInFrontOfUnit.Y, (1 - u) * LastPlayerPosition.Z + u * PosInFrontOfUnit.Z);
+                        }
+                        else
+                        {
+                            toGo = PosInFrontOfUnit;
+                        }
+                        CharacterManager.MoveToPosition(toGo);
                     }
                     else if (MovementEngine.CurrentPath?.Count > 0
                             && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
