@@ -96,6 +96,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     return;
                 }
+                if (!ObjectManager.Player.IsAutoAttacking)
+                {
+                    HookManager.StartAutoAttack();
+                }
                 Player = ObjectManager.Player;
                 int rage = Player.Rage;
                 bool isGCDReady = IsReady(NextGCDSpell);
@@ -329,6 +333,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private double distanceTraveled = 0;
 
         private ObjectManager ObjectManager { get; }
+        private bool isRunningRoute = false;
 
         private DateTime LastRage { get; set; }
         private DateTime LastReckless { get; set; }
@@ -366,23 +371,32 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             SearchNewTarget(ref target, false);
             if (target != null)
             {
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                //ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
                 CharacterManager.Face(target.Position, target.Guid);
-                LastPlayerPosition = ObjectManager.Player.Position;
-                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                bool targetDistanceChanged = false;
+                if(!LastPlayerPosition.Equals(ObjectManager.Player.Position))
+                {
+                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                    LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
+                    targetDistanceChanged = true;
+                }
                 if (!LastTargetPosition.Equals(target.Position))
                 {
                     hasTargetMoved = true;
-                    LastTargetPosition = target.Position;
-                    distanceToTarget = ObjectManager.Player.Position.GetDistance(LastTargetPosition);
+                    LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                     float u = (float)(3 / distanceToTarget);
                     PosInFrontOfUnit = new Vector3((1 - u) * LastTargetPosition.X + u * LastPlayerPosition.X, (1 - u) * LastTargetPosition.Y + u * LastPlayerPosition.Y, (1 - u) * LastTargetPosition.Z + u * LastPlayerPosition.Z);
-                    Console.WriteLine("traveled: " + distanceTraveled + ", distanceToTarget: " + distanceToTarget);
+                    targetDistanceChanged = true;
                 }
                 else if(hasTargetMoved)
                 {
                     hasTargetMoved = false;
                     computeNewRoute = true;
+                }
+                if(targetDistanceChanged)
+                {
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                    Console.WriteLine("distanceToTarget: " + distanceToTarget);
                 }
                 HandleMovement(target);
                 HandleAttacking(target);
@@ -391,9 +405,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
-            LastPlayerPosition = ObjectManager.Player.Position;
-            distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+            // ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+            if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
+            {
+                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
+            }
             if (distanceTraveled < 0.001)
             {
                 ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
@@ -404,11 +421,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     if (!LastTargetPosition.Equals(target.Position))
                     {
                         hasTargetMoved = true;
-                        LastTargetPosition = target.Position;
-                        distanceToTarget = ObjectManager.Player.Position.GetDistance(LastTargetPosition);
+                        LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                         float u = (float)(4 / distanceToTarget);
                         PosInFrontOfUnit = new Vector3((1 - u) * LastTargetPosition.X + u * LastPlayerPosition.X, (1 - u) * LastTargetPosition.Y + u * LastPlayerPosition.Y, (1 - u) * LastTargetPosition.Z + u * LastPlayerPosition.Z);
-                        Console.WriteLine("traveled: " + distanceTraveled + ", distanceToTarget: " + distanceToTarget);
                     }
                     else
                     {
@@ -475,34 +491,53 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             if(distanceToTarget > 4.0)
             {
-                if (computeNewRoute)
-                {
-                    Console.WriteLine("compute new route..");
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
-                    MovementEngine.LoadPath(path);
-                    computeNewRoute = false;
-                }
-                else if(hasTargetMoved)
+                if(hasTargetMoved)
                 {
                     Console.WriteLine("pursue target");
-                    CharacterManager.MoveToPosition(LastTargetPosition);
+                    CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                    isRunningRoute = false;
                 }
-                else if (MovementEngine.CurrentPath?.Count > 0
-                            && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                else if (computeNewRoute)
                 {
-                    Console.WriteLine("follow route");
-                    CharacterManager.MoveToPosition(positionToGoTo);
-                    if (needToJump)
+                    Console.WriteLine("compute new route..");
+                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, PosInFrontOfUnit);
+                    MovementEngine.LoadPath(path);
+                    computeNewRoute = false;
+                    isRunningRoute = true;
+                    if (MovementEngine.CurrentPath?.Count > 0
+                        && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                     {
-                        CharacterManager.Jump();
+                        PosInFrontOfUnit = positionToGoTo;
+                        CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                        if (needToJump)
+                        {
+                            CharacterManager.Jump();
+                        }
                     }
                 }
-                else
+                if (isRunningRoute)
                 {
-                    Console.WriteLine("run straight to the target");
-                    CharacterManager.MoveToPosition(LastTargetPosition);
+                    if(LastPlayerPosition.GetDistance(PosInFrontOfUnit) > 0.5)
+                    {
+                        CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                    }
+                    else if (MovementEngine.CurrentPath?.Count > 0
+                            && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    {
+                        Console.WriteLine("follow route");
+                        PosInFrontOfUnit = positionToGoTo;
+                        CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                        if (needToJump)
+                        {
+                            CharacterManager.Jump();
+                        }
+                    }
+                    else
+                    {
+                        isRunningRoute = false;
+                    }
                 }
-            }
+            }/*
             else
             {
                 if (CharacterManager.GetCurrentClickToMovePoint(out Vector3 ctmPosition)
@@ -512,8 +547,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     Console.WriteLine("stop movement");
                     CharacterManager.StopMovement(ctmPosition, ObjectManager.Player.Guid);
+                    isRunningRoute = false;
                 }
-            }
+            }*/
             
         }
     }
