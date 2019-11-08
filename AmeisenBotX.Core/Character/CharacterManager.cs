@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Character
                 if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out int expectedItemCount))
                 {
                     // if we dont have an item in the slot or if we only have 3 of 4 bags
-                    if (matchedItems.Count == 0 || matchedItems.Count() < expectedItemCount)
+                    if (matchedItems.Count == 0)
                     {
                         return true;
                     }
