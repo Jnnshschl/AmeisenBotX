@@ -190,7 +190,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                        else if(distanceToTarget < 4)
+                        else if(distanceToTarget < 3.6)
                         {
                             // -- close combat --
                             // Berserker Stance
@@ -462,7 +462,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             if (target == null)
                 return;
-            if(distanceToTarget > 4.0)
+            if(distanceToTarget > 3.6)
             {
                 if(hasTargetMoved)
                 {
@@ -480,6 +480,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     if (MovementEngine.CurrentPath?.Count > 0
                         && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                     {
+                        Console.WriteLine("follow route");
                         PosInFrontOfUnit = positionToGoTo;
                         CharacterManager.MoveToPosition(PosInFrontOfUnit);
                         if (needToJump)
