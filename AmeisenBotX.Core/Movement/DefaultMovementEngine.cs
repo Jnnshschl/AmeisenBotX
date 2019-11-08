@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;

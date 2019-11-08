@@ -10,7 +10,7 @@ namespace AmeisenBotX.Logging
 {
     public class AmeisenLogger
     {
-        private static readonly object padlock = new object();
+        private static readonly object Padlock = new object();
         private static AmeisenLogger instance;
 
         private AmeisenLogger()
@@ -28,10 +28,13 @@ namespace AmeisenBotX.Logging
         {
             get
             {
-                lock (padlock)
+                lock (Padlock)
                 {
                     if (instance == null)
-                    { instance = new AmeisenLogger(); }
+                    {
+                        instance = new AmeisenLogger();
+                    }
+
                     return instance;
                 }
             }

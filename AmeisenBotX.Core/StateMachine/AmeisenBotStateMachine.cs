@@ -42,6 +42,7 @@ namespace AmeisenBotX.Core.StateMachine
             BotDataPath = botDataPath;
             Config = config;
             XMemory = xMemory;
+            OffsetList = offsetList;
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
@@ -86,6 +87,8 @@ namespace AmeisenBotX.Core.StateMachine
         public string PlayerName { get; internal set; }
 
         internal XMemory XMemory { get; }
+
+        internal IOffsetList OffsetList { get; }
 
         private IAmeisenBotCache BotCache { get; }
 

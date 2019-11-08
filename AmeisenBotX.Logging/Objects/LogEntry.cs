@@ -1,9 +1,5 @@
 ﻿using AmeisenBotX.Logging.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Logging.Objects
 {
@@ -33,7 +29,7 @@ namespace AmeisenBotX.Logging.Objects
 
         public override string ToString()
         {
-            return $"[{TimeStamp.ToLongTimeString()}] {("["+LogLevel.ToString()+"]").PadRight(9)} [{CallingClass}:{CallingCodeline}:{CallingFunction}] {Message}";
+            return $"[{TimeStamp.ToLongTimeString()}] {("[" + LogLevel.ToString() + "]").PadRight(9)} [{CallingClass}:{CallingCodeline}:{CallingFunction}] {Message}";
         }
     }
 }

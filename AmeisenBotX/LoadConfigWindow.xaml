@@ -13,18 +13,17 @@
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
     <Grid>
-        <ComboBox x:Name="comboboxSelectedConfig" Margin="10,10,55,10" FontFamily="Segoe UI Semibold" SelectionChanged="ComboboxSelectedConfig_SelectionChanged" FontSize="16"/>
+        <ComboBox x:Name="comboboxSelectedConfig" Margin="10,10,55,10" FontFamily="Segoe UI Semibold" SelectionChanged="ComboboxSelectedConfig_SelectionChanged" FontSize="16" />
         <Button x:Name="buttonClose" Content="X" Margin="0,10,10,10" HorizontalAlignment="Right" Width="40" FontFamily="Unispace" FontSize="16" Click="ButtonClose_Click">
             <Button.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkAccent1}"/>
+                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
             </Button.Foreground>
             <Button.BorderBrush>
-                <SolidColorBrush Color="{DynamicResource DarkBorder}"/>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Button.BorderBrush>
             <Button.Background>
-                <SolidColorBrush Color="{DynamicResource DarkBackground}"/>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </Button.Background>
         </Button>
-
     </Grid>
 </Window>

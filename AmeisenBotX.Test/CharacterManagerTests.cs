@@ -94,7 +94,7 @@ namespace AmeisenBotX.Test
             item = ItemFactory.BuildSpecificItem(item);
             Assert.IsInstanceOfType(item, typeof(WowMiscellaneousItem));
 
-            Assert.AreEqual(1337,item.Id);
+            Assert.AreEqual(1337, item.Id);
             Assert.AreEqual(1, item.Count);
             Assert.AreEqual(ItemQuality.Common, item.ItemQuality);
             Assert.AreEqual(10, item.Durability);

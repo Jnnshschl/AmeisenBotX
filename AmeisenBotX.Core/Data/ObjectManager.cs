@@ -1,10 +1,8 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -449,7 +447,7 @@ namespace AmeisenBotX.Core.Data
                 XMemory.Read(new IntPtr(current), out testGuid);
             }
 
-            XMemory.ReadString(IntPtr.Add(new IntPtr(current), OffsetList.NameString.ToInt32()), Encoding.ASCII, out string name, 12);
+            XMemory.ReadString(IntPtr.Add(new IntPtr(current), OffsetList.NameString.ToInt32()), Encoding.UTF8, out string name, 16);
 
             if (name.Length > 0)
             {
@@ -471,7 +469,7 @@ namespace AmeisenBotX.Core.Data
                 XMemory.Read(IntPtr.Add(activeObject, 0x964), out uint objName);
                 XMemory.Read(IntPtr.Add(new IntPtr(objName), 0x05C), out objName);
 
-                XMemory.ReadString(new IntPtr(objName), Encoding.ASCII, out string name, 32);
+                XMemory.ReadString(new IntPtr(objName), Encoding.UTF8, out string name, 32);
 
                 if (name.Length > 0)
                 {

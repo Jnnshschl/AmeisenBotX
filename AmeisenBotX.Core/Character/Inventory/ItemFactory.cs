@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Inventory
@@ -21,31 +20,31 @@ namespace AmeisenBotX.Core.Character.Inventory
             });
         }
 
+        public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
+        {
+            return (basicItem.Type.ToUpper()) switch
+            {
+                "ARMOR" => new WowArmor(basicItem),
+                "CONSUMEABLE" => new WowConsumable(basicItem),
+                "CONTAINER" => new WowContainer(basicItem),
+                "GEM" => new WowGem(basicItem),
+                "KEY" => new WowKey(basicItem),
+                "MISCELLANEOUS" => new WowMiscellaneousItem(basicItem),
+                "MONEY" => new WowMoneyItem(basicItem),
+                "PROJECTILE" => new WowProjectile(basicItem),
+                "QUEST" => new WowQuestItem(basicItem),
+                "QUIVER" => new WowQuiver(basicItem),
+                "REAGENT" => new WowReagent(basicItem),
+                "RECIPE" => new WowRecipe(basicItem),
+                "TRADE GOODS" => new WowTradegood(basicItem),
+                "WEAPON" => new WowWeapon(basicItem),
+                _ => basicItem,
+            };
+        }
+
         private static void HandleDeserializationError(object sender, ErrorEventArgs e)
         {
             e.ErrorContext.Handled = true;
-        }
-
-        public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
-        {
-            switch (basicItem.Type.ToUpper())
-            {
-                case "ARMOR": return new WowArmor(basicItem);
-                case "CONSUMEABLE": return new WowConsumable(basicItem);
-                case "CONTAINER": return new WowContainer(basicItem);
-                case "GEM": return new WowGem(basicItem);
-                case "KEY": return new WowKey(basicItem);
-                case "MISCELLANEOUS": return new WowMiscellaneousItem(basicItem);
-                case "MONEY": return new WowMoneyItem(basicItem);
-                case "PROJECTILE": return new WowProjectile(basicItem);
-                case "QUEST": return new WowQuestItem(basicItem);
-                case "QUIVER": return new WowQuiver(basicItem);
-                case "REAGENT": return new WowReagent(basicItem);
-                case "RECIPE": return new WowRecipe(basicItem);
-                case "TRADE GOODS": return new WowTradegood(basicItem);
-                case "WEAPON": return new WowWeapon(basicItem);
-                default: return basicItem;
-            }
         }
     }
 }

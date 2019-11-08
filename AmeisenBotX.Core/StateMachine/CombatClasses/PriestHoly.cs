@@ -5,8 +5,6 @@ using AmeisenBotX.Core.Hook;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
@@ -26,8 +24,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private readonly int buffCheckTime = 30;
         private readonly int deadPartymembersCheckTime = 4;
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -57,6 +53,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private HookManager HookManager { get; }
 
         private ObjectManager ObjectManager { get; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public void Execute()
         {

@@ -1,7 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Hook;
-using Newtonsoft.Json;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -21,38 +22,23 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            Equipment.Clear();
-            foreach (EquipmentSlot equipmentSlot in Enum.GetValues(typeof(EquipmentSlot)))
+            string resultJson = HookManager.GetEquipmentItems();
+
+            try
             {
-                if (equipmentSlot == EquipmentSlot.NOT_EQUIPABLE)
-                {
-                    continue;
-                }
+                List<WowBasicItem> rawEquipment = ItemFactory.ParseItemList(resultJson);
 
-                try
+                Equipment.Clear();
+                foreach (WowBasicItem rawItem in rawEquipment)
                 {
-                    string resultJson = ReadEquipmentSlot(equipmentSlot);
-
-                    if (resultJson == "noItem")
-                    {
-                        continue;
-                    }
-
-                    WowBasicItem rawItem = ItemFactory.ParseItem(resultJson);
-                    Equipment.Add(equipmentSlot, ItemFactory.BuildSpecificItem(rawItem));
-                }
-                catch
-                {
-                    // we will ignore that, this only happens when there is no item equipped
+                    IWowItem item = ItemFactory.BuildSpecificItem(rawItem);
+                    Equipment.Add(item.EquipSlot, item);
                 }
             }
-        }
-
-        private string ReadEquipmentSlot(EquipmentSlot equipmentSlot)
-        {
-            string command = $"abotItemSlot={(int)equipmentSlot};abotItemInfoResult='noItem';abId=GetInventoryItemID('player',abotItemSlot);abCount=GetInventoryItemCount('player',abotItemSlot);abQuality=GetInventoryItemQuality('player',abotItemSlot);abCurrentDurability,abMaxDurability=GetInventoryItemDurability(abotItemSlot);abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',abotItemSlot);abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(GetInventoryItemLink('player',abotItemSlot));abotItemInfoResult='{{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"{(int)equipmentSlot}\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';";
-            HookManager.LuaDoString(command);
-            return HookManager.GetLocalizedText("abotItemInfoResult");
+            catch (Exception e)
+            {
+                AmeisenLogger.Instance.Log($"Failed to parse Equipment JSON:\n{resultJson}\n{e.ToString()}", LogLevel.Error);
+            }
         }
     }
 }

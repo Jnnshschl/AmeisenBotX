@@ -5,13 +5,7 @@ using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
-using AmeisenBotX.Memory;
-using AmeisenBotX.Memory.Win32;
-using AmeisenBotX.Pathfinding.Objects;
-using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 

@@ -4,6 +4,8 @@ namespace AmeisenBotX.Core.Data.Persistence
 {
     public interface IAmeisenBotCache
     {
+        void Clear();
+
         void Save();
 
         void Load();

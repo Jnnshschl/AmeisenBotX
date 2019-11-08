@@ -3,16 +3,12 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
@@ -80,7 +76,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                             BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 200, 500);
                         }
                     }
-                }                
+                }
             }
         }
 

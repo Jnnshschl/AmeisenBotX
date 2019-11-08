@@ -1,14 +1,14 @@
-﻿using System;
+﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using AmeisenBotX.Core;
-using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using Newtonsoft.Json;
 
 namespace AmeisenBotX
 {
@@ -82,103 +82,124 @@ namespace AmeisenBotX
                 labelPlayerName.Content = AmeisenBot.ObjectManager.Player.Name;
 
                 labelCurrentLevel.Content = $"lvl. {AmeisenBot.ObjectManager.Player.Level}";
-                labelCurrentRace.Content = $"{AmeisenBot.ObjectManager.Player.Race} {AmeisenBot.ObjectManager.Player.Gender}";
-                labelCurrentClass.Content = AmeisenBot.ObjectManager.Player.Class;
-                labelCurrentPowerType.Content = AmeisenBot.ObjectManager.Player.PowerType;
+                labelCurrentRace.Content = $"{AmeisenBot.ObjectManager.Player.Gender} {AmeisenBot.ObjectManager.Player.Race}";
+                labelCurrentClass.Content = $"{AmeisenBot.ObjectManager.Player.Class} [{AmeisenBot.ObjectManager.Player.PowerType}]";
+
+                if (AmeisenBot.CombatClass == null)
+                {
+                    labelCurrentCombatclass.Content = $"No CombatClass";
+                }
+                else
+                {
+                    labelCurrentCombatclass.Content = $"{AmeisenBot.CombatClass.GetType().Name}";
+                }
+
+                progressbarExp.Maximum = AmeisenBot.ObjectManager.Player.MaxExp;
+                progressbarExp.Value = AmeisenBot.ObjectManager.Player.Exp;
+                labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Exp)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxExp)}";
 
                 progressbarHealth.Maximum = AmeisenBot.ObjectManager.Player.MaxHealth;
                 progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;
+                labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxHealth)}";
 
                 switch (AmeisenBot.ObjectManager.Player.Class)
                 {
                     case WowClass.DeathKnight:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxRuneenergy;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Runeenergy;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Runeenergy)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxRuneenergy)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(196,30,59));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(196, 30, 59));
                         break;
 
                     case WowClass.Druid:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(255,125,10));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(255, 125, 10));
                         break;
 
                     case WowClass.Hunter:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(171,212,115));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(171, 212, 115));
                         break;
 
                     case WowClass.Mage:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(105,204,240));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(105, 204, 240));
                         break;
 
                     case WowClass.Paladin:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(245,140,186));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(245, 140, 186));
                         break;
 
                     case WowClass.Priest:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(255,255,255));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         break;
 
                     case WowClass.Rogue:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxEnergy;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Energy;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Energy)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxEnergy)}";
 
                         progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 0));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(255,245,105));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(255, 245, 105));
                         break;
 
                     case WowClass.Shaman:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(0,112,222));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(0, 112, 222));
                         break;
 
                     case WowClass.Warlock:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
 
-                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0,0,255));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(148,130,201));
+                        progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(148, 130, 201));
                         break;
 
                     case WowClass.Warrior:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxRage;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Rage;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Rage)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxRage)}";
 
                         progressbarSecondary.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 0));
-                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(199,156,110));
+                        progressbarHealth.Foreground = new SolidColorBrush(Color.FromRgb(199, 156, 110));
                         break;
 
                     default:
-                        progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxEnergy;
-                        progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Energy;
+                        progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxMana;
+                        progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Mana;
+                        labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Mana)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxMana)}";
                         break;
                 }
-
-                progressbarExp.Maximum = AmeisenBot.ObjectManager.Player.MaxExp;
-                progressbarExp.Value = AmeisenBot.ObjectManager.Player.Exp;
 
                 if (LastStateMachineTick + TimeSpan.FromSeconds(1) < DateTime.Now)
                 {
