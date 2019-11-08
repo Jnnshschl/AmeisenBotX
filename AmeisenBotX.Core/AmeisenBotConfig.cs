@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Memory.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AmeisenBotX.Core
 {
@@ -22,7 +23,7 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = "";
 
-        public List<string> CustomCombatClassDependencies { get; set; } = new List<string>() { "System.dll", $"{AppDomain.CurrentDomain.BaseDirectory}/AmeisenBotX.Core.dll" };
+        public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
 
         public bool FollowGroupLeader { get; set; } = false;
 
