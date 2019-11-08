@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Character.Inventory
         public void Update()
         {
             string resultJson = HookManager.GetEquipmentItems();
-            if (resultJson.Substring(resultJson.Length-2,2).Equals(",]"))
+            if (resultJson.Substring(resultJson.Length - 2, 2).Equals(",]"))
             {
                 resultJson.Remove(resultJson.Length - 2);
             }
