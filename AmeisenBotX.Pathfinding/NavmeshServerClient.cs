@@ -107,8 +107,6 @@ namespace AmeisenBotX.Pathfinding
 
             if (TcpClient == null || !TcpClient.Connected)
             {
-                TcpClient?.Close();
-
                 try
                 {
                     TcpClient.Connect(Ip, Port);

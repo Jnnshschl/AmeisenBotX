@@ -238,7 +238,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                                 ObjectManager.WowObjects.OfType<WowPlayer>()
                                     .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
                                     .Where(e => HookManager.GetUnitReaction(ObjectManager.Player, (WowUnit)ObjectManager.WowObjects.FirstOrDefault(r => r.Guid == e.TargetGuid)) != WowUnitReaction.Friendly)
-                                    .FirstOrDefault(r => r.IsInCombat).TargetGuid);
+                                    .FirstOrDefault(r => r.IsInCombat)?.TargetGuid);
 
                         if (partytarget != null)
                         {
