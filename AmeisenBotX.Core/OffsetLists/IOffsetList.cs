@@ -18,17 +18,17 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr ClickToMoveGuid { get; }
 
-        IntPtr ClickToMoveTurnSpeed { get; }
+        IntPtr ClickToMovePendingMovement { get; }
 
         IntPtr ClickToMovePointer { get; }
+
+        IntPtr ClickToMoveTurnSpeed { get; }
 
         IntPtr ClickToMoveX { get; }
 
         IntPtr ClickToMoveY { get; }
 
         IntPtr ClickToMoveZ { get; }
-
-        IntPtr ClickToMovePendingMovement { get; }
 
         IntPtr ClientConnection { get; }
 
@@ -53,6 +53,8 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr DescriptorFactionTemplate { get; }
 
         IntPtr DescriptorHealth { get; }
+
+        IntPtr DescriptorInfoFlags { get; }
 
         IntPtr DescriptorLevel { get; }
 
@@ -80,8 +82,6 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr DescriptorUnitFlagsDynamic { get; }
 
-        IntPtr DescriptorInfoFlags { get; }
-
         IntPtr EndSceneOffset { get; }
 
         IntPtr EndSceneOffsetDevice { get; }
@@ -92,23 +92,23 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr FirstObject { get; }
 
-        IntPtr FunctionGetActivePlayerObject { get; }
-
         IntPtr FunctionCastSpellById { get; }
+
+        IntPtr FunctionClickToMove { get; }
+
+        IntPtr FunctionGetActivePlayerObject { get; }
 
         IntPtr FunctionGetLocalizedText { get; }
 
         IntPtr FunctionGetUnitReaction { get; }
+
+        IntPtr FunctionHandleTerrainClick { get; }
 
         IntPtr FunctionLuaDoString { get; }
 
         IntPtr FunctionSendMovementPacket { get; }
 
         IntPtr FunctionSetTarget { get; }
-
-        IntPtr FunctionHandleTerrainClick { get; }
-
-        IntPtr FunctionClickToMove { get; }
 
         IntPtr GameState { get; }
 
@@ -158,11 +158,11 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr RealmName { get; }
 
+        IntPtr RuneCooldown { get; }
+
         IntPtr Runes { get; }
 
         IntPtr RuneType { get; }
-
-        IntPtr RuneCooldown { get; }
 
         IntPtr TargetGuid { get; }
 

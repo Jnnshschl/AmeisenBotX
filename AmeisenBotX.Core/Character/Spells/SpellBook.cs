@@ -21,6 +21,9 @@ namespace AmeisenBotX.Core.Character.Spells
 
         private HookManager HookManager { get; }
 
+        public bool IsSpellKnown(string spellname)
+            => Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+
         public void Update()
         {
             string rawSpells = HookManager.GetSpells();
@@ -35,8 +38,5 @@ namespace AmeisenBotX.Core.Character.Spells
                 Spells = new List<Spell>();
             }
         }
-
-        public bool IsSpellKnown(string spellname)
-            => Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
     }
 }

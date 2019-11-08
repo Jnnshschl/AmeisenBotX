@@ -86,6 +86,29 @@ namespace AmeisenBotX.Test
             "}]";
 
         [TestMethod]
+        public void TestItemListParsing()
+        {
+            List<WowBasicItem> items = ItemFactory.ParseItemList(testItemList);
+            Assert.IsInstanceOfType(items, typeof(List<WowBasicItem>));
+            Assert.IsTrue(items.Count == 3);
+
+            WowBasicItem item0 = ItemFactory.BuildSpecificItem(items[0]);
+            WowBasicItem item1 = ItemFactory.BuildSpecificItem(items[1]);
+            WowBasicItem item2 = ItemFactory.BuildSpecificItem(items[2]);
+
+            Assert.IsInstanceOfType(item0, typeof(WowMiscellaneousItem));
+            Assert.IsInstanceOfType(item1, typeof(WowArmor));
+            Assert.IsInstanceOfType(item2, typeof(WowWeapon));
+
+            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item0.EquipSlot);
+            Assert.AreEqual(EquipmentSlot.INVSLOT_CHEST, item1.EquipSlot);
+            Assert.AreEqual(EquipmentSlot.INVSLOT_RANGED, item2.EquipSlot);
+
+            Assert.AreEqual(ArmorType.CLOTH, ((WowArmor)item1).ArmorType);
+            Assert.AreEqual(WeaponType.GUNS, ((WowWeapon)item2).WeaponType);
+        }
+
+        [TestMethod]
         public void TestItemParsing()
         {
             WowBasicItem item = ItemFactory.ParseItem(testItem);
@@ -107,29 +130,6 @@ namespace AmeisenBotX.Test
             Assert.AreEqual(1, item.MaxStack);
             Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item.EquipSlot);
             Assert.AreEqual(650, item.Price);
-        }
-
-        [TestMethod]
-        public void TestItemListParsing()
-        {
-            List<WowBasicItem> items = ItemFactory.ParseItemList(testItemList);
-            Assert.IsInstanceOfType(items, typeof(List<WowBasicItem>));
-            Assert.IsTrue(items.Count == 3);
-
-            WowBasicItem item0 = ItemFactory.BuildSpecificItem(items[0]);
-            WowBasicItem item1 = ItemFactory.BuildSpecificItem(items[1]);
-            WowBasicItem item2 = ItemFactory.BuildSpecificItem(items[2]);
-
-            Assert.IsInstanceOfType(item0, typeof(WowMiscellaneousItem));
-            Assert.IsInstanceOfType(item1, typeof(WowArmor));
-            Assert.IsInstanceOfType(item2, typeof(WowWeapon));
-
-            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item0.EquipSlot);
-            Assert.AreEqual(EquipmentSlot.INVSLOT_CHEST, item1.EquipSlot);
-            Assert.AreEqual(EquipmentSlot.INVSLOT_RANGED, item2.EquipSlot);
-
-            Assert.AreEqual(ArmorType.CLOTH, ((WowArmor)item1).ArmorType);
-            Assert.AreEqual(WeaponType.GUNS, ((WowWeapon)item2).WeaponType);
         }
     }
 }

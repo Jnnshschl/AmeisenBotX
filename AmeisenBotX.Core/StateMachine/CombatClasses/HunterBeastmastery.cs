@@ -10,30 +10,29 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class HunterBeastmastery : ICombatClass
     {
-        private readonly string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
-        private readonly string callPetSpell = "Call Pet";
-        private readonly string revivePetSpell = "Revive Pet";
-        private readonly string mendPetSpell = "Mend Pet";
-        private readonly string huntersMarkSpell = "Hunter's Mark";
-        private readonly string serpentStingSpell = "Serpent Sting";
-        private readonly string killShotSpell = "Kill Shot";
         private readonly string arcaneShotSpell = "Arcane Shot";
-        private readonly string steadyShotSpell = "Steady Shot";
-        private readonly string concussiveShotSpell = "Concussive Shot";
+        private readonly string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
         private readonly string beastialWrathSpell = "Beastial Wrath";
-        private readonly string killCommandSpell = "Kill Command";
-        private readonly string intimidationSpell = "Intimidation";
-        private readonly string disengageSpell = "Disengage";
-        private readonly string deterrenceSpell = "Deterrence";
-        private readonly string frostTrapSpell = "Frost Trap";
-        private readonly string feignDeathSpell = "Feign Death";
-        private readonly string wingClipSpell = "Wing Clip";
-        private readonly string rapidFireSpell = "Rapid Fire";
-
         private readonly int buffCheckTime = 30;
+        private readonly string callPetSpell = "Call Pet";
+        private readonly string concussiveShotSpell = "Concussive Shot";
         private readonly int debuffCheckTime = 3;
-        private readonly int petstatusCheckTime = 3;
+        private readonly string deterrenceSpell = "Deterrence";
+        private readonly string disengageSpell = "Disengage";
         private readonly int enemyCastingCheckTime = 1;
+        private readonly string feignDeathSpell = "Feign Death";
+        private readonly string frostTrapSpell = "Frost Trap";
+        private readonly string huntersMarkSpell = "Hunter's Mark";
+        private readonly string intimidationSpell = "Intimidation";
+        private readonly string killCommandSpell = "Kill Command";
+        private readonly string killShotSpell = "Kill Shot";
+        private readonly string mendPetSpell = "Mend Pet";
+        private readonly int petstatusCheckTime = 3;
+        private readonly string rapidFireSpell = "Rapid Fire";
+        private readonly string revivePetSpell = "Revive Pet";
+        private readonly string serpentStingSpell = "Serpent Sting";
+        private readonly string steadyShotSpell = "Steady Shot";
+        private readonly string wingClipSpell = "Wing Clip";
 
         public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -48,23 +47,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => false;
 
-        private DateTime LastBuffCheck { get; set; }
-
-        private DateTime PetStatusCheck { get; set; }
-
-        private DateTime LastDebuffCheck { get; set; }
-
-        private DateTime LastMendPetUsed { get; set; }
-
-        private DateTime LastEnemyCastingCheck { get; set; }
+        private CharacterManager CharacterManager { get; }
 
         private bool Disengaged { get; set; }
 
-        private CharacterManager CharacterManager { get; }
-
         private HookManager HookManager { get; }
 
+        private DateTime LastBuffCheck { get; set; }
+
+        private DateTime LastDebuffCheck { get; set; }
+
+        private DateTime LastEnemyCastingCheck { get; set; }
+
+        private DateTime LastMendPetUsed { get; set; }
+
         private ObjectManager ObjectManager { get; }
+
+        private DateTime PetStatusCheck { get; set; }
 
         public void Execute()
         {
@@ -208,43 +207,30 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             Disengaged = false;
         }
 
-        private void HandleIntimmidation()
+        private void CheckPetStatus()
         {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
+            WowUnit pet = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.PetGuid);
 
-            if (castinInfo.Item1.Length > 0
-                && castinInfo.Item2 > 0
-                && IsSpellKnown(intimidationSpell)
-                && !IsOnCooldown(intimidationSpell))
+            if (pet?.Health == 0
+                && IsSpellKnown(revivePetSpell)
+                && !IsOnCooldown(revivePetSpell))
             {
-                HookManager.CastSpell(intimidationSpell);
+                HookManager.CastSpell(revivePetSpell);
                 return;
             }
 
-            LastEnemyCastingCheck = DateTime.Now;
-        }
-
-        private void HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target.ToString());
-
-            if (IsSpellKnown(huntersMarkSpell)
-                && !targetDebuffs.Any(e => e.Equals(huntersMarkSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(huntersMarkSpell))
+            // mend pet has a 15 sec HoT
+            if (DateTime.Now - LastMendPetUsed > TimeSpan.FromSeconds(15)
+                && pet?.HealthPercentage < 80
+                && IsSpellKnown(mendPetSpell)
+                && !IsOnCooldown(mendPetSpell))
             {
-                HookManager.CastSpell(huntersMarkSpell);
+                HookManager.CastSpell(mendPetSpell);
+                LastMendPetUsed = DateTime.Now;
                 return;
             }
 
-            if (IsSpellKnown(serpentStingSpell)
-                && !targetDebuffs.Any(e => e.Equals(serpentStingSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(serpentStingSpell))
-            {
-                HookManager.CastSpell(serpentStingSpell);
-                return;
-            }
-
-            LastDebuffCheck = DateTime.Now;
+            PetStatusCheck = DateTime.Now;
         }
 
         private void HandleBuffing()
@@ -276,39 +262,52 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             LastBuffCheck = DateTime.Now;
         }
 
-        private void CheckPetStatus()
+        private void HandleDebuffing()
         {
-            WowUnit pet = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.PetGuid);
+            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target.ToString());
 
-            if (pet?.Health == 0
-                && IsSpellKnown(revivePetSpell)
-                && !IsOnCooldown(revivePetSpell))
+            if (IsSpellKnown(huntersMarkSpell)
+                && !targetDebuffs.Any(e => e.Equals(huntersMarkSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(huntersMarkSpell))
             {
-                HookManager.CastSpell(revivePetSpell);
+                HookManager.CastSpell(huntersMarkSpell);
                 return;
             }
 
-            // mend pet has a 15 sec HoT
-            if (DateTime.Now - LastMendPetUsed > TimeSpan.FromSeconds(15)
-                && pet?.HealthPercentage < 80
-                && IsSpellKnown(mendPetSpell)
-                && !IsOnCooldown(mendPetSpell))
+            if (IsSpellKnown(serpentStingSpell)
+                && !targetDebuffs.Any(e => e.Equals(serpentStingSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(serpentStingSpell))
             {
-                HookManager.CastSpell(mendPetSpell);
-                LastMendPetUsed = DateTime.Now;
+                HookManager.CastSpell(serpentStingSpell);
                 return;
             }
 
-            PetStatusCheck = DateTime.Now;
+            LastDebuffCheck = DateTime.Now;
+        }
+
+        private void HandleIntimmidation()
+        {
+            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
+
+            if (castinInfo.Item1.Length > 0
+                && castinInfo.Item2 > 0
+                && IsSpellKnown(intimidationSpell)
+                && !IsOnCooldown(intimidationSpell))
+            {
+                HookManager.CastSpell(intimidationSpell);
+                return;
+            }
+
+            LastEnemyCastingCheck = DateTime.Now;
         }
 
         private bool HasEnoughMana(string spellName)
             => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
 
-        private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
-
         private bool IsOnCooldown(string spellName)
             => HookManager.GetSpellCooldown(spellName) > 0;
+
+        private bool IsSpellKnown(string spellName)
+                    => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
     }
 }

@@ -10,20 +10,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class PriestHoly : ICombatClass
     {
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string innerFireSpell = "Inner Fire";
-        private readonly string flashHealSpell = "Flash Heal";
-        private readonly string greaterHealSpell = "Greater Heal";
         private readonly string bindingHealSpell = "Binding Heal";
-        private readonly string renewSpell = "Renew";
-        private readonly string prayerOfMendingSpell = "Prayer of Mending";
-        private readonly string prayerOfHealingSpell = "Prayer of Healing";
-        private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string guardianSpiritSpell = "Guardian Spirit";
-        private readonly string resurrectionSpell = "Resurrection";
-
         private readonly int buffCheckTime = 30;
         private readonly int deadPartymembersCheckTime = 4;
+        private readonly string flashHealSpell = "Flash Heal";
+        private readonly string greaterHealSpell = "Greater Heal";
+        private readonly string guardianSpiritSpell = "Guardian Spirit";
+        private readonly string hymnOfHopeSpell = "Hymn of Hope";
+        private readonly string innerFireSpell = "Inner Fire";
+        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
+        private readonly string prayerOfHealingSpell = "Prayer of Healing";
+        private readonly string prayerOfMendingSpell = "Prayer of Mending";
+        private readonly string renewSpell = "Renew";
+        private readonly string resurrectionSpell = "Resurrection";
 
         public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -44,13 +43,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => false;
 
-        private DateTime LastBuffCheck { get; set; }
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
         private CharacterManager CharacterManager { get; }
 
         private HookManager HookManager { get; }
+
+        private DateTime LastBuffCheck { get; set; }
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
@@ -134,25 +133,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
-        private void HandleDeadPartymembers()
-        {
-            if (IsSpellKnown(resurrectionSpell)
-                && !IsOnCooldown(resurrectionSpell))
-            {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(resurrectionSpell);
-                }
-            }
-        }
-
         private void HandleBuffing()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
 
             if (IsSpellKnown(powerWordFortitudeSpell)
@@ -174,16 +157,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             LastBuffCheck = DateTime.Now;
         }
 
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
+        private void HandleDeadPartymembers()
         {
-            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
+            if (IsSpellKnown(resurrectionSpell)
+                && !IsOnCooldown(resurrectionSpell))
+            {
+                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
+                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
 
-            groupPlayers.Add(ObjectManager.Player);
-
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
+                if (groupPlayers.Count > 0)
+                {
+                    HookManager.TargetGuid(groupPlayers.First().Guid);
+                    HookManager.CastSpell(resurrectionSpell);
+                }
+            }
         }
 
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
@@ -195,10 +182,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool HasEnoughMana(string spellName)
             => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
 
+        private bool IsOnCooldown(string spellName)
+            => HookManager.GetSpellCooldown(spellName) > 0;
+
         private bool IsSpellKnown(string spellName)
             => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
 
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
+        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
+        {
+            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
+
+            groupPlayers.Add(ObjectManager.Player);
+
+            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
+
+            return playersThatNeedHealing.Count > 0;
+        }
     }
 }

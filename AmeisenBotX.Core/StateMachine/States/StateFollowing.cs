@@ -29,13 +29,13 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private AmeisenBotConfig Config { get; }
 
+        private IMovementEngine MovementEngine { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
 
         private WowPlayer PlayerToFollow { get; set; }
-
-        private IMovementEngine MovementEngine { get; set; }
 
         private int TryCount { get; set; }
 

@@ -24,11 +24,11 @@ namespace AmeisenBotX.Memory
 
         public ManagedFasm Fasm { get; private set; }
 
+        public IntPtr MainThreadHandle { get; private set; }
+
         public Process Process { get; private set; }
 
         public IntPtr ProcessHandle { get; private set; }
-
-        public IntPtr MainThreadHandle { get; private set; }
 
         private Dictionary<Type, int> SizeCache { get; }
 
@@ -47,41 +47,6 @@ namespace AmeisenBotX.Memory
                 && rect.Bottom > 0)
             {
                 MoveWindow(windowHandle, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, true);
-            }
-        }
-
-        public ProcessThread GetMainThread()
-        {
-            if (Process.MainWindowHandle == null)
-            {
-                return null;
-            }
-
-            int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
-            foreach (ProcessThread processThread in Process.Threads)
-            {
-                if (processThread.Id == id)
-                {
-                    return processThread;
-                }
-            }
-
-            return null;
-        }
-
-        public void SuspendMainThread()
-        {
-            if (OpenMainThread())
-            {
-                SuspendThread(MainThreadHandle);
-            }
-        }
-
-        public void ResumeMainThread()
-        {
-            if (OpenMainThread())
-            {
-                ResumeThread(MainThreadHandle);
             }
         }
 
@@ -116,6 +81,25 @@ namespace AmeisenBotX.Memory
             {
                 return false;
             }
+        }
+
+        public ProcessThread GetMainThread()
+        {
+            if (Process.MainWindowHandle == null)
+            {
+                return null;
+            }
+
+            int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
+            foreach (ProcessThread processThread in Process.Threads)
+            {
+                if (processThread.Id == id)
+                {
+                    return processThread;
+                }
+            }
+
+            return null;
         }
 
         public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
@@ -255,6 +239,22 @@ namespace AmeisenBotX.Memory
 
             value = default;
             return false;
+        }
+
+        public void ResumeMainThread()
+        {
+            if (OpenMainThread())
+            {
+                ResumeThread(MainThreadHandle);
+            }
+        }
+
+        public void SuspendMainThread()
+        {
+            if (OpenMainThread())
+            {
+                SuspendThread(MainThreadHandle);
+            }
         }
 
         public bool Write<T>(IntPtr address, T value, int size = 0)

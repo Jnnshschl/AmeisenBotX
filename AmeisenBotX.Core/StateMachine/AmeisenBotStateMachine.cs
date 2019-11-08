@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.StateMachine
 
         public delegate void StateMachineTick();
 
-        public event StateMachineStateChange OnStateMachineStateChange;
+        public event StateMachineStateChange OnStateMachineStateChanged;
 
         public event StateMachineTick OnStateMachineTick;
 
@@ -86,9 +86,9 @@ namespace AmeisenBotX.Core.StateMachine
 
         public string PlayerName { get; internal set; }
 
-        internal XMemory XMemory { get; }
-
         internal IOffsetList OffsetList { get; }
+
+        internal XMemory XMemory { get; }
 
         private IAmeisenBotCache BotCache { get; }
 
@@ -155,6 +155,9 @@ namespace AmeisenBotX.Core.StateMachine
             CurrentState.Value.Execute();
         }
 
+        internal bool IsAnyPartymemberInCombat()
+            => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.IsInCombat);
+
         internal void SetState(AmeisenBotState state)
         {
             if (CurrentState.Key == state)
@@ -167,11 +170,8 @@ namespace AmeisenBotX.Core.StateMachine
             CurrentState = States.First(s => s.Key == state);
             CurrentState.Value.Enter();
 
-            OnStateMachineStateChange?.Invoke();
+            OnStateMachineStateChanged?.Invoke();
         }
-
-        internal bool IsAnyPartymemberInCombat()
-            => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.IsInCombat);
 
         private void HandleEventPull()
         {

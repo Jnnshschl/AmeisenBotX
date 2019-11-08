@@ -8,17 +8,21 @@ namespace AmeisenBotX.Core.Movement
         Queue<Vector3> CurrentPath { get; }
 
         /// <summary>
+        /// Get the Position (Vector3) that you need to got to based
+        /// on your current Position.
+        /// </summary>
+        /// <param name="currentPosition">Your current Position as a Vector3</param>
+        /// <param name="positionToGoTo">The next step to got to as a Vector3</param>
+        /// <param name="needToJump">Wether we need to jump or not</param>
+        /// <returns>Wether there is a next step or not</returns>
+        bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump);
+
+        /// <summary>
         /// Load a Path (List<Vector3>) to process the movement on.
         /// You may obtain this Path from any IPathfindingHandler.
         /// </summary>
         /// <param name="path">The Path to process</param>
         void LoadPath(List<Vector3> path);
-
-        /// <summary>
-        /// Clears the current Path and resets the IMovementEngine to
-        /// its default state.
-        /// </summary>
-        void Reset();
 
         /// <summary>
         /// (OPTIONAL) This Method may be used to optimize the given
@@ -32,13 +36,9 @@ namespace AmeisenBotX.Core.Movement
         void PostProcessPath();
 
         /// <summary>
-        /// Get the Position (Vector3) that you need to got to based
-        /// on your current Position.
+        /// Clears the current Path and resets the IMovementEngine to
+        /// its default state.
         /// </summary>
-        /// <param name="currentPosition">Your current Position as a Vector3</param>
-        /// <param name="positionToGoTo">The next step to got to as a Vector3</param>
-        /// <param name="needToJump">Wether we need to jump or not</param>
-        /// <returns>Wether there is a next step or not</returns>
-        bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump);
+        void Reset();
     }
 }

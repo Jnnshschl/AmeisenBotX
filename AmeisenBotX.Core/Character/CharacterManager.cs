@@ -37,67 +37,31 @@ namespace AmeisenBotX.Core.Character
             Skills = new List<string>();
         }
 
-        private Dictionary<VirtualKeys, bool> KeyMap { get; set; }
-
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private IOffsetList OffsetList { get; }
-
-        private XMemory XMemory { get; }
-
-        private IWowItemComparator Comparator { get; }
-
-        public CharacterInventory Inventory { get; }
-
         public CharacterEquipment Equipment { get; }
 
-        public SpellBook SpellBook { get; }
+        public CharacterInventory Inventory { get; }
 
         public int Money { get; private set; }
 
         public List<string> Skills { get; private set; }
 
+        public SpellBook SpellBook { get; }
+
+        private IWowItemComparator Comparator { get; }
+
+        private AmeisenBotConfig Config { get; }
+
+        private HookManager HookManager { get; }
+
+        private Dictionary<VirtualKeys, bool> KeyMap { get; set; }
+
+        private ObjectManager ObjectManager { get; }
+
+        private IOffsetList OffsetList { get; }
+
+        private XMemory XMemory { get; }
+
         public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
-
-        public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
-
-        public void UpdateAll()
-        {
-            AmeisenLogger.Instance.Log($"Updating full character...", LogLevel.Verbose);
-
-            Inventory.Update();
-            Equipment.Update();
-            SpellBook.Update();
-            UpdateSkills();
-            UpdateMoney();
-        }
-
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 4.5f)
-        {
-            if (pos == Vector3.Zero)
-            {
-                return;
-            }
-
-            if (Config.UseClickToMove)
-            {
-                XMemory.Write(OffsetList.ClickToMoveX, pos.X);
-                XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
-                XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
-                XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 2.5f);
-                XMemory.Write(OffsetList.ClickToMoveGuid, ObjectManager.PlayerGuid);
-                XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
-            }
-            else
-            {
-                HandleInputSimulationMovement(pos);
-            }
-        }
 
         public void Face(Vector3 pos, ulong guid, float turnSpeed = 6.28f)
         {
@@ -121,56 +85,6 @@ namespace AmeisenBotX.Core.Character
             }
         }
 
-        public void HoldKey(VirtualKeys key)
-        {
-            BotUtils.HoldKey(XMemory.Process.MainWindowHandle, new IntPtr((int)key));
-
-            if (KeyMap.ContainsKey(key))
-            {
-                KeyMap[key] = false;
-            }
-            else
-            {
-                KeyMap.Add(key, false);
-            }
-        }
-
-        public void ReleaseKey(VirtualKeys key)
-        {
-            BotUtils.RealeaseKey(XMemory.Process.MainWindowHandle, new IntPtr((int)key));
-
-            if (KeyMap.ContainsKey(key))
-            {
-                KeyMap[key] = true;
-            }
-            else
-            {
-                KeyMap.Add(key, true);
-            }
-        }
-
-        public void StopMovement(Vector3 playerPosition, ulong playerGuid)
-        {
-            if (Config.UseClickToMove)
-            {
-                XMemory.Write(OffsetList.ClickToMoveX, playerPosition.X);
-                XMemory.Write(OffsetList.ClickToMoveY, playerPosition.Y);
-                XMemory.Write(OffsetList.ClickToMoveZ, playerPosition.Z);
-                XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 6.28);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 3.0f);
-                XMemory.Write(OffsetList.ClickToMoveGuid, playerGuid);
-                XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Stop);
-                //// BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
-            }
-            else
-            {
-                foreach (KeyValuePair<VirtualKeys, bool> keyValuePair in KeyMap.Where(e => e.Value == true))
-                {
-                    BotUtils.RealeaseKey(XMemory.Process.MainWindowHandle, new IntPtr((int)keyValuePair.Key));
-                }
-            }
-        }
-
         public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
         {
             if (XMemory.Read(OffsetList.ClickToMoveX, out Vector3 currentCtmPos))
@@ -183,30 +97,17 @@ namespace AmeisenBotX.Core.Character
             return false;
         }
 
-        public void UpdateCharacterGear()
+        public void HoldKey(VirtualKeys key)
         {
-            foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
-            {
-                List<IWowItem> itemsLikeEquipped = Inventory.Items.Where(e => e.EquipLocation.Length > 0 && SlotToEquipLocation((int)slot).Contains(e.EquipLocation)).OrderByDescending(e => e.ItemLevel).ToList();
+            BotUtils.HoldKey(XMemory.Process.MainWindowHandle, new IntPtr((int)key));
 
-                if (itemsLikeEquipped.Count > 0)
-                {
-                    if (Equipment.Equipment.TryGetValue(slot, out IWowItem equippedItem))
-                    {
-                        foreach (IWowItem item in itemsLikeEquipped)
-                        {
-                            if (IsItemAnImprovement(item, out IWowItem itemToReplace))
-                            {
-                                HookManager.ReplaceItem(null, item);
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        HookManager.ReplaceItem(null, itemsLikeEquipped.First());
-                    }
-                }
+            if (KeyMap.ContainsKey(key))
+            {
+                KeyMap[key] = false;
+            }
+            else
+            {
+                KeyMap.Add(key, false);
             }
         }
 
@@ -285,35 +186,103 @@ namespace AmeisenBotX.Core.Character
             return false;
         }
 
-        private void UpdateSkills()
-        {
-            Skills = HookManager.GetSkills();
-        }
+        public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
-        private void UpdateMoney()
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 4.5f)
         {
-            string rawMoney = HookManager.GetMoney();
-            if (int.TryParse(rawMoney, out int money))
+            if (pos == Vector3.Zero)
             {
-                Money = money;
+                return;
+            }
+
+            if (Config.UseClickToMove)
+            {
+                XMemory.Write(OffsetList.ClickToMoveX, pos.X);
+                XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
+                XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
+                XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 2.5f);
+                XMemory.Write(OffsetList.ClickToMoveGuid, ObjectManager.PlayerGuid);
+                XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
+            }
+            else
+            {
+                HandleInputSimulationMovement(pos);
             }
         }
 
-        private bool GetMatchingItem(IWowItem item, out IWowItem matchingItem)
+        public void ReleaseKey(VirtualKeys key)
         {
-            matchingItem = null;
+            BotUtils.RealeaseKey(XMemory.Process.MainWindowHandle, new IntPtr((int)key));
 
-            if (item.GetType() == typeof(WowArmor) || item.GetType() == typeof(WowWeapon))
+            if (KeyMap.ContainsKey(key))
             {
-                if (Equipment.Equipment.TryGetValue(item.EquipSlot, out IWowItem matchedItem))
+                KeyMap[key] = true;
+            }
+            else
+            {
+                KeyMap.Add(key, true);
+            }
+        }
+
+        public void StopMovement(Vector3 playerPosition, ulong playerGuid)
+        {
+            if (Config.UseClickToMove)
+            {
+                XMemory.Write(OffsetList.ClickToMoveX, playerPosition.X);
+                XMemory.Write(OffsetList.ClickToMoveY, playerPosition.Y);
+                XMemory.Write(OffsetList.ClickToMoveZ, playerPosition.Z);
+                XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 6.28);
+                XMemory.Write(OffsetList.ClickToMoveDistance, 3.0f);
+                XMemory.Write(OffsetList.ClickToMoveGuid, playerGuid);
+                XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Stop);
+                //// BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 0, 0);
+            }
+            else
+            {
+                foreach (KeyValuePair<VirtualKeys, bool> keyValuePair in KeyMap.Where(e => e.Value == true))
                 {
-                    matchingItem = matchedItem;
+                    BotUtils.RealeaseKey(XMemory.Process.MainWindowHandle, new IntPtr((int)keyValuePair.Key));
                 }
-
-                return true;
             }
+        }
 
-            return false;
+        public void UpdateAll()
+        {
+            AmeisenLogger.Instance.Log($"Updating full character...", LogLevel.Verbose);
+
+            Inventory.Update();
+            Equipment.Update();
+            SpellBook.Update();
+            UpdateSkills();
+            UpdateMoney();
+        }
+
+        public void UpdateCharacterGear()
+        {
+            foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
+            {
+                List<IWowItem> itemsLikeEquipped = Inventory.Items.Where(e => e.EquipLocation.Length > 0 && SlotToEquipLocation((int)slot).Contains(e.EquipLocation)).OrderByDescending(e => e.ItemLevel).ToList();
+
+                if (itemsLikeEquipped.Count > 0)
+                {
+                    if (Equipment.Equipment.TryGetValue(slot, out IWowItem equippedItem))
+                    {
+                        foreach (IWowItem item in itemsLikeEquipped)
+                        {
+                            if (IsItemAnImprovement(item, out IWowItem itemToReplace))
+                            {
+                                HookManager.ReplaceItem(null, item);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        HookManager.ReplaceItem(null, itemsLikeEquipped.First());
+                    }
+                }
+            }
         }
 
         private bool GetItemsByEquiplocation(string equiplocation, out List<IWowItem> matchedItems, out int expectedItemCount)
@@ -357,46 +326,26 @@ namespace AmeisenBotX.Core.Character
             return true;
         }
 
-        private void TryAddWeapons(List<IWowItem> matchedItems, ref int expectedItemCount)
+        private bool GetMatchingItem(IWowItem item, out IWowItem matchingItem)
         {
-            TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems);
-            TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems);
+            matchingItem = null;
 
-            expectedItemCount = 2;
-        }
-
-        private void TryAddTrinkets(List<IWowItem> matchedItems, ref int expectedItemCount)
-        {
-            TryAddItem(EquipmentSlot.INVSLOT_TRINKET1, matchedItems);
-            TryAddItem(EquipmentSlot.INVSLOT_TRINKET2, matchedItems);
-
-            expectedItemCount = 2;
-        }
-
-        private void TryAddRings(List<IWowItem> matchedItems, ref int expectedItemCount)
-        {
-            TryAddItem(EquipmentSlot.INVSLOT_RING1, matchedItems);
-            TryAddItem(EquipmentSlot.INVSLOT_RING2, matchedItems);
-
-            expectedItemCount = 2;
-        }
-
-        private void TryAddAllBags(List<IWowItem> matchedItems, ref int expectedItemCount)
-        {
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_1, matchedItems);
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_2, matchedItems);
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_3, matchedItems);
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_4, matchedItems);
-
-            expectedItemCount = 4;
-        }
-
-        private void TryAddItem(EquipmentSlot slot, List<IWowItem> matchedItems)
-        {
-            if (Equipment.Equipment.TryGetValue(slot, out IWowItem ammoItem))
+            if (item.GetType() == typeof(WowArmor) || item.GetType() == typeof(WowWeapon))
             {
-                matchedItems.Add(ammoItem);
+                if (Equipment.Equipment.TryGetValue(item.EquipSlot, out IWowItem matchedItem))
+                {
+                    matchingItem = matchedItem;
+                }
+
+                return true;
             }
+
+            return false;
+        }
+
+        private void HandleInputSimulationMovement(Vector3 positionToMoveTo)
+        {
+            double angleDiff = BotMath.GetFacingAngle(ObjectManager.Player.Position, positionToMoveTo);
         }
 
         private string SlotToEquipLocation(int slot)
@@ -431,9 +380,60 @@ namespace AmeisenBotX.Core.Character
             };
         }
 
-        private void HandleInputSimulationMovement(Vector3 positionToMoveTo)
+        private void TryAddAllBags(List<IWowItem> matchedItems, ref int expectedItemCount)
         {
-            double angleDiff = BotMath.GetFacingAngle(ObjectManager.Player.Position, positionToMoveTo);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_1, matchedItems);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_2, matchedItems);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_3, matchedItems);
+            TryAddItem(EquipmentSlot.CONTAINER_BAG_4, matchedItems);
+
+            expectedItemCount = 4;
+        }
+
+        private void TryAddItem(EquipmentSlot slot, List<IWowItem> matchedItems)
+        {
+            if (Equipment.Equipment.TryGetValue(slot, out IWowItem ammoItem))
+            {
+                matchedItems.Add(ammoItem);
+            }
+        }
+
+        private void TryAddRings(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.INVSLOT_RING1, matchedItems);
+            TryAddItem(EquipmentSlot.INVSLOT_RING2, matchedItems);
+
+            expectedItemCount = 2;
+        }
+
+        private void TryAddTrinkets(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.INVSLOT_TRINKET1, matchedItems);
+            TryAddItem(EquipmentSlot.INVSLOT_TRINKET2, matchedItems);
+
+            expectedItemCount = 2;
+        }
+
+        private void TryAddWeapons(List<IWowItem> matchedItems, ref int expectedItemCount)
+        {
+            TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems);
+            TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems);
+
+            expectedItemCount = 2;
+        }
+
+        private void UpdateMoney()
+        {
+            string rawMoney = HookManager.GetMoney();
+            if (int.TryParse(rawMoney, out int money))
+            {
+                Money = money;
+            }
+        }
+
+        private void UpdateSkills()
+        {
+            Skills = HookManager.GetSkills();
         }
     }
 }

@@ -5,25 +5,23 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowUnit : WowObject
     {
+        public WowClass Class { get; set; }
+
         public int CurrentlyCastingSpellId { get; set; }
 
         public int CurrentlyChannelingSpellId { get; set; }
 
         public int Energy { get; set; }
 
+        public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
+
         public int FactionTemplate { get; set; }
+
+        public WowGender Gender { get; set; }
 
         public int Health { get; set; }
 
         public double HealthPercentage => ReturnPercentage(Health, MaxHealth);
-
-        public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
-
-        public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
-
-        public double RagePercentage => ReturnPercentage(Rage, MaxRage);
-
-        public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
 
         public bool IsAutoAttacking { get; set; }
 
@@ -77,6 +75,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Mana { get; set; }
 
+        public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
+
         public int MaxEnergy { get; set; }
 
         public int MaxHealth { get; set; }
@@ -89,25 +89,25 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public string Name { get; set; }
 
+        public WowPowertype PowerType { get; set; }
+
+        public WowRace Race { get; set; }
+
         public int Rage { get; set; }
+
+        public double RagePercentage => ReturnPercentage(Rage, MaxRage);
 
         public float Rotation { get; set; }
 
         public int Runeenergy { get; set; }
+
+        public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
 
         public ulong TargetGuid { get; set; }
 
         public BitVector32 UnitFlags { get; set; }
 
         public BitVector32 UnitFlagsDynamic { get; set; }
-
-        public WowRace Race { get; set; }
-
-        public WowClass Class { get; set; }
-
-        public WowGender Gender { get; set; }
-
-        public WowPowertype PowerType { get; set; }
 
         private double ReturnPercentage(int value, int max)
         {

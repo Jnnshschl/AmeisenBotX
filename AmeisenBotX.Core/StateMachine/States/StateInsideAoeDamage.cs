@@ -27,11 +27,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private AmeisenBotConfig Config { get; }
 
+        private IMovementEngine MovementEngine { get; }
+
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
-
-        private IMovementEngine MovementEngine { get; }
 
         public override void Enter()
         {
@@ -84,6 +84,13 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
         }
 
+        private void BuildNewPath(Vector3 targetPosition)
+        {
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, targetPosition);
+            MovementEngine.LoadPath(path);
+            MovementEngine.PostProcessPath();
+        }
+
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)
         {
             double angleX = ObjectManager.Player.Position.X - aoePosition.X;
@@ -105,13 +112,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             };
 
             return destination;
-        }
-
-        private void BuildNewPath(Vector3 targetPosition)
-        {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, targetPosition);
-            MovementEngine.LoadPath(path);
-            MovementEngine.PostProcessPath();
         }
     }
 }

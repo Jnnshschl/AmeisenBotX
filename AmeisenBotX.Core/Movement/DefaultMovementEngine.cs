@@ -22,9 +22,9 @@ namespace AmeisenBotX.Core.Movement
 
         public Queue<Vector3> CurrentPath { get; private set; }
 
-        public Vector3 SelectedWaypoint { get; private set; }
-
         public Vector3 LastPosition { get; private set; }
+
+        public Vector3 SelectedWaypoint { get; private set; }
 
         public MovementSettings Settings { get; private set; }
 
@@ -102,11 +102,6 @@ namespace AmeisenBotX.Core.Movement
             SelectedWaypoint = Vector3.Zero;
         }
 
-        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
-        {
-            return false;
-        }
-
         private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)
         {
             double x = currentPosition.X + Math.Cos(currentRotation + Math.PI);
@@ -120,6 +115,11 @@ namespace AmeisenBotX.Core.Movement
             };
 
             return destination;
+        }
+
+        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
+        {
+            return false;
         }
     }
 }

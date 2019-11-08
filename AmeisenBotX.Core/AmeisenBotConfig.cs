@@ -1,10 +1,12 @@
-﻿namespace AmeisenBotX.Core
+﻿using AmeisenBotX.Memory.Win32;
+using System;
+using System.Collections.Generic;
+
+namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
-        public AmeisenBotConfig()
-        {
-        }
+        public bool AutocloseWow { get; set; } = false;
 
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
@@ -12,11 +14,15 @@
 
         public bool AutostartWow { get; set; } = false;
 
-        public bool AutocloseWow { get; set; } = false;
+        public Rect BotWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
+
+        public string BuiltInCombatClassName { get; set; } = "ClassSpec";
 
         public int CharacterSlot { get; set; } = 0;
 
-        public string CombatClassName { get; set; } = "ClassSpec";
+        public string CustomCombatClassFile { get; set; } = "";
+
+        public List<string> CustomCombatClassDependencies { get; set; } = new List<string>() { "System.dll", $"{AppDomain.CurrentDomain.BaseDirectory}/AmeisenBotX.Core.dll" };
 
         public bool FollowGroupLeader { get; set; } = false;
 
@@ -26,11 +32,11 @@
 
         public int MaxFollowDistance { get; set; } = 100;
 
-        public int MinFollowDistance { get; set; } = 6;
-
         public int MaxFps { get; set; } = 20;
 
         public int MaxFpsCombat { get; set; } = 30;
+
+        public int MinFollowDistance { get; set; } = 6;
 
         public int NameshServerPort { get; set; } = 47110;
 
@@ -56,8 +62,12 @@
 
         public double StateMachineTickMs { get; set; } = 50;
 
+        public bool UseClickToMove { get; set; } = true;
+
+        public bool UseBuiltInCombatClass { get; set; } = true;
+
         public string Username { get; set; } = string.Empty;
 
-        public bool UseClickToMove { get; set; } = true;
+        public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
     }
 }

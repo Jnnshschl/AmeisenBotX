@@ -213,7 +213,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 // slam
                                 else
                                 {
-                                    List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+                                    List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player);
                                     if(Buffs.Any(e => e.Contains("slam")) && rage > 15)
                                     {
                                         castSpell(slam, ref rage, 15, 0, false);

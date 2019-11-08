@@ -5,36 +5,36 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public interface IWowItem
     {
-        int Id { get; }
+        int Count { get; }
 
-        string Type { get; }
-
-        string Subtype { get; }
-
-        string Name { get; }
-
-        string ItemLink { get; }
+        int Durability { get; }
 
         string EquipLocation { get; }
 
         EquipmentSlot EquipSlot { get; }
 
-        ItemQuality ItemQuality { get; }
+        int Id { get; }
 
         int ItemLevel { get; }
 
-        int RequiredLevel { get; }
+        string ItemLink { get; }
 
-        int Price { get; }
-
-        int Count { get; }
-
-        int MaxStack { get; }
-
-        int Durability { get; }
+        ItemQuality ItemQuality { get; }
 
         int MaxDurability { get; }
 
+        int MaxStack { get; }
+
+        string Name { get; }
+
+        int Price { get; }
+
+        int RequiredLevel { get; }
+
         Dictionary<string, int> Stats { get; }
+
+        string Subtype { get; }
+
+        string Type { get; }
     }
 }
