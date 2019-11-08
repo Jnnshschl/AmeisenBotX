@@ -31,13 +31,13 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private HookManager HookManager { get; }
 
+        private IMovementEngine MovementEngine { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
         private IOffsetList OffsetList { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
 
         private int TryCount { get; set; }
 

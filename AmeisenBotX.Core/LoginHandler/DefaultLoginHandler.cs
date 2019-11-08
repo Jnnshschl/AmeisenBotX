@@ -59,7 +59,11 @@ namespace AmeisenBotX.Core.LoginHandler
                     XMemory.ReadInt(OffsetList.IsWorldLoaded, out isWorldLoaded);
                 }
 
-                XMemory.Process.WaitForInputIdle();
+                if (XMemory.Process != null && !XMemory.Process.HasExited)
+                {
+                    XMemory.Process?.WaitForInputIdle();
+                }
+
                 return true;
             }
 

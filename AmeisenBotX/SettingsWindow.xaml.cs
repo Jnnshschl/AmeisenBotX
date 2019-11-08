@@ -13,7 +13,7 @@ namespace AmeisenBotX
         public SettingsWindow(AmeisenBotConfig config)
         {
             Config = config;
-            PendingChanges = true;
+            PendingChanges = false;
 
             InitializeComponent();
         }
@@ -21,9 +21,6 @@ namespace AmeisenBotX
         public AmeisenBotConfig Config { get; private set; }
 
         private bool PendingChanges { get; set; }
-
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-            => DragMove();
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
@@ -42,5 +39,8 @@ namespace AmeisenBotX
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
         }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+            => DragMove();
     }
 }

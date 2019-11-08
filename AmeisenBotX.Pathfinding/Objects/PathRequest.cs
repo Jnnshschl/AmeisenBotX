@@ -17,20 +17,20 @@ namespace AmeisenBotX.Pathfinding.Objects
 
         public Vector3 B { get; set; }
 
+        public PathRequestFlags Flags { get; set; }
+
         public int MapId { get; set; }
 
         public MovementType MovementType { get; set; }
 
-        public PathRequestFlags Flags { get; set; }
+        public static bool operator !=(PathRequest left, PathRequest right)
+        {
+            return !(left == right);
+        }
 
         public static bool operator ==(PathRequest left, PathRequest right)
         {
             return left.Equals(right);
-        }
-
-        public static bool operator !=(PathRequest left, PathRequest right)
-        {
-            return !(left == right);
         }
 
         public override bool Equals(object obj)

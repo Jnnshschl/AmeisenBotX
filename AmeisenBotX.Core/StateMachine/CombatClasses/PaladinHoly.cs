@@ -10,17 +10,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class PaladinHoly : ICombatClass
     {
+        private readonly string blessingOfWisdom = "Blessing of Wisdom";
+        private readonly int buffCheckTime = 30;
         private readonly string devotionAuraSpell = "Devotion Aura";
-        private readonly string divinePleaSpell = "Divine Plea";
         private readonly string divineFavorSpell = "Divine Favor";
         private readonly string divineIlluminationSpell = "Divine Illumination";
-        private readonly string holyShockSpell = "Holy Shock";
-        private readonly string holyLightSpell = "Holy Light";
+        private readonly string divinePleaSpell = "Divine Plea";
         private readonly string flashOfLight = "Flash of Light";
+        private readonly string holyLightSpell = "Holy Light";
+        private readonly string holyShockSpell = "Holy Shock";
         private readonly string layOnHands = "Lay on Hands";
-        private readonly string blessingOfWisdom = "Blessing of Wisdom";
-
-        private readonly int buffCheckTime = 30;
 
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -42,11 +41,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => false;
 
-        private DateTime LastBuffCheck { get; set; }
-
         private CharacterManager CharacterManager { get; }
 
         private HookManager HookManager { get; }
+
+        private DateTime LastBuffCheck { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
@@ -127,7 +126,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleBuffing()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
 
             if (IsSpellKnown(devotionAuraSpell)
@@ -149,18 +148,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             LastBuffCheck = DateTime.Now;
         }
 
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
-        {
-            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-            groupPlayers.Add(ObjectManager.Player);
-
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
-        }
-
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
@@ -175,10 +162,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool HasEnoughMana(string spellName)
             => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
 
+        private bool IsOnCooldown(string spellName)
+            => HookManager.GetSpellCooldown(spellName) > 0;
+
         private bool IsSpellKnown(string spellName)
             => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
 
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
+        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
+        {
+            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+
+            groupPlayers.Add(ObjectManager.Player);
+
+            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
+
+            return playersThatNeedHealing.Count > 0;
+        }
     }
 }

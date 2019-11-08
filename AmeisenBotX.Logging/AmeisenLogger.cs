@@ -40,17 +40,36 @@ namespace AmeisenBotX.Logging
             }
         }
 
-        public bool Enabled { get; private set; }
-
         public LogLevel ActiveLogLevel { get; set; }
+
+        public bool Enabled { get; private set; }
 
         public string LogFileFolder { get; private set; }
 
         public string LogFilePath { get; private set; }
 
+        private ConcurrentQueue<LogEntry> LogQueue { get; }
+
         private Thread LogWorker { get; set; }
 
-        private ConcurrentQueue<LogEntry> LogQueue { get; }
+        public void ChangeLogFolder(string logFolderPath)
+        {
+            LogFileFolder = logFolderPath;
+            if (!Directory.Exists(logFolderPath))
+            {
+                Directory.CreateDirectory(logFolderPath);
+            }
+
+            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now.ToString("dd.MM.yyyy")}.{DateTime.Now.ToString("HH.mm")}.txt";
+        }
+
+        public void Log(string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
+        {
+            if (logLevel <= ActiveLogLevel)
+            {
+                LogQueue.Enqueue(new LogEntry(logLevel, message, Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+            }
+        }
 
         public void Start()
         {
@@ -70,25 +89,6 @@ namespace AmeisenBotX.Logging
             {
                 LogWorker.Join();
             }
-        }
-
-        public void Log(string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
-        {
-            if (logLevel <= ActiveLogLevel)
-            {
-                LogQueue.Enqueue(new LogEntry(logLevel, message, Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
-            }
-        }
-
-        public void ChangeLogFolder(string logFolderPath)
-        {
-            LogFileFolder = logFolderPath;
-            if (!Directory.Exists(logFolderPath))
-            {
-                Directory.CreateDirectory(logFolderPath);
-            }
-
-            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now.ToString("dd.MM.yyyy")}.{DateTime.Now.ToString("HH.mm")}.txt";
         }
 
         private void DoLogWork()

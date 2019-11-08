@@ -29,29 +29,29 @@ namespace AmeisenBotX.Core.StateMachine.States
             DistanceToTarget = combatClass == null || combatClass.IsMelee ? 3.0 : 25.0;
         }
 
+        public double DistanceToTarget { get; private set; }
+
         private CharacterManager CharacterManager { get; }
 
         private ICombatClass CombatClass { get; }
 
         private AmeisenBotConfig Config { get; }
 
+        private WowUnit CurrentTarget => ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.Player.TargetGuid);
+
         private HookManager HookManager { get; }
+
+        private DateTime LastRotationCheck { get; set; }
+
+        private IMovementEngine MovementEngine { get; set; }
+
+        private bool NeedToStopMovement { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
 
-        private IMovementEngine MovementEngine { get; set; }
-
-        private WowUnit CurrentTarget => ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.Player.TargetGuid);
-
-        private DateTime LastRotationCheck { get; set; }
-
-        private bool NeedToStopMovement { get; set; }
-
         private int TryCount { get; set; }
-
-        public double DistanceToTarget { get; private set; }
 
         public override void Enter()
         {
@@ -128,6 +128,12 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 HookManager.ClearTarget();
             }
+        }
+
+        private void BuildNewPath(WowUnit target)
+        {
+            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
+            MovementEngine.LoadPath(path);
         }
 
         private void HandleMovement(WowUnit target)
@@ -210,12 +216,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
                 }
             }
-        }
-
-        private void BuildNewPath(WowUnit target)
-        {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
-            MovementEngine.LoadPath(path);
         }
 
         private bool SelectTargetToAttack(out WowUnit target)

@@ -284,6 +284,33 @@ namespace AmeisenBotX.Core.Data
             return false;
         }
 
+        public void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress)
+        {
+            WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
+            switch (wowObjectType)
+            {
+                case WowObjectType.Gameobject:
+                    WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
+                    break;
+
+                case WowObjectType.Dynobject:
+                    WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
+                    break;
+
+                case WowObjectType.Unit:
+                    WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
+                    break;
+
+                case WowObjectType.Player:
+                    WowObjects.Add(ReadWowPlayer(baseAddress, wowObjectType));
+                    break;
+
+                default:
+                    WowObjects.Add(ReadWowObject(baseAddress, wowObjectType));
+                    break;
+            }
+        }
+
         public void UpdateWowObjects()
         {
             if (!XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
@@ -368,33 +395,6 @@ namespace AmeisenBotX.Core.Data
             }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);
-        }
-
-        public void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress)
-        {
-            WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
-            switch (wowObjectType)
-            {
-                case WowObjectType.Gameobject:
-                    WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
-                    break;
-
-                case WowObjectType.Dynobject:
-                    WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
-                    break;
-
-                case WowObjectType.Unit:
-                    WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
-                    break;
-
-                case WowObjectType.Player:
-                    WowObjects.Add(ReadWowPlayer(baseAddress, wowObjectType));
-                    break;
-
-                default:
-                    WowObjects.Add(ReadWowObject(baseAddress, wowObjectType));
-                    break;
-            }
         }
 
         private void EnableClickToMove()

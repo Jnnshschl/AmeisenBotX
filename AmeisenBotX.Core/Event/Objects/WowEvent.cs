@@ -5,11 +5,11 @@ namespace AmeisenBotX.Core.Event.Objects
 {
     public class WowEvent
     {
-        [JsonProperty("event")]
-        public string EventName { get; set; }
-
         [JsonProperty("args")]
         public List<string> Arguments { get; set; }
+
+        [JsonProperty("event")]
+        public string EventName { get; set; }
 
         [JsonProperty("time")]
         public long Timestamp { get; set; }

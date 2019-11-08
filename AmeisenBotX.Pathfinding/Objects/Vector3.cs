@@ -19,22 +19,6 @@ namespace AmeisenBotX.Pathfinding.Objects
 
         public float Z { get; set; }
 
-        public static Vector3 operator +(Vector3 a, Vector3 b)
-            => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-
-        public static Vector3 operator -(Vector3 a, Vector3 b)
-            => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
-
-        public static bool operator ==(Vector3 left, Vector3 right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Vector3 left, Vector3 right)
-        {
-            return !(left == right);
-        }
-
         public static Vector3 FromArray(float[] array)
             => new Vector3()
             {
@@ -43,19 +27,35 @@ namespace AmeisenBotX.Pathfinding.Objects
                 Z = array[2]
             };
 
-        public float[] ToArray()
-            => new float[3]
-            {
-                X,
-                Y,
-                Z
-            };
+        public static Vector3 operator -(Vector3 a, Vector3 b)
+            => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+
+        public static bool operator !=(Vector3 left, Vector3 right)
+        {
+            return !(left == right);
+        }
+
+        public static Vector3 operator +(Vector3 a, Vector3 b)
+            => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+
+        public static bool operator ==(Vector3 left, Vector3 right)
+        {
+            return left.Equals(right);
+        }
 
         public override bool Equals(object obj)
             => obj.GetType() == typeof(Vector3)
             && ((Vector3)obj).X == X
             && ((Vector3)obj).Y == Y
             && ((Vector3)obj).Z == Z;
+
+        public double GetDistance(Vector3 b)
+            => Math.Sqrt(((X - b.X) * (X - b.X))
+                       + ((Y - b.Y) * (Y - b.Y))
+                       + ((Z - b.Z) * (Z - b.Z)));
+
+        public double GetDistance2D(Vector3 b)
+            => Math.Sqrt(Math.Pow(X - b.X, 2) + Math.Pow(Y - b.Y, 2));
 
         public override int GetHashCode()
         {
@@ -65,12 +65,12 @@ namespace AmeisenBotX.Pathfinding.Objects
             }
         }
 
-        public double GetDistance(Vector3 b)
-            => Math.Sqrt(((X - b.X) * (X - b.X))
-                       + ((Y - b.Y) * (Y - b.Y))
-                       + ((Z - b.Z) * (Z - b.Z)));
-
-        public double GetDistance2D(Vector3 b)
-            => Math.Sqrt(Math.Pow(X - b.X, 2) + Math.Pow(Y - b.Y, 2));
+        public float[] ToArray()
+            => new float[3]
+            {
+                X,
+                Y,
+                Z
+            };
     }
 }

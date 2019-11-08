@@ -15,17 +15,17 @@ namespace AmeisenBotX.Logging.Objects
             CallingCodeline = callingCodeline;
         }
 
-        public DateTime TimeStamp { get; private set; }
-
-        public string Message { get; private set; }
-
-        public LogLevel LogLevel { get; private set; }
-
         public string CallingClass { get; private set; }
+
+        public int CallingCodeline { get; private set; }
 
         public string CallingFunction { get; private set; }
 
-        public int CallingCodeline { get; private set; }
+        public LogLevel LogLevel { get; private set; }
+
+        public string Message { get; private set; }
+
+        public DateTime TimeStamp { get; private set; }
 
         public override string ToString()
         {

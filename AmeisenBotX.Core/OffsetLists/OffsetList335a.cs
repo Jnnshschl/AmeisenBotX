@@ -18,17 +18,17 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr ClickToMoveGuid { get; } = new IntPtr(0xCA11D8 + 0x20);
 
-        public IntPtr ClickToMoveTurnSpeed { get; } = new IntPtr(0xCA11D8 + 0x4);
+        public IntPtr ClickToMovePendingMovement { get; } = new IntPtr(0xCA1200);
 
         public IntPtr ClickToMovePointer { get; } = new IntPtr(0xBD08F4);
+
+        public IntPtr ClickToMoveTurnSpeed { get; } = new IntPtr(0xCA11D8 + 0x4);
 
         public IntPtr ClickToMoveX { get; } = new IntPtr(0xCA11D8 + 0x8C);
 
         public IntPtr ClickToMoveY { get; } = new IntPtr(0xCA11D8 + 0x90);
 
         public IntPtr ClickToMoveZ { get; } = new IntPtr(0xCA11D8 + 0x94);
-
-        public IntPtr ClickToMovePendingMovement { get; } = new IntPtr(0xCA1200);
 
         public IntPtr ClientConnection { get; } = new IntPtr(0xC79CE0);
 
@@ -44,6 +44,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr CurrentObjectManager { get; } = new IntPtr(0x2ED0);
 
+        public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
+
         public IntPtr DescriptorEnergy { get; } = new IntPtr(0x6C);
 
         public IntPtr DescriptorExp { get; } = new IntPtr(0x1E3C);
@@ -51,6 +53,8 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr DescriptorFactionTemplate { get; } = new IntPtr(0xDC);
 
         public IntPtr DescriptorHealth { get; } = new IntPtr(0x60);
+
+        public IntPtr DescriptorInfoFlags { get; } = new IntPtr(0x5C);
 
         public IntPtr DescriptorLevel { get; } = new IntPtr(0xD8);
 
@@ -78,8 +82,6 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x240);
 
-        public IntPtr DescriptorInfoFlags { get; } = new IntPtr(0x5C);
-
         public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8);
 
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);
@@ -92,21 +94,21 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr FunctionCastSpellById { get; } = new IntPtr(0x80DA40);
 
+        public IntPtr FunctionClickToMove { get; } = new IntPtr(0x727400);
+
         public IntPtr FunctionGetActivePlayerObject { get; } = new IntPtr(0x4038F0);
 
         public IntPtr FunctionGetLocalizedText { get; } = new IntPtr(0x7225E0);
 
         public IntPtr FunctionGetUnitReaction { get; } = new IntPtr(0x7251C0);
 
+        public IntPtr FunctionHandleTerrainClick { get; } = new IntPtr(0x80C340);
+
         public IntPtr FunctionLuaDoString { get; } = new IntPtr(0x819210);
 
         public IntPtr FunctionSendMovementPacket { get; } = new IntPtr(0x7413F0);
 
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
-
-        public IntPtr FunctionHandleTerrainClick { get; } = new IntPtr(0x80C340);
-
-        public IntPtr FunctionClickToMove { get; } = new IntPtr(0x727400);
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 
@@ -156,11 +158,11 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr RealmName { get; } = new IntPtr(0xC79B9E);
 
+        public IntPtr RuneCooldown { get; } = new IntPtr(0xC24364);
+
         public IntPtr Runes { get; } = new IntPtr(0xC24388);
 
         public IntPtr RuneType { get; } = new IntPtr(0xC24304);
-
-        public IntPtr RuneCooldown { get; } = new IntPtr(0xC24364);
 
         public IntPtr TargetGuid { get; } = new IntPtr(0xBD07B0);
 
@@ -197,7 +199,5 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr WowUnitPosition { get; } = new IntPtr(0x798);
 
         public IntPtr ZoneId { get; } = new IntPtr(0xAF4E48);
-
-        public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
     }
 }

@@ -24,30 +24,9 @@ namespace AmeisenBotX
 
         private string BotDataPath { get; set; }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void ButtonClose_Click(object sender, RoutedEventArgs e)
         {
-            if (Directory.Exists(BotDataPath))
-            {
-                foreach (string directory in Directory.GetDirectories(BotDataPath))
-                {
-                    comboboxSelectedConfig.Items.Add(Path.GetFileName(directory));
-                }
-            }
-
-            comboboxSelectedConfig.Items.Add("New Config");
-
-            string[] args = Environment.GetCommandLineArgs();
-            if (args.Length > 1)
-            {
-                string botnameParam = args[1];
-
-                if (comboboxSelectedConfig.Items.Contains(botnameParam))
-                {
-                    comboboxSelectedConfig.SelectedItem = botnameParam;
-                }
-            }
+            Close();
         }
 
         private void ComboboxSelectedConfig_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -77,9 +56,30 @@ namespace AmeisenBotX
             Close();
         }
 
-        private void ButtonClose_Click(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Close();
+            if (Directory.Exists(BotDataPath))
+            {
+                foreach (string directory in Directory.GetDirectories(BotDataPath))
+                {
+                    comboboxSelectedConfig.Items.Add(Path.GetFileName(directory));
+                }
+            }
+
+            comboboxSelectedConfig.Items.Add("New Config");
+
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1)
+            {
+                string botnameParam = args[1];
+
+                if (comboboxSelectedConfig.Items.Contains(botnameParam))
+                {
+                    comboboxSelectedConfig.SelectedItem = botnameParam;
+                }
+            }
         }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
     }
 }

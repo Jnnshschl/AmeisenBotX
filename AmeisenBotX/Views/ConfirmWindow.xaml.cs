@@ -21,8 +21,11 @@ namespace AmeisenBotX.Views
 
         public bool OkayPressed { get; private set; }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-            => DragMove();
+        private void ButtonCancel_Click(object sender, RoutedEventArgs e)
+        {
+            OkayPressed = false;
+            Close();
+        }
 
         private void ButtonOkay_Click(object sender, RoutedEventArgs e)
         {
@@ -30,10 +33,7 @@ namespace AmeisenBotX.Views
             Close();
         }
 
-        private void ButtonCancel_Click(object sender, RoutedEventArgs e)
-        {
-            OkayPressed = false;
-            Close();
-        }
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+                            => DragMove();
     }
 }

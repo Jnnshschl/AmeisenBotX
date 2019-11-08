@@ -15,9 +15,14 @@ namespace AmeisenBotX
             InitializeComponent();
         }
 
+        public AmeisenBotConfig Config { get; private set; }
+
         public string ConfigName { get; private set; }
 
-        public AmeisenBotConfig Config { get; private set; }
+        private void ButtonAbort_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
 
         private void ButtonOkay_Click(object sender, RoutedEventArgs e)
         {
@@ -27,7 +32,7 @@ namespace AmeisenBotX
                 Username = textboxUsername.Text,
                 Password = textboxPassword.Password,
                 CharacterSlot = int.Parse(textboxCharacterSlot.Text),
-                CombatClassName = textboxCombatClass.Text,
+                BuiltInCombatClassName = textboxCombatClass.Text,
                 AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false),
                 AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false),
                 FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false),
@@ -43,6 +48,19 @@ namespace AmeisenBotX
             };
 
             Close();
+        }
+
+        private void ButtonOpenWowExe_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Wow Executeable|*.exe"
+            };
+
+            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
+            {
+                textboxWowPath.Text = openFileDialog.FileName;
+            }
         }
 
         private void CheckboxAutoStartWow_Checked(object sender, RoutedEventArgs e)
@@ -67,24 +85,6 @@ namespace AmeisenBotX
         {
             textboxFollowSpecificCharacterName.IsEnabled = false;
             textboxFollowSpecificCharacterName.Text = string.Empty;
-        }
-
-        private void ButtonAbort_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void ButtonOpenWowExe_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Filter = "Wow Executeable|*.exe"
-            };
-
-            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
-            {
-                textboxWowPath.Text = openFileDialog.FileName;
-            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();

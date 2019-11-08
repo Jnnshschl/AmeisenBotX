@@ -67,20 +67,14 @@ namespace AmeisenBotX.Memory.Win32
             DIRECT_IMPERSONATION = (0x0200)
         }
 
-        [DllImport("kernel32.dll")]
-        public static extern IntPtr OpenThread(ThreadAccess threadAccess, bool inheritHandle, uint threadId);
-
-        [DllImport("kernel32.dll")]
-        public static extern uint SuspendThread(IntPtr threadHandle);
-
-        [DllImport("kernel32.dll")]
-        public static extern int ResumeThread(IntPtr threadHandle);
-
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool MoveWindow(IntPtr windowHandle, int x, int y, int width, int height, bool repaint);
@@ -88,11 +82,20 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool inheritHandle, int processId);
 
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr OpenThread(ThreadAccess threadAccess, bool inheritHandle, uint threadId);
+
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool ReadProcessMemory(IntPtr processHandle, IntPtr baseAddress, IntPtr buffer, int size, out IntPtr numberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool ReadProcessMemory(IntPtr processHandle, IntPtr baseAddress, [Out] byte[] buffer, int size, out IntPtr numberOfBytesRead);
+
+        [DllImport("kernel32.dll")]
+        public static extern int ResumeThread(IntPtr threadHandle);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint SuspendThread(IntPtr threadHandle);
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtection memoryProtection);
@@ -105,8 +108,5 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool WriteProcessMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
-
-        [DllImport("user32.dll")]
-        public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
     }
 }

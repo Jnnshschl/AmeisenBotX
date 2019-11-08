@@ -7,19 +7,6 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public static class ItemFactory
     {
-        public static WowBasicItem ParseItem(string json)
-        {
-            return JsonConvert.DeserializeObject<WowBasicItem>(json);
-        }
-
-        public static List<WowBasicItem> ParseItemList(string json)
-        {
-            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
-            {
-                Error = HandleDeserializationError
-            });
-        }
-
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
         {
             return (basicItem.Type.ToUpper()) switch
@@ -40,6 +27,19 @@ namespace AmeisenBotX.Core.Character.Inventory
                 "WEAPON" => new WowWeapon(basicItem),
                 _ => basicItem,
             };
+        }
+
+        public static WowBasicItem ParseItem(string json)
+        {
+            return JsonConvert.DeserializeObject<WowBasicItem>(json);
+        }
+
+        public static List<WowBasicItem> ParseItemList(string json)
+        {
+            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
+            {
+                Error = HandleDeserializationError
+            });
         }
 
         private static void HandleDeserializationError(object sender, ErrorEventArgs e)

@@ -4,18 +4,18 @@ namespace AmeisenBotX.Core.Data.Persistence
 {
     public interface IAmeisenBotCache
     {
-        void Clear();
+        void CacheName(ulong guid, string name);
 
-        void Save();
+        void CacheReaction(int a, int b, WowUnitReaction reaction);
+
+        void Clear();
 
         void Load();
 
+        void Save();
+
         bool TryGetName(ulong guid, out string name);
 
-        void CacheName(ulong guid, string name);
-
         bool TryGetReaction(int a, int b, out WowUnitReaction reaction);
-
-        void CacheReaction(int a, int b, WowUnitReaction reaction);
     }
 }

@@ -24,6 +24,10 @@ namespace AmeisenBotX.Core.StateMachine.States
             CombatClass = combatClass;
         }
 
+        private CharacterManager CharacterManager { get; }
+
+        private ICombatClass CombatClass { get; }
+
         private AmeisenBotConfig Config { get; }
 
         private EventHookManager EventHookManager { get; }
@@ -32,11 +36,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private ObjectManager ObjectManager { get; }
 
-        private CharacterManager CharacterManager { get; }
-
         private IOffsetList OffsetList { get; }
-
-        private ICombatClass CombatClass { get; }
 
         public override void Enter()
         {

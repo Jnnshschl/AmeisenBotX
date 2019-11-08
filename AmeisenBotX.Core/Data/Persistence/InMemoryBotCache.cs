@@ -21,22 +21,26 @@ namespace AmeisenBotX.Core.Data.Persistence
 
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
 
+        public void CacheName(ulong guid, string name)
+        {
+            if (!NameCache.ContainsKey(guid))
+            {
+                NameCache.Add(guid, name);
+            }
+        }
+
+        public void CacheReaction(int a, int b, WowUnitReaction reaction)
+        {
+            if (!ReactionCache.ContainsKey((a, b)))
+            {
+                ReactionCache.Add((a, b), reaction);
+            }
+        }
+
         public void Clear()
         {
             NameCache = new Dictionary<ulong, string>();
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
-        }
-
-        public void Save()
-        {
-            if (!Directory.Exists(Path.GetDirectoryName(FilePath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
-            }
-
-            using Stream stream = File.Open(FilePath, FileMode.Create);
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            binaryFormatter.Serialize(stream, this);
         }
 
         public void Load()
@@ -57,6 +61,18 @@ namespace AmeisenBotX.Core.Data.Persistence
             }
         }
 
+        public void Save()
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(FilePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+            }
+
+            using Stream stream = File.Open(FilePath, FileMode.Create);
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            binaryFormatter.Serialize(stream, this);
+        }
+
         public bool TryGetName(ulong guid, out string name)
         {
             if (NameCache.ContainsKey(guid))
@@ -67,14 +83,6 @@ namespace AmeisenBotX.Core.Data.Persistence
 
             name = "";
             return false;
-        }
-
-        public void CacheName(ulong guid, string name)
-        {
-            if (!NameCache.ContainsKey(guid))
-            {
-                NameCache.Add(guid, name);
-            }
         }
 
         public bool TryGetReaction(int a, int b, out WowUnitReaction reaction)
@@ -92,14 +100,6 @@ namespace AmeisenBotX.Core.Data.Persistence
 
             reaction = WowUnitReaction.Unknown;
             return false;
-        }
-
-        public void CacheReaction(int a, int b, WowUnitReaction reaction)
-        {
-            if (!ReactionCache.ContainsKey((a, b)))
-            {
-                ReactionCache.Add((a, b), reaction);
-            }
         }
     }
 }

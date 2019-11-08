@@ -166,8 +166,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100.0;
             double playerHealthPercent = (ObjectManager.Player.Health / (double)ObjectManager.Player.MaxHealth) * 100.0;
             (string, int) targetCastingInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-            List<string> Debuffs = HookManager.GetDebuffs(WowLuaUnit.Target.ToString());
-            List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+            List<string> Debuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
+            List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
             // buffs
             if (!Buffs.Any(e => e.Contains("evotion")))

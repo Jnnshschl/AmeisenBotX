@@ -157,5 +157,16 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
+        <Button x:Name="buttonClearCache" Content="Clear Cache" Margin="0,214,192,0" Click="ButtonClearCache_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="80" Height="20" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+            </Button.Background>
+        </Button>
     </Grid>
 </Window>
