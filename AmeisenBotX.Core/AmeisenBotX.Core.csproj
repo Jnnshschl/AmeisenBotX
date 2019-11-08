@@ -138,6 +138,7 @@
     <Compile Include="StateMachine\States\StateAttacking.cs" />
     <Compile Include="StateMachine\States\StateDead.cs" />
     <Compile Include="StateMachine\States\StateFollowing.cs" />
+    <Compile Include="StateMachine\States\StateLooting.cs" />
     <Compile Include="StateMachine\States\StateGhost.cs" />
     <Compile Include="StateMachine\States\StateHealing.cs" />
     <Compile Include="StateMachine\States\StateIdle.cs" />

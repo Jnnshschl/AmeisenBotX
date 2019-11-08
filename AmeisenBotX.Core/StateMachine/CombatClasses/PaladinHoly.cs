@@ -68,42 +68,45 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
-                ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-
-                if (target.HealthPercentage < 12
-                    && IsSpellKnown(layOnHands)
-                    && !IsOnCooldown(layOnHands))
+                if (target != null)
                 {
-                    HookManager.CastSpell(layOnHands);
-                    return;
-                }
+                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
-                if (target.HealthPercentage < 50
-                   && IsSpellKnown(divineFavorSpell)
-                   && !IsOnCooldown(divineFavorSpell))
-                {
-                    HookManager.CastSpell(divineFavorSpell);
-                }
-
-                if (ObjectManager.Player.ManaPercentage < 50
-                   && ObjectManager.Player.ManaPercentage > 20
-                   && IsSpellKnown(divineIlluminationSpell)
-                   && !IsOnCooldown(divineIlluminationSpell))
-                {
-                    HookManager.CastSpell(divineIlluminationSpell);
-                }
-
-                double healthDifference = target.MaxHealth - target.Health;
-                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                {
-                    if (IsSpellKnown(keyValuePair.Value)
-                        && HasEnoughMana(keyValuePair.Value)
-                        && !IsOnCooldown(keyValuePair.Value))
+                    if (target.HealthPercentage < 12
+                        && IsSpellKnown(layOnHands)
+                        && !IsOnCooldown(layOnHands))
                     {
-                        HookManager.CastSpell(keyValuePair.Value);
-                        break;
+                        HookManager.CastSpell(layOnHands);
+                        return;
+                    }
+
+                    if (target.HealthPercentage < 50
+                       && IsSpellKnown(divineFavorSpell)
+                       && !IsOnCooldown(divineFavorSpell))
+                    {
+                        HookManager.CastSpell(divineFavorSpell);
+                    }
+
+                    if (ObjectManager.Player.ManaPercentage < 50
+                       && ObjectManager.Player.ManaPercentage > 20
+                       && IsSpellKnown(divineIlluminationSpell)
+                       && !IsOnCooldown(divineIlluminationSpell))
+                    {
+                        HookManager.CastSpell(divineIlluminationSpell);
+                    }
+
+                    double healthDifference = target.MaxHealth - target.Health;
+                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                    {
+                        if (IsSpellKnown(keyValuePair.Value)
+                            && HasEnoughMana(keyValuePair.Value)
+                            && !IsOnCooldown(keyValuePair.Value))
+                        {
+                            HookManager.CastSpell(keyValuePair.Value);
+                            break;
+                        }
                     }
                 }
             }

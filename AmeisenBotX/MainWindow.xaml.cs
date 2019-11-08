@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -280,7 +281,7 @@ namespace AmeisenBotX
 
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
 
-                labelDebug.Content = $"BaseAddress: 0x{AmeisenBot.ObjectManager.Player.BaseAddress.ToString("X")}\nDescriptorAddress: 0x{AmeisenBot.ObjectManager.Player.DescriptorAddress.ToString("X")}";
+                labelDebug.Content = $"BaseAddress: 0x{AmeisenBot.ObjectManager.Player.BaseAddress.ToString("X")}\nDescriptorAddress: 0x{AmeisenBot.ObjectManager.Player.DescriptorAddress.ToString("X")}\nLootableUnitsNear: {AmeisenBot.ObjectManager.WowObjects.OfType<WowUnit>().Where(e=>e.IsLootable).Count()}";
             });
         }
 

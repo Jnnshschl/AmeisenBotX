@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateIdle : State
     {
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, EventHookManager eventHookManager, ICombatClass combatClass) : base(stateMachine)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, EventHookManager eventHookManager, ICombatClass combatClass, Queue<ulong> unitLootList) : base(stateMachine)
         {
             Config = config;
             OffsetList = offsetList;
@@ -22,6 +22,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             EventHookManager = eventHookManager;
             CharacterManager = characterManager;
             CombatClass = combatClass;
+            UnitLootList = unitLootList;
         }
 
         private CharacterManager CharacterManager { get; }
@@ -38,14 +39,16 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IOffsetList OffsetList { get; }
 
+        private Queue<ulong> UnitLootList { get; }
+
         public override void Enter()
         {
-            AmeisenBotStateMachine.XMemory.ReadString(OffsetList.PlayerName, Encoding.ASCII, out string playerName);
-            AmeisenBotStateMachine.PlayerName = playerName;
-
             // first start
             if (!HookManager.IsWoWHooked)
             {
+                AmeisenBotStateMachine.XMemory.ReadString(OffsetList.PlayerName, Encoding.ASCII, out string playerName);
+                AmeisenBotStateMachine.PlayerName = playerName;
+
                 HookManager.SetupEndsceneHook();
                 HookManager.SetMaxFps((byte)Config.MaxFps);
 
@@ -57,6 +60,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+            if (UnitLootList.Count > 0)
+            {
+                AmeisenBotStateMachine.SetState(AmeisenBotState.Looting);
+                return;
+            }
+
             if (IsUnitToFollowThere())
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Following);

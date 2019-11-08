@@ -643,12 +643,11 @@ namespace AmeisenBotX.Core.Hook
         {
             string[] asm = new string[]
             {
-                $"MOV ECX, 0x{wowUnit.BaseAddress.ToString("X")}",
-                "MOV EAX, DWORD[ECX]",
-                "MOV EAX, DWORD[EAX + 88H]",
-                "CALL EAX",
+                $"MOV ECX, {wowUnit.BaseAddress.ToInt32()}",
+                $"CALL 0x00731260",
                 "RETN",
             };
+
             InjectAndExecute(asm, false);
         }
 
