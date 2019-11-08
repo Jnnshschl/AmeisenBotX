@@ -32,6 +32,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool IsMelee => true;
 
         private bool Jumped { get; set; }
+        private bool hasTargetMoved = false;
+        private bool computeNewRoute = false;
         private WarriorFurySpells Spells;
 
         private class WarriorFurySpells
@@ -137,11 +139,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         castSpell(berserkerRage, ref rage, 0, 20.1, true); // lasts 10 sec
                     }
                 }
-                if (distanceToTarget < 30)
+                if (distanceToTarget < 29)
                 {
-                    if(distanceToTarget < 25)
+                    if(distanceToTarget < 24)
                     {
-                        if(distanceToTarget > 8)
+                        if(distanceToTarget > 9)
                         {
                             // -- run to the target! --
                             if (Player.IsInCombat)
@@ -154,7 +156,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                         if(rage > 10 && IsReady(intercept))
                                         {
                                             castSpell(intercept, ref rage, 10, 30, true);
-                                            HookManager.SendChatMessage("/s gotcha!");
                                         }
                                     }
                                     else
@@ -175,12 +176,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                     if (IsReady(NextStance))
                                     {
                                         changeToStance(battleStance, out rage);
-                                        // charge
-                                        if (IsReady(charge))
-                                        {
-                                            castSpell(charge, ref rage, 0, 15, false);
-                                            HookManager.SendChatMessage("/s boo!");
-                                        }
                                     }
                                 }
                                 else
@@ -189,26 +184,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                     if (IsReady(charge))
                                     {
                                         castSpell(charge, ref rage, 0, 15, false);
-                                        HookManager.SendChatMessage("/s boo!");
                                     }
                                 }
                             }
                         }
-                        else if(distanceToTarget < 3)
+                        else if(distanceToTarget < 4)
                         {
                             // -- close combat --
                             // Berserker Stance
-                            if (IsReady(NextStance))
+                            if (!IsInBerserkerStance && IsReady(NextStance))
                             {
                                 changeToStance(berserkerStance, out rage);
                             }
-                            if (isGCDReady)
+                            else if (isGCDReady)
                             {
                                 // bloodthirst
                                 if (lowHealth && rage > 20 && IsReady(bloodthirst))
                                 {
                                     castSpell(bloodthirst, ref rage, 20, 4, true);
-                                    HookManager.SendChatMessage("/s oooh shit");
                                 }
                                 // slam
                                 else
@@ -231,10 +224,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                         castSpell(execute, ref rage, 10, 0, true);
                                     }
                                     // heroic strike
-                                    else if (rage > 12)
+                                    else if (rage > 12 && IsReady(heroicStrike))
                                     {
-                                        castSpell(heroicStrike, ref rage, 12, 0, false);
+                                        castSpell(heroicStrike, ref rage, 12, 1.5, false);
                                     }
+                                }
+                            }
+                            // heroic strike
+                            else if (rage > 12 && IsReady(heroicStrike))
+                            {
+                                castSpell(heroicStrike, ref rage, 12, 1.5, false);
+                            }
+                            else
+                            {
+                                if (!ObjectManager.Player.IsAutoAttacking)
+                                {
+                                    HookManager.StartAutoAttack();
                                 }
                             }
                         }
@@ -253,13 +258,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                         if (IsReady(NextStance))
                                         {
                                             changeToStance(battleStance, out rage);
-                                            if(rage > 25)
-                                            {
-                                                castSpell(shatteringThrow, ref rage, 25, 301.5, false);
-                                                NextCast = DateTime.Now.AddSeconds(1.5); // casting time
-                                                NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
-                                                HookManager.SendChatMessage("/s and i'm like.. bam!");
-                                            }
                                         }
                                     }
                                     else
@@ -267,14 +265,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                         castSpell(shatteringThrow, ref rage, 25, 301.5, false);
                                         NextCast = DateTime.Now.AddSeconds(1.5); // casting time
                                         NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
-                                        HookManager.SendChatMessage("/s and i'm like.. bam!");
                                     }
                                 }
                                 // heroic throw
                                 else
                                 {
                                     castSpell(heroicThrow, ref rage, 0, 60, true);
-                                    HookManager.SendChatMessage("/s drive by shootin, baby!");
                                 }
                             }
                         }
@@ -283,11 +279,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             public void resetAfterTargetDeath()
             {
-                DateTime NextSpellAvailable;
-                if(NextActionTime.TryGetValue(hamstring, out NextSpellAvailable))
-                {
-                    NextSpellAvailable = DateTime.Now;
-                }
+                NextActionTime[hamstring] = DateTime.Now;
             }
             private bool IsReady(DateTime nextAction)
             {
@@ -295,8 +287,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             private bool IsReady(string spell)
             {
-                DateTime NextSpellAvailable;
-                return !NextActionTime.TryGetValue(spell, out NextSpellAvailable) || IsReady(NextSpellAvailable);
+                return !NextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable);
             }
             private int updateRage()
             {
@@ -307,14 +298,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private void castSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
                 HookManager.CastSpell(spell);
+                Console.WriteLine("[" + DateTime.Now.ToString() + "] casting " + spell);
                 rage -= rageCosts;
                 if(cooldown > 0)
                 {
-                    DateTime NextSpellAvailable;
-                    if(NextActionTime.TryGetValue(spell, out NextSpellAvailable))
-                    {
-                        NextSpellAvailable = DateTime.Now.AddSeconds(cooldown);
-                    }
+                    NextActionTime[spell] = DateTime.Now.AddSeconds(cooldown);
                 }
                 if (gcd)
                 {
@@ -336,7 +324,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Vector3 LastPlayerPosition { get; set; }
         private Vector3 LastTargetPosition { get; set; }
+        Vector3 PosInFrontOfUnit { get; set; }
         private double distanceToTarget = 0;
+        private double distanceTraveled = 0;
 
         private ObjectManager ObjectManager { get; }
 
@@ -376,39 +366,61 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             SearchNewTarget(ref target, false);
             if (target != null)
             {
-                // make sure we're auto attacking
-                if (LastPlayerPosition != ObjectManager.Player.Position || LastTargetPosition != target.Position)
+                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                CharacterManager.Face(target.Position, target.Guid);
+                LastPlayerPosition = ObjectManager.Player.Position;
+                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                if (!LastTargetPosition.Equals(target.Position))
                 {
-                    LastPlayerPosition = ObjectManager.Player.Position;
+                    hasTargetMoved = true;
                     LastTargetPosition = target.Position;
-                    distanceToTarget = ObjectManager.Player.Position.GetDistance2D(target.Position);
+                    distanceToTarget = ObjectManager.Player.Position.GetDistance(LastTargetPosition);
+                    float u = (float)(3 / distanceToTarget);
+                    PosInFrontOfUnit = new Vector3((1 - u) * LastTargetPosition.X + u * LastPlayerPosition.X, (1 - u) * LastTargetPosition.Y + u * LastPlayerPosition.Y, (1 - u) * LastTargetPosition.Z + u * LastPlayerPosition.Z);
+                    Console.WriteLine("traveled: " + distanceTraveled + ", distanceToTarget: " + distanceToTarget);
                 }
-                if (!ObjectManager.Player.IsAutoAttacking)
+                else if(hasTargetMoved)
                 {
-                    HookManager.StartAutoAttack();
+                    hasTargetMoved = false;
+                    computeNewRoute = true;
                 }
-                if (ObjectManager.Player.IsInCombat || distanceToTarget <= 8 || distanceToTarget >= 25)
-                {
-                    HandleMovement(target);
-                }
+                HandleMovement(target);
                 HandleAttacking(target);
             }
         }
 
         public void OutOfCombatExecute()
         {
-            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
-            if(distanceTraveled < 0.001)
+            ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+            LastPlayerPosition = ObjectManager.Player.Position;
+            distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+            if (distanceTraveled < 0.001)
             {
                 ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
+                    CharacterManager.Face(target.Position, target.Guid);
+                    if (!LastTargetPosition.Equals(target.Position))
+                    {
+                        hasTargetMoved = true;
+                        LastTargetPosition = target.Position;
+                        distanceToTarget = ObjectManager.Player.Position.GetDistance(LastTargetPosition);
+                        float u = (float)(4 / distanceToTarget);
+                        PosInFrontOfUnit = new Vector3((1 - u) * LastTargetPosition.X + u * LastPlayerPosition.X, (1 - u) * LastTargetPosition.Y + u * LastPlayerPosition.Y, (1 - u) * LastTargetPosition.Z + u * LastPlayerPosition.Z);
+                        Console.WriteLine("traveled: " + distanceTraveled + ", distanceToTarget: " + distanceToTarget);
+                    }
+                    else
+                    {
+                        computeNewRoute = true;
+                        hasTargetMoved = false;
+                    }
                     HandleMovement(target);
                     HandleAttacking(target);
                 }
                 else if(!Dancing)
                 {
+                    HookManager.ClearTarget();
                     HookManager.SendChatMessage("/dance");
                     Dancing = true;
                 }
@@ -429,7 +441,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 100)
                 {
-                    if((unit.IsInCombat && unit.Health < targetHealth) || !inCombat && grinding && (target == null || target.IsDead) && unit.Health < targetHealth)
+                    if((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
                     {
                         target = unit;
                         targetHealth = unit.Health;
@@ -442,56 +454,67 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if(target == null || target.IsDead)
             {
                 HookManager.ClearTarget();
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
-                if(leaderGuid != ObjectManager.PlayerGuid)
-                {
-                    WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
-                    HandleMovement(leader);
-                }
-
+                newTargetFound = false;
             }
             return newTargetFound;
         }
 
         private void HandleAttacking(WowUnit target)
         {
+            CharacterManager.Face(target.Position, target.Guid, 100.0f);
             Spells.castNextSpell(distanceToTarget, target);
             if(target.IsDead)
             {
                 Spells.resetAfterTargetDeath();
             }
-            // back to attack
-            else if (!ObjectManager.Player.IsAutoAttacking)
-            {
-                HookManager.StartAutoAttack();
-            }
         }
 
         private void HandleMovement(WowUnit target)
         {
-            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
-            double distanceToTarget = ObjectManager.Player.Position.GetDistance(LastTargetPosition);
-
-            if (distanceToTarget > 3 && distanceTraveled < 0.001)
+            if (target == null)
+                return;
+            if(distanceToTarget > 4.0)
             {
-                if(Jumped)
+                if (computeNewRoute)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
+                    Console.WriteLine("compute new route..");
+                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
                     MovementEngine.LoadPath(path);
-                    CharacterManager.Jump();
+                    computeNewRoute = false;
+                }
+                else if(hasTargetMoved)
+                {
+                    Console.WriteLine("pursue target");
+                    CharacterManager.MoveToPosition(LastTargetPosition);
+                }
+                else if (MovementEngine.CurrentPath?.Count > 0
+                            && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                {
+                    Console.WriteLine("follow route");
+                    CharacterManager.MoveToPosition(positionToGoTo);
+                    if (needToJump)
+                    {
+                        CharacterManager.Jump();
+                    }
                 }
                 else
                 {
-                    CharacterManager.MoveToPosition(target.Position);
-                    CharacterManager.Jump();
-                    Jumped = true;
+                    Console.WriteLine("run straight to the target");
+                    CharacterManager.MoveToPosition(LastTargetPosition);
                 }
             }
             else
             {
-                Jumped = false;
-                CharacterManager.MoveToPosition(target.Position);
+                if (CharacterManager.GetCurrentClickToMovePoint(out Vector3 ctmPosition)
+                           && (int)ctmPosition.X != (int)ObjectManager.Player.Position.X
+                           || (int)ctmPosition.Y != (int)ObjectManager.Player.Position.Y
+                           || (int)ctmPosition.Z != (int)ObjectManager.Player.Position.Z)
+                {
+                    Console.WriteLine("stop movement");
+                    CharacterManager.StopMovement(ctmPosition, ObjectManager.Player.Guid);
+                }
             }
+            
         }
     }
 }

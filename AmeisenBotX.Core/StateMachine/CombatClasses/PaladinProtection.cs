@@ -310,6 +310,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleMovement(WowUnit target)
         {
+            if(target == null)
+            {
+                return;
+            }
             double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPosition);
             double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
 
