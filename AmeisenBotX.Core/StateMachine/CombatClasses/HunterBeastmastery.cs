@@ -235,7 +235,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleBuffing()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
 
             if (IsSpellKnown(aspectOfTheDragonhawkSpell)
@@ -264,7 +264,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleDebuffing()
         {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target.ToString());
+            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
 
             if (IsSpellKnown(huntersMarkSpell)
                 && !targetDebuffs.Any(e => e.Equals(huntersMarkSpell, StringComparison.OrdinalIgnoreCase))
