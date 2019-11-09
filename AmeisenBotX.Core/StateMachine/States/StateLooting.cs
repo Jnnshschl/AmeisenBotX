@@ -27,6 +27,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             PathfindingHandler = pathfindingHandler;
             MovementEngine = movementEngine;
             UnitLootList = unitLootList;
+            UnitsAlreadyLootedList = new List<ulong>();
         }
 
         private CharacterManager CharacterManager { get; }
@@ -42,6 +43,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private IOffsetList OffsetList { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
+
+        private List<ulong> UnitsAlreadyLootedList { get; }
 
         private Queue<ulong> UnitLootList { get; }
 
@@ -60,6 +63,12 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
+                if (UnitsAlreadyLootedList.Contains(UnitLootList.Peek()))
+                {
+                    UnitLootList.Dequeue();
+                    return;
+                }
+
                 WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == UnitLootList.Peek());
                 if (selectedUnit != null && selectedUnit.IsDead && selectedUnit.IsLootable)
                 {
@@ -100,7 +109,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     else
                     {
                         HookManager.RightClickUnit(selectedUnit);
-                        UnitLootList.Dequeue();
+                        UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
                     }
                 }
                 else

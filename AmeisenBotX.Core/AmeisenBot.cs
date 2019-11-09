@@ -363,7 +363,7 @@ namespace AmeisenBotX.Core
                 }
             }
 
-            HookManager.RollOnItem(rollId, RollType.Greed);
+            HookManager.RollOnItem(rollId, RollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
