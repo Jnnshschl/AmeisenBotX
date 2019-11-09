@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
     {
         // author: Jannis Höschele
 
-        private readonly string blessingOfMight = "Blessing of Might";
+        private readonly string blessingOfMightSpell = "Blessing of Might";
         private readonly string retributionAuraSpell = "Retribution Aura";
         private readonly string avengingWrathSpell = "Avenging Wrath";
         private readonly string sealOfVengeanceSpell = "Seal of Vengeance";
@@ -192,16 +192,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (IsSpellKnown(blessingOfMight)
-                && !myBuffs.Any(e => e.Equals(blessingOfMight, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(blessingOfMight))
+            if (IsSpellKnown(blessingOfMightSpell)
+                && !myBuffs.Any(e => e.Equals(blessingOfMightSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(blessingOfMightSpell))
             {
-                HookManager.CastSpell(blessingOfMight);
+                HookManager.CastSpell(blessingOfMightSpell);
                 return;
             }
 
             if (IsSpellKnown(sealOfVengeanceSpell)
-                && !myBuffs.Any(e => e.Equals(blessingOfMight, StringComparison.OrdinalIgnoreCase))
+                && !myBuffs.Any(e => e.Equals(blessingOfMightSpell, StringComparison.OrdinalIgnoreCase))
                 && !IsOnCooldown(sealOfVengeanceSpell))
             {
                 HookManager.CastSpell(sealOfVengeanceSpell);

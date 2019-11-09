@@ -194,10 +194,12 @@ namespace AmeisenBotX.Core.Data
                 if (PlayerGuid != 0 && wowUnit.Guid == PlayerGuid)
                 {
                     if (XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorExp.ToInt32()), out int exp)
-                        && XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp))
+                        && XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp)
+                        && XMemory.Read(OffsetList.ComboPoints, out byte comboPoints))
                     {
                         player.Exp = exp;
                         player.MaxExp = maxExp;
+                        player.ComboPoints = comboPoints;
                     }
 
                     Player = player;

@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
 
-        public IntPtr DescriptorEnergy { get; } = new IntPtr(0x6C);
+        public IntPtr DescriptorEnergy { get; } = new IntPtr(0x70);
 
         public IntPtr DescriptorExp { get; } = new IntPtr(0x1E3C);
 
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr DescriptorMana { get; } = new IntPtr(0x64);
 
-        public IntPtr DescriptorMaxEnergy { get; } = new IntPtr(0x8C);
+        public IntPtr DescriptorMaxEnergy { get; } = new IntPtr(0x90);
 
         public IntPtr DescriptorMaxExp { get; } = new IntPtr(0x1E40);
 

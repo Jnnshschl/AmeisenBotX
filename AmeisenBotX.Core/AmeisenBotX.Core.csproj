@@ -134,6 +134,7 @@
     <Compile Include="StateMachine\CombatClasses\PaladinProtection.cs" />
     <Compile Include="StateMachine\CombatClasses\PaladinRetribution.cs" />
     <Compile Include="StateMachine\CombatClasses\PriestHoly.cs" />
+    <Compile Include="StateMachine\CombatClasses\RogueAssassination.cs" />
     <Compile Include="StateMachine\CombatClasses\WarlockAffliction.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
     <Compile Include="StateMachine\States\AmeisenBotState.cs" />
