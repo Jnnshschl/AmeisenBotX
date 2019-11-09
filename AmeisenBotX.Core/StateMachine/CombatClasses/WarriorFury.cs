@@ -32,7 +32,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool hasTargetMoved = false;
         private bool computeNewRoute = false;
+        public bool multipleTargets = false;
         private readonly WarriorFurySpells Spells;
+        private int mainhandSpeed = 3;
 
         private class WarriorFurySpells
         {
@@ -51,6 +53,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             static readonly string hamstring = "Hamstring";
             static readonly string execute = "Execute";
             static readonly string heroicStrike = "Heroic Strike"; // noGCD, wird aber so behandelt, da low priority
+            static readonly string retaliation = "Retaliation";
+            static readonly string enragedRegeneration = "Enraged Regeneration";
+            static readonly string whirlwind = "Whirlwind";
             private HookManager HookManager { get; set; }
             private ObjectManager ObjectManager { get; set; }
             private WowPlayer Player { get; set; }
@@ -70,6 +75,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 { bloodthirst, DateTime.Now },
                 { hamstring, DateTime.Now },
                 { execute, DateTime.Now },
+                { whirlwind, DateTime.Now },
+                { retaliation, DateTime.Now },
+                { enragedRegeneration, DateTime.Now },
                 { heroicStrike, DateTime.Now }
             };
             private DateTime NextGCDSpell { get; set; }
@@ -88,7 +96,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 NextStance = DateTime.Now;
                 NextCast = DateTime.Now;
             }
-            public void CastNextSpell(double distanceToTarget, WowUnit target)
+            public void CastNextSpell(double distanceToTarget, WowUnit target, bool multipleTargets)
             {
                 if(!IsReady(NextCast))
                 {
@@ -118,6 +126,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     askedForHeal = true;
                 }
                 // -- buffs --
+                if(lowHealth && rage > 15 && IsReady(enragedRegeneration))
+                {
+                    if (IsReady(enragedRegeneration))
+                    {
+                        CastSpell(enragedRegeneration, ref rage, 15, 180, false);
+                    }
+                }
                 if (isGCDReady)
                 {
                     // Death Wish
@@ -165,6 +180,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                         // Berserker Stance
                                         if (IsReady(NextStance))
                                         {
+                                            if (IsReady(retaliation))
+                                            {
+                                                CastSpell(retaliation, ref rage, 0, 300, false);
+                                            }
                                             ChangeToStance(berserkerStance, out rage);
                                         }
                                     }
@@ -196,12 +215,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                             // Berserker Stance
                             if (!IsInBerserkerStance && IsReady(NextStance))
                             {
+                                if(IsReady(retaliation))
+                                {
+                                    CastSpell(retaliation, ref rage, 0, 300, false);
+                                }
                                 ChangeToStance(berserkerStance, out rage);
                             }
                             else if (isGCDReady)
                             {
                                 // bloodthirst
-                                if (lowHealth && rage > 20 && IsReady(bloodthirst))
+                                if (mediumHealth && rage > 20 && IsReady(bloodthirst))
                                 {
                                     CastSpell(bloodthirst, ref rage, 20, 4, true);
                                 }
@@ -224,6 +247,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                     else if (target.HealthPercentage <= 20 && rage > 10)
                                     {
                                         CastSpell(execute, ref rage, 10, 0, true);
+                                    }
+                                    // whirlwind
+                                    else if (multipleTargets && rage > 25 && IsReady(whirlwind))
+                                    {
+                                        CastSpell(whirlwind, ref rage, 25, 10, true);
                                     }
                                     // heroic strike
                                     else if (rage > 12 && IsReady(heroicStrike))
@@ -340,6 +368,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             ulong targetGuid = ObjectManager.TargetGuid;
+            /*Character.Inventory.Objects.IWowItem weapon;
+            if(CharacterManager.Equipment.Equipment.TryGetValue(Character.Inventory.Enums.EquipmentSlot.INVSLOT_MAINHAND, out weapon))
+            {
+                if(mainhandSpeed != 1 && weapon != null && weapon.Stats != null && weapon.Stats.Keys != null)
+                {
+                    foreach (string stat in weapon.Stats.Keys)
+                    {
+                        Console.WriteLine(stat);
+                        mainhandSpeed = 1;
+                    }
+                }
+                //mainhandSpeed = weapon.Stats["ITEM_MOD_SPEED_SHORT"];
+            }*/
             WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
             SearchNewTarget(ref target, false);
             if (target != null)
@@ -417,16 +458,26 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
+            int targetCount = 0;
+            multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 100)
+                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    if((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
+                    if (tmpDistance < 100.0)
                     {
-                        target = unit;
-                        targetHealth = unit.Health;
-                        newTargetFound = true;
-                        inCombat = unit.IsInCombat;
+                        if(tmpDistance < 6.0)
+                        {
+                            targetCount++;
+                        }
+                        if ((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
+                        {
+                            target = unit;
+                            targetHealth = unit.Health;
+                            newTargetFound = true;
+                            inCombat = unit.IsInCombat;
+                        }
                     }
                 }
             }
@@ -436,7 +487,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 newTargetFound = false;
                 target = null;
             }
-            if(newTargetFound)
+            else if (targetCount > 1)
+            {
+                multipleTargets = true;
+            }
+            if (newTargetFound)
             {
                 HookManager.TargetGuid(target.Guid);
             }
@@ -445,7 +500,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleAttacking(WowUnit target)
         {
-            Spells.CastNextSpell(distanceToTarget, target);
+            Spells.CastNextSpell(distanceToTarget, target, multipleTargets);
             if(target.IsDead)
             {
                 Spells.ResetAfterTargetDeath();
