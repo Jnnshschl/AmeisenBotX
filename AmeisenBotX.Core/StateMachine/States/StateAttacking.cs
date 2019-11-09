@@ -147,9 +147,13 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             // we don't want to move when we are casting/channeling something either
-            if (target != null && target.Guid != ObjectManager.PlayerGuid && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
+            if (target != null 
+                && target.Guid != ObjectManager.PlayerGuid 
+                && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position) 
+                && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
                 CharacterManager.Face(target.Position, target.Guid);
+                CharacterManager.StopMovement(target.Position, target.Guid);
                 LastRotationCheck = DateTime.Now;
             }
 

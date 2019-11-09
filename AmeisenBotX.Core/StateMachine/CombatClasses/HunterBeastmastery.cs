@@ -1,7 +1,10 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,13 +38,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 3;
         private readonly int enemyCastingCheckTime = 1;
-        private readonly int petstatusCheckTime = 3;
+        private readonly int petstatusCheckTime = 2;
 
-        public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, XMemory xMemory)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+            XMemory = xMemory;
         }
 
         public bool HandlesMovement => false;
@@ -65,6 +69,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private DateTime LastMendPetUsed { get; set; }
 
         private ObjectManager ObjectManager { get; }
+
+        private XMemory XMemory { get; }
 
         private DateTime PetStatusCheck { get; set; }
 
@@ -97,105 +103,107 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
-            if (target == null)
+            if (target != null)
             {
-                HookManager.TargetNearestEnemy();
-                HookManager.StartAutoAttack();
-            }
+                double distanceToTarget = target.Position.GetDistance2D(ObjectManager.Player.Position);
 
-            double distanceToTarget = target.Position.GetDistance2D(ObjectManager.Player.Position);
-
-            if (ObjectManager.Player.HealthPercentage < 15
-                && IsSpellKnown(feignDeathSpell)
-                && !IsOnCooldown(feignDeathSpell))
-            {
-                HookManager.CastSpell(feignDeathSpell);
-            }
-
-            if (distanceToTarget < 6
-                && IsSpellKnown(disengageSpell)
-                && HasEnoughMana(disengageSpell)
-                && !IsOnCooldown(disengageSpell))
-            {
-                HookManager.CastSpell(disengageSpell);
-                Disengaged = true;
-                return;
-            }
-
-            if (distanceToTarget < 10)
-            {
-                if (ObjectManager.Player.HealthPercentage < 50
-                    && IsSpellKnown(deterrenceSpell)
-                    && HasEnoughMana(deterrenceSpell)
-                    && !IsOnCooldown(deterrenceSpell))
+                if (ObjectManager.Player.HealthPercentage < 15
+                    && IsSpellKnown(feignDeathSpell)
+                    && !IsOnCooldown(feignDeathSpell))
                 {
-                    HookManager.CastSpell(deterrenceSpell);
+                    HookManager.CastSpell(feignDeathSpell);
                 }
 
-                if (IsSpellKnown(frostTrapSpell)
-                && HasEnoughMana(frostTrapSpell)
-                    && !IsOnCooldown(frostTrapSpell))
+                if (distanceToTarget < 4)
                 {
-                    HookManager.CastSpell(frostTrapSpell);
-                    return;
+                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 750, 1250);
                 }
-            }
 
-            if (distanceToTarget > 3)
-            {
-                if (Disengaged
-                    && IsSpellKnown(concussiveShotSpell)
-                    && HasEnoughMana(concussiveShotSpell)
-                    && !IsOnCooldown(concussiveShotSpell))
+                if (distanceToTarget < 6
+                    && IsSpellKnown(disengageSpell)
+                    && HasEnoughMana(disengageSpell)
+                    && !IsOnCooldown(disengageSpell))
                 {
-                    HookManager.CastSpell(concussiveShotSpell);
-                    Disengaged = false;
+                    HookManager.CastSpell(disengageSpell);
+                    Disengaged = true;
                     return;
                 }
 
-                if (IsSpellKnown(killShotSpell)
-                    && target.HealthPercentage < 20
-                    && HasEnoughMana(killShotSpell)
-                    && !IsOnCooldown(killShotSpell))
+                if (distanceToTarget < 10)
                 {
-                    HookManager.CastSpell(killShotSpell);
-                    return;
+                    if (ObjectManager.Player.HealthPercentage < 50
+                        && IsSpellKnown(deterrenceSpell)
+                        && HasEnoughMana(deterrenceSpell)
+                        && !IsOnCooldown(deterrenceSpell))
+                    {
+                        HookManager.CastSpell(deterrenceSpell);
+                    }
+
+                    if (IsSpellKnown(frostTrapSpell)
+                    && HasEnoughMana(frostTrapSpell)
+                        && !IsOnCooldown(frostTrapSpell))
+                    {
+                        HookManager.CastSpell(frostTrapSpell);
+                        return;
+                    }
                 }
 
-                if (IsSpellKnown(killCommandSpell)
-                    && HasEnoughMana(killCommandSpell)
-                    && !IsOnCooldown(killCommandSpell))
+                if (distanceToTarget > 3)
                 {
-                    HookManager.CastSpell(killCommandSpell);
-                }
+                    if (Disengaged
+                        && IsSpellKnown(concussiveShotSpell)
+                        && HasEnoughMana(concussiveShotSpell)
+                        && !IsOnCooldown(concussiveShotSpell))
+                    {
+                        HookManager.CastSpell(concussiveShotSpell);
+                        Disengaged = false;
+                        return;
+                    }
 
-                if (IsSpellKnown(beastialWrathSpell)
-                    && HasEnoughMana(beastialWrathSpell)
-                    && !IsOnCooldown(beastialWrathSpell))
-                {
-                    HookManager.CastSpell(beastialWrathSpell);
-                }
+                    if (IsSpellKnown(killShotSpell)
+                        && target.HealthPercentage < 20
+                        && HasEnoughMana(killShotSpell)
+                        && !IsOnCooldown(killShotSpell))
+                    {
+                        HookManager.CastSpell(killShotSpell);
+                        return;
+                    }
 
-                if (IsSpellKnown(rapidFireSpell)
-                    && !IsOnCooldown(rapidFireSpell))
-                {
-                    HookManager.CastSpell(rapidFireSpell);
-                }
+                    if (IsSpellKnown(killCommandSpell)
+                        && HasEnoughMana(killCommandSpell)
+                        && !IsOnCooldown(killCommandSpell))
+                    {
+                        HookManager.CastSpell(killCommandSpell);
+                    }
 
-                if (IsSpellKnown(arcaneShotSpell)
-                    && HasEnoughMana(arcaneShotSpell)
-                    && !IsOnCooldown(arcaneShotSpell))
-                {
-                    HookManager.CastSpell(arcaneShotSpell);
-                    return;
-                }
+                    if (IsSpellKnown(beastialWrathSpell)
+                        && HasEnoughMana(beastialWrathSpell)
+                        && !IsOnCooldown(beastialWrathSpell))
+                    {
+                        HookManager.CastSpell(beastialWrathSpell);
+                    }
 
-                if (IsSpellKnown(steadyShotSpell)
-                    && HasEnoughMana(steadyShotSpell)
-                    && !IsOnCooldown(steadyShotSpell))
-                {
-                    HookManager.CastSpell(steadyShotSpell);
-                    return;
+                    if (IsSpellKnown(rapidFireSpell)
+                        && !IsOnCooldown(rapidFireSpell))
+                    {
+                        HookManager.CastSpell(rapidFireSpell);
+                    }
+
+                    if (IsSpellKnown(arcaneShotSpell)
+                        && HasEnoughMana(arcaneShotSpell)
+                        && !IsOnCooldown(arcaneShotSpell))
+                    {
+                        HookManager.CastSpell(arcaneShotSpell);
+                        return;
+                    }
+
+                    if (IsSpellKnown(steadyShotSpell)
+                        && HasEnoughMana(steadyShotSpell)
+                        && !IsOnCooldown(steadyShotSpell))
+                    {
+                        HookManager.CastSpell(steadyShotSpell);
+                        return;
+                    }
                 }
             }
         }
@@ -207,6 +215,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HandleBuffing();
             }
 
+            if (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime))
+            {
+                CheckPetStatus();
+            }
+
             Disengaged = false;
         }
 
@@ -214,7 +227,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             WowUnit pet = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.PetGuid);
 
-            if (pet?.Health == 0
+            if (pet != null
+                && pet.Health == 0
+                || pet.IsDead
                 && IsSpellKnown(revivePetSpell)
                 && !IsOnCooldown(revivePetSpell))
             {

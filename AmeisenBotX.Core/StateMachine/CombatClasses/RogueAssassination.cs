@@ -54,6 +54,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
+            if (!ObjectManager.Player.IsAutoAttacking)
+            {
+                HookManager.StartAutoAttack();
+            }
+
             if (!ObjectManager.Player.IsInCombat && DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
             {
                 HandleBuffs();

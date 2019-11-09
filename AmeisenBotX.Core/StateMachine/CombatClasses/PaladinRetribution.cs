@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string holyLightSpell = "Holy Light";
         private readonly string layOnHandsSpell = "Lay on Hands";
 
-        private readonly int buffCheckTime = 8;
+        private readonly int buffCheckTime = 4;
         private readonly int enemyCastingCheckTime = 1;
 
         public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
@@ -58,6 +58,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
+            if (!ObjectManager.Player.IsAutoAttacking)
+            {
+                HookManager.StartAutoAttack();
+            }
+
             if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
             {
                 HandleBuffing();
@@ -112,14 +117,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     HookManager.CastSpell(hammerOfWrathSpell);
                     return;
                 }
-            }
-
-            if (IsSpellKnown(judgementOfLightSpell)
-                && HasEnoughMana(judgementOfLightSpell)
-                && !IsOnCooldown(judgementOfLightSpell))
-            {
-                HookManager.CastSpell(judgementOfLightSpell);
-                return;
             }
 
             if (IsSpellKnown(crusaderStrikeSpell)
@@ -183,6 +180,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            
+            if (IsSpellKnown(sealOfVengeanceSpell)
+                && !myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(sealOfVengeanceSpell))
+            {
+                HookManager.CastSpell(sealOfVengeanceSpell);
+                return;
+            }
+
+            if (IsSpellKnown(judgementOfLightSpell)
+                && myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
+                && HasEnoughMana(judgementOfLightSpell)
+                && !IsOnCooldown(judgementOfLightSpell))
+            {
+                HookManager.CastSpell(judgementOfLightSpell);
+                return;
+            }
 
             if (IsSpellKnown(retributionAuraSpell)
                 && !myBuffs.Any(e => e.Equals(retributionAuraSpell, StringComparison.OrdinalIgnoreCase))
@@ -197,14 +211,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 && !IsOnCooldown(blessingOfMightSpell))
             {
                 HookManager.CastSpell(blessingOfMightSpell);
-                return;
-            }
-
-            if (IsSpellKnown(sealOfVengeanceSpell)
-                && !myBuffs.Any(e => e.Equals(blessingOfMightSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(sealOfVengeanceSpell))
-            {
-                HookManager.CastSpell(sealOfVengeanceSpell);
                 return;
             }
 
