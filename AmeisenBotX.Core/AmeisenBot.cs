@@ -161,6 +161,7 @@ namespace AmeisenBotX.Core
                 "WARLOCKAFFLICTION" => new WarlockAffliction(ObjectManager, CharacterManager, HookManager),
                 "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
                 "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),
+                "SHAMANELEMENTAL" => new ShamanElemental(ObjectManager, CharacterManager, HookManager),                
                 _ => null,
             };
         }
