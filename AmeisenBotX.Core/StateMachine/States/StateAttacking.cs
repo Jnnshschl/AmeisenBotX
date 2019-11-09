@@ -128,6 +128,14 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 HookManager.ClearTarget();
             }
+
+            foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable))
+            {
+                if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
+                {
+                    AmeisenBotStateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
+                }
+            }
         }
 
         private void BuildNewPath(WowUnit target)
@@ -144,7 +152,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             // we don't want to move when we are casting/channeling something either
-            if (target != null && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
+            if (target != null && target.Guid != ObjectManager.PlayerGuid && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
                 CharacterManager.Face(target.Position, target.Guid);
                 LastRotationCheck = DateTime.Now;

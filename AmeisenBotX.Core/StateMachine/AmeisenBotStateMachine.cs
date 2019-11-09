@@ -53,19 +53,23 @@ namespace AmeisenBotX.Core.StateMachine
             LastGhostCheck = DateTime.Now;
             LastEventPull = DateTime.Now;
 
+            LastState = AmeisenBotState.None;
+            UnitLootList = new Queue<ulong>();
+
             States = new Dictionary<AmeisenBotState, State>()
             {
                 { AmeisenBotState.None, new StateNone(this, config) },
                 { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
                 { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager) },
                 { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, xMemory, config, objectManager) },
-                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass) },
+                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass, UnitLootList) },
                 { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager) },
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, combatClass) },
                 { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager) },
-                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) }
+                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
+                { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) }
             };
 
             CurrentState = States.First();
@@ -84,11 +88,15 @@ namespace AmeisenBotX.Core.StateMachine
 
         public KeyValuePair<AmeisenBotState, State> CurrentState { get; private set; }
 
+        public AmeisenBotState LastState { get; private set; }
+
         public string PlayerName { get; internal set; }
 
         internal IOffsetList OffsetList { get; }
 
         internal XMemory XMemory { get; }
+
+        internal Queue<ulong> UnitLootList { get; set; }
 
         private IAmeisenBotCache BotCache { get; }
 
@@ -166,6 +174,7 @@ namespace AmeisenBotX.Core.StateMachine
                 return;
             }
 
+            LastState = CurrentState.Key;
             CurrentState.Value.Exit();
             CurrentState = States.First(s => s.Key == state);
             CurrentState.Value.Enter();

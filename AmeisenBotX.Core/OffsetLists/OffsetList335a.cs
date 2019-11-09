@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr DescriptorUnitFlags { get; } = new IntPtr(0xEC);
 
-        public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x240);
+        public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x13C);
 
         public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8);
 

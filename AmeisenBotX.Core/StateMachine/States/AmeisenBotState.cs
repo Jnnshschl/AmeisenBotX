@@ -13,6 +13,7 @@
         Healing,
         LoadingScreen,
         InsideAoeDamage,
-        Unstuck
+        Unstuck,
+        Looting
     }
 }
