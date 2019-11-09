@@ -13,7 +13,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         // author: Jannis Höschele
 
         private readonly string blessingOfWisdomSpell = "Blessing of Wisdom";
-        private readonly int buffCheckTime = 8;
         private readonly string devotionAuraSpell = "Devotion Aura";
         private readonly string divineFavorSpell = "Divine Favor";
         private readonly string divineIlluminationSpell = "Divine Illumination";
@@ -22,6 +21,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string holyLightSpell = "Holy Light";
         private readonly string holyShockSpell = "Holy Shock";
         private readonly string layOnHandsSpell = "Lay on Hands";
+
+        private readonly int buffCheckTime = 8;
 
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {

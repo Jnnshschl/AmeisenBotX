@@ -15,13 +15,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string arcaneShotSpell = "Arcane Shot";
         private readonly string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
         private readonly string beastialWrathSpell = "Beastial Wrath";
-        private readonly int buffCheckTime = 8;
         private readonly string callPetSpell = "Call Pet";
         private readonly string concussiveShotSpell = "Concussive Shot";
-        private readonly int debuffCheckTime = 3;
         private readonly string deterrenceSpell = "Deterrence";
         private readonly string disengageSpell = "Disengage";
-        private readonly int enemyCastingCheckTime = 1;
         private readonly string feignDeathSpell = "Feign Death";
         private readonly string frostTrapSpell = "Frost Trap";
         private readonly string huntersMarkSpell = "Hunter's Mark";
@@ -29,12 +26,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string killCommandSpell = "Kill Command";
         private readonly string killShotSpell = "Kill Shot";
         private readonly string mendPetSpell = "Mend Pet";
-        private readonly int petstatusCheckTime = 3;
         private readonly string rapidFireSpell = "Rapid Fire";
         private readonly string revivePetSpell = "Revive Pet";
         private readonly string serpentStingSpell = "Serpent Sting";
         private readonly string steadyShotSpell = "Steady Shot";
         private readonly string wingClipSpell = "Wing Clip";
+
+        private readonly int buffCheckTime = 8;
+        private readonly int debuffCheckTime = 3;
+        private readonly int enemyCastingCheckTime = 1;
+        private readonly int petstatusCheckTime = 3;
 
         public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {

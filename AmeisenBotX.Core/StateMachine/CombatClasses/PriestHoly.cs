@@ -13,8 +13,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         // author: Jannis Höschele
 
         private readonly string bindingHealSpell = "Binding Heal";
-        private readonly int buffCheckTime = 8;
-        private readonly int deadPartymembersCheckTime = 4;
         private readonly string flashHealSpell = "Flash Heal";
         private readonly string greaterHealSpell = "Greater Heal";
         private readonly string guardianSpiritSpell = "Guardian Spirit";
@@ -25,6 +23,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string prayerOfMendingSpell = "Prayer of Mending";
         private readonly string renewSpell = "Renew";
         private readonly string resurrectionSpell = "Resurrection";
+
+        private readonly int buffCheckTime = 8;
+        private readonly int deadPartymembersCheckTime = 4;
 
         public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {

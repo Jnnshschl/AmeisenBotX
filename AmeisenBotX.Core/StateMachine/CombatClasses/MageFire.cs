@@ -13,13 +13,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         // author: Jannis Höschele
 
         private readonly string arcaneIntellectSpell = "Arcane Intellect";
-        private readonly int buffCheckTime = 8;
         private readonly string counterspellSpell = "Counterspell";
-        private readonly int debuffCheckTime = 1;
-        private readonly int enemyCastingCheckTime = 1;
         private readonly string evocationSpell = "Evocation";
         private readonly string fireballSpell = "Fireball";
-        private readonly int hotstreakCheckTime = 1;
         private readonly string hotstreakSpell = "Hot Streak";
         private readonly string improvedScorchSpell = "Improved Scorch";
         private readonly string livingBombSpell = "Living Bomb";
@@ -27,6 +23,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string moltenArmorSpell = "Molten Armor";
         private readonly string pyroblastSpell = "Pyroblast";
         private readonly string scorchSpell = "Scorch";
+
+        private readonly int buffCheckTime = 8;
+        private readonly int debuffCheckTime = 1;
+        private readonly int enemyCastingCheckTime = 1;
+        private readonly int hotstreakCheckTime = 1;
 
         public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {

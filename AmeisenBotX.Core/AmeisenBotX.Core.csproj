@@ -126,6 +126,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\AmeisenBotStateMachine.cs" />
     <Compile Include="StateMachine\CombatClasses\DeathKnightBlood.cs" />
+    <Compile Include="StateMachine\CombatClasses\DruidRestoration.cs" />
     <Compile Include="StateMachine\CombatClasses\HunterBeastmastery.cs" />
     <Compile Include="StateMachine\CombatClasses\MageFire.cs" />
     <Compile Include="StateMachine\CombatClasses\PaladinHoly.cs" />
