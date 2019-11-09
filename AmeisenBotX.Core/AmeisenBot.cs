@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log($"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
             CombatClass = (Config.BuiltInCombatClassName.ToUpper()) switch
             {
-                "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager),
+                "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "DEATHKNIGHTBLOOD" => new DeathKnightBlood(ObjectManager, CharacterManager, HookManager),
                 "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
