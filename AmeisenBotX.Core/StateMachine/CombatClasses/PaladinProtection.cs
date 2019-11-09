@@ -27,6 +27,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         }
 
         public bool HandlesMovement => true;
+        private bool hasTargetMoved = false;
+        private bool computeNewRoute = false;
 
         public bool HandlesTargetSelection => true;
 
@@ -35,10 +37,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool Jumped { get; set; }
 
         private CharacterManager CharacterManager { get; }
+        private Vector3 LastPlayerPosition { get; set; }
+        private Vector3 LastTargetPosition { get; set; }
+        private double distanceToTarget = 0;
+        private double distanceTraveled = 0;
 
         private HookManager HookManager { get; }
-
-        private Vector3 LastPosition { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
@@ -74,12 +78,29 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             SearchNewTarget(ref target, false);
             if (target != null)
             {
-                // make sure we're auto attacking
-                if (!ObjectManager.Player.IsAutoAttacking)
+                bool targetDistanceChanged = false;
+                if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
-                    HookManager.StartAutoAttack();
+                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                    LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
+                    targetDistanceChanged = true;
                 }
-
+                if (!LastTargetPosition.Equals(target.Position))
+                {
+                    hasTargetMoved = true;
+                    LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+                    targetDistanceChanged = true;
+                }
+                else if (hasTargetMoved)
+                {
+                    hasTargetMoved = false;
+                    computeNewRoute = true;
+                }
+                if (targetDistanceChanged)
+                {
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                    Console.WriteLine("distanceToTarget: " + distanceToTarget);
+                }
                 HandleMovement(target);
                 HandleAttacking(target);
             }
@@ -87,7 +108,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPosition);
+            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
             if(distanceTraveled < 0.001)
             {
                 ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
@@ -234,14 +255,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     lowMember = member;
                 }
             }
-            if(lowMember != null && playerMana >= 117)
+            if(lowMember != null)
             {
-                HookManager.TargetGuid(lowMember.Guid);
-                targetAimed = false;
                 if (!gcdWaiting && (lowMember.IsDazed || lowMember.IsConfused || lowMember.IsFleeing || lowMember.IsSilenced))
                 {
                     if (playerMana >= 276)
                     {
+                        HookManager.TargetGuid(lowMember.Guid);
+                        targetAimed = false;
                         HookManager.CastSpell("Blessing of Sanctuary");
                         playerMana -= 276;
                         SetGCD(1.5);
@@ -249,6 +270,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     }
                     if (playerMana >= 236)
                     {
+                        HookManager.TargetGuid(lowMember.Guid);
+                        targetAimed = false;
                         HookManager.CastSpell("Hand of Freedom");
                         playerMana -= 236;
                         SetGCD(1.5);
@@ -259,6 +282,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     if (!gcdWaiting && lowMember.HealthPercentage < 20 && playerMana >= 117)
                     {
+                        HookManager.TargetGuid(lowMember.Guid);
+                        targetAimed = false;
                         HookManager.CastSpell("Divine Shield");
                         LastDivineShield = DateTime.Now;
                         playerMana -= 117;
@@ -267,6 +292,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     }
                     else if (lowMember.HealthPercentage < 50 && playerMana >= 117)
                     {
+                        HookManager.TargetGuid(lowMember.Guid);
+                        targetAimed = false;
                         HookManager.CastSpell("Divine Protection");
                         LastProtection = DateTime.Now;
                         playerMana -= 117;
@@ -314,31 +341,32 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 return;
             }
-            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPosition);
-            double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
 
-            if (distanceToTarget > 3 && distanceTraveled < 0.001)
+            if (hasTargetMoved || (distanceToTarget < 6.0 && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
             {
-                if(Jumped)
+                CharacterManager.MoveToPosition(LastTargetPosition);
+            }
+            else if (distanceToTarget >= 6.0)
+            {
+                if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
+                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
                     MovementEngine.LoadPath(path);
-                    CharacterManager.Jump();
+                    MovementEngine.PostProcessPath();
                 }
                 else
                 {
-                    CharacterManager.MoveToPosition(target.Position);
-                    CharacterManager.Jump();
-                    Jumped = true;
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    {
+                        CharacterManager.MoveToPosition(positionToGoTo);
+
+                        if (needToJump)
+                        {
+                            CharacterManager.Jump();
+                        }
+                    }
                 }
             }
-            else
-            {
-                Jumped = false;
-                CharacterManager.MoveToPosition(target.Position);
-            }
-
-            LastPosition = ObjectManager.Player.Position;
         }
     }
 }

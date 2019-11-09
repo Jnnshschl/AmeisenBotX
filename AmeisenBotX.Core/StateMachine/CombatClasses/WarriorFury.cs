@@ -32,7 +32,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool hasTargetMoved = false;
         private bool computeNewRoute = false;
+        public bool multipleTargets = false;
         private readonly WarriorFurySpells Spells;
+        private int mainhandSpeed = 3;
 
         private class WarriorFurySpells
         {
@@ -51,6 +53,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             static readonly string hamstring = "Hamstring";
             static readonly string execute = "Execute";
             static readonly string heroicStrike = "Heroic Strike"; // noGCD, wird aber so behandelt, da low priority
+            static readonly string retaliation = "Retaliation";
+            static readonly string enragedRegeneration = "Enraged Regeneration";
+            static readonly string whirlwind = "Whirlwind";
             private HookManager HookManager { get; set; }
             private ObjectManager ObjectManager { get; set; }
             private WowPlayer Player { get; set; }
@@ -70,6 +75,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 { bloodthirst, DateTime.Now },
                 { hamstring, DateTime.Now },
                 { execute, DateTime.Now },
+                { whirlwind, DateTime.Now },
+                { retaliation, DateTime.Now },
+                { enragedRegeneration, DateTime.Now },
                 { heroicStrike, DateTime.Now }
             };
             private DateTime NextGCDSpell { get; set; }
@@ -88,7 +96,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 NextStance = DateTime.Now;
                 NextCast = DateTime.Now;
             }
-            public void CastNextSpell(double distanceToTarget, WowUnit target)
+            public void CastNextSpell(double distanceToTarget, WowUnit target, bool multipleTargets)
             {
                 if(!IsReady(NextCast))
                 {
@@ -118,6 +126,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     askedForHeal = true;
                 }
                 // -- buffs --
+                if(lowHealth && rage > 15 && IsReady(enragedRegeneration))
+                {
+                    if (IsReady(enragedRegeneration))
+                    {
+                        CastSpell(enragedRegeneration, ref rage, 15, 180, false);
+                    }
+                }
                 if (isGCDReady)
                 {
                     // Death Wish
@@ -165,6 +180,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                         // Berserker Stance
                                         if (IsReady(NextStance))
                                         {
+                                            if (IsReady(retaliation))
+                                            {
+                                                CastSpell(retaliation, ref rage, 0, 300, false);
+                                            }
                                             ChangeToStance(berserkerStance, out rage);
                                         }
                                     }
@@ -190,18 +209,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                        else if(distanceToTarget < 3.6)
+                        else
                         {
                             // -- close combat --
                             // Berserker Stance
                             if (!IsInBerserkerStance && IsReady(NextStance))
                             {
+                                if(IsReady(retaliation))
+                                {
+                                    CastSpell(retaliation, ref rage, 0, 300, false);
+                                }
                                 ChangeToStance(berserkerStance, out rage);
                             }
                             else if (isGCDReady)
                             {
                                 // bloodthirst
-                                if (lowHealth && rage > 20 && IsReady(bloodthirst))
+                                if (mediumHealth && rage > 20 && IsReady(bloodthirst))
                                 {
                                     CastSpell(bloodthirst, ref rage, 20, 4, true);
                                 }
@@ -225,17 +248,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                     {
                                         CastSpell(execute, ref rage, 10, 0, true);
                                     }
+                                    // whirlwind
+                                    else if (multipleTargets && rage > 25 && IsReady(whirlwind))
+                                    {
+                                        CastSpell(whirlwind, ref rage, 25, 10, true);
+                                    }
                                     // heroic strike
                                     else if (rage > 12 && IsReady(heroicStrike))
                                     {
-                                        CastSpell(heroicStrike, ref rage, 12, 1.5, false);
+                                        CastSpell(heroicStrike, ref rage, 12, 3.6, false);
                                     }
                                 }
                             }
                             // heroic strike
-                            else if (rage > 12 && IsReady(heroicStrike))
+                            else if (target.HealthPercentage > 20 && rage > 12 && IsReady(heroicStrike))
                             {
-                                CastSpell(heroicStrike, ref rage, 12, 1.5, false);
+                                CastSpell(heroicStrike, ref rage, 12, 3.6, false);
                             }
                             else
                             {
@@ -245,7 +273,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         if(isGCDReady)
                         {
@@ -300,7 +329,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
                 HookManager.CastSpell(spell);
-                Console.WriteLine("[" + DateTime.Now.ToString() + "] casting " + spell);
                 rage -= rageCosts;
                 if(cooldown > 0)
                 {
@@ -326,12 +354,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Vector3 LastPlayerPosition { get; set; }
         private Vector3 LastTargetPosition { get; set; }
-        Vector3 PosInFrontOfUnit { get; set; }
         private double distanceToTarget = 0;
         private double distanceTraveled = 0;
 
         private ObjectManager ObjectManager { get; }
-        private bool isRunningRoute = false;
 
         private bool Dancing { get; set; }
 
@@ -342,11 +368,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             ulong targetGuid = ObjectManager.TargetGuid;
+            /*Character.Inventory.Objects.IWowItem weapon;
+            if(CharacterManager.Equipment.Equipment.TryGetValue(Character.Inventory.Enums.EquipmentSlot.INVSLOT_MAINHAND, out weapon))
+            {
+                if(mainhandSpeed != 1 && weapon != null && weapon.Stats != null && weapon.Stats.Keys != null)
+                {
+                    foreach (string stat in weapon.Stats.Keys)
+                    {
+                        Console.WriteLine(stat);
+                        mainhandSpeed = 1;
+                    }
+                }
+                //mainhandSpeed = weapon.Stats["ITEM_MOD_SPEED_SHORT"];
+            }*/
             WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
             SearchNewTarget(ref target, false);
             if (target != null)
             {
-                CharacterManager.Face(target.Position, target.Guid);
                 bool targetDistanceChanged = false;
                 if(!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
@@ -358,8 +396,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     hasTargetMoved = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                    float u = (float)(3 / distanceToTarget);
-                    PosInFrontOfUnit = new Vector3((1 - u) * LastTargetPosition.X + u * LastPlayerPosition.X, (1 - u) * LastTargetPosition.Y + u * LastPlayerPosition.Y, (1 - u) * LastTargetPosition.Z + u * LastPlayerPosition.Z);
                     targetDistanceChanged = true;
                 }
                 else if(hasTargetMoved)
@@ -370,7 +406,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if(targetDistanceChanged)
                 {
                     distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
-                    Console.WriteLine("distanceToTarget: " + distanceToTarget);
                 }
                 HandleMovement(target);
                 HandleAttacking(target);
@@ -390,14 +425,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
-                    CharacterManager.Face(target.Position, target.Guid);
                     if (!LastTargetPosition.Equals(target.Position))
                     {
                         hasTargetMoved = true;
                         LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                         distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
-                        float u = (float)(4 / distanceToTarget);
-                        PosInFrontOfUnit = new Vector3((1 - u) * LastTargetPosition.X + u * LastPlayerPosition.X, (1 - u) * LastTargetPosition.Y + u * LastPlayerPosition.Y, (1 - u) * LastTargetPosition.Z + u * LastPlayerPosition.Z);
                     }
                     else
                     {
@@ -426,17 +458,26 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
+            int targetCount = 0;
+            multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance(unit.Position) < 100)
+                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    if((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
+                    if (tmpDistance < 100.0)
                     {
-                        target = unit;
-                        targetHealth = unit.Health;
-                        HookManager.TargetGuid(target.Guid);
-                        newTargetFound = true;
-                        inCombat = unit.IsInCombat;
+                        if(tmpDistance < 6.0)
+                        {
+                            targetCount++;
+                        }
+                        if ((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
+                        {
+                            target = unit;
+                            targetHealth = unit.Health;
+                            newTargetFound = true;
+                            inCombat = unit.IsInCombat;
+                        }
                     }
                 }
             }
@@ -444,14 +485,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.ClearTarget();
                 newTargetFound = false;
+                target = null;
+            }
+            else if (targetCount > 1)
+            {
+                multipleTargets = true;
+            }
+            if (newTargetFound)
+            {
+                HookManager.TargetGuid(target.Guid);
             }
             return newTargetFound;
         }
 
         private void HandleAttacking(WowUnit target)
         {
-            CharacterManager.Face(target.Position, target.Guid, 100.0f);
-            Spells.CastNextSpell(distanceToTarget, target);
+            Spells.CastNextSpell(distanceToTarget, target, multipleTargets);
             if(target.IsDead)
             {
                 Spells.ResetAfterTargetDeath();
@@ -460,92 +509,36 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleMovement(WowUnit target)
         {
-            if (target == null)
+            if(target == null)
+            {
                 return;
-            if(distanceToTarget > 3.6)
+            }
+
+            if (hasTargetMoved || (distanceToTarget < 6.0 && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
             {
-                if(hasTargetMoved)
+                CharacterManager.MoveToPosition(LastTargetPosition);
+            }
+            else if(distanceToTarget >= 6.0)
+            {
+                if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
-                    Console.WriteLine("pursue target");
-                    Vector3 toGo;
-                    if (distanceToTarget > 99)
-                    {
-                        float u = (float)(3 / distanceToTarget);
-                        toGo = new Vector3((1 - u) * LastPlayerPosition.X + u * LastTargetPosition.X, (1 - u) * LastPlayerPosition.Y + u * LastTargetPosition.Y, (1 - u) * LastPlayerPosition.Z + u * LastTargetPosition.Z);
-                    } else
-                    {
-                        toGo = PosInFrontOfUnit;
-                    }
-                    CharacterManager.MoveToPosition(toGo);
-                    isRunningRoute = false;
-                }
-                else if (computeNewRoute)
-                {
-                    Console.WriteLine("compute new route..");
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, PosInFrontOfUnit);
+                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
                     MovementEngine.LoadPath(path);
-                    computeNewRoute = false;
-                    isRunningRoute = true;
-                    if (MovementEngine.CurrentPath?.Count > 0
-                        && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    MovementEngine.PostProcessPath();
+                }
+                else
+                {
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                     {
-                        Console.WriteLine("follow route");
-                        PosInFrontOfUnit = positionToGoTo;
-                        CharacterManager.MoveToPosition(PosInFrontOfUnit);
+                        CharacterManager.MoveToPosition(positionToGoTo);
+
                         if (needToJump)
                         {
                             CharacterManager.Jump();
                         }
                     }
                 }
-                if (isRunningRoute)
-                {
-                    double distanceToPos = LastPlayerPosition.GetDistance(PosInFrontOfUnit);
-                    if (distanceToPos > 3.0)
-                    {
-                        Console.WriteLine("follow route");
-                        Vector3 toGo;
-                        if (distanceToPos > 99)
-                        {
-                            float u = (float)(3 / distanceToPos);
-                            toGo = new Vector3((1 - u) * LastPlayerPosition.X + u * PosInFrontOfUnit.X, (1 - u) * LastPlayerPosition.Y + u * PosInFrontOfUnit.Y, (1 - u) * LastPlayerPosition.Z + u * PosInFrontOfUnit.Z);
-                        }
-                        else
-                        {
-                            toGo = PosInFrontOfUnit;
-                        }
-                        CharacterManager.MoveToPosition(toGo);
-                    }
-                    else if (MovementEngine.CurrentPath?.Count > 0
-                            && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
-                    {
-                        Console.WriteLine("follow route");
-                        PosInFrontOfUnit = positionToGoTo;
-                        CharacterManager.MoveToPosition(PosInFrontOfUnit);
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                        }
-                    }
-                    else
-                    {
-                        isRunningRoute = false;
-                    }
-                }
-            }/*
-            else
-            {
-                if (CharacterManager.GetCurrentClickToMovePoint(out Vector3 ctmPosition)
-                           && (int)ctmPosition.X != (int)ObjectManager.Player.Position.X
-                           || (int)ctmPosition.Y != (int)ObjectManager.Player.Position.Y
-                           || (int)ctmPosition.Z != (int)ObjectManager.Player.Position.Z)
-                {
-                    Console.WriteLine("stop movement");
-                    CharacterManager.StopMovement(ctmPosition, ObjectManager.Player.Guid);
-                    isRunningRoute = false;
-                }
-            }*/
-            
+            }
         }
     }
 }
