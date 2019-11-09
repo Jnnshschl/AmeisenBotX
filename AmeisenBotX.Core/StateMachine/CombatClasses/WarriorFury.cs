@@ -245,7 +245,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         if(isGCDReady)
                         {
@@ -300,7 +301,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
                 HookManager.CastSpell(spell);
-                Console.WriteLine("[" + DateTime.Now.ToString() + "] casting " + spell);
                 rage -= rageCosts;
                 if(cooldown > 0)
                 {
@@ -365,7 +365,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if(targetDistanceChanged)
                 {
                     distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
-                    Console.WriteLine("distanceToTarget: " + distanceToTarget);
                 }
                 HandleMovement(target);
                 HandleAttacking(target);
