@@ -156,6 +156,7 @@ namespace AmeisenBotX.Core
                 "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
                 "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager),
                 "PRIESTHOLY" => new PriestHoly(ObjectManager, CharacterManager, HookManager),
+                "WARLOCKAFFLICTION" => new WarlockAffliction(ObjectManager, CharacterManager, HookManager),
                 _ => null,
             };
         }
