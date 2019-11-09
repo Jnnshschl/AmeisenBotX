@@ -10,8 +10,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class PriestHoly : ICombatClass
     {
+        // author: Jannis Höschele
+
         private readonly string bindingHealSpell = "Binding Heal";
-        private readonly int buffCheckTime = 30;
+        private readonly int buffCheckTime = 8;
         private readonly int deadPartymembersCheckTime = 4;
         private readonly string flashHealSpell = "Flash Heal";
         private readonly string greaterHealSpell = "Greater Heal";

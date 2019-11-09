@@ -10,8 +10,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class MageFire : ICombatClass
     {
+        // author: Jannis Höschele
+
         private readonly string arcaneIntellectSpell = "Arcane Intellect";
-        private readonly int buffCheckTime = 30;
+        private readonly int buffCheckTime = 8;
         private readonly string counterspellSpell = "Counterspell";
         private readonly int debuffCheckTime = 1;
         private readonly int enemyCastingCheckTime = 1;
@@ -65,7 +67,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HandlePyroblastAndManaShield();
             }
 
-            if (IsSpellKnown(pyroblastSpell) || IsSpellKnown(manaShieldSpell) && DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime))
+            if (IsSpellKnown(counterspellSpell) && DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime))
             {
                 HandleCounterspell();
             }

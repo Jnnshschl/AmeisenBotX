@@ -10,16 +10,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class PaladinHoly : ICombatClass
     {
-        private readonly string blessingOfWisdom = "Blessing of Wisdom";
-        private readonly int buffCheckTime = 30;
+        // author: Jannis Höschele
+
+        private readonly string blessingOfWisdomSpell = "Blessing of Wisdom";
+        private readonly int buffCheckTime = 8;
         private readonly string devotionAuraSpell = "Devotion Aura";
         private readonly string divineFavorSpell = "Divine Favor";
         private readonly string divineIlluminationSpell = "Divine Illumination";
         private readonly string divinePleaSpell = "Divine Plea";
-        private readonly string flashOfLight = "Flash of Light";
+        private readonly string flashOfLightSpell = "Flash of Light";
         private readonly string holyLightSpell = "Holy Light";
         private readonly string holyShockSpell = "Holy Shock";
-        private readonly string layOnHands = "Lay on Hands";
+        private readonly string layOnHandsSpell = "Lay on Hands";
 
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -29,7 +31,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, flashOfLight },
+                { 0, flashOfLightSpell },
                 { 2000, holyShockSpell },
                 { 10000, holyLightSpell }
             };
@@ -73,10 +75,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
                     if (target.HealthPercentage < 12
-                        && IsSpellKnown(layOnHands)
-                        && !IsOnCooldown(layOnHands))
+                        && IsSpellKnown(layOnHandsSpell)
+                        && !IsOnCooldown(layOnHandsSpell))
                     {
-                        HookManager.CastSpell(layOnHands);
+                        HookManager.CastSpell(layOnHandsSpell);
                         return;
                     }
 
@@ -140,11 +142,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (IsSpellKnown(blessingOfWisdom)
-                && !myBuffs.Any(e => e.Equals(blessingOfWisdom, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(blessingOfWisdom))
+            if (IsSpellKnown(blessingOfWisdomSpell)
+                && !myBuffs.Any(e => e.Equals(blessingOfWisdomSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(blessingOfWisdomSpell))
             {
-                HookManager.CastSpell(blessingOfWisdom);
+                HookManager.CastSpell(blessingOfWisdomSpell);
                 return;
             }
 

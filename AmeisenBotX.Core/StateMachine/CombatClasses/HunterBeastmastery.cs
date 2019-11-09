@@ -10,10 +10,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class HunterBeastmastery : ICombatClass
     {
+        // author: Jannis Höschele
+
         private readonly string arcaneShotSpell = "Arcane Shot";
         private readonly string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
         private readonly string beastialWrathSpell = "Beastial Wrath";
-        private readonly int buffCheckTime = 30;
+        private readonly int buffCheckTime = 8;
         private readonly string callPetSpell = "Call Pet";
         private readonly string concussiveShotSpell = "Concussive Shot";
         private readonly int debuffCheckTime = 3;

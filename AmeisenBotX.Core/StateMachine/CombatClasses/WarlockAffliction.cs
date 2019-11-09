@@ -12,6 +12,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     class WarlockAffliction : ICombatClass
     {
+        // author: Jannis Höschele
+
         private readonly string corruptionSpell = "Corruption";
         private readonly string curseOfAgonySpell = "Curse of Agony";
         private readonly string unstableAfflictionSpell = "Unstable Affliction";
