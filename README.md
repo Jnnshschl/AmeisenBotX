@@ -21,9 +21,9 @@ Druid | ❌ Balance | ❌ Feral | ✔️ Restoration
 Hunter | ❌ Marksmanship | ✔️ Beast Mastery | ❌ Survival
 Mage | ✔️ Fire | ❌ Frost | ❌ Arcane
 Paladin | ✔️ Holy | ✔️ Retribution | ⚠️ Protection
-Priest | ✔️ Holy | ❌ Discipline | ❌ Shadow
-Rogue | ❌ Combat | ❌ Assasination | ❌ Sublety
-Shaman | ❌ Elemental | ❌Enhancement | ❌ Restoration
+Priest | ✔️ Holy | ❌ Discipline | ✔️ Shadow
+Rogue | ❌ Combat | ⚠️ Assasination | ❌ Sublety
+Shaman | ✔️ Elemental | ❌Enhancement | ❌ Restoration
 Warlock | ✔️ Affliction | ❌ Demonology | ❌ Destruction
 Warrior | ⚠️ Arms | ✔️ Fury | ❌ Protection
 Death Knight | ⚠️ Blood | ❌ Frost | ❌ Unholy

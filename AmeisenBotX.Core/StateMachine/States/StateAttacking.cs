@@ -80,19 +80,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
 
                     // Select a new target if our current target is invalid
-                    if ((!BotUtils.IsValidUnit(CurrentTarget)
-                        || CurrentTarget == null
-                        || !CurrentTarget.IsInCombat)
-                        && SelectTargetToAttack(out WowUnit target))
+                    if ((ObjectManager.TargetGuid == 0
+                        || (CurrentTarget == null || CurrentTarget.Guid == ObjectManager.PlayerGuid))
+                        && SelectTargetToAttack(out WowUnit target)
+                        && target.Guid != ObjectManager.PlayerGuid)
                     {
                         HookManager.TargetGuid(target.Guid);
                         ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
                         ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-                    }
-
-                    if (CurrentTarget == null || CurrentTarget.IsDead)
-                    {
-                        HookManager.ClearTarget();
                     }
                 }
 
@@ -152,9 +147,13 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             // we don't want to move when we are casting/channeling something either
-            if (target != null && target.Guid != ObjectManager.PlayerGuid && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
+            if (target != null 
+                && target.Guid != ObjectManager.PlayerGuid 
+                && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position) 
+                && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
                 CharacterManager.Face(target.Position, target.Guid);
+                CharacterManager.StopMovement(target.Position, target.Guid);
                 LastRotationCheck = DateTime.Now;
             }
 
@@ -228,7 +227,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private bool SelectTargetToAttack(out WowUnit target)
         {
-            List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly).ToList();
+            List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && e.Guid != ObjectManager.PlayerGuid).ToList();
             if (wowUnits.Count > 0)
             {
                 target = wowUnits.FirstOrDefault(t => t.IsInCombat);
@@ -244,7 +243,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                         WowUnit partytarget = (WowUnit)ObjectManager.WowObjects
                             .FirstOrDefault(a => a.Guid ==
                                 ObjectManager.WowObjects.OfType<WowPlayer>()
-                                    .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
+                                    .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Guid != ObjectManager.PlayerGuid)
                                     .Where(e => HookManager.GetUnitReaction(ObjectManager.Player, (WowUnit)ObjectManager.WowObjects.FirstOrDefault(r => r.Guid == e.TargetGuid)) != WowUnitReaction.Friendly)
                                     .FirstOrDefault(r => r.IsInCombat)?.TargetGuid);
 

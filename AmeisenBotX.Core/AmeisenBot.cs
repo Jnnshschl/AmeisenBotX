@@ -155,10 +155,13 @@ namespace AmeisenBotX.Core
                 "PALADINRETRIBUTION" => new PaladinRetribution(ObjectManager, CharacterManager, HookManager),
                 "PALADINPROTECTION" => new PaladinProtection(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
-                "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager),
+                "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager, XMemory),
                 "PRIESTHOLY" => new PriestHoly(ObjectManager, CharacterManager, HookManager),
+                "PRIESTSHADOW" => new PriestShadow(ObjectManager, CharacterManager, HookManager),
                 "WARLOCKAFFLICTION" => new WarlockAffliction(ObjectManager, CharacterManager, HookManager),
                 "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
+                "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),
+                "SHAMANELEMENTAL" => new ShamanElemental(ObjectManager, CharacterManager, HookManager),                
                 _ => null,
             };
         }

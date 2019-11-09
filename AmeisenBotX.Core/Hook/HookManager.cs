@@ -668,6 +668,9 @@ namespace AmeisenBotX.Core.Hook
         public void SendChatMessage(string message)
             => LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
 
+        public void LearnAllAvaiableSpells()
+            => LuaDoString("/run LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e = 0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
+
         public void SetMaxFps(byte maxFps)
         {
             XMemory.Write(OffsetList.CvarMaxFps, maxFps);

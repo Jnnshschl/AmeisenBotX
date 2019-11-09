@@ -5,5 +5,7 @@
         public int Exp { get; set; }
 
         public int MaxExp { get; set; }
+
+        public int ComboPoints { get; set; }
     }
 }

@@ -163,6 +163,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleDeadPartymembers()
         {
             if (IsSpellKnown(resurrectionSpell)
+                && HasEnoughMana(resurrectionSpell)
                 && !IsOnCooldown(resurrectionSpell))
             {
                 IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
