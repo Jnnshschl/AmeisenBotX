@@ -234,7 +234,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     lowMember = member;
                 }
             }
-            if(lowMember != null && playerMana >= 117)
+            if(lowMember != null && playerMana >= 117 && lowMember.HealthPercentage < 50)
             {
                 HookManager.TargetGuid(lowMember.Guid);
                 targetAimed = false;
