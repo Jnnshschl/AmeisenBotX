@@ -110,7 +110,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
 
                     LastPosition = positionToGoTo;
-
                     CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
 
                     if (needToJump)

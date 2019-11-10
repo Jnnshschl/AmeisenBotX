@@ -67,8 +67,12 @@ namespace AmeisenBotX.Core
 
         public bool UseBuiltInCombatClass { get; set; } = true;
 
+        public bool LootUnits { get; set; } = true;
+
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
+
+        public double LootUnitsRadius { get;  set; } = 20.0;
     }
 }
