@@ -8,30 +8,29 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class MageFire : ICombatClass
+    public class MageArcane : ICombatClass
     {
         // author: Jannis Höschele
 
         private readonly string arcaneIntellectSpell = "Arcane Intellect";
         private readonly string counterspellSpell = "Counterspell";
         private readonly string evocationSpell = "Evocation";
-        private readonly string fireballSpell = "Fireball";
-        private readonly string hotstreakSpell = "Hot Streak";
-        private readonly string improvedScorchSpell = "Improved Scorch";
-        private readonly string livingBombSpell = "Living Bomb";
+        private readonly string arcaneBlastSpell = "Arcane Blast";
+        private readonly string arcaneBarrageSpell = "Arcane Barrage";
+        private readonly string arcaneMissilesSpell = "Arcane Missiles";
+        private readonly string missileBarrageSpell = "Missile Barrage";
         private readonly string manaShieldSpell = "Mana Shield";
-        private readonly string moltenArmorSpell = "Molten Armor";
-        private readonly string pyroblastSpell = "Pyroblast";
-        private readonly string scorchSpell = "Scorch";
+        private readonly string mageArmorSpell = "Mage Armor";
         private readonly string mirrorImageSpell = "Mirror Image";
         private readonly string iceBlockSpell = "Ice Block";
+        private readonly string icyVeinsSpell = "Icy Veins";
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
         private readonly int enemyCastingCheckTime = 1;
-        private readonly int hotstreakCheckTime = 1;
+        private readonly int manashieldCheckTime = 1;
 
-        public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -54,20 +53,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastEnemyCastingCheck { get; set; }
 
-        private DateTime LastHotstreakCheck { get; set; }
+        private DateTime LastManashieldCheck { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
+        private int BarrageCounter { get; set; }
+
         public void Execute()
         {
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime))
+            if (IsSpellKnown(arcaneMissilesSpell) && DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime))
             {
-                HandleDebuffing();
+                HandleArcaneMissiles();
             }
 
-            if (IsSpellKnown(pyroblastSpell) || IsSpellKnown(manaShieldSpell) && DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime))
+            if (IsSpellKnown(manaShieldSpell) && DateTime.Now - LastManashieldCheck > TimeSpan.FromSeconds(manashieldCheckTime))
             {
-                HandlePyroblastAndManaShield();
+                HandleManaShield();
             }
 
             if (IsSpellKnown(counterspellSpell) && DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime))
@@ -92,11 +93,42 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (IsSpellKnown(fireballSpell)
-                && HasEnoughMana(fireballSpell)
-                && !IsOnCooldown(fireballSpell))
+            if (IsSpellKnown(mirrorImageSpell)
+                && HasEnoughMana(mirrorImageSpell)
+                && !IsOnCooldown(mirrorImageSpell))
             {
-                HookManager.CastSpell(fireballSpell);
+                HookManager.CastSpell(mirrorImageSpell);
+                return;
+            }
+
+            if (IsSpellKnown(arcaneBarrageSpell)
+                && HasEnoughMana(arcaneBarrageSpell)
+                && !IsOnCooldown(arcaneBarrageSpell))
+            {
+                HookManager.CastSpell(arcaneBarrageSpell);
+                return;
+            }
+
+            if (IsSpellKnown(arcaneBlastSpell)
+                && HasEnoughMana(arcaneBlastSpell)
+                && !IsOnCooldown(arcaneBlastSpell))
+            {
+                HookManager.CastSpell(arcaneBlastSpell);
+                BarrageCounter++;
+                return;
+            }
+        }
+
+        private void HandleArcaneMissiles()
+        {
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
+
+            if (IsSpellKnown(arcaneMissilesSpell)
+                && myBuffs.Any(e => e.Equals(arcaneMissilesSpell, StringComparison.OrdinalIgnoreCase))
+                && HasEnoughMana(arcaneMissilesSpell)
+                && !IsOnCooldown(arcaneMissilesSpell))
+            {
+                HookManager.CastSpell(arcaneMissilesSpell);
                 return;
             }
         }
@@ -118,11 +150,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (IsSpellKnown(moltenArmorSpell)
-                && !myBuffs.Any(e => e.Equals(moltenArmorSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(moltenArmorSpell))
+            if (IsSpellKnown(mageArmorSpell)
+                && !myBuffs.Any(e => e.Equals(mageArmorSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(mageArmorSpell))
             {
-                HookManager.CastSpell(moltenArmorSpell);
+                HookManager.CastSpell(mageArmorSpell);
                 return;
             }
 
@@ -153,41 +185,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             LastEnemyCastingCheck = DateTime.Now;
         }
 
-        private void HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if (IsSpellKnown(livingBombSpell)
-                && !targetDebuffs.Any(e => e.Equals(livingBombSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(livingBombSpell))
-            {
-                HookManager.CastSpell(livingBombSpell);
-                return;
-            }
-
-            if (IsSpellKnown(scorchSpell)
-                && !targetDebuffs.Any(e => e.Equals(scorchSpell, StringComparison.OrdinalIgnoreCase))
-                || !targetDebuffs.Any(e => e.Equals(improvedScorchSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(scorchSpell))
-            {
-                HookManager.CastSpell(scorchSpell);
-                return;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-        }
-
-        private void HandlePyroblastAndManaShield()
+        private void HandleManaShield()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (IsSpellKnown(pyroblastSpell)
-                && myBuffs.Any(e => e.Equals(hotstreakSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(pyroblastSpell))
-            {
-                HookManager.CastSpell(pyroblastSpell);
-                return;
-            }
 
             if (IsSpellKnown(manaShieldSpell)
                 && !myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
@@ -197,7 +197,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            LastHotstreakCheck = DateTime.Now;
+            if (!myBuffs.Any(e => e.Equals(missileBarrageSpell, StringComparison.OrdinalIgnoreCase)))
+            {
+                BarrageCounter = 0;
+                return;
+            }
+
+            LastManashieldCheck = DateTime.Now;
         }
 
         private bool HasEnoughMana(string spellName)

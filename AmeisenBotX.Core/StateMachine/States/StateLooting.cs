@@ -116,10 +116,10 @@ namespace AmeisenBotX.Core.StateMachine.States
                         {
                             HookManager.RightClickUnit(selectedUnit);
                             LootTryCount++;
-                            Task.Delay(1000).GetAwaiter().GetResult();
+                            Task.Delay(500).GetAwaiter().GetResult();
                         } while (AmeisenBotStateMachine.XMemory.ReadByte(OffsetList.LootWindowOpen, out byte lootOpen)
                                  && lootOpen == 0
-                                 && LootTryCount < 5);
+                                 && LootTryCount < 2);
 
                         UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
                     }
