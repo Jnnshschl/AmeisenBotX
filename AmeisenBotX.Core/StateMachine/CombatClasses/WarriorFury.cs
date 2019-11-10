@@ -128,11 +128,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 // -- buffs --
                 if(lowHealth && rage > 15 && IsReady(enragedRegeneration))
                 {
-                    if (IsReady(enragedRegeneration))
-                    {
-                        HookManager.SendChatMessage("/s Oh shit");
-                        CastSpell(enragedRegeneration, ref rage, 15, 180, false);
-                    }
+                    HookManager.SendChatMessage("/s Oh shit");
+                    CastSpell(enragedRegeneration, ref rage, 15, 180, false);
                 }
                 // Death Wish
                 if (!lowHealth && rage > 10 && IsReady(deathWish))
@@ -377,7 +374,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 bool targetDistanceChanged = false;
                 if(!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
-                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                    distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
                     LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
@@ -394,7 +391,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
                 if(targetDistanceChanged)
                 {
-                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                    distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
                 }
                 HandleMovement(target);
                 HandleAttacking(target);
@@ -420,7 +417,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
             {
-                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
                 LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
             }
             if (distanceTraveled < 0.001)
@@ -433,7 +430,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         hasTargetMoved = true;
                         LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                        distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
                     }
                     else
                     {
@@ -466,6 +463,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool SearchNewTarget (ref WowUnit? target, bool grinding)
         {
+            if (target != null && !(target.IsDead || target.Health == 0))
+            {
+                return false;
+            }
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
@@ -476,7 +477,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
                     if (tmpDistance < 100.0)
                     {
                         if(tmpDistance < 6.0)
