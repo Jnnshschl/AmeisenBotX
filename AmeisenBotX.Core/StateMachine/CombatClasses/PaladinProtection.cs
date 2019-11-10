@@ -183,11 +183,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             bool gcdWaiting = IsGCD();
             bool targetAimed = true;
             double playerMana = ObjectManager.Player.Mana;
-            double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
-            double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100.0;
-            double playerHealthPercent = (ObjectManager.Player.Health / (double)ObjectManager.Player.MaxHealth) * 100.0;
-            (string, int) targetCastingInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-            List<string> Debuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
+            double targetHealthPercent = target.HealthPercentage;
+            double playerHealthPercent = ObjectManager.Player.HealthPercentage;
             List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
             // buffs

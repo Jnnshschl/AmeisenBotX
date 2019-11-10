@@ -86,6 +86,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private bool IsInBerserkerStance { get; set; }
             private bool askedForHelp = false;
             private bool askedForHeal = false;
+            private bool targetIsDown = false;
             public WarriorFurySpells(HookManager hookManager, ObjectManager objectManager)
             {
                 HookManager = hookManager;
@@ -98,7 +99,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             public void CastNextSpell(double distanceToTarget, WowUnit target, bool multipleTargets)
             {
-                if(!IsReady(NextCast))
+                if(!IsReady(NextCast) || !IsReady(NextGCDSpell))
                 {
                     return;
                 }
@@ -108,7 +109,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
                 Player = ObjectManager.Player;
                 int rage = Player.Rage;
-                bool isGCDReady = IsReady(NextGCDSpell);
                 bool lowHealth = Player.HealthPercentage <= 20;
                 bool mediumHealth = !lowHealth && Player.HealthPercentage <= 50;
                 if(!(lowHealth || mediumHealth))
@@ -130,31 +130,30 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     if (IsReady(enragedRegeneration))
                     {
+                        HookManager.SendChatMessage("/s Oh shit");
                         CastSpell(enragedRegeneration, ref rage, 15, 180, false);
                     }
                 }
-                if (isGCDReady)
+                // Death Wish
+                if (!lowHealth && rage > 10 && IsReady(deathWish))
                 {
-                    // Death Wish
-                    if (!lowHealth && rage > 10 && IsReady(deathWish))
-                    {
-                        CastSpell(deathWish, ref rage, 10, 120.6, true); // lasts 30 sec
-                    }
-                    // Battleshout
-                    else if (rage > 10 && IsReady(battleShout))
-                    {
-                        CastSpell(battleShout, ref rage, 10, 120, true); // lasts 2 min
-                    }
-                    // Recklessness (in Berserker Stance)
-                    else if (IsInBerserkerStance && rage > 10 && Player.HealthPercentage > 50 && IsReady(recklessness))
-                    {
-                        CastSpell(recklessness, ref rage, 0, 201, true); // lasts 12 sec
-                    }
-                    // Berserker Rage
-                    else if (Player.Health < Player.MaxHealth && IsReady(berserkerRage))
-                    {
-                        CastSpell(berserkerRage, ref rage, 0, 20.1, true); // lasts 10 sec
-                    }
+                    CastSpell(deathWish, ref rage, 10, 120.6, true); // lasts 30 sec
+                }
+                // Battleshout
+                else if (rage > 10 && IsReady(battleShout))
+                {
+                    HookManager.SendChatMessage("/roar");
+                    CastSpell(battleShout, ref rage, 10, 120, true); // lasts 2 min
+                }
+                // Recklessness (in Berserker Stance)
+                else if (IsInBerserkerStance && rage > 10 && Player.HealthPercentage > 50 && IsReady(recklessness))
+                {
+                    CastSpell(recklessness, ref rage, 0, 201, true); // lasts 12 sec
+                }
+                // Berserker Rage
+                else if (Player.Health < Player.MaxHealth && IsReady(berserkerRage))
+                {
+                    CastSpell(berserkerRage, ref rage, 0, 20.1, true); // lasts 10 sec
                 }
                 if (distanceToTarget < 29)
                 {
@@ -165,27 +164,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                             // -- run to the target! --
                             if (Player.IsInCombat)
                             {
-                                if (isGCDReady)
+                                if(IsInBerserkerStance)
                                 {
-                                    if(IsInBerserkerStance)
+                                    // intercept
+                                    if(rage > 10 && IsReady(intercept))
                                     {
-                                        // intercept
-                                        if(rage > 10 && IsReady(intercept))
-                                        {
-                                            CastSpell(intercept, ref rage, 10, 30, true);
-                                        }
+                                        CastSpell(intercept, ref rage, 10, 30, true);
                                     }
-                                    else
+                                }
+                                else
+                                {
+                                    // Berserker Stance
+                                    if (IsReady(NextStance))
                                     {
-                                        // Berserker Stance
-                                        if (IsReady(NextStance))
+                                        if (IsReady(retaliation))
                                         {
-                                            if (IsReady(retaliation))
-                                            {
-                                                CastSpell(retaliation, ref rage, 0, 300, false);
-                                            }
-                                            ChangeToStance(berserkerStance, out rage);
+                                            CastSpell(retaliation, ref rage, 0, 300, false);
                                         }
+                                        ChangeToStance(berserkerStance, out rage);
                                     }
                                 }
                             }
@@ -204,6 +200,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                     // charge
                                     if (IsReady(charge))
                                     {
+                                        HookManager.SendChatMessage("/incoming");
                                         CastSpell(charge, ref rage, 0, 15, false);
                                     }
                                 }
@@ -221,53 +218,41 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                                 ChangeToStance(berserkerStance, out rage);
                             }
-                            else if (isGCDReady)
+                            else if (mediumHealth && rage > 20 && IsReady(bloodthirst))
                             {
-                                // bloodthirst
-                                if (mediumHealth && rage > 20 && IsReady(bloodthirst))
-                                {
-                                    CastSpell(bloodthirst, ref rage, 20, 4, true);
-                                }
-                                // slam
-                                else
-                                {
-                                    List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player);
-                                    if(Buffs.Any(e => e.Contains("slam")) && rage > 15)
-                                    {
-                                        CastSpell(slam, ref rage, 15, 0, false);
-                                        NextCast = DateTime.Now.AddSeconds(1.5); // casting time
-                                        NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
-                                    }
-                                    // hamstring
-                                    else if(rage > 10 && IsReady(hamstring))
-                                    {
-                                        CastSpell(hamstring, ref rage, 10, 15, true);
-                                    }
-                                    // execute
-                                    else if (target.HealthPercentage <= 20 && rage > 10)
-                                    {
-                                        CastSpell(execute, ref rage, 10, 0, true);
-                                    }
-                                    // whirlwind
-                                    else if (multipleTargets && rage > 25 && IsReady(whirlwind))
-                                    {
-                                        CastSpell(whirlwind, ref rage, 25, 10, true);
-                                    }
-                                    // heroic strike
-                                    else if (rage > 12 && IsReady(heroicStrike))
-                                    {
-                                        CastSpell(heroicStrike, ref rage, 12, 3.6, false);
-                                    }
-                                }
+                                CastSpell(bloodthirst, ref rage, 20, 4, true);
                             }
-                            // heroic strike
-                            else if (target.HealthPercentage > 20 && rage > 12 && IsReady(heroicStrike))
-                            {
-                                CastSpell(heroicStrike, ref rage, 12, 3.6, false);
-                            }
+                            // slam
                             else
                             {
-                                if (!ObjectManager.Player.IsAutoAttacking)
+                                List<string> Buffs = HookManager.GetBuffs(WowLuaUnit.Player);
+                                if(Buffs.Any(e => e.Contains("slam")) && rage > 15)
+                                {
+                                    CastSpell(slam, ref rage, 15, 0, false);
+                                    NextCast = DateTime.Now.AddSeconds(1.5); // casting time
+                                    NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
+                                }
+                                // hamstring
+                                else if(rage > 10 && IsReady(hamstring))
+                                {
+                                    CastSpell(hamstring, ref rage, 10, 15, true);
+                                }
+                                // execute
+                                else if (target.HealthPercentage <= 20 && rage > 10)
+                                {
+                                    CastSpell(execute, ref rage, 10, 0, true);
+                                }
+                                // whirlwind
+                                else if (multipleTargets && rage > 25 && IsReady(whirlwind))
+                                {
+                                    CastSpell(whirlwind, ref rage, 25, 10, true);
+                                }
+                                // heroic strike
+                                else if (rage > 12 && IsReady(heroicStrike))
+                                {
+                                    CastSpell(heroicStrike, ref rage, 12, 3.6, false);
+                                }
+                                else if (!ObjectManager.Player.IsAutoAttacking)
                                 {
                                     HookManager.StartAutoAttack();
                                 }
@@ -276,34 +261,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     }
                     else
                     {
-                        if(isGCDReady)
+                        // shattering throw (in Battle Stance)
+                        if(rage > 25 && IsReady(shatteringThrow))
                         {
-                            // -- distant attacks --
-                            if (isGCDReady)
+                            if (IsInBerserkerStance)
                             {
-                                // shattering throw (in Battle Stance)
-                                if(rage > 25 && IsReady(shatteringThrow))
+                                if (IsReady(NextStance))
                                 {
-                                    if (IsInBerserkerStance)
-                                    {
-                                        if (IsReady(NextStance))
-                                        {
-                                            ChangeToStance(battleStance, out rage);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        CastSpell(shatteringThrow, ref rage, 25, 301.5, false);
-                                        NextCast = DateTime.Now.AddSeconds(1.5); // casting time
-                                        NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
-                                    }
-                                }
-                                // heroic throw
-                                else
-                                {
-                                    CastSpell(heroicThrow, ref rage, 0, 60, true);
+                                    ChangeToStance(battleStance, out rage);
                                 }
                             }
+                            else
+                            {
+                                CastSpell(shatteringThrow, ref rage, 25, 301.5, false);
+                                NextCast = DateTime.Now.AddSeconds(1.5); // casting time
+                                NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
+                            }
+                        }
+                        // heroic throw
+                        else
+                        {
+                            CastSpell(heroicThrow, ref rage, 0, 60, true);
                         }
                     }
                 }
@@ -318,7 +296,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             private bool IsReady(string spell)
             {
-                return !NextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable);
+                bool result = true; // begin with neutral element of AND
+                if(spell.Equals(hamstring) || spell.Equals(battleShout))
+                {
+                    // only use these spells in a certain interval
+                    result &= (!NextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable));
+                }
+                result &= (HookManager.GetSpellCooldown(spell) <= 0 && HookManager.GetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0);
+                return result;
             }
             private int UpdateRage()
             {
@@ -351,11 +336,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private CharacterManager CharacterManager { get; }
 
         private HookManager HookManager { get; }
+        private bool standing = false;
 
         private Vector3 LastPlayerPosition { get; set; }
         private Vector3 LastTargetPosition { get; set; }
         private double distanceToTarget = 0;
         private double distanceTraveled = 0;
+        readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
+        readonly string[] standingEmotes = { "/chug", "/pick", "/whistle", "/shimmy", "/dance", "/twiddle", "/bored", "/violin", "/highfive", "/bow" };
 
         private ObjectManager ObjectManager { get; }
 
@@ -385,6 +373,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             SearchNewTarget(ref target, false);
             if (target != null)
             {
+                Dancing = false;
                 bool targetDistanceChanged = false;
                 if(!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
@@ -409,6 +398,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
                 HandleMovement(target);
                 HandleAttacking(target);
+            }
+            else if (!Dancing)
+            {
+                if(distanceTraveled < 0.001)
+                {
+                    HookManager.ClearTarget();
+                    HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    Dancing = true;
+                }
+                else
+                {
+                    HookManager.ClearTarget();
+                    HookManager.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    Dancing = true;
+                }
             }
         }
 
@@ -436,19 +440,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         computeNewRoute = true;
                         hasTargetMoved = false;
                     }
+                    Dancing = false;
                     HandleMovement(target);
                     HandleAttacking(target);
                 }
-                else if(!Dancing)
+                else if (!Dancing || standing)
                 {
+                    standing = false;
                     HookManager.ClearTarget();
-                    HookManager.SendChatMessage("/dance");
+                    HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                 }
             } 
             else
             {
-                Dancing = false;
+                if (!Dancing || !standing)
+                {
+                    standing = true;
+                    HookManager.ClearTarget();
+                    HookManager.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    Dancing = true;
+                }
             }
         }
 
