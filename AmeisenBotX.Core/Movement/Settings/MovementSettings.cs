@@ -23,6 +23,6 @@ namespace AmeisenBotX.Core.Movement.Settings
 
         public double WaypointCheckThreshold { get; set; } = 5;
 
-        public double SeperationDistance { get; set; } = 12;
+        public double SeperationDistance { get; set; } = 6;
     }
 }

@@ -81,34 +81,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 {
                     if (ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.0)
                     {
-                        if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
-                        {
-                            LastPosition = Vector3.Zero;
-                            BuildNewPath(selectedUnit.Position);
-                        }
-
-                        if (MovementEngine.CurrentPath?.Count > 0)
-                        {
-                            if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
-                            {
-                                if (LastPosition == positionToGoTo)
-                                {
-                                    BuildNewPath(selectedUnit.Position);
-                                    return;
-                                }
-
-                                LastPosition = positionToGoTo;
-
-                                CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
-
-                                if (needToJump)
-                                {
-                                    CharacterManager.Jump();
-                                    DoRandomUnstuckMovement();
-                                    TryCount++;
-                                }
-                            }
-                        }
+                        CharacterManager.MoveToPosition(selectedUnit.Position, 20.9f, 0.2f);
                     }
                     else
                     {

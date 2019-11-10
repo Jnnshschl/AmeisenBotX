@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class DeathKnightBlood : ICombatClass
+    public class DeathknightBlood : ICombatClass
     {
-        public DeathKnightBlood(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DeathknightBlood(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;

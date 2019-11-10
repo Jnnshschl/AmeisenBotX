@@ -117,20 +117,21 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Exit()
         {
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
-
             MovementEngine.Reset();
-            MovementEngine.CurrentPath.Clear();
 
             if (CombatClass == null || !CombatClass.HandlesTargetSelection)
             {
                 HookManager.ClearTarget();
             }
 
-            foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance2D(ObjectManager.Player.Position) < 20))
+            if (Config.LootUnits)
             {
-                if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
+                foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance2D(ObjectManager.Player.Position) < Config.LootUnitsRadius))
                 {
-                    AmeisenBotStateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
+                    if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
+                    {
+                        AmeisenBotStateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
+                    }
                 }
             }
         }
@@ -148,28 +149,26 @@ namespace AmeisenBotX.Core.StateMachine.States
                 return;
             }
 
-            // we don't want to move when we are casting/channeling something either
-            if (target != null 
-                && target.Guid != ObjectManager.PlayerGuid 
-                && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position) 
+            if (target.Guid != ObjectManager.PlayerGuid
+                && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position)
                 && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(1000))
             {
                 CharacterManager.Face(target.Position, target.Guid);
-                CharacterManager.StopMovement(target.Position, target.Guid);
                 LastRotationCheck = DateTime.Now;
             }
 
+            // we don't want to move when we are casting/channeling something either
             if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
             {
                 return;
             }
 
             // if we are close enough, face the target and start attacking
-            double distance = ObjectManager.Player.Position.GetDistance(target.Position);
+            double distance = ObjectManager.Player.Position.GetDistance2D(target.Position);
             if (distance <= DistanceToTarget)
             {
                 // do we need to stop movement
-                if (NeedToStopMovement)
+                if (!CombatClass.IsMelee && NeedToStopMovement)
                 {
                     if (CharacterManager.GetCurrentClickToMovePoint(out Vector3 ctmPosition)
                         && (int)ctmPosition.X != (int)ObjectManager.Player.Position.Z
@@ -178,48 +177,31 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         CharacterManager.StopMovement(ctmPosition, ObjectManager.Player.Guid);
                         NeedToStopMovement = false;
-
-                        return;
                     }
                 }
+
+                NeedToStopMovement = LastPosition != ObjectManager.Player.Position;
+                LastPosition = ObjectManager.Player.Position;
+                return;
             }
-            else
+
+            if (target.Guid != ObjectManager.PlayerGuid
+                && target != null
+                && target.Guid != 0
+                && target.Health > 1
+                && !target.IsDead)
             {
-                if (target.Guid != ObjectManager.PlayerGuid
-                    && target != null
-                    && target.Guid != 0
-                    && target.Health > 1
-                    && !target.IsDead)
-                {
-                    if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
-                    {
-                        LastPosition = Vector3.Zero;
-                        BuildNewPath(target);
-                    }
+                CharacterManager.MoveToPosition(target.Position, 20.9f, 0.2f);
 
-                    if (MovementEngine.CurrentPath?.Count > 0)
-                    {
-                        if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
-                        {
-                            if (LastPosition == positionToGoTo)
-                            {
-                                BuildNewPath(target);
-                                return;
-                            }
-
-                            LastPosition = positionToGoTo;
-
-                            CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
-
-                            if (needToJump)
-                            {
-                                CharacterManager.Jump();
-                                DoRandomUnstuckMovement();
-                                TryCount++;
-                            }
-                        }
-                    }
-                }
+                //// if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 1)
+                //// {
+                ////     BuildNewPath(target);
+                //// }
+                //// 
+                //// if (MovementEngine.CurrentPath.Count >= 1)
+                //// {
+                ////     CharacterManager.MoveToPosition(target.Position, 20.9f, 0.2f);
+                //// }                
             }
         }
 
