@@ -162,6 +162,7 @@ namespace AmeisenBotX.Core
                 "PRIESTSHADOW" => new PriestShadow(ObjectManager, CharacterManager, HookManager),
                 "WARLOCKAFFLICTION" => new WarlockAffliction(ObjectManager, CharacterManager, HookManager),
                 "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
+                "DRUIDBALANCE" => new DruidBalance(ObjectManager, CharacterManager, HookManager),
                 "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),
                 "SHAMANELEMENTAL" => new ShamanElemental(ObjectManager, CharacterManager, HookManager),                
                 _ => null,
