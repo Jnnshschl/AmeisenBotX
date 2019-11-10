@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Movement
         /// <param name="positionToGoTo">The next step to got to as a Vector3</param>
         /// <param name="needToJump">Wether we need to jump or not</param>
         /// <returns>Wether there is a next step or not</returns>
-        bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump);
+        bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false);
 
         /// <summary>
         /// Load a Path (List<Vector3>) to process the movement on.

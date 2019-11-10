@@ -634,6 +634,8 @@ namespace AmeisenBotX.Core.Hook
             {
                 LuaDoString($"EquipItemByName(\"{newItem.Name}\", {(int)currentItem.EquipSlot});");
             }
+
+            CofirmBop();
         }
 
         public void RetrieveCorpse()

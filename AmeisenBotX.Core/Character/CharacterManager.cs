@@ -188,7 +188,7 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 4.5f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 4.5f, float distance = 2f)
         {
             if (pos == Vector3.Zero)
             {
@@ -201,7 +201,7 @@ namespace AmeisenBotX.Core.Character
                 XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
                 XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
                 XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                XMemory.Write(OffsetList.ClickToMoveDistance, 2.5f);
+                XMemory.Write(OffsetList.ClickToMoveDistance, distance);
                 XMemory.Write(OffsetList.ClickToMoveGuid, ObjectManager.PlayerGuid);
                 XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
             }

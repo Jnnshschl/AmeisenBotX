@@ -7,6 +7,7 @@ using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
@@ -68,7 +69,8 @@ namespace AmeisenBotX.Core
             CharacterManager = new CharacterManager(XMemory, config, OffsetList, ObjectManager, HookManager);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
-            MovemenEngine = new DefaultMovementEngine();
+            MovementSettings = new MovementSettings();
+            MovemenEngine = new DefaultMovementEngine(ObjectManager, MovementSettings);
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -181,6 +183,8 @@ namespace AmeisenBotX.Core
         public ICombatClass CombatClass { get; set; }
 
         public AmeisenBotConfig Config { get; }
+
+        public MovementSettings MovementSettings { get; set; }
 
         public double CurrentExecutionMs
         {

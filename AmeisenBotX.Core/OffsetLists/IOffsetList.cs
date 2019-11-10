@@ -118,6 +118,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr LastTargetGuid { get; }
 
+        IntPtr LootWindowOpen { get; }
+
         IntPtr MapId { get; }
 
         IntPtr NameBase { get; }

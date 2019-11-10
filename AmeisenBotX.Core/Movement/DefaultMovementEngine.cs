@@ -1,15 +1,20 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Movement
 {
     public class DefaultMovementEngine : IMovementEngine
     {
-        public DefaultMovementEngine(MovementSettings settings = null)
+        public DefaultMovementEngine(ObjectManager objectManager, MovementSettings settings = null)
         {
+            ObjectManager = objectManager;
+
             if (settings == null)
             {
                 settings = new MovementSettings();
@@ -24,61 +29,126 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 LastPosition { get; private set; }
 
-        public Vector3 SelectedWaypoint { get; private set; }
+        public Vector3 Acceleration { get; private set; }
+
+        public Vector3 Velocity { get; private set; }
 
         public MovementSettings Settings { get; private set; }
 
-        public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump)
+        private ObjectManager ObjectManager { get; }
+
+        public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
         {
-            if (CurrentPath == null || CurrentPath.Count == 0)
+            positionToGoTo = Vector3.Zero;
+            needToJump = false;
+
+            double distance = currentPosition.GetDistance2D(CurrentPath.Peek());
+            if ((CurrentPath == null || CurrentPath.Count == 0)
+                || (CurrentPath.Peek() != Vector3.Zero && distance > 1024))
             {
-                positionToGoTo = Vector3.Zero;
-                needToJump = false;
                 return false;
             }
 
-            double distance = currentPosition.GetDistance2D(SelectedWaypoint);
-
-            if (SelectedWaypoint != Vector3.Zero && distance > 1024)
+            if (distance < Settings.WaypointCheckThreshold
+                && CurrentPath.Count > 1)
             {
-                Reset();
-                positionToGoTo = Vector3.Zero;
-                needToJump = false;
-                return false;
+                CurrentPath.Dequeue();
             }
 
-            if (SelectedWaypoint == Vector3.Zero
-                || distance < Settings.WaypointDoneThreshold)
+            Vector3 seekForce = Seek(currentPosition, distance);
+            seekForce.Multiply(1);
+
+            Vector3 seperationForce = Vector3.Zero;
+            if (enableSeperation)
             {
-                do
-                {
-                    SelectedWaypoint = CurrentPath.Dequeue();
-                    distance = currentPosition.GetDistance(SelectedWaypoint);
-                } while (distance < 4 && CurrentPath.Count > 0);
+                // seperation is more important than seeking
+                seperationForce = Seperate(ObjectManager.Player.Position);
+                seperationForce.Multiply(4);
             }
 
+
+            positionToGoTo = currentPosition;
+            positionToGoTo.Add(seekForce);
+            positionToGoTo.Add(seperationForce);
+
+            Acceleration = Vector3.Zero;
+
+            double distanceTraveled = currentPosition.GetDistance2D(LastPosition);
+            needToJump = LastPosition != Vector3.Zero && distanceTraveled > 0 && distanceTraveled < 0.1;
+            LastPosition = currentPosition;
+            return true;
+        }
+
+        private Vector3 Seek(Vector3 currentPosition, double distance)
+        {
+            Vector3 desired = CurrentPath.Peek() - currentPosition;
+            desired.Normalize(desired.GetMagnitude());
+
+            float multiplier = Convert.ToSingle(distance);
+            if (multiplier < 0.2)
+            {
+                multiplier = 0;
+            }
+            else if (multiplier > Settings.Acceleration)
+            {
+                multiplier = Settings.Acceleration;
+            }
+
+            Vector3 steering = (desired * multiplier) - Velocity;
+            steering.Limit(Settings.MaxForce);
+
+            Vector3 newVelocity = Velocity + steering;
+            newVelocity.Limit(Settings.MaxSpeed);
+            Velocity = newVelocity;
+            return newVelocity;
+        }
+
+        private Vector3 Seperate(Vector3 currentPosition)
+        {
             Vector3 force = Vector3.Zero;
 
-            Vector3 waypointForce = SelectedWaypoint - currentPosition;
-            force += BotMath.CapVector3(waypointForce, Settings.MaxVelocity);
-
-            //// Vector3 obstacleForce = Vector3.Zero;
-            //// force -= BotMath.CapVector3(obstacleForce, Settings.MaxVelocity);
-
-            Vector3 velocity = BotMath.CapVector3(force, Settings.MaxVelocity);
-            Vector3 newPosition = currentPosition + velocity;
-
-            double distanceTraveled = currentPosition.GetDistance(LastPosition);
-            needToJump = distanceTraveled > 0 && distanceTraveled < 0.05;
-
-            if (needToJump)
+            int playersInRange = 0;
+            foreach (WowPlayer player in ObjectManager.WowObjects.OfType<WowPlayer>())
             {
-                //SelectedWaypoint = CurrentPath.Dequeue();
+                if (player.Guid == ObjectManager.PlayerGuid)
+                {
+                    continue;
+                }
+
+                double distance = currentPosition.GetDistance2D(player.Position);
+                if (distance == 0)
+                {
+                    // randomly move away
+                    Random rnd = new Random();
+                    force.X = Convert.ToSingle((rnd.NextDouble() - 3) * 6);
+                    force.Y = Convert.ToSingle((rnd.NextDouble() - 3) * 6);
+                    force.Z = Convert.ToSingle((rnd.NextDouble() - 3) * 6);
+                }
+                else
+                    if (distance < Settings.SeperationDistance)
+                {
+                    Vector3 difference = currentPosition;
+                    difference.Substract(player.Position);
+                    difference.Normalize(difference.GetMagnitude());
+
+                    Vector3 weightedDifference = difference;
+                    weightedDifference.Divide(Convert.ToSingle(distance));
+
+                    force.Add(weightedDifference);
+                    playersInRange++;
+                }
             }
 
-            LastPosition = currentPosition;
-            positionToGoTo = newPosition;
-            return true;
+            if (playersInRange > 0)
+            {
+                force.Divide(playersInRange);
+                force.Normalize(force.GetMagnitude());
+                force.Multiply(Settings.MaxSpeed);
+                force.Substract(Velocity);
+                force.Limit(Settings.MaxForce);
+            }
+
+            return force;
         }
 
         public void LoadPath(List<Vector3> path)
@@ -97,9 +167,13 @@ namespace AmeisenBotX.Core.Movement
 
         public void Reset()
         {
-            CurrentPath = new Queue<Vector3>();
-            LastPosition = Vector3.Zero;
-            SelectedWaypoint = Vector3.Zero;
+            if (CurrentPath == null)
+            {
+                CurrentPath = new Queue<Vector3>();
+            }
+
+            Acceleration = Vector3.Zero;
+            CurrentPath.Clear();
         }
 
         private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)

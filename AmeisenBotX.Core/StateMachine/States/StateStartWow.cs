@@ -22,9 +22,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Enter()
         {
             WowProcess = Process.Start(Config.PathToWowExe);
-            Thread.Sleep(2000);
-
             WowProcess.WaitForInputIdle();
+            Thread.Sleep(1000);
             XMemory.Attach(WowProcess);
         }
 

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
@@ -50,9 +51,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private int TryCount { get; set; }
 
+        private int LootTryCount { get; set; }
+
+        private Vector3 LastPosition { get; set; }
+
         public override void Enter()
         {
             MovementEngine.CurrentPath.Clear();
+            TryCount = 0;
+            LootTryCount = 0;
         }
 
         public override void Execute()
@@ -74,33 +81,30 @@ namespace AmeisenBotX.Core.StateMachine.States
                 {
                     if (ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.0)
                     {
-                        if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
+                        if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
                         {
+                            LastPosition = Vector3.Zero;
                             BuildNewPath(selectedUnit.Position);
-                            TryCount = 0;
                         }
-                        else
+
+                        if (MovementEngine.CurrentPath?.Count > 0)
                         {
                             if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                             {
-                                CharacterManager.MoveToPosition(positionToGoTo);
+                                if (LastPosition == positionToGoTo)
+                                {
+                                    BuildNewPath(selectedUnit.Position);
+                                    return;
+                                }
+
+                                LastPosition = positionToGoTo;
+
+                                CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
 
                                 if (needToJump)
                                 {
                                     CharacterManager.Jump();
-
-                                    Random rnd = new Random();
-                                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
-
-                                    if (rnd.Next(10) >= 5)
-                                    {
-                                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
-                                    }
-                                    else
-                                    {
-                                        BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
-                                    }
-
+                                    DoRandomUnstuckMovement();
                                     TryCount++;
                                 }
                             }
@@ -108,7 +112,15 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
                     else
                     {
-                        HookManager.RightClickUnit(selectedUnit);
+                        do
+                        {
+                            HookManager.RightClickUnit(selectedUnit);
+                            LootTryCount++;
+                            Task.Delay(1000).GetAwaiter().GetResult();
+                        } while (AmeisenBotStateMachine.XMemory.ReadByte(OffsetList.LootWindowOpen, out byte lootOpen)
+                                 && lootOpen == 0
+                                 && LootTryCount < 5);
+
                         UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
                     }
                 }
@@ -116,6 +128,28 @@ namespace AmeisenBotX.Core.StateMachine.States
                 {
                     UnitLootList.Dequeue();
                 }
+            }
+        }
+
+        private void DoRandomUnstuckMovement()
+        {
+            Random rnd = new Random();
+            if (rnd.Next(10) >= 5)
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_A), 300, 600);
+            }
+            else
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 600);
+            }
+
+            if (rnd.Next(10) >= 5)
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
+            }
+            else
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
             }
         }
 

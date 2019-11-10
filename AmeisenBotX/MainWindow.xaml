@@ -91,11 +91,6 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Label x:Name="labelDebug" Content="None" HorizontalAlignment="Left" Margin="146,0,0,0" VerticalAlignment="Top" FontFamily="Unispace">
-            <Label.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-            </Label.Foreground>
-        </Label>
         <Label x:Name="labelCurrentLevel" Content="lvl. 0 " HorizontalAlignment="Left" Margin="4,100,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -157,7 +152,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonClearCache" Content="Clear Cache" Margin="0,214,192,0" Click="ButtonClearCache_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="80" Height="20" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10">
+        <Button x:Name="buttonClearCache" Content="Clear Cache" Margin="0,219,193.333,0" Click="ButtonClearCache_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="80" Height="16" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
@@ -168,5 +163,15 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </Button.Background>
         </Button>
+        <Slider x:Name="sliderMaxSpeed" HorizontalAlignment="Left" Margin="146,153,0,0" VerticalAlignment="Top" Width="261" LargeChange="0.1" Maximum="16" Value="0.1" TickFrequency="0.1" ValueChanged="SliderMaxSpeed_ValueChanged"/>
+        <Slider x:Name="sliderMaxForce" HorizontalAlignment="Left" Margin="146,198,0,0" VerticalAlignment="Top" Width="261" LargeChange="0.02" Maximum="1" Value="0.1" TickFrequency="0.02" ValueChanged="SliderMaxForce_ValueChanged" SmallChange="0.02"/>
+        <Label x:Name="labelMaxForce" Content="MaxForce: 0.1" HorizontalAlignment="Left" Margin="141,172,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="labelMaxSpeed" Content="MaxSpeed: 1" HorizontalAlignment="Left" Margin="141,127,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Slider x:Name="sliderMaxAcceleration" HorizontalAlignment="Left" Margin="145,114,0,0" VerticalAlignment="Top" Width="261" Maximum="12" Value="5" ValueChanged="SliderMaxAcceleration_ValueChanged" LargeChange="0.1" TickFrequency="0.1"/>
+        <Label x:Name="labelMaxAcceleration" Content="Acceleration: 10" HorizontalAlignment="Left" Margin="140,88,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Slider x:Name="sliderWaypointThreshold" HorizontalAlignment="Left" Margin="146,70,0,0" VerticalAlignment="Top" Width="261" Maximum="24" Value="5" ValueChanged="SliderWaypointThreshold_ValueChanged" LargeChange="0.1" TickFrequency="0.1" Minimum="1"/>
+        <Label x:Name="labelWaypointThreshold" Content="WaypointThreshold: 5" HorizontalAlignment="Left" Margin="141,44,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Slider x:Name="sliderSeperationDistance" HorizontalAlignment="Left" Margin="146,26,0,0" VerticalAlignment="Top" Width="261" Maximum="24" Value="5" ValueChanged="sliderSeperationDistance_ValueChanged" LargeChange="0.1" TickFrequency="0.1" Minimum="1"/>
+        <Label x:Name="labelSeperationDistance" Content="SeperationDistance: 5" HorizontalAlignment="Left" Margin="141,0,0,0" VerticalAlignment="Top" Foreground="White"/>
     </Grid>
 </Window>

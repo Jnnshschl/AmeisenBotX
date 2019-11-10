@@ -158,6 +158,12 @@ namespace AmeisenBotX
                 progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;
                 labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxHealth)}";
 
+                sliderSeperationDistance.Value = AmeisenBot.MovementSettings.SeperationDistance;
+                sliderWaypointThreshold.Value = AmeisenBot.MovementSettings.WaypointCheckThreshold;
+                sliderMaxAcceleration.Value = AmeisenBot.MovementSettings.Acceleration;
+                sliderMaxForce.Value = AmeisenBot.MovementSettings.MaxForce;
+                sliderMaxSpeed.Value = AmeisenBot.MovementSettings.MaxSpeed;
+
                 switch (AmeisenBot.ObjectManager.Player.Class)
                 {
                     case WowClass.DeathKnight:
@@ -280,8 +286,6 @@ namespace AmeisenBotX
                 }
 
                 labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
-
-                labelDebug.Content = $"BaseAddress: 0x{AmeisenBot.ObjectManager.Player.BaseAddress.ToString("X")}\nDescriptorAddress: 0x{AmeisenBot.ObjectManager.Player.DescriptorAddress.ToString("X")}\nLootableUnitsNear: {AmeisenBot.ObjectManager.WowObjects.OfType<WowUnit>().Where(e=>e.IsLootable).Count()}";
             });
         }
 
@@ -314,5 +318,55 @@ namespace AmeisenBotX
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
             => DragMove();
+
+        private void SliderMaxForce_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (AmeisenBot != null)
+            {
+                double value = Math.Round(e.NewValue, 2);
+                labelMaxForce.Content = $"MaxForce: {value}";
+                AmeisenBot.MovementSettings.MaxForce = Convert.ToSingle(value);
+            }
+        }
+
+        private void SliderMaxSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (AmeisenBot != null)
+            {
+                double value = Math.Round(e.NewValue, 2);
+                labelMaxSpeed.Content = $"MaxSpeed: {value}";
+                AmeisenBot.MovementSettings.MaxSpeed = Convert.ToSingle(value);
+            }
+        }
+
+        private void SliderMaxAcceleration_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (AmeisenBot != null)
+            {
+                double value = Math.Round(e.NewValue, 2);
+                labelMaxAcceleration.Content = $"Acceleration: {value}";
+                AmeisenBot.MovementSettings.Acceleration = Convert.ToSingle(value);
+            }
+        }
+
+        private void SliderWaypointThreshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (AmeisenBot != null)
+            {
+                double value = Math.Round(e.NewValue, 2);
+                labelWaypointThreshold.Content = $"WaypointThreshold: {value}";
+                AmeisenBot.MovementSettings.WaypointCheckThreshold = Convert.ToSingle(value);
+            }
+        }
+
+        private void sliderSeperationDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (AmeisenBot != null)
+            {
+                double value = Math.Round(e.NewValue, 2);
+                labelSeperationDistance.Content = $"SeperationDistance: {value}";
+                AmeisenBot.MovementSettings.SeperationDistance = Convert.ToSingle(value);
+            }
+        }
     }
 }

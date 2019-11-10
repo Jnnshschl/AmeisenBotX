@@ -53,6 +53,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private int TryCount { get; set; }
 
+        private Vector3 LastPosition { get; set; }
+
         public override void Enter()
         {
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
@@ -124,7 +126,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 HookManager.ClearTarget();
             }
 
-            foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable))
+            foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance2D(ObjectManager.Player.Position) < 20))
             {
                 if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
                 {
@@ -189,39 +191,57 @@ namespace AmeisenBotX.Core.StateMachine.States
                     && target.Health > 1
                     && !target.IsDead)
                 {
-                    if (MovementEngine.CurrentPath?.Count == 0 || TryCount == 5)
+                    if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
                     {
+                        LastPosition = Vector3.Zero;
                         BuildNewPath(target);
                     }
-                    else
+
+                    if (MovementEngine.CurrentPath?.Count > 0)
                     {
-                        if (MovementEngine.CurrentPath?.Count > 0
-                            && MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                        if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                         {
-                            CharacterManager.MoveToPosition(positionToGoTo, 6.28f);
-                            NeedToStopMovement = true;
+                            if (LastPosition == positionToGoTo)
+                            {
+                                BuildNewPath(target);
+                                return;
+                            }
+
+                            LastPosition = positionToGoTo;
+
+                            CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
 
                             if (needToJump)
                             {
                                 CharacterManager.Jump();
-
-                                Random rnd = new Random();
-                                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 1000);
-
-                                if (rnd.Next(10) >= 5)
-                                {
-                                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
-                                }
-                                else
-                                {
-                                    BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
-                                }
-
+                                DoRandomUnstuckMovement();
                                 TryCount++;
                             }
                         }
                     }
                 }
+            }
+        }
+
+        private void DoRandomUnstuckMovement()
+        {
+            Random rnd = new Random();
+            if (rnd.Next(10) >= 5)
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_A), 300, 600);
+            }
+            else
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 600);
+            }
+
+            if (rnd.Next(10) >= 5)
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
+            }
+            else
+            {
+                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
             }
         }
 

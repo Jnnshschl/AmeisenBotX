@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr ClientConnection { get; } = new IntPtr(0xC79CE0);
 
-        public IntPtr ComboPoints { get; } = new IntPtr(0xBD0845);
+        public IntPtr ComboPoints { get; } = new IntPtr(0xBD084D);
 
         public IntPtr ContinentName { get; } = new IntPtr(0xCE06D0);
 
@@ -117,6 +117,8 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr IsWorldLoaded { get; } = new IntPtr(0xBEBA40);
 
         public IntPtr LastTargetGuid { get; } = new IntPtr(0xBD07B8);
+
+        public IntPtr LootWindowOpen { get; } = new IntPtr(0xBFA8D8);
 
         public IntPtr MapId { get; } = new IntPtr(0xAB63BC);
 
