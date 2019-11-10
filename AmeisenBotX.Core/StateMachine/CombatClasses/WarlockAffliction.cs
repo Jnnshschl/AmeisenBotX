@@ -145,7 +145,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
+
+            if (!ObjectManager.Player.IsInCombat)
+            {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            }
 
             if (IsSpellKnown(felArmorSpell))
             {

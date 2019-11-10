@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         // author: Jannis Höschele
 
         private readonly string moonkinFormSpell = "Moonkin Form";
-        private readonly string heartOfTheWildSpell = "Heart of the Wild";
+        private readonly string markOfTheWildSpell = "Mark of the Wild";
         private readonly string innervateSpell = "Innervate";
         private readonly string moonfireSpell = "Moonfire";
         private readonly string insectSwarmSpell = "Insect Swarm";
@@ -35,8 +35,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+
+            LunarEclipse = true;
             SolarEclipse = false;
-            LunarEclipse = false;
         }
 
         public bool HandlesMovement => false;
@@ -63,6 +64,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
+            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+            {
+                HandleBuffing();
+            }
+
             if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime))
             {
                 HandleDebuffing();
@@ -99,8 +105,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if ((LunarEclipse
-                || (!LunarEclipse && !SolarEclipse))
+            if (LunarEclipse
                 && IsSpellKnown(starfireSpell)
                 && HasEnoughMana(starfireSpell)
                 && !IsOnCooldown(starfireSpell))
@@ -108,17 +113,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.CastSpell(starfireSpell);
                 return;
             }
-            else
+
+            if (SolarEclipse
+                && IsSpellKnown(wrathSpell)
+                && HasEnoughMana(wrathSpell)
+                && !IsOnCooldown(wrathSpell))
             {
-                if ((SolarEclipse
-                    || (!LunarEclipse && !SolarEclipse))
-                    && IsSpellKnown(wrathSpell)
-                    && HasEnoughMana(wrathSpell)
-                    && !IsOnCooldown(wrathSpell))
-                {
-                    HookManager.CastSpell(wrathSpell);
-                    return;
-                }
+                HookManager.CastSpell(wrathSpell);
+                return;
             }
 
             if (IsSpellKnown(starfallSpell)
@@ -141,7 +143,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
+
+            if (!ObjectManager.Player.IsInCombat)
+            {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            }
 
             if (IsSpellKnown(moonkinFormSpell)
                 && !myBuffs.Any(e => e.Equals(moonkinFormSpell, StringComparison.OrdinalIgnoreCase))
@@ -151,11 +157,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (IsSpellKnown(heartOfTheWildSpell)
-                && !myBuffs.Any(e => e.Equals(heartOfTheWildSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(heartOfTheWildSpell))
+            if (IsSpellKnown(markOfTheWildSpell)
+                && !myBuffs.Any(e => e.Equals(markOfTheWildSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(markOfTheWildSpell))
             {
-                HookManager.CastSpell(heartOfTheWildSpell);
+                HookManager.CastSpell(markOfTheWildSpell);
                 return;
             }
 
@@ -174,26 +180,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if ((LunarEclipse
-                || (!LunarEclipse && !SolarEclipse))
+            if (LunarEclipse
                 && IsSpellKnown(moonfireSpell)
+                && HasEnoughMana(moonfireSpell)
                 && !targetDebuffs.Any(e => e.Equals(moonfireSpell, StringComparison.OrdinalIgnoreCase))
                 && !IsOnCooldown(moonfireSpell))
             {
                 HookManager.CastSpell(moonfireSpell);
                 return;
             }
-            else
+
+            if (SolarEclipse
+                && IsSpellKnown(insectSwarmSpell)
+                && HasEnoughMana(insectSwarmSpell)
+                && !targetDebuffs.Any(e => e.Equals(insectSwarmSpell, StringComparison.OrdinalIgnoreCase))
+                && !IsOnCooldown(insectSwarmSpell))
             {
-                if ((SolarEclipse
-                    || (!LunarEclipse && !SolarEclipse))
-                    && IsSpellKnown(insectSwarmSpell)
-                    && !targetDebuffs.Any(e => e.Equals(insectSwarmSpell, StringComparison.OrdinalIgnoreCase))
-                    && !IsOnCooldown(insectSwarmSpell))
-                {
-                    HookManager.CastSpell(insectSwarmSpell);
-                    return;
-                }
+                HookManager.CastSpell(insectSwarmSpell);
+                return;
             }
 
             LastDebuffCheck = DateTime.Now;
@@ -203,16 +207,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
-            if (myBuffs.Any(e => e.Equals(eclipseSolarSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(eclipseSolarSpell))
+            if (myBuffs.Any(e => e.Equals(eclipseLunarSpell, StringComparison.OrdinalIgnoreCase)))
             {
-                SolarEclipse = true;
-                LunarEclipse = false;
+                SolarEclipse = false;
+                LunarEclipse = true;
                 return;
             }
 
-            if (!myBuffs.Any(e => e.Equals(eclipseLunarSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(eclipseLunarSpell))
+            if (myBuffs.Any(e => e.Equals(eclipseSolarSpell, StringComparison.OrdinalIgnoreCase)))
             {
                 SolarEclipse = true;
                 LunarEclipse = false;

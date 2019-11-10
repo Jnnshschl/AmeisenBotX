@@ -158,6 +158,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
+            if (!ObjectManager.Player.IsInCombat)
+            {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            }
+
             if (IsSpellKnown(lightningShieldSpell)
                 && ObjectManager.Player.ManaPercentage > 80
                 && !myBuffs.Any(e => e.Equals(lightningShieldSpell, StringComparison.OrdinalIgnoreCase))
