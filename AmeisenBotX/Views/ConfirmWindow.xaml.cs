@@ -15,6 +15,11 @@ namespace AmeisenBotX.Views
             messageTitle.Text = title;
             messageLabel.Text = message;
 
+            if (message.Length > 64)
+            {
+                messageLabel.FontSize = 12;
+            }
+
             buttonOkay.Content = btnOkayText;
             buttonCancel.Content = btnCancelText;
         }
@@ -34,6 +39,17 @@ namespace AmeisenBotX.Views
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-                            => DragMove();
+            => DragMove();
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Point pointToWindow = Mouse.GetPosition(this);
+            Point pointToScreen = PointToScreen(pointToWindow);
+
+            System.Windows.Media.Matrix transform = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
+            Point mouse = transform.Transform(pointToScreen);
+            Left = mouse.X - (Width / 2);
+            Top = mouse.Y - (Height / 2);
+        }
     }
 }

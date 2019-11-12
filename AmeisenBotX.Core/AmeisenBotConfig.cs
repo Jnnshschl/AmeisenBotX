@@ -21,15 +21,19 @@ namespace AmeisenBotX.Core
 
         public int CharacterSlot { get; set; } = 0;
 
-        public string CustomCombatClassFile { get; set; } = "";
-
         public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
+
+        public string CustomCombatClassFile { get; set; } = "";
 
         public bool FollowGroupLeader { get; set; } = false;
 
         public bool FollowGroupMembers { get; set; } = false;
 
         public bool FollowSpecificCharacter { get; set; } = false;
+
+        public bool LootUnits { get; set; } = true;
+
+        public double LootUnitsRadius { get; set; } = 20.0;
 
         public int MaxFollowDistance { get; set; } = 100;
 
@@ -63,16 +67,12 @@ namespace AmeisenBotX.Core
 
         public double StateMachineTickMs { get; set; } = 50;
 
-        public bool UseClickToMove { get; set; } = true;
-
         public bool UseBuiltInCombatClass { get; set; } = true;
 
-        public bool LootUnits { get; set; } = true;
+        public bool UseClickToMove { get; set; } = true;
 
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
-
-        public double LootUnitsRadius { get;  set; } = 20.0;
     }
 }

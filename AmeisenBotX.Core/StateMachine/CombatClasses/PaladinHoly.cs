@@ -56,11 +56,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
-            if (IsSpellKnown(divinePleaSpell)
-                && ObjectManager.Player.ManaPercentage < 80
-                && !IsOnCooldown(divinePleaSpell))
+            if (ObjectManager.Player.ManaPercentage < 80
+                && CastSpellIfPossible(divinePleaSpell, true))
             {
-                HookManager.CastSpell(divinePleaSpell);
                 return;
             }
 
@@ -76,26 +74,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
                     if (target.HealthPercentage < 12
-                        && IsSpellKnown(layOnHandsSpell)
-                        && !IsOnCooldown(layOnHandsSpell))
+                        && CastSpellIfPossible(layOnHandsSpell))
                     {
-                        HookManager.CastSpell(layOnHandsSpell);
                         return;
                     }
 
-                    if (target.HealthPercentage < 50
-                       && IsSpellKnown(divineFavorSpell)
-                       && !IsOnCooldown(divineFavorSpell))
+                    if (target.HealthPercentage < 50)
                     {
-                        HookManager.CastSpell(divineFavorSpell);
+                        CastSpellIfPossible(divineFavorSpell, true);
                     }
 
                     if (ObjectManager.Player.ManaPercentage < 50
-                       && ObjectManager.Player.ManaPercentage > 20
-                       && IsSpellKnown(divineIlluminationSpell)
-                       && !IsOnCooldown(divineIlluminationSpell))
+                       && ObjectManager.Player.ManaPercentage > 20)
                     {
-                        HookManager.CastSpell(divineIlluminationSpell);
+                        CastSpellIfPossible(divineIlluminationSpell, true);
                     }
 
                     double healthDifference = target.MaxHealth - target.Health;
@@ -103,11 +95,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (IsSpellKnown(keyValuePair.Value)
-                            && HasEnoughMana(keyValuePair.Value)
-                            && !IsOnCooldown(keyValuePair.Value))
+                        if (CastSpellIfPossible(keyValuePair.Value, true))
                         {
-                            HookManager.CastSpell(keyValuePair.Value);
                             break;
                         }
                     }
@@ -115,9 +104,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
-                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                    && HandleBuffing())
                 {
-                    HandleBuffing();
+                    return;
                 }
             }
         }
@@ -130,28 +120,25 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
-        private void HandleBuffing()
+        private bool HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
 
-            if (IsSpellKnown(devotionAuraSpell)
-                && !myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(devotionAuraSpell))
+            if (!myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(devotionAuraSpell, true))
             {
-                HookManager.CastSpell(devotionAuraSpell);
-                return;
+                return true;
             }
 
-            if (IsSpellKnown(blessingOfWisdomSpell)
-                && !myBuffs.Any(e => e.Equals(blessingOfWisdomSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(blessingOfWisdomSpell))
+            if (!myBuffs.Any(e => e.Equals(blessingOfWisdomSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(blessingOfWisdomSpell, true))
             {
-                HookManager.CastSpell(blessingOfWisdomSpell);
-                return;
+                return true;
             }
 
             LastBuffCheck = DateTime.Now;
+            return false;
         }
 
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
@@ -165,14 +152,31 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
+        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        {
+            if (IsSpellKnown(spellname)
+                && (needsMana && HasEnoughMana(spellname))
+                && !IsOnCooldown(spellname))
+            {
+                HookManager.CastSpell(spellname);
+                return true;
+            }
+
+            return false;
+        }
+
         private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
+            => CharacterManager.SpellBook.Spells
+            .OrderByDescending(e => e.Rank)
+            .FirstOrDefault(e => e.Name.Equals(spellName))
+            ?.Costs <= ObjectManager.Player.Mana;
 
         private bool IsOnCooldown(string spellName)
             => HookManager.GetSpellCooldown(spellName) > 0;
 
         private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
+            => CharacterManager.SpellBook.Spells
+            .Any(e => e.Name.Equals(spellName));
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {

@@ -67,58 +67,55 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
-                ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-
-                if (target.HealthPercentage < 25
-                    && IsSpellKnown(guardianSpiritSpell)
-                    && !IsOnCooldown(guardianSpiritSpell))
+                if (target != null)
                 {
-                    HookManager.CastSpell(guardianSpiritSpell);
-                    return;
-                }
+                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
-                if (playersThatNeedHealing.Count > 4
-                    && IsSpellKnown(prayerOfHealingSpell)
-                    && !IsOnCooldown(prayerOfHealingSpell))
-                {
-                    HookManager.CastSpell(prayerOfHealingSpell);
-                    return;
-                }
-
-                if (target.HealthPercentage < 70
-                    && ObjectManager.Player.HealthPercentage < 70
-                    && IsSpellKnown(bindingHealSpell)
-                    && !IsOnCooldown(bindingHealSpell))
-                {
-                    HookManager.CastSpell(bindingHealSpell);
-                }
-
-                if (ObjectManager.Player.ManaPercentage < 50
-                    && IsSpellKnown(hymnOfHopeSpell)
-                    && !IsOnCooldown(hymnOfHopeSpell))
-                {
-                    HookManager.CastSpell(hymnOfHopeSpell);
-                }
-
-                double healthDifference = target.MaxHealth - target.Health;
-                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                {
-                    if (IsSpellKnown(keyValuePair.Value)
-                        && HasEnoughMana(keyValuePair.Value)
-                        && !IsOnCooldown(keyValuePair.Value))
+                    if (target.HealthPercentage < 25
+                        && CastSpellIfPossible(guardianSpiritSpell, true))
                     {
-                        HookManager.CastSpell(keyValuePair.Value);
-                        break;
+                        HookManager.CastSpell(guardianSpiritSpell);
+                        return;
+                    }
+
+                    if (playersThatNeedHealing.Count > 4
+                        && CastSpellIfPossible(prayerOfHealingSpell, true))
+                    {
+                        HookManager.CastSpell(prayerOfHealingSpell);
+                        return;
+                    }
+
+                    if (target.HealthPercentage < 70
+                        && ObjectManager.Player.HealthPercentage < 70
+                        && CastSpellIfPossible(bindingHealSpell, true))
+                    {
+                        return;
+                    }
+
+                    if (ObjectManager.Player.ManaPercentage < 50
+                        && CastSpellIfPossible(hymnOfHopeSpell))
+                    {
+                        return;
+                    }
+
+                    double healthDifference = target.MaxHealth - target.Health;
+                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                    {
+                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        {
+                            HookManager.CastSpell(keyValuePair.Value);
+                            break;
+                        }
                     }
                 }
-            }
-            else
-            {
-                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+                else
                 {
-                    HandleBuffing();
+                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+                    {
+                        HandleBuffing();
+                    }
                 }
             }
         }
@@ -136,28 +133,28 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
-        private void HandleBuffing()
+        private bool HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
-
-            if (IsSpellKnown(powerWordFortitudeSpell)
-                && !myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(powerWordFortitudeSpell))
+            if (!ObjectManager.Player.IsInCombat)
             {
-                HookManager.CastSpell(powerWordFortitudeSpell);
-                return;
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (IsSpellKnown(innerFireSpell)
-                && !myBuffs.Any(e => e.Equals(innerFireSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(innerFireSpell))
+            if (!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(powerWordFortitudeSpell, true))
             {
-                HookManager.CastSpell(innerFireSpell);
-                return;
+                return true;
+            }
+
+            if (!myBuffs.Any(e => e.Equals(innerFireSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(innerFireSpell, true))
+            {
+                return true;
             }
 
             LastBuffCheck = DateTime.Now;
+            return false;
         }
 
         private void HandleDeadPartymembers()
@@ -183,14 +180,31 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
         }
 
+        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        {
+            if (IsSpellKnown(spellname)
+                && (needsMana && HasEnoughMana(spellname))
+                && !IsOnCooldown(spellname))
+            {
+                HookManager.CastSpell(spellname);
+                return true;
+            }
+
+            return false;
+        }
+
         private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
+            => CharacterManager.SpellBook.Spells
+            .OrderByDescending(e => e.Rank)
+            .FirstOrDefault(e => e.Name.Equals(spellName))
+            ?.Costs <= ObjectManager.Player.Mana;
 
         private bool IsOnCooldown(string spellName)
             => HookManager.GetSpellCooldown(spellName) > 0;
 
         private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
+            => CharacterManager.SpellBook.Spells
+            .Any(e => e.Name.Equals(spellName));
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {
