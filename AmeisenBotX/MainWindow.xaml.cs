@@ -64,11 +64,18 @@ namespace AmeisenBotX
 
         private readonly Brush warriorSecondaryBrush = new SolidColorBrush(Color.FromRgb(255, 0, 0));
 
+        private readonly Brush darkForegroundBrush;
+
+        private readonly Brush textAccentBrush;
+
         public MainWindow()
         {
             InitializeComponent();
 
             Config = LoadConfig();
+
+            darkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
+            textAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
 
             if (Config != null)
             {
@@ -157,12 +164,6 @@ namespace AmeisenBotX
                 progressbarHealth.Maximum = AmeisenBot.ObjectManager.Player.MaxHealth;
                 progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;
                 labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxHealth)}";
-
-                sliderSeperationDistance.Value = AmeisenBot.MovementSettings.SeperationDistance;
-                sliderWaypointThreshold.Value = AmeisenBot.MovementSettings.WaypointCheckThreshold;
-                sliderMaxAcceleration.Value = AmeisenBot.MovementSettings.Acceleration;
-                sliderMaxForce.Value = AmeisenBot.MovementSettings.MaxForce;
-                sliderMaxSpeed.Value = AmeisenBot.MovementSettings.MaxSpeed;
 
                 switch (AmeisenBot.ObjectManager.Player.Class)
                 {
@@ -319,53 +320,25 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
             => DragMove();
 
-        private void SliderMaxForce_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot != null)
-            {
-                double value = Math.Round(e.NewValue, 2);
-                labelMaxForce.Content = $"MaxForce: {value}";
-                AmeisenBot.MovementSettings.MaxForce = Convert.ToSingle(value);
-            }
+            ConfigEditorWindow configEditor = new ConfigEditorWindow(BotDataPath, Config);
+            configEditor.ShowDialog();
         }
 
-        private void SliderMaxSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot != null)
+            if (AmeisenBot.IsRunning)
             {
-                double value = Math.Round(e.NewValue, 2);
-                labelMaxSpeed.Content = $"MaxSpeed: {value}";
-                AmeisenBot.MovementSettings.MaxSpeed = Convert.ToSingle(value);
+                AmeisenBot.Pause();
+                buttonStartPause.Content = "▶";
+                buttonStartPause.Foreground = darkForegroundBrush;
             }
-        }
-
-        private void SliderMaxAcceleration_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (AmeisenBot != null)
+            else
             {
-                double value = Math.Round(e.NewValue, 2);
-                labelMaxAcceleration.Content = $"Acceleration: {value}";
-                AmeisenBot.MovementSettings.Acceleration = Convert.ToSingle(value);
-            }
-        }
-
-        private void SliderWaypointThreshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (AmeisenBot != null)
-            {
-                double value = Math.Round(e.NewValue, 2);
-                labelWaypointThreshold.Content = $"WaypointThreshold: {value}";
-                AmeisenBot.MovementSettings.WaypointCheckThreshold = Convert.ToSingle(value);
-            }
-        }
-
-        private void sliderSeperationDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (AmeisenBot != null)
-            {
-                double value = Math.Round(e.NewValue, 2);
-                labelSeperationDistance.Content = $"SeperationDistance: {value}";
-                AmeisenBot.MovementSettings.SeperationDistance = Convert.ToSingle(value);
+                AmeisenBot.Resume();
+                buttonStartPause.Content = "||";
+                buttonStartPause.Foreground = textAccentBrush;
             }
         }
     }

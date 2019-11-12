@@ -26,7 +26,7 @@ namespace AmeisenBotX
         {
             if (PendingChanges)
             {
-                ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to exit without saving?", "Exit Wihtout Saving", "Cancel");
+                ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you want to exit without saving?", "Exit without saving", "Cancel");
                 confirmWindow.ShowDialog();
 
                 if (confirmWindow.OkayPressed)

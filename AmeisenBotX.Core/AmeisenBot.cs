@@ -226,11 +226,14 @@ namespace AmeisenBotX.Core
 
         private XMemory XMemory { get; }
 
+        public bool IsRunning { get; private set; }
+
         public void Start()
         {
             StateMachineTimer.Start();
             BotCache.Load();
             SubscribeToWowEvents();
+            IsRunning = true;
         }
 
         public void Stop()
@@ -391,10 +394,20 @@ namespace AmeisenBotX.Core
             HookManager.CofirmReadyCheck(true);
         }
 
+        public void Pause()
+        {
+            IsRunning = false;
+        }
+
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log($"Event OnResurrectRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.AcceptResurrect();
+        }
+
+        public void Resume()
+        {
+            IsRunning = true;
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
@@ -430,7 +443,8 @@ namespace AmeisenBotX.Core
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)
         {
             // only start one timer tick at a time
-            if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1)
+            if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1
+                || !IsRunning)
             {
                 return;
             }

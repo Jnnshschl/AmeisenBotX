@@ -15,7 +15,7 @@
     <Grid>
         <WrapPanel x:Name="mainWrapPanel">
         </WrapPanel>
-        <Button x:Name="buttonExit" Margin="0,0,0,0" Click="ButtonExit_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Content="X">
+        <Button x:Name="buttonExit" Margin="0,0,0,0" Click="ButtonExit_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Content="X" Style="{DynamicResource ButtonStyleDark}">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
@@ -26,7 +26,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </Button.Background>
         </Button>
-        <Button x:Name="buttonSave" Margin="0,0,20.333,0" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Content="💾" FontSize="10" Click="ButtonSave_Click">
+        <Button x:Name="buttonSave" Margin="0,0,20.333,0" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Content="💾" FontSize="10" Click="ButtonSave_Click" Style="{DynamicResource ButtonStyleDark}">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

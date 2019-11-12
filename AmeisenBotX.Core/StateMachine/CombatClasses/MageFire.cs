@@ -60,43 +60,38 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void Execute()
         {
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime))
+            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
+                && HandleDebuffing())
             {
-                HandleDebuffing();
+                return;
             }
 
-            if (IsSpellKnown(pyroblastSpell) || IsSpellKnown(manaShieldSpell) && DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime))
+            if (DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime)
+                && HandlePyroblastAndManaShield())
             {
-                HandlePyroblastAndManaShield();
+                return;
             }
 
-            if (IsSpellKnown(counterspellSpell) && DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime))
+            if (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
+                && HandleCounterspell())
             {
-                HandleCounterspell();
+                return;
             }
 
             if (ObjectManager.Player.HealthPercentage < 16
-                && IsSpellKnown(iceBlockSpell)
-                && !IsOnCooldown(iceBlockSpell))
+                && CastSpellIfPossible(iceBlockSpell,true))
             {
-                HookManager.CastSpell(iceBlockSpell);
                 return;
             }
 
             if (ObjectManager.Player.ManaPercentage < 40
-                && IsSpellKnown(evocationSpell)
-                && HasEnoughMana(evocationSpell)
-                && !IsOnCooldown(evocationSpell))
+                && CastSpellIfPossible(evocationSpell,true))
             {
-                HookManager.CastSpell(evocationSpell);
                 return;
             }
 
-            if (IsSpellKnown(fireballSpell)
-                && HasEnoughMana(fireballSpell)
-                && !IsOnCooldown(fireballSpell))
+            if (CastSpellIfPossible(fireballSpell,true))
             {
-                HookManager.CastSpell(fireballSpell);
                 return;
             }
         }
@@ -109,7 +104,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
-        private void HandleBuffing()
+        private bool HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
@@ -118,95 +113,103 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (IsSpellKnown(moltenArmorSpell)
-                && !myBuffs.Any(e => e.Equals(moltenArmorSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(moltenArmorSpell))
+            if (!myBuffs.Any(e => e.Equals(moltenArmorSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(moltenArmorSpell, true))
             {
-                HookManager.CastSpell(moltenArmorSpell);
-                return;
+                return true;
             }
 
-            if (IsSpellKnown(arcaneIntellectSpell)
-                && !myBuffs.Any(e => e.Equals(arcaneIntellectSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(arcaneIntellectSpell))
+            if (!myBuffs.Any(e => e.Equals(arcaneIntellectSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(arcaneIntellectSpell, true))
             {
-                HookManager.CastSpell(arcaneIntellectSpell);
-                return;
+                return true;
             }
 
             LastBuffCheck = DateTime.Now;
+            return false;
         }
 
-        private void HandleCounterspell()
+        private bool HandleCounterspell()
         {
             (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
 
-            if (castinInfo.Item1.Length > 0
-                && castinInfo.Item2 > 0
-                && IsSpellKnown(counterspellSpell)
-                && !IsOnCooldown(counterspellSpell))
+            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
+
+            if (isCasting
+                && CastSpellIfPossible(counterspellSpell, true))
             {
-                HookManager.CastSpell(counterspellSpell);
-                return;
+                return true;
             }
 
             LastEnemyCastingCheck = DateTime.Now;
+            return false;
         }
 
-        private void HandleDebuffing()
+        private bool HandleDebuffing()
         {
             List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
 
-            if (IsSpellKnown(livingBombSpell)
-                && !targetDebuffs.Any(e => e.Equals(livingBombSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(livingBombSpell))
+            if (!targetDebuffs.Any(e => e.Equals(livingBombSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(livingBombSpell, true))
             {
-                HookManager.CastSpell(livingBombSpell);
-                return;
+                return true;
             }
 
-            if (IsSpellKnown(scorchSpell)
-                && !targetDebuffs.Any(e => e.Equals(scorchSpell, StringComparison.OrdinalIgnoreCase))
+            if (!targetDebuffs.Any(e => e.Equals(scorchSpell, StringComparison.OrdinalIgnoreCase))
                 || !targetDebuffs.Any(e => e.Equals(improvedScorchSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(scorchSpell))
+                && CastSpellIfPossible(scorchSpell, true))
             {
-                HookManager.CastSpell(scorchSpell);
-                return;
+                return true;
             }
 
             LastDebuffCheck = DateTime.Now;
+            return false;
         }
 
-        private void HandlePyroblastAndManaShield()
+        private bool HandlePyroblastAndManaShield()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
-            if (IsSpellKnown(pyroblastSpell)
-                && myBuffs.Any(e => e.Equals(hotstreakSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(pyroblastSpell))
+            if (myBuffs.Any(e => e.Equals(hotstreakSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(pyroblastSpell))
             {
-                HookManager.CastSpell(pyroblastSpell);
-                return;
+                return true;
             }
 
-            if (IsSpellKnown(manaShieldSpell)
-                && !myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(manaShieldSpell))
+            if (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(manaShieldSpell))
             {
-                HookManager.CastSpell(manaShieldSpell);
-                return;
+                return true;
             }
 
             LastHotstreakCheck = DateTime.Now;
+            return false;
+        }
+
+        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        {
+            if (IsSpellKnown(spellname)
+                && (needsMana && HasEnoughMana(spellname))
+                && !IsOnCooldown(spellname))
+            {
+                HookManager.CastSpell(spellname);
+                return true;
+            }
+
+            return false;
         }
 
         private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells.OrderByDescending(e => e.Rank).FirstOrDefault(e => e.Name.Equals(spellName))?.Costs <= ObjectManager.Player.Mana;
+            => CharacterManager.SpellBook.Spells
+            .OrderByDescending(e => e.Rank)
+            .FirstOrDefault(e => e.Name.Equals(spellName))
+            ?.Costs <= ObjectManager.Player.Mana;
 
         private bool IsOnCooldown(string spellName)
             => HookManager.GetSpellCooldown(spellName) > 0;
 
         private bool IsSpellKnown(string spellName)
-                    => CharacterManager.SpellBook.Spells.Any(e => e.Name.Equals(spellName));
+            => CharacterManager.SpellBook.Spells
+            .Any(e => e.Name.Equals(spellName));
     }
 }

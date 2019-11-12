@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX.Views"
         mc:Ignorable="d"
-        Title="Confirm" Height="140" Width="420" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" Icon="../icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        Title="Confirm" Height="140" Width="420" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" Icon="../icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -13,38 +13,25 @@
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
     <Grid>
-        <TextBlock x:Name="messageLabel" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" Width="397" Height="63" Text="Message..." TextAlignment="Center">
+        <TextBlock x:Name="messageLabel" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" Width="397" Height="63" Text="Message..." TextAlignment="Center" FontSize="16">
             <TextBlock.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </TextBlock.Foreground>
         </TextBlock>
-        <TextBlock x:Name="messageTitle" HorizontalAlignment="Left" Margin="15,10,0,0" VerticalAlignment="Top" Width="397" Height="24" Text="Title" TextAlignment="Center" FontWeight="Bold" FontSize="16">
+        <TextBlock x:Name="messageTitle" HorizontalAlignment="Left" Margin="15,6,0,0" VerticalAlignment="Top" Width="397" Height="24" Text="Title" TextAlignment="Center" FontWeight="Bold" FontSize="20">
             <TextBlock.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </TextBlock.Foreground>
         </TextBlock>
-        <Button x:Name="buttonOkay" Content="Okay" HorizontalAlignment="Left" Margin="60,0,0,10" VerticalAlignment="Bottom" Width="128" Click="ButtonOkay_Click">
+        <Button x:Name="buttonOkay" Content="Okay" HorizontalAlignment="Left" Margin="60,0,0,10" VerticalAlignment="Bottom" Width="128" Click="ButtonOkay_Click" Style="{DynamicResource ButtonStyleDark}">
             <Button.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
-            <Button.BorderBrush>
-                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
-            </Button.BorderBrush>
-            <Button.Background>
-                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
-            </Button.Background>
         </Button>
-        <Button x:Name="buttonCancel" Content="Cancel" Margin="0,0,60,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128
-                " Click="ButtonCancel_Click">
+        <Button x:Name="buttonCancel" Content="Cancel" Margin="0,0,60,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Click="ButtonCancel_Click" Style="{DynamicResource ButtonStyleDark}">
             <Button.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
-            <Button.BorderBrush>
-                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
-            </Button.BorderBrush>
-            <Button.Background>
-                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
-            </Button.Background>
         </Button>
     </Grid>
 </Window>
