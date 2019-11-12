@@ -30,6 +30,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool HandlesMovement => true;
         private bool hasTargetMoved = false;
         private bool computeNewRoute = false;
+        public bool multipleTargets = false;
 
         public bool HandlesTargetSelection => true;
 
@@ -55,6 +56,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private DateTime LastProtection { get; set; }
         private DateTime LastWisdom { get; set; }
         private DateTime LastTargetCheck { get; set; }
+        private DateTime LastConsecration { get; set; }
         private bool Dancing { get; set; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
@@ -147,27 +149,36 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ulong memberGuid = (target == null || target.IsDead) ? 0 : target.TargetGuid;
             WowUnit member = (target == null || target.IsDead) ? null : ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == memberGuid);
             int memberHealth = member == null ? 2147483647 : member.Health;
+            int targetCount = 0;
+            multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead && ObjectManager.Player.Position.GetDistance2D(unit.Position) < areaToLookAt)
+                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    int compHealth = 2147483647;
-                    if (unit.IsInCombat)
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
+                    if(tmpDistance < areaToLookAt)
                     {
-                        member = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == unit.TargetGuid);
-                        if(member != null)
+                        int compHealth = 2147483647;
+                        if (tmpDistance < 6.0)
                         {
-                            compHealth = member.Health;
+                            targetCount++;
                         }
-                    }
-                    if ((unit.IsInCombat && compHealth < memberHealth) || !inCombat && grinding && (target == null || target.IsDead) && unit.Health < targetHealth)
-                    {
-                        target = unit;
-                        HookManager.TargetGuid(target.Guid);
-                        newTargetFound = true;
-                        inCombat = unit.IsInCombat;
-                        memberHealth = compHealth;
-                        targetHealth = unit.Health;
+                        if (unit.IsInCombat)
+                        {
+                            member = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == unit.TargetGuid);
+                            if (member != null)
+                            {
+                                compHealth = member.Health;
+                            }
+                        }
+                        if ((unit.IsInCombat && compHealth < memberHealth) || !inCombat && grinding && (target == null || target.IsDead) && unit.Health < targetHealth)
+                        {
+                            target = unit;
+                            newTargetFound = true;
+                            inCombat = unit.IsInCombat;
+                            memberHealth = compHealth;
+                            targetHealth = unit.Health;
+                        }
                     }
                 }
             }
@@ -180,7 +191,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
                     HandleMovement(leader);
                 }
-
+            }
+            else if (targetCount > 1)
+            {
+                multipleTargets = true;
+            }
+            if (newTargetFound)
+            {
+                HookManager.TargetGuid(target.Guid);
             }
             return newTargetFound;
         }
@@ -235,6 +253,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 // close combat
                 if (!gcdWaiting && distanceToTarget < 10)
                 {
+                    if (multipleTargets && DateTime.Now.Subtract(LastConsecration).TotalSeconds > 8 && playerMana >= 869)
+                    {
+                        HookManager.CastSpell("Consecration");
+                        LastConsecration = DateTime.Now;
+                        HookManager.SendChatMessage("/s MOVE BITCH!!!!!11");
+                        playerMana -= 869;
+                        SetGCD(1.5);
+                        return;
+                    }
                     if (DateTime.Now.Subtract(LastHammer).TotalSeconds > 60 && playerMana >= 117)
                     {
                         HookManager.CastSpell("Hammer of Justice");
