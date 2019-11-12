@@ -332,13 +332,13 @@ namespace AmeisenBotX
             {
                 AmeisenBot.Pause();
                 buttonStartPause.Content = "▶";
-                buttonStartPause.Foreground = darkForegroundBrush;
+                buttonStartPause.Foreground = textAccentBrush;
             }
             else
             {
                 AmeisenBot.Resume();
                 buttonStartPause.Content = "||";
-                buttonStartPause.Foreground = textAccentBrush;
+                buttonStartPause.Foreground = darkForegroundBrush;
             }
         }
     }

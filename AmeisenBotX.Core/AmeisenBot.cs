@@ -408,6 +408,7 @@ namespace AmeisenBotX.Core
         public void Resume()
         {
             IsRunning = true;
+            stateMachineTimerBusy = 0;
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
