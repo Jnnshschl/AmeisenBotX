@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
@@ -43,6 +46,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 { 3000, regrowthSpell },
                 { 5000, healingTouchSpell },
             };
+
+            Spells = new Dictionary<string, Spell>();
+            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
         }
 
         public bool HandlesMovement => false;
@@ -61,20 +67,35 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private ObjectManager ObjectManager { get; }
 
+        private CooldownManager CooldownManager { get; }
+
+        private Dictionary<string, Spell> Spells { get; }
+
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public void Execute()
         {
+            // we dont want to do anything if we are casting something...
+            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            {
+                return;
+            }
+
+            if (ObjectManager.Player.ManaPercentage < 30
+                && CastSpellIfPossible(innervateSpell, true))
+            {
+                return;
+            }
+
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
                 ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
 
-                if (IsSpellKnown(tranquilitySpell) 
-                    && playersThatNeedHealing.Count > 4
-                    && !IsOnCooldown(tranquilitySpell))
+                if (playersThatNeedHealing.Count > 4
+                    && CastSpellIfPossible(tranquilitySpell, true))
                 {
-                    HookManager.CastSpell(tranquilitySpell);
                     return;
                 }
 
@@ -83,59 +104,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if (target != null)
                 {
                     ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-                    List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Target);
+                    List<string> targetBuffs = HookManager.GetBuffs(WowLuaUnit.Target);
 
-                    if (target.HealthPercentage < 15
-                        && IsSpellKnown(naturesSwiftnessSpell)
-                        && !IsOnCooldown(naturesSwiftnessSpell))
+                    if ((target.HealthPercentage < 15
+                            && CastSpellIfPossible(naturesSwiftnessSpell, true))
+                        || (target.HealthPercentage < 90
+                            && !targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
+                            && CastSpellIfPossible(rejuvenationSpell, true))
+                        || (target.HealthPercentage < 85
+                            && !targetBuffs.Any(e => e.Equals(wildGrowthSpell, StringComparison.OrdinalIgnoreCase))
+                            && CastSpellIfPossible(wildGrowthSpell, true))
+                        || (target.HealthPercentage < 85
+                            && !targetBuffs.Any(e => e.Equals(lifebloomSpell, StringComparison.OrdinalIgnoreCase))
+                            && CastSpellIfPossible(reviveSpell, true))
+                        || (target.HealthPercentage < 70
+                            && (targetBuffs.Any(e => e.Equals(regrowthSpell, StringComparison.OrdinalIgnoreCase))
+                                || targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
+                            && CastSpellIfPossible(swiftmendSpell, true))))
                     {
-                        HookManager.CastSpell(naturesSwiftnessSpell);
-                        HookManager.CastSpell(regrowthSpell);
-                        return;
-                    }
-
-                    if (target.HealthPercentage < 90
-                       && IsSpellKnown(rejuvenationSpell)
-                       && !myBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
-                       && !IsOnCooldown(rejuvenationSpell))
-                    {
-                        HookManager.CastSpell(rejuvenationSpell);
-                        return;
-                    }
-
-                    if (target.HealthPercentage < 85
-                       && IsSpellKnown(wildGrowthSpell)
-                       && !myBuffs.Any(e => e.Equals(wildGrowthSpell, StringComparison.OrdinalIgnoreCase))
-                       && !IsOnCooldown(wildGrowthSpell))
-                    {
-                        HookManager.CastSpell(wildGrowthSpell);
-                        return;
-                    }
-
-                    if (target.HealthPercentage < 85
-                       && IsSpellKnown(lifebloomSpell)
-                       && !myBuffs.Any(e => e.Equals(lifebloomSpell, StringComparison.OrdinalIgnoreCase))
-                       && !IsOnCooldown(lifebloomSpell))
-                    {
-                        HookManager.CastSpell(lifebloomSpell);
-                        return;
-                    }
-
-                    if (target.HealthPercentage < 70
-                       && IsSpellKnown(swiftmendSpell)
-                       && myBuffs.Any(e => e.Equals(regrowthSpell, StringComparison.OrdinalIgnoreCase))
-                       || myBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
-                       && !IsOnCooldown(swiftmendSpell))
-                    {
-                        HookManager.CastSpell(swiftmendSpell);
-                        return;
-                    }
-
-                    if (ObjectManager.Player.ManaPercentage < 30
-                       && IsSpellKnown(innervateSpell)
-                       && !IsOnCooldown(innervateSpell))
-                    {
-                        HookManager.CastSpell(innervateSpell);
                         return;
                     }
 
@@ -144,11 +130,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (IsSpellKnown(keyValuePair.Value)
-                            && HasEnoughMana(keyValuePair.Value)
-                            && !IsOnCooldown(keyValuePair.Value))
+                        if (CastSpellIfPossible(keyValuePair.Value, true))
                         {
-                            HookManager.CastSpell(keyValuePair.Value);
                             break;
                         }
                     }
@@ -156,55 +139,52 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
-                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                    && HandleBuffing())
                 {
-                    HandleBuffing();
+                    return;
                 }
             }
         }
 
         public void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                    && HandleBuffing())
+                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                    && HandleDeadPartymembers()))
             {
-                HandleBuffing();
-            }
-
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime))
-            {
-                HandleDeadPartymembers();
+                return;
             }
         }
 
-        private void HandleBuffing()
+        private bool HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
 
-            if (IsSpellKnown(markofTheWildSpell)
-                && !myBuffs.Any(e => e.Equals(markofTheWildSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(markofTheWildSpell))
+            if ((!myBuffs.Any(e => e.Equals(markofTheWildSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(markofTheWildSpell, true))
+                || (!myBuffs.Any(e => e.Equals(treeOfLifeSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(treeOfLifeSpell, true)))
             {
-                HookManager.CastSpell(markofTheWildSpell);
-                return;
-            }
-
-            if (IsSpellKnown(treeOfLifeSpell)
-                && !myBuffs.Any(e => e.Equals(treeOfLifeSpell, StringComparison.OrdinalIgnoreCase))
-                && !IsOnCooldown(treeOfLifeSpell))
-            {
-                HookManager.CastSpell(treeOfLifeSpell);
-                return;
+                return true;
             }
 
             LastBuffCheck = DateTime.Now;
+            return false;
         }
 
-        private void HandleDeadPartymembers()
+        private bool HandleDeadPartymembers()
         {
-            if (IsSpellKnown(reviveSpell)
-                && HasEnoughMana(reviveSpell)
-                && !IsOnCooldown(reviveSpell))
+            if (!Spells.ContainsKey(reviveSpell))
+            {
+                Spells.Add(reviveSpell, CharacterManager.SpellBook.GetSpellByName(reviveSpell));
+            }
+
+            if (Spells[reviveSpell] != null
+                && !CooldownManager.IsSpellOnCooldown(reviveSpell)
+                && Spells[reviveSpell].Costs < ObjectManager.Player.Mana)
             {
                 IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
                 List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
@@ -213,8 +193,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     HookManager.TargetGuid(groupPlayers.First().Guid);
                     HookManager.CastSpell(reviveSpell);
+                    CooldownManager.SetSpellCooldown(reviveSpell, (int)HookManager.GetSpellCooldown(reviveSpell));
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
@@ -228,31 +212,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
-        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
-            if (IsSpellKnown(spellname)
-                && (needsMana && HasEnoughMana(spellname))
-                && !IsOnCooldown(spellname))
+            if (!Spells.ContainsKey(spellName))
             {
-                HookManager.CastSpell(spellname);
+                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+            }
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+            {
+                HookManager.CastSpell(spellName);
+                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
                 return true;
             }
 
             return false;
         }
-
-        private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .OrderByDescending(e => e.Rank)
-            .FirstOrDefault(e => e.Name.Equals(spellName))
-            ?.Costs <= ObjectManager.Player.Mana;
-
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
-
-        private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .Any(e => e.Name.Equals(spellName));
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {

@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+
+            Spells = new Dictionary<string, Spell>();
+            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
         }
 
         public bool HandlesMovement => false;
@@ -58,39 +64,30 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private ObjectManager ObjectManager { get; }
 
+        private CooldownManager CooldownManager { get; }
+
+        private Dictionary<string, Spell> Spells { get; }
+
         public void Execute()
         {
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                && HandleDebuffing())
+            // we dont want to do anything if we are casting something...
+            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
             {
                 return;
             }
 
-            if (DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime)
-                && HandlePyroblastAndManaShield())
-            {
-                return;
-            }
-
-            if (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                && HandleCounterspell())
-            {
-                return;
-            }
-
-            if (ObjectManager.Player.HealthPercentage < 16
-                && CastSpellIfPossible(iceBlockSpell,true))
-            {
-                return;
-            }
-
-            if (ObjectManager.Player.ManaPercentage < 40
-                && CastSpellIfPossible(evocationSpell,true))
-            {
-                return;
-            }
-
-            if (CastSpellIfPossible(fireballSpell,true))
+            if ((DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
+                    && HandleDebuffing())
+                || (DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime)
+                    && HandlePyroblastAndManaShield())
+                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
+                    && HandleCounterspell())
+                || (ObjectManager.Player.HealthPercentage < 16
+                    && CastSpellIfPossible(iceBlockSpell, true))
+                || (ObjectManager.Player.ManaPercentage < 40
+                    && CastSpellIfPossible(evocationSpell, true))
+                || CastSpellIfPossible(fireballSpell, true))
             {
                 return;
             }
@@ -98,9 +95,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                && HandleBuffing())
             {
-                HandleBuffing();
+                return;
             }
         }
 
@@ -113,14 +111,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (!myBuffs.Any(e => e.Equals(moltenArmorSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(moltenArmorSpell, true))
-            {
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(arcaneIntellectSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(arcaneIntellectSpell, true))
+            if ((!myBuffs.Any(e => e.Equals(moltenArmorSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(moltenArmorSpell, true))
+                || (!myBuffs.Any(e => e.Equals(arcaneIntellectSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(arcaneIntellectSpell, true)))
             {
                 return true;
             }
@@ -170,14 +164,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
-            if (myBuffs.Any(e => e.Equals(hotstreakSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(pyroblastSpell))
-            {
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(manaShieldSpell))
+            if ((myBuffs.Any(e => e.Equals(hotstreakSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(pyroblastSpell))
+                || (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(manaShieldSpell)))
             {
                 return true;
             }
@@ -186,30 +176,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
-            if (IsSpellKnown(spellname)
-                && (needsMana && HasEnoughMana(spellname))
-                && !IsOnCooldown(spellname))
+            if (!Spells.ContainsKey(spellName))
             {
-                HookManager.CastSpell(spellname);
+                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+            }
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+            {
+                HookManager.CastSpell(spellName);
+                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
                 return true;
             }
 
             return false;
         }
-
-        private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .OrderByDescending(e => e.Rank)
-            .FirstOrDefault(e => e.Name.Equals(spellName))
-            ?.Costs <= ObjectManager.Player.Mana;
-
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
-
-        private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .Any(e => e.Name.Equals(spellName));
     }
 }

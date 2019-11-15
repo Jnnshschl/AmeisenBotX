@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,9 +37,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
 
             LunarEclipse = true;
             SolarEclipse = false;
+
+            Spells = new Dictionary<string, Spell>();
+            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
         }
 
         public bool HandlesMovement => false;
@@ -62,57 +68,40 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private ObjectManager ObjectManager { get; }
 
+        private CooldownManager CooldownManager { get; }
+
+        private Dictionary<string, Spell> Spells { get; }
+
         public void Execute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            // we dont want to do anything if we are casting something...
+            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
             {
                 return;
             }
 
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                && HandleDebuffing())
-            {
-                ;
-            }
-
-            if (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
-                && CheckForEclipseProcs())
-            {
-                return;
-            }
-
-            if (ObjectManager.Player.ManaPercentage < 30
-                && CastSpellIfPossible(innervateSpell))
-            {
-                return;
-            }
-
-            if (ObjectManager.Player.HealthPercentage < 70
-                && CastSpellIfPossible(barkskinSpell,true))
-            {
-                return;
-            }
-
-            if (CastSpellIfPossible(forceOfNatureSpell,true))
+            if (CastSpellIfPossible(forceOfNatureSpell, true))
             {
                 HookManager.ClickOnTerrain(ObjectManager.Player.Position);
                 return;
             }
 
-            if (LunarEclipse
-                && CastSpellIfPossible(starfireSpell,true))
-            {
-                return;
-            }
-
-            if (SolarEclipse
-                && CastSpellIfPossible(wrathSpell,true))
-            {
-                return;
-            }
-
-            if (CastSpellIfPossible(starfallSpell,true))
+            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                    && HandleBuffing())
+                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
+                    && HandleDebuffing())
+                || (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
+                    && CheckForEclipseProcs())
+                || (ObjectManager.Player.ManaPercentage < 30
+                    && CastSpellIfPossible(innervateSpell))
+                || (ObjectManager.Player.HealthPercentage < 70
+                    && CastSpellIfPossible(barkskinSpell, true))
+                || (LunarEclipse
+                    && CastSpellIfPossible(starfireSpell, true))
+                || (SolarEclipse
+                    && CastSpellIfPossible(wrathSpell, true))
+                || CastSpellIfPossible(starfallSpell, true))
             {
                 return;
             }
@@ -120,9 +109,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                && HandleBuffing())
             {
-                HandleBuffing();
+                return;
             }
         }
 
@@ -135,14 +125,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (!myBuffs.Any(e => e.Equals(moonkinFormSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(moonkinFormSpell))
-            {
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(markOfTheWildSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(markOfTheWildSpell, true))
+            if ((!myBuffs.Any(e => e.Equals(moonkinFormSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(moonkinFormSpell))
+                || (!myBuffs.Any(e => e.Equals(markOfTheWildSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(markOfTheWildSpell, true)))
             {
                 return true;
             }
@@ -155,22 +141,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
 
-            if (!targetDebuffs.Any(e => e.Equals(faerieFireSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(faerieFireSpell, true))
-            {
-                return true;
-            }
-
-            if (LunarEclipse
-                && !targetDebuffs.Any(e => e.Equals(moonfireSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(moonfireSpell, true))
-            {
-                return true;
-            }
-
-            if (SolarEclipse
-                && !targetDebuffs.Any(e => e.Equals(insectSwarmSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(insectSwarmSpell, true))
+            if ((!targetDebuffs.Any(e => e.Equals(faerieFireSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(faerieFireSpell, true))
+                || (LunarEclipse
+                    && !targetDebuffs.Any(e => e.Equals(moonfireSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(moonfireSpell, true))
+                || (SolarEclipse
+                    && !targetDebuffs.Any(e => e.Equals(insectSwarmSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(insectSwarmSpell, true)))
             {
                 return true;
             }
@@ -198,30 +176,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
-            if (IsSpellKnown(spellname)
-                && (needsMana && HasEnoughMana(spellname))
-                && !IsOnCooldown(spellname))
+            if (!Spells.ContainsKey(spellName))
             {
-                HookManager.CastSpell(spellname);
+                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+            }
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+            {
+                HookManager.CastSpell(spellName);
+                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
                 return true;
             }
 
             return false;
         }
-
-        private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .OrderByDescending(e => e.Rank)
-            .FirstOrDefault(e => e.Name.Equals(spellName))
-            ?.Costs <= ObjectManager.Player.Mana;
-
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
-
-        private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .Any(e => e.Name.Equals(spellName));
     }
 }
