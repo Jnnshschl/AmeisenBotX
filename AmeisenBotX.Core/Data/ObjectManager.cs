@@ -7,6 +7,7 @@ using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 
 namespace AmeisenBotX.Core.Data
@@ -47,6 +48,12 @@ namespace AmeisenBotX.Core.Data
 
         public WowPlayer Player { get; private set; }
 
+        public WowUnit Target { get; private set; }
+
+        public WowUnit LastTarget { get; private set; }
+
+        public WowUnit Pet { get; private set; }
+
         public IntPtr PlayerBase { get; private set; }
 
         public ulong PlayerGuid { get; private set; }
@@ -79,6 +86,9 @@ namespace AmeisenBotX.Core.Data
         private IOffsetList OffsetList { get; }
 
         private XMemory XMemory { get; }
+
+        public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
+            => WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
 
         public ulong ReadPartyLeaderGuid()
         {
@@ -286,6 +296,9 @@ namespace AmeisenBotX.Core.Data
             return false;
         }
 
+        public void UpdateObject<T>(T wowObject) where T : WowObject
+            => UpdateObject(wowObject.Type, wowObject.BaseAddress);        
+
         public void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress)
         {
             WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
@@ -356,27 +369,30 @@ namespace AmeisenBotX.Core.Data
             while (isWorldLoaded == 1 && (objectType <= 7 && objectType > 0))
             {
                 WowObjectType wowObjectType = (WowObjectType)objectType;
-                switch (wowObjectType)
+                WowObject obj = wowObjectType switch
                 {
-                    case WowObjectType.Gameobject:
-                        WowObjects.Add(ReadWowGameobject(activeObject, wowObjectType));
-                        break;
+                    WowObjectType.Gameobject => ReadWowGameobject(activeObject, wowObjectType),
+                    WowObjectType.Dynobject => ReadWowDynobject(activeObject, wowObjectType),
+                    WowObjectType.Unit => ReadWowUnit(activeObject, wowObjectType),
+                    WowObjectType.Player => ReadWowPlayer(activeObject, wowObjectType),
+                    _ => ReadWowObject(activeObject, wowObjectType),
+                };
 
-                    case WowObjectType.Dynobject:
-                        WowObjects.Add(ReadWowDynobject(activeObject, wowObjectType));
-                        break;
+                WowObjects.Add(obj);
 
-                    case WowObjectType.Unit:
-                        WowObjects.Add(ReadWowUnit(activeObject, wowObjectType));
-                        break;
+                if(obj.Guid == TargetGuid)
+                {
+                    Target = (WowUnit)obj;
+                }
 
-                    case WowObjectType.Player:
-                        WowObjects.Add(ReadWowPlayer(activeObject, wowObjectType));
-                        break;
+                if (obj.Guid == PetGuid)
+                {
+                    Pet = (WowUnit)obj;
+                }
 
-                    default:
-                        WowObjects.Add(ReadWowObject(activeObject, wowObjectType));
-                        break;
+                if (obj.Guid == LastTargetGuid)
+                {
+                    LastTarget = (WowUnit)obj;
                 }
 
                 XMemory.Read(IntPtr.Add(activeObject, OffsetList.NextObject.ToInt32()), out activeObject);

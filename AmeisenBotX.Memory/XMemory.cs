@@ -217,7 +217,7 @@ namespace AmeisenBotX.Memory
 
         public bool ReadStruct<T>(IntPtr address, out T value)
         {
-            int size = Marshal.SizeOf(typeof(T));
+            int size = SizeOf(typeof(T));
             IntPtr readBuffer = Marshal.AllocHGlobal(size);
 
             try
@@ -227,10 +227,6 @@ namespace AmeisenBotX.Memory
                     value = (T)Marshal.PtrToStructure(readBuffer, typeof(T));
                     return true;
                 }
-            }
-            catch
-            {
-                // ignored lel
             }
             finally
             {

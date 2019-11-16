@@ -32,17 +32,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Utils
             if (!Cooldowns.ContainsKey(spellname.ToUpper()))
             {
                 Cooldowns.Add(spellname.ToUpper(), DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs));
-                return true;
+            }
+            else
+            {
+                Cooldowns[spellname.ToUpper()] = DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs);
             }
 
-            return false;
+            return true;
         }
 
         public bool IsSpellOnCooldown(string spellname)
         {
-            if (Cooldowns.ContainsKey(spellname))
+            if (Cooldowns.ContainsKey(spellname.ToUpper()))
             {
-                return Cooldowns.TryGetValue(spellname, out DateTime dateTime)
+                return Cooldowns.TryGetValue(spellname.ToUpper(), out DateTime dateTime)
                        && dateTime > DateTime.Now;
             }
 
