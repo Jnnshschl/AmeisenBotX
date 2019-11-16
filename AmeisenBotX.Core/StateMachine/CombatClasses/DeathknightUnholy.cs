@@ -174,10 +174,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsRuneenergy && Spells[spellName].Costs < ObjectManager.Player.Runeenergy)
-                && (needsBloodrune && (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
-                && (needsFrostrune && (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
-                && (needsUnholyrune && (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5))))
+                && (!needsRuneenergy || Spells[spellName].Costs < ObjectManager.Player.Runeenergy)
+                && (!needsBloodrune || (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
+                && (!needsFrostrune || (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
+                && (!needsUnholyrune || (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5))))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));

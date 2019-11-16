@@ -212,7 +212,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));

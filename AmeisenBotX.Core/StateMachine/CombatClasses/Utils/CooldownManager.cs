@@ -13,11 +13,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Utils
         {
             Cooldowns = new Dictionary<string, DateTime>();
 
-            foreach (Spell spell in spells)
+            if (spells != null)
             {
-                if (!Cooldowns.ContainsKey(spell.Name.ToUpper()))
+                foreach (Spell spell in spells)
                 {
-                    Cooldowns.Add(spell.Name.ToUpper(), DateTime.Now);
+                    if (!Cooldowns.ContainsKey(spell.Name.ToUpper()))
+                    {
+                        Cooldowns.Add(spell.Name.ToUpper(), DateTime.Now);
+                    }
                 }
             }
         }
@@ -26,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Utils
 
         public bool SetSpellCooldown(string spellname, int cooldownLeftMs)
         {
-            if (Cooldowns.ContainsKey(spellname.ToUpper()))
+            if (!Cooldowns.ContainsKey(spellname.ToUpper()))
             {
                 Cooldowns.Add(spellname.ToUpper(), DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs));
                 return true;
@@ -36,7 +39,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Utils
         }
 
         public bool IsSpellOnCooldown(string spellname)
-            => Cooldowns.TryGetValue(spellname, out DateTime dateTime)
-            && dateTime > DateTime.Now;
+        {
+            if (Cooldowns.ContainsKey(spellname))
+            {
+                return Cooldowns.TryGetValue(spellname, out DateTime dateTime)
+                       && dateTime > DateTime.Now;
+            }
+
+            return false;
+        }
     }
 }

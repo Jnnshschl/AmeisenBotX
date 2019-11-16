@@ -32,6 +32,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly int debuffCheckTime = 1;
         private readonly int enemyCastingCheckTime = 1;
         private readonly int hotstreakCheckTime = 1;
+        private readonly int shieldCheckTime = 16;
 
         public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -62,6 +63,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastHotstreakCheck { get; set; }
 
+        private DateTime LastShieldCheck { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
         private CooldownManager CooldownManager { get; }
@@ -80,7 +83,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if ((DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
                     && HandleDebuffing())
                 || (DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime)
-                    && HandlePyroblastAndManaShield())
+                    && HandlePyroblast())
+                || (DateTime.Now - LastShieldCheck > TimeSpan.FromSeconds(shieldCheckTime)
+                    && HandleManaShield())
                 || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
                     && HandleCounterspell())
                 || (ObjectManager.Player.HealthPercentage < 16
@@ -149,8 +154,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return true;
             }
 
-            if (!targetDebuffs.Any(e => e.Equals(scorchSpell, StringComparison.OrdinalIgnoreCase))
-                || !targetDebuffs.Any(e => e.Equals(improvedScorchSpell, StringComparison.OrdinalIgnoreCase))
+            if ((!targetDebuffs.Any(e => e.Equals(scorchSpell, StringComparison.OrdinalIgnoreCase))
+                && !targetDebuffs.Any(e => e.Equals(improvedScorchSpell, StringComparison.OrdinalIgnoreCase)))
                 && CastSpellIfPossible(scorchSpell, true))
             {
                 return true;
@@ -160,19 +165,31 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool HandlePyroblastAndManaShield()
+        private bool HandlePyroblast()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
             if ((myBuffs.Any(e => e.Equals(hotstreakSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(pyroblastSpell))
-                || (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(manaShieldSpell)))
+                    && CastSpellIfPossible(pyroblastSpell)))
             {
                 return true;
             }
 
             LastHotstreakCheck = DateTime.Now;
+            return false;
+        }
+
+        private bool HandleManaShield()
+        {
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
+
+            if ((!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(manaShieldSpell)))
+            {
+                return true;
+            }
+
+            LastShieldCheck = DateTime.Now;
             return false;
         }
 
@@ -185,7 +202,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));

@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if ((!ObjectManager.Player.IsInCombat && DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
                     && HandleBuffs())
-                || CastSpellIfPossible(hungerForBloodSpell, true)
+                // || CastSpellIfPossible(hungerForBloodSpell, true)
                 || (ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossible(cloakOfShadowsSpell, true)))
             {
@@ -97,7 +97,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
             }
 
-            if (CastSpellIfPossible(eviscerateSpell, true)
+            if (CastSpellIfPossible(eviscerateSpell, true, true, 3)
                 || CastSpellIfPossible(mutilateSpell, true))
             {
                 return;
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
 
             if ((!myBuffs.Any(e => e.Equals(sliceAndDiceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(sliceAndDiceSpell))
+                    && CastSpellIfPossible(sliceAndDiceSpell, false, true, 1))
                 || (!myBuffs.Any(e => e.Equals(coldBloodSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(coldBloodSpell)))
             {
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool CastSpellIfPossible(string spellName, bool needsEnergy = false)
+        private bool CastSpellIfPossible(string spellName, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1)
         {
             if (!Spells.ContainsKey(spellName))
             {
@@ -150,7 +150,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsEnergy && Spells[spellName].Costs < ObjectManager.Player.Energy))
+                && (!needsEnergy || Spells[spellName].Costs < ObjectManager.Player.Energy)
+                && (!needsCombopoints || ObjectManager.Player.ComboPoints >= requiredCombopoints))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));

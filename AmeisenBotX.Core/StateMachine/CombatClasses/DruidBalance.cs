@@ -84,7 +84,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if (CastSpellIfPossible(forceOfNatureSpell, true))
             {
                 HookManager.ClickOnTerrain(ObjectManager.Player.Position);
-                return;
             }
 
             if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
@@ -185,7 +184,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));

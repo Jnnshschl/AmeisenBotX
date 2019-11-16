@@ -30,7 +30,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
         private readonly int enemyCastingCheckTime = 1;
-        private readonly int manashieldCheckTime = 1;
+        private readonly int manashieldCheckTime = 16;
+        private readonly int missileBarrageCheckTime = 1;
 
         public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -61,6 +62,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastManashieldCheck { get; set; }
 
+        private DateTime LastMissileBarrageCheck { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
         private CooldownManager CooldownManager { get; }
@@ -82,6 +85,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && HandleArcaneMissiles())
                 || (DateTime.Now - LastManashieldCheck > TimeSpan.FromSeconds(manashieldCheckTime)
                     && HandleManaShield())
+                || (DateTime.Now - LastMissileBarrageCheck > TimeSpan.FromSeconds(missileBarrageCheckTime)
+                    && HandleMissileBarrage())
                 || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
                     && HandleCounterspell())
                 || (ObjectManager.Player.HealthPercentage < 16
@@ -153,15 +158,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool HandleManaShield()
+        private bool HandleMissileBarrage()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(manaShieldSpell))
-            {
-                return true;
-            }
 
             if (!myBuffs.Any(e => e.Equals(missileBarrageSpell, StringComparison.OrdinalIgnoreCase)))
             {
@@ -170,6 +169,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             else
             {
                 BarrageCounter++;
+            }
+
+            LastMissileBarrageCheck = DateTime.Now;
+            return false;
+        }
+
+        private bool HandleManaShield()
+        {
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
+
+            if (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
+                && CastSpellIfPossible(manaShieldSpell))
+            {
+                return true;
             }
 
             LastManashieldCheck = DateTime.Now;
@@ -185,7 +198,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));

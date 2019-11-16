@@ -134,14 +134,37 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if ((!myBuffs.Any(e => e.Equals(demonSkinSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(demonSkinSpell, true))
-                || (!myBuffs.Any(e => e.Equals(demonArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(demonArmorSpell, true))
-                || (!myBuffs.Any(e => e.Equals(felArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(felArmorSpell, true)))
+            if (Spells.ContainsKey(demonSkinSpell)
+                && Spells[demonSkinSpell] != null)
             {
-                return true;
+                if ((!myBuffs.Any(e => e.Equals(demonSkinSpell, StringComparison.OrdinalIgnoreCase))
+                        && CastSpellIfPossible(demonSkinSpell, true)))
+                {
+                    return true;
+                }
+            }
+            else if (Spells.ContainsKey(demonArmorSpell)
+                    && Spells[demonArmorSpell] != null)
+            {
+                if (Spells.ContainsKey(demonArmorSpell)
+                    && Spells[demonSkinSpell] != null
+                    && (!myBuffs.Any(e => e.Equals(demonArmorSpell, StringComparison.OrdinalIgnoreCase))
+                        && CastSpellIfPossible(demonArmorSpell, true)))
+                {
+                    return true;
+                }
+            }
+            else if (Spells.ContainsKey(felArmorSpell)
+                    && Spells[felArmorSpell] != null)
+            {
+
+                if (Spells.ContainsKey(felArmorSpell)
+                    && Spells[demonSkinSpell] != null
+                    && (!myBuffs.Any(e => e.Equals(felArmorSpell, StringComparison.OrdinalIgnoreCase))
+                        && CastSpellIfPossible(felArmorSpell, true)))
+                {
+                    return true;
+                }
             }
 
             LastBuffCheck = DateTime.Now;
@@ -177,7 +200,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (needsMana && Spells[spellName].Costs < ObjectManager.Player.Mana))
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
