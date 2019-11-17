@@ -378,6 +378,7 @@ namespace AmeisenBotX
             comboboxBuiltInCombatClass.Items.Add("WarriorArms");
             comboboxBuiltInCombatClass.Items.Add("DeathknightBlood");
             comboboxBuiltInCombatClass.Items.Add("DeathknightUnholy");
+            comboboxBuiltInCombatClass.Items.Add("DeathknightFrost");
             comboboxBuiltInCombatClass.Items.Add("WarriorFury");
             comboboxBuiltInCombatClass.Items.Add("PaladinHoly");
             comboboxBuiltInCombatClass.Items.Add("PaladinRetribution");

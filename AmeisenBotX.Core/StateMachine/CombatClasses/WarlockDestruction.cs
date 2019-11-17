@@ -34,7 +34,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string summonImpSpell = "Summon Imp";
 
         private readonly int buffCheckTime = 8;
-        private readonly int damageBuffCheckTime = 1;
         private readonly int debuffCheckTime = 1;
 
         public WarlockDestruction(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
@@ -66,8 +65,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private HookManager HookManager { get; }
 
         private DateTime LastBuffCheck { get; set; }
-
-        private DateTime LastDamageBuffCheck { get; set; }
 
         private DateTime LastDebuffCheck { get; set; }
 

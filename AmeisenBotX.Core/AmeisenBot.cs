@@ -153,6 +153,7 @@ namespace AmeisenBotX.Core
                 "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "DEATHKNIGHTBLOOD" => new DeathknightBlood(ObjectManager, CharacterManager, HookManager),
                 "DEATHKNIGHTUNHOLY" => new DeathknightUnholy(ObjectManager, CharacterManager, HookManager),
+                "DEATHKNIGHTFROST" => new DeathknightFrost(ObjectManager, CharacterManager, HookManager),
                 "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
                 "PALADINRETRIBUTION" => new PaladinRetribution(ObjectManager, CharacterManager, HookManager),

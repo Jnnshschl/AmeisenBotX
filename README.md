@@ -19,7 +19,7 @@ None yet...
 ------------ | ------------- | ------------- | -------------
 Druid | ✔️ Balance | ❌ Feral | ✔️ Restoration 
 Hunter | ❌ Marksmanship | ✔️ Beast Mastery | ❌ Survival
-Mage | ✔️ Fire | ❌ Frost | ✔️ Arcane
+Mage | ✔️ Fire | ✔️ Frost | ✔️ Arcane
 Paladin | ✔️ Holy | ✔️ Retribution | ✔️ Protection
 Priest | ✔️ Holy | ❌ Discipline | ✔️ Shadow
 Rogue | ❌ Combat | ⚠️ Assasination | ❌ Sublety
