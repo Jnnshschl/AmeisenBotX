@@ -45,7 +45,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
 
             Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
+            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            {
+                Spells.Clear();
+                foreach (Spell spell in CharacterManager.SpellBook.Spells)
+                {
+                    Spells.Add(spell.Name, spell);
+                }
+            };
         }
 
         public bool HandlesMovement => false;

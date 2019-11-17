@@ -163,6 +163,8 @@ namespace AmeisenBotX.Core
                 "PRIESTHOLY" => new PriestHoly(ObjectManager, CharacterManager, HookManager),
                 "PRIESTSHADOW" => new PriestShadow(ObjectManager, CharacterManager, HookManager),
                 "WARLOCKAFFLICTION" => new WarlockAffliction(ObjectManager, CharacterManager, HookManager),
+                "WARLOCKDEMONOLOGY" => new WarlockDemonology(ObjectManager, CharacterManager, HookManager),
+                "WARLOCKDESTRUCTION" => new WarlockDestruction(ObjectManager, CharacterManager, HookManager),
                 "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
                 "DRUIDBALANCE" => new DruidBalance(ObjectManager, CharacterManager, HookManager),
                 "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),

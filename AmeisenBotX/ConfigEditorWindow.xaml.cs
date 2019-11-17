@@ -65,6 +65,7 @@ namespace AmeisenBotX
                     CustomCombatClassFile = textboxCombatClassFile.Text,
                     AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false),
                     AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false),
+                    AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false),
                     AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false),
                     FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false),
                     FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false),
@@ -118,7 +119,7 @@ namespace AmeisenBotX
             if (textboxNavmeshServerPort.Text.Length == 0
                 || !int.TryParse(textboxNavmeshServerPort.Text, out int port)
                 || port < 0
-                || port > short.MaxValue)
+                || port > ushort.MaxValue)
             {
                 textboxNavmeshServerPort.BorderBrush = errorBorderBrush;
                 failed = true;
@@ -349,6 +350,7 @@ namespace AmeisenBotX
             textboxCombatClassFile.Text = Config.CustomCombatClassFile;
             checkboxAvoidAoe.IsChecked = Config.AutoDodgeAoeSpells;
             checkboxAutoStartWow.IsChecked = Config.AutostartWow;
+            checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
             checkboxAutoLogin.IsChecked = Config.AutoLogin;
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
@@ -384,8 +386,10 @@ namespace AmeisenBotX
             comboboxBuiltInCombatClass.Items.Add("MageFire");
             comboboxBuiltInCombatClass.Items.Add("HunterBeastmastery");
             comboboxBuiltInCombatClass.Items.Add("PriestHoly");
-            comboboxBuiltInCombatClass.Items.Add("RiestShadow");
+            comboboxBuiltInCombatClass.Items.Add("PriestShadow");
             comboboxBuiltInCombatClass.Items.Add("WarlockAffliction");
+            comboboxBuiltInCombatClass.Items.Add("WarlockDemonology");
+            comboboxBuiltInCombatClass.Items.Add("WarlockDestruction");
             comboboxBuiltInCombatClass.Items.Add("DruidRestoration");
             comboboxBuiltInCombatClass.Items.Add("DruidBalance");
             comboboxBuiltInCombatClass.Items.Add("RogueAssasination");

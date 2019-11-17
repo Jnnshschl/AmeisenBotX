@@ -24,7 +24,7 @@ Paladin | ✔️ Holy | ✔️ Retribution | ✔️ Protection
 Priest | ✔️ Holy | ❌ Discipline | ✔️ Shadow
 Rogue | ❌ Combat | ⚠️ Assasination | ❌ Sublety
 Shaman | ✔️ Elemental | ❌Enhancement | ❌ Restoration
-Warlock | ✔️ Affliction | ❌ Demonology | ❌ Destruction
+Warlock | ✔️ Affliction | ✔️ Demonology | ✔️ Destruction
 Warrior | ✔️ Arms | ✔️ Fury | ❌ Protection
 Death Knight | ⚠️ Blood | ❌ Frost | ✔️ Unholy
 
