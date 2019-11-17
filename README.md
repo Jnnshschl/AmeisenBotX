@@ -34,7 +34,9 @@ Death Knight | ⚠️ Blood | ❌ Frost | ✔️ Unholy
 
 ## Screenshots
 
-... will follow.
+![Main Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/mainWindow.PNG "Main Window")
+
+![Config Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/configWindow.PNG "Config Window")
 
 ## Setup Guide
 

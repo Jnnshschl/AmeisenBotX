@@ -13,13 +13,21 @@ namespace AmeisenBotX.Core.Character.Spells
     {
         public SpellBook(HookManager hookManager)
         {
+            Spells = new List<Spell>();
+
             HookManager = hookManager;
             Update();
         }
 
+        public delegate void SpellBookUpdate();
+        public event SpellBookUpdate OnSpellBookUpdate;
+
         public List<Spell> Spells { get; private set; }
 
         private HookManager HookManager { get; }
+
+        public Spell GetSpellByName(string spellname)
+            => Spells.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
 
         public bool IsSpellKnown(string spellname)
             => Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
@@ -32,11 +40,13 @@ namespace AmeisenBotX.Core.Character.Spells
             try
             {
                 Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells);
+
+                Spells.OrderBy(e => e.Name).ThenByDescending(e => e.Rank);
+                OnSpellBookUpdate?.Invoke();
             }
             catch (Exception e)
             {
                 AmeisenLogger.Instance.Log($"Failed to parse Spells JSON:\n{rawSpells}\n{e.ToString()}", LogLevel.Error);
-                Spells = new List<Spell>();
             }
         }
     }

@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
 using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
@@ -46,6 +48,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             CharacterManager = characterManager;
             HookManager = hookManager;
             XMemory = xMemory;
+            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+
+            Spells = new Dictionary<string, Spell>();
+            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
         }
 
         public bool HandlesMovement => false;
@@ -70,37 +76,36 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private ObjectManager ObjectManager { get; }
 
+        private CooldownManager CooldownManager { get; }
+
+        private Dictionary<string, Spell> Spells { get; }
+
         private XMemory XMemory { get; }
 
         private DateTime PetStatusCheck { get; set; }
 
         public void Execute()
         {
+            // we dont want to do anything if we are casting something...
+            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            {
+                return;
+            }
+
             if (!ObjectManager.Player.IsAutoAttacking)
             {
                 HookManager.StartAutoAttack();
             }
 
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
-            {
-                return;
-            }
-
-            if (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
-                && CheckPetStatus())
-            {
-                return;
-            }
-
-            if (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                && HandleIntimmidation())
-            {
-                return;
-            }
-
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                && HandleDebuffing())
+            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                    && HandleBuffing())
+                || (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
+                    && CheckPetStatus())
+                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
+                    && HandleIntimmidation())
+                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
+                    && HandleDebuffing()))
             {
                 return;
             }
@@ -117,22 +122,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     return;
                 }
 
-                if (distanceToTarget < 3)
+                if (distanceToTarget < 3
+                    && ObjectManager.Player.CurrentlyCastingSpellId <= 0
+                    && ObjectManager.Player.CurrentlyChannelingSpellId <= 0)
                 {
                     BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 750, 1250);
                 }
 
-                if (distanceToTarget < 10)
+                if (distanceToTarget < 3)
                 {
+                    CastSpellIfPossible(deterrenceSpell, true);
+
                     if (CastSpellIfPossible(frostTrapSpell, true))
                     {
                         return;
                     }
-
-                    CastSpellIfPossible(deterrenceSpell, true);
                 }
 
-                if (distanceToTarget < 9
+                if (distanceToTarget < 6
                     && CastSpellIfPossible(disengageSpell, true))
                 {
                     Disengaged = true;
@@ -158,12 +165,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     CastSpellIfPossible(beastialWrathSpell, true);
                     CastSpellIfPossible(rapidFireSpell);
 
-                    if (CastSpellIfPossible(arcaneShotSpell, true))
-                    {
-                        return;
-                    }
-
-                    if (CastSpellIfPossible(steadyShotSpell,true))
+                    if (CastSpellIfPossible(arcaneShotSpell, true)
+                        || CastSpellIfPossible(steadyShotSpell, true))
                     {
                         return;
                     }
@@ -173,14 +176,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
-            {
-                return;
-            }
-
-            if (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
-                && CheckPetStatus())
+            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                    && HandleBuffing())
+                || (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
+                    && CheckPetStatus()))
             {
                 return;
             }
@@ -192,15 +191,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             WowUnit pet = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.PetGuid);
 
-            if (ObjectManager.PetGuid == 0
-                && CastSpellIfPossible(callPetSpell))
-            {
-                return true;
-            }
-
-            if (pet != null
-                && (pet.Health == 0 || pet.IsDead)
-                && CastSpellIfPossible(revivePetSpell))
+            if ((ObjectManager.PetGuid == 0
+                    && CastSpellIfPossible(callPetSpell))
+                || (pet != null
+                    && (pet.Health == 0 || pet.IsDead)
+                    && CastSpellIfPossible(revivePetSpell)))
             {
                 return true;
             }
@@ -237,14 +232,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
 
-            if (!targetDebuffs.Any(e => e.Equals(huntersMarkSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(huntersMarkSpell, true))
-            {
-                return true;
-            }
-
-            if (!targetDebuffs.Any(e => e.Equals(serpentStingSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(serpentStingSpell, true))
+            if ((!targetDebuffs.Any(e => e.Equals(huntersMarkSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(huntersMarkSpell, true))
+                || (!targetDebuffs.Any(e => e.Equals(serpentStingSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(serpentStingSpell, true)))
             {
                 return true;
             }
@@ -269,30 +260,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
-            if (IsSpellKnown(spellname)
-                && (needsMana && HasEnoughMana(spellname))
-                && !IsOnCooldown(spellname))
+            if (!Spells.ContainsKey(spellName))
             {
-                HookManager.CastSpell(spellname);
+                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+            }
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
+            {
+                HookManager.CastSpell(spellName);
+                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
                 return true;
             }
 
             return false;
         }
-
-        private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .OrderByDescending(e => e.Rank)
-            .FirstOrDefault(e => e.Name.Equals(spellName))
-            ?.Costs <= ObjectManager.Player.Mana;
-
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
-
-        private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .Any(e => e.Name.Equals(spellName));
     }
 }

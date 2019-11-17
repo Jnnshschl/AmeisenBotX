@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,12 +34,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
+            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, flashHealSpell },
                 { 5000, greaterHealSpell },
             };
+
+            Spells = new Dictionary<string, Spell>();
+            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
         }
 
         public bool HandlesMovement => false;
@@ -56,10 +62,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private ObjectManager ObjectManager { get; }
 
+        private CooldownManager CooldownManager { get; }
+
+        private Dictionary<string, Spell> Spells { get; }
+
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public void Execute()
         {
+            // we dont want to do anything if we are casting something...
+            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            {
+                return;
+            }
+
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
@@ -159,9 +176,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private void HandleDeadPartymembers()
         {
-            if (IsSpellKnown(resurrectionSpell)
-                && HasEnoughMana(resurrectionSpell)
-                && !IsOnCooldown(resurrectionSpell))
+            if (!Spells.ContainsKey(resurrectionSpell))
+            {
+                Spells.Add(resurrectionSpell, CharacterManager.SpellBook.GetSpellByName(resurrectionSpell));
+            }
+
+            if (Spells[resurrectionSpell] != null
+                && !CooldownManager.IsSpellOnCooldown(resurrectionSpell)
+                && Spells[resurrectionSpell].Costs < ObjectManager.Player.Mana)
             {
                 IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
                 List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
@@ -170,6 +192,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     HookManager.TargetGuid(groupPlayers.First().Guid);
                     HookManager.CastSpell(resurrectionSpell);
+                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
                 }
             }
         }
@@ -180,31 +203,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
         }
 
-        private bool CastSpellIfPossible(string spellname, bool needsMana = false)
+        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
-            if (IsSpellKnown(spellname)
-                && (needsMana && HasEnoughMana(spellname))
-                && !IsOnCooldown(spellname))
+            if (!Spells.ContainsKey(spellName))
             {
-                HookManager.CastSpell(spellname);
+                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+            }
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
+            {
+                HookManager.CastSpell(spellName);
+                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
                 return true;
             }
 
             return false;
         }
-
-        private bool HasEnoughMana(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .OrderByDescending(e => e.Rank)
-            .FirstOrDefault(e => e.Name.Equals(spellName))
-            ?.Costs <= ObjectManager.Player.Mana;
-
-        private bool IsOnCooldown(string spellName)
-            => HookManager.GetSpellCooldown(spellName) > 0;
-
-        private bool IsSpellKnown(string spellName)
-            => CharacterManager.SpellBook.Spells
-            .Any(e => e.Name.Equals(spellName));
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {

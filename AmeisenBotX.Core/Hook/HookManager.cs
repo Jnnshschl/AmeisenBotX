@@ -339,8 +339,8 @@ namespace AmeisenBotX.Core.Hook
 
             if (double.TryParse(result, out double value))
             {
-                value = Math.Round(value, 0);
-                return value > 0 ? value : 0;
+                value = Math.Round(value, 3);
+                return value > 0 ? value * 1000 : 0;
             }
 
             return -1;
