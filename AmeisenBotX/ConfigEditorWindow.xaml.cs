@@ -395,6 +395,7 @@ namespace AmeisenBotX
             comboboxBuiltInCombatClass.Items.Add("DruidBalance");
             comboboxBuiltInCombatClass.Items.Add("RogueAssasination");
             comboboxBuiltInCombatClass.Items.Add("ShamanElemental");
+            comboboxBuiltInCombatClass.Items.Add("ShamanRestoration");
             comboboxBuiltInCombatClass.SelectedIndex = 0;
         }
 

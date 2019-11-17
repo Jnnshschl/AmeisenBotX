@@ -9,38 +9,38 @@ using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class ShamanElemental : ICombatClass
+    public class ShamanRestoration : ICombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string flameShockSpell = "Flame Shock";
-        private readonly string lavaBurstSpell = "Lava Burst";
-        private readonly string lightningBoltSpell = "Lightning Bolt";
-        private readonly string chainLightningSpell = "Chain Lightning";
-        private readonly string windShearSpell = "Wind Shear";
-        private readonly string thunderstormSpell = "Thunderstorm";
-        private readonly string lightningShieldSpell = "Lightning Shield";
+        private readonly string chainHealSpell = "Chain Heal";
+        private readonly string healingWaveSpell = "Healing Wave";
+        private readonly string riptideSpell = "Riptide";
+        private readonly string earthShieldSpell = "Earth Shield";
         private readonly string waterShieldSpell = "Water Shield";
-        private readonly string flametoungueWeaponSpell = "Flametoungue Weapon";
-        private readonly string elementalMasterySpell = "Elemental Mastery";
-        private readonly string heroismSpell = "Heroism";
+        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
+        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
+        private readonly string tidalForceSpell = "Tidal Force";
         private readonly string ancestralSpiritSpell = "Ancestral Spirit";
 
         private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
         private readonly int deadPartymembersCheckTime = 4;
 
-        public ShamanElemental(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
             CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+
+            SpellUsageHealDict = new Dictionary<int, string>()
+            {
+                { 0, riptideSpell },
+                { 5000, healingWaveSpell },
+            };
 
             Spells = new Dictionary<string, Spell>();
             CharacterManager.SpellBook.OnSpellBookUpdate += () =>
@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
+        public bool HandlesTargetSelection => true;
 
         public bool IsMelee => false;
 
@@ -65,8 +65,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastBuffCheck { get; set; }
 
-        private DateTime LastDebuffCheck { get; set; }
-
         private DateTime LastDeadPartymembersCheck { get; set; }
 
         private ObjectManager ObjectManager { get; }
@@ -74,6 +72,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private CooldownManager CooldownManager { get; }
 
         private Dictionary<string, Spell> Spells { get; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public void Execute()
         {
@@ -84,60 +84,68 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing())
+            if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
-                return;
-            }
+                HandleTargetSelection(playersThatNeedHealing);
+                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
 
-            //// if (ObjectManager.Player.HealthPercentage < 70
-            ////     && IsSpellKnown(flashHealSpell)
-            ////     && !IsOnCooldown(flashHealSpell))
-            //// {
-            ////     HookManager.CastSpell(flashHealSpell);
-            ////     return;
-            //// }
+                WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target != null)
-            {
-                if ((target.Position.GetDistance2D(ObjectManager.Player.Position) < 8
-                        && CastSpellIfPossible(thunderstormSpell, true))
-                    || (target.MaxHealth > 300000
-                        && target.HealthPercentage < 16
-                        && CastSpellIfPossible(heroismSpell))
-                    || CastSpellIfPossible(lavaBurstSpell, true)
-                    || CastSpellIfPossible(elementalMasterySpell)
-                    || CastSpellIfPossible(lightningBoltSpell, true))
+                if (target != null)
                 {
-                    return;
+                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
+
+                    if (target.HealthPercentage < 25
+                        && CastSpellIfPossible(earthShieldSpell, true))
+                    {
+                        return;
+                    }
+
+                    if (playersThatNeedHealing.Count > 4
+                        && CastSpellIfPossible(chainHealSpell, true))
+                    {
+                        return;
+                    }
+
+                    if (playersThatNeedHealing.Count > 6
+                        && (CastSpellIfPossible(naturesSwiftnessSpell, true)
+                        || CastSpellIfPossible(tidalForceSpell, true)))
+                    {
+                        return;
+                    }
+
+                    double healthDifference = target.MaxHealth - target.Health;
+                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                    {
+                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        {
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                        && HandleBuffing())
+                    {
+                        return;
+                    }
                 }
             }
         }
 
-        private bool HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if (!targetDebuffs.Any(e => e.Equals(flameShockSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(flameShockSpell, true))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
         public void OutOfCombatExecute()
         {
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                    && HandleDeadPartymembers())
+            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                && HandleBuffing())
+            {
+                return;
+            }
+
+            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers())
             {
                 return;
             }
@@ -146,21 +154,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
             if (!ObjectManager.Player.IsInCombat)
             {
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if ((ObjectManager.Player.ManaPercentage > 80
-                    && !myBuffs.Any(e => e.Equals(lightningShieldSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(lightningShieldSpell, true))
-                || (ObjectManager.Player.ManaPercentage < 25
-                    && !myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
+            if ((!myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(waterShieldSpell, true)))
                 // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
                 //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
-                //     && CastSpellIfPossible(flametoungueWeaponSpell, true)))
+                //     && CastSpellIfPossible(earthlivingWeaponSpell, true)))
             {
                 return true;
             }
@@ -191,7 +194,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     return true;
                 }
             }
+
             return false;
+        }
+
+        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
+        {
+            // select the one with lowest hp
+            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
         }
 
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
@@ -211,6 +221,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             return false;
+        }
+
+        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
+        {
+            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
+
+            groupPlayers.Add(ObjectManager.Player);
+
+            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
+
+            return playersThatNeedHealing.Count > 0;
         }
     }
 }

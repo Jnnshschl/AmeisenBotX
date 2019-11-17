@@ -98,14 +98,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     if (target.HealthPercentage < 25
                         && CastSpellIfPossible(guardianSpiritSpell, true))
                     {
-                        HookManager.CastSpell(guardianSpiritSpell);
                         return;
                     }
 
                     if (playersThatNeedHealing.Count > 4
                         && CastSpellIfPossible(prayerOfHealingSpell, true))
                     {
-                        HookManager.CastSpell(prayerOfHealingSpell);
                         return;
                     }
 
@@ -129,16 +127,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         if (CastSpellIfPossible(keyValuePair.Value, true))
                         {
-                            HookManager.CastSpell(keyValuePair.Value);
-                            break;
+                            return;
                         }
                     }
                 }
                 else
                 {
-                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                        && HandleBuffing())
                     {
-                        HandleBuffing();
+                        return;
                     }
                 }
             }
@@ -146,14 +144,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
+            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                && HandleBuffing())
             {
-                HandleBuffing();
+                return;
             }
 
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime))
+            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers())
             {
-                HandleDeadPartymembers();
+                return;
             }
         }
 
@@ -165,14 +165,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(powerWordFortitudeSpell, true))
-            {
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(innerFireSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(innerFireSpell, true))
+            if ((!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(powerWordFortitudeSpell, true))
+                || (!myBuffs.Any(e => e.Equals(innerFireSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(innerFireSpell, true)))
             {
                 return true;
             }
@@ -181,7 +177,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private void HandleDeadPartymembers()
+        private bool HandleDeadPartymembers()
         {
             if (!Spells.ContainsKey(resurrectionSpell))
             {
@@ -200,8 +196,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     HookManager.TargetGuid(groupPlayers.First().Guid);
                     HookManager.CastSpell(resurrectionSpell);
                     CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
