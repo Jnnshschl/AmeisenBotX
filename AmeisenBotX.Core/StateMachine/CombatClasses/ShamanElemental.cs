@@ -43,7 +43,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
 
             Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () => { Spells.Clear(); };
+            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            {
+                Spells.Clear();
+                foreach (Spell spell in CharacterManager.SpellBook.Spells)
+                {
+                    Spells.Add(spell.Name, spell);
+                }
+            };
         }
 
         public bool HandlesMovement => false;
@@ -150,10 +157,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && CastSpellIfPossible(lightningShieldSpell, true))
                 || (ObjectManager.Player.ManaPercentage < 25
                     && !myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(waterShieldSpell, true))
-                || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
-                    && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(flametoungueWeaponSpell, true)))
+                    && CastSpellIfPossible(waterShieldSpell, true)))
+                // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
+                //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
+                //     && CastSpellIfPossible(flametoungueWeaponSpell, true)))
             {
                 return true;
             }

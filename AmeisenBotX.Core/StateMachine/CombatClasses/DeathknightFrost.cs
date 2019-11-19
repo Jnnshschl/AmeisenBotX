@@ -13,31 +13,31 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class DeathknightUnholy : ICombatClass
+    public class DeathknightFrost : ICombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string unholyPresenceSpell = "Unholy Presence";
+        private readonly string frostPresenceSpell = "Frost Presence";
         private readonly string icyTouchSpell = "Icy Touch";
-        private readonly string scourgeStrikeSpell = "Scourge Strike";
         private readonly string bloodStrikeSpell = "Blood Strike";
         private readonly string plagueStrikeSpell = "Plague Strike";
         private readonly string runeStrikeSpell = "Rune Strike";
         private readonly string strangulateSpell = "Strangulate";
         private readonly string mindFreezeSpell = "Mind Freeze";
-        private readonly string summonGargoyleSpell = "Summon Gargoyle";
+        private readonly string obliterateSpell = "Obliterate";
         private readonly string frostFeverSpell = "Frost Fever";
         private readonly string bloodPlagueSpell = "Blood Plague";
         private readonly string deathCoilSpell = "Death Coil";
         private readonly string hornOfWinterSpell = "Horn of Winter";
         private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
+        private readonly string unbreakableArmorSpell = "Unbreakable Armor";
         private readonly string armyOfTheDeadSpell = "Army of the Dead";
 
         private readonly int buffCheckTime = 4;
         private readonly int deBuffCheckTime = 4;
         private readonly int enemyCastingCheckTime = 1;
 
-        public DeathknightUnholy(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DeathknightFrost(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -99,10 +99,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && HandleEnemyCasting())
                 || (ObjectManager.Player.HealthPercentage < 60
                     && CastSpellIfPossible(iceboundFortitudeSpell, true))
+                || CastSpellIfPossible(unbreakableArmorSpell, false, false, true)
+                || CastSpellIfPossible(obliterateSpell, false, false, true, true)
                 || CastSpellIfPossible(bloodStrikeSpell, false, true)
-                || CastSpellIfPossible(scourgeStrikeSpell, false, false, true, true)
                 || CastSpellIfPossible(deathCoilSpell, true)
-                || CastSpellIfPossible(summonGargoyleSpell, true)
                 || (ObjectManager.Player.Runeenergy > 60
                     && CastSpellIfPossible(runeStrikeSpell)))
             {
@@ -162,8 +162,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if ((ObjectManager.Player.IsInCombat
                     && !myBuffs.Any(e => e.Equals(hornOfWinterSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(hornOfWinterSpell))
-                || (!myBuffs.Any(e => e.Equals(unholyPresenceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(unholyPresenceSpell)))
+                || (!myBuffs.Any(e => e.Equals(frostPresenceSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(frostPresenceSpell)))
             {
                 return true;
             }

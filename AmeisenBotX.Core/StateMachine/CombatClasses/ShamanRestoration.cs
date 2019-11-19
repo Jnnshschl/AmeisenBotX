@@ -1,4 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -10,23 +12,24 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
-    public class PaladinHoly : ICombatClass
+    public class ShamanRestoration : ICombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string blessingOfWisdomSpell = "Blessing of Wisdom";
-        private readonly string devotionAuraSpell = "Devotion Aura";
-        private readonly string divineFavorSpell = "Divine Favor";
-        private readonly string divineIlluminationSpell = "Divine Illumination";
-        private readonly string divinePleaSpell = "Divine Plea";
-        private readonly string flashOfLightSpell = "Flash of Light";
-        private readonly string holyLightSpell = "Holy Light";
-        private readonly string holyShockSpell = "Holy Shock";
-        private readonly string layOnHandsSpell = "Lay on Hands";
+        private readonly string chainHealSpell = "Chain Heal";
+        private readonly string healingWaveSpell = "Healing Wave";
+        private readonly string riptideSpell = "Riptide";
+        private readonly string earthShieldSpell = "Earth Shield";
+        private readonly string waterShieldSpell = "Water Shield";
+        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
+        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
+        private readonly string tidalForceSpell = "Tidal Force";
+        private readonly string ancestralSpiritSpell = "Ancestral Spirit";
 
         private readonly int buffCheckTime = 8;
+        private readonly int deadPartymembersCheckTime = 4;
 
-        public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -35,9 +38,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, flashOfLightSpell },
-                { 2000, holyShockSpell },
-                { 10000, holyLightSpell }
+                { 0, riptideSpell },
+                { 5000, healingWaveSpell },
             };
 
             Spells = new Dictionary<string, Spell>();
@@ -63,6 +65,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastBuffCheck { get; set; }
 
+        private DateTime LastDeadPartymembersCheck { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
         private CooldownManager CooldownManager { get; }
@@ -80,12 +84,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercentage < 80
-                && CastSpellIfPossible(divinePleaSpell, true))
-            {
-                return;
-            }
-
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
@@ -97,21 +95,23 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
-                    if (target.HealthPercentage < 12
-                        && CastSpellIfPossible(layOnHandsSpell))
+                    if (target.HealthPercentage < 25
+                        && CastSpellIfPossible(earthShieldSpell, true))
                     {
                         return;
                     }
 
-                    if (target.HealthPercentage < 50)
+                    if (playersThatNeedHealing.Count > 4
+                        && CastSpellIfPossible(chainHealSpell, true))
                     {
-                        CastSpellIfPossible(divineFavorSpell, true);
+                        return;
                     }
 
-                    if (ObjectManager.Player.ManaPercentage < 50
-                       && ObjectManager.Player.ManaPercentage > 20)
+                    if (playersThatNeedHealing.Count > 6
+                        && (CastSpellIfPossible(naturesSwiftnessSpell, true)
+                        || CastSpellIfPossible(tidalForceSpell, true)))
                     {
-                        CastSpellIfPossible(divineIlluminationSpell, true);
+                        return;
                     }
 
                     double healthDifference = target.MaxHealth - target.Health;
@@ -121,17 +121,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         if (CastSpellIfPossible(keyValuePair.Value, true))
                         {
-                            break;
+                            return;
                         }
                     }
                 }
-            }
-            else
-            {
-                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
+                else
                 {
-                    return;
+                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
+                        && HandleBuffing())
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -143,17 +143,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 return;
             }
+
+            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers())
+            {
+                return;
+            }
         }
 
         private bool HandleBuffing()
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            if (!ObjectManager.Player.IsInCombat)
+            {
+                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+            }
 
-            if ((!myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(devotionAuraSpell, true))
-                || (!myBuffs.Any(e => e.Equals(blessingOfWisdomSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(blessingOfWisdomSpell, true)))
+            if ((!myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(waterShieldSpell, true)))
+                // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
+                //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
+                //     && CastSpellIfPossible(earthlivingWeaponSpell, true)))
             {
                 return true;
             }
@@ -162,15 +172,36 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
+        private bool HandleDeadPartymembers()
+        {
+            if (!Spells.ContainsKey(ancestralSpiritSpell))
+            {
+                Spells.Add(ancestralSpiritSpell, CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
+            }
+
+            if (Spells[ancestralSpiritSpell] != null
+                && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
+                && Spells[ancestralSpiritSpell].Costs < ObjectManager.Player.Mana)
+            {
+                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
+                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+
+                if (groupPlayers.Count > 0)
+                {
+                    HookManager.TargetGuid(groupPlayers.First().Guid);
+                    HookManager.CastSpell(ancestralSpiritSpell);
+                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)HookManager.GetSpellCooldown(ancestralSpiritSpell));
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
-            WowUnit target = possibleTargets.OrderBy(e => e.HealthPercentage).First();
-
-            if (target != null)
-            {
-                HookManager.TargetGuid(target.Guid);
-            }
+            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
         }
 
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
@@ -195,7 +226,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {
             IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
 
             groupPlayers.Add(ObjectManager.Player);
 
