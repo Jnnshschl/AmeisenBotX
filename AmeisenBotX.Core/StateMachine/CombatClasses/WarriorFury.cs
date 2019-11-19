@@ -507,6 +507,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if (newTargetFound)
             {
                 HookManager.TargetGuid(target.Guid);
+                Spells.ResetAfterTargetDeath();
             }
             return newTargetFound;
         }

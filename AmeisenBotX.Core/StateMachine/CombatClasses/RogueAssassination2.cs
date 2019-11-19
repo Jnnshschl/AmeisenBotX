@@ -32,7 +32,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool hasTargetMoved = false;
         private bool computeNewRoute = false;
-        public bool multipleTargets = false;
+        private bool wasInStealth = false;
+        private bool isSneaky = false;
+        private bool multipleTargets = false;
         private readonly RogueAssassinSpells Spells;
 
         private class RogueAssassinSpells
@@ -146,6 +148,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         if (IsReady(vanish))
                         {
                             CastSpell(vanish, ref energy, 0, 180, false);
+                            HookManager.ClearTarget();
+                            return;
                         }
                     }
                 }
@@ -345,12 +349,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
-                if (!LastTargetPosition.Equals(target.Position) || LastTargetRotation != target.Rotation)
+                if(LastTargetRotation != target.Rotation)
                 {
                     hasTargetMoved = true;
-                    LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                     LastTargetRotation = target.Rotation;
-                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - 5f * (float)Math.Cos(LastTargetRotation), LastTargetPosition.Y, LastTargetPosition.Z - 5f * (float)Math.Sin(LastTargetRotation));
+                }
+                if (!LastTargetPosition.Equals(target.Position))
+                {
+                    hasTargetMoved = true;
+                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - (9 * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - (9 * (float)Math.Sin(LastTargetRotation)));
                     targetDistanceChanged = true;
                 }
                 else if(hasTargetMoved)
@@ -385,6 +392,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
+            if(!HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            {
+                HookManager.CastSpell("Stealth");
+                Spells.ResetAfterTargetDeath();
+            }
             if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
             {
                 distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
@@ -433,7 +445,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool SearchNewTarget (ref WowUnit? target, bool grinding)
         {
-            if (target != null && !(target.IsDead || target.Health == 0))
+            if ((target != null && !(target.IsDead || target.Health == 0)) || (HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")) && ObjectManager.Player.HealthPercentage <= 20))
             {
                 return false;
             }
@@ -477,6 +489,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if (newTargetFound)
             {
                 HookManager.TargetGuid(target.Guid);
+                Spells.ResetAfterTargetDeath();
             }
             return newTargetFound;
         }
@@ -496,19 +509,37 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 return;
             }
-
-            if (hasTargetMoved || (distanceToTarget < 6.0 && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
+            if(HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
             {
-                if(ObjectManager.Player.IsInCombat && distanceToBehindTarget < 2.0)
+                if(!wasInStealth || hasTargetMoved)
                 {
-                    CharacterManager.MoveToPosition(LastTargetPosition);
+                    isSneaky = true;
                 }
-                else
+                wasInStealth = true;
+            }
+            else
+            {
+                isSneaky = false;
+                wasInStealth = false;
+            }
+            if(distanceToBehindTarget < 0.1)
+            {
+                isSneaky = false;
+            }
+            bool closeToTarget = distanceToTarget < 10.0;
+            //Console.WriteLine("isSneaky:" + isSneaky + ";distanceToTarget:" + distanceToTarget + ";distanceToBehindTarget:" + distanceToBehindTarget);
+            if(closeToTarget)
+            {
+                if (isSneaky || distanceToTarget >= 6)
                 {
                     CharacterManager.MoveToPosition(LastBehindTargetPosition);
                 }
+                else if (!BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25))
+                {
+                    CharacterManager.MoveToPosition(LastTargetPosition);
+                }
             }
-            else if(distanceToTarget >= 6.0)
+            else if (!closeToTarget)
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
