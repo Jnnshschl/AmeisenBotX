@@ -153,6 +153,7 @@
     <Compile Include="StateMachine\CombatClasses\WarlockDemonology.cs" />
     <Compile Include="StateMachine\CombatClasses\WarlockAffliction.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
+    <Compile Include="StateMachine\CombatClasses\RogueAssassination2.cs" />
     <Compile Include="StateMachine\States\AmeisenBotState.cs" />
     <Compile Include="StateMachine\States\State.cs" />
     <Compile Include="StateMachine\States\StateAttacking.cs" />

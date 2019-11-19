@@ -170,6 +170,7 @@ namespace AmeisenBotX.Core
                 "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
                 "DRUIDBALANCE" => new DruidBalance(ObjectManager, CharacterManager, HookManager),
                 "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),
+                "ALTROGUEASSASSINATION" => new RogueAssassination2(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
                 "SHAMANELEMENTAL" => new ShamanElemental(ObjectManager, CharacterManager, HookManager),
                 "SHAMANRESTORATION" => new ShamanRestoration(ObjectManager, CharacterManager, HookManager),
                 _ => null,
