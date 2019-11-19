@@ -357,6 +357,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if (!LastTargetPosition.Equals(target.Position))
                 {
                     hasTargetMoved = true;
+                    LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                     LastBehindTargetPosition = new Vector3(LastTargetPosition.X - (9 * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - (9 * (float)Math.Sin(LastTargetRotation)));
                     targetDistanceChanged = true;
                 }
@@ -522,15 +523,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 isSneaky = false;
                 wasInStealth = false;
             }
-            if(distanceToBehindTarget < 0.1)
+            if(distanceToBehindTarget < 3.0)
             {
                 isSneaky = false;
             }
             bool closeToTarget = distanceToTarget < 10.0;
-            //Console.WriteLine("isSneaky:" + isSneaky + ";distanceToTarget:" + distanceToTarget + ";distanceToBehindTarget:" + distanceToBehindTarget);
-            if(closeToTarget)
+            if(hasTargetMoved)
             {
-                if (isSneaky || distanceToTarget >= 6)
+                CharacterManager.MoveToPosition(LastBehindTargetPosition);
+            }
+            else if(closeToTarget)
+            {
+                if (isSneaky)
                 {
                     CharacterManager.MoveToPosition(LastBehindTargetPosition);
                 }
@@ -539,7 +543,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     CharacterManager.MoveToPosition(LastTargetPosition);
                 }
             }
-            else if (!closeToTarget)
+            else
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
