@@ -6,7 +6,17 @@ namespace AmeisenBotX.Core.OffsetLists
     {
         public IntPtr AccountName { get; } = new IntPtr(0xB6AA40);
 
+        public IntPtr AutolootEnabled { get; } = new IntPtr(0x30);
+
+        public IntPtr AutolootPointer { get; } = new IntPtr(0xBD0914);
+
+        public IntPtr BattlegroundFinished { get; } = new IntPtr(0xBEA588);
+
         public IntPtr CharacterSlotSelected { get; } = new IntPtr(0xAC436C);
+
+        public IntPtr ChatBuffer { get; } = new IntPtr(0xB75A60);
+
+        public IntPtr ChatNextMessage { get; } = new IntPtr(0x17C0);
 
         public IntPtr ChatOpened { get; } = new IntPtr(0xD41660);
 
@@ -46,6 +56,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
 
+        public IntPtr DescriptorCombatReach { get; } = new IntPtr(0x290);
+
         public IntPtr DescriptorEnergy { get; } = new IntPtr(0x70);
 
         public IntPtr DescriptorExp { get; } = new IntPtr(0x1E3C);
@@ -71,6 +83,8 @@ namespace AmeisenBotX.Core.OffsetLists
         public IntPtr DescriptorMaxRage { get; } = new IntPtr(0x88);
 
         public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x9C);
+
+        public IntPtr DescriptorNpcFlags { get; } = new IntPtr(0x2D4);
 
         public IntPtr DescriptorRage { get; } = new IntPtr(0x68);
 
@@ -104,11 +118,19 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr FunctionHandleTerrainClick { get; } = new IntPtr(0x80C340);
 
+        public IntPtr FunctionIsClickMoving { get; } = new IntPtr(0x721F90);
+
         public IntPtr FunctionLuaDoString { get; } = new IntPtr(0x819210);
+
+        public IntPtr FunctionRenderWorld { get; } = new IntPtr(0x4FAF90);
 
         public IntPtr FunctionSendMovementPacket { get; } = new IntPtr(0x7413F0);
 
+        public IntPtr FunctionSetFacing { get; } = new IntPtr(0x72EA50);
+
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
+
+        public IntPtr FunctionStopClickToMove { get; } = new IntPtr(0x72B3A0);
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 

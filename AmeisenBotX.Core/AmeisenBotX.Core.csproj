@@ -87,7 +87,12 @@
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />
+    <Compile Include="Data\Enums\CreatureType.cs" />
+    <Compile Include="Data\Enums\DungeonDifficulty.cs" />
+    <Compile Include="Data\Enums\RaidDifficulty.cs" />
     <Compile Include="Data\Enums\RollType.cs" />
+    <Compile Include="Data\Enums\RuneType.cs" />
+    <Compile Include="Data\Enums\ShapeshiftForm.cs" />
     <Compile Include="Data\Enums\WowGender.cs" />
     <Compile Include="Data\Enums\WowPowertype.cs" />
     <Compile Include="Data\ObjectManager.cs" />
@@ -155,12 +160,14 @@
     <Compile Include="StateMachine\States\StateFollowing.cs" />
     <Compile Include="StateMachine\States\StateLooting.cs" />
     <Compile Include="StateMachine\States\StateGhost.cs" />
-    <Compile Include="StateMachine\States\StateHealing.cs" />
+    <Compile Include="StateMachine\States\StateEating.cs" />
     <Compile Include="StateMachine\States\StateIdle.cs" />
     <Compile Include="StateMachine\States\StateInsideAoeDamage.cs" />
     <Compile Include="StateMachine\States\StateLoadingScreen.cs" />
     <Compile Include="StateMachine\States\StateLogin.cs" />
     <Compile Include="StateMachine\States\StateNone.cs" />
+    <Compile Include="StateMachine\States\StateSelling.cs" />
+    <Compile Include="StateMachine\States\StateRepairing.cs" />
     <Compile Include="StateMachine\States\StateStartWow.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorFury.cs" />
   </ItemGroup>

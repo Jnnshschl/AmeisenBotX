@@ -98,8 +98,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             double angle = Math.Atan2(angleX, angleY);
 
-            // move one meter out of the aoe spell
-            double distanceToMove = aoeRadius - ObjectManager.Player.Position.GetDistance2D(aoePosition) + 1;
+            // move three meter out of the aoe spell
+            double distanceToMove = aoeRadius - ObjectManager.Player.Position.GetDistance2D(aoePosition) + 3;
 
             double x = ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
             double y = ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);

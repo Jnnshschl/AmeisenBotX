@@ -54,7 +54,6 @@ namespace AmeisenBotX.Core.Common
         public static bool IsValidUnit(WowUnit unit)
         {
             return unit != null
-                && unit.Health > 0
                 && !unit.IsNotAttackable;
         }
 

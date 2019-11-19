@@ -1,10 +1,12 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +41,10 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IOffsetList OffsetList { get; }
 
+        private DateTime LastRepairCheck { get; set; }
+
+        private DateTime LastBagSlotCheck { get; set; }
+
         private Queue<ulong> UnitLootList { get; }
 
         public override void Enter()
@@ -60,18 +66,56 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+            // do i need to loot units
             if (UnitLootList.Count > 0)
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Looting);
                 return;
             }
 
+            // do i need to follow someone
             if (IsUnitToFollowThere())
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Following);
             }
 
+            // do we need to repair our equipment
+            if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(60))
+            {
+                if (IsRepairNpcNear()
+                    && CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.1))
+                {
+                    AmeisenBotStateMachine.SetState(AmeisenBotState.Repairing);
+                }
+
+                LastRepairCheck = DateTime.Now;
+            }
+
+            // do we need to sell stuff
+            if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(60)
+                && CharacterManager.Inventory.Items.Any(e => e.ItemQuality == ItemQuality.Poor))
+            {
+                if (IsVendorNpcNear()
+                    && HookManager.GetFreeBagSlotCount() < 4)
+                {
+                    AmeisenBotStateMachine.SetState(AmeisenBotState.Selling);
+                }
+
+                LastBagSlotCheck = DateTime.Now;
+            }
+
+            // do buffing etc...
             CombatClass?.OutOfCombatExecute();
+        }
+
+        private bool IsVendorNpcNear()
+        {
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 100);
+        }
+
+        private bool IsRepairNpcNear()
+        {
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 100);
         }
 
         public override void Exit()

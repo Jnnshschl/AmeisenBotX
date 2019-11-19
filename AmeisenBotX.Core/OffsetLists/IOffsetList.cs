@@ -6,7 +6,17 @@ namespace AmeisenBotX.Core.OffsetLists
     {
         IntPtr AccountName { get; }
 
+        IntPtr AutolootEnabled { get; }
+
+        IntPtr AutolootPointer { get; }
+
+        IntPtr BattlegroundFinished { get; }
+
         IntPtr CharacterSlotSelected { get; }
+
+        IntPtr ChatBuffer { get; }
+
+        IntPtr ChatNextMessage { get; }
 
         IntPtr ChatOpened { get; }
 
@@ -46,6 +56,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr CvarMaxFps { get; }
 
+        IntPtr DescriptorCombatReach { get; }
+
         IntPtr DescriptorEnergy { get; }
 
         IntPtr DescriptorExp { get; }
@@ -71,6 +83,8 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr DescriptorMaxRage { get; }
 
         IntPtr DescriptorMaxRuneenergy { get; }
+
+        IntPtr DescriptorNpcFlags { get; }
 
         IntPtr DescriptorRage { get; }
 
@@ -104,11 +118,19 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr FunctionHandleTerrainClick { get; }
 
+        IntPtr FunctionIsClickMoving { get; }
+
         IntPtr FunctionLuaDoString { get; }
+
+        IntPtr FunctionRenderWorld { get; }
 
         IntPtr FunctionSendMovementPacket { get; }
 
+        IntPtr FunctionSetFacing { get; }
+
         IntPtr FunctionSetTarget { get; }
+
+        IntPtr FunctionStopClickToMove { get; }
 
         IntPtr GameState { get; }
 

@@ -71,6 +71,56 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TrackUnit];
 
+        public bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlags.Auctioneer];
+
+        public bool IsBanker => NpcFlags[(int)WowUnitNpcFlags.Banker];
+
+        public bool IsBattlemaster => NpcFlags[(int)WowUnitNpcFlags.Battlemaster];
+
+        public bool IsClasstrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
+
+        public bool IsFlightmaster => NpcFlags[(int)WowUnitNpcFlags.Flightmaster];
+
+        public bool IsFoodVendor => NpcFlags[(int)WowUnitNpcFlags.FoodVendor];
+
+        public bool IsGeneralGoodsVendor => NpcFlags[(int)WowUnitNpcFlags.GeneralGoodsVendor];
+
+        public bool IsGossip => NpcFlags[(int)WowUnitNpcFlags.Gossip];
+
+        public bool IsGuard => NpcFlags[(int)WowUnitNpcFlags.Guard];
+
+        public bool IsGuildbanker => NpcFlags[(int)WowUnitNpcFlags.Guildbanker];
+
+        public bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlags.Innkeeper];
+
+        public bool IsNpc => !NpcFlags[(int)WowUnitNpcFlags.None];
+
+        public bool IsPetition => !NpcFlags[(int)WowUnitNpcFlags.Petitioner];
+
+        public bool IsPoisonVendor => !NpcFlags[(int)WowUnitNpcFlags.PoisonVendor];
+
+        public bool IsProfessionTrainer => !NpcFlags[(int)WowUnitNpcFlags.ProfessionTrainer];
+
+        public bool IsQuestgiver => !NpcFlags[(int)WowUnitNpcFlags.Questgiver];
+
+        public bool IsReagentVendor => !NpcFlags[(int)WowUnitNpcFlags.ReagentVendor];
+
+        public bool IsRepairVendor => !NpcFlags[(int)WowUnitNpcFlags.RepairVendor];
+
+        public bool IsSpellclick => !NpcFlags[(int)WowUnitNpcFlags.Spellclick];
+
+        public bool IsSpiritguide => !NpcFlags[(int)WowUnitNpcFlags.Spiritguide];
+
+        public bool IsSpirithealer => !NpcFlags[(int)WowUnitNpcFlags.Spirithealer];
+
+        public bool IsStablemaster => !NpcFlags[(int)WowUnitNpcFlags.Stablemaster];
+
+        public bool IsTabarddesigner => !NpcFlags[(int)WowUnitNpcFlags.Tabarddesigner];
+
+        public bool IsTrainer => !NpcFlags[(int)WowUnitNpcFlags.Trainer];
+
+        public bool IsVendor => !NpcFlags[(int)WowUnitNpcFlags.Vendor];
+
         public int Level { get; set; }
 
         public int Mana { get; set; }
@@ -99,6 +149,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public float Rotation { get; set; }
 
+        public float CombatReach { get; set; }
+
         public int Runeenergy { get; set; }
 
         public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
@@ -108,6 +160,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public BitVector32 UnitFlags { get; set; }
 
         public BitVector32 UnitFlagsDynamic { get; set; }
+
+        public BitVector32 NpcFlags { get; set; }
 
         private double ReturnPercentage(int value, int max)
         {

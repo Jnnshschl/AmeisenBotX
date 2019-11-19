@@ -67,7 +67,9 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, combatClass) },
-                { AmeisenBotState.Healing, new StateHealing(this, config, objectManager, characterManager) },
+                { AmeisenBotState.Repairing, new StateRepairing(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
+                { AmeisenBotState.Selling, new StateSelling(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
+                { AmeisenBotState.Healing, new StateEating(this, config, objectManager, characterManager) },
                 { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) }
             };
@@ -120,7 +122,7 @@ namespace AmeisenBotX.Core.StateMachine
 
         public void Execute()
         {
-            if (XMemory.Process != null && XMemory.Process.HasExited)
+            if (XMemory.Process == null || XMemory.Process.HasExited)
             {
                 AmeisenLogger.Instance.Log("WoW crashed...", LogLevel.Verbose);
                 SetState(AmeisenBotState.None);

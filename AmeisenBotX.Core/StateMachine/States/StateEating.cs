@@ -3,9 +3,9 @@ using AmeisenBotX.Core.Data;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateHealing : State
+    public class StateEating : State
     {
-        public StateHealing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
+        public StateEating(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
@@ -24,6 +24,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+
         }
 
         public override void Exit()
