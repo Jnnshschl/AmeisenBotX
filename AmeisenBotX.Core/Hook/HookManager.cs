@@ -47,9 +47,9 @@ namespace AmeisenBotX.Core.Hook
         {
             get
             {
-                if (XMemory.ReadBytes(EndsceneAddress, 1, out byte[] c))
+                if (XMemory.ReadByte(EndsceneAddress, out byte c))
                 {
-                    return c[0] == 0xE9;
+                    return c == 0xE9;
                 }
                 else
                 {
@@ -94,9 +94,6 @@ namespace AmeisenBotX.Core.Hook
             WriteCtmValues(unit.Position, ClickToMoveType.AttackGuid);
         }
 
-        public void CastSpell(int spellId)
-            => LuaDoString($"CastSpell({spellId});");
-
         public void CastSpell(string name, bool castOnSelf = false)
         {
             AmeisenLogger.Instance.Log($"Casting spell with name: {name}", LogLevel.Verbose);
@@ -111,23 +108,40 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public int GetFreeBagSlotCount()
+        {
+            LuaDoString("abFreeBagSlots=0 for i=1,5 do abFreeBagSlots=abFreeBagSlots+GetContainerNumFreeSlots(i-1)end");
+
+            if (int.TryParse(GetLocalizedText("abFreeBagSlots"), out int bagSlots))
+            {
+                return bagSlots;
+            }
+            else
+            {
+                return 100;
+            }
+        }
+
+        public void SellAllItems()
+            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
+
         public void CastSpellById(int spellId)
         {
             AmeisenLogger.Instance.Log($"Casting spell with id: {spellId}", LogLevel.Verbose);
 
             if (spellId > 0)
             {
-                string[] asmLocalText = new string[]
+                string[] asm = new string[]
                 {
                     "PUSH 0",
                     "PUSH 0",
                     "PUSH 0",
                     $"PUSH {spellId}",
-                    $"CALL 0x{OffsetList.FunctionCastSpellById.ToString("X")}",
+                    $"CALL {OffsetList.FunctionCastSpellById.ToInt32()}",
                     "ADD ESP, 0x10",
                 };
 
-                InjectAndExecute(asmLocalText, false);
+                InjectAndExecute(asm, false);
             }
         }
 
@@ -147,7 +161,7 @@ namespace AmeisenBotX.Core.Hook
                 string[] asm = new string[]
                 {
                     $"PUSH {codeCaveVector3.ToInt32()}",
-                    $"CALL 0x{OffsetList.FunctionHandleTerrainClick.ToString("X")}",
+                    $"CALL {OffsetList.FunctionHandleTerrainClick.ToInt32()}",
                     "ADD ESP, 0x4",
                     "RETN",
                 };
@@ -167,7 +181,7 @@ namespace AmeisenBotX.Core.Hook
                 {
                     $"PUSH {codeCaveVector3.ToInt32()}",
                     $"MOV ECX, {playerBase.ToInt32()}",
-                    $"CALL 0x{OffsetList.FunctionClickToMove.ToString("X")}",
+                    $"CALL {OffsetList.FunctionClickToMove.ToInt32()}",
                     "RETN",
                 };
 
@@ -216,11 +230,11 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public void FaceUnit(WowPlayer player, Vector3 positionToFace)
+        public void FacePosition(WowPlayer player, Vector3 positionToFace)
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
-            XMemory.Write(IntPtr.Add(player.BaseAddress, OffsetList.PlayerRotation.ToInt32()), angle);
-            BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x41), 0, 0);
+            SetFacing(player, angle);
+            SendMovementPacket(player, 0xDA);
         }
 
         public List<string> GetAuras(WowLuaUnit luaunit)
@@ -287,17 +301,17 @@ namespace AmeisenBotX.Core.Hook
                         return string.Empty;
                     }
 
-                    string[] asmLocalText = new string[]
+                    string[] asm = new string[]
                     {
-                        $"CALL 0x{OffsetList.FunctionGetActivePlayerObject.ToString("X")}",
+                        $"CALL {OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
                         "MOV ECX, EAX",
                         "PUSH -1",
-                        $"PUSH 0x{memAlloc.ToString("X")}",
-                        $"CALL 0x{OffsetList.FunctionGetLocalizedText.ToString("X")}",
+                        $"PUSH {memAlloc.ToInt32()}",
+                        $"CALL {OffsetList.FunctionGetLocalizedText.ToInt32()}",
                         "RETN",
                     };
 
-                    string result = Encoding.UTF8.GetString(InjectAndExecute(asmLocalText, true));
+                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
                     XMemory.FreeMemory(memAlloc);
                     return result;
                 }
@@ -372,6 +386,66 @@ namespace AmeisenBotX.Core.Hook
             return (string.Empty, 0);
         }
 
+        public void StopClickToMove(WowUnit unit)
+        {
+            string[] asm = new string[]
+            {
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionStopClickToMove}",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
+
+        public bool IsCtmMoving(WowUnit unit)
+        {
+            string[] asm = new string[]
+            {
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionStopClickToMove}",
+                "RETN",
+            };
+
+            return InjectAndExecute(asm, true)[0] == 0x1;
+        }
+
+        public void SetFacing(WowUnit unit, float angle)
+        {
+            string[] asm = new string[]
+            {
+                $"PUSH {angle}",
+                $"PUSH {Environment.TickCount}",
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionSetFacing}",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
+
+        public void UseItemByName(string itemName)
+            => SellItemsByName(itemName);
+
+        public void SellItemsByName(string itemName)
+            => LuaDoString($"for bag = 0,4,1 do for slot = 1, GetContainerNumSlots(bag), 1 do local name = GetContainerItemLink(bag,slot); if name and string.find(name,\"{itemName}\") then UseContainerItem(bag,slot) end end end");
+
+        public void SendMovementPacket(WowUnit unit, int opcode)
+        {
+            string[] asm = new string[]
+            {
+                "PUSH 0",
+                "PUSH 0",
+                $"PUSH {opcode}",
+                $"PUSH {Environment.TickCount}",
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionSendMovementPacket}",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
+
         public WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
         {
             WowUnitReaction reaction = WowUnitReaction.Unknown;
@@ -400,17 +474,10 @@ namespace AmeisenBotX.Core.Hook
             };
 
             // we need this, to be very accurate, otherwise wow will crash
-            if (XMemory.ReadStruct(IntPtr.Add(wowUnitA.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsA))
+            if (XMemory.ReadStruct(IntPtr.Add(wowUnitA.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsA)
+                && XMemory.ReadStruct(IntPtr.Add(wowUnitB.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsB))
             {
                 wowUnitA.UnitFlags = unitFlagsA;
-            }
-            else
-            {
-                return reaction;
-            }
-
-            if (XMemory.ReadStruct(IntPtr.Add(wowUnitB.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsB))
-            {
                 wowUnitB.UnitFlags = unitFlagsB;
             }
             else
@@ -456,7 +523,7 @@ namespace AmeisenBotX.Core.Hook
                 // wait for the code to be executed
                 while (IsInjectionUsed)
                 {
-                    if (timeoutCounter == 500)
+                    if (timeoutCounter == 5000)
                     {
                         return Array.Empty<byte>();
                     }
@@ -489,7 +556,7 @@ namespace AmeisenBotX.Core.Hook
                 // wait for the code to be executed
                 while (XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
                 {
-                    if (timeoutCounter == 500)
+                    if (timeoutCounter == 5000)
                     {
                         return Array.Empty<byte>();
                     }
@@ -571,6 +638,29 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public Dictionary<RuneType, int> GetRunesReady(int runeId)
+        {
+            Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
+            {
+                { RuneType.Blood, 0 },
+                { RuneType.Frost, 0 },
+                { RuneType.Unholy, 0 },
+                { RuneType.Death, 0 }
+            };
+
+            for (int i = 0; i < 6; ++i)
+            {
+                if (XMemory.Read(OffsetList.RuneType + (4 * i), out RuneType type)
+                    && XMemory.ReadByte(OffsetList.Runes, out byte runeStatus)
+                    && ((1 << runeId) & runeStatus) != 0)
+                {
+                    runes[type]++;
+                }
+            }
+
+            return runes;
+        }
+
         public bool IsSpellKnown(int spellId, bool isPetSpell = false)
         {
             LuaDoString($"abIsSpellKnown = IsSpellKnown({spellId}, {isPetSpell});");
@@ -603,13 +693,13 @@ namespace AmeisenBotX.Core.Hook
 
                     string[] asm = new string[]
                     {
-                    $"MOV EAX, 0x{memAlloc.ToString("X")}",
-                    "PUSH 0",
-                    "PUSH EAX",
-                    "PUSH EAX",
-                    $"CALL 0x{OffsetList.FunctionLuaDoString.ToString("X")}",
-                    "ADD ESP, 0xC",
-                    "RETN",
+                        $"MOV EAX, {memAlloc.ToInt32()}",
+                        "PUSH 0",
+                        "PUSH EAX",
+                        "PUSH EAX",
+                        $"CALL {OffsetList.FunctionLuaDoString.ToInt32()}",
+                        "ADD ESP, 0xC",
+                        "RETN",
                     };
 
                     InjectAndExecute(asm, false);
@@ -665,7 +755,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public void SellAllGrayItems()
-            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) print(\"Sold: \"..n) end end end print(\"Total: \"..GetCoinText(p))");
+            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
 
         public void SendChatMessage(string message)
             => LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
@@ -799,10 +889,11 @@ namespace AmeisenBotX.Core.Hook
             {
                 $"PUSH {BitConverter.ToUInt32(guidBytes, 4)}",
                 $"PUSH {BitConverter.ToUInt32(guidBytes, 0)}",
-                $"CALL 0x{OffsetList.FunctionSetTarget.ToString("X")}",
+                $"CALL {OffsetList.FunctionSetTarget.ToInt32()}",
                 "ADD ESP, 0x8",
                 "RETN"
             };
+
             InjectAndExecute(asm, false);
         }
 

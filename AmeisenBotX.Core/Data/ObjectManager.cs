@@ -79,6 +79,9 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        public List<WowObject> Partymembers
+            => WowObjects.Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
+
         public int ZoneId { get; private set; }
 
         private IAmeisenBotCache BotCache { get; }
@@ -86,6 +89,9 @@ namespace AmeisenBotX.Core.Data
         private IOffsetList OffsetList { get; }
 
         private XMemory XMemory { get; }
+
+        public WowObject GetWowObjectByGuid(ulong guid)
+            => WowObjects.FirstOrDefault(e => e.Guid == guid);
 
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
             => WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
@@ -171,6 +177,7 @@ namespace AmeisenBotX.Core.Data
                 WowPlayer player = new WowPlayer()
                 {
                     BaseAddress = activeObject,
+                    CombatReach = wowUnit.CombatReach,
                     DescriptorAddress = wowUnit.DescriptorAddress,
                     Guid = wowUnit.Guid,
                     Type = wowObjectType,
@@ -230,9 +237,11 @@ namespace AmeisenBotX.Core.Data
                 && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowUnitPosition.ToInt32()), out Vector3 wowPosition)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.PlayerRotation.ToInt32()), out float rotation)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.IsAutoAttacking.ToInt32()), out int isAutoAttacking)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorCombatReach.ToInt32()), out int combatReach)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorFactionTemplate.ToInt32()), out int factionTemplate)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlags)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorUnitFlagsDynamic.ToInt32()), out BitVector32 dynamicUnitFlags)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorNpcFlags.ToInt32()), out BitVector32 npcFlags)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorHealth.ToInt32()), out int health)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMaxHealth.ToInt32()), out int maxHealth)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorMana.ToInt32()), out int mana)
@@ -251,6 +260,7 @@ namespace AmeisenBotX.Core.Data
                 return new WowUnit()
                 {
                     BaseAddress = activeObject,
+                    CombatReach = combatReach,
                     DescriptorAddress = wowObject.DescriptorAddress,
                     Guid = wowObject.Guid,
                     Type = wowObjectType,
@@ -265,6 +275,7 @@ namespace AmeisenBotX.Core.Data
                     MaxHealth = maxHealth,
                     Mana = mana,
                     MaxMana = maxMana,
+                    NpcFlags = npcFlags,
                     Energy = energy,
                     MaxEnergy = maxEnergy,
                     Rage = rage / 10,

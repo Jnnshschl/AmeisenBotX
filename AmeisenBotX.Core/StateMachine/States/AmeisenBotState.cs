@@ -14,6 +14,8 @@
         LoadingScreen,
         InsideAoeDamage,
         Unstuck,
-        Looting
+        Looting,
+        Repairing,
+        Selling
     }
 }
