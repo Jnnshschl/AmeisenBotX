@@ -234,7 +234,8 @@ namespace AmeisenBotX.Core.Hook
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
             SetFacing(player, angle);
-            SendMovementPacket(player, 0xDA);
+            // buggy atm
+            //// SendMovementPacket(player, 0xDA);
         }
 
         public List<string> GetAuras(WowLuaUnit luaunit)
@@ -434,12 +435,10 @@ namespace AmeisenBotX.Core.Hook
         {
             string[] asm = new string[]
             {
-                "PUSH 0",
-                "PUSH 0",
                 $"PUSH {opcode}",
                 $"PUSH {Environment.TickCount}",
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionSendMovementPacket}",
+                $"MOV ECX, {unit.BaseAddress.ToInt32()}",
+                $"CALL {OffsetList.FunctionSendMovementPacket.ToInt32()}",
                 "RETN",
             };
 
