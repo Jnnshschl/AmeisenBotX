@@ -155,6 +155,17 @@ namespace AmeisenBotX.Core.Character
             };
         }
 
+        public void Face(Vector3 position, ulong guid)
+        {
+            XMemory.Write(OffsetList.ClickToMoveX, position.X);
+            XMemory.Write(OffsetList.ClickToMoveY, position.Y);
+            XMemory.Write(OffsetList.ClickToMoveZ, position.Z);
+            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 20.9f);
+            XMemory.Write(OffsetList.ClickToMoveDistance, 0.1f);
+            XMemory.Write(OffsetList.ClickToMoveGuid, guid);
+            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
+        }
+
         public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)
         {
             itemToReplace = null;

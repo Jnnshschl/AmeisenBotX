@@ -341,5 +341,11 @@ namespace AmeisenBotX
                 buttonStartPause.Foreground = darkForegroundBrush;
             }
         }
+
+        private void ButtonFaceTarget_Click(object sender, RoutedEventArgs e)
+        {
+            float angle = BotMath.GetFacingAngle(AmeisenBot.ObjectManager.Player.Position, AmeisenBot.ObjectManager.Target.Position);
+            AmeisenBot.HookManager.SetFacing(AmeisenBot.ObjectManager.Player, angle);
+        }
     }
 }

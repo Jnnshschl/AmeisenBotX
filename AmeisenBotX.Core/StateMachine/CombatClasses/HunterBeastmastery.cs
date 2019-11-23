@@ -95,7 +95,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0
+                || ObjectManager.TargetGuid == ObjectManager.PlayerGuid)
             {
                 return;
             }
@@ -138,9 +139,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (distanceToTarget < 3)
                 {
-                    CastSpellIfPossible(deterrenceSpell, true);
-
                     if (CastSpellIfPossible(frostTrapSpell, true))
+                    {
+                        return;
+                    }
+
+                    if (ObjectManager.Player.HealthPercentage < 30 
+                        && CastSpellIfPossible(deterrenceSpell, true))
                     {
                         return;
                     }
@@ -224,6 +229,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
             HookManager.TargetGuid(ObjectManager.PlayerGuid);
+
+            if (myBuffs.Any(e => e.Equals(feignDeathSpell, StringComparison.OrdinalIgnoreCase)))
+            {
+                HookManager.SendChatMessage("/cancelaura Feign Death");
+            }
 
             if (!myBuffs.Any(e => e.Equals(aspectOfTheDragonhawkSpell, StringComparison.OrdinalIgnoreCase))
                 && CastSpellIfPossible(aspectOfTheDragonhawkSpell))

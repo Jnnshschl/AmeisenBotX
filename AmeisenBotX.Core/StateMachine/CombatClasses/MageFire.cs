@@ -27,6 +27,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string scorchSpell = "Scorch";
         private readonly string mirrorImageSpell = "Mirror Image";
         private readonly string iceBlockSpell = "Ice Block";
+        private readonly string spellStealSpell = "Spellsteal";
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
@@ -88,13 +89,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             if ((DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing())
+                    && (HandleDebuffing()
+                    || HandleSpellSteal()))
                 || (DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime)
                     && HandlePyroblast())
                 || (DateTime.Now - LastShieldCheck > TimeSpan.FromSeconds(shieldCheckTime)
                     && HandleManaShield())
                 || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
                     && HandleCounterspell())
+                || CastSpellIfPossible(mirrorImageSpell, true)
                 || (ObjectManager.Player.HealthPercentage < 16
                     && CastSpellIfPossible(iceBlockSpell, true))
                 || (ObjectManager.Player.ManaPercentage < 40
@@ -132,6 +135,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             LastBuffCheck = DateTime.Now;
+            return false;
+        }
+
+        private bool HandleSpellSteal()
+        {
+            CastSpellIfPossible(spellStealSpell, true);
             return false;
         }
 

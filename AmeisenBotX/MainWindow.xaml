@@ -150,7 +150,12 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonStartPause" Content="||" Margin="0,0,249,0" BorderThickness="0,0,1,1" Padding="1" HorizontalAlignment="Right" Width="28" Height="28" VerticalAlignment="Top" FontFamily="Verdana" FontSize="16" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click">
+        <Button x:Name="buttonStartPause" Content="||" Margin="0,0,249.333,0" BorderThickness="0,0,1,1" Padding="1" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="16" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Button x:Name="buttonFaceTarget" Content="Face Target" Margin="0,219,108.333,0" Click="ButtonFaceTarget_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="80" Height="16" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10" Style="{DynamicResource ButtonStyleDark}">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

@@ -26,6 +26,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string mirrorImageSpell = "Mirror Image";
         private readonly string iceBlockSpell = "Ice Block";
         private readonly string icyVeinsSpell = "Icy Veins";
+        private readonly string spellStealSpell = "Spellsteal";
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
@@ -89,7 +90,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             if ((DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleArcaneMissiles())
+                    && (HandleArcaneMissiles()
+                    || HandleSpellSteal()))
                 || (DateTime.Now - LastManashieldCheck > TimeSpan.FromSeconds(manashieldCheckTime)
                     && HandleManaShield())
                 || (DateTime.Now - LastMissileBarrageCheck > TimeSpan.FromSeconds(missileBarrageCheckTime)
@@ -116,6 +118,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return true;
             }
 
+            return false;
+        }
+
+        private bool HandleSpellSteal()
+        {
+            CastSpellIfPossible(spellStealSpell, true);
             return false;
         }
 

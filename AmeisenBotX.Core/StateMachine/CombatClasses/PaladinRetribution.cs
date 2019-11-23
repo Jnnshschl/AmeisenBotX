@@ -33,6 +33,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string layOnHandsSpell = "Lay on Hands";
 
         private readonly int buffCheckTime = 4;
+        private readonly int judgementCheckTime = 1;
         private readonly int enemyCastingCheckTime = 1;
 
         public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
@@ -65,6 +66,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastBuffCheck { get; set; }
 
+        private DateTime LastJudgementCheck { get; set; }
+
         private DateTime LastEnemyCastingCheck { get; set; }
 
         private ObjectManager ObjectManager { get; }
@@ -89,8 +92,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
                     && HandleBuffing())
+                || (DateTime.Now - LastJudgementCheck > TimeSpan.FromSeconds(judgementCheckTime)
+                    && HandleJudgement())
                 || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                    && HandleHammerOfWrath())
+                    && HandleHammerOfJustice())
                 || (ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossible(layOnHandsSpell))
                 || (ObjectManager.Player.HealthPercentage < 60
@@ -120,6 +125,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
         }
 
+        private bool HandleJudgement()
+        {
+            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
+
+            if (myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(judgementOfLightSpell, true))
+            {
+                return true;
+            }
+
+            LastJudgementCheck = DateTime.Now;
+            return false;
+        }
+
         public void OutOfCombatExecute()
         {
             if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
@@ -140,8 +159,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if ((!myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(sealOfVengeanceSpell, true))
-                || (myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(judgementOfLightSpell, true))
                 || (!myBuffs.Any(e => e.Equals(retributionAuraSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(retributionAuraSpell, true))
                 || (!myBuffs.Any(e => e.Equals(blessingOfMightSpell, StringComparison.OrdinalIgnoreCase))
@@ -154,13 +171,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             return false;
         }
 
-        private bool HandleHammerOfWrath()
+        private bool HandleHammerOfJustice()
         {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
+            WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.CurrentlyCastingSpellId > 0 || e.CurrentlyChannelingSpellId > 0);
+            if (castingUnit != null
+                && CastSpellIfPossible(hammerOfJusticeSpell, true))
+            {
+                return true;
+            }
 
-            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
-
-            if (isCasting
+            WowUnit castingPlayer = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.CurrentlyCastingSpellId > 0 || e.CurrentlyChannelingSpellId > 0);
+            if (castingPlayer != null
                 && CastSpellIfPossible(hammerOfJusticeSpell, true))
             {
                 return true;

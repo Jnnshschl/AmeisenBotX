@@ -165,8 +165,8 @@ namespace AmeisenBotX.Core.StateMachine.States
                 && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position)
                 && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(250))
             {
-                // CharacterManager.Face(target.Position, target.Guid);
                 HookManager.FacePosition(ObjectManager.Player, target.Position);
+                CharacterManager.Face(target.Position, target.Guid);
                 LastRotationCheck = DateTime.Now;
             }
 

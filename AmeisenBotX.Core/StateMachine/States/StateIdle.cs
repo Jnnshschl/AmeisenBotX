@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             // do we need to repair our equipment
-            if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(60))
+            if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(12))
             {
                 if (IsRepairNpcNear()
                     && CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.1))
@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
 
             // do we need to sell stuff
-            if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(60)
+            if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(5)
                 && CharacterManager.Inventory.Items.Any(e => e.ItemQuality == ItemQuality.Poor))
             {
                 if (IsVendorNpcNear()
@@ -108,14 +108,14 @@ namespace AmeisenBotX.Core.StateMachine.States
             CombatClass?.OutOfCombatExecute();
         }
 
-        private bool IsVendorNpcNear()
+        internal bool IsVendorNpcNear()
         {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 100);
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
         }
 
-        private bool IsRepairNpcNear()
+        internal bool IsRepairNpcNear()
         {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 100);
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
         }
 
         public override void Exit()

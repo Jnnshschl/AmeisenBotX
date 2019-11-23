@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsRepairVendor);
+            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
                 double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);

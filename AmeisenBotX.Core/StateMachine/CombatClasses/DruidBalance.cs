@@ -107,7 +107,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && CastSpellIfPossible(starfireSpell, true))
                 || (SolarEclipse
                     && CastSpellIfPossible(wrathSpell, true))
-                || CastSpellIfPossible(starfallSpell, true))
+                || (ObjectManager.WowObjects.OfType<WowUnit>().Count() < 8 
+                    && CastSpellIfPossible(starfallSpell, true)))
             {
                 return;
             }
