@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(12))
             {
                 if (IsRepairNpcNear()
-                    && CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.1))
+                    && CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.2))
                 {
                     AmeisenBotStateMachine.SetState(AmeisenBotState.Repairing);
                 }
@@ -110,12 +110,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         internal bool IsVendorNpcNear()
         {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsNpc && e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.GetType() != typeof(WowPlayer) && e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
         }
 
         internal bool IsRepairNpcNear()
         {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsNpc && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
         }
 
         public override void Exit()

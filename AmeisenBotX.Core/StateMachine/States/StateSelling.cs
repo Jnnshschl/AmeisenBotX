@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
@@ -48,7 +49,17 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsNpc && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+            if(HookManager.GetFreeBagSlotCount() > 4
+               || !CharacterManager.Inventory.Items.Any(e => e.ItemQuality == ItemQuality.Poor))
+            {
+                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                return;
+            }
+
+            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
+                .OrderBy(e=>e.Position.GetDistance(ObjectManager.Player.Position))
+                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
                 double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
