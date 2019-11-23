@@ -110,12 +110,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         internal bool IsVendorNpcNear()
         {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsNpc && e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
         }
 
         internal bool IsRepairNpcNear()
         {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.IsNpc && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
         }
 
         public override void Exit()
