@@ -312,7 +312,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
                 if(lowMember.HealthPercentage > 1)
                 {
-                    if (!gcdWaiting && lowMember.HealthPercentage < 20 && playerMana >= 117)
+                    if (!gcdWaiting && DateTime.Now.Subtract(LastDivineShield).TotalSeconds > 240 && lowMember.HealthPercentage < 20 && playerMana >= 117)
                     {
                         HookManager.TargetGuid(lowMember.Guid);
                         targetAimed = false;
@@ -322,7 +322,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         SetGCD(1.5);
                         return;
                     }
-                    else if (lowMember.HealthPercentage < 50 && playerMana >= 117)
+                    else if (lowMember.HealthPercentage < 50 && DateTime.Now.Subtract(LastProtection).TotalSeconds > 120 && playerMana >= 117)
                     {
                         HookManager.TargetGuid(lowMember.Guid);
                         targetAimed = false;
