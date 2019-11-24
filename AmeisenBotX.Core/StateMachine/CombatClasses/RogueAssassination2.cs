@@ -173,7 +173,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 CastSpell(sprint, ref energy, 15, 180, true);
                             }
                         }
-                        else
+                        else if (distanceToTarget < 6)
                         {
                             // distance <= 9
                             // close combat

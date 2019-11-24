@@ -203,7 +203,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                        else
+                        else if (distanceToTarget < 6)
                         {
                             // -- close combat --
                             // Berserker Stance
