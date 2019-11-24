@@ -37,7 +37,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool computeNewRoute = false;
         public bool multipleTargets = false;
         private readonly WarriorFurySpells Spells;
-        private int mainhandSpeed = 3;
 
         private class WarriorFurySpells
         {
@@ -89,7 +88,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private bool IsInBerserkerStance { get; set; }
             private bool askedForHelp = false;
             private bool askedForHeal = false;
-            private bool targetIsDown = false;
             public WarriorFurySpells(HookManager hookManager, ObjectManager objectManager)
             {
                 HookManager = hookManager;

@@ -37,7 +37,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool computeNewRoute = false;
         public bool multipleTargets = false;
         private readonly WarriorArmSpells Spells;
-        private int mainhandSpeed = 3;
 
         private class WarriorArmSpells
         {
