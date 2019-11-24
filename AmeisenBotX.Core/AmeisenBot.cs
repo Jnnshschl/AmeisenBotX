@@ -345,7 +345,7 @@ namespace AmeisenBotX.Core
 
             CharacterManager.Inventory.Update();
             CharacterManager.UpdateCharacterGear();
-            CharacterManager.Equipment.Update();
+            CharacterManager.Inventory.Update();
         }
 
         private void OnCombatLog(long timestamp, List<string> args)

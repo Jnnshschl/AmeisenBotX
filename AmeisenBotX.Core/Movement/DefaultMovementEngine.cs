@@ -66,15 +66,20 @@ namespace AmeisenBotX.Core.Movement
                 seperationForce.Multiply(4);
             }
 
-
             positionToGoTo = currentPosition;
             positionToGoTo.Add(seekForce);
             positionToGoTo.Add(seperationForce);
 
             Acceleration = Vector3.Zero;
 
+            double heightDiff = positionToGoTo.Z - positionToGoTo.Z;
+            if (heightDiff < 0)
+            {
+                heightDiff *= -1;
+            }
+
             double distanceTraveled = currentPosition.GetDistance2D(LastPosition);
-            needToJump = LastPosition != Vector3.Zero && distanceTraveled > 0 && distanceTraveled < 0.1;
+            needToJump =  LastPosition != Vector3.Zero && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
             LastPosition = currentPosition;
             return true;
         }
@@ -98,8 +103,8 @@ namespace AmeisenBotX.Core.Movement
             steering.Limit(Settings.MaxForce);
 
             Vector3 newVelocity = Velocity + steering;
-            newVelocity.Limit(Settings.MaxSpeed);
             Velocity = newVelocity;
+            Velocity.Limit(Settings.MaxSpeed);
             return newVelocity;
         }
 

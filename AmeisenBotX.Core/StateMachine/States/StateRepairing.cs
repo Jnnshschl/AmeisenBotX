@@ -65,6 +65,8 @@ namespace AmeisenBotX.Core.StateMachine.States
                 {
                     if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
                     {
+                        TryCount = 0;
+                        CharacterManager.Jump();
                         BuildNewPath(selectedUnit.Position);
                     }
 
@@ -72,7 +74,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                         {
-                            CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
+                            CharacterManager.MoveToPosition(positionToGoTo, 10f, 0.2f);
 
                             if (needToJump)
                             {

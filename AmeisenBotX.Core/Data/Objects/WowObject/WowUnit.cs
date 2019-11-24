@@ -93,33 +93,33 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlags.Innkeeper];
 
-        public bool IsNpc => !NpcFlags[(int)WowUnitNpcFlags.None];
+        public bool IsNoneNpc => NpcFlags[(int)WowUnitNpcFlags.None];
 
-        public bool IsPetition => !NpcFlags[(int)WowUnitNpcFlags.Petitioner];
+        public bool IsPetition => NpcFlags[(int)WowUnitNpcFlags.Petitioner];
 
-        public bool IsPoisonVendor => !NpcFlags[(int)WowUnitNpcFlags.PoisonVendor];
+        public bool IsPoisonVendor => NpcFlags[(int)WowUnitNpcFlags.PoisonVendor];
 
-        public bool IsProfessionTrainer => !NpcFlags[(int)WowUnitNpcFlags.ProfessionTrainer];
+        public bool IsProfessionTrainer => NpcFlags[(int)WowUnitNpcFlags.ProfessionTrainer];
 
-        public bool IsQuestgiver => !NpcFlags[(int)WowUnitNpcFlags.Questgiver];
+        public bool IsQuestgiver => NpcFlags[(int)WowUnitNpcFlags.Questgiver];
 
-        public bool IsReagentVendor => !NpcFlags[(int)WowUnitNpcFlags.ReagentVendor];
+        public bool IsReagentVendor => NpcFlags[(int)WowUnitNpcFlags.ReagentVendor];
 
-        public bool IsRepairVendor => !NpcFlags[(int)WowUnitNpcFlags.RepairVendor];
+        public bool IsRepairVendor => NpcFlags[(int)WowUnitNpcFlags.RepairVendor];
 
-        public bool IsSpellclick => !NpcFlags[(int)WowUnitNpcFlags.Spellclick];
+        public bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlags.Spellclick];
 
-        public bool IsSpiritguide => !NpcFlags[(int)WowUnitNpcFlags.Spiritguide];
+        public bool IsSpiritguide => NpcFlags[(int)WowUnitNpcFlags.Spiritguide];
 
-        public bool IsSpirithealer => !NpcFlags[(int)WowUnitNpcFlags.Spirithealer];
+        public bool IsSpirithealer => NpcFlags[(int)WowUnitNpcFlags.Spirithealer];
 
-        public bool IsStablemaster => !NpcFlags[(int)WowUnitNpcFlags.Stablemaster];
+        public bool IsStablemaster => NpcFlags[(int)WowUnitNpcFlags.Stablemaster];
 
-        public bool IsTabarddesigner => !NpcFlags[(int)WowUnitNpcFlags.Tabarddesigner];
+        public bool IsTabarddesigner => NpcFlags[(int)WowUnitNpcFlags.Tabarddesigner];
 
-        public bool IsTrainer => !NpcFlags[(int)WowUnitNpcFlags.Trainer];
+        public bool IsTrainer => NpcFlags[(int)WowUnitNpcFlags.Trainer];
 
-        public bool IsVendor => !NpcFlags[(int)WowUnitNpcFlags.Vendor];
+        public bool IsVendor => NpcFlags[(int)WowUnitNpcFlags.Vendor];
 
         public int Level { get; set; }
 

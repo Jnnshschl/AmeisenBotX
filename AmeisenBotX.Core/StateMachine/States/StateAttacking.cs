@@ -48,6 +48,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IPathfindingHandler PathfindingHandler { get; }
 
+        private int TryCount { get; set; }
+
         public override void Enter()
         {
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
@@ -118,6 +120,8 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
                 }
             }
+
+            TryCount = 0;
         }
 
         public override void Exit()
@@ -185,17 +189,26 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                CharacterManager.MoveToPosition(target.Position, 20.9f, 0.2f);
+                if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
+                {
+                    TryCount = 0;
+                    BuildNewPath(target);
+                }
 
-                //// if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 1)
-                //// {
-                ////     BuildNewPath(target);
-                //// }
-                //// 
-                //// if (MovementEngine.CurrentPath.Count >= 1)
-                //// {
-                ////     CharacterManager.MoveToPosition(target.Position, 20.9f, 0.2f);
-                //// }
+                if (MovementEngine.CurrentPath?.Count > 0)
+                {
+                    if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump, true))
+                    {
+                        CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
+
+                        if (needToJump)
+                        {
+                            CharacterManager.Jump();
+                            DoRandomUnstuckMovement();
+                            TryCount++;
+                        }
+                    }
+                }
             }
         }
 

@@ -8,6 +8,8 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         public WowWeapon(WowBasicItem wowBasicItem) : base()
         {
             Id = wowBasicItem.Id;
+            BagId = wowBasicItem.BagId;
+            BagSlot = wowBasicItem.BagSlot;
             Type = wowBasicItem.Type;
             Subtype = wowBasicItem.Subtype;
             Name = wowBasicItem.Name;

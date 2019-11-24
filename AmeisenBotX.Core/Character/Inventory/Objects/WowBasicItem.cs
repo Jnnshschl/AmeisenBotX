@@ -6,6 +6,12 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public class WowBasicItem : IWowItem
     {
+        [JsonProperty("bagid")]
+        public int BagId { get; set; }
+
+        [JsonProperty("bagslot")]
+        public int BagSlot { get; set; }
+
         [JsonProperty("count")]
         public int Count { get; set; }
 

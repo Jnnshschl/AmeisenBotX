@@ -93,7 +93,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // do we need to sell stuff
             if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(5)
-                && CharacterManager.Inventory.Items.Any(e => e.ItemQuality == ItemQuality.Poor))
+                && CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
                 if (IsVendorNpcNear()
                     && HookManager.GetFreeBagSlotCount() < 4)
