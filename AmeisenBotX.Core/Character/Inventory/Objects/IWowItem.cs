@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         int RequiredLevel { get; }
 
-        Dictionary<string, int> Stats { get; }
+        Dictionary<string, string> Stats { get; }
 
         string Subtype { get; }
 
