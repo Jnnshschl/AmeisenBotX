@@ -7,6 +7,10 @@ namespace AmeisenBotX.Core.Character.Comparators
     {
         public bool IsBetter(IWowItem current, IWowItem item)
         {
+            if(current == null)
+            {
+                return true;
+            }
             float currentRating = GetRating(current, current.EquipSlot);
             float newItemRating = GetRating(item, current.EquipSlot);
             return currentRating < newItemRating;
