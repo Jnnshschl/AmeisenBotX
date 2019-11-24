@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core
                 LoadCustomCombatClass();
             }
 
-            if (CombatClass.ItemComparator != null)
+            if (CombatClass?.ItemComparator != null)
             {
                 CharacterManager.ItemComparator = CombatClass.ItemComparator;
             }
