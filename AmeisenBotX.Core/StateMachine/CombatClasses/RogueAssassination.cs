@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -50,6 +51,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool HandlesTargetSelection => false;
 
         public bool IsMelee => true;
+
+        public IWowItemComparator ItemComparator => null;
 
         public bool InOpener { get; set; }
 

@@ -1,4 +1,6 @@
-﻿namespace AmeisenBotX.Core.StateMachine.CombatClasses
+﻿using AmeisenBotX.Core.Character.Comparators;
+
+namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public interface ICombatClass
     {
@@ -7,6 +9,8 @@
         bool HandlesTargetSelection { get; }
 
         bool IsMelee { get; }
+
+        IWowItemComparator ItemComparator { get; }
 
         void Execute();
 

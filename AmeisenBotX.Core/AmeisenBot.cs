@@ -87,6 +87,11 @@ namespace AmeisenBotX.Core
                 LoadCustomCombatClass();
             }
 
+            if (CombatClass.ItemComparator != null)
+            {
+                CharacterManager.ItemComparator = CombatClass.ItemComparator;
+            }
+
             StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, BotCache, PathfindingHandler, MovemenEngine, CombatClass);
             StateMachine.OnStateMachineStateChanged += HandlePositionLoad;
         }
