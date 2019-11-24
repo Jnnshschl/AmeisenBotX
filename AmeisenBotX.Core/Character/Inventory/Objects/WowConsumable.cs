@@ -5,6 +5,8 @@
         public WowConsumable(WowBasicItem wowBasicItem) : base()
         {
             Id = wowBasicItem.Id;
+            BagId = wowBasicItem.BagId;
+            BagSlot = wowBasicItem.BagSlot;
             Type = wowBasicItem.Type;
             Subtype = wowBasicItem.Subtype;
             Name = wowBasicItem.Name;

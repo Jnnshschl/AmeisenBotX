@@ -5,6 +5,10 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public interface IWowItem
     {
+        int BagId { get; }
+
+        int BagSlot { get; }
+
         int Count { get; }
 
         int Durability { get; }

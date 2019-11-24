@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
@@ -49,15 +50,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if(HookManager.GetFreeBagSlotCount() > 4
-               || !CharacterManager.Inventory.Items.Any(e => e.ItemQuality == ItemQuality.Poor))
+            if (HookManager.GetFreeBagSlotCount() > 4
+               || !CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
                 return;
             }
 
             WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
-                .OrderBy(e=>e.Position.GetDistance(ObjectManager.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position))
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
 
             if (selectedUnit != null && !selectedUnit.IsDead)
@@ -65,8 +66,10 @@ namespace AmeisenBotX.Core.StateMachine.States
                 double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
                 if (distance > 5.0)
                 {
-                    if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
+                    if (MovementEngine.CurrentPath?.Count < 2 || TryCount > 2)
                     {
+                        TryCount = 0;
+                        CharacterManager.Jump();
                         BuildNewPath(selectedUnit.Position);
                     }
 
@@ -74,7 +77,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
                         {
-                            CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
+                            CharacterManager.MoveToPosition(positionToGoTo, 10f, 1.2f);
 
                             if (needToJump)
                             {
@@ -87,9 +90,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
                 else
                 {
-                    if (distance > 3)
+                    if (distance > 4)
                     {
-                        CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 0.2f);
+                        CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 2f);
                     }
                     else
                     {
@@ -97,7 +100,17 @@ namespace AmeisenBotX.Core.StateMachine.States
                         Task.Delay(1000).GetAwaiter().GetResult();
 
                         HookManager.SellAllGrayItems();
-                        Task.Delay(1000).GetAwaiter().GetResult();
+                        foreach (IWowItem item in CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                        {
+                            IWowItem itemToSell = item;
+                            if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                            {
+                                itemToSell = itemToReplace;
+                                HookManager.ReplaceItem(null, item);
+                            }
+
+                            HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                        }
                     }
                 }
             }

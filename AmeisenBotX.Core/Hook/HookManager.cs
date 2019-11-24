@@ -145,6 +145,9 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void UseItemByBagAndSlot(int bagId, int bagSlot)
+            => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
+
         public void ClearTarget()
             => SendChatMessage("/cleartarget");
 

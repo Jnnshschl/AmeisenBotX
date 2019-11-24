@@ -61,6 +61,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
                 {
+                    TryCount = 0;
                     LastPosition = Vector3.Zero;
                     BuildNewPath(corpsePosition);
                 }
@@ -77,7 +78,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
                         LastPosition = positionToGoTo;
 
-                        CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
+                        CharacterManager.MoveToPosition(positionToGoTo, 10f, 0.2f);
 
                         if (needToJump)
                         {

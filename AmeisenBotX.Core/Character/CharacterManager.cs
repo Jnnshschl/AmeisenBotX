@@ -250,8 +250,14 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateCharacterGear()
         {
+            Equipment.Update();
             foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
             {
+                if(slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
+                {
+                    continue;
+                }
+
                 List<IWowItem> itemsLikeEquipped = Inventory.Items.Where(e => e.EquipLocation.Length > 0 && SlotToEquipLocation((int)slot).Contains(e.EquipLocation)).OrderByDescending(e => e.ItemLevel).ToList();
 
                 if (itemsLikeEquipped.Count > 0)
@@ -263,6 +269,7 @@ namespace AmeisenBotX.Core.Character
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 HookManager.ReplaceItem(null, item);
+                                Equipment.Update();
                                 break;
                             }
                         }
@@ -270,6 +277,7 @@ namespace AmeisenBotX.Core.Character
                     else
                     {
                         HookManager.ReplaceItem(null, itemsLikeEquipped.First());
+                        Equipment.Update();
                     }
                 }
             }

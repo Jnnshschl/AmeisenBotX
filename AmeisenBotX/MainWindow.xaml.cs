@@ -165,6 +165,16 @@ namespace AmeisenBotX
                 progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;
                 labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxHealth)}";
 
+                if(AmeisenBot.ObjectManager.Target != null)
+                {
+                    labelBaseAddress.Content = $"BaseAddress: {AmeisenBot.ObjectManager.Target.BaseAddress.ToString("X")}";
+                    labelDescriptor.Content = $"Descriptor: {AmeisenBot.ObjectManager.Target.DescriptorAddress.ToString("X")}";
+                    labelNpcFlags.Content = $"NpcFlags: {AmeisenBot.ObjectManager.Target.NpcFlags.Data.ToString("X")}";
+                    labelisNpc.Content = $"isNpc: {AmeisenBot.ObjectManager.Target.IsNoneNpc}";
+                    labelisVendor.Content = $"isVendor: {AmeisenBot.ObjectManager.Target.IsVendor}";
+                    labelisRepair.Content = $"isRepair: {AmeisenBot.ObjectManager.Target.IsRepairVendor}";
+                }
+
                 switch (AmeisenBot.ObjectManager.Player.Class)
                 {
                     case WowClass.DeathKnight:
