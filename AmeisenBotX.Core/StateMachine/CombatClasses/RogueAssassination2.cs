@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private DateTime NextGCDSpell { get; set; }
             private DateTime NextStance { get; set; }
             private DateTime NextCast { get; set; }
-            private bool isInStealth()
+            private bool IsInStealth()
             {
                 return HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth"));
             }
@@ -93,13 +93,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("acerate") || e.Contains("Bleed") || e.Contains("bleed") || e.Contains("Rip") || e.Contains("rip")
                  || e.Contains("Rake") || e.Contains("rake") || e.Contains("iercing") || e.Contains("arrote") || e.Contains("emorrhage") || e.Contains("upture") || e.Contains("Wounds") || e.Contains("wounds"));
             }
-            private bool isTargetPoisoned()
+            private bool IsTargetPoisoned()
             {
                 return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("Poison") || e.Contains("poison"));
             }
             private bool askedForHelp = false;
             private bool askedForHeal = false;
-            private bool targetIsDown = false;
             private int comboCnt = 0;
             public RogueAssassinSpells(HookManager hookManager, ObjectManager objectManager)
             {
@@ -116,7 +115,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     return;
                 }
-                if (!ObjectManager.Player.IsAutoAttacking && !isInStealth())
+                if (!ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
                     HookManager.StartAutoAttack();
                 }
@@ -140,7 +139,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     askedForHeal = true;
                 }
                 // -- stealth --
-                if(!isInStealth())
+                if(!IsInStealth())
                 {
                     if(!Player.IsInCombat)
                     {
@@ -161,7 +160,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if (distanceToTarget < 29)
                 {
                     // in range
-                    if(energy > 15 && IsReady(hungerForBlood) && isTargetBleeding() && !isInStealth())
+                    if(energy > 15 && IsReady(hungerForBlood) && isTargetBleeding() && !IsInStealth())
                     {
                         CastSpell(hungerForBlood, ref energy, 15, 60, true);
                     }
@@ -180,7 +179,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         {
                             // distance <= 9
                             // close combat
-                            if(isInStealth())
+                            if(IsInStealth())
                             {
                                 if(energy > 50 && IsReady(garrote) && !isTargetBleeding())
                                 {
@@ -199,7 +198,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 {
                                     CastSpell(kick, ref energy, 25, 10, true);
                                 }
-                                else if (comboCnt > 4 && energy > 35 && isTargetPoisoned())
+                                else if (comboCnt > 4 && energy > 35 && IsTargetPoisoned())
                                 {
                                     if(IsReady(coldBlood))
                                     {
@@ -223,7 +222,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                     CastSpell(sliceAndDice, ref energy, 25, 6 + (3 * comboCntUsed), true);
                                     comboCnt -= comboCntUsed;
                                 }
-                                else if (energy > 60 && isTargetPoisoned())
+                                else if (energy > 60 && IsTargetPoisoned())
                                 {
                                     CastSpell(mutilate, ref energy, 60, 0, true);
                                     comboCnt += 2;
