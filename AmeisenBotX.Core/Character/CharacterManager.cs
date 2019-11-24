@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Character
             Inventory = new CharacterInventory(hookManager);
             Equipment = new CharacterEquipment(hookManager);
             SpellBook = new SpellBook(hookManager);
-            Comparator = new ItemLevelComparator();
+            ItemComparator = new ItemLevelComparator();
             Skills = new List<string>();
         }
 
@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Character
 
         public SpellBook SpellBook { get; }
 
-        private IWowItemComparator Comparator { get; }
+        public IWowItemComparator ItemComparator { get; set; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -185,7 +185,7 @@ namespace AmeisenBotX.Core.Character
                     {
                         if (matchedItem != null)
                         {
-                            if (Comparator.IsBetter(matchedItem, item))
+                            if (ItemComparator.IsBetter(matchedItem, item))
                             {
                                 itemToReplace = item;
                                 return true;

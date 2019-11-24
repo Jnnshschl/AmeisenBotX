@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -35,6 +36,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool HandlesTargetSelection => true;
 
         public bool IsMelee => true;
+
+        public IWowItemComparator ItemComparator => null;
 
         public bool Jumped { get; set; }
 
