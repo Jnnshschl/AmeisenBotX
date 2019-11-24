@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => true;
 
-        public IWowItemComparator ItemComparator => null;
+        public IWowItemComparator ItemComparator => new TankItemComparator();
 
         public bool Jumped { get; set; }
 
@@ -45,7 +45,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private Vector3 LastPlayerPosition { get; set; }
         private Vector3 LastTargetPosition { get; set; }
         private double distanceToTarget = 0;
-        private double distanceTraveled = 0;
 
         private HookManager HookManager { get; }
 
@@ -88,7 +87,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 bool targetDistanceChanged = false;
                 if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
-                    distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
                     LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
