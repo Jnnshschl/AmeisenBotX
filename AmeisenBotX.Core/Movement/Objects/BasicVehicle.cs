@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public BasicVehicle(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, float maxSteering, float maxVelocity, float maxAcceleration)
         {
-            Velocity = Vector3.Zero;
+            Velocity = new Vector3(0, 0, 0);
             MaxSteering = maxSteering;
             MaxVelocity = maxVelocity;
             MaxAcceleration = maxAcceleration;
@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             foreach (Vector3 force in forces)
             {
-                Velocity.Add(force);
+                Velocity += (force);
             }
 
             Velocity.Limit(MaxVelocity);

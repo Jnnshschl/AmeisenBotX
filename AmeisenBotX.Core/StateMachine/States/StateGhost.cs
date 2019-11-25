@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
@@ -39,14 +40,9 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IPathfindingHandler PathfindingHandler { get; }
 
-        private int TryCount { get; set; }
-
-        private Vector3 LastPosition { get; set; }
-
         public override void Enter()
         {
-            MovementEngine.CurrentPath.Clear();
-            TryCount = 0;
+
         }
 
         public override void Execute()
@@ -59,35 +55,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out Vector3 corpsePosition)
                 && ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
             {
-                if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
-                {
-                    TryCount = 0;
-                    LastPosition = Vector3.Zero;
-                    BuildNewPath(corpsePosition);
-                }
-
-                if (MovementEngine.CurrentPath?.Count > 0)
-                {
-                    if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
-                    {
-                        if (LastPosition == positionToGoTo)
-                        {
-                            BuildNewPath(corpsePosition);
-                            return;
-                        }
-
-                        LastPosition = positionToGoTo;
-
-                        CharacterManager.MoveToPosition(positionToGoTo, 10f, 0.2f);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                            DoRandomUnstuckMovement();
-                            TryCount++;
-                        }
-                    }
-                }
+                MovementEngine.SetState(MovementEngineState.Moving, corpsePosition);
+                MovementEngine.Execute();
             }
             else
             {
@@ -95,38 +64,9 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
         }
 
-        private void DoRandomUnstuckMovement()
-        {
-            Random rnd = new Random();
-            if (rnd.Next(10) >= 5)
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_A), 300, 600);
-            }
-            else
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 600);
-            }
-
-            if (rnd.Next(10) >= 5)
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
-            }
-            else
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
-            }
-        }
-
         public override void Exit()
         {
-            MovementEngine.CurrentPath.Clear();
-        }
 
-        private void BuildNewPath(Vector3 corpsePosition)
-        {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, corpsePosition);
-            MovementEngine.LoadPath(path);
-            MovementEngine.PostProcessPath();
         }
     }
 }

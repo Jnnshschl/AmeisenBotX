@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
@@ -35,6 +36,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
+
         }
 
         public override void Execute()
@@ -52,43 +54,16 @@ namespace AmeisenBotX.Core.StateMachine.States
                     return;
                 }
 
-                if (MovementEngine.CurrentPath?.Count == 0)
-                {
-                    Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
+                Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
 
-                    double distance = ObjectManager.Player.Position.GetDistance(targetPosition);
-                    if (distance > 3.2)
-                    {
-                        BuildNewPath(targetPosition);
-                    }
-                }
-                else
-                {
-                    if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
-                    {
-                        CharacterManager.MoveToPosition(positionToGoTo);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-
-                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 200, 500);
-                            BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 200, 500);
-                        }
-                    }
-                }
+                MovementEngine.SetState(MovementEngineState.Moving, targetPosition);
+                MovementEngine.Execute();
             }
         }
 
         public override void Exit()
         {
-        }
 
-        private void BuildNewPath(Vector3 targetPosition)
-        {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, targetPosition);
-            MovementEngine.LoadPath(path);
-            MovementEngine.PostProcessPath();
         }
 
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)

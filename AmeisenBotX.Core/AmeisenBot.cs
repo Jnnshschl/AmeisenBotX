@@ -17,6 +17,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using Microsoft.CSharp;
 using Newtonsoft.Json;
 using System;
@@ -70,7 +71,7 @@ namespace AmeisenBotX.Core
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             MovementSettings = new MovementSettings();
-            MovemenEngine = new DefaultMovementEngine(ObjectManager, MovementSettings);
+            MovemenEngine = new SmartMovementEngine(() => ObjectManager.Player.Position, () => ObjectManager.Player.Rotation, CharacterManager.MoveToPosition, (Vector3 start, Vector3 end) => PathfindingHandler.GetPath(ObjectManager.MapId, start, end), MovementSettings);
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -155,14 +156,14 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log($"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
             CombatClass = (Config.BuiltInCombatClassName.ToUpper()) switch
             {
-                "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
+                "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
                 "DEATHKNIGHTBLOOD" => new DeathknightBlood(ObjectManager, CharacterManager, HookManager),
                 "DEATHKNIGHTUNHOLY" => new DeathknightUnholy(ObjectManager, CharacterManager, HookManager),
                 "DEATHKNIGHTFROST" => new DeathknightFrost(ObjectManager, CharacterManager, HookManager),
-                "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
+                "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
                 "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
                 "PALADINRETRIBUTION" => new PaladinRetribution(ObjectManager, CharacterManager, HookManager),
-                "PALADINPROTECTION" => new PaladinProtection(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
+                "PALADINPROTECTION" => new PaladinProtection(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
                 "MAGEARCANE" => new MageArcane(ObjectManager, CharacterManager, HookManager),
                 "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
                 "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager, XMemory),
@@ -175,7 +176,7 @@ namespace AmeisenBotX.Core
                 "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
                 "DRUIDBALANCE" => new DruidBalance(ObjectManager, CharacterManager, HookManager),
                 "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),
-                "ALTROGUEASSASSINATION" => new RogueAssassination2(ObjectManager, CharacterManager, HookManager, PathfindingHandler, MovemenEngine),
+                "ALTROGUEASSASSINATION" => new RogueAssassination2(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
                 "SHAMANELEMENTAL" => new ShamanElemental(ObjectManager, CharacterManager, HookManager),
                 "SHAMANRESTORATION" => new ShamanRestoration(ObjectManager, CharacterManager, HookManager),
                 _ => null,
@@ -219,7 +220,7 @@ namespace AmeisenBotX.Core
 
         public HookManager HookManager { get; set; }
 
-        public DefaultMovementEngine MovemenEngine { get; set; }
+        public IMovementEngine MovemenEngine { get; set; }
 
         public ObjectManager ObjectManager { get; set; }
 

@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
@@ -53,9 +54,6 @@ namespace AmeisenBotX.Core.StateMachine.States
         public override void Enter()
         {
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
-
-            MovementEngine.CurrentPath.Clear();
-            MovementEngine.Reset();
         }
 
         public override void Execute()
@@ -129,8 +127,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             // set our normal maxfps
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
 
-            MovementEngine.Reset();
-
             // clear our target after we exited the combat state
             if (CombatClass == null || !CombatClass.HandlesTargetSelection)
             {
@@ -148,12 +144,6 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }
                 }
             }
-        }
-
-        private void BuildNewPath(WowUnit target)
-        {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, target.Position);
-            MovementEngine.LoadPath(path);
         }
 
         private void HandleMovement(WowUnit target)
@@ -189,26 +179,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
-                {
-                    TryCount = 0;
-                    BuildNewPath(target);
-                }
-
-                if (MovementEngine.CurrentPath?.Count > 0)
-                {
-                    if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump, true))
-                    {
-                        CharacterManager.MoveToPosition(positionToGoTo, 20.9f, 0.2f);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                            DoRandomUnstuckMovement();
-                            TryCount++;
-                        }
-                    }
-                }
+                MovementEngine.SetState(MovementEngineState.Chasing, target.Position);
+                MovementEngine.Execute();
             }
         }
 

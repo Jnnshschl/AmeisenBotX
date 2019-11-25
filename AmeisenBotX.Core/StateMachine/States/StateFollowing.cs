@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
@@ -35,14 +36,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private WowPlayer PlayerToFollow { get; set; }
 
-        private int TryCount { get; set; }
-
-        private Vector3 LastPosition { get; set; }
-
         public override void Enter()
         {
-            MovementEngine.CurrentPath.Clear();
-            MovementEngine.Reset();
             PlayerToFollow = null;
 
             // TODO: make this crap less redundant
@@ -75,8 +70,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
             }
-
-            TryCount = 0;
         }
 
         public override void Execute()
@@ -93,35 +86,8 @@ namespace AmeisenBotX.Core.StateMachine.States
                 return;
             }
 
-            if (MovementEngine.CurrentPath?.Count < 1 || TryCount > 2)
-            {
-                TryCount = 0;
-                LastPosition = Vector3.Zero;
-                BuildNewPath();
-            }
-
-            if(MovementEngine.CurrentPath?.Count > 0)
-            {
-                if (MovementEngine.GetNextStep(ObjectManager.Player.Position, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump, true))
-                {
-                    if (LastPosition == positionToGoTo)
-                    {
-                        BuildNewPath();
-                        CharacterManager.Jump();
-                        return;
-                    }
-
-                    LastPosition = positionToGoTo;
-                    CharacterManager.MoveToPosition(positionToGoTo, 10f, 0.2f);
-
-                    if (needToJump)
-                    {
-                        CharacterManager.Jump();
-                        DoRandomUnstuckMovement();
-                        TryCount++;
-                    }
-                }
-            }
+            MovementEngine.SetState(MovementEngineState.Moving, PlayerToFollow.Position);
+            MovementEngine.Execute();
         }
 
         private void DoRandomUnstuckMovement()
@@ -148,15 +114,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-            MovementEngine.CurrentPath.Clear();
-            MovementEngine.Reset();
-        }
 
-        private void BuildNewPath()
-        {
-            List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, ObjectManager.Player.Position, PlayerToFollow.Position);
-            MovementEngine.LoadPath(path);
-            MovementEngine.PostProcessPath();
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)

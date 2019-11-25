@@ -11,7 +11,7 @@ using static AmeisenBotX.Core.Movement.Objects.BasicVehicle;
 
 namespace AmeisenBotX.Core.Movement
 {
-    public class SmartMovementEngine
+    public class SmartMovementEngine : IMovementEngine
     {
         public delegate List<Vector3> GeneratePathFunction(Vector3 start, Vector3 end);
 
@@ -22,6 +22,7 @@ namespace AmeisenBotX.Core.Movement
             GetRotation = getRotationFunction;
             MoveToPosition = moveToPositionFunction;
             GeneratePath = generatePathFunction;
+            MovementSettings = movementSettings;
 
             PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
         }
@@ -44,19 +45,13 @@ namespace AmeisenBotX.Core.Movement
 
         public MovementSettings MovementSettings { get; private set; }
 
-        public void SetMove(Vector3 position)
-            => SetNewState(MovementEngineState.Moving, position);
-
-        public void SetFollow(Vector3 position)
-            => SetNewState(MovementEngineState.Following, position);
-
         public void Execute()
         {
             if (CurrentPath.Count == 0)
             {
                 List<Vector3> nodes = GeneratePath.Invoke(GetPosition.Invoke(), TargetPosition);
 
-                if(nodes.Count == 0)
+                if (nodes.Count == 0)
                 {
                     // pathfinding was unsuccessful
                     return;
@@ -75,8 +70,14 @@ namespace AmeisenBotX.Core.Movement
 
             if (distanceToTargetPosition < MovementSettings.WaypointCheckThreshold)
             {
-                CurrentPath.Dequeue();
-                targetPosition = CurrentPath.Peek();
+                if (CurrentPath.Count > 1)
+                {
+                    targetPosition = CurrentPath.Peek();
+                }
+                else if (CurrentPath.Count == 1)
+                {
+                    targetPosition = CurrentPath.Dequeue();
+                }
             }
 
             Vector3 positionToGoTo = MoveAhead(targetPosition, 1.5);
@@ -88,6 +89,10 @@ namespace AmeisenBotX.Core.Movement
                     break;
 
                 case MovementEngineState.Following:
+                    forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
+                    break;
+
+                case MovementEngineState.Chasing:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     break;
             }
@@ -110,10 +115,14 @@ namespace AmeisenBotX.Core.Movement
             };
         }
 
-        private void SetNewState(MovementEngineState state, Vector3 position)
+        public void SetState(MovementEngineState state, Vector3 position)
         {
-            Reset();
-            State = state;
+            if (State != state)
+            {
+                Reset();
+                State = state;
+            }
+
             TargetPosition = position;
         }
 

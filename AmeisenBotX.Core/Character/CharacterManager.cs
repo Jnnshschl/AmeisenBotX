@@ -85,7 +85,7 @@ namespace AmeisenBotX.Core.Character
         private XMemory XMemory { get; }
 
         public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
-        
+
         public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
         {
             if (XMemory.Read(OffsetList.ClickToMoveX, out Vector3 currentCtmPos))
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Character
                 return true;
             }
 
-            currentCtmPosition = Vector3.Zero;
+            currentCtmPosition = new Vector3(0, 0, 0);
             return false;
         }
 
@@ -200,9 +200,12 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
+        public void MoveToPosition(Vector3 pos)
+            => MoveToPosition(pos, 20.9f, 0.4f);
+
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 3f)
         {
-            if (pos == Vector3.Zero)
+            if (pos == new Vector3(0, 0, 0))
             {
                 return;
             }
@@ -253,7 +256,7 @@ namespace AmeisenBotX.Core.Character
             Equipment.Update();
             foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
             {
-                if(slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
+                if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
                 {
                     continue;
                 }

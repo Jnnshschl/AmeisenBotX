@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Movement
 {
-    public class DefaultMovementEngine : IMovementEngine
+    public class DefaultMovementEngine
     {
         public DefaultMovementEngine(ObjectManager objectManager, MovementSettings settings = null)
         {
@@ -39,12 +39,12 @@ namespace AmeisenBotX.Core.Movement
 
         public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
         {
-            positionToGoTo = Vector3.Zero;
+            positionToGoTo = new Vector3(0, 0, 0);
             needToJump = false;
 
             double distance = currentPosition.GetDistance2D(CurrentPath.Peek());
             if ((CurrentPath == null || CurrentPath.Count == 0)
-                || (CurrentPath.Peek() != Vector3.Zero && distance > 1024))
+                || (CurrentPath.Peek() != new Vector3(0, 0, 0) && distance > 1024))
             {
                 return false;
             }
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Movement
             Vector3 seekForce = Seek(currentPosition, distance);
             seekForce.Multiply(1);
 
-            Vector3 seperationForce = Vector3.Zero;
+            Vector3 seperationForce = new Vector3(0, 0, 0);
             if (enableSeperation)
             {
                 // seperation is more important than seeking
@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Movement
             positionToGoTo.Add(seekForce);
             positionToGoTo.Add(seperationForce);
 
-            Acceleration = Vector3.Zero;
+            Acceleration = new Vector3(0, 0, 0);
 
             double heightDiff = positionToGoTo.Z - positionToGoTo.Z;
             if (heightDiff < 0)
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Movement
             }
 
             double distanceTraveled = currentPosition.GetDistance2D(LastPosition);
-            needToJump =  LastPosition != Vector3.Zero && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
+            needToJump =  LastPosition != new Vector3(0, 0, 0) && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
             LastPosition = currentPosition;
             return true;
         }
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Movement
 
         private Vector3 Seperate(Vector3 currentPosition)
         {
-            Vector3 force = Vector3.Zero;
+            Vector3 force = new Vector3(0, 0, 0);
 
             int playersInRange = 0;
             foreach (WowPlayer player in ObjectManager.WowObjects.OfType<WowPlayer>())
@@ -177,7 +177,7 @@ namespace AmeisenBotX.Core.Movement
                 CurrentPath = new Queue<Vector3>();
             }
 
-            Acceleration = Vector3.Zero;
+            Acceleration = new Vector3(0, 0, 0);
             CurrentPath.Clear();
         }
 
