@@ -94,17 +94,17 @@ namespace AmeisenBotX.Core.Movement
             {
                 multiplier = 0;
             }
-            else if (multiplier > Settings.Acceleration)
+            else if (multiplier > Settings.MaxAcceleration)
             {
-                multiplier = Settings.Acceleration;
+                multiplier = Settings.MaxAcceleration;
             }
 
             Vector3 steering = (desired * multiplier) - Velocity;
-            steering.Limit(Settings.MaxForce);
+            steering.Limit(Settings.MaxSteering);
 
             Vector3 newVelocity = Velocity + steering;
             Velocity = newVelocity;
-            Velocity.Limit(Settings.MaxSpeed);
+            Velocity.Limit(Settings.MaxVelocity);
             return newVelocity;
         }
 
@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Movement
                     if (distance < Settings.SeperationDistance)
                 {
                     Vector3 difference = currentPosition;
-                    difference.Substract(player.Position);
+                    difference.Subtract(player.Position);
                     difference.Normalize(difference.GetMagnitude());
 
                     Vector3 weightedDifference = difference;
@@ -148,9 +148,9 @@ namespace AmeisenBotX.Core.Movement
             {
                 force.Divide(playersInRange);
                 force.Normalize(force.GetMagnitude());
-                force.Multiply(Settings.MaxSpeed);
-                force.Substract(Velocity);
-                force.Limit(Settings.MaxForce);
+                force.Multiply(Settings.MaxVelocity);
+                force.Subtract(Velocity);
+                force.Limit(Settings.MaxSteering);
             }
 
             return force;

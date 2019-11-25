@@ -126,7 +126,9 @@
     <Compile Include="Movement\DefaultMovementEngine.cs" />
     <Compile Include="Movement\Enums\MovementEngineState.cs" />
     <Compile Include="Movement\IMovementEngine.cs" />
+    <Compile Include="Movement\Objects\BasicVehicle.cs" />
     <Compile Include="Movement\Settings\MovementSettings.cs" />
+    <Compile Include="Movement\SmartMovementEngine.cs" />
     <Compile Include="OffsetLists\OffsetList335a.cs" />
     <Compile Include="OffsetLists\IOffsetList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

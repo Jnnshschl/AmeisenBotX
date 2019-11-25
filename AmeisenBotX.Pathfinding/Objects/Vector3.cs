@@ -39,7 +39,7 @@ namespace AmeisenBotX.Pathfinding.Objects
 
         public static Vector3 operator -(Vector3 a, Vector3 b)
             => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
-
+        
         public static Vector3 operator +(Vector3 a, Vector3 b)
             => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Pathfinding.Objects
             Z += vector.Z;
         }
 
-        public void Substract(Vector3 vector)
+        public void Subtract(Vector3 vector)
         {
             X -= vector.X;
             Y -= vector.Y;
@@ -113,6 +113,9 @@ namespace AmeisenBotX.Pathfinding.Objects
 
         public float GetMagnitude()
             => Convert.ToSingle(Math.Sqrt(X * X + Y * Y));
+
+        public void Normalize()
+            => Normalize(GetMagnitude());
 
         public void Normalize(float magnitude)
         {

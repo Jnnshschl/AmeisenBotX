@@ -2,9 +2,11 @@
 {
     public enum MovementEngineState
     {
-        IDLE,
-        MOVING_NORMAL,
-        MOVING_MOUNTED,
-        UNSTUCKING
+        None,
+        Moving,
+        Following,
+        Fleeing,
+        Chasing,
+        Stuck
     }
 }
