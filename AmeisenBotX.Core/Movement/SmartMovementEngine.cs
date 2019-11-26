@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Settings;
@@ -15,7 +16,7 @@ namespace AmeisenBotX.Core.Movement
     {
         public delegate List<Vector3> GeneratePathFunction(Vector3 start, Vector3 end);
 
-        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, MovementSettings movementSettings)
+        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, ObjectManager objectManager, MovementSettings movementSettings)
         {
             State = MovementEngineState.None;
             GetPosition = getPositionFunction;
@@ -23,8 +24,9 @@ namespace AmeisenBotX.Core.Movement
             MoveToPosition = moveToPositionFunction;
             GeneratePath = generatePathFunction;
             MovementSettings = movementSettings;
+            ObjectManager = objectManager;
 
-            PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
+            PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, objectManager, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
         }
 
         public MovementEngineState State { get; private set; }
@@ -32,6 +34,8 @@ namespace AmeisenBotX.Core.Movement
         public Queue<Vector3> CurrentPath { get; private set; }
 
         public Vector3 TargetPosition { get; private set; }
+
+        public ObjectManager ObjectManager { get; }
 
         public MoveToPositionFunction MoveToPosition { get; set; }
 
@@ -95,6 +99,13 @@ namespace AmeisenBotX.Core.Movement
                 case MovementEngineState.Chasing:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     break;
+
+                case MovementEngineState.Fleeing:
+                    forces.Add(PlayerVehicle.Flee(positionToGoTo, 1));
+                    break;
+
+                case MovementEngineState.None:
+                    return;
             }
 
             // move

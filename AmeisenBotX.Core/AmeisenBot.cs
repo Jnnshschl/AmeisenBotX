@@ -71,7 +71,13 @@ namespace AmeisenBotX.Core
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             MovementSettings = new MovementSettings();
-            MovemenEngine = new SmartMovementEngine(() => ObjectManager.Player.Position, () => ObjectManager.Player.Rotation, CharacterManager.MoveToPosition, (Vector3 start, Vector3 end) => PathfindingHandler.GetPath(ObjectManager.MapId, start, end), MovementSettings);
+            MovemenEngine = new SmartMovementEngine(
+                () => ObjectManager.Player.Position,
+                () => ObjectManager.Player.Rotation,
+                CharacterManager.MoveToPosition,
+                (Vector3 start, Vector3 end) => PathfindingHandler.GetPath(ObjectManager.MapId, start, end),
+                ObjectManager,
+                MovementSettings);
 
             if (!Directory.Exists(BotDataPath))
             {
