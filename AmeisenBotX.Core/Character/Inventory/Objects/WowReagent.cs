@@ -2,7 +2,7 @@
 {
     public class WowReagent : WowBasicItem
     {
-        public WowReagent(WowBasicItem wowBasicItem) : base()
+        public WowReagent(WowBasicItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;

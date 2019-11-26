@@ -2,7 +2,7 @@
 {
     public class WowTradegood : WowBasicItem
     {
-        public WowTradegood(WowBasicItem wowBasicItem) : base()
+        public WowTradegood(WowBasicItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;

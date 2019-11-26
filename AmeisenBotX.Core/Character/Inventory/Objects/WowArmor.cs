@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public class WowArmor : WowBasicItem
     {
-        public WowArmor(WowBasicItem wowBasicItem) : base()
+        public WowArmor(WowBasicItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;

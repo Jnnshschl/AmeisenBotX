@@ -6,6 +6,39 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public class WowBasicItem : IWowItem
     {
+        /**
+         * Default Constructor
+         */
+        public WowBasicItem() { }
+
+        /**
+         * Copy Constructor
+         */
+        public WowBasicItem(WowBasicItem item)
+        {
+            if(item != null)
+            {
+                this.BagId = item.BagId;
+                this.BagSlot = item.BagSlot;
+                this.Count = Count;
+                this.Durability = item.Durability;
+                this.EquipLocation = item.EquipLocation;
+                this.EquipSlot = item.EquipSlot;
+                this.Id = item.Id;
+                this.ItemLevel = item.ItemLevel;
+                this.ItemLink = item.ItemLink;
+                this.ItemQuality = item.ItemQuality;
+                this.MaxDurability = item.MaxDurability;
+                this.MaxStack = item.MaxStack;
+                this.Name = item.Name;
+                this.Price = item.Price;
+                this.RequiredLevel = item.RequiredLevel;
+                this.Stats = item.Stats;
+                this.Subtype = item.Subtype;
+                this.Type = item.Type;
+            }
+        }
+
         [JsonProperty("bagid")]
         public int BagId { get; set; }
 

@@ -2,7 +2,7 @@
 {
     public class WowKey : WowBasicItem
     {
-        public WowKey(WowBasicItem wowBasicItem) : base()
+        public WowKey(WowBasicItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;
