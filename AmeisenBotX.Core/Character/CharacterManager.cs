@@ -201,7 +201,7 @@ namespace AmeisenBotX.Core.Character
         public void Jump() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
         public void MoveToPosition(Vector3 pos)
-            => MoveToPosition(pos, 20.9f, 0.4f);
+            => MoveToPosition(pos, 20.9f, 0.5f);
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 3f)
         {

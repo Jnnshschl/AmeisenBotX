@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.Movement
                     continue;
                 }
 
-                double distance = currentPosition.GetDistance2D(player.Position);
+                double distance = currentPosition.GetDistance(player.Position);
                 if (distance == 0)
                 {
                     // randomly move away

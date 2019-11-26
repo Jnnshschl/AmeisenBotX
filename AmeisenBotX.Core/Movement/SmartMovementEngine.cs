@@ -74,13 +74,13 @@ namespace AmeisenBotX.Core.Movement
 
             if (distanceToTargetPosition < MovementSettings.WaypointCheckThreshold)
             {
-                if (CurrentPath.Count > 1)
-                {
-                    targetPosition = CurrentPath.Peek();
-                }
-                else if (CurrentPath.Count == 1)
+                if (CurrentPath.Count > 0)
                 {
                     targetPosition = CurrentPath.Dequeue();
+                }
+                if(CurrentPath.Count == 0)
+                {
+                    return;
                 }
             }
 
