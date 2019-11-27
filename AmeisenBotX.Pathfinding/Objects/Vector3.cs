@@ -81,6 +81,7 @@ namespace AmeisenBotX.Pathfinding.Objects
             Y = multiplier > 0 ? Y * multiplier : 0;
             Z = multiplier > 0 ? Z * multiplier : 0;
         }
+
         public void Divide(float multiplier)
         {
             X = multiplier > 0 ? X / multiplier : 0;
@@ -122,6 +123,20 @@ namespace AmeisenBotX.Pathfinding.Objects
                 X /= magnitude;
                 Y /= magnitude;
             }
+        }
+
+        public void Rotate(double degrees)
+        {
+            RotateRadians(degrees * (Math.PI / 180));
+        }
+
+        public void RotateRadians(double radians)
+        {
+            double ca = Math.Cos(radians);
+            double sa = Math.Sin(radians);
+
+            X = Convert.ToSingle(ca * X - sa * Y);
+            Y = Convert.ToSingle(sa * X + ca * Y);
         }
 
         public override int GetHashCode()

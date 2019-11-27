@@ -35,6 +35,8 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 TargetPosition { get; private set; }
 
+        public float TargetRotation { get; private set; }
+
         public ObjectManager ObjectManager { get; }
 
         public MoveToPositionFunction MoveToPosition { get; set; }
@@ -70,7 +72,7 @@ namespace AmeisenBotX.Core.Movement
             List<Vector3> forces = new List<Vector3>();
             Vector3 currentPosition = GetPosition.Invoke();
             Vector3 targetPosition = CurrentPath.Peek();
-            double distanceToTargetPosition = currentPosition.GetDistance(targetPosition);
+            double distanceToTargetPosition = currentPosition.GetDistance2D(targetPosition);
 
             if (distanceToTargetPosition < MovementSettings.WaypointCheckThreshold)
             {
@@ -78,7 +80,7 @@ namespace AmeisenBotX.Core.Movement
                 {
                     targetPosition = CurrentPath.Dequeue();
                 }
-                if(CurrentPath.Count == 0)
+                else if(CurrentPath.Count == 0)
                 {
                     return;
                 }
@@ -97,14 +99,26 @@ namespace AmeisenBotX.Core.Movement
                     break;
 
                 case MovementEngineState.Chasing:
-                    forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
+                    forces.Add(PlayerVehicle.Pursuit(positionToGoTo, 1, TargetRotation));
                     break;
 
                 case MovementEngineState.Fleeing:
                     forces.Add(PlayerVehicle.Flee(positionToGoTo, 1));
                     break;
 
-                case MovementEngineState.None:
+                case MovementEngineState.Evading:
+                    forces.Add(PlayerVehicle.Evade(positionToGoTo, 1, TargetRotation));
+                    break;
+
+                case MovementEngineState.Wandering:
+                    forces.Add(PlayerVehicle.Wander(1));
+                    break;
+
+                case MovementEngineState.Stuck:
+                    forces.Add(PlayerVehicle.Unstuck(1));
+                    break;
+
+                default:
                     return;
             }
 
@@ -126,7 +140,7 @@ namespace AmeisenBotX.Core.Movement
             };
         }
 
-        public void SetState(MovementEngineState state, Vector3 position)
+        public void SetState(MovementEngineState state, Vector3 position, float targetRotation = 0f)
         {
             if (State != state)
             {
@@ -135,6 +149,7 @@ namespace AmeisenBotX.Core.Movement
             }
 
             TargetPosition = position;
+            TargetRotation = targetRotation;
         }
 
         private void Reset()

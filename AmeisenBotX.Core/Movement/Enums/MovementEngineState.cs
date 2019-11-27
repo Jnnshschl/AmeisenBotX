@@ -7,6 +7,8 @@
         Following,
         Fleeing,
         Chasing,
-        Stuck
+        Stuck,
+        Evading,
+        Wandering
     }
 }

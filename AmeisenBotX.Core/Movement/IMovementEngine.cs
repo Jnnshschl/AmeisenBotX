@@ -10,6 +10,6 @@ namespace AmeisenBotX.Core.Movement
 
         void Execute();
 
-        void SetState(MovementEngineState state, Vector3 position);
+        void SetState(MovementEngineState state, Vector3 position, float targetRotation = 0f);
     }
 }
