@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, ObjectManager objectManager, float maxSteering, float maxVelocity, float maxAcceleration)
+        public BasicVehicle(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, JumpFunction jumpFunction, ObjectManager objectManager, float maxSteering, float maxVelocity, float maxAcceleration)
         {
             Velocity = new Vector3(0, 0, 0);
             MaxSteering = maxSteering;
@@ -21,7 +21,10 @@ namespace AmeisenBotX.Core.Movement.Objects
             GetPosition = getPositionFunction;
             MoveToPosition = moveToPositionFunction;
             ObjectManager = objectManager;
+            Jump = jumpFunction;
         }
+
+        public delegate void JumpFunction();
 
         public delegate Vector3 GetPositionFunction();
 
@@ -38,6 +41,8 @@ namespace AmeisenBotX.Core.Movement.Objects
         public ObjectManager ObjectManager { get; }
 
         public Vector3 Velocity { get; private set; }
+
+        public JumpFunction Jump { get; private set; }
 
         private GetPositionFunction GetPosition { get; set; }
 
