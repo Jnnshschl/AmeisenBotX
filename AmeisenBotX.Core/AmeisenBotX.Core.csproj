@@ -56,6 +56,7 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\ClickToMoveType.cs" />
+    <Compile Include="Character\Comparators\ArmsAxeItemComparator.cs" />
     <Compile Include="Character\Comparators\TankItemComparator.cs" />
     <Compile Include="Character\Comparators\ItemLevelComparator.cs" />
     <Compile Include="Character\Comparators\IWowItemComparator.cs" />

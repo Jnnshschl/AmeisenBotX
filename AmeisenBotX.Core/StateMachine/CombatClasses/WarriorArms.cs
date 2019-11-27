@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => true;
 
-        public IWowItemComparator ItemComparator => null;
+        public IWowItemComparator ItemComparator => new ArmsAxeItemComparator();
 
         private bool hasTargetMoved = false;
         private bool computeNewRoute = false;
