@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 return;
             }
 
-            MovementEngine.SetState(MovementEngineState.Moving, PlayerToFollow.Position);
+            MovementEngine.SetState(MovementEngineState.Following, PlayerToFollow.Position);
             MovementEngine.Execute();
         }
 

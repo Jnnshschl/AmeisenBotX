@@ -52,10 +52,8 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 AvoidObstacles(float multiplier)
         {
-            Vector3 currentPosition = GetPosition();
             Vector3 acceleration = new Vector3(0, 0, 0);
-            acceleration += currentPosition;
-            acceleration += GetObjectForceAroundMe<WowObject>();
+            acceleration += GetObjectForceAroundMe<WowObject>(8);
             acceleration.Limit(MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
@@ -150,17 +148,15 @@ namespace AmeisenBotX.Core.Movement.Objects
             newRandomPosition += CalculateFuturePosition(currentPosition, GetRotation.Invoke(), Convert.ToSingle((rnd.NextDouble() * 4) + 4));
 
             // rotate the vector by  random amount of degrees
-            newRandomPosition.Rotate(rnd.Next(-14,14));
+            newRandomPosition.Rotate(rnd.Next(-14, 14));
 
             return Seek(newRandomPosition, multiplier);
         }
 
         public Vector3 Seperate(float multiplier)
         {
-            Vector3 currentPosition = GetPosition();
             Vector3 acceleration = new Vector3(0, 0, 0);
-            acceleration += currentPosition;
-            acceleration += GetObjectForceAroundMe<WowPlayer>();
+            acceleration += GetObjectForceAroundMe<WowPlayer>(2);
             acceleration.Limit(MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;

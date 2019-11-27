@@ -109,6 +109,7 @@ namespace AmeisenBotX.Core.Movement
 
                 case MovementEngineState.Following:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
+                    forces.Add(PlayerVehicle.Seperate(1));
                     break;
 
                 case MovementEngineState.Chasing:
