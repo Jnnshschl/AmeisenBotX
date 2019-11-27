@@ -76,6 +76,7 @@ namespace AmeisenBotX.Core
                 () => ObjectManager.Player.Rotation,
                 CharacterManager.MoveToPosition,
                 (Vector3 start, Vector3 end) => PathfindingHandler.GetPath(ObjectManager.MapId, start, end),
+                CharacterManager.Jump,
                 ObjectManager,
                 MovementSettings);
 

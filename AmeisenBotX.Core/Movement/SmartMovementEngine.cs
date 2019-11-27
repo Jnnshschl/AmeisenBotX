@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Movement
     {
         public delegate List<Vector3> GeneratePathFunction(Vector3 start, Vector3 end);
 
-        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, ObjectManager objectManager, MovementSettings movementSettings)
+        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, JumpFunction jumpFunction, ObjectManager objectManager, MovementSettings movementSettings)
         {
             State = MovementEngineState.None;
             GetPosition = getPositionFunction;
@@ -25,8 +25,9 @@ namespace AmeisenBotX.Core.Movement
             GeneratePath = generatePathFunction;
             MovementSettings = movementSettings;
             ObjectManager = objectManager;
+            Jump = jumpFunction;
 
-            PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, objectManager, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
+            PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, jumpFunction, objectManager, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
         }
 
         public MovementEngineState State { get; private set; }
@@ -35,9 +36,19 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 TargetPosition { get; private set; }
 
+        public Vector3 CurrentPathTargetPosition { get; private set; }
+
+        public Vector3 LastPosition { get; private set; }
+
+        public DateTime LastJumpCheck { get; private set; }
+
+        public bool HasMoved { get; private set; }
+
         public float TargetRotation { get; private set; }
 
         public ObjectManager ObjectManager { get; }
+
+        public JumpFunction Jump { get; set; }
 
         public MoveToPositionFunction MoveToPosition { get; set; }
 
@@ -53,7 +64,7 @@ namespace AmeisenBotX.Core.Movement
 
         public void Execute()
         {
-            if (CurrentPath.Count == 0)
+            if (CurrentPath.Count == 0 || CurrentPathTargetPosition.GetDistance(TargetPosition) > 1)
             {
                 List<Vector3> nodes = GeneratePath.Invoke(GetPosition.Invoke(), TargetPosition);
 
@@ -67,6 +78,8 @@ namespace AmeisenBotX.Core.Movement
                 {
                     CurrentPath.Enqueue(node);
                 }
+
+                CurrentPathTargetPosition = TargetPosition;
             }
 
             List<Vector3> forces = new List<Vector3>();
@@ -80,7 +93,7 @@ namespace AmeisenBotX.Core.Movement
                 {
                     targetPosition = CurrentPath.Dequeue();
                 }
-                else if(CurrentPath.Count == 0)
+                else if (CurrentPath.Count == 0)
                 {
                     return;
                 }
@@ -124,6 +137,20 @@ namespace AmeisenBotX.Core.Movement
 
             // move
             PlayerVehicle.Update(forces);
+
+            if (DateTime.Now - LastJumpCheck > TimeSpan.FromMilliseconds(500))
+            {
+                double distanceTraveled = LastPosition.GetDistance(GetPosition.Invoke());
+                if ((LastPosition.X == 0 && LastPosition.Y == 0 && LastPosition.Z == 0) || distanceTraveled < 0.5)
+                {
+                    Jump.Invoke();
+                }
+
+                LastPosition = GetPosition.Invoke();
+                LastJumpCheck = DateTime.Now;
+            }
+
+            HasMoved = true;
         }
 
         private Vector3 MoveAhead(Vector3 targetPosition, double offset)
@@ -155,7 +182,8 @@ namespace AmeisenBotX.Core.Movement
         private void Reset()
         {
             State = MovementEngineState.None;
-            CurrentPath = new Queue<Vector3>();
+            CurrentPath = new Queue<Vector3>(); 
+            HasMoved = false;
         }
     }
 }
