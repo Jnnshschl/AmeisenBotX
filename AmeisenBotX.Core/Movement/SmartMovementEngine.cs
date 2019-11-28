@@ -87,7 +87,12 @@ namespace AmeisenBotX.Core.Movement
             Vector3 targetPosition = CurrentPath.Peek();
             double distanceToTargetPosition = currentPosition.GetDistance2D(targetPosition);
 
-            if (distanceToTargetPosition < MovementSettings.WaypointCheckThreshold)
+            if (distanceToTargetPosition > 2048)
+            {
+                Reset();
+                return;
+            }
+            else if (distanceToTargetPosition < MovementSettings.WaypointCheckThreshold)
             {
                 if (CurrentPath.Count > 0)
                 {
@@ -183,7 +188,7 @@ namespace AmeisenBotX.Core.Movement
         private void Reset()
         {
             State = MovementEngineState.None;
-            CurrentPath = new Queue<Vector3>(); 
+            CurrentPath = new Queue<Vector3>();
             HasMoved = false;
         }
     }
