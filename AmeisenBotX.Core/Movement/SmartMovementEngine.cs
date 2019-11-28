@@ -139,10 +139,10 @@ namespace AmeisenBotX.Core.Movement
             // move
             PlayerVehicle.Update(forces);
 
-            if (DateTime.Now - LastJumpCheck > TimeSpan.FromMilliseconds(500))
+            if (DateTime.Now - LastJumpCheck > TimeSpan.FromMilliseconds(250))
             {
                 double distanceTraveled = LastPosition.GetDistance(GetPosition.Invoke());
-                if ((LastPosition.X == 0 && LastPosition.Y == 0 && LastPosition.Z == 0) || distanceTraveled < 0.5)
+                if ((LastPosition.X == 0 && LastPosition.Y == 0 && LastPosition.Z == 0) || distanceTraveled < 0.3)
                 {
                     Jump.Invoke();
                 }

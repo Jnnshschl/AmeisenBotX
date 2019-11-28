@@ -34,6 +34,10 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IPathfindingHandler PathfindingHandler { get; }
 
+        private List<int> FriendlySpells { get; } = new List<int> () { 
+            0
+        };
+
         public override void Enter()
         {
 
@@ -46,7 +50,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 // TODO: exclude friendly spells like Circle of Healing
                 WowDynobject aoeSpellObject = ObjectManager.WowObjects.OfType<WowDynobject>()
-                    .FirstOrDefault(e => e.Position.GetDistance2D(ObjectManager.Player.Position) < e.Radius + 1);
+                    .FirstOrDefault(e => FriendlySpells.Contains(e.SpellId) && e.Position.GetDistance2D(ObjectManager.Player.Position) < e.Radius + 1);
 
                 if (aoeSpellObject == null)
                 {
@@ -73,20 +77,17 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             double angle = Math.Atan2(angleX, angleY);
 
-            // move three meter out of the aoe spell
             double distanceToMove = aoeRadius - ObjectManager.Player.Position.GetDistance2D(aoePosition) + 3;
 
             double x = ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
             double y = ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);
 
-            Vector3 destination = new Vector3()
+            return new Vector3()
             {
                 X = Convert.ToSingle(x),
                 Y = Convert.ToSingle(y),
                 Z = ObjectManager.Player.Position.Z
             };
-
-            return destination;
         }
     }
 }

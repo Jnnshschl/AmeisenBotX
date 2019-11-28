@@ -57,7 +57,10 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
                 .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position))
-                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
+                    && HookManager.GetUnitReaction(ObjectManager.Player, e) == WowUnitReaction.Friendly
+                    && e.IsRepairVendor
+                    && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {

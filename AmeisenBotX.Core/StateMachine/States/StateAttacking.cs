@@ -184,28 +184,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
         }
 
-        private void DoRandomUnstuckMovement()
-        {
-            Random rnd = new Random();
-            if (rnd.Next(10) >= 5)
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_A), 300, 600);
-            }
-            else
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 300, 600);
-            }
-
-            if (rnd.Next(10) >= 5)
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_Q), 300, 600);
-            }
-            else
-            {
-                BotUtils.SendKey(AmeisenBotStateMachine.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_E), 300, 600);
-            }
-        }
-
         private bool SelectTargetToAttack(out WowUnit target)
         {
             // TODO: need to handle duels, our target will

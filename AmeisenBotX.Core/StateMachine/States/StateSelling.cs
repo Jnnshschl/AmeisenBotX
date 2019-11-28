@@ -58,39 +58,35 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
                 .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position))
-                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
+                    && HookManager.GetUnitReaction(ObjectManager.Player, e) == WowUnitReaction.Friendly
+                    && e.IsRepairVendor
+                    && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
                 double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                if (distance > 5.0)
+                if (distance > 3.0)
                 {
                     MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
                     MovementEngine.Execute();
                 }
                 else
                 {
-                    if (distance > 4)
-                    {
-                        CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 2f);
-                    }
-                    else
-                    {
-                        HookManager.RightClickUnit(selectedUnit);
-                        Task.Delay(1000).GetAwaiter().GetResult();
+                    HookManager.RightClickUnit(selectedUnit);
+                    Task.Delay(1000).GetAwaiter().GetResult();
 
-                        HookManager.SellAllGrayItems();
-                        foreach (IWowItem item in CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                    HookManager.SellAllGrayItems();
+                    foreach (IWowItem item in CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                    {
+                        IWowItem itemToSell = item;
+                        if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                         {
-                            IWowItem itemToSell = item;
-                            if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                            {
-                                itemToSell = itemToReplace;
-                                HookManager.ReplaceItem(null, item);
-                            }
-
-                            HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                            itemToSell = itemToReplace;
+                            HookManager.ReplaceItem(null, item);
                         }
+
+                        HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
                     }
                 }
             }

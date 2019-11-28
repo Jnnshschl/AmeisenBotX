@@ -72,7 +72,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private CharacterManager CharacterManager { get; }
 
-        private bool Disengaged { get; set; }
+        private bool DisengagePrepared { get; set; } = false;
+
+        private bool InFrostTrapCombo { get; set; } = false;
 
         private HookManager HookManager { get; }
 
@@ -133,17 +135,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     return;
                 }
 
-                if (distanceToTarget < 3
-                    && ObjectManager.Player.CurrentlyCastingSpellId <= 0
-                    && ObjectManager.Player.CurrentlyChannelingSpellId <= 0)
-                {
-                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_S), 750, 1250);
-                }
-
                 if (distanceToTarget < 3)
                 {
                     if (CastSpellIfPossible(frostTrapSpell, true))
                     {
+                        InFrostTrapCombo = true;
+                        DisengagePrepared = true;
                         return;
                     }
 
@@ -153,20 +150,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         return;
                     }
                 }
-
-                if (distanceToTarget < 6
-                    && CastSpellIfPossible(disengageSpell, true))
+                else
                 {
-                    Disengaged = true;
-                    return;
-                }
-
-                if (distanceToTarget > 3)
-                {
-                    if (Disengaged
+                    if (DisengagePrepared
                         && CastSpellIfPossible(concussiveShotSpell,true))
                     {
-                        Disengaged = false;
+                        DisengagePrepared = false;
+                        return;
+                    }
+
+                    if (InFrostTrapCombo
+                        && CastSpellIfPossible(disengageSpell, true))
+                    {
+                        InFrostTrapCombo = false;
                         return;
                     }
 
@@ -199,7 +195,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            Disengaged = false;
+            DisengagePrepared = false;
         }
 
         private bool CheckPetStatus()
