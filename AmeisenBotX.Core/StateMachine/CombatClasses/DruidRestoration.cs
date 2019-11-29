@@ -212,7 +212,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
-            WowUnit target = possibleTargets.OrderBy(e => e.HealthPercentage).First();
+            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
 
             if (target != null)
             {

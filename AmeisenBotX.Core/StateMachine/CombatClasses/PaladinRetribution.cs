@@ -173,7 +173,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool HandleHammerOfJustice()
         {
-            WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && (e.CurrentlyCastingSpellId > 0 || e.CurrentlyChannelingSpellId > 0));
+            WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
             if (castingUnit != null)
             {
                 ulong lastTargetGuid = ObjectManager.TargetGuid;

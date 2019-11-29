@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
-            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
+            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
         }
 
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)

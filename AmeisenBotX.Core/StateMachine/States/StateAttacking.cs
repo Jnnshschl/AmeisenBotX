@@ -201,7 +201,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // get all targets that are not friendly to us
             List<WowUnit> nonFriendlyUnits = ObjectManager.WowObjects.OfType<WowUnit>()
-                .Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly)
+                .Where(e => e.IsInCombat && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly)
                 .ToList();
 
             // remove all invalid, dead units
@@ -266,7 +266,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     HookManager.TargetNearestEnemy();
                     ObjectManager.UpdateObject(ObjectManager.Player);
 
-                    target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.Player.Guid);
+                    target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.Guid == ObjectManager.Player.Guid);
                     if (BotUtils.IsValidUnit(target)
                         && target.IsInCombat)
                     {
