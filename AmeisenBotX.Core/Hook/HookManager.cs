@@ -886,6 +886,11 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetGuid(ulong guid)
         {
+            if(guid == 0)
+            {
+                return;
+            }
+
             byte[] guidBytes = BitConverter.GetBytes(guid);
             string[] asm = new string[]
             {

@@ -36,11 +36,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string revivePetSpell = "Revive Pet";
         private readonly string serpentStingSpell = "Serpent Sting";
         private readonly string steadyShotSpell = "Steady Shot";
+        private readonly string scatterShotSpell = "Scatter Shot"; 
         private readonly string wingClipSpell = "Wing Clip";
+        private readonly string multiShotSpell = "Multi-Shot";
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 3;
-        private readonly int enemyCastingCheckTime = 1;
         private readonly int petstatusCheckTime = 2;
 
         public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, XMemory xMemory)
@@ -82,8 +83,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastDebuffCheck { get; set; }
 
-        private DateTime LastEnemyCastingCheck { get; set; }
-
         private DateTime LastMendPetUsed { get; set; }
 
         private ObjectManager ObjectManager { get; }
@@ -99,8 +98,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0
+            if (ObjectManager.Player.IsCasting
                 || ObjectManager.TargetGuid == ObjectManager.PlayerGuid)
             {
                 return;
@@ -115,18 +113,40 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && HandleBuffing())
                 || (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
                     && CheckPetStatus())
-                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                    && HandleIntimmidation())
                 || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
                     && HandleDebuffing()))
             {
                 return;
             }
 
+            ulong oldTargetGuid = 0;
+            WowUnit targetToStun = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
+
+            if (targetToStun != null)
+            {
+                // target the target to stun it later,
+                // save the guid to restore the target
+                // if we are not able to stun it
+                oldTargetGuid = ObjectManager.TargetGuid;
+                HookManager.TargetGuid(targetToStun.Guid);
+            }
+
             WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 
             if (target != null)
             {
+                if (target.IsCasting
+                    && (CastSpellIfPossible(intimidationSpell)
+                    || CastSpellIfPossible(scatterShotSpell)))
+                {
+                    return;
+                }
+                else if(oldTargetGuid > 0)
+                {
+                    // restore the old target if we cant stun the target
+                    HookManager.TargetGuid(oldTargetGuid);
+                }
+
                 double distanceToTarget = target.Position.GetDistance2D(ObjectManager.Player.Position);
 
                 if (ObjectManager.Player.HealthPercentage < 15
@@ -144,7 +164,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         return;
                     }
 
-                    if (ObjectManager.Player.HealthPercentage < 30 
+                    if (ObjectManager.Player.HealthPercentage < 30
                         && CastSpellIfPossible(deterrenceSpell, true))
                     {
                         return;
@@ -153,7 +173,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 else
                 {
                     if (DisengagePrepared
-                        && CastSpellIfPossible(concussiveShotSpell,true))
+                        && CastSpellIfPossible(concussiveShotSpell, true))
                     {
                         DisengagePrepared = false;
                         return;
@@ -167,7 +187,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     }
 
                     if (target.HealthPercentage < 20
-                        && CastSpellIfPossible(killShotSpell,true))
+                        && CastSpellIfPossible(killShotSpell, true))
                     {
                         return;
                     }
@@ -176,7 +196,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     CastSpellIfPossible(beastialWrathSpell, true);
                     CastSpellIfPossible(rapidFireSpell);
 
-                    if (CastSpellIfPossible(arcaneShotSpell, true)
+                    if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, true))
+                        || CastSpellIfPossible(arcaneShotSpell, true)
                         || CastSpellIfPossible(steadyShotSpell, true))
                     {
                         return;
@@ -257,22 +278,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleIntimmidation()
-        {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-
-            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
-
-            if (isCasting
-                && CastSpellIfPossible(intimidationSpell))
-            {
-                return true;
-            }
-
-            LastEnemyCastingCheck = DateTime.Now;
             return false;
         }
 

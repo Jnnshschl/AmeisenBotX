@@ -86,8 +86,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -98,18 +97,26 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 || (DateTime.Now - LastManashieldCheck > TimeSpan.FromSeconds(manashieldCheckTime)
                     && HandleManaShield())
                 || (DateTime.Now - LastMissileBarrageCheck > TimeSpan.FromSeconds(missileBarrageCheckTime)
-                    && HandleMissileBarrage())
-                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                    && HandleCounterspell())
-                || (ObjectManager.Player.HealthPercentage < 16
+                    && HandleMissileBarrage())) { return; }
+
+            if (ObjectManager.Target != null)
+            {
+                if (ObjectManager.Target.IsCasting
+                    && CastSpellIfPossible(counterspellSpell, true))
+                {
+                    return;
+                }
+
+                if ((ObjectManager.Player.HealthPercentage < 16
                     && CastSpellIfPossible(iceBlockSpell))
                 || (ObjectManager.Player.ManaPercentage < 40
                     && CastSpellIfPossible(evocationSpell, true))
                 || CastSpellIfPossible(mirrorImageSpell, true)
                 || CastSpellIfPossible(arcaneBarrageSpell, true)
                 || CastSpellIfPossible(arcaneBlastSpell, true))
-            {
-                return;
+                {
+                    return;
+                }
             }
         }
 
@@ -157,22 +164,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleCounterspell()
-        {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-
-            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
-
-            if (isCasting
-                && CastSpellIfPossible(counterspellSpell, true))
-            {
-                return true;
-            }
-
-            LastEnemyCastingCheck = DateTime.Now;
             return false;
         }
 

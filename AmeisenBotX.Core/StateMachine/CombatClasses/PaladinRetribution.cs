@@ -82,8 +82,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -110,9 +109,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target != null)
+            if (ObjectManager.Target != null)
             {
                 if ((ObjectManager.Player.HealthPercentage < 20
                         && CastSpellIfPossible(hammerOfWrathSpell, true))
@@ -176,18 +173,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool HandleHammerOfJustice()
         {
-            WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.CurrentlyCastingSpellId > 0 || e.CurrentlyChannelingSpellId > 0);
-            if (castingUnit != null
-                && CastSpellIfPossible(hammerOfJusticeSpell, true))
+            WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && (e.CurrentlyCastingSpellId > 0 || e.CurrentlyChannelingSpellId > 0));
+            if (castingUnit != null)
             {
-                return true;
-            }
+                ulong lastTargetGuid = ObjectManager.TargetGuid;
+                HookManager.TargetGuid(castingUnit.Guid);
 
-            WowUnit castingPlayer = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.CurrentlyCastingSpellId > 0 || e.CurrentlyChannelingSpellId > 0);
-            if (castingPlayer != null
-                && CastSpellIfPossible(hammerOfJusticeSpell, true))
-            {
-                return true;
+                if (CastSpellIfPossible(hammerOfJusticeSpell, true))
+                {
+                    HookManager.TargetGuid(lastTargetGuid);
+                    return true;
+                }
             }
 
             LastEnemyCastingCheck = DateTime.Now;

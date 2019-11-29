@@ -31,6 +31,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string elementalMasterySpell = "Elemental Mastery";
         private readonly string heroismSpell = "Heroism";
         private readonly string ancestralSpiritSpell = "Ancestral Spirit";
+        private readonly string hexSpell = "Hex";
+        private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
@@ -78,11 +80,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Dictionary<string, Spell> Spells { get; }
 
+        private bool hexedTarget { get; set; }
+
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -95,25 +98,41 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            //// if (ObjectManager.Player.HealthPercentage < 70
-            ////     && IsSpellKnown(flashHealSpell)
-            ////     && !IsOnCooldown(flashHealSpell))
-            //// {
-            ////     HookManager.CastSpell(flashHealSpell);
-            ////     return;
-            //// }
-
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target != null)
+            if (ObjectManager.Player.HealthPercentage < 30
+                && CastSpellIfPossible(hexSpell, true))
             {
-                if ((target.Position.GetDistance2D(ObjectManager.Player.Position) < 8
+                hexedTarget = true;
+                return;
+            }
+
+            if (ObjectManager.Player.HealthPercentage < 30
+                && (!CharacterManager.SpellBook.IsSpellKnown(hexSpell)
+                || hexedTarget)
+                && CastSpellIfPossible(lesserHealingWaveSpell, true))
+            {
+                return;
+            }
+
+            if (ObjectManager.Target != null)
+            {
+                if (ObjectManager.Target.IsCasting
+                    && CastSpellIfPossible(windShearSpell))
+                {
+                    return;
+                }
+
+                if ((ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) < 6
                         && CastSpellIfPossible(thunderstormSpell, true))
-                    || (target.MaxHealth > 300000
-                        && target.HealthPercentage < 16
+                    || (ObjectManager.Target.MaxHealth > 1000000
+                        && ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(heroismSpell))
                     || CastSpellIfPossible(lavaBurstSpell, true)
-                    || CastSpellIfPossible(elementalMasterySpell)
+                    || CastSpellIfPossible(elementalMasterySpell))
+                {
+                    return;
+                }
+
+                if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, true))
                     || CastSpellIfPossible(lightningBoltSpell, true))
                 {
                     return;
@@ -144,6 +163,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 return;
             }
+
+            if (hexedTarget)
+            {
+                hexedTarget = false;
+            }
         }
 
         private bool HandleBuffing()
@@ -161,9 +185,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 || (ObjectManager.Player.ManaPercentage < 25
                     && !myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(waterShieldSpell, true)))
-                // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
-                //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
-                //     && CastSpellIfPossible(flametoungueWeaponSpell, true)))
+            // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
+            //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
+            //     && CastSpellIfPossible(flametoungueWeaponSpell, true)))
             {
                 return true;
             }

@@ -73,8 +73,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -93,14 +92,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target != null)
+            if (ObjectManager.Target != null)
             {
                 if ((CharacterManager.SpellBook.IsSpellKnown(kickSpell) 
-                        && DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                        && HandleKick())
-                    || (target.Position.GetDistance2D(ObjectManager.Player.Position) > 16
+                        && ObjectManager.Target.IsCasting
+                        && CastSpellIfPossible(kickSpell))
+                    || (ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) > 16
                         && CastSpellIfPossible(sprintSpell, true)))
                 {
                     return;
@@ -132,22 +129,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleKick()
-        {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-
-            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
-
-            if (isCasting
-                && CastSpellIfPossible(kickSpell, true))
-            {
-                return true;
-            }
-
-            LastEnemyCastingCheck = DateTime.Now;
             return false;
         }
 

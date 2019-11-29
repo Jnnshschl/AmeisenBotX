@@ -85,8 +85,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -97,17 +96,28 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 || (DateTime.Now - LastHotstreakCheck > TimeSpan.FromSeconds(hotstreakCheckTime)
                     && HandlePyroblast())
                 || (DateTime.Now - LastShieldCheck > TimeSpan.FromSeconds(shieldCheckTime)
-                    && HandleManaShield())
-                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                    && HandleCounterspell())
-                || CastSpellIfPossible(mirrorImageSpell, true)
-                || (ObjectManager.Player.HealthPercentage < 16
-                    && CastSpellIfPossible(iceBlockSpell, true))
-                || (ObjectManager.Player.ManaPercentage < 40
-                    && CastSpellIfPossible(evocationSpell, true))
-                || CastSpellIfPossible(fireballSpell, true))
+                    && HandleManaShield()))
             {
                 return;
+            }
+
+            if (ObjectManager.Target != null)
+            {
+                if (ObjectManager.Target.IsCasting
+                    && CastSpellIfPossible(counterspellSpell))
+                {
+                    return;
+                }
+
+                if (CastSpellIfPossible(mirrorImageSpell, true)
+                    || (ObjectManager.Player.HealthPercentage < 16
+                        && CastSpellIfPossible(iceBlockSpell, true))
+                    || (ObjectManager.Player.ManaPercentage < 40
+                        && CastSpellIfPossible(evocationSpell, true))
+                    || CastSpellIfPossible(fireballSpell, true))
+                {
+                    return;
+                }
             }
         }
 

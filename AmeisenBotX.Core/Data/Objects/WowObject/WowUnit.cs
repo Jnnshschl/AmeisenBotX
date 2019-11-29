@@ -121,6 +121,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsVendor => NpcFlags[(int)WowUnitNpcFlags.Vendor];
 
+        public bool IsCasting => CurrentlyCastingSpellId > 0 || CurrentlyChannelingSpellId > 0;
+
         public int Level { get; set; }
 
         public int Mana { get; set; }

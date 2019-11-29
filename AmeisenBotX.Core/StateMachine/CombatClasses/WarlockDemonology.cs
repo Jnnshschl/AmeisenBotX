@@ -44,6 +44,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly int buffCheckTime = 8;
         private readonly int damageBuffCheckTime = 1;
         private readonly int debuffCheckTime = 1;
+        private readonly int fearAttemptDelay = 5;
 
         public WarlockDemonology(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -87,11 +88,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Dictionary<string, Spell> Spells { get; }
 
+        private DateTime LastFearAttempt { get; set; }
+
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -115,17 +117,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target != null)
+            if (ObjectManager.Target != null)
             {
-                if (target.GetType() == typeof(WowPlayer))
+                if (ObjectManager.Target.GetType() == typeof(WowPlayer))
                 {
-                    if ((ObjectManager.Player.Position.GetDistance(target.Position) < 6
+                    if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
+                        && ((ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) < 6
                             && CastSpellIfPossible(howlOfTerrorSpell, true))
-                        || (ObjectManager.Player.Position.GetDistance(target.Position) < 12
-                            && CastSpellIfPossible(fearSpell, true)))
+                        || (ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) < 12
+                            && CastSpellIfPossible(fearSpell, true))))
                     {
+                        LastFearAttempt = DateTime.Now;
                         return;
                     }
                 }
@@ -133,7 +135,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if ((ObjectManager.Player.CurrentlyCastingSpellId == 0
                     && ObjectManager.Player.CurrentlyCastingSpellId == 0
                     && CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                    && target.HealthPercentage < 8
+                    && ObjectManager.Target.HealthPercentage < 8
                     && CastSpellIfPossible(drainSoulSpell, true)))
                 {
                     return;

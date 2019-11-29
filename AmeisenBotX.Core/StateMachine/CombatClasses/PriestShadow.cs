@@ -79,8 +79,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -111,8 +110,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             ////     return;
             //// }
 
-            if (ObjectManager.Player.CurrentlyCastingSpellId == 0
-                && ObjectManager.Player.CurrentlyChannelingSpellId == 0
+            if (ObjectManager.Player.IsCasting
                 && CastSpellIfPossible(mindFlaySpell, true))
             {
                 return;

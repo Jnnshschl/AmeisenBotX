@@ -85,8 +85,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -110,7 +109,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && CastSpellIfPossible(starfireSpell, true))
                 || (SolarEclipse
                     && CastSpellIfPossible(wrathSpell, true))
-                || (ObjectManager.WowObjects.OfType<WowUnit>().Count() < 8 
+                || (ObjectManager.WowObjects.OfType<WowUnit>().Where(e=>!e.IsInCombat && ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
                     && CastSpellIfPossible(starfallSpell, true)))
             {
                 return;
