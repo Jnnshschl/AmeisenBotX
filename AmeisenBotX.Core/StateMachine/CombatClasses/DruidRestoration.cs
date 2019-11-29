@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator => null;
+        public IWowItemComparator ItemComparator { get; } = new BasicSpiritComparator();
 
         private CharacterManager CharacterManager { get; }
 

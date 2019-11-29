@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator => null;
+        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
 
         public bool SolarEclipse { get; set; }
 

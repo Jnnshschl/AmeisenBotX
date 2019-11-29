@@ -40,6 +40,8 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 LastPosition { get; private set; }
 
+        public Vector3 LastTargetPosition { get; private set; }
+
         public DateTime LastJumpCheck { get; private set; }
 
         public bool HasMoved { get; private set; }
@@ -118,7 +120,7 @@ namespace AmeisenBotX.Core.Movement
                     break;
 
                 case MovementEngineState.Chasing:
-                    forces.Add(PlayerVehicle.Pursuit(positionToGoTo, 1, TargetRotation));
+                    forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     break;
 
                 case MovementEngineState.Fleeing:
@@ -156,6 +158,7 @@ namespace AmeisenBotX.Core.Movement
                 LastJumpCheck = DateTime.Now;
             }
 
+            LastTargetPosition = GetPosition.Invoke();
             HasMoved = true;
         }
 

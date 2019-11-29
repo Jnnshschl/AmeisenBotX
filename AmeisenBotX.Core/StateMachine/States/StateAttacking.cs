@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
@@ -17,7 +18,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateAttacking : State
     {
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, ICombatClass combatClass) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, MovementSettings movementSettings, ICombatClass combatClass) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
@@ -25,6 +26,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             PathfindingHandler = pathfindingHandler;
             MovementEngine = movementEngine;
+            MovementSettings = movementSettings;
             CombatClass = combatClass;
 
             // default distance values
@@ -40,6 +42,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         private AmeisenBotConfig Config { get; }
 
         private HookManager HookManager { get; }
+
+        private MovementSettings MovementSettings { get; }
 
         private DateTime LastRotationCheck { get; set; }
 
@@ -179,8 +183,13 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
+                float oldMaxSteering = MovementSettings.MaxSteering;
+                MovementSettings.MaxSteering = 2f;
+
                 MovementEngine.SetState(MovementEngineState.Chasing, target.Position);
                 MovementEngine.Execute();
+
+                MovementSettings.MaxSteering = oldMaxSteering;
             }
         }
 

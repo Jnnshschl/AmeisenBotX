@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool IsMelee => true;
 
-        public IWowItemComparator ItemComparator => null;
+        public IWowItemComparator ItemComparator { get; } = new BasicAgilityComparator();
 
         public bool InOpener { get; set; }
 
