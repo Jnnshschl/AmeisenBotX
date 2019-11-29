@@ -54,12 +54,16 @@ namespace AmeisenBotX.Core.Character.Comparators
             if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
             {
                 // also 2nd weapons
-                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_SWORDS))
+                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WeaponType.DAGGERS))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString) && double.TryParse(dpsString, out double dps))
                     {
                         rating += 2f * dps;
                     }
+                }
+                else
+                {
+                    rating = 0;
                 }
             }
             else if (!(slot.Equals(EquipmentSlot.INVSLOT_NECK) || slot.Equals(EquipmentSlot.INVSLOT_RING1)

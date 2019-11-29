@@ -188,7 +188,7 @@ namespace AmeisenBotX.Core.Movement
             TargetRotation = targetRotation;
         }
 
-        private void Reset()
+        public void Reset()
         {
             State = MovementEngineState.None;
             CurrentPath = new Queue<Vector3>();

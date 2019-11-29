@@ -186,6 +186,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 float oldMaxSteering = MovementSettings.MaxSteering;
                 MovementSettings.MaxSteering = 2f;
 
+                MovementEngine.Reset();
                 MovementEngine.SetState(MovementEngineState.Chasing, target.Position);
                 MovementEngine.Execute();
 
