@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Data
                 && XMemory.ReadStruct(IntPtr.Add(activeObject, OffsetList.WowUnitPosition.ToInt32()), out Vector3 wowPosition)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.PlayerRotation.ToInt32()), out float rotation)
                 && XMemory.Read(IntPtr.Add(activeObject, OffsetList.IsAutoAttacking.ToInt32()), out int isAutoAttacking)
-                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorCombatReach.ToInt32()), out int combatReach)
+                && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorCombatReach.ToInt32()), out float combatReach)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorFactionTemplate.ToInt32()), out int factionTemplate)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlags)
                 && XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, OffsetList.DescriptorUnitFlagsDynamic.ToInt32()), out BitVector32 dynamicUnitFlags)
