@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             {
                 return true;
             }
-            else if(item.Stats == null)
+            else if (item.Stats == null)
             {
                 return false;
             }
@@ -24,6 +24,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             {
                 return true;
             }
+
             double currentRating = GetRating(current, current.EquipSlot);
             double newItemRating = GetRating(item, current.EquipSlot);
             return currentRating < newItemRating;
@@ -36,22 +37,27 @@ namespace AmeisenBotX.Core.Character.Comparators
             {
                 rating += 2f * meleeCrit;
             }
+
             if (item.Stats.TryGetValue("ITEM_MOD_CRIT_RATING_SHORT", out string critString) && double.TryParse(critString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double crit))
             {
                 rating += 2f * crit;
             }
+
             if (item.Stats.TryGetValue("ITEM_MOD_AGILITY_SHORT", out string agilityString) && double.TryParse(agilityString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double agility))
             {
                 rating += 1f * agility;
             }
+
             if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
             {
                 rating += 0.25f * attack;
             }
+
             if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
             {
                 rating += 0.5f * strength;
             }
+
             if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
             {
                 // also 2nd weapons
@@ -76,11 +82,13 @@ namespace AmeisenBotX.Core.Character.Comparators
                 {
                     rating += 0.05f * armor;
                 }
+
                 if (item.Stats.TryGetValue("ITEM_MOD_DODGE_RATING_SHORT", out string dodgeString) && double.TryParse(dodgeString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double dodge))
                 {
                     rating += 0.5f * dodge;
                 }
             }
+
             return rating;
         }
     }

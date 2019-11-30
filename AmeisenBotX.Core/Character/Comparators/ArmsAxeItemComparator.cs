@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             {
                 return true;
             }
-            else if(item.Stats == null)
+            else if (item.Stats == null)
             {
                 return false;
             }
@@ -24,6 +24,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             {
                 return true;
             }
+
             double currentRating = GetRating(current, current.EquipSlot);
             double newItemRating = GetRating(item, current.EquipSlot);
             return currentRating < newItemRating;
@@ -46,10 +47,12 @@ namespace AmeisenBotX.Core.Character.Comparators
                     {
                         rating += 0.5f * attack;
                     }
+
                     if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString) && double.TryParse(dpsString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double dps))
                     {
                         rating += 2f * dps;
                     }
+
                     if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
                     {
                         rating += 1f * strength;
@@ -65,6 +68,7 @@ namespace AmeisenBotX.Core.Character.Comparators
                 {
                     rating += 0.5f * attack;
                 }
+
                 if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
                 {
                     rating += 1f * strength;
@@ -77,15 +81,18 @@ namespace AmeisenBotX.Core.Character.Comparators
                 {
                     rating += 0.5f * armor;
                 }
+
                 if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
                 {
                     rating += 0.5f * attack;
                 }
+
                 if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
                 {
                     rating += 1f * strength;
                 }
             }
+
             return rating;
         }
     }
