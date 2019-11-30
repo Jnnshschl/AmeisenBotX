@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
+using System;
 using System.Collections.Specialized;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject

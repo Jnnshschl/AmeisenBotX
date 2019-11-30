@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.StateMachine
         }
 
         internal bool IsAnyPartymemberInCombat()
-            => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.IsInCombat);
+            => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < 60 && r.IsInCombat);
 
         internal void SetState(AmeisenBotState state)
         {

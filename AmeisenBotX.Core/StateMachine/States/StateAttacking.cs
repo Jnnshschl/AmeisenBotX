@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat())
+            if ((!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat()))
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
                 return;
