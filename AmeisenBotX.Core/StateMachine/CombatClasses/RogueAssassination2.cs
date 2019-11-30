@@ -533,7 +533,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     isSneaky = false;
                 }
             }
-            bool closeToTarget = distanceToTarget < 10.0;
+            bool closeToTarget = distanceToTarget < 12.0 + target.CombatReach;
             if(hasTargetMoved)
             {
                 CharacterManager.MoveToPosition(LastBehindTargetPosition);
