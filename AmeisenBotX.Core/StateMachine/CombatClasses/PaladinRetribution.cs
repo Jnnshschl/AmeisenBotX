@@ -173,15 +173,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool HandleHammerOfJustice()
         {
-            WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
-            if (castingUnit != null)
+            //WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
+            if (ObjectManager.Target.IsCasting)
             {
-                ulong lastTargetGuid = ObjectManager.TargetGuid;
-                HookManager.TargetGuid(castingUnit.Guid);
-
                 if (CastSpellIfPossible(hammerOfJusticeSpell, true))
                 {
-                    HookManager.TargetGuid(lastTargetGuid);
                     return true;
                 }
             }
