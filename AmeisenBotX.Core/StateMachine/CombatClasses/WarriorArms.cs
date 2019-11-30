@@ -169,11 +169,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                         CastSpell(retaliation, ref rage, 0, 300, false);
                     }
                 }
-                if (distanceToTarget < 29)
+                if (distanceToTarget < (29 + target.CombatReach))
                 {
-                    if (distanceToTarget < 24)
+                    if (distanceToTarget < (24 + target.CombatReach))
                     {
-                        if (distanceToTarget > 9)
+                        if (distanceToTarget > (9 + target.CombatReach))
                         {
                             // -- run to the target! --
                             if (Player.IsInCombat)
@@ -218,7 +218,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                        else if (distanceToTarget < 6)
+                        else if (distanceToTarget < target.CombatReach)
                         {
                             // -- close combat --
                             // Battle Stance
@@ -524,11 +524,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (hasTargetMoved || (distanceToTarget < 6.0 && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
+            if (hasTargetMoved || (distanceToTarget < target.CombatReach && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
             {
                 CharacterManager.MoveToPosition(LastTargetPosition);
             }
-            else if (distanceToTarget >= 6.0)
+            else if (distanceToTarget >= target.CombatReach)
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {

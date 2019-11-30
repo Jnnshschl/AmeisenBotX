@@ -157,16 +157,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
 
                 // combat
-                if (distanceToTarget < 29)
+                if (distanceToTarget < (29 + target.CombatReach))
                 {
                     // in range
                     if(energy > 15 && IsReady(hungerForBlood) && isTargetBleeding() && !IsInStealth())
                     {
                         CastSpell(hungerForBlood, ref energy, 15, 60, true);
                     }
-                    if (distanceToTarget < 24)
+                    if (distanceToTarget < (24 + target.CombatReach))
                     {
-                        if (distanceToTarget > 9)
+                        if (distanceToTarget > (9 + target.CombatReach))
                         {
                             // 9 < distance < 24
                             // run?
@@ -175,7 +175,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 CastSpell(sprint, ref energy, 15, 180, true);
                             }
                         }
-                        else if (distanceToTarget < 6)
+                        else if (distanceToTarget <= target.CombatReach)
                         {
                             // distance <= 9
                             // close combat
@@ -360,7 +360,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     hasTargetMoved = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - (9 * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - (9 * (float)Math.Sin(LastTargetRotation)));
+                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((9 + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((9 + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
                     targetDistanceChanged = true;
                 }
                 else if(hasTargetMoved)
@@ -527,9 +527,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             if(distanceToBehindTarget < 3.0)
             {
-                isSneaky = false;
+                if(isSneaky)
+                {
+                    CharacterManager.MoveToPosition(LastTargetPosition);
+                    isSneaky = false;
+                }
             }
-            bool closeToTarget = distanceToTarget < 10.0;
+            bool closeToTarget = distanceToTarget < 12.0 + target.CombatReach;
             if(hasTargetMoved)
             {
                 CharacterManager.MoveToPosition(LastBehindTargetPosition);

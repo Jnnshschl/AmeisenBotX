@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             // distance attack
-            if (!gcdWaiting && distanceToTarget > 10 && distanceToTarget < 30)
+            if (!gcdWaiting && distanceToTarget > (10 + target.CombatReach) && distanceToTarget < (30 + target.CombatReach))
             {
                 if (DateTime.Now.Subtract(LastAvenger).TotalSeconds > 30 && playerMana >= 1027)
                 {
@@ -252,7 +252,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             else
             {
                 // close combat
-                if (!gcdWaiting && distanceToTarget < 10)
+                if (!gcdWaiting && distanceToTarget < target.CombatReach)
                 {
                     if (multipleTargets && DateTime.Now.Subtract(LastConsecration).TotalSeconds > 8 && playerMana >= 869)
                     {
@@ -374,11 +374,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (hasTargetMoved || (distanceToTarget < 6.0 && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
+            if (hasTargetMoved || (distanceToTarget < target.CombatReach && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
             {
                 CharacterManager.MoveToPosition(LastTargetPosition);
             }
-            else if (distanceToTarget >= 6.0)
+            else if (distanceToTarget >= target.CombatReach)
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {

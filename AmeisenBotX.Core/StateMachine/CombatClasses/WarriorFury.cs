@@ -153,11 +153,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     CastSpell(berserkerRage, ref rage, 0, 20.1, true); // lasts 10 sec
                 }
-                if (distanceToTarget < 29)
+                if (distanceToTarget < (29 + target.CombatReach))
                 {
-                    if(distanceToTarget < 24)
+                    if(distanceToTarget < (24 + target.CombatReach))
                     {
-                        if(distanceToTarget > 9)
+                        if(distanceToTarget > (9 + target.CombatReach))
                         {
                             // -- run to the target! --
                             if (Player.IsInCombat)
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                             }
                         }
-                        else if (distanceToTarget < 6)
+                        else if (distanceToTarget < target.CombatReach)
                         {
                             // -- close combat --
                             // Berserker Stance
