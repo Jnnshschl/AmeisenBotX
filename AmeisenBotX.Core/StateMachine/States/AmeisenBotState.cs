@@ -16,6 +16,7 @@
         Unstuck,
         Looting,
         Repairing,
-        Selling
+        Selling,
+        Battleground
     }
 }

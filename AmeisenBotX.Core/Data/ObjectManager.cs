@@ -370,6 +370,16 @@ namespace AmeisenBotX.Core.Data
                 PlayerBase = playerbase;
             }
 
+            if (XMemory.Read(OffsetList.MapId, out int mapId))
+            {
+                MapId = mapId;
+            }
+
+            if (XMemory.Read(OffsetList.ZoneId, out int zoneId))
+            {
+                ZoneId = zoneId;
+            }
+
             WowObjects = new List<WowObject>();
             XMemory.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
             XMemory.Read(IntPtr.Add(clientConnection, OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
@@ -412,16 +422,6 @@ namespace AmeisenBotX.Core.Data
 
             PartyleaderGuid = ReadPartyLeaderGuid();
             PartymemberGuids = ReadPartymemberGuids();
-
-            if (XMemory.Read(OffsetList.MapId, out int mapId))
-            {
-                MapId = mapId;
-            }
-
-            if (XMemory.Read(OffsetList.ZoneId, out int zoneId))
-            {
-                ZoneId = zoneId;
-            }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);
         }

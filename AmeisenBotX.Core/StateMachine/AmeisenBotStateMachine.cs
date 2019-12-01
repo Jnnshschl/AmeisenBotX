@@ -73,7 +73,8 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Selling, new StateSelling(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Healing, new StateEating(this, config, objectManager, characterManager) },
                 { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) }
+                { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
+                { AmeisenBotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine) }
             };
 
             CurrentState = States.First();
@@ -167,8 +168,17 @@ namespace AmeisenBotX.Core.StateMachine
             CurrentState.Value.Execute();
         }
 
+        internal bool IsOnBattleground()
+            => ObjectManager.MapId == 30
+            || ObjectManager.MapId == 489
+            || ObjectManager.MapId == 529
+            || ObjectManager.MapId == 566
+            || ObjectManager.MapId == 607;
+
         internal bool IsAnyPartymemberInCombat()
-            => ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid)).Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < 60 && r.IsInCombat);
+            => ObjectManager.WowObjects.OfType<WowPlayer>()
+            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
+            .Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < 60 && r.IsInCombat);
 
         internal void SetState(AmeisenBotState state)
         {

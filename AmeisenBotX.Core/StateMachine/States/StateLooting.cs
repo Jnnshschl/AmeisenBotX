@@ -78,6 +78,12 @@ namespace AmeisenBotX.Core.StateMachine.States
                     {
                         MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
                         MovementEngine.Execute();
+                        LootTryCount++;
+
+                        if(LootTryCount == 16)
+                        {
+                            UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
+                        }
                     }
                     else
                     {

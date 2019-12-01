@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core.OffsetLists
 
         IntPtr AutolootPointer { get; }
 
+        IntPtr BattlegroundStatus { get; }
+
         IntPtr BattlegroundFinished { get; }
 
         IntPtr CharacterSlotSelected { get; }
@@ -215,6 +217,10 @@ namespace AmeisenBotX.Core.OffsetLists
         IntPtr WowObjectDescriptor { get; }
 
         IntPtr WowObjectGuid { get; }
+
+        IntPtr WowObjectEntryId { get; }
+
+        IntPtr WowObjectScale { get; }
 
         IntPtr WowObjectPosition { get; }
 

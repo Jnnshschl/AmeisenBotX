@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            Vector3 positionToGoTo = MoveAhead(targetPosition, 1.5);
+            Vector3 positionToGoTo = MoveAhead(targetPosition, 3);
 
             switch (State)
             {

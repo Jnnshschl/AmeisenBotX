@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
 
             ulong oldTargetGuid = 0;
-            WowUnit targetToStun = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
+            /*WowUnit targetToStun = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
 
             if (targetToStun != null)
             {
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 // if we are not able to stun it
                 oldTargetGuid = ObjectManager.TargetGuid;
                 HookManager.TargetGuid(targetToStun.Guid);
-            }
+            }*/
 
             WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
 

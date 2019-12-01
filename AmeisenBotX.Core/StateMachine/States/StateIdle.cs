@@ -66,6 +66,16 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+            CheckForBattlegroundInvites();
+
+            // we are on a battleground
+            if (AmeisenBotStateMachine.XMemory.Read(OffsetList.BattlegroundStatus, out int bgStatus)
+                && bgStatus == 3)
+            {
+                AmeisenBotStateMachine.SetState(AmeisenBotState.Battleground);
+                return;
+            } 
+
             // do i need to loot units
             if (UnitLootList.Count > 0)
             {
@@ -106,6 +116,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // do buffing etc...
             CombatClass?.OutOfCombatExecute();
+        }
+
+        private void CheckForBattlegroundInvites()
+        {
+            if (AmeisenBotStateMachine.XMemory.Read(OffsetList.BattlegroundStatus, out int bgStatus)
+                && bgStatus == 2)
+            {
+                HookManager.AcceptBattlegroundInvite();
+            }
         }
 
         internal bool IsVendorNpcNear()

@@ -31,9 +31,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
-        private readonly int enemyCastingCheckTime = 1;
         private readonly int manashieldCheckTime = 16;
         private readonly int missileBarrageCheckTime = 1;
+        private readonly int spellstealCheckTime = 1;
 
         public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -69,8 +69,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastDebuffCheck { get; set; }
 
-        private DateTime LastEnemyCastingCheck { get; set; }
-
         private DateTime LastManashieldCheck { get; set; }
 
         private DateTime LastMissileBarrageCheck { get; set; }
@@ -82,6 +80,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private Dictionary<string, Spell> Spells { get; }
 
         private int BarrageCounter { get; set; }
+
+        public DateTime LastSpellstealCheck { get; private set; }
 
         public void Execute()
         {
@@ -133,7 +133,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool HandleSpellSteal()
         {
-            CastSpellIfPossible(spellStealSpell, true);
+            if (DateTime.Now - LastSpellstealCheck > TimeSpan.FromSeconds(spellstealCheckTime)
+                && HookManager.HasUnitStealableBuffs(WowLuaUnit.Target)
+                && CastSpellIfPossible(spellStealSpell, true))
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -177,7 +183,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             }
             else
             {
-                BarrageCounter++;
+                BarrageCounter = 1;
             }
 
             LastMissileBarrageCheck = DateTime.Now;

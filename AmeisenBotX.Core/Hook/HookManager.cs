@@ -60,6 +60,18 @@ namespace AmeisenBotX.Core.Hook
 
         public byte[] OriginalEndsceneBytes { get; private set; }
 
+        public void RightClickObject(WowObject flagObject)
+        {
+            string[] asm = new string[]
+            {
+                $"MOV ECX, {flagObject.BaseAddress.ToInt32()}",
+                $"CALL 0x711140",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
+
         public IntPtr ReturnValueAddress { get; private set; }
 
         private IAmeisenBotCache BotCache { get; }
@@ -75,6 +87,14 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString("AcceptGroup();");
             SendChatMessage("/click StaticPopup1Button1");
         }
+
+        public void AcceptBattlegroundInvite()
+        {
+            SendChatMessage("/click StaticPopup1Button1");
+        }
+
+        public void LeaveBattleground()
+            => LuaDoString("/click ");
 
         public void AcceptResurrect()
         {
@@ -738,7 +758,7 @@ namespace AmeisenBotX.Core.Hook
             string[] asm = new string[]
             {
                 $"MOV ECX, {wowUnit.BaseAddress.ToInt32()}",
-                $"CALL 0x00731260",
+                $"CALL 0x731260",
                 "RETN",
             };
 
@@ -917,6 +937,22 @@ namespace AmeisenBotX.Core.Hook
             XMemory.Write(OffsetList.ClickToMoveZ, targetPosition.Z);
             XMemory.Write(OffsetList.ClickToMoveDistance, distance);
             XMemory.Write(OffsetList.ClickToMoveAction, clickToMoveType);
+        }
+
+        public bool HasUnitStealableBuffs(WowLuaUnit luaUnit)
+        {
+            LuaDoString($"abIsStealableStuffThere=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,isStealable=UnitAura(\"{luaUnit}\",i);if isStealable==1 then abIsStealableStuffThere=1;end end");
+            string rawValue = GetLocalizedText("abIsStealableStuffThere");
+
+            return int.TryParse(rawValue, out int result) ? result == 1 : false;
+        }
+
+        public bool IsBgInviteReady()
+        {
+            LuaDoString("abBgQueueIsReady = 0;for i=1,2 do local x = GetBattlefieldPortExpiration(i) if x > 0 then abBgQueueIsReady = 1 end end");
+            string rawValue = GetLocalizedText("abBgQueueIsReady");
+
+            return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
         private bool AllocateCodeCaves()

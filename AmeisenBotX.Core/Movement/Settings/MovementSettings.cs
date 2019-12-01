@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Movement.Settings
 
         public float MaxAcceleration { get; set; } = 6f;
 
-        public double WaypointCheckThreshold { get; set; } = 4;
+        public double WaypointCheckThreshold { get; set; } = 3;
 
         public double SeperationDistance { get; set; } = 6;
     }

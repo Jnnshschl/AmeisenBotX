@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private DateTime LastRotationCheck { get; set; }
 
+        private DateTime LastValidTargetCheck { get; set; }
+
         private IMovementEngine MovementEngine { get; set; }
 
         private ObjectManager ObjectManager { get; }
@@ -83,13 +85,15 @@ namespace AmeisenBotX.Core.StateMachine.States
                     ObjectManager.UpdateObject(ObjectManager.Target);
 
                     // do we need to clear our target
-                    if (ObjectManager.TargetGuid > 0
+                    if (DateTime.Now - LastValidTargetCheck > TimeSpan.FromMilliseconds(1000)
+                        && ObjectManager.TargetGuid > 0
                         && (ObjectManager.Target.IsDead
                         || HookManager.GetUnitReaction(ObjectManager.Player, ObjectManager.Target) == WowUnitReaction.Friendly))
                     {
                         HookManager.ClearTarget();
                         ObjectManager.UpdateObject(ObjectManager.Player);
                     }
+                    LastValidTargetCheck = DateTime.Now;
 
                     // select a new target if our current target is invalid
                     if ((ObjectManager.TargetGuid == 0

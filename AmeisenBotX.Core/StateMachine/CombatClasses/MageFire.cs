@@ -32,9 +32,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private readonly int buffCheckTime = 8;
         private readonly int debuffCheckTime = 1;
-        private readonly int enemyCastingCheckTime = 1;
         private readonly int hotstreakCheckTime = 1;
         private readonly int shieldCheckTime = 16;
+        private double spellstealCheckTime = 1;
 
         public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -70,8 +70,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastDebuffCheck { get; set; }
 
-        private DateTime LastEnemyCastingCheck { get; set; }
-
         private DateTime LastHotstreakCheck { get; set; }
 
         private DateTime LastShieldCheck { get; set; }
@@ -81,6 +79,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private CooldownManager CooldownManager { get; }
 
         private Dictionary<string, Spell> Spells { get; }
+        public DateTime LastSpellstealCheck { get; private set; }
 
         public void Execute()
         {
@@ -153,23 +152,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool HandleSpellSteal()
         {
-            CastSpellIfPossible(spellStealSpell, true);
-            return false;
-        }
-
-        private bool HandleCounterspell()
-        {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-
-            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
-
-            if (isCasting
-                && CastSpellIfPossible(counterspellSpell, true))
+            if (DateTime.Now - LastSpellstealCheck > TimeSpan.FromSeconds(spellstealCheckTime)
+                && HookManager.HasUnitStealableBuffs(WowLuaUnit.Target)
+                && CastSpellIfPossible(spellStealSpell, true))
             {
                 return true;
             }
 
-            LastEnemyCastingCheck = DateTime.Now;
             return false;
         }
 

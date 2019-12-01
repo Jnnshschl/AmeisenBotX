@@ -54,6 +54,13 @@
   <ItemGroup>
     <Compile Include="AmeisenBotConfig.cs" />
     <Compile Include="AmeisenBot.cs" />
+    <Compile Include="Battleground\BattlegroundEngine.cs" />
+    <Compile Include="Battleground\Enums\BattlegroundType.cs" />
+    <Compile Include="Battleground\Objectives\CaptureTheFlagObjective.cs" />
+    <Compile Include="Battleground\Objectives\CarryFlagToBaseObjective.cs" />
+    <Compile Include="Battleground\Objectives\IBattlegroundObjective.cs" />
+    <Compile Include="Battleground\Profiles\IBattlegroundProfile.cs" />
+    <Compile Include="Battleground\Profiles\WarsongGulchProfile.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\ClickToMoveType.cs" />
     <Compile Include="Character\Comparators\AssassinationItemComparator.cs" />
@@ -178,6 +185,7 @@
     <Compile Include="StateMachine\States\StateLoadingScreen.cs" />
     <Compile Include="StateMachine\States\StateLogin.cs" />
     <Compile Include="StateMachine\States\StateNone.cs" />
+    <Compile Include="StateMachine\States\StateBattleground.cs" />
     <Compile Include="StateMachine\States\StateSelling.cs" />
     <Compile Include="StateMachine\States\StateRepairing.cs" />
     <Compile Include="StateMachine\States\StateStartWow.cs" />

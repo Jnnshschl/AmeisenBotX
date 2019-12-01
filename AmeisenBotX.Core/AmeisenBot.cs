@@ -494,9 +494,46 @@ namespace AmeisenBotX.Core
             EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
             EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
+            EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnBattlegroundScoreUpdate);
+            EventHookManager.Subscribe("UPDATE_WORLD_STATES", OnWorldStateUpdate);
+            EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
+
+            EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnBgAllianceMessage);
+            EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
+            EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnBgNeutralMessage);
 
             //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
             //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
+        }
+
+        private void OnBgNeutralMessage(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnBgNeutralMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+        }
+
+        private void OnBgHordeMessage(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnBgHordeMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+        }
+
+        private void OnBgAllianceMessage(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnBgAllianceMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+        }
+
+        private void OnPvpQueueShow(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnPvpQueueShow: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+        }
+
+        private void OnWorldStateUpdate(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnWorldStateUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+        }
+
+        private void OnBattlegroundScoreUpdate(long timestamp, List<string> args)
+        {
+            AmeisenLogger.Instance.Log($"Event OnBattlegroundScoreUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
     }
 }
