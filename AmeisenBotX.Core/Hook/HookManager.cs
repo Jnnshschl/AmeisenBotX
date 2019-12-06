@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public void LeaveBattleground()
-            => LuaDoString("/click ");
+            => SendChatMessage("/click WorldStateScoreFrameLeaveButton");
 
         public void AcceptResurrect()
         {
@@ -164,6 +164,9 @@ namespace AmeisenBotX.Core.Hook
                 InjectAndExecute(asm, false);
             }
         }
+
+        public void QueuBattlegroundByName(string bgName)
+            => SendChatMessage($"/run for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)
             => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");

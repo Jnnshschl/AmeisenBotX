@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Data.Persistence;
+using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding.Objects;
@@ -59,6 +60,8 @@ namespace AmeisenBotX.Core.Data
         public ulong PlayerGuid { get; private set; }
 
         public ulong TargetGuid { get; private set; }
+
+        public HookManager HookManager { get; internal set; }
 
         public List<WowObject> WowObjects
         {
@@ -165,8 +168,16 @@ namespace AmeisenBotX.Core.Data
                 };
             }
 
-            return null;
+            return null;        
         }
+
+        public IEnumerable<WowPlayer> GetNearEnemies(double distance)
+            => WowObjects.OfType<WowPlayer>()
+                .Where(e => e.Guid != PlayerGuid
+                && !e.IsDead
+                && !e.IsNotAttackable
+                && HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                && e.Position.GetDistance(Player.Position) < distance);
 
         public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Player)
         {

@@ -12,20 +12,22 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Battleground.Objectives
 {
-    public class CarryFlagToBaseObjective : IBattlegroundObjective
+    public class RetrieveOwnFlagObjective : IBattlegroundObjective
     {
-        public CarryFlagToBaseObjective(int priority, Vector3 homePosition, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine)
+        public RetrieveOwnFlagObjective(int priority, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine)
         {
             Priority = priority;
-            HomePosition = homePosition;
             HookManager = hookManager;
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
+            IsAvailable = false;
         }
 
         public int Priority { get; private set; }
 
-        public Vector3 HomePosition { get; private set; }
+        public WowPlayer FlagCarrier { get; set; }
+
+        public bool IsAvailable { get; set; }
 
         private HookManager HookManager { get; }
 
@@ -33,20 +35,30 @@ namespace AmeisenBotX.Core.Battleground.Objectives
 
         private IMovementEngine MovementEngine { get; }
 
-        public bool IsAvailable => HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains(" flag"));
-
-        public void Execute()
-        {
-            if (ObjectManager.Player.Position.GetDistance(HomePosition) > 3)
-            {
-                MovementEngine.SetState(MovementEngineState.Moving, HomePosition);
-                MovementEngine.Execute();
-            }
-        }
-
         public void Enter()
         {
             MovementEngine.Reset();
+        }
+
+        public void Execute()
+        {
+            if(FlagCarrier == null)
+            {
+                return;
+            }
+
+            ObjectManager.UpdateObject(FlagCarrier);
+
+            if (ObjectManager.Player.Position.GetDistance(FlagCarrier.Position) > 3)
+            {
+                MovementEngine.SetState(MovementEngineState.Moving, FlagCarrier.Position);
+                MovementEngine.Execute();
+            }
+            else
+            {
+                HookManager.TargetGuid(FlagCarrier.Guid);
+                HookManager.StartAutoAttack();
+            }
         }
 
         public void Exit()

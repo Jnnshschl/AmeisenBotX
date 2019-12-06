@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
+﻿using AmeisenBotX.Core.Battleground;
+using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -37,7 +38,8 @@ namespace AmeisenBotX.Core.StateMachine
             IPathfindingHandler pathfindingHandler,
             IMovementEngine movementEngine,
             MovementSettings movementSettings,
-            ICombatClass combatClass)
+            ICombatClass combatClass,
+            BattlegroundEngine battlegroundEngine)
         {
             AmeisenLogger.Instance.Log("Starting AmeisenBotStateMachine...", LogLevel.Verbose);
 
@@ -74,7 +76,7 @@ namespace AmeisenBotX.Core.StateMachine
                 { AmeisenBotState.Healing, new StateEating(this, config, objectManager, characterManager) },
                 { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
                 { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
-                { AmeisenBotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine) }
+                { AmeisenBotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) }
             };
 
             CurrentState = States.First();
@@ -102,6 +104,8 @@ namespace AmeisenBotX.Core.StateMachine
         internal XMemory XMemory { get; }
 
         internal Queue<ulong> UnitLootList { get; set; }
+
+        internal BattlegroundEngine BattlegroundEngine { get; }
 
         private IAmeisenBotCache BotCache { get; }
 
@@ -152,8 +156,14 @@ namespace AmeisenBotX.Core.StateMachine
                             SetState(AmeisenBotState.InsideAoeDamage);
                         }
 
-                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
+                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat() || (BattlegroundEngine != null && (BattlegroundEngine != null && !BattlegroundEngine.ForceCombat)))
                         {
+                            if(BattlegroundEngine != null && BattlegroundEngine.ForceCombat && ObjectManager.GetNearEnemies(50.0).Count() == 0)
+                            {
+                                BattlegroundEngine.ForceCombat = false;
+                                return;
+                            }
+
                             SetState(AmeisenBotState.Attacking);
                         }
                     }

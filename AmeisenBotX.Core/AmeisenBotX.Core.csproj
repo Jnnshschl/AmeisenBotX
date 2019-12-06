@@ -56,9 +56,11 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Battleground\BattlegroundEngine.cs" />
     <Compile Include="Battleground\Enums\BattlegroundType.cs" />
-    <Compile Include="Battleground\Objectives\CaptureTheFlagObjective.cs" />
+    <Compile Include="Battleground\Objectives\AttackEnemyPlayers.cs" />
+    <Compile Include="Battleground\Objectives\CaptureFlagObjective.cs" />
     <Compile Include="Battleground\Objectives\CarryFlagToBaseObjective.cs" />
     <Compile Include="Battleground\Objectives\IBattlegroundObjective.cs" />
+    <Compile Include="Battleground\Objectives\RetrieveOwnFlagObjective.cs" />
     <Compile Include="Battleground\Profiles\IBattlegroundProfile.cs" />
     <Compile Include="Battleground\Profiles\WarsongGulchProfile.cs" />
     <Compile Include="Character\CharacterManager.cs" />
@@ -146,6 +148,8 @@
     <Compile Include="Movement\SmartMovementEngine.cs" />
     <Compile Include="OffsetLists\OffsetList335a.cs" />
     <Compile Include="OffsetLists\IOffsetList.cs" />
+    <Compile Include="Personality\BotPersonality.cs" />
+    <Compile Include="Personality\Enums\Scale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\AmeisenBotStateMachine.cs" />
     <Compile Include="StateMachine\CombatClasses\DeathknightBlood.cs" />

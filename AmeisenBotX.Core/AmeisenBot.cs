@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
+﻿using AmeisenBotX.Core.Battleground;
+using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data;
@@ -67,6 +68,7 @@ namespace AmeisenBotX.Core
             BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, accountName, "cache.bin"));
             ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
+            ObjectManager.HookManager = HookManager;
             CharacterManager = new CharacterManager(XMemory, config, OffsetList, ObjectManager, HookManager);
             EventHookManager = new EventHookManager(HookManager);
             PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
@@ -79,6 +81,7 @@ namespace AmeisenBotX.Core
                 CharacterManager.Jump,
                 ObjectManager,
                 MovementSettings);
+            BattlegroundEngine = new BattlegroundEngine(HookManager, ObjectManager, MovemenEngine);
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -100,7 +103,7 @@ namespace AmeisenBotX.Core
                 CharacterManager.ItemComparator = CombatClass.ItemComparator;
             }
 
-            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, BotCache, PathfindingHandler, MovemenEngine, MovementSettings, CombatClass);
+            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, BotCache, PathfindingHandler, MovemenEngine, MovementSettings, CombatClass, BattlegroundEngine);
             StateMachine.OnStateMachineStateChanged += HandlePositionLoad;
         }
 
@@ -228,7 +231,7 @@ namespace AmeisenBotX.Core
         public HookManager HookManager { get; set; }
 
         public IMovementEngine MovemenEngine { get; set; }
-
+        public BattlegroundEngine BattlegroundEngine { get; private set; }
         public ObjectManager ObjectManager { get; set; }
 
         public IOffsetList OffsetList { get; }
@@ -509,16 +512,67 @@ namespace AmeisenBotX.Core
         private void OnBgNeutralMessage(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log($"Event OnBgNeutralMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
+            if (args.Count > 1)
+            {
+                ProcessBgMessage(args[0], args[1]);
+            }
         }
 
         private void OnBgHordeMessage(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log($"Event OnBgHordeMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
+            if (args.Count > 1)
+            {
+                ProcessBgMessage(args[0], args[1]);
+            }
         }
 
         private void OnBgAllianceMessage(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log($"Event OnBgAllianceMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
+            if (args.Count > 1)
+            {
+                ProcessBgMessage(args[0], args[1]);
+            }
+        }
+
+        private void ProcessBgMessage(string message, string arg1)
+        {
+            if (message.ToUpper().Contains("ALLIANCE FLAG WAS PICKED UP"))
+            {
+                BattlegroundEngine.AllianceFlagWasPickedUp(arg1);
+            }
+            else if (message.ToUpper().Contains("HORDE FLAG WAS PICKED UP"))
+            {
+                BattlegroundEngine.HordeFlagWasPickedUp(arg1);
+            }
+            else if (message.ToUpper().Contains("ALLIANCE FLAG WAS DROPPED"))
+            {
+                BattlegroundEngine.AllianceFlagWasDropped(arg1);
+            }
+            else if (message.ToUpper().Contains("HORDE FLAG WAS DROPPED"))
+            {
+                BattlegroundEngine.HordeFlagWasDropped(arg1);
+            }
+            else if (message.ToUpper().Contains("CAPTURED THE ALLIANCE FLAG"))
+            {
+                BattlegroundEngine.AllianceFlagWasDropped(arg1);
+            }
+            else if (message.ToUpper().Contains("CAPTURED THE HORDE FLAG"))
+            {
+                BattlegroundEngine.HordeFlagWasDropped(arg1);
+            }
+            else if (message.ToUpper().Contains("THE ALLIANCE FLAG IS NOW PLACED At ITS BASE"))
+            {
+                BattlegroundEngine.AllianceFlagWasDropped(arg1);
+            }
+            else if (message.ToUpper().Contains("THE HORDE FLAG IS NOW PLACED At ITS BASE"))
+            {
+                BattlegroundEngine.HordeFlagWasDropped(arg1);
+            }
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
