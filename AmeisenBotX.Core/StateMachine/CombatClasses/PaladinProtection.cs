@@ -108,7 +108,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if (targetDistanceChanged)
                 {
                     distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
-                    Console.WriteLine("distanceToTarget: " + distanceToTarget);
                 }
 
                 HandleMovement(target);
