@@ -2,38 +2,37 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class PriestDiscipline : ICombatClass
+    public class PriestHoly : ICombatClass
     {
         // author: Jannis Höschele
 
         private readonly string bindingHealSpell = "Binding Heal";
         private readonly string flashHealSpell = "Flash Heal";
         private readonly string greaterHealSpell = "Greater Heal";
+        private readonly string guardianSpiritSpell = "Guardian Spirit";
         private readonly string hymnOfHopeSpell = "Hymn of Hope";
         private readonly string innerFireSpell = "Inner Fire";
-        private readonly string desperatePrayerSpell = "Desperate Prayer";
         private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string powerWordShieldSpell = "Power Word: Shield";
         private readonly string prayerOfHealingSpell = "Prayer of Healing";
         private readonly string prayerOfMendingSpell = "Prayer of Mending";
         private readonly string renewSpell = "Renew";
-        private readonly string weakenedSoulSpell = "Weakened Soul";
-        private readonly string penanceSpell = "Penance";
         private readonly string resurrectionSpell = "Resurrection";
 
         private readonly int buffCheckTime = 8;
         private readonly int deadPartymembersCheckTime = 4;
 
-        public PriestDiscipline(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -43,7 +42,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, flashHealSpell },
-                { 3000, penanceSpell },
                 { 5000, greaterHealSpell },
             };
 
@@ -82,6 +80,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
+        public string Displayname => "Priest Holy";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Holy Priest spec.";
+
+        public WowClass Class => WowClass.Priest;
+
+        public CombatClassRole Role => CombatClassRole.Heal;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
@@ -100,14 +112,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 {
                     ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
+                    if (target.HealthPercentage < 25
+                        && CastSpellIfPossible(guardianSpiritSpell, true))
+                    {
+                        return;
+                    }
+
                     if (playersThatNeedHealing.Count > 4
                         && CastSpellIfPossible(prayerOfHealingSpell, true))
                     {
                         return;
                     }
 
-                    if (target.Guid != ObjectManager.PlayerGuid
-                        && target.HealthPercentage < 70
+                    if (target.HealthPercentage < 70
                         && ObjectManager.Player.HealthPercentage < 70
                         && CastSpellIfPossible(bindingHealSpell, true))
                     {
@@ -116,25 +133,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                     if (ObjectManager.Player.ManaPercentage < 50
                         && CastSpellIfPossible(hymnOfHopeSpell))
-                    {
-                        return;
-                    }
-
-                    if (ObjectManager.Player.HealthPercentage < 20
-                        && CastSpellIfPossible(desperatePrayerSpell))
-                    {
-                        return;
-                    }
-
-                    List<string> targetBuffs = HookManager.GetAuras(WowLuaUnit.Target);
-
-                    if ((target.HealthPercentage < 85
-                            && !targetBuffs.Any(e => e.Equals(weakenedSoulSpell, StringComparison.OrdinalIgnoreCase))
-                            && !targetBuffs.Any(e => e.Equals(powerWordShieldSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(powerWordShieldSpell, true))
-                        || (target.HealthPercentage < 80
-                            && !targetBuffs.Any(e => e.Equals(renewSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(renewSpell, true)))
                     {
                         return;
                     }
@@ -225,7 +223,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
-            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
+            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
         }
 
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)

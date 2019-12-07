@@ -4,16 +4,18 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
     public class ShamanElemental : ICombatClass
     {
@@ -80,7 +82,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Dictionary<string, Spell> Spells { get; }
 
-        private bool hexedTarget { get; set; }
+        private bool HexedTarget { get; set; }
+
+        public string Displayname => "Shaman Elemental";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
+
+        public WowClass Class => WowClass.Shaman;
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -101,13 +117,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if (ObjectManager.Player.HealthPercentage < 30
                 && CastSpellIfPossible(hexSpell, true))
             {
-                hexedTarget = true;
+                HexedTarget = true;
                 return;
             }
 
             if (ObjectManager.Player.HealthPercentage < 30
                 && (!CharacterManager.SpellBook.IsSpellKnown(hexSpell)
-                || hexedTarget)
+                || HexedTarget)
                 && CastSpellIfPossible(lesserHealingWaveSpell, true))
             {
                 return;
@@ -164,9 +180,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 return;
             }
 
-            if (hexedTarget)
+            if (HexedTarget)
             {
-                hexedTarget = false;
+                HexedTarget = false;
             }
         }
 

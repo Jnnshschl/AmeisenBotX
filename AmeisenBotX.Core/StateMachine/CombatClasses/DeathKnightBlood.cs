@@ -1,8 +1,10 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -36,6 +38,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private Vector3 LastPosition { get; set; }
 
         private ObjectManager ObjectManager { get; }
+
+        public string Displayname => "[WIP] Blood Deathknight";
+
+        public string Version => "1.0";
+
+        public string Author => "Jamsbaer";
+
+        public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
+
+        public WowClass Class => WowClass.Deathknight;
+
+        public CombatClassRole Role => CombatClassRole.Tank;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

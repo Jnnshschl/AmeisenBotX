@@ -172,7 +172,7 @@ namespace AmeisenBotX
 
                 switch (AmeisenBot.ObjectManager.Player.Class)
                 {
-                    case WowClass.DeathKnight:
+                    case WowClass.Deathknight:
                         progressbarSecondary.Maximum = AmeisenBot.ObjectManager.Player.MaxRuneenergy;
                         progressbarSecondary.Value = AmeisenBot.ObjectManager.Player.Runeenergy;
                         labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Runeenergy)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxRuneenergy)}";

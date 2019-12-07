@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Movement
 
         public void Execute()
         {
-            if (CurrentPath.Count == 0 || CurrentPathTargetPosition.GetDistance(TargetPosition) > 1 || TryCount > 2)
+            if (CurrentPath.Count == 0 || TryCount > 2)
             {
                 TryCount = 0;
                 List<Vector3> nodes = GeneratePath.Invoke(GetPosition.Invoke(), TargetPosition);

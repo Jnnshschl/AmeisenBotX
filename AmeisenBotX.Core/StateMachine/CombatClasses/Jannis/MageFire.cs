@@ -2,14 +2,16 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
     public class MageFire : ICombatClass
     {
@@ -34,7 +36,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly int debuffCheckTime = 1;
         private readonly int hotstreakCheckTime = 1;
         private readonly int shieldCheckTime = 16;
-        private double spellstealCheckTime = 1;
+        private readonly double spellstealCheckTime = 1;
 
         public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
@@ -79,7 +81,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private CooldownManager CooldownManager { get; }
 
         private Dictionary<string, Spell> Spells { get; }
-        public DateTime LastSpellstealCheck { get; private set; }
+
+        private DateTime LastSpellstealCheck { get; set; }
+
+        public string Displayname => "Mage Fire";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Fire Mage spec.";
+
+        public WowClass Class => WowClass.Mage;
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

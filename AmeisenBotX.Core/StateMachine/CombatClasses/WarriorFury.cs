@@ -2,9 +2,11 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
@@ -66,6 +68,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
+
+        public string Displayname => "Fury Warrior";
+
+        public string Version => "1.0";
+
+        public string Author => "einTyp";
+
+        public string Description => "...";
+
+        public WowClass Class => WowClass.Warrior;
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

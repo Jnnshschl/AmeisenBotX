@@ -2,9 +2,11 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
@@ -78,6 +80,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private IPathfindingHandler PathfindingHandler { get; set; }
         
         private double GCDTime { get; set; }
+
+        public string Displayname => "Protection Paladin";
+
+        public string Version => "1.0";
+
+        public string Author => "einTyp";
+
+        public string Description => "...";
+
+        public WowClass Class => WowClass.Paladin;
+
+        public CombatClassRole Role => CombatClassRole.Tank;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

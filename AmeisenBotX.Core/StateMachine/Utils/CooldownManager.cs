@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Utils
+namespace AmeisenBotX.Core.StateMachine.Utils
 {
     public class CooldownManager
     {

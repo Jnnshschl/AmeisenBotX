@@ -3,42 +3,44 @@ using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class DeathknightFrost : ICombatClass
+    public class DeathknightUnholy : ICombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string frostPresenceSpell = "Frost Presence";
+        private readonly string unholyPresenceSpell = "Unholy Presence";
         private readonly string icyTouchSpell = "Icy Touch";
+        private readonly string scourgeStrikeSpell = "Scourge Strike";
         private readonly string bloodStrikeSpell = "Blood Strike";
         private readonly string plagueStrikeSpell = "Plague Strike";
         private readonly string runeStrikeSpell = "Rune Strike";
         private readonly string strangulateSpell = "Strangulate";
         private readonly string mindFreezeSpell = "Mind Freeze";
-        private readonly string obliterateSpell = "Obliterate";
+        private readonly string summonGargoyleSpell = "Summon Gargoyle";
         private readonly string frostFeverSpell = "Frost Fever";
         private readonly string bloodPlagueSpell = "Blood Plague";
         private readonly string deathCoilSpell = "Death Coil";
         private readonly string hornOfWinterSpell = "Horn of Winter";
         private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
-        private readonly string unbreakableArmorSpell = "Unbreakable Armor";
         private readonly string armyOfTheDeadSpell = "Army of the Dead";
 
         private readonly int buffCheckTime = 4;
         private readonly int deBuffCheckTime = 4;
         private readonly int enemyCastingCheckTime = 1;
 
-        public DeathknightFrost(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DeathknightUnholy(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -80,6 +82,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Dictionary<string, Spell> Spells { get; }
 
+        public string Displayname => "Deathknight Unholy";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
+
+        public WowClass Class => WowClass.Deathknight;
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
@@ -101,10 +117,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     && HandleEnemyCasting())
                 || (ObjectManager.Player.HealthPercentage < 60
                     && CastSpellIfPossible(iceboundFortitudeSpell, true))
-                || CastSpellIfPossible(unbreakableArmorSpell, false, false, true)
-                || CastSpellIfPossible(obliterateSpell, false, false, true, true)
                 || CastSpellIfPossible(bloodStrikeSpell, false, true)
+                || CastSpellIfPossible(scourgeStrikeSpell, false, false, true, true)
                 || CastSpellIfPossible(deathCoilSpell, true)
+                || CastSpellIfPossible(summonGargoyleSpell, true)
                 || (ObjectManager.Player.Runeenergy > 60
                     && CastSpellIfPossible(runeStrikeSpell)))
             {
@@ -164,8 +180,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if ((ObjectManager.Player.IsInCombat
                     && !myBuffs.Any(e => e.Equals(hornOfWinterSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(hornOfWinterSpell))
-                || (!myBuffs.Any(e => e.Equals(frostPresenceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(frostPresenceSpell)))
+                || (!myBuffs.Any(e => e.Equals(unholyPresenceSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(unholyPresenceSpell)))
             {
                 return true;
             }

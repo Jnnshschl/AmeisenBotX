@@ -12,6 +12,7 @@ using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Jannis;
 using AmeisenBotX.Core.StateMachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -177,6 +178,8 @@ namespace AmeisenBotX.Core
                 "MAGEARCANE" => new MageArcane(ObjectManager, CharacterManager, HookManager),
                 "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
                 "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager, XMemory),
+                "HUNTERMARKSMANSHIP" => new HunterMarksmanship(ObjectManager, CharacterManager, HookManager, XMemory),
+                "HUNTERSURVIVAL" => new HunterSurvival(ObjectManager, CharacterManager, HookManager, XMemory),
                 "PRIESTHOLY" => new PriestHoly(ObjectManager, CharacterManager, HookManager),
                 "PRIESTDISCIPLINE" => new PriestDiscipline(ObjectManager, CharacterManager, HookManager),
                 "PRIESTSHADOW" => new PriestShadow(ObjectManager, CharacterManager, HookManager),

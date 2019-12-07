@@ -18,7 +18,7 @@ None yet...
 **Class** | | | |
 ------------ | ------------- | ------------- | -------------
 Druid | ✔️ Balance | ❌ Feral | ✔️ Restoration 
-Hunter | ❌ Marksmanship | ✔️ Beast Mastery | ❌ Survival
+Hunter | ✔️ Marksmanship | ✔️ Beast Mastery | ✔️ Survival
 Mage | ✔️ Fire | ✔️ Frost | ✔️ Arcane
 Paladin | ✔️ Holy | ✔️ Retribution | ✔️ Protection
 Priest | ✔️ Holy | ✔️ Discipline | ✔️ Shadow

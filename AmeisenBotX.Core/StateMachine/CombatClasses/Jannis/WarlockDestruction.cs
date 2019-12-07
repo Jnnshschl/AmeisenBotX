@@ -2,36 +2,32 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class WarlockDemonology : ICombatClass
+    public class WarlockDestruction : ICombatClass
     {
         // author: Jannis Höschele
 
         private readonly string corruptionSpell = "Corruption";
         private readonly string curseOftheElementsSpell = "Curse of the Elements";
-        private readonly string soulfireSpell = "Soul Fire";
+        private readonly string chaosBoltSpell = "Chaos Bolt";
+        private readonly string conflagrateSpell = "Conflagrate";
         private readonly string incinerateSpell = "Incinerate";
-        private readonly string moltenCoreSpell = "Molten Core";
-        private readonly string decimationSpell = "Decimation";
-        private readonly string metamorphosisSpell = "Metamorphosis";
-        private readonly string immolationAuraSpell = "Immolation Aura";
-        private readonly string demonicEmpowermentSpell = "Demonic Empowerment";
         private readonly string immolateSpell = "Immolate";
         private readonly string lifeTapSpell = "Life Tap";
         private readonly string drainSoulSpell = "Drain Soul";
         private readonly string drainLifeSpell = "Drain Life";
-        private readonly string shadowBoltSpell = "Shadow Bolt";
-        private readonly string shadowMasterySpell = "Shadow Mastery";
         private readonly string fearSpell = "Fear";
         private readonly string howlOfTerrorSpell = "Howl of Terror";
         private readonly string demonSkinSpell = "Demon Skin";
@@ -39,14 +35,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private readonly string felArmorSpell = "Fel Armor";
         private readonly string deathCoilSpell = "Death Coil";
         private readonly string summonImpSpell = "Summon Imp";
-        private readonly string summonFelguardSpell = "Summon Felguard";
 
         private readonly int buffCheckTime = 8;
-        private readonly int damageBuffCheckTime = 1;
         private readonly int debuffCheckTime = 1;
         private readonly int fearAttemptDelay = 5;
 
-        public WarlockDemonology(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public WarlockDestruction(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -78,8 +72,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DateTime LastBuffCheck { get; set; }
 
-        private DateTime LastDamageBuffCheck { get; set; }
-
         private DateTime LastDebuffCheck { get; set; }
 
         private ObjectManager ObjectManager { get; }
@@ -89,6 +81,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private Dictionary<string, Spell> Spells { get; }
 
         private DateTime LastFearAttempt { get; set; }
+
+        public string Displayname => "Warlock Destruction";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Destruction Warlock spec.";
+
+        public WowClass Class => WowClass.Warlock;
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -108,11 +114,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 || (ObjectManager.Player.HealthPercentage < 80
                     && CastSpellIfPossible(deathCoilSpell, true))
                 || (ObjectManager.Player.HealthPercentage < 50
-                    && CastSpellIfPossible(drainLifeSpell, true))
-                || (DateTime.Now - LastDamageBuffCheck > TimeSpan.FromSeconds(damageBuffCheckTime)
-                    && HandleDamageBuffing())
-                || CastSpellIfPossible(metamorphosisSpell)
-                || CastSpellIfPossible(demonicEmpowermentSpell))
+                    && CastSpellIfPossible(drainLifeSpell, true)))
             {
                 return;
             }
@@ -142,7 +144,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 }
             }
 
-            if (CastSpellIfPossible(incinerateSpell, true))
+            if (CastSpellIfPossible(chaosBoltSpell, true)
+                || CastSpellIfPossible(conflagrateSpell, true)
+                || CastSpellIfPossible(incinerateSpell, true))
             {
                 return;
             }
@@ -165,47 +169,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool SummonPet()
         {
-            if (CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)))
-            {
-                if (CastSpellIfPossible(summonFelguardSpell, true))
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                if (CastSpellIfPossible(summonImpSpell, true))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool HandleDamageBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (myBuffs.Any(e => e.Equals(decimationSpell, StringComparison.OrdinalIgnoreCase)))
-            {
-                if (myBuffs.Any(e => e.Equals(moltenCoreSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(soulfireSpell, true))
-                {
-                    return true;
-                }
-                else if (CastSpellIfPossible(soulfireSpell, true))
-                {
-                    return true;
-                }
-            }
-            else if (myBuffs.Any(e => e.Equals(moltenCoreSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(incinerateSpell, true))
+            if (CastSpellIfPossible(summonImpSpell, true))
             {
                 return true;
             }
-
-            LastDamageBuffCheck = DateTime.Now;
             return false;
         }
 
@@ -218,7 +185,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if (CharacterManager.SpellBook.IsSpellKnown(felArmorSpell))
+            if (Spells.ContainsKey(felArmorSpell)
+                    && Spells[felArmorSpell] != null)
             {
                 if ((!myBuffs.Any(e => e.Equals(felArmorSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(felArmorSpell, true)))
@@ -226,7 +194,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     return true;
                 }
             }
-            else if (CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell))
+            else if (Spells.ContainsKey(demonArmorSpell)
+                    && Spells[demonArmorSpell] != null)
             {
                 if ((!myBuffs.Any(e => e.Equals(demonArmorSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(demonArmorSpell, true)))
@@ -234,7 +203,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     return true;
                 }
             }
-            else if (CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell))
+            else if (Spells.ContainsKey(demonSkinSpell)
+                    && Spells[demonSkinSpell] != null)
             {
                 if ((!myBuffs.Any(e => e.Equals(demonSkinSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(demonSkinSpell, true)))
@@ -262,9 +232,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 || (!targetDebuffs.Any(e => e.Equals(immolateSpell, StringComparison.OrdinalIgnoreCase))
                     && CastSpellIfPossible(immolateSpell, true))
                 || (!targetDebuffs.Any(e => e.Equals(corruptionSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(corruptionSpell, true))
-                || (!targetDebuffs.Any(e => e.Equals(shadowMasterySpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(shadowBoltSpell, true)))
+                    && CastSpellIfPossible(corruptionSpell, true)))
             {
                 return true;
             }

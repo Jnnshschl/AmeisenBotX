@@ -386,6 +386,8 @@ namespace AmeisenBotX
             comboboxBuiltInCombatClass.Items.Add("MageArcane");
             comboboxBuiltInCombatClass.Items.Add("MageFire");
             comboboxBuiltInCombatClass.Items.Add("HunterBeastmastery");
+            comboboxBuiltInCombatClass.Items.Add("HunterMarksmanship");
+            comboboxBuiltInCombatClass.Items.Add("HunterSurvival");
             comboboxBuiltInCombatClass.Items.Add("PriestHoly");
             comboboxBuiltInCombatClass.Items.Add("PriestDiscipline");
             comboboxBuiltInCombatClass.Items.Add("PriestShadow"); 
