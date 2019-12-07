@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Movement
             Vector3 targetPosition = CurrentPath.Peek();
             double distanceToTargetPosition = currentPosition.GetDistance2D(targetPosition);
 
-            if (distanceToTargetPosition > 2048)
+            if (distanceToTargetPosition > 128)
             {
                 Reset();
                 return;
@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            Vector3 positionToGoTo = MoveAhead(targetPosition, 3);
+            Vector3 positionToGoTo = MoveAhead(targetPosition, 1);
 
             switch (State)
             {

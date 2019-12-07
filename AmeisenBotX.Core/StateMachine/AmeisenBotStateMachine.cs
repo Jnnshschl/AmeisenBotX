@@ -52,6 +52,7 @@ namespace AmeisenBotX.Core.StateMachine
             HookManager = hookManager;
             EventHookManager = eventHookManager;
             BotCache = botCache;
+            MovementEngine = movementEngine;
 
             LastObjectUpdate = DateTime.Now;
             LastGhostCheck = DateTime.Now;
@@ -127,6 +128,8 @@ namespace AmeisenBotX.Core.StateMachine
 
         private Dictionary<AmeisenBotState, State> States { get; }
 
+        private IMovementEngine MovementEngine { get; set; }
+
         public void Execute()
         {
             if (XMemory.Process == null || XMemory.Process.HasExited)
@@ -140,6 +143,7 @@ namespace AmeisenBotX.Core.StateMachine
                 if (!ObjectManager.IsWorldLoaded)
                 {
                     SetState(AmeisenBotState.LoadingScreen);
+                    MovementEngine.Reset();
                 }
 
                 HandleEventPull();
