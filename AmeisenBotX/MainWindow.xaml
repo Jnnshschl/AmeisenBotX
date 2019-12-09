@@ -115,7 +115,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Rectangle HorizontalAlignment="Left" Margin="0,0,0,210" Width="140" Height="1" VerticalAlignment="Bottom">
+        <Rectangle HorizontalAlignment="Left" Margin="0,0,0,209.333" Width="140" Height="1" VerticalAlignment="Bottom">
             <Rectangle.Fill>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
@@ -150,7 +150,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonStartPause" Content="||" Margin="0,0,248,0" BorderThickness="0,0,1,1" Padding="1" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="16" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click">
+        <Button x:Name="buttonStartPause" Content="||" Margin="0,0,248.333,0" BorderThickness="0,0,1,1" Padding="1" HorizontalAlignment="Right" Width="28" Height="28" VerticalAlignment="Top" FontFamily="Verdana" FontSize="16" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
@@ -160,11 +160,6 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label x:Name="labelisNpc" Content="isNpc:" HorizontalAlignment="Left" Margin="146,32,0,0" VerticalAlignment="Top" Foreground="White"/>
-        <Label x:Name="labelisVendor" Content="isVendor:" HorizontalAlignment="Left" Margin="146,56,0,0" VerticalAlignment="Top" Foreground="White"/>
-        <Label x:Name="labelisRepair" Content="isRepair:" HorizontalAlignment="Left" Margin="146,82,0,0" VerticalAlignment="Top" Foreground="White"/>
-        <Label x:Name="labelBaseAddress" Content="BaseAddress:" HorizontalAlignment="Left" Margin="146,144,0,0" VerticalAlignment="Top" Foreground="White"/>
-        <Label x:Name="labelDescriptor" Content="Descriptor:" HorizontalAlignment="Left" Margin="146,175,0,0" VerticalAlignment="Top" Foreground="White"/>
-        <Label x:Name="labelNpcFlags" Content="NpcFlags:" HorizontalAlignment="Left" Margin="146,113,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="labelBgObjective" Content="BGObjective: None" HorizontalAlignment="Left" Margin="146,32,0,0" VerticalAlignment="Top" Foreground="White"/>
     </Grid>
 </Window>

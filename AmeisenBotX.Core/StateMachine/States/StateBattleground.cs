@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateBattleground : State
     {
-        public StateBattleground(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IMovementEngine movementEngine) : base(stateMachine)
+        public StateBattleground(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IMovementEngine movementEngine, BattlegroundEngine battlegroundEngine) : base(stateMachine)
         {
             Config = config;
             OffsetList = offsetList;
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             CharacterManager = characterManager;
             MovementEngine = movementEngine;
-            BattlegroundEngine = new BattlegroundEngine(hookManager, objectManager, movementEngine);
+            BattlegroundEngine = battlegroundEngine;
         }
 
         private CharacterManager CharacterManager { get; }
@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
+            MovementEngine.Reset();
         }
     }
 }

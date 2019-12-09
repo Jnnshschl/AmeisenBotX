@@ -1,36 +1,38 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class PriestHoly : ICombatClass
+    public class ShamanRestoration : ICombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string bindingHealSpell = "Binding Heal";
-        private readonly string flashHealSpell = "Flash Heal";
-        private readonly string greaterHealSpell = "Greater Heal";
-        private readonly string guardianSpiritSpell = "Guardian Spirit";
-        private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string innerFireSpell = "Inner Fire";
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string prayerOfHealingSpell = "Prayer of Healing";
-        private readonly string prayerOfMendingSpell = "Prayer of Mending";
-        private readonly string renewSpell = "Renew";
-        private readonly string resurrectionSpell = "Resurrection";
+        private readonly string chainHealSpell = "Chain Heal";
+        private readonly string healingWaveSpell = "Healing Wave";
+        private readonly string riptideSpell = "Riptide";
+        private readonly string earthShieldSpell = "Earth Shield";
+        private readonly string waterShieldSpell = "Water Shield";
+        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
+        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
+        private readonly string tidalForceSpell = "Tidal Force";
+        private readonly string ancestralSpiritSpell = "Ancestral Spirit";
 
         private readonly int buffCheckTime = 8;
         private readonly int deadPartymembersCheckTime = 4;
 
-        public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -39,8 +41,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, flashHealSpell },
-                { 5000, greaterHealSpell },
+                { 0, riptideSpell },
+                { 5000, healingWaveSpell },
             };
 
             Spells = new Dictionary<string, Spell>();
@@ -78,6 +80,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
+        public string Displayname => "Shaman Restoration";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
+
+        public WowClass Class => WowClass.Shaman;
+
+        public CombatClassRole Role => CombatClassRole.Heal;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
         public void Execute()
         {
             // we dont want to do anything if we are casting something...
@@ -97,26 +113,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     ObjectManager.UpdateObject(target.Type, target.BaseAddress);
 
                     if (target.HealthPercentage < 25
-                        && CastSpellIfPossible(guardianSpiritSpell, true))
+                        && CastSpellIfPossible(earthShieldSpell, true))
                     {
                         return;
                     }
 
                     if (playersThatNeedHealing.Count > 4
-                        && CastSpellIfPossible(prayerOfHealingSpell, true))
+                        && CastSpellIfPossible(chainHealSpell, true))
                     {
                         return;
                     }
 
-                    if (target.HealthPercentage < 70
-                        && ObjectManager.Player.HealthPercentage < 70
-                        && CastSpellIfPossible(bindingHealSpell, true))
-                    {
-                        return;
-                    }
-
-                    if (ObjectManager.Player.ManaPercentage < 50
-                        && CastSpellIfPossible(hymnOfHopeSpell))
+                    if (playersThatNeedHealing.Count > 6
+                        && (CastSpellIfPossible(naturesSwiftnessSpell, true)
+                        || CastSpellIfPossible(tidalForceSpell, true)))
                     {
                         return;
                     }
@@ -166,10 +176,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.TargetGuid(ObjectManager.PlayerGuid);
             }
 
-            if ((!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(powerWordFortitudeSpell, true))
-                || (!myBuffs.Any(e => e.Equals(innerFireSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(innerFireSpell, true)))
+            if ((!myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
+                    && CastSpellIfPossible(waterShieldSpell, true)))
+                // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
+                //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
+                //     && CastSpellIfPossible(earthlivingWeaponSpell, true)))
             {
                 return true;
             }
@@ -180,14 +191,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool HandleDeadPartymembers()
         {
-            if (!Spells.ContainsKey(resurrectionSpell))
+            if (!Spells.ContainsKey(ancestralSpiritSpell))
             {
-                Spells.Add(resurrectionSpell, CharacterManager.SpellBook.GetSpellByName(resurrectionSpell));
+                Spells.Add(ancestralSpiritSpell, CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
             }
 
-            if (Spells[resurrectionSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(resurrectionSpell)
-                && Spells[resurrectionSpell].Costs < ObjectManager.Player.Mana)
+            if (Spells[ancestralSpiritSpell] != null
+                && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
+                && Spells[ancestralSpiritSpell].Costs < ObjectManager.Player.Mana)
             {
                 IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
                 List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
@@ -195,8 +206,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 if (groupPlayers.Count > 0)
                 {
                     HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(resurrectionSpell);
-                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
+                    HookManager.CastSpell(ancestralSpiritSpell);
+                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)HookManager.GetSpellCooldown(ancestralSpiritSpell));
                     return true;
                 }
             }

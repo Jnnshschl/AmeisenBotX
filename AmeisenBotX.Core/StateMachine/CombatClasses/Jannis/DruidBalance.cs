@@ -2,14 +2,16 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
     public class DruidBalance : ICombatClass
     {
@@ -81,6 +83,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private CooldownManager CooldownManager { get; }
 
         private Dictionary<string, Spell> Spells { get; }
+
+        public string Displayname => "Druid Balance";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
+
+        public WowClass Class => WowClass.Druid;
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

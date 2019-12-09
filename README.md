@@ -11,6 +11,17 @@ Currently supported versions:
 
 None yet...
 
+### Battlegrounds
+
+**Battleground** | **Working** |
+------------ | ------------- |
+Warsong Gulch | ⚠️ 25%
+Arathi Basin | ❌ 0%
+Alterac Valley | ❌ 0%
+Eye of the Storm | ❌ 0%
+Isle of Conquest | ❌ 0%
+Wintergrasp | ❌ 0%
+
 ## Supported Stuff
 
 ### Combat Classes
@@ -18,7 +29,7 @@ None yet...
 **Class** | | | |
 ------------ | ------------- | ------------- | -------------
 Druid | ✔️ Balance | ❌ Feral | ✔️ Restoration 
-Hunter | ❌ Marksmanship | ✔️ Beast Mastery | ❌ Survival
+Hunter | ✔️ Marksmanship | ✔️ Beast Mastery | ✔️ Survival
 Mage | ✔️ Fire | ✔️ Frost | ✔️ Arcane
 Paladin | ✔️ Holy | ✔️ Retribution | ✔️ Protection
 Priest | ✔️ Holy | ✔️ Discipline | ✔️ Shadow

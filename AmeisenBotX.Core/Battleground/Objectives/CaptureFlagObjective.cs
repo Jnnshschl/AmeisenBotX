@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Battleground.Objectives
 {
-    public class CaptureTheFlagObjective : IBattlegroundObjective
+    public class CaptureFlagObjective : IBattlegroundObjective
     {
-        public CaptureTheFlagObjective(int priority, Vector3 flagPosition, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine)
+        public CaptureFlagObjective(int priority, Vector3 flagPosition, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine)
         {
             Priority = priority;
             FlagPosition = flagPosition;
@@ -35,6 +35,11 @@ namespace AmeisenBotX.Core.Battleground.Objectives
         private ObjectManager ObjectManager { get; }
 
         private IMovementEngine MovementEngine { get; }
+
+        public void Enter()
+        {
+            MovementEngine.Reset();
+        }
 
         public void Execute()
         {
@@ -59,6 +64,11 @@ namespace AmeisenBotX.Core.Battleground.Objectives
                     // flag is not here
                 }
             }
+        }
+
+        public void Exit()
+        {
+            MovementEngine.Reset();
         }
     }
 }

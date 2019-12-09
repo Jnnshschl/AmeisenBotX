@@ -2,14 +2,16 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Utils;
+using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.StateMachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
     public class PaladinHoly : ICombatClass
     {
@@ -73,6 +75,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private Dictionary<string, Spell> Spells { get; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
+
+        public string Displayname => "Paladin Holy";
+
+        public string Version => "1.0";
+
+        public string Author => "Jannis";
+
+        public string Description => "FCFS based CombatClass for the Holy Paladin spec.";
+
+        public WowClass Class => WowClass.Paladin;
+
+        public CombatClassRole Role => CombatClassRole.Heal;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

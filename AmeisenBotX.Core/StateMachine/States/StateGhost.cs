@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
@@ -10,6 +11,7 @@ using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
@@ -42,7 +44,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Enter()
         {
+            WowUnit spiritHealer = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Name.ToUpper().Contains("SPIRIT HEALER"));
 
+            if (spiritHealer != null)
+            {
+                HookManager.RightClickUnit(spiritHealer);
+            }
         }
 
         public override void Execute()
@@ -50,6 +57,12 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (ObjectManager.Player.Health > 1)
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+            }
+
+            if (AmeisenBotStateMachine.IsOnBattleground())
+            {
+                // just wait for the mass ress
+                return;
             }
 
             if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out Vector3 corpsePosition)

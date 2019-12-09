@@ -27,6 +27,8 @@ namespace AmeisenBotX.Core.Movement
             ObjectManager = objectManager;
             Jump = jumpFunction;
 
+            TryCount = 0;
+
             PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, jumpFunction, objectManager, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
         }
 
@@ -45,6 +47,8 @@ namespace AmeisenBotX.Core.Movement
         public DateTime LastJumpCheck { get; private set; }
 
         public bool HasMoved { get; private set; }
+
+        public int TryCount { get; private set; }
 
         public float TargetRotation { get; private set; }
 
@@ -66,8 +70,9 @@ namespace AmeisenBotX.Core.Movement
 
         public void Execute()
         {
-            if (CurrentPath.Count == 0 || CurrentPathTargetPosition.GetDistance(TargetPosition) > 1)
+            if (CurrentPath.Count == 0 || TryCount > 2)
             {
+                TryCount = 0;
                 List<Vector3> nodes = GeneratePath.Invoke(GetPosition.Invoke(), TargetPosition);
 
                 if (nodes.Count == 0)
@@ -89,7 +94,7 @@ namespace AmeisenBotX.Core.Movement
             Vector3 targetPosition = CurrentPath.Peek();
             double distanceToTargetPosition = currentPosition.GetDistance2D(targetPosition);
 
-            if (distanceToTargetPosition > 2048)
+            if (distanceToTargetPosition > 128)
             {
                 Reset();
                 return;
@@ -106,7 +111,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            Vector3 positionToGoTo = MoveAhead(targetPosition, 3);
+            Vector3 positionToGoTo = MoveAhead(targetPosition, 1);
 
             switch (State)
             {
@@ -152,6 +157,7 @@ namespace AmeisenBotX.Core.Movement
                 if ((LastPosition.X == 0 && LastPosition.Y == 0 && LastPosition.Z == 0) || distanceTraveled < 0.3)
                 {
                     Jump.Invoke();
+                    TryCount++;
                 }
 
                 LastPosition = GetPosition.Invoke();
@@ -193,6 +199,7 @@ namespace AmeisenBotX.Core.Movement
             State = MovementEngineState.None;
             CurrentPath = new Queue<Vector3>();
             HasMoved = false;
+            TryCount = 0;
         }
     }
 }

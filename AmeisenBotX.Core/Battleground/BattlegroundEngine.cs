@@ -18,7 +18,14 @@ namespace AmeisenBotX.Core.Battleground
             HookManager = hookManager;
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
+
+            ForceCombat = false;
+            CurrentObjectiveName = "None";
         }
+
+        public string CurrentObjectiveName { get; private set; }
+
+        public bool ForceCombat { get; set; }
 
         private IBattlegroundProfile BattlegroundProfile { get; set; }
 
@@ -28,6 +35,8 @@ namespace AmeisenBotX.Core.Battleground
 
         private IMovementEngine MovementEngine { get; set; }
 
+        private IBattlegroundObjective LastObjective { get; set; }
+
         public void Execute()
         {
             if (BattlegroundProfile == null)
@@ -35,15 +44,25 @@ namespace AmeisenBotX.Core.Battleground
                 TryLoadProfile(ObjectManager.MapId);
             }
 
-            foreach (IBattlegroundObjective objective in BattlegroundProfile.Objectives.OrderByDescending(e => e.Priority))
+            if (BattlegroundProfile != null)
             {
-                if (!objective.IsAvailable)
+                foreach (IBattlegroundObjective objective in BattlegroundProfile.Objectives.OrderByDescending(e => e.Priority))
                 {
-                    continue;
-                }
+                    if (!objective.IsAvailable)
+                    {
+                        continue;
+                    }
 
-                objective.Execute();
-                return;
+                    if(CurrentObjectiveName != objective.GetType().Name)
+                    {
+                        LastObjective?.Exit();
+                        objective.Enter();
+                    }
+
+                    objective.Execute();
+                    CurrentObjectiveName = objective.GetType().Name;
+                    return;
+                }
             }
         }
 
@@ -56,7 +75,7 @@ namespace AmeisenBotX.Core.Battleground
                     return false;
 
                 case 489:
-                    BattlegroundProfile = new WarsongGulchProfile(ObjectManager.Player.IsAlliance(), HookManager, ObjectManager, MovementEngine);
+                    BattlegroundProfile = new WarsongGulchProfile(ObjectManager.Player.IsAlliance(), HookManager, ObjectManager, MovementEngine, ForceCombat);
                     return true;
 
                 case 529:
@@ -73,6 +92,38 @@ namespace AmeisenBotX.Core.Battleground
 
                 default:
                     return false;
+            }
+        }
+
+        public void AllianceFlagWasPickedUp(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasPickedUp(playername);
+            }
+        }
+
+        public void HordeFlagWasPickedUp(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasPickedUp(playername);
+            }
+        }
+
+        public void AllianceFlagWasDropped(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped(playername);
+            }
+        }
+
+        public void HordeFlagWasDropped(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped(playername);
             }
         }
     }

@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if ((!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat()))
+            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat() && !(AmeisenBotStateMachine.BattlegroundEngine != null && AmeisenBotStateMachine.BattlegroundEngine.ForceCombat))
             {
                 AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
                 return;
@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
 
                 // use the default MovementEngine to move if the CombatClass doesnt
-                if (CombatClass == null || !CombatClass.HandlesMovement)
+                if ((CombatClass == null || !CombatClass.HandlesMovement) && ObjectManager.Target != null)
                 {
                     HandleMovement(ObjectManager.Target);
                 }
@@ -132,6 +132,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
+
             // set our normal maxfps
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
 
@@ -190,8 +192,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 float oldMaxSteering = MovementSettings.MaxSteering;
                 MovementSettings.MaxSteering = 2f;
 
-                MovementEngine.Reset();
-                MovementEngine.SetState(MovementEngineState.Chasing, target.Position);
+                MovementEngine.SetState(MovementEngineState.Moving, target.Position);
                 MovementEngine.Execute();
 
                 MovementSettings.MaxSteering = oldMaxSteering;
@@ -224,7 +225,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 else
                 {
                     // maybe we are able to assist our partymembers
-                    if (ObjectManager.PartymemberGuids.Count > 0)
+                    /*if (ObjectManager.PartymemberGuids.Count > 0)
                     {
                         Dictionary<ulong, int> partymemberTargets = new Dictionary<ulong, int>();
                         ObjectManager.Partymembers.ForEach(e =>
@@ -264,7 +265,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                             target = validTarget;
                             return true;
                         }
-                    }
+                    }*/
 
                     // last fallback, target our nearest enemy
                     HookManager.TargetNearestEnemy();

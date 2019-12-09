@@ -13,6 +13,10 @@ namespace AmeisenBotX.Core.Battleground.Objectives
 
         bool IsAvailable { get; }
 
+        void Enter();
+
         void Execute();
+
+        void Exit();
     }
 }
