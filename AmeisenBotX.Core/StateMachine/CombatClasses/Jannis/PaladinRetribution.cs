@@ -7,15 +7,19 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
+using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class PaladinRetribution : ICombatClass
+    public class PaladinRetribution : BasicCombatClass
     {
         // author: Jannis Höschele
 
@@ -34,68 +38,45 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string divinePleaSpell = "Divine Plea";
         private readonly string holyLightSpell = "Holy Light";
         private readonly string layOnHandsSpell = "Lay on Hands";
-
-        private readonly int buffCheckTime = 4;
-        private readonly int judgementCheckTime = 1;
-        private readonly int enemyCastingCheckTime = 1;
-
-        public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        
+        public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { blessingOfMightSpell, () => CastSpellIfPossible(blessingOfMightSpell, true) },
+                { retributionAuraSpell, () => CastSpellIfPossible(retributionAuraSpell, true) },
+                { sealOfVengeanceSpell, () => CastSpellIfPossible(sealOfVengeanceSpell, true) }
+            };
+            
+            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, () => CastSpellIfPossible(hammerOfJusticeSpell, true) }
             };
         }
 
-        public bool HandlesMovement => false;
+        public override bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
+        public override bool HandlesTargetSelection => false;
 
-        public bool IsMelee => true;
+        public override bool IsMelee => true;
 
-        public IWowItemComparator ItemComparator => null;
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator();
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Paladin Retribution";
 
-        private HookManager HookManager { get; }
+        public override string Version => "1.0";
 
-        private DateTime LastBuffCheck { get; set; }
+        public override string Author => "Jannis";
 
-        private DateTime LastJudgementCheck { get; set; }
+        public override string Description => "FCFS based CombatClass for the Retribution Paladin spec.";
 
-        private DateTime LastEnemyCastingCheck { get; set; }
+        public override WowClass Class => WowClass.Paladin;
 
-        private ObjectManager ObjectManager { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        private CooldownManager CooldownManager { get; }
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        private Dictionary<string, Spell> Spells { get; }
-
-        public string Displayname => "Paladin Retribution";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Retribution Paladin spec.";
-
-        public WowClass Class => WowClass.Paladin;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void Execute()
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.IsCasting)
@@ -108,12 +89,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 HookManager.StartAutoAttack();
             }
 
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - LastJudgementCheck > TimeSpan.FromSeconds(judgementCheckTime)
-                    && HandleJudgement())
-                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                    && HandleHammerOfJustice())
+            if (MyAuraManager.Tick()
+                || TargetInterruptManager.Tick()
+                || (MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLower())
+                    && CastSpellIfPossible(judgementOfLightSpell))
                 || (ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossible(layOnHandsSpell))
                 || (ObjectManager.Player.HealthPercentage < 60
@@ -141,69 +120,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             }
         }
 
-        private bool HandleJudgement()
+        public override void OutOfCombatExecute()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(judgementOfLightSpell, true))
-            {
-                return true;
-            }
-
-            LastJudgementCheck = DateTime.Now;
-            return false;
-        }
-
-        public void OutOfCombatExecute()
-        {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (MyAuraManager.Tick())
             {
                 return;
             }
         }
 
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if ((!myBuffs.Any(e => e.Equals(sealOfVengeanceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(sealOfVengeanceSpell, true))
-                || (!myBuffs.Any(e => e.Equals(retributionAuraSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(retributionAuraSpell, true))
-                || (!myBuffs.Any(e => e.Equals(blessingOfMightSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(blessingOfMightSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleHammerOfJustice()
-        {
-            //WowUnit castingUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
-            if (ObjectManager.Target.IsCasting)
-            {
-                if (CastSpellIfPossible(hammerOfJusticeSpell, true))
-                {
-                    return true;
-                }
-            }
-
-            LastEnemyCastingCheck = DateTime.Now;
-            return false;
-        }
-
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
@@ -215,6 +143,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 return true;
             }
 

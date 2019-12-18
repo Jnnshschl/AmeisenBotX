@@ -7,13 +7,16 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class PriestHoly : ICombatClass
+    public class PriestHoly : BasicCombatClass
     {
         // author: Jannis Höschele
 
@@ -32,69 +35,48 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly int buffCheckTime = 8;
         private readonly int deadPartymembersCheckTime = 4;
 
-        public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            {
+                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, true) },
+                { innerFireSpell, () => CastSpellIfPossible(innerFireSpell, true) }
+            };
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, flashHealSpell },
                 { 5000, greaterHealSpell },
             };
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
-            {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
-            };
         }
 
-        public bool HandlesMovement => false;
+        public override bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => true;
+        public override bool HandlesTargetSelection => true;
 
-        public bool IsMelee => false;
+        public override bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator { get; } = new BasicSpiritComparator();
-
-        private CharacterManager CharacterManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private DateTime LastBuffCheck { get; set; }
-
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
+        
         private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public string Displayname => "Priest Holy";
+        public override string Displayname => "Priest Holy";
 
-        public string Version => "1.0";
+        public override string Version => "1.0";
 
-        public string Author => "Jannis";
+        public override string Author => "Jannis";
 
-        public string Description => "FCFS based CombatClass for the Holy Priest spec.";
+        public override string Description => "FCFS based CombatClass for the Holy Priest spec.";
 
-        public WowClass Class => WowClass.Priest;
+        public override WowClass Class => WowClass.Priest;
 
-        public CombatClassRole Role => CombatClassRole.Heal;
+        public override CombatClassRole Role => CombatClassRole.Heal;
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public void Execute()
+        public override void Execute()
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.IsCasting)
@@ -107,12 +89,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 HandleTargetSelection(playersThatNeedHealing);
                 ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
 
-                WowUnit target = ObjectManager.Target;
-                if (target != null)
+                if (ObjectManager.Target != null)
                 {
-                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
+                    ObjectManager.UpdateObject(ObjectManager.Target.Type, ObjectManager.Target.BaseAddress);
 
-                    if (target.HealthPercentage < 25
+                    if (ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(guardianSpiritSpell, true))
                     {
                         return;
@@ -124,7 +105,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                         return;
                     }
 
-                    if (target.HealthPercentage < 70
+                    if (ObjectManager.Target.HealthPercentage < 70
                         && ObjectManager.Player.HealthPercentage < 70
                         && CastSpellIfPossible(bindingHealSpell, true))
                     {
@@ -137,7 +118,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                         return;
                     }
 
-                    double healthDifference = target.MaxHealth - target.Health;
+                    double healthDifference = ObjectManager.Target.MaxHealth - ObjectManager.Target.Health;
                     List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
@@ -150,8 +131,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 }
                 else
                 {
-                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                        && HandleBuffing())
+                    if (MyAuraManager.Tick())
                     {
                         return;
                     }
@@ -159,39 +139,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (MyAuraManager.Tick()
+                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers()))
             {
                 return;
             }
-
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers())
-            {
-                return;
-            }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if ((!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(powerWordFortitudeSpell, true))
-                || (!myBuffs.Any(e => e.Equals(innerFireSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(innerFireSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
         }
 
         private bool HandleDeadPartymembers()
@@ -228,6 +183,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
@@ -239,6 +196,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 return true;
             }
 

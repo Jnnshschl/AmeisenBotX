@@ -7,15 +7,18 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class WarlockDestruction : ICombatClass
+    public class WarlockDestruction : BasicCombatClass
     {
         // author: Jannis Höschele
 
@@ -36,67 +39,59 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string deathCoilSpell = "Death Coil";
         private readonly string summonImpSpell = "Summon Imp";
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
         private readonly int fearAttemptDelay = 5;
 
-        public WarlockDestruction(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public WarlockDestruction(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            PetManager = new PetManager(
+                ObjectManager.Pet,
+                TimeSpan.FromSeconds(1),
+                null,
+                () => (CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell)),
+                null);
 
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { felArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(felArmorSpell, true) },
+                { demonArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, true) },
+                { demonSkinSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, true) }
+            };
+
+            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            {
+                { corruptionSpell, () => CastSpellIfPossible(corruptionSpell, true) },
+                { curseOftheElementsSpell, () => CastSpellIfPossible(curseOftheElementsSpell, true) },
+                { immolateSpell, () => CastSpellIfPossible(immolateSpell, true) }
             };
         }
 
-        public bool HandlesMovement => false;
+        public override bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
+        public override bool HandlesTargetSelection => false;
 
-        public bool IsMelee => false;
+        public override bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
-
-        private CharacterManager CharacterManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private DateTime LastBuffCheck { get; set; }
-
-        private DateTime LastDebuffCheck { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
         private DateTime LastFearAttempt { get; set; }
 
-        public string Displayname => "Warlock Destruction";
+        public override string Displayname => "Warlock Destruction";
 
-        public string Version => "1.0";
+        public override string Version => "1.0";
 
-        public string Author => "Jannis";
+        public override string Author => "Jannis";
 
-        public string Description => "FCFS based CombatClass for the Destruction Warlock spec.";
+        public override string Description => "FCFS based CombatClass for the Destruction Warlock spec.";
 
-        public WowClass Class => WowClass.Warlock;
+        public override WowClass Class => WowClass.Warlock;
 
-        public CombatClassRole Role => CombatClassRole.Dps;
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public void Execute()
+        public PetManager PetManager { get; private set; }
+
+        public override void Execute()
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.IsCasting)
@@ -104,10 +99,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing())
+            if (MyAuraManager.Tick()
+                || TargetAuraManager.Tick()
+                || PetManager.Tick()
                 || ObjectManager.Player.ManaPercentage < 20
                     && ObjectManager.Player.HealthPercentage > 60
                     && CastSpellIfPossible(lifeTapSpell)
@@ -134,11 +128,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     }
                 }
 
-                if ((ObjectManager.Player.CurrentlyCastingSpellId == 0
-                    && ObjectManager.Player.CurrentlyCastingSpellId == 0
+                if (!ObjectManager.Player.IsCasting
                     && CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
                     && ObjectManager.Target.HealthPercentage < 8
-                    && CastSpellIfPossible(drainSoulSpell, true)))
+                    && CastSpellIfPossible(drainSoulSpell, true))
                 {
                     return;
                 }
@@ -152,97 +145,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (MyAuraManager.Tick()
+                || PetManager.Tick())
             {
                 return;
             }
-
-            if (ObjectManager.PetGuid == 0
-                && SummonPet())
-            {
-                return;
-            }
-        }
-
-        private bool SummonPet()
-        {
-            if (CastSpellIfPossible(summonImpSpell, true))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if (Spells.ContainsKey(felArmorSpell)
-                    && Spells[felArmorSpell] != null)
-            {
-                if ((!myBuffs.Any(e => e.Equals(felArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(felArmorSpell, true)))
-                {
-                    return true;
-                }
-            }
-            else if (Spells.ContainsKey(demonArmorSpell)
-                    && Spells[demonArmorSpell] != null)
-            {
-                if ((!myBuffs.Any(e => e.Equals(demonArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(demonArmorSpell, true)))
-                {
-                    return true;
-                }
-            }
-            else if (Spells.ContainsKey(demonSkinSpell)
-                    && Spells[demonSkinSpell] != null)
-            {
-                if ((!myBuffs.Any(e => e.Equals(demonSkinSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(demonSkinSpell, true)))
-                {
-                    return true;
-                }
-            }
-
-            if (ObjectManager.PetGuid == 0
-                && SummonPet())
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if ((!targetDebuffs.Any(e => e.Equals(curseOftheElementsSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(curseOftheElementsSpell, true))
-                || (!targetDebuffs.Any(e => e.Equals(immolateSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(immolateSpell, true))
-                || (!targetDebuffs.Any(e => e.Equals(corruptionSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(corruptionSpell, true)))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
         }
 
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
@@ -254,6 +169,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 return true;
             }
 

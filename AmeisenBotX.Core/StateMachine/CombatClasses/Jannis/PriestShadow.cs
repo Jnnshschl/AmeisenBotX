@@ -7,15 +7,18 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class PriestShadow : ICombatClass
+    public class PriestShadow : BasicCombatClass
     {
         // author: Jannis Höschele
 
@@ -32,67 +35,51 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string mindFlaySpell = "Mind Flay";
         private readonly string vampiricEmbraceSpell = "Vampiric Embrace";
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
         private readonly int deadPartymembersCheckTime = 4;
 
-        public PriestShadow(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public PriestShadow(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { shadowformSpell, () => CastSpellIfPossible(shadowformSpell, true) },
+                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, true) },
+                { vampiricEmbraceSpell, () => CastSpellIfPossible(vampiricEmbraceSpell, true) }
+            };
+
+            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            {
+                { vampiricTouchSpell, () => CastSpellIfPossible(vampiricTouchSpell, true) },
+                { devouringPlagueSpell, () => CastSpellIfPossible(devouringPlagueSpell, true) },
+                { shadowWordPainSpell, () => CastSpellIfPossible(shadowWordPainSpell, true) },
+                { mindBlastSpell, () => CastSpellIfPossible(mindBlastSpell, true) }
             };
         }
 
-        public bool HandlesMovement => false;
+        public override bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
+        public override bool HandlesTargetSelection => false;
 
-        public bool IsMelee => false;
+        public override bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
-
-        private CharacterManager CharacterManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private DateTime LastBuffCheck { get; set; }
-
-        private DateTime LastDebuffCheck { get; set; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        private ObjectManager ObjectManager { get; }
+        public override string Displayname => "Priest Shadow";
 
-        private CooldownManager CooldownManager { get; }
+        public override string Version => "1.0";
 
-        private Dictionary<string, Spell> Spells { get; }
+        public override string Author => "Jannis";
 
-        public string Displayname => "Priest Shadow";
+        public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
 
-        public string Version => "1.0";
+        public override WowClass Class => WowClass.Priest;
 
-        public string Author => "Jannis";
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public string Description => "FCFS based CombatClass for the Shadow Priest spec.";
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public WowClass Class => WowClass.Priest;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void Execute()
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.IsCasting)
@@ -100,8 +87,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                && HandleDebuffing())
+            if (MyAuraManager.Tick()
+                || TargetAuraManager.Tick())
             {
                 return;
             }
@@ -118,99 +105,35 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            //// if (ObjectManager.Player.HealthPercentage < 70
-            ////     && IsSpellKnown(flashHealSpell)
-            ////     && !IsOnCooldown(flashHealSpell))
-            //// {
-            ////     HookManager.CastSpell(flashHealSpell);
-            ////     return;
-            //// }
+            if (ObjectManager.Player.HealthPercentage < 70
+                && CastSpellIfPossible(flashHealSpell))
+            {
+                HookManager.CastSpell(flashHealSpell);
+                return;
+            }
 
-            if (ObjectManager.Player.IsCasting
+            if (!ObjectManager.Player.IsCasting
                 && CastSpellIfPossible(mindFlaySpell, true))
             {
                 return;
             }
         }
 
-        private bool HandleDebuffing()
+        public override void OutOfCombatExecute()
         {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if (!targetDebuffs.Any(e => e.Equals(vampiricTouchSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(vampiricTouchSpell,true))
+            if (MyAuraManager.Tick())
             {
-                return true;
+                return;
             }
 
-            if (!targetDebuffs.Any(e => e.Equals(devouringPlagueSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(devouringPlagueSpell))
+            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers())
             {
-                return true;
-            }
-
-            if (!targetDebuffs.Any(e => e.Equals(mindBlastSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(mindBlastSpell))
-            {
-                return true;
-            }
-
-            if (!targetDebuffs.Any(e => e.Equals(shadowWordPainSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(shadowWordPainSpell, true))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
-        public void OutOfCombatExecute()
-        {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
-            {
-                HandleBuffing();
-            }
-
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime))
-            {
-                HandleDeadPartymembers();
+                return;
             }
         }
 
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if (!myBuffs.Any(e => e.Equals(shadowformSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(shadowformSpell, true))
-            {
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(powerWordFortitudeSpell, true))
-            {
-                HookManager.CastSpell(powerWordFortitudeSpell);
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(vampiricEmbraceSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(vampiricEmbraceSpell, true))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private void HandleDeadPartymembers()
+        private bool HandleDeadPartymembers()
         {
             if (!Spells.ContainsKey(resurrectionSpell))
             {
@@ -231,16 +154,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
                 }
             }
-        }
 
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
+            LastDeadPartymembersCheck = DateTime.Now;
+            return true;
         }
-
+        
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
@@ -252,6 +174,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 return true;
             }
 

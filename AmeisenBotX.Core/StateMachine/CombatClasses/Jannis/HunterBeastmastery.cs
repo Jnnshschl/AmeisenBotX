@@ -9,14 +9,18 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
+using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class HunterBeastmastery : ICombatClass
+    public class HunterBeastmastery : BasicCombatClass
     {
         // author: Jannis Höschele
 
@@ -38,82 +42,70 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string revivePetSpell = "Revive Pet";
         private readonly string serpentStingSpell = "Serpent Sting";
         private readonly string steadyShotSpell = "Steady Shot";
-        private readonly string scatterShotSpell = "Scatter Shot"; 
+        private readonly string scatterShotSpell = "Scatter Shot";
         private readonly string wingClipSpell = "Wing Clip";
         private readonly string multiShotSpell = "Multi-Shot";
         private readonly string raptorStrikeSpell = "Raptor Strike";
         private readonly string mongooseBiteSpell = "Mongoose Bite";
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 3;
         private readonly int petstatusCheckTime = 2;
 
-        public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, XMemory xMemory)
+        public HunterBeastmastery(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            XMemory = xMemory;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            PetManager = new PetManager(
+                ObjectManager.Pet, 
+                TimeSpan.FromSeconds(15),
+                () => CastSpellIfPossible(mendPetSpell, true),
+                () => CastSpellIfPossible(callPetSpell),
+                () => CastSpellIfPossible(revivePetSpell));
 
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { aspectOfTheDragonhawkSpell, () => CastSpellIfPossible(aspectOfTheDragonhawkSpell, true) }
+            };
+
+            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            {
+                { huntersMarkSpell, () => CastSpellIfPossible(huntersMarkSpell, true) },
+                { serpentStingSpell, () => CastSpellIfPossible(serpentStingSpell, true) }
+            };
+
+            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, () => CastSpellIfPossible(scatterShotSpell, true) },
+                { 1, () => CastSpellIfPossible(intimidationSpell, true) }
             };
         }
 
-        public bool HandlesMovement => false;
+        public override bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
+        public override bool HandlesTargetSelection => false;
 
-        public bool IsMelee => false;
+        public override bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
-
-        private CharacterManager CharacterManager { get; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
         private bool DisengagePrepared { get; set; } = false;
 
         private bool InFrostTrapCombo { get; set; } = false;
 
-        private HookManager HookManager { get; }
+        private PetManager PetManager { get; set; }
 
-        private DateTime LastBuffCheck { get; set; }
+        public override string Displayname => "Hunter Beastmastery";
 
-        private DateTime LastDebuffCheck { get; set; }
+        public override string Version => "1.0";
 
-        private DateTime LastMendPetUsed { get; set; }
+        public override string Author => "Jannis";
 
-        private ObjectManager ObjectManager { get; }
+        public override string Description => "FCFS based CombatClass for the Beastmastery Hunter spec.";
 
-        private CooldownManager CooldownManager { get; }
+        public override WowClass Class => WowClass.Hunter;
 
-        private Dictionary<string, Spell> Spells { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        private XMemory XMemory { get; }
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        private DateTime PetStatusCheck { get; set; }
-
-        public string Displayname => "Hunter Beastmastery";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Beastmastery Hunter spec.";
-
-        public WowClass Class => WowClass.Hunter;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void Execute()
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.IsCasting
@@ -127,45 +119,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 HookManager.StartAutoAttack();
             }
 
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
-                    && CheckPetStatus())
-                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing()))
+            if (MyAuraManager.Tick()
+                || TargetAuraManager.Tick()
+                || TargetInterruptManager.Tick()
+                || PetManager.Tick())
             {
                 return;
             }
 
-            ulong oldTargetGuid = 0;
-            /*WowUnit targetToStun = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.IsCasting);
-
-            if (targetToStun != null)
+            if (ObjectManager.Target != null)
             {
-                // target the target to stun it later,
-                // save the guid to restore the target
-                // if we are not able to stun it
-                oldTargetGuid = ObjectManager.TargetGuid;
-                HookManager.TargetGuid(targetToStun.Guid);
-            }*/
-
-            WowUnit target = (WowUnit)ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == ObjectManager.TargetGuid);
-
-            if (target != null)
-            {
-                if (target.IsCasting
-                    && (CastSpellIfPossible(intimidationSpell)
-                    || CastSpellIfPossible(scatterShotSpell)))
-                {
-                    return;
-                }
-                else if(oldTargetGuid > 0)
-                {
-                    // restore the old target if we cant stun the target
-                    HookManager.TargetGuid(oldTargetGuid);
-                }
-
-                double distanceToTarget = target.Position.GetDistance2D(ObjectManager.Player.Position);
+                double distanceToTarget = ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position);
 
                 if (ObjectManager.Player.HealthPercentage < 15
                     && CastSpellIfPossible(feignDeathSpell))
@@ -210,7 +174,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                         return;
                     }
 
-                    if (target.HealthPercentage < 20
+                    if (ObjectManager.Target.HealthPercentage < 20
                         && CastSpellIfPossible(killShotSpell, true))
                     {
                         return;
@@ -220,7 +184,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     CastSpellIfPossible(beastialWrathSpell, true);
                     CastSpellIfPossible(rapidFireSpell);
 
-                    if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, true))
+                    if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, true))
                         || CastSpellIfPossible(arcaneShotSpell, true)
                         || CastSpellIfPossible(steadyShotSpell, true))
                     {
@@ -230,12 +194,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - PetStatusCheck > TimeSpan.FromSeconds(petstatusCheckTime)
-                    && CheckPetStatus()))
+            if (MyAuraManager.Tick()
+                || PetManager.Tick())
             {
                 return;
             }
@@ -243,74 +205,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             DisengagePrepared = false;
         }
 
-        private bool CheckPetStatus()
-        {
-            WowUnit pet = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == ObjectManager.PetGuid);
-
-            if ((ObjectManager.PetGuid == 0
-                    && CastSpellIfPossible(callPetSpell, true))
-                || (pet != null && ((pet.Health == 0 || pet.IsDead)
-                    && CastSpellIfPossible(revivePetSpell, true))))
-            {
-                return true;
-            }
-
-            if (pet == null || pet.Health == 0 || pet.IsDead)
-            {
-                return true;
-            }
-
-            // mend pet has a 15 sec HoT
-            if (DateTime.Now - LastMendPetUsed > TimeSpan.FromSeconds(15)
-                && pet?.HealthPercentage < 80
-                && CastSpellIfPossible(mendPetSpell, true))
-            {
-                LastMendPetUsed = DateTime.Now;
-                return true;
-            }
-
-            PetStatusCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
-
-            if (myBuffs.Any(e => e.Equals(feignDeathSpell, StringComparison.OrdinalIgnoreCase)))
-            {
-                HookManager.SendChatMessage("/cancelaura Feign Death");
-            }
-
-            if (!myBuffs.Any(e => e.Equals(aspectOfTheDragonhawkSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(aspectOfTheDragonhawkSpell))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if ((!targetDebuffs.Any(e => e.Equals(huntersMarkSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(huntersMarkSpell, true))
-                || (!targetDebuffs.Any(e => e.Equals(serpentStingSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(serpentStingSpell, true)))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
@@ -322,6 +220,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 return true;
             }
 

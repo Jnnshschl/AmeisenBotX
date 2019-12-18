@@ -7,13 +7,17 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
+using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
-    public class MageArcane : ICombatClass
+    public class MageArcane : BasicCombatClass
     {
         // author: Jannis Höschele
 
@@ -31,75 +35,48 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string icyVeinsSpell = "Icy Veins";
         private readonly string spellStealSpell = "Spellsteal";
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
-        private readonly int manashieldCheckTime = 16;
-        private readonly int missileBarrageCheckTime = 1;
-        private readonly int spellstealCheckTime = 1;
-
-        public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { arcaneIntellectSpell, () => CastSpellIfPossible(arcaneIntellectSpell, true) },
+                { mageArmorSpell, () => CastSpellIfPossible(mageArmorSpell, true) },
+                { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
+            };
+
+            DispellBuffsFunction = () => HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
+
+            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, () => CastSpellIfPossible(counterspellSpell, true) }
             };
         }
 
-        public bool HandlesMovement => false;
+        public override bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
+        public override bool HandlesTargetSelection => false;
 
-        public bool IsMelee => false;
+        public override bool IsMelee => false;
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
-
-        private CharacterManager CharacterManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private DateTime LastBuffCheck { get; set; }
-
-        private DateTime LastDebuffCheck { get; set; }
-
-        private DateTime LastManashieldCheck { get; set; }
-
-        private DateTime LastMissileBarrageCheck { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
-
-        private int BarrageCounter { get; set; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
         public DateTime LastSpellstealCheck { get; private set; }
 
-        public string Displayname => "Mage Arcane";
+        public override string Displayname => "Mage Arcane";
 
-        public string Version => "1.0";
+        public override string Version => "1.0";
 
-        public string Author => "Jannis";
+        public override string Author => "Jannis";
 
-        public string Description => "FCFS based CombatClass for the Arcane Mage spec.";
+        public override string Description => "FCFS based CombatClass for the Arcane Mage spec.";
 
-        public WowClass Class => WowClass.Mage;
+        public override WowClass Class => WowClass.Mage;
 
-        public CombatClassRole Role => CombatClassRole.Dps;
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public void Execute()
+        public override void Execute()
         {
             // we dont want to do anything if we are casting something...
             if (ObjectManager.Player.IsCasting)
@@ -107,121 +84,41 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if ((DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && (HandleArcaneMissiles()
-                    || HandleSpellSteal()))
-                || (DateTime.Now - LastManashieldCheck > TimeSpan.FromSeconds(manashieldCheckTime)
-                    && HandleManaShield())
-                || (DateTime.Now - LastMissileBarrageCheck > TimeSpan.FromSeconds(missileBarrageCheckTime)
-                    && HandleMissileBarrage())) { return; }
+            if (MyAuraManager.Tick()
+                || TargetAuraManager.Tick()
+                || TargetInterruptManager.Tick())
+            {
+                return;
+            }
 
             if (ObjectManager.Target != null)
             {
-                if (ObjectManager.Target.IsCasting
-                    && CastSpellIfPossible(counterspellSpell, true))
-                {
-                    return;
-                }
-
                 if ((ObjectManager.Player.HealthPercentage < 16
-                    && CastSpellIfPossible(iceBlockSpell))
-                || (ObjectManager.Player.ManaPercentage < 40
-                    && CastSpellIfPossible(evocationSpell, true))
-                || CastSpellIfPossible(mirrorImageSpell, true)
-                || CastSpellIfPossible(arcaneBarrageSpell, true)
-                || CastSpellIfPossible(arcaneBlastSpell, true))
+                        && CastSpellIfPossible(iceBlockSpell))
+                    || (ObjectManager.Player.ManaPercentage < 40
+                        && CastSpellIfPossible(evocationSpell, true))
+                    || CastSpellIfPossible(mirrorImageSpell, true)
+                    || (MyAuraManager.Buffs.Contains(missileBarrageSpell.ToLower()) && CastSpellIfPossible(arcaneMissilesSpell, true))
+                    || CastSpellIfPossible(arcaneBarrageSpell, true)
+                    || CastSpellIfPossible(arcaneBlastSpell, true))
                 {
                     return;
                 }
             }
         }
 
-        private bool HandleArcaneMissiles()
+        public override void OutOfCombatExecute()
         {
-            if (BarrageCounter > 0
-                && CastSpellIfPossible(arcaneMissilesSpell, true))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool HandleSpellSteal()
-        {
-            if (DateTime.Now - LastSpellstealCheck > TimeSpan.FromSeconds(spellstealCheckTime)
-                && HookManager.HasUnitStealableBuffs(WowLuaUnit.Target)
-                && CastSpellIfPossible(spellStealSpell, true))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public void OutOfCombatExecute()
-        {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (MyAuraManager.Tick())
             {
                 return;
             }
         }
 
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if ((!myBuffs.Any(e => e.Equals(mageArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(mageArmorSpell, true))
-                || (!myBuffs.Any(e => e.Equals(arcaneIntellectSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(arcaneIntellectSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleMissileBarrage()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!myBuffs.Any(e => e.Equals(missileBarrageSpell, StringComparison.OrdinalIgnoreCase)))
-            {
-                BarrageCounter = 0;
-            }
-            else
-            {
-                BarrageCounter = 1;
-            }
-
-            LastMissileBarrageCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleManaShield()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!myBuffs.Any(e => e.Equals(manaShieldSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(manaShieldSpell))
-            {
-                return true;
-            }
-
-            LastManashieldCheck = DateTime.Now;
-            return false;
-        }
-
         private bool CastSpellIfPossible(string spellName, bool needsMana = false)
         {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
@@ -233,6 +130,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HookManager.CastSpell(spellName);
                 CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 return true;
             }
 
