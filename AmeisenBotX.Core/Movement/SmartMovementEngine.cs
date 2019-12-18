@@ -46,6 +46,8 @@ namespace AmeisenBotX.Core.Movement
 
         public DateTime LastJumpCheck { get; private set; }
 
+        public DateTime LastLastPositionUpdate { get; private set; }
+
         public bool HasMoved { get; private set; }
 
         public int TryCount { get; private set; }
@@ -70,7 +72,13 @@ namespace AmeisenBotX.Core.Movement
 
         public void Execute()
         {
-            if (CurrentPath.Count == 0 || TryCount > 2)
+            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(GetPosition.Invoke()) > 24) || TryCount > 2)
+            {
+                Reset();
+                return;
+            }
+
+            if (CurrentPath.Count == 0)
             {
                 TryCount = 0;
                 List<Vector3> nodes = GeneratePath.Invoke(GetPosition.Invoke(), TargetPosition);
@@ -161,6 +169,7 @@ namespace AmeisenBotX.Core.Movement
                 }
 
                 LastPosition = GetPosition.Invoke();
+                LastLastPositionUpdate = DateTime.Now;
                 LastJumpCheck = DateTime.Now;
             }
 
@@ -200,6 +209,7 @@ namespace AmeisenBotX.Core.Movement
             CurrentPath = new Queue<Vector3>();
             HasMoved = false;
             TryCount = 0;
+            LastLastPositionUpdate = DateTime.Now;
         }
     }
 }

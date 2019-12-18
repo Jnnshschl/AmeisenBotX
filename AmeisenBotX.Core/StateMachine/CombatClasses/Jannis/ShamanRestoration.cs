@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, true) }
             };

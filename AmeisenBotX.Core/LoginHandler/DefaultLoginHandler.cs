@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.LoginHandler
                 while (!failed && currentSlot != characterSlot)
                 {
                     BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x28));
-                    Thread.Sleep(200);
+                    Thread.Sleep(1000);
                     failed = XMemory.ReadInt(OffsetList.CharacterSlotSelected, out currentSlot);
                 }
 
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.LoginHandler
             foreach (char c in username)
             {
                 BotUtils.SendKeyShift(XMemory.Process.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
-                Thread.Sleep(10);
+                Thread.Sleep(50);
             }
 
             Thread.Sleep(100);

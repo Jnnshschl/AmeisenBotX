@@ -39,9 +39,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public PriestDiscipline(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, true) },
+                { powerWordFortitudeSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(powerWordFortitudeSpell, true);
+                    }
+                },
                 { innerFireSpell, () => CastSpellIfPossible(innerFireSpell, true) }
             };
 

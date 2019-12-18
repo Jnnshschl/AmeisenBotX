@@ -39,14 +39,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public PriestShadow(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { shadowformSpell, () => CastSpellIfPossible(shadowformSpell, true) },
-                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, true) },
+                { powerWordFortitudeSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(powerWordFortitudeSpell, true);
+                    } 
+                },
                 { vampiricEmbraceSpell, () => CastSpellIfPossible(vampiricEmbraceSpell, true) }
             };
 
-            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { vampiricTouchSpell, () => CastSpellIfPossible(vampiricTouchSpell, true) },
                 { devouringPlagueSpell, () => CastSpellIfPossible(devouringPlagueSpell, true) },

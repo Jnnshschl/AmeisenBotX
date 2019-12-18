@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.Data
                 };
             }
 
-            return null;        
+            return null;
         }
 
         public IEnumerable<WowPlayer> GetNearEnemies(double distance)
@@ -319,7 +319,14 @@ namespace AmeisenBotX.Core.Data
         }
 
         public void UpdateObject<T>(T wowObject) where T : WowObject
-            => UpdateObject(wowObject.Type, wowObject.BaseAddress);        
+        {
+            if (wowObject == null)
+            {
+                return;
+            }
+
+            UpdateObject(wowObject.Type, wowObject.BaseAddress);
+        }
 
         public void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress)
         {
@@ -412,7 +419,7 @@ namespace AmeisenBotX.Core.Data
 
                 WowObjects.Add(obj);
 
-                if(obj.Guid == TargetGuid)
+                if (obj.Guid == TargetGuid)
                 {
                     Target = (WowUnit)obj;
                 }

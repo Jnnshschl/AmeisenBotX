@@ -15,14 +15,14 @@ namespace AmeisenBotX.Core.Movement.Settings
             //// SeperationDistance *= rnd.NextDouble() + 1;
         }
 
-        public float MaxVelocity { get; set; } = 6f;
+        public float MaxVelocity { get; set; } = 8f;
 
-        public float MaxSteering { get; set; } = 1f;
+        public float MaxSteering { get; set; } = 0.8f;
 
-        public float MaxAcceleration { get; set; } = 6f;
+        public float MaxAcceleration { get; set; } = 4f;
 
-        public double WaypointCheckThreshold { get; set; } = 3;
+        public double WaypointCheckThreshold { get; set; } = 2;
 
-        public double SeperationDistance { get; set; } = 6;
+        public double SeperationDistance { get; set; } = 4;
     }
 }

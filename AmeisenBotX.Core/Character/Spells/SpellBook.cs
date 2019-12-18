@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,10 @@ namespace AmeisenBotX.Core.Character.Spells
 
             try
             {
-                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells);
+                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells, new JsonSerializerSettings
+                {
+                    Error = HandleDeserializationError
+                });
 
                 Spells.OrderBy(e => e.Name).ThenByDescending(e => e.Rank);
                 OnSpellBookUpdate?.Invoke();
@@ -48,6 +52,11 @@ namespace AmeisenBotX.Core.Character.Spells
             {
                 AmeisenLogger.Instance.Log($"Failed to parse Spells JSON:\n{rawSpells}\n{e.ToString()}", LogLevel.Error);
             }
+        }
+
+        private static void HandleDeserializationError(object sender, ErrorEventArgs e)
+        {
+            e.ErrorContext.Handled = true;
         }
     }
 }

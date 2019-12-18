@@ -32,28 +32,31 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         public bool Tick()
         {
-            if (CastCallPet != null
-                && ((Pet.Guid == 0
-                    && CastCallPet.Invoke())
-                || CastRevivePet != null
-                    && (Pet != null && ((Pet.Health == 0 || Pet.IsDead)
-                        && CastRevivePet.Invoke()))))
+            if (Pet != null)
             {
-                return true;
-            }
+                if (CastCallPet != null
+                    && ((Pet.Guid == 0
+                        && CastCallPet.Invoke())
+                    || CastRevivePet != null
+                        && (Pet != null && ((Pet.Health == 0 || Pet.IsDead)
+                            && CastRevivePet.Invoke()))))
+                {
+                    return true;
+                }
 
-            if (Pet == null || Pet.Health == 0 || Pet.IsDead)
-            {
-                return true;
-            }
+                if (Pet == null || Pet.Health == 0 || Pet.IsDead)
+                {
+                    return true;
+                }
 
-            if (CastMendPet != null
-                && (DateTime.Now - LastMendPetUsed > HealPetCooldown
-                    && Pet?.HealthPercentage < 80
-                    && CastMendPet.Invoke()))
-            {
-                LastMendPetUsed = DateTime.Now;
-                return true;
+                if (CastMendPet != null
+                    && (DateTime.Now - LastMendPetUsed > HealPetCooldown
+                        && Pet?.HealthPercentage < 80
+                        && CastMendPet.Invoke()))
+                {
+                    LastMendPetUsed = DateTime.Now;
+                    return true;
+                }
             }
 
             return false;

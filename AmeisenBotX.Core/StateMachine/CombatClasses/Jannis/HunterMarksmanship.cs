@@ -56,18 +56,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                    () => CastSpellIfPossible(callPetSpell),
                    () => CastSpellIfPossible(revivePetSpell));
 
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { aspectOfTheDragonhawkSpell, () => CastSpellIfPossible(aspectOfTheDragonhawkSpell, true) }
             };
 
-            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { huntersMarkSpell, () => CastSpellIfPossible(huntersMarkSpell, true) },
                 { serpentStingSpell, () => CastSpellIfPossible(serpentStingSpell, true) }
             };
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(silencingShotSpell, true) }
             };

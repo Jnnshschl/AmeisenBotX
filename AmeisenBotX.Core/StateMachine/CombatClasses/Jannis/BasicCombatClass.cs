@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
 
             MyAuraManager = new AuraManager(
-                BuffsToKeepOnMe, 
+                null, 
                 null, 
                 TimeSpan.FromSeconds(1), 
                 () => HookManager.GetBuffs(WowLuaUnit.Player), 
@@ -44,14 +44,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
             TargetAuraManager = new AuraManager(
                 null,
-                DebuffsToKeepOnTarget,
+                null,
                 TimeSpan.FromSeconds(1),
                 () => HookManager.GetBuffs(WowLuaUnit.Target),
                 () => HookManager.GetDebuffs(WowLuaUnit.Target),
                 DispellBuffsFunction,
                 null);
 
-            TargetInterruptManager = new InterruptManager(ObjectManager.Target, InterruptSpells);
+            TargetInterruptManager = new InterruptManager(ObjectManager.Target, null);
         }
 
         public DispellBuffsFunction DispellBuffsFunction { get; internal set; }
@@ -73,12 +73,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public AuraManager TargetAuraManager { get; internal set; }
 
         public InterruptManager TargetInterruptManager { get; internal set; }
-
-        public Dictionary<string, CastFunction> BuffsToKeepOnMe { get; internal set; }
-
-        public Dictionary<string, CastFunction> DebuffsToKeepOnTarget { get; internal set; }
-
-        public SortedList<int, CastInterruptFunction> InterruptSpells { get; internal set; }
 
         public abstract string Displayname { get; }
 

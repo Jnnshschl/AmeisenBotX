@@ -37,22 +37,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { arcaneIntellectSpell, () => CastSpellIfPossible(arcaneIntellectSpell, true) },
+                { arcaneIntellectSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(arcaneIntellectSpell, true);
+                    }
+                },
                 { moltenArmorSpell, () => CastSpellIfPossible(moltenArmorSpell, true) },
                 { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
             };
 
-            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { scorchSpell, () => CastSpellIfPossible(scorchSpell, true) },
                 { livingBombSpell, () => CastSpellIfPossible(livingBombSpell, true) }
             };
 
-            DispellBuffsFunction = () => HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
+            TargetAuraManager.DispellBuffs = () => HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(counterspellSpell, true) }
             };

@@ -31,17 +31,17 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         public List<string> Debuffs { get; private set; }
 
-        public Dictionary<string, CastFunction> BuffsToKeepActive { get; private set; }
+        public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
 
-        public Dictionary<string, CastFunction> DebuffsToKeepActive { get; private set; }
+        public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 
-        private DispellBuffsFunction DispellBuffs { get; }
+        public DispellBuffsFunction DispellBuffs { get; set; }
 
-        private DispellDebuffsFunction DispellDebuffs { get; }
+        public DispellDebuffsFunction DispellDebuffs { get; set; }
 
-        private GetBuffsFunction GetBuffs { get; }
+        public GetBuffsFunction GetBuffs { get; set; }
 
-        private GetDebuffsFunction GetDebuffs { get; }
+        public GetDebuffsFunction GetDebuffs { get; set; }
 
         public AuraManager()
         {
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         public bool Tick(bool forceUpdate = false)
         {
-            if (DateTime.Now - LastBuffUpdate < MinUpdateTime
+            if (DateTime.Now - LastBuffUpdate > MinUpdateTime
                 || forceUpdate)
             {
                 Buffs = GetBuffs();
@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.StateMachine.Utils
                 LastBuffUpdate = DateTime.Now;
             }
 
-            if (BuffsToKeepActive?.Count > 0)
+            if (BuffsToKeepActive?.Count > 0 && Buffs != null)
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
                 {
@@ -73,12 +73,12 @@ namespace AmeisenBotX.Core.StateMachine.Utils
                 }
             }
 
-            if (Buffs.Count > 0 && DispellBuffs != null)
+            if (Buffs?.Count > 0 && DispellBuffs != null)
             {
                 DispellBuffs.Invoke();
             }
 
-            if (DebuffsToKeepActive?.Count > 0)
+            if (DebuffsToKeepActive?.Count > 0 && Debuffs != null)
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in DebuffsToKeepActive)
                 {
@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.StateMachine.Utils
                 }
             }
 
-            if (Debuffs.Count > 0 && DispellDebuffs != null)
+            if (Debuffs?.Count > 0 && DispellDebuffs != null)
             {
                 DispellDebuffs.Invoke();
             }

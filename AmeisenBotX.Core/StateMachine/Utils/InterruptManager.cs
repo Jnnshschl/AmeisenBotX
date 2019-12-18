@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         private WowUnit UnitToWatch { get; set; }
 
-        private SortedList<int, CastInterruptFunction> InterruptSpells { get; set; }
+        public SortedList<int, CastInterruptFunction> InterruptSpells { get; set; }
 
         public bool Tick()
         {

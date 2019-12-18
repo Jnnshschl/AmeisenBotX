@@ -41,14 +41,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         
         public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { blessingOfMightSpell, () => CastSpellIfPossible(blessingOfMightSpell, true) },
+                { blessingOfMightSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(blessingOfMightSpell, true);
+                    }
+                },
                 { retributionAuraSpell, () => CastSpellIfPossible(retributionAuraSpell, true) },
                 { sealOfVengeanceSpell, () => CastSpellIfPossible(sealOfVengeanceSpell, true) }
             };
-            
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(hammerOfJusticeSpell, true) }
             };

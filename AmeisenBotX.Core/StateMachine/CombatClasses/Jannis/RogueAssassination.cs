@@ -33,13 +33,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public RogueAssassination(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { sliceAndDiceSpell, () => CastSpellIfPossible(sliceAndDiceSpell, true, true, 1) },
                 { coldBloodSpell, () => CastSpellIfPossible(coldBloodSpell, true) }
             };
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(kickSpell, true) }
             };

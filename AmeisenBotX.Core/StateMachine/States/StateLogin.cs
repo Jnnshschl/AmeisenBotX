@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.LoginHandler;
 using AmeisenBotX.Core.OffsetLists;
 using System;
+using System.Threading;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
@@ -30,6 +31,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
+            Thread.Sleep(1000);
+
             if (LoginHandler.Login(AmeisenBotStateMachine.XMemory.Process, Config.Username, Config.Password, Config.CharacterSlot))
             {
                 if (AmeisenBotStateMachine.XMemory.Read(OffsetList.ChatOpened, out byte isChatOpened)
@@ -42,6 +45,11 @@ namespace AmeisenBotX.Core.StateMachine.States
                 {
                     AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
                 }
+            }
+            else
+            {
+                AmeisenBotStateMachine.XMemory.Process.Kill();
+                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
             }
         }
 

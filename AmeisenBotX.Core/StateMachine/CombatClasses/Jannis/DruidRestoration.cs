@@ -40,10 +40,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public DruidRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { treeOfLifeSpell, () => CastSpellIfPossible(treeOfLifeSpell, true) },
-                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, true) }
+                { markOfTheWildSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(markOfTheWildSpell, true); 
+                    }
+                }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()

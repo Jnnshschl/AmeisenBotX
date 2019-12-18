@@ -35,19 +35,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public DeathknightUnholy(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { unholyPresenceSpell, () => CastSpellIfPossible(unholyPresenceSpell) },
                 { hornOfWinterSpell, () => CastSpellIfPossible(hornOfWinterSpell, true) }
             };
 
-            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { frostFeverSpell, () => CastSpellIfPossible(icyTouchSpell, false, false, false, true) },
                 { bloodPlagueSpell, () => CastSpellIfPossible(plagueStrikeSpell, false, false, false, true) }
             };
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(mindFreezeSpell, true) },
                 { 1, () => CastSpellIfPossible(strangulateSpell, false, true) }

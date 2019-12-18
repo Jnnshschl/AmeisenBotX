@@ -44,18 +44,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public ShamanElemental(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { lightningShieldSpell, () => ObjectManager.Player.ManaPercentage > 0.8 && CastSpellIfPossible(lightningShieldSpell, true) },
                 { waterShieldSpell, () => ObjectManager.Player.ManaPercentage < 0.2 && CastSpellIfPossible(waterShieldSpell, true) }
             };
 
-            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { flameShockSpell, () => CastSpellIfPossible(flameShockSpell, true) }
             };
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(windShearSpell, true) },
                 { 1, () => CastSpellIfPossible(hexSpell, true) }

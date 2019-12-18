@@ -39,19 +39,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public DruidBalance(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, true) },
-                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, true) }
+                { markOfTheWildSpell, () => 
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(markOfTheWildSpell, true); 
+                    } 
+                }
             };
 
-            DebuffsToKeepOnTarget = new Dictionary<string, CastFunction>()
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { moonfireSpell, () => LunarEclipse && CastSpellIfPossible(moonfireSpell, true) },
                 { insectSwarmSpell, () => SolarEclipse && CastSpellIfPossible(insectSwarmSpell, true) }
             };
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(faerieFireSpell, true) },
             };
@@ -93,11 +98,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if (CastSpellIfPossible(forceOfNatureSpell, true))
-            {
-                HookManager.ClickOnTerrain(ObjectManager.Player.Position);
-            }
-
             if (MyAuraManager.Tick()
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick()
@@ -115,6 +115,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     && CastSpellIfPossible(starfallSpell, true)))
             {
                 return;
+            }
+
+            if (CastSpellIfPossible(forceOfNatureSpell, true))
+            {
+                HookManager.ClickOnTerrain(ObjectManager.Player.Position);
             }
         }
 

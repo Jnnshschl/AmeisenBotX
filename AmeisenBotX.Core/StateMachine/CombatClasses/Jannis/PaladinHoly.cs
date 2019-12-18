@@ -33,9 +33,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { blessingOfWisdomSpell, () => CastSpellIfPossible(blessingOfWisdomSpell, true) },
+                { blessingOfWisdomSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(blessingOfWisdomSpell, true);
+                    }
+                },
                 { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, true) }
             };
 

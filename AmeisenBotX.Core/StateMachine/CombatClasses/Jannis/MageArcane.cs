@@ -37,16 +37,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
-            BuffsToKeepOnMe = new Dictionary<string, CastFunction>()
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { arcaneIntellectSpell, () => CastSpellIfPossible(arcaneIntellectSpell, true) },
+                { arcaneIntellectSpell, () =>
+                    {
+                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        return CastSpellIfPossible(arcaneIntellectSpell, true);
+                    } 
+                },
                 { mageArmorSpell, () => CastSpellIfPossible(mageArmorSpell, true) },
                 { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
             };
 
-            DispellBuffsFunction = () => HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
+            TargetAuraManager.DispellBuffs = () => HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
 
-            InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
                 { 0, () => CastSpellIfPossible(counterspellSpell, true) }
             };

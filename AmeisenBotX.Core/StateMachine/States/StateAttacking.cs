@@ -159,19 +159,9 @@ namespace AmeisenBotX.Core.StateMachine.States
         private void HandleMovement(WowUnit target)
         {
             // we cant move to a null target
-            if (target == null)
+            if (target == null || target.IsDead || target.IsNotAttackable)
             {
                 return;
-            }
-
-            // perform a facing check every 250ms, should be enough
-            if (target.Guid != ObjectManager.PlayerGuid
-                && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position)
-                && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(250))
-            {
-                HookManager.FacePosition(ObjectManager.Player, target.Position);
-                CharacterManager.Face(target.Position, target.Guid);
-                LastRotationCheck = DateTime.Now;
             }
 
             // we don't want to move when we are casting or channeling something
@@ -186,11 +176,21 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 // do we need to stop movement
                 HookManager.StopClickToMove(ObjectManager.Player);
+
+                // perform a facing check every 250ms, should be enough
+                if (target.Guid != ObjectManager.PlayerGuid
+                    && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position)
+                    && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(250))
+                {
+                    HookManager.FacePosition(ObjectManager.Player, target.Position);
+                    CharacterManager.Face(target.Position, target.Guid);
+                    LastRotationCheck = DateTime.Now;
+                }
             }
             else
             {
                 float oldMaxSteering = MovementSettings.MaxSteering;
-                MovementSettings.MaxSteering = 2f;
+                MovementSettings.MaxSteering = 1f;
 
                 MovementEngine.SetState(MovementEngineState.Moving, target.Position);
                 MovementEngine.Execute();
