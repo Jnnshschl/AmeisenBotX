@@ -35,13 +35,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { sliceAndDiceSpell, () => CastSpellIfPossible(sliceAndDiceSpell, true, true, 1) },
-                { coldBloodSpell, () => CastSpellIfPossible(coldBloodSpell, true) }
+                { sliceAndDiceSpell, () => CastSpellIfPossibleRogue(sliceAndDiceSpell, true, true, 1) },
+                { coldBloodSpell, () => CastSpellIfPossibleRogue(coldBloodSpell, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(kickSpell, true) }
+                { 0, () => CastSpellIfPossibleRogue(kickSpell, true) }
             };
         }
 
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossible(cloakOfShadowsSpell, true)))
+                    && CastSpellIfPossibleRogue(cloakOfShadowsSpell, true)))
             {
                 return;
             }
@@ -91,14 +91,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (ObjectManager.Target != null)
             {
                 if ((ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) > 16
-                        && CastSpellIfPossible(sprintSpell, true)))
+                        && CastSpellIfPossibleRogue(sprintSpell, true)))
                 {
                     return;
                 }
             }
 
-            if (CastSpellIfPossible(eviscerateSpell, true, true, 5)
-                || CastSpellIfPossible(mutilateSpell, true))
+            if (CastSpellIfPossibleRogue(eviscerateSpell, true, true, 5)
+                || CastSpellIfPossibleRogue(mutilateSpell, true))
             {
                 return;
             }
@@ -107,29 +107,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void OutOfCombatExecute()
         {
 
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1)
-        {
-            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsEnergy || Spells[spellName].Costs < ObjectManager.Player.Energy)
-                && (!needsCombopoints || ObjectManager.Player.ComboPoints >= requiredCombopoints))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-                return true;
-            }
-
-            return false;
         }
     }
 }

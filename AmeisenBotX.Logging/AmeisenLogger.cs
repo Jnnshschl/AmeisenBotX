@@ -13,7 +13,7 @@ namespace AmeisenBotX.Logging
         private static readonly object Padlock = new object();
         private static AmeisenLogger instance;
 
-        private AmeisenLogger()
+        private AmeisenLogger(bool deleteOldLogs = true)
         {
             LogQueue = new ConcurrentQueue<LogEntry>();
 
@@ -22,6 +22,11 @@ namespace AmeisenBotX.Logging
 
             // default log path
             ChangeLogFolder(AppDomain.CurrentDomain.BaseDirectory + "log/");
+
+            if (deleteOldLogs)
+            {
+                DeleteOldLogs();
+            }
         }
 
         public static AmeisenLogger Instance
@@ -60,7 +65,24 @@ namespace AmeisenBotX.Logging
                 Directory.CreateDirectory(logFolderPath);
             }
 
-            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now.ToString("dd.MM.yyyy")}.{DateTime.Now.ToString("HH.mm")}.txt";
+            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now.ToString("dd.MM.yyyy")}-{DateTime.Now.ToString("HH.mm")}.txt";
+        }
+
+        public void DeleteOldLogs(int daysToKeep = 1)
+        {
+            try
+            {
+                foreach (string file in Directory.GetFiles(LogFileFolder))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+
+                    if (fileInfo.LastAccessTime < DateTime.Now.AddDays(daysToKeep * -1))
+                    {
+                        fileInfo.Delete();
+                    }
+                }
+            }
+            catch { }
         }
 
         public void Log(string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.CombatLog.Objects;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +22,8 @@ namespace AmeisenBotX.Core.Data.Persistence
 
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
 
+        public List<BasicCombatLogEntry> CombatLogEntries { get; private set; }
+
         public void CacheName(ulong guid, string name)
         {
             if (!NameCache.ContainsKey(guid))
@@ -41,6 +44,7 @@ namespace AmeisenBotX.Core.Data.Persistence
         {
             NameCache = new Dictionary<ulong, string>();
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
+            CombatLogEntries = new List<BasicCombatLogEntry>();
         }
 
         public void Load()
@@ -56,8 +60,16 @@ namespace AmeisenBotX.Core.Data.Persistence
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
                 InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
 
-                NameCache = loadedCache.NameCache;
-                ReactionCache = loadedCache.ReactionCache;
+                if (loadedCache != null)
+                {
+                    NameCache = loadedCache.NameCache ?? new Dictionary<ulong, string>();
+                    ReactionCache = loadedCache.ReactionCache ?? new Dictionary<(int, int), WowUnitReaction>();
+                    CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
+                }
+                else
+                {
+                    Clear();
+                }
             }
         }
 

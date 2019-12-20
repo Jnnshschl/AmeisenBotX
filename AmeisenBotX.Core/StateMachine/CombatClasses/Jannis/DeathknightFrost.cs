@@ -37,20 +37,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { frostPresenceSpell, () => CastSpellIfPossible(frostPresenceSpell) },
-                { hornOfWinterSpell, () => CastSpellIfPossible(hornOfWinterSpell, true) }
+                { frostPresenceSpell, () => CastSpellIfPossibleDk(frostPresenceSpell) },
+                { hornOfWinterSpell, () => CastSpellIfPossibleDk(hornOfWinterSpell, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { frostFeverSpell, () => CastSpellIfPossible(icyTouchSpell, false, false, false, true) },
-                { bloodPlagueSpell, () => CastSpellIfPossible(plagueStrikeSpell, false, false, false, true) }
+                { frostFeverSpell, () => CastSpellIfPossibleDk(icyTouchSpell, false, false, false, true) },
+                { bloodPlagueSpell, () => CastSpellIfPossibleDk(plagueStrikeSpell, false, false, false, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(mindFreezeSpell, true) },
-                { 1, () => CastSpellIfPossible(strangulateSpell, false, true) }
+                { 0, () => CastSpellIfPossibleDk(mindFreezeSpell, true) },
+                { 1, () => CastSpellIfPossibleDk(strangulateSpell, false, true) }
             };
         }
 
@@ -94,13 +94,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossible(iceboundFortitudeSpell, true))
-                || CastSpellIfPossible(unbreakableArmorSpell, false, false, true)
-                || CastSpellIfPossible(obliterateSpell, false, false, true, true)
-                || CastSpellIfPossible(bloodStrikeSpell, false, true)
-                || CastSpellIfPossible(deathCoilSpell, true)
+                    && CastSpellIfPossibleDk(iceboundFortitudeSpell, true))
+                || CastSpellIfPossibleDk(unbreakableArmorSpell, false, false, true)
+                || CastSpellIfPossibleDk(obliterateSpell, false, false, true, true)
+                || CastSpellIfPossibleDk(bloodStrikeSpell, false, true)
+                || CastSpellIfPossibleDk(deathCoilSpell, true)
                 || (ObjectManager.Player.Runeenergy > 60
-                    && CastSpellIfPossible(runeStrikeSpell)))
+                    && CastSpellIfPossibleDk(runeStrikeSpell)))
             {
                 return;
             }
@@ -109,31 +109,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void OutOfCombatExecute()
         {
             MyAuraManager.Tick();
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false)
-        {
-            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsRuneenergy || Spells[spellName].Costs < ObjectManager.Player.Runeenergy)
-                && (!needsBloodrune || (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
-                && (!needsFrostrune || (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
-                && (!needsUnholyrune || (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5))))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-                return true;
-            }
-
-            return false;
         }
     }
 }

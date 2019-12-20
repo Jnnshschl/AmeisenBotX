@@ -7,6 +7,8 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
@@ -34,12 +36,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
 
             MyAuraManager = new AuraManager(
-                null, 
-                null, 
-                TimeSpan.FromSeconds(1), 
-                () => HookManager.GetBuffs(WowLuaUnit.Player), 
-                () => HookManager.GetDebuffs(WowLuaUnit.Player), 
-                null, 
+                null,
+                null,
+                TimeSpan.FromSeconds(1),
+                () => HookManager.GetBuffs(WowLuaUnit.Player),
+                () => HookManager.GetDebuffs(WowLuaUnit.Player),
+                null,
                 DispellDebuffsFunction);
 
             TargetAuraManager = new AuraManager(
@@ -99,5 +101,82 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public abstract void Execute();
 
         public abstract void OutOfCombatExecute();
+
+        internal bool CastSpellIfPossible(string spellName, bool needsResource = false, int currentResourceAmount = 0)
+        {
+            if (currentResourceAmount == 0)
+            {
+                currentResourceAmount = ObjectManager.Player.Class switch
+                {
+                    WowClass.Deathknight => ObjectManager.Player.Runeenergy,
+                    WowClass.Rogue => ObjectManager.Player.Energy,
+                    WowClass.Warrior => ObjectManager.Player.Rage,
+                    _ => ObjectManager.Player.Mana,
+                };
+            }
+
+            PrepareCast(spellName);
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (!needsResource || Spells[spellName].Costs < currentResourceAmount))
+            {
+                CastSpell(spellName);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool CastSpellIfPossibleDk(string spellName, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false)
+        {
+            PrepareCast(spellName);
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (!needsRuneenergy || Spells[spellName].Costs < ObjectManager.Player.Runeenergy)
+                && (!needsBloodrune || (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
+                && (!needsFrostrune || (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
+                && (!needsUnholyrune || (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5))))
+            {
+                CastSpell(spellName);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool CastSpellIfPossibleRogue(string spellName, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1)
+        {
+            PrepareCast(spellName);
+
+            if (Spells[spellName] != null
+                && !CooldownManager.IsSpellOnCooldown(spellName)
+                && (!needsEnergy || Spells[spellName].Costs < ObjectManager.Player.Energy)
+                && (!needsCombopoints || ObjectManager.Player.ComboPoints >= requiredCombopoints))
+            {
+                CastSpell(spellName);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void PrepareCast(string spellName)
+        {
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+
+            if (!Spells.ContainsKey(spellName))
+            {
+                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+            }
+        }
+
+        private void CastSpell(string spellName)
+        {
+            HookManager.CastSpell(spellName);
+            CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+            AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+        }
     }
 }

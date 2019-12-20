@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
@@ -10,6 +11,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.StateMachine;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Core.StateMachine.CombatClasses.Jannis;
@@ -67,6 +69,8 @@ namespace AmeisenBotX.Core
 
             XMemory = new XMemory();
             BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, accountName, "cache.bin"));
+            BotPersonality = new BotPersonality(Path.Combine(BotDataPath, accountName, "personality.bin"));
+            CombatLogParser = new CombatLogParser(BotCache);
             ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
             HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
             ObjectManager.HookManager = HookManager;
@@ -203,6 +207,10 @@ namespace AmeisenBotX.Core
         public string AccountName { get; }
 
         public IAmeisenBotCache BotCache { get; set; }
+
+        public BotPersonality BotPersonality { get; set; }
+
+        public CombatLogParser CombatLogParser { get; set; }
 
         public string BotDataPath { get; }
 
@@ -362,11 +370,6 @@ namespace AmeisenBotX.Core
             CharacterManager.Inventory.Update();
         }
 
-        private void OnCombatLog(long timestamp, List<string> args)
-        {
-            // analyze the combat log
-        }
-
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log($"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
@@ -494,22 +497,23 @@ namespace AmeisenBotX.Core
             EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
             EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
+
             EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
             EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
             EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
             EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
             EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
+            //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
+
             EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnBattlegroundScoreUpdate);
             EventHookManager.Subscribe("UPDATE_WORLD_STATES", OnWorldStateUpdate);
             EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
-
             EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnBgAllianceMessage);
             EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
             EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnBgNeutralMessage);
 
-            //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
-            //// EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog);
+            EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", CombatLogParser.Parse);
         }
 
         private void OnBgNeutralMessage(long timestamp, List<string> args)

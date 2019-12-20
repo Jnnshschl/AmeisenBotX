@@ -105,6 +105,8 @@
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />
+    <Compile Include="Data\CombatLog\CombatLogParser.cs" />
+    <Compile Include="Data\CombatLog\Objects\BasicCombatLogEntry.cs" />
     <Compile Include="Data\Enums\CreatureType.cs" />
     <Compile Include="Data\Enums\DungeonDifficulty.cs" />
     <Compile Include="Data\Enums\RaidDifficulty.cs" />
@@ -149,6 +151,8 @@
     <Compile Include="OffsetLists\OffsetList335a.cs" />
     <Compile Include="OffsetLists\IOffsetList.cs" />
     <Compile Include="Personality\BotPersonality.cs" />
+    <Compile Include="Personality\Enums\PlayerRelationship.cs" />
+    <Compile Include="Personality\Enums\UnitRelationship.cs" />
     <Compile Include="Personality\Enums\Scale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\AmeisenBotStateMachine.cs" />
