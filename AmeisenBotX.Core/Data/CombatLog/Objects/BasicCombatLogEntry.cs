@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Data.CombatLog.Objects
 {
+    [Serializable]
     public class BasicCombatLogEntry
     {
         public BasicCombatLogEntry(CombatLogEntryType combatLogEntryType, CombatLogEntrySubtype combatLogEntrySubtype)

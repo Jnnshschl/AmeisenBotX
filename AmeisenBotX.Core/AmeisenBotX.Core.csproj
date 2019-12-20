@@ -106,6 +106,8 @@
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />
     <Compile Include="Data\CombatLog\CombatLogParser.cs" />
+    <Compile Include="Data\CombatLog\Enums\CombatLogEntrySubtype.cs" />
+    <Compile Include="Data\CombatLog\Enums\CombatLogEntryType.cs" />
     <Compile Include="Data\CombatLog\Objects\BasicCombatLogEntry.cs" />
     <Compile Include="Data\Enums\CreatureType.cs" />
     <Compile Include="Data\Enums\DungeonDifficulty.cs" />
