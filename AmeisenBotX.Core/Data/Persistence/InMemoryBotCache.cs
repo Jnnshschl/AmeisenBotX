@@ -58,16 +58,26 @@ namespace AmeisenBotX.Core.Data.Persistence
             {
                 using Stream stream = File.Open(FilePath, FileMode.Open);
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
-                InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
 
-                if (loadedCache != null)
+                try
                 {
-                    NameCache = loadedCache.NameCache ?? new Dictionary<ulong, string>();
-                    ReactionCache = loadedCache.ReactionCache ?? new Dictionary<(int, int), WowUnitReaction>();
-                    CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
+                    InMemoryBotCache loadedCache = (InMemoryBotCache)binaryFormatter.Deserialize(stream);
+
+                    if (loadedCache != null)
+                    {
+                        NameCache = loadedCache.NameCache ?? new Dictionary<ulong, string>();
+                        ReactionCache = loadedCache.ReactionCache ?? new Dictionary<(int, int), WowUnitReaction>();
+                        CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
+                    }
+                    else
+                    {
+                        Clear();
+                    }
                 }
-                else
+                catch
                 {
+                    stream.Close();
+                    File.Delete(FilePath);
                     Clear();
                 }
             }

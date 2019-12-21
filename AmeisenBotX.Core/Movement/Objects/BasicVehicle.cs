@@ -44,11 +44,11 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public JumpFunction Jump { get; private set; }
 
-        private GetPositionFunction GetPosition { get; set; }
+        public MoveToPositionFunction MoveToPosition { get; set; }
 
-        private GetRotationFunction GetRotation { get; set; }
+        public GetPositionFunction GetPosition { get; set; }
 
-        private MoveToPositionFunction MoveToPosition { get; set; }
+        public GetRotationFunction GetRotation { get; set; }
 
         public Vector3 AvoidObstacles(float multiplier)
         {

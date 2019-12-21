@@ -4,6 +4,7 @@
     {
         None,
         Moving,
+        DirectMoving,
         Following,
         Fleeing,
         Chasing,

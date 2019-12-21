@@ -189,13 +189,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                float oldMaxSteering = MovementSettings.MaxSteering;
-                MovementSettings.MaxSteering = 1f;
-
-                MovementEngine.SetState(MovementEngineState.Moving, target.Position);
+                MovementEngine.SetState(MovementEngineState.DirectMoving, target.Position);
                 MovementEngine.Execute();
-
-                MovementSettings.MaxSteering = oldMaxSteering;
             }
         }
 
@@ -215,7 +210,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             // if there are no non Friendly units, we can't attack anything
             if (nonFriendlyUnits.Count > 0)
             {
-                List<WowUnit> unitsInCombat = nonFriendlyUnits.Where(e => e.IsInCombat).ToList();
+                List<WowUnit> unitsInCombat = nonFriendlyUnits.OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position)).ToList();
                 target = unitsInCombat.FirstOrDefault();
 
                 if (target != null)

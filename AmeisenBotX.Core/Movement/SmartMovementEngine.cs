@@ -120,11 +120,17 @@ namespace AmeisenBotX.Core.Movement
             }
 
             Vector3 positionToGoTo = MoveAhead(targetPosition, 1);
+            bool updateForces = true;
 
             switch (State)
             {
                 case MovementEngineState.Moving:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
+                    break;
+
+                case MovementEngineState.DirectMoving:
+                    PlayerVehicle.MoveToPosition(positionToGoTo);
+                    updateForces = false;
                     break;
 
                 case MovementEngineState.Following:
@@ -156,8 +162,10 @@ namespace AmeisenBotX.Core.Movement
                     return;
             }
 
-            // move
-            PlayerVehicle.Update(forces);
+            if (updateForces)
+            {
+                PlayerVehicle.Update(forces);
+            }
 
             if (DateTime.Now - LastJumpCheck > TimeSpan.FromMilliseconds(250))
             {

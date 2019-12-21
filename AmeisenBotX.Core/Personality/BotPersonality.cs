@@ -49,15 +49,24 @@ namespace AmeisenBotX.Core.Personality
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
                 BotPersonality loadedCache = (BotPersonality)binaryFormatter.Deserialize(stream);
 
-                if (loadedCache != null)
+                try
                 {
-                    RememberedUnits = loadedCache.RememberedUnits ?? new Dictionary<ulong, double>();
-                    RememberedPlayers = loadedCache.RememberedPlayers ?? new Dictionary<ulong, double>();
-                    SocialityScore = loadedCache.SocialityScore;
-                    BraveryScore = loadedCache.BraveryScore;
+                    if (loadedCache != null)
+                    {
+                        RememberedUnits = loadedCache.RememberedUnits ?? new Dictionary<ulong, double>();
+                        RememberedPlayers = loadedCache.RememberedPlayers ?? new Dictionary<ulong, double>();
+                        SocialityScore = loadedCache.SocialityScore;
+                        BraveryScore = loadedCache.BraveryScore;
+                    }
+                    else
+                    {
+                        Clear();
+                    }
                 }
-                else
+                catch
                 {
+                    stream.Close();
+                    File.Delete(FilePath);
                     Clear();
                 }
             }
