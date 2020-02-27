@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
                 if (aoeSpellObject == null)
                 {
-                    AmeisenBotStateMachine.SetState(BotState.Idle);
+                    AmeisenBotStateMachine.SetState(AmeisenBotStateMachine.LastState);
                     return;
                 }
 

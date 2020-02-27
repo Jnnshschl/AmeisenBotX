@@ -144,31 +144,34 @@ namespace AmeisenBotX.Core.StateMachine
                 {
                     SetState(BotState.LoadingScreen);
                     MovementEngine.Reset();
+                    return;
                 }
-
-                HandleEventPull();
-
-                if (ObjectManager.Player != null)
+                else
                 {
-                    HandlePlayerDeadOrGhostState();
+                    HandleObjectUpdates();
+                    HandleEventPull();
 
-                    if (CurrentState.Key != BotState.Dead && CurrentState.Key != BotState.Ghost)
+                    if (ObjectManager.Player != null)
                     {
-                        if (Config.AutoDodgeAoeSpells
-                            && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
-                        {
-                            SetState(BotState.InsideAoeDamage);
-                        }
+                        HandlePlayerDeadOrGhostState();
 
-                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
+                        if (CurrentState.Key != BotState.Dead && CurrentState.Key != BotState.Ghost)
                         {
-                            SetState(BotState.Attacking);
+                            if (Config.AutoDodgeAoeSpells
+                                && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
+                            {
+                                SetState(BotState.InsideAoeDamage);
+                            }
+
+                            if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
+                            {
+                                SetState(BotState.Attacking);
+                            }
                         }
                     }
                 }
             }
 
-            HandleObjectUpdates();
             CharacterManager.AntiAfk();
 
             // used for ui updates

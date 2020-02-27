@@ -130,12 +130,6 @@ namespace AmeisenBotX.Core.StateMachine.States
             // set our normal maxfps
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
 
-            // clear our target after we exited the combat state
-            if (CombatClass == null || !CombatClass.HandlesTargetSelection)
-            {
-                HookManager.ClearTarget();
-            }
-
             // add nearby Units to the loot List
             if (Config.LootUnits)
             {
@@ -188,10 +182,10 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private bool IsTargetInValid()
-                            => !BotUtils.IsValidUnit(ObjectManager.Target)
+            => !BotUtils.IsValidUnit(ObjectManager.Target)
+                || ObjectManager.Target.IsDead
                 || ObjectManager.Target.Guid == ObjectManager.PlayerGuid
-                || ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) > 50
-                || HookManager.GetUnitReaction(ObjectManager.Player, ObjectManager.Target) == WowUnitReaction.Friendly;
+                || ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) > 50;
 
         private bool SelectTargetToAttack(out WowUnit target)
         {

@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
-                && IsInRange(Spells[spellName], ObjectManager.Target.Position))
+                && (ObjectManager.Target != null && IsInRange(Spells[spellName], ObjectManager.Target.Position)))
             {
                 CastSpell(spellName);
                 return true;
