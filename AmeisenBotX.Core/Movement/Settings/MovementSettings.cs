@@ -1,7 +1,4 @@
-﻿using AmeisenBotX.Pathfinding.Objects;
-using System;
-
-namespace AmeisenBotX.Core.Movement.Settings
+﻿namespace AmeisenBotX.Core.Movement.Settings
 {
     public class MovementSettings
     {
@@ -15,14 +12,14 @@ namespace AmeisenBotX.Core.Movement.Settings
             //// SeperationDistance *= rnd.NextDouble() + 1;
         }
 
-        public float MaxVelocity { get; set; } = 5f;
+        public float MaxAcceleration { get; set; } = 3f;
 
         public float MaxSteering { get; set; } = 1f;
 
-        public float MaxAcceleration { get; set; } = 3f;
-
-        public double WaypointCheckThreshold { get; set; } = 2;
+        public float MaxVelocity { get; set; } = 5f;
 
         public double SeperationDistance { get; set; } = 4;
+
+        public double WaypointCheckThreshold { get; set; } = 2;
     }
 }

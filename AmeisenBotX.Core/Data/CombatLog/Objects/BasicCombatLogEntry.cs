@@ -1,9 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Data.CombatLog.Objects
 {
@@ -16,8 +12,8 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
             CombatLogEntrySubtype = combatLogEntrySubtype;
         }
 
-        public CombatLogEntryType CombatLogEntryType { get; }
-
         public CombatLogEntrySubtype CombatLogEntrySubtype { get; }
+
+        public CombatLogEntryType CombatLogEntryType { get; }
     }
 }

@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System.Collections.Generic;
@@ -17,21 +16,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string frostPresenceSpell = "Frost Presence";
-        private readonly string icyTouchSpell = "Icy Touch";
+        private readonly string armyOfTheDeadSpell = "Army of the Dead";
+        private readonly string bloodPlagueSpell = "Blood Plague";
         private readonly string bloodStrikeSpell = "Blood Strike";
+        private readonly string deathCoilSpell = "Death Coil";
+        private readonly string frostFeverSpell = "Frost Fever";
+        private readonly string frostPresenceSpell = "Frost Presence";
+        private readonly string hornOfWinterSpell = "Horn of Winter";
+        private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
+        private readonly string icyTouchSpell = "Icy Touch";
+        private readonly string mindFreezeSpell = "Mind Freeze";
+        private readonly string obliterateSpell = "Obliterate";
         private readonly string plagueStrikeSpell = "Plague Strike";
         private readonly string runeStrikeSpell = "Rune Strike";
         private readonly string strangulateSpell = "Strangulate";
-        private readonly string mindFreezeSpell = "Mind Freeze";
-        private readonly string obliterateSpell = "Obliterate";
-        private readonly string frostFeverSpell = "Frost Fever";
-        private readonly string bloodPlagueSpell = "Blood Plague";
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string hornOfWinterSpell = "Horn of Winter";
-        private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
         private readonly string unbreakableArmorSpell = "Unbreakable Armor";
-        private readonly string armyOfTheDeadSpell = "Army of the Dead";
 
         public DeathknightFrost(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -54,18 +53,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
-        public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Displayname => "Deathknight Frost";
-
-        public override string Version => "1.0";
-
         public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Deathknight;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Frost Deathknight spec.";
 
-        public override WowClass Class => WowClass.Deathknight;
-        
+        public override string Displayname => "Deathknight Frost";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -74,7 +71,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator();
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override CombatClassRole Role => CombatClassRole.Dps;
+
+        public override string Version => "1.0";
 
         public override void Execute()
         {

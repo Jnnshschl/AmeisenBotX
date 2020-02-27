@@ -9,14 +9,18 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         /**
          * Default Constructor
          */
-        public WowBasicItem() { }
+
+        public WowBasicItem()
+        {
+        }
 
         /**
          * Copy Constructor
          */
+
         public WowBasicItem(WowBasicItem item)
         {
-            if(item != null)
+            if (item != null)
             {
                 this.BagId = item.BagId;
                 this.BagSlot = item.BagSlot;

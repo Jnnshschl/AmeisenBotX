@@ -24,6 +24,17 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         public Dictionary<string, DateTime> Cooldowns { get; }
 
+        public bool IsSpellOnCooldown(string spellname)
+        {
+            if (Cooldowns.ContainsKey(spellname.ToUpper()))
+            {
+                return Cooldowns.TryGetValue(spellname.ToUpper(), out DateTime dateTime)
+                       && dateTime > DateTime.Now;
+            }
+
+            return false;
+        }
+
         public bool SetSpellCooldown(string spellname, int cooldownLeftMs)
         {
             if (!Cooldowns.ContainsKey(spellname.ToUpper()))
@@ -36,17 +47,6 @@ namespace AmeisenBotX.Core.StateMachine.Utils
             }
 
             return true;
-        }
-
-        public bool IsSpellOnCooldown(string spellname)
-        {
-            if (Cooldowns.ContainsKey(spellname.ToUpper()))
-            {
-                return Cooldowns.TryGetValue(spellname.ToUpper(), out DateTime dateTime)
-                       && dateTime > DateTime.Now;
-            }
-
-            return false;
         }
     }
 }

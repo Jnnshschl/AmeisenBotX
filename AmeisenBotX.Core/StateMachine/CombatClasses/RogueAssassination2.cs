@@ -51,6 +51,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             spells = new RogueAssassinSpells(hookManager, objectManager);
         }
 
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Rogue;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Assasination Rogue";
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -58,6 +68,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool IsMelee => true;
 
         public IWowItemComparator ItemComparator => new AssassinationItemComparator();
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public string Version => "1.0";
 
         private CharacterManager CharacterManager { get; }
 
@@ -78,20 +92,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
-
-        public string Displayname => "Assasination Rogue";
-
-        public string Version => "1.0";
-
-        public string Author => "einTyp";
-
-        public string Description => "...";
-
-        public WowClass Class => WowClass.Rogue;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {

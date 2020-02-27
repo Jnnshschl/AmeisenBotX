@@ -1,21 +1,13 @@
 ﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
-using AmeisenBotX.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateBattleground : State
+    public class StateBattleground : BasicState
     {
         public StateBattleground(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IMovementEngine movementEngine, BattlegroundEngine battlegroundEngine) : base(stateMachine)
         {
@@ -28,23 +20,22 @@ namespace AmeisenBotX.Core.StateMachine.States
             BattlegroundEngine = battlegroundEngine;
         }
 
+        private BattlegroundEngine BattlegroundEngine { get; }
+
         private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
 
         private HookManager HookManager { get; }
 
+        private IMovementEngine MovementEngine { get; }
+
         private ObjectManager ObjectManager { get; }
 
         private IOffsetList OffsetList { get; }
 
-        private IMovementEngine MovementEngine { get; }
-
-        private BattlegroundEngine BattlegroundEngine { get; }
-
         public override void Enter()
         {
-
         }
 
         public override void Execute()
@@ -52,7 +43,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (AmeisenBotStateMachine.XMemory.Read(OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 0)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
                 return;
             }
 

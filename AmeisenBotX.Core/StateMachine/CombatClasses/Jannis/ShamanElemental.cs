@@ -1,21 +1,14 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
@@ -25,22 +18,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string flameShockSpell = "Flame Shock";
-        private readonly string lavaBurstSpell = "Lava Burst";
-        private readonly string lightningBoltSpell = "Lightning Bolt";
-        private readonly string chainLightningSpell = "Chain Lightning";
-        private readonly string windShearSpell = "Wind Shear";
-        private readonly string thunderstormSpell = "Thunderstorm";
-        private readonly string lightningShieldSpell = "Lightning Shield";
-        private readonly string waterShieldSpell = "Water Shield";
-        private readonly string flametoungueWeaponSpell = "Flametoungue Weapon";
-        private readonly string elementalMasterySpell = "Elemental Mastery";
-        private readonly string heroismSpell = "Heroism";
         private readonly string ancestralSpiritSpell = "Ancestral Spirit";
-        private readonly string hexSpell = "Hex";
-        private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
-
+        private readonly string chainLightningSpell = "Chain Lightning";
         private readonly int deadPartymembersCheckTime = 4;
+        private readonly string elementalMasterySpell = "Elemental Mastery";
+        private readonly string flameShockSpell = "Flame Shock";
+        private readonly string flametoungueWeaponSpell = "Flametoungue Weapon";
+        private readonly string heroismSpell = "Heroism";
+        private readonly string hexSpell = "Hex";
+        private readonly string lavaBurstSpell = "Lava Burst";
+        private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
+        private readonly string lightningBoltSpell = "Lightning Bolt";
+        private readonly string lightningShieldSpell = "Lightning Shield";
+        private readonly string thunderstormSpell = "Thunderstorm";
+        private readonly string waterShieldSpell = "Water Shield";
+        private readonly string windShearSpell = "Wind Shear";
 
         public ShamanElemental(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -62,6 +54,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Shaman;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
+
+        public override string Displayname => "Shaman Elemental";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -70,23 +72,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private bool HexedTarget { get; set; }
-
-        public override string Displayname => "Shaman Elemental";
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
 
-        public override string Author => "Jannis";
+        private bool HexedTarget { get; set; }
 
-        public override string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
-
-        public override WowClass Class => WowClass.Shaman;
-
-        public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void Execute()
         {

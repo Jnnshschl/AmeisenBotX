@@ -1,10 +1,6 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
-using AmeisenBotX.Core.Battleground.Objectives;
-using System;
+using AmeisenBotX.Core.Battleground.States;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Battleground.Profiles
 {
@@ -12,6 +8,6 @@ namespace AmeisenBotX.Core.Battleground.Profiles
     {
         BattlegroundType BattlegroundType { get; }
 
-        List<IBattlegroundObjective> Objectives { get; }
+        Dictionary<BattlegroundState, BasicBattlegroundState> States { get; }
     }
 }

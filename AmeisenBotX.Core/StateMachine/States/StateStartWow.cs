@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateStartWow : State
+    public class StateStartWow : BasicState
     {
         public StateStartWow(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, Process wowProcess, XMemory xMemory) : base(stateMachine)
         {
@@ -31,17 +31,17 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (WowProcess.HasExited)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
+                AmeisenBotStateMachine.SetState(BotState.None);
                 return;
             }
 
             if (Config.AutoLogin)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Login);
+                AmeisenBotStateMachine.SetState(BotState.Login);
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
         }
 

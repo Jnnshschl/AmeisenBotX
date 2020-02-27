@@ -1,17 +1,12 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
@@ -21,18 +16,18 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
+        private readonly string arcaneBarrageSpell = "Arcane Barrage";
+        private readonly string arcaneBlastSpell = "Arcane Blast";
         private readonly string arcaneIntellectSpell = "Arcane Intellect";
+        private readonly string arcaneMissilesSpell = "Arcane Missiles";
         private readonly string counterspellSpell = "Counterspell";
         private readonly string evocationSpell = "Evocation";
-        private readonly string arcaneBlastSpell = "Arcane Blast";
-        private readonly string arcaneBarrageSpell = "Arcane Barrage";
-        private readonly string arcaneMissilesSpell = "Arcane Missiles";
-        private readonly string missileBarrageSpell = "Missile Barrage";
-        private readonly string manaShieldSpell = "Mana Shield";
-        private readonly string mageArmorSpell = "Mage Armor";
-        private readonly string mirrorImageSpell = "Mirror Image";
         private readonly string iceBlockSpell = "Ice Block";
         private readonly string icyVeinsSpell = "Icy Veins";
+        private readonly string mageArmorSpell = "Mage Armor";
+        private readonly string manaShieldSpell = "Mana Shield";
+        private readonly string mirrorImageSpell = "Mirror Image";
+        private readonly string missileBarrageSpell = "Missile Barrage";
         private readonly string spellStealSpell = "Spellsteal";
 
         public MageArcane(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
@@ -43,7 +38,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     {
                         HookManager.TargetGuid(ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(arcaneIntellectSpell, true);
-                    } 
+                    }
                 },
                 { mageArmorSpell, () => CastSpellIfPossible(mageArmorSpell, true) },
                 { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
@@ -57,6 +52,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Mage;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Arcane Mage spec.";
+
+        public override string Displayname => "Mage Arcane";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -67,19 +72,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public DateTime LastSpellstealCheck { get; private set; }
 
-        public override string Displayname => "Mage Arcane";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Arcane Mage spec.";
-
-        public override WowClass Class => WowClass.Mage;
-
         public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override string Version => "1.0";
 
         public override void Execute()
         {

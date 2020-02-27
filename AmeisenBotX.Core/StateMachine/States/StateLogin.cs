@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateLogin : State
+    public class StateLogin : BasicState
     {
         public StateLogin(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, CharacterManager characterManager) : base(stateMachine)
         {
@@ -43,13 +43,13 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
                 else
                 {
-                    AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                    AmeisenBotStateMachine.SetState(BotState.Idle);
                 }
             }
             else
             {
                 AmeisenBotStateMachine.XMemory.Process.Kill();
-                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
+                AmeisenBotStateMachine.SetState(BotState.None);
             }
         }
 

@@ -1,16 +1,11 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,18 +17,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string chainHealSpell = "Chain Heal";
-        private readonly string healingWaveSpell = "Healing Wave";
-        private readonly string riptideSpell = "Riptide";
-        private readonly string earthShieldSpell = "Earth Shield";
-        private readonly string waterShieldSpell = "Water Shield";
-        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
-        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
-        private readonly string tidalForceSpell = "Tidal Force";
         private readonly string ancestralSpiritSpell = "Ancestral Spirit";
-
         private readonly int buffCheckTime = 8;
+        private readonly string chainHealSpell = "Chain Heal";
         private readonly int deadPartymembersCheckTime = 4;
+        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
+        private readonly string earthShieldSpell = "Earth Shield";
+        private readonly string healingWaveSpell = "Healing Wave";
+        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
+        private readonly string riptideSpell = "Riptide";
+        private readonly string tidalForceSpell = "Tidal Force";
+        private readonly string waterShieldSpell = "Water Shield";
 
         public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -49,6 +43,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Shaman;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
+
+        public override string Displayname => "Shaman Restoration";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => true;
@@ -57,25 +61,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
 
+        public override CombatClassRole Role => CombatClassRole.Heal;
+
+        public override string Version => "1.0";
+
         private DateTime LastBuffCheck { get; set; }
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
-
-        public override string Displayname => "Shaman Restoration";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
-
-        public override WowClass Class => WowClass.Shaman;
-
-        public override CombatClassRole Role => CombatClassRole.Heal;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override void Execute()
         {

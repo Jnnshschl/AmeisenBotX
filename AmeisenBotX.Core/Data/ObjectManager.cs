@@ -35,7 +35,11 @@ namespace AmeisenBotX.Core.Data
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
 
+        public HookManager HookManager { get; internal set; }
+
         public bool IsWorldLoaded { get; private set; }
+
+        public WowUnit LastTarget { get; private set; }
 
         public ulong LastTargetGuid { get; private set; }
 
@@ -45,23 +49,22 @@ namespace AmeisenBotX.Core.Data
 
         public List<ulong> PartymemberGuids { get; private set; }
 
+        public List<WowObject> Partymembers
+            => WowObjects.Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
+
+        public WowUnit Pet { get; private set; }
+
         public ulong PetGuid { get; private set; }
 
         public WowPlayer Player { get; private set; }
-
-        public WowUnit Target { get; private set; }
-
-        public WowUnit LastTarget { get; private set; }
-
-        public WowUnit Pet { get; private set; }
 
         public IntPtr PlayerBase { get; private set; }
 
         public ulong PlayerGuid { get; private set; }
 
-        public ulong TargetGuid { get; private set; }
+        public WowUnit Target { get; private set; }
 
-        public HookManager HookManager { get; internal set; }
+        public ulong TargetGuid { get; private set; }
 
         public List<WowObject> WowObjects
         {
@@ -82,9 +85,6 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public List<WowObject> Partymembers
-            => WowObjects.Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
-
         public int ZoneId { get; private set; }
 
         private IAmeisenBotCache BotCache { get; }
@@ -93,11 +93,30 @@ namespace AmeisenBotX.Core.Data
 
         private XMemory XMemory { get; }
 
+        public IEnumerable<WowPlayer> GetNearEnemies(Vector3 position, double distance)
+            => WowObjects.OfType<WowPlayer>()
+                .Where(e => e.Guid != PlayerGuid
+                && !e.IsDead
+                && !e.IsNotAttackable
+                && HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                && e.Position.GetDistance(position) < distance);
+
+        public IEnumerable<WowPlayer> GetNearFriends(Vector3 position, int distance)
+            => WowObjects.OfType<WowPlayer>()
+                .Where(e => e.Guid != PlayerGuid
+                && !e.IsDead
+                && !e.IsNotAttackable
+                && HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
+                && e.Position.GetDistance(position) < distance);
+
         public WowObject GetWowObjectByGuid(ulong guid)
-            => WowObjects.FirstOrDefault(e => e.Guid == guid);
+                            => WowObjects.FirstOrDefault(e => e.Guid == guid);
 
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
             => WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
+
+        public WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+            => WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Name.Equals(playername.ToUpper(), stringComparison));
 
         public ulong ReadPartyLeaderGuid()
         {
@@ -170,14 +189,6 @@ namespace AmeisenBotX.Core.Data
 
             return null;
         }
-
-        public IEnumerable<WowPlayer> GetNearEnemies(double distance)
-            => WowObjects.OfType<WowPlayer>()
-                .Where(e => e.Guid != PlayerGuid
-                && !e.IsDead
-                && !e.IsNotAttackable
-                && HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                && e.Position.GetDistance(Player.Position) < distance);
 
         public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Player)
         {

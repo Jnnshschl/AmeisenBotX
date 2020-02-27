@@ -1,14 +1,11 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +18,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         // author: Jannis Höschele
 
         private readonly string bindingHealSpell = "Binding Heal";
+        private readonly int buffCheckTime = 8;
+        private readonly int deadPartymembersCheckTime = 4;
         private readonly string flashHealSpell = "Flash Heal";
         private readonly string greaterHealSpell = "Greater Heal";
         private readonly string guardianSpiritSpell = "Guardian Spirit";
@@ -31,9 +30,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string prayerOfMendingSpell = "Prayer of Mending";
         private readonly string renewSpell = "Renew";
         private readonly string resurrectionSpell = "Resurrection";
-
-        private readonly int buffCheckTime = 8;
-        private readonly int deadPartymembersCheckTime = 4;
 
         public PriestHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -55,6 +51,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Priest;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Holy Priest spec.";
+
+        public override string Displayname => "Priest Holy";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => true;
@@ -62,24 +68,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override bool IsMelee => false;
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
-        
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
-
-        public override string Displayname => "Priest Holy";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Holy Priest spec.";
-
-        public override WowClass Class => WowClass.Priest;
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override string Version => "1.0";
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void Execute()
         {

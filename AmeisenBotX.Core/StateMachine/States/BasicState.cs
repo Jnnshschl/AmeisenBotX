@@ -1,8 +1,8 @@
 ﻿namespace AmeisenBotX.Core.StateMachine.States
 {
-    public abstract class State
+    public abstract class BasicState
     {
-        public State(AmeisenBotStateMachine stateMachine)
+        public BasicState(AmeisenBotStateMachine stateMachine)
         {
             AmeisenBotStateMachine = stateMachine;
         }

@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Character
+﻿namespace AmeisenBotX.Core.Character.Enums
 {
     public enum ClickToMoveType : int
     {

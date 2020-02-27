@@ -21,6 +21,7 @@ namespace AmeisenBotX.Core.Character.Spells
         }
 
         public delegate void SpellBookUpdate();
+
         public event SpellBookUpdate OnSpellBookUpdate;
 
         public List<Spell> Spells { get; private set; }

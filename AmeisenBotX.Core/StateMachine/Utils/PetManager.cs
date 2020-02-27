@@ -14,21 +14,23 @@ namespace AmeisenBotX.Core.StateMachine.Utils
             CastRevivePet = castRevivePetFunction;
         }
 
-        public delegate bool CastMendPetFunction();
         public delegate bool CastCallPetFunction();
+
+        public delegate bool CastMendPetFunction();
+
         public delegate bool CastRevivePetFunction();
 
-        public CastMendPetFunction CastMendPet { get; set; }
-
         public CastCallPetFunction CastCallPet { get; set; }
+
+        public CastMendPetFunction CastMendPet { get; set; }
 
         public CastRevivePetFunction CastRevivePet { get; set; }
 
         public TimeSpan HealPetCooldown { get; set; }
 
-        public WowUnit Pet { get; set; }
-
         public DateTime LastMendPetUsed { get; private set; }
+
+        public WowUnit Pet { get; set; }
 
         public bool Tick()
         {

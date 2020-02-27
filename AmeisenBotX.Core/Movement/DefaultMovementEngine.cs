@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Pathfinding.Objects;
@@ -25,15 +24,15 @@ namespace AmeisenBotX.Core.Movement
             Reset();
         }
 
+        public Vector3 Acceleration { get; private set; }
+
         public Queue<Vector3> CurrentPath { get; private set; }
 
         public Vector3 LastPosition { get; private set; }
 
-        public Vector3 Acceleration { get; private set; }
+        public MovementSettings Settings { get; private set; }
 
         public Vector3 Velocity { get; private set; }
-
-        public MovementSettings Settings { get; private set; }
 
         private ObjectManager ObjectManager { get; }
 
@@ -79,9 +78,54 @@ namespace AmeisenBotX.Core.Movement
             }
 
             double distanceTraveled = currentPosition.GetDistance2D(LastPosition);
-            needToJump =  LastPosition != new Vector3(0, 0, 0) && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
+            needToJump = LastPosition != new Vector3(0, 0, 0) && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
             LastPosition = currentPosition;
             return true;
+        }
+
+        public void LoadPath(List<Vector3> path)
+        {
+            CurrentPath = new Queue<Vector3>();
+            foreach (Vector3 v in path)
+            {
+                CurrentPath.Enqueue(v);
+            }
+        }
+
+        public void PostProcessPath()
+        {
+            // wont do anything here
+        }
+
+        public void Reset()
+        {
+            if (CurrentPath == null)
+            {
+                CurrentPath = new Queue<Vector3>();
+            }
+
+            Acceleration = new Vector3(0, 0, 0);
+            CurrentPath.Clear();
+        }
+
+        private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)
+        {
+            double x = currentPosition.X + Math.Cos(currentRotation + Math.PI);
+            double y = currentPosition.Y + Math.Sin(currentRotation + Math.PI);
+
+            Vector3 destination = new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = currentPosition.Z
+            };
+
+            return destination;
+        }
+
+        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
+        {
+            return false;
         }
 
         private Vector3 Seek(Vector3 currentPosition, double distance)
@@ -154,51 +198,6 @@ namespace AmeisenBotX.Core.Movement
             }
 
             return force;
-        }
-
-        public void LoadPath(List<Vector3> path)
-        {
-            CurrentPath = new Queue<Vector3>();
-            foreach (Vector3 v in path)
-            {
-                CurrentPath.Enqueue(v);
-            }
-        }
-
-        public void PostProcessPath()
-        {
-            // wont do anything here
-        }
-
-        public void Reset()
-        {
-            if (CurrentPath == null)
-            {
-                CurrentPath = new Queue<Vector3>();
-            }
-
-            Acceleration = new Vector3(0, 0, 0);
-            CurrentPath.Clear();
-        }
-
-        private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)
-        {
-            double x = currentPosition.X + Math.Cos(currentRotation + Math.PI);
-            double y = currentPosition.Y + Math.Sin(currentRotation + Math.PI);
-
-            Vector3 destination = new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = currentPosition.Z
-            };
-
-            return destination;
-        }
-
-        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
-        {
-            return false;
         }
     }
 }

@@ -9,13 +9,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public IntPtr DescriptorAddress { get; set; }
 
-        public ulong Guid { get; set; }
-
         public int EntryId { get; set; }
 
-        public float Scale { get; set; }
+        public ulong Guid { get; set; }
 
         public Vector3 Position { get; set; }
+
+        public float Scale { get; set; }
 
         public WowObjectType Type { get; set; }
     }

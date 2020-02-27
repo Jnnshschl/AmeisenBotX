@@ -16,13 +16,13 @@ namespace AmeisenBotX.Core.Data.Persistence
             Clear();
         }
 
+        public List<BasicCombatLogEntry> CombatLogEntries { get; private set; }
+
         public string FilePath { get; }
 
         public Dictionary<ulong, string> NameCache { get; private set; }
 
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
-
-        public List<BasicCombatLogEntry> CombatLogEntries { get; private set; }
 
         public void CacheName(ulong guid, string name)
         {

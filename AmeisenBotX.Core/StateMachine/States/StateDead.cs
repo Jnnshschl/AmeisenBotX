@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Hook;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateDead : State
+    public class StateDead : BasicState
     {
         public StateDead(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookManager) : base(stateMachine)
         {
@@ -30,11 +30,11 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else if (HookManager.IsGhost("player"))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Ghost);
+                AmeisenBotStateMachine.SetState(BotState.Ghost);
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
         }
 

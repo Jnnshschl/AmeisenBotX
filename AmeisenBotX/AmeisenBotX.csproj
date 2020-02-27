@@ -143,6 +143,10 @@
       <Project>{6f95990d-d5d9-4242-9992-deefbf8d3e60}</Project>
       <Name>AmeisenBotX.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
+      <Project>{AFE27893-225B-4F90-9CFD-87DB2EE0D7DF}</Project>
+      <Name>AmeisenBotX.Logging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmeisenBotX.Pathfinding\AmeisenBotX.Pathfinding.csproj">
       <Project>{BA329AA1-E3DA-42A1-87B4-3A695919767F}</Project>
       <Name>AmeisenBotX.Pathfinding</Name>

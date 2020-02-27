@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -42,35 +43,13 @@ namespace AmeisenBotX.Core.Character
 
         public CharacterInventory Inventory { get; }
 
-        public void InteractWithUnit(WowUnit unit, float turnSpeed = 20.9f, float distance = 3f)
-        {
-            XMemory.Write(OffsetList.ClickToMoveX, unit.Position.X);
-            XMemory.Write(OffsetList.ClickToMoveY, unit.Position.Y);
-            XMemory.Write(OffsetList.ClickToMoveZ, unit.Position.Z);
-            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            XMemory.Write(OffsetList.ClickToMoveDistance, distance);
-            XMemory.Write(OffsetList.ClickToMoveGuid, unit.Guid);
-            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Interact);
-        }
-
-        public void InteractWithObject(WowObject obj, float turnSpeed = 20.9f, float distance = 3f)
-        {
-            XMemory.Write(OffsetList.ClickToMoveX, obj.Position.X);
-            XMemory.Write(OffsetList.ClickToMoveY, obj.Position.Y);
-            XMemory.Write(OffsetList.ClickToMoveZ, obj.Position.Z);
-            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            XMemory.Write(OffsetList.ClickToMoveDistance, distance);
-            XMemory.Write(OffsetList.ClickToMoveGuid, obj.Guid);
-            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.InteractObject);
-        }
+        public IWowItemComparator ItemComparator { get; set; }
 
         public int Money { get; private set; }
 
         public List<string> Skills { get; private set; }
 
         public SpellBook SpellBook { get; }
-
-        public IWowItemComparator ItemComparator { get; set; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -85,6 +64,17 @@ namespace AmeisenBotX.Core.Character
         private XMemory XMemory { get; }
 
         public void AntiAfk() => XMemory.Write(OffsetList.TickCount, Environment.TickCount);
+
+        public void Face(Vector3 position, ulong guid)
+        {
+            XMemory.Write(OffsetList.ClickToMoveX, position.X);
+            XMemory.Write(OffsetList.ClickToMoveY, position.Y);
+            XMemory.Write(OffsetList.ClickToMoveZ, position.Z);
+            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 20.9f);
+            XMemory.Write(OffsetList.ClickToMoveDistance, 0.1f);
+            XMemory.Write(OffsetList.ClickToMoveGuid, guid);
+            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
+        }
 
         public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
         {
@@ -110,6 +100,28 @@ namespace AmeisenBotX.Core.Character
             {
                 KeyMap.Add(key, false);
             }
+        }
+
+        public void InteractWithObject(WowObject obj, float turnSpeed = 20.9f, float distance = 3f)
+        {
+            XMemory.Write(OffsetList.ClickToMoveX, obj.Position.X);
+            XMemory.Write(OffsetList.ClickToMoveY, obj.Position.Y);
+            XMemory.Write(OffsetList.ClickToMoveZ, obj.Position.Z);
+            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+            XMemory.Write(OffsetList.ClickToMoveDistance, distance);
+            XMemory.Write(OffsetList.ClickToMoveGuid, obj.Guid);
+            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.InteractObject);
+        }
+
+        public void InteractWithUnit(WowUnit unit, float turnSpeed = 20.9f, float distance = 3f)
+        {
+            XMemory.Write(OffsetList.ClickToMoveX, unit.Position.X);
+            XMemory.Write(OffsetList.ClickToMoveY, unit.Position.Y);
+            XMemory.Write(OffsetList.ClickToMoveZ, unit.Position.Z);
+            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+            XMemory.Write(OffsetList.ClickToMoveDistance, distance);
+            XMemory.Write(OffsetList.ClickToMoveGuid, unit.Guid);
+            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Interact);
         }
 
         public bool IsAbleToUseArmor(WowArmor item)
@@ -153,17 +165,6 @@ namespace AmeisenBotX.Core.Character
                 WeaponType.MISCELLANEOUS => true,
                 _ => false,
             };
-        }
-
-        public void Face(Vector3 position, ulong guid)
-        {
-            XMemory.Write(OffsetList.ClickToMoveX, position.X);
-            XMemory.Write(OffsetList.ClickToMoveY, position.Y);
-            XMemory.Write(OffsetList.ClickToMoveZ, position.Z);
-            XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 20.9f);
-            XMemory.Write(OffsetList.ClickToMoveDistance, 0.1f);
-            XMemory.Write(OffsetList.ClickToMoveGuid, guid);
-            XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
         }
 
         public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)

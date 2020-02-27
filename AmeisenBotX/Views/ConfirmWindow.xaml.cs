@@ -38,9 +38,6 @@ namespace AmeisenBotX.Views
             Close();
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-            => DragMove();
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Point pointToWindow = Mouse.GetPosition(this);
@@ -51,5 +48,8 @@ namespace AmeisenBotX.Views
             Left = mouse.X - (Width / 2);
             Top = mouse.Y - (Height / 2);
         }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+                    => DragMove();
     }
 }

@@ -1,6 +1,4 @@
 ﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement;
@@ -13,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateInsideAoeDamage : State
+    public class StateInsideAoeDamage : BasicState
     {
         public StateInsideAoeDamage(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
         {
@@ -28,19 +26,18 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private AmeisenBotConfig Config { get; }
 
+        private List<int> FriendlySpells { get; } = new List<int>() {
+            0
+        };
+
         private IMovementEngine MovementEngine { get; }
 
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; }
 
-        private List<int> FriendlySpells { get; } = new List<int> () { 
-            0
-        };
-
         public override void Enter()
         {
-
         }
 
         public override void Execute()
@@ -54,7 +51,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
                 if (aoeSpellObject == null)
                 {
-                    AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                    AmeisenBotStateMachine.SetState(BotState.Idle);
                     return;
                 }
 
@@ -67,7 +64,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
 
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)

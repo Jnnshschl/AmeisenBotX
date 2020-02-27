@@ -56,15 +56,23 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Battleground\BattlegroundEngine.cs" />
     <Compile Include="Battleground\Enums\BattlegroundType.cs" />
-    <Compile Include="Battleground\Objectives\AttackEnemyPlayers.cs" />
-    <Compile Include="Battleground\Objectives\CaptureFlagObjective.cs" />
-    <Compile Include="Battleground\Objectives\CarryFlagToBaseObjective.cs" />
-    <Compile Include="Battleground\Objectives\IBattlegroundObjective.cs" />
-    <Compile Include="Battleground\Objectives\RetrieveOwnFlagObjective.cs" />
     <Compile Include="Battleground\Profiles\IBattlegroundProfile.cs" />
+    <Compile Include="Battleground\Profiles\ICtfBattlegroundProfile.cs" />
     <Compile Include="Battleground\Profiles\WarsongGulchProfile.cs" />
+    <Compile Include="Battleground\States\AssistOwnFlagCarrierBgState.cs" />
+    <Compile Include="Battleground\States\BattlegroundState.cs" />
+    <Compile Include="Battleground\States\BasicBattlegroundState.cs" />
+    <Compile Include="Battleground\States\DefendMyselfBgState.cs" />
+    <Compile Include="Battleground\States\ExitBattlegroundBgState.cs" />
+    <Compile Include="Battleground\States\MoveToEnemyBaseBgState.cs" />
+    <Compile Include="Battleground\States\MoveToEnemyFlagCarrierBgState.cs" />
+    <Compile Include="Battleground\States\MoveToOwnBaseBgState.cs" />
+    <Compile Include="Battleground\States\PickupBuffBgState.cs" />
+    <Compile Include="Battleground\States\PickupEnemyFlagBgState.cs" />
+    <Compile Include="Battleground\States\PickupOwnFlagBgState.cs" />
+    <Compile Include="Battleground\States\WaitingForStartBgState.cs" />
     <Compile Include="Character\CharacterManager.cs" />
-    <Compile Include="Character\ClickToMoveType.cs" />
+    <Compile Include="Character\Enums\ClickToMoveType.cs" />
     <Compile Include="Character\Comparators\AssassinationItemComparator.cs" />
     <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
     <Compile Include="Character\Comparators\BasicIntellectComparator.cs" />
@@ -139,9 +147,18 @@
     <Compile Include="Data\Objects\WowObject\WowUnitFlags.cs" />
     <Compile Include="Data\Persistence\InMemoryBotCache.cs" />
     <Compile Include="Data\Persistence\IAmeisenBotCache.cs" />
+    <Compile Include="Dungeon\DungeonEngine.cs" />
+    <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Event\EventHookManager.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
     <Compile Include="Hook\HookManager.cs" />
+    <Compile Include="Jobs\Enums\JobEngineStatus.cs" />
+    <Compile Include="Jobs\Enums\JobType.cs" />
+    <Compile Include="Jobs\JobEngine.cs" />
+    <Compile Include="Jobs\Profiles\Crafting\ICraftingProfile.cs" />
+    <Compile Include="Jobs\Profiles\Gathering\IGatheringProfile.cs" />
+    <Compile Include="Jobs\Profiles\Grinding\IGrindingProfile.cs" />
+    <Compile Include="Jobs\Profiles\IJobProfile.cs" />
     <Compile Include="LoginHandler\DefaultLoginHandler.cs" />
     <Compile Include="LoginHandler\ILoginHandler.cs" />
     <Compile Include="Movement\DefaultMovementEngine.cs" />
@@ -157,6 +174,8 @@
     <Compile Include="Personality\Enums\UnitRelationship.cs" />
     <Compile Include="Personality\Enums\Scale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Raid\RaidEngine.cs" />
+    <Compile Include="Raid\Profiles\IRaidProfile.cs" />
     <Compile Include="StateMachine\AmeisenBotStateMachine.cs" />
     <Compile Include="StateMachine\CombatClasses\DeathknightBlood.cs" />
     <Compile Include="StateMachine\CombatClasses\Jannis\BasicCombatClass.cs" />
@@ -180,6 +199,7 @@
     <Compile Include="StateMachine\CombatClasses\Jannis\PriestShadow.cs" />
     <Compile Include="StateMachine\CombatClasses\Jannis\RogueAssassination.cs" />
     <Compile Include="StateMachine\Enums\CombatClassRole.cs" />
+    <Compile Include="StateMachine\States\StateJob.cs" />
     <Compile Include="StateMachine\Utils\AuraManager.cs" />
     <Compile Include="StateMachine\Utils\CooldownManager.cs" />
     <Compile Include="StateMachine\CombatClasses\Jannis\WarlockDestruction.cs" />
@@ -187,8 +207,8 @@
     <Compile Include="StateMachine\CombatClasses\Jannis\WarlockAffliction.cs" />
     <Compile Include="StateMachine\CombatClasses\WarriorArms.cs" />
     <Compile Include="StateMachine\CombatClasses\RogueAssassination2.cs" />
-    <Compile Include="StateMachine\States\AmeisenBotState.cs" />
-    <Compile Include="StateMachine\States\State.cs" />
+    <Compile Include="StateMachine\States\BotState.cs" />
+    <Compile Include="StateMachine\States\BasicState.cs" />
     <Compile Include="StateMachine\States\StateAttacking.cs" />
     <Compile Include="StateMachine\States\StateDead.cs" />
     <Compile Include="StateMachine\States\StateFollowing.cs" />
@@ -225,6 +245,15 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Dungeon\Profiles\Classic\" />
+    <Folder Include="Dungeon\Profiles\TBC\" />
+    <Folder Include="Dungeon\Profiles\WotLK\" />
+    <Folder Include="Jobs\Profiles\Gathering\Herbs\" />
+    <Folder Include="Jobs\Profiles\Gathering\Mining\" />
+    <Folder Include="Raid\Profiles\Classic\" />
+    <Folder Include="Raid\Profiles\TBC\" />
+    <Folder Include="Raid\Profiles\WotLK\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

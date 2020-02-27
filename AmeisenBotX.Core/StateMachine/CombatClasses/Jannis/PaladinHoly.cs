@@ -1,19 +1,13 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
-using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
@@ -30,7 +24,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string holyLightSpell = "Holy Light";
         private readonly string holyShockSpell = "Holy Shock";
         private readonly string layOnHandsSpell = "Lay on Hands";
-        
+
         public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -52,6 +46,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Paladin;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Holy Paladin spec.";
+
+        public override string Displayname => "Paladin Holy";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => true;
@@ -60,21 +64,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
 
-        private Dictionary<int, string> SpellUsageHealDict { get; }
-
-        public override string Displayname => "Paladin Holy";
+        public override CombatClassRole Role => CombatClassRole.Heal;
 
         public override string Version => "1.0";
 
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Holy Paladin spec.";
-
-        public override WowClass Class => WowClass.Paladin;
-
-        public override CombatClassRole Role => CombatClassRole.Heal;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void Execute()
         {

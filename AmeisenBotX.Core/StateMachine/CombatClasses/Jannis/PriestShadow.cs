@@ -1,19 +1,14 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
@@ -22,20 +17,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
+        private readonly int deadPartymembersCheckTime = 4;
+        private readonly string devouringPlagueSpell = "Devouring Plague";
         private readonly string flashHealSpell = "Flash Heal";
         private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string shadowformSpell = "Shadowform";
-        private readonly string shadowfiendSpell = "Shadowfiend";
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string resurrectionSpell = "Resurrection";
-        private readonly string vampiricTouchSpell = "Vampiric Touch";
-        private readonly string devouringPlagueSpell = "Devouring Plague";
-        private readonly string shadowWordPainSpell = "Shadow Word: Pain";
         private readonly string mindBlastSpell = "Mind Blast";
         private readonly string mindFlaySpell = "Mind Flay";
+        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
+        private readonly string resurrectionSpell = "Resurrection";
+        private readonly string shadowfiendSpell = "Shadowfiend";
+        private readonly string shadowformSpell = "Shadowform";
+        private readonly string shadowWordPainSpell = "Shadow Word: Pain";
         private readonly string vampiricEmbraceSpell = "Vampiric Embrace";
-
-        private readonly int deadPartymembersCheckTime = 4;
+        private readonly string vampiricTouchSpell = "Vampiric Touch";
 
         public PriestShadow(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -46,7 +40,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     {
                         HookManager.TargetGuid(ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(powerWordFortitudeSpell, true);
-                    } 
+                    }
                 },
                 { vampiricEmbraceSpell, () => CastSpellIfPossible(vampiricEmbraceSpell, true) }
             };
@@ -60,6 +54,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Priest;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
+
+        public override string Displayname => "Priest Shadow";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -68,21 +72,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        public override string Displayname => "Priest Shadow";
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
 
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
-
-        public override WowClass Class => WowClass.Priest;
-
-        public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void Execute()
         {

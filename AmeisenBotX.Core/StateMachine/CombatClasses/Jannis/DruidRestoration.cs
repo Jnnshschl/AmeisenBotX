@@ -1,19 +1,14 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
@@ -22,21 +17,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string rejuvenationSpell = "Rejuvenation";
-        private readonly string lifebloomSpell = "Lifebloom";
-        private readonly string wildGrowthSpell = "Wild Growth";
-        private readonly string regrowthSpell = "Regrowth";
-        private readonly string healingTouchSpell = "Healing Touch";
-        private readonly string nourishSpell = "Nourish";
-        private readonly string treeOfLifeSpell = "Tree of Life";
-        private readonly string markOfTheWildSpell = "Mark of the Wild";
-        private readonly string reviveSpell = "Revive";
-        private readonly string tranquilitySpell = "Tranquility";
-        private readonly string innervateSpell = "Innervate";
-        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
-        private readonly string swiftmendSpell = "Swiftmend";
-
         private readonly int deadPartymembersCheckTime = 4;
+        private readonly string healingTouchSpell = "Healing Touch";
+        private readonly string innervateSpell = "Innervate";
+        private readonly string lifebloomSpell = "Lifebloom";
+        private readonly string markOfTheWildSpell = "Mark of the Wild";
+        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
+        private readonly string nourishSpell = "Nourish";
+        private readonly string regrowthSpell = "Regrowth";
+        private readonly string rejuvenationSpell = "Rejuvenation";
+        private readonly string reviveSpell = "Revive";
+        private readonly string swiftmendSpell = "Swiftmend";
+        private readonly string tranquilitySpell = "Tranquility";
+        private readonly string treeOfLifeSpell = "Tree of Life";
+        private readonly string wildGrowthSpell = "Wild Growth";
 
         public DruidRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -46,7 +40,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 { markOfTheWildSpell, () =>
                     {
                         HookManager.TargetGuid(ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(markOfTheWildSpell, true); 
+                        return CastSpellIfPossible(markOfTheWildSpell, true);
                     }
                 }
             };
@@ -59,6 +53,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Druid;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
+
+        public override string Displayname => "Druid Restoration";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => true;
@@ -67,23 +71,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
-
-        public override string Displayname => "Druid Restoration";
+        public override CombatClassRole Role => CombatClassRole.Heal;
 
         public override string Version => "1.0";
 
-        public override string Author => "Jannis";
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
-        public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
-
-        public override WowClass Class => WowClass.Druid;
-
-        public override CombatClassRole Role => CombatClassRole.Heal;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void Execute()
         {

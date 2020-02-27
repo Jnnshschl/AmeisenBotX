@@ -1,13 +1,11 @@
-﻿using AmeisenBotX.Core.Battleground.Objectives;
-using AmeisenBotX.Core.Battleground.Profiles;
+﻿using AmeisenBotX.Core.Battleground.Profiles;
+using AmeisenBotX.Core.Battleground.States;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Battleground
 {
@@ -18,52 +16,68 @@ namespace AmeisenBotX.Core.Battleground
             HookManager = hookManager;
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
-
-            ForceCombat = false;
-            CurrentObjectiveName = "None";
         }
 
-        public string CurrentObjectiveName { get; private set; }
+        public IBattlegroundProfile BattlegroundProfile { get; private set; }
 
-        public bool ForceCombat { get; set; }
+        public KeyValuePair<BattlegroundState, BasicBattlegroundState> CurrentState { get; private set; }
 
-        private IBattlegroundProfile BattlegroundProfile { get; set; }
-
-        private ObjectManager ObjectManager { get; set; }
+        public BattlegroundState LastState { get; private set; }
 
         private HookManager HookManager { get; set; }
 
         private IMovementEngine MovementEngine { get; set; }
 
-        private IBattlegroundObjective LastObjective { get; set; }
+        private ObjectManager ObjectManager { get; set; }
+
+        public void AllianceFlagWasDropped(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped(playername);
+            }
+        }
+
+        public void AllianceFlagWasPickedUp(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasPickedUp(playername);
+            }
+        }
 
         public void Execute()
         {
             if (BattlegroundProfile == null)
             {
                 TryLoadProfile(ObjectManager.MapId);
+                CurrentState = BattlegroundProfile.States.First();
             }
-
-            if (BattlegroundProfile != null)
+            else
             {
-                foreach (IBattlegroundObjective objective in BattlegroundProfile.Objectives.OrderByDescending(e => e.Priority))
-                {
-                    if (!objective.IsAvailable)
-                    {
-                        continue;
-                    }
-
-                    if(CurrentObjectiveName != objective.GetType().Name)
-                    {
-                        LastObjective?.Exit();
-                        objective.Enter();
-                    }
-
-                    objective.Execute();
-                    CurrentObjectiveName = objective.GetType().Name;
-                    return;
-                }
+                CurrentState.Value.Execute();
             }
+        }
+
+        public void HordeFlagWasDropped(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped(playername);
+            }
+        }
+
+        public void HordeFlagWasPickedUp(string playername)
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasPickedUp(playername);
+            }
+        }
+
+        public void Reset()
+        {
+            BattlegroundProfile = null;
         }
 
         public bool TryLoadProfile(int mapId)
@@ -75,7 +89,7 @@ namespace AmeisenBotX.Core.Battleground
                     return false;
 
                 case 489:
-                    BattlegroundProfile = new WarsongGulchProfile(ObjectManager.Player.IsAlliance(), HookManager, ObjectManager, MovementEngine, ForceCombat);
+                    BattlegroundProfile = new WarsongGulchProfile(ObjectManager.Player.IsAlliance(), HookManager, ObjectManager, MovementEngine, this);
                     return true;
 
                 case 529:
@@ -95,36 +109,27 @@ namespace AmeisenBotX.Core.Battleground
             }
         }
 
-        public void AllianceFlagWasPickedUp(string playername)
+        internal IEnumerable<WowGameobject> GetBattlegroundFlags()
         {
-            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
-            {
-                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasPickedUp(playername);
-            }
+            IEnumerable<WowGameobject> flagObjects = ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => e.GameobjectType == WowGameobjectType.Flagdrop || e.GameobjectType == WowGameobjectType.Flagstand);
+
+            return flagObjects;
         }
 
-        public void HordeFlagWasPickedUp(string playername)
+        internal void SetState(BattlegroundState state)
         {
-            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            if (BattlegroundProfile == null || CurrentState.Key == state)
             {
-                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasPickedUp(playername);
+                // we are already in this state
+                return;
             }
-        }
 
-        public void AllianceFlagWasDropped(string playername)
-        {
-            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
-            {
-                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped(playername);
-            }
-        }
-
-        public void HordeFlagWasDropped(string playername)
-        {
-            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
-            {
-                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped(playername);
-            }
+            LastState = CurrentState.Key;
+            CurrentState.Value.Exit();
+            CurrentState = BattlegroundProfile.States.First(s => s.Key == state);
+            CurrentState.Value.Enter();
         }
     }
 }

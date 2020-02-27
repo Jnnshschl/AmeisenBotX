@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.StateMachine.States
 {
-    public enum AmeisenBotState
+    public enum BotState
     {
         None,
         StartWow,

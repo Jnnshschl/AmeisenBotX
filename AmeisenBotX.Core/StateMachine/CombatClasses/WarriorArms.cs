@@ -19,15 +19,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
     {
         private readonly WarriorArmSpells spells;
 
-        private bool multipleTargets = false;
-
         private bool computeNewRoute = false;
-
         private double distanceToTarget = 0;
-
         private double distanceTraveled = 0;
-
         private bool hasTargetMoved = false;
+        private bool multipleTargets = false;
 
         public WarriorArms(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
@@ -39,6 +35,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             spells = new WarriorArmSpells(hookManager, objectManager);
         }
 
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Warrior;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Arms Warrior";
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -46,6 +52,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool IsMelee => true;
 
         public IWowItemComparator ItemComparator => new ArmsAxeItemComparator();
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public string Version => "1.0";
 
         private CharacterManager CharacterManager { get; }
 
@@ -62,20 +72,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
-
-        public string Displayname => "Arms Warrior";
-
-        public string Version => "1.0";
-
-        public string Author => "einTyp";
-
-        public string Description => "...";
-
-        public WowClass Class => WowClass.Warrior;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -292,6 +288,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private static readonly string ShatteringThrow = "Shattering Throw";
             private static readonly string Slam = "Slam";
             private static readonly string Whirlwind = "Whirlwind";
+
             private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
             {
                 { BattleShout, DateTime.Now },

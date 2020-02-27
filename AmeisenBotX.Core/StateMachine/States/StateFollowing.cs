@@ -1,19 +1,15 @@
 ﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    internal class StateFollowing : State
+    internal class StateFollowing : BasicState
     {
         public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
         {
@@ -68,7 +64,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             if (PlayerToFollow == null)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
         }
 
@@ -78,7 +74,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
 
             if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
@@ -92,7 +88,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)

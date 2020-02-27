@@ -4,8 +4,6 @@ using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Movement.Objects
 {
@@ -24,13 +22,19 @@ namespace AmeisenBotX.Core.Movement.Objects
             Jump = jumpFunction;
         }
 
-        public delegate void JumpFunction();
-
         public delegate Vector3 GetPositionFunction();
 
         public delegate float GetRotationFunction();
 
+        public delegate void JumpFunction();
+
         public delegate void MoveToPositionFunction(Vector3 position);
+
+        public GetPositionFunction GetPosition { get; set; }
+
+        public GetRotationFunction GetRotation { get; set; }
+
+        public JumpFunction Jump { get; private set; }
 
         public float MaxAcceleration { get; private set; }
 
@@ -38,17 +42,11 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public float MaxVelocity { get; private set; }
 
+        public MoveToPositionFunction MoveToPosition { get; set; }
+
         public ObjectManager ObjectManager { get; }
 
         public Vector3 Velocity { get; private set; }
-
-        public JumpFunction Jump { get; private set; }
-
-        public MoveToPositionFunction MoveToPosition { get; set; }
-
-        public GetPositionFunction GetPosition { get; set; }
-
-        public GetRotationFunction GetRotation { get; set; }
 
         public Vector3 AvoidObstacles(float multiplier)
         {
@@ -130,10 +128,34 @@ namespace AmeisenBotX.Core.Movement.Objects
             return acceleration;
         }
 
+        public Vector3 Seperate(float multiplier)
+        {
+            Vector3 acceleration = new Vector3(0, 0, 0);
+            acceleration += GetObjectForceAroundMe<WowPlayer>(2);
+            acceleration.Limit(MaxAcceleration);
+            acceleration.Multiply(multiplier);
+            return acceleration;
+        }
+
         public Vector3 Unstuck(int multiplier)
         {
             Vector3 positionBehindMe = CalculatPositionnBehind(GetPosition.Invoke(), GetRotation(), 4);
             return Seek(positionBehindMe, multiplier);
+        }
+
+        public void Update(List<Vector3> forces)
+        {
+            foreach (Vector3 force in forces)
+            {
+                Velocity += (force);
+            }
+
+            Velocity.Limit(MaxVelocity);
+
+            Vector3 currentPosition = GetPosition();
+            currentPosition.Add(Velocity);
+
+            MoveToPosition?.Invoke(currentPosition);
         }
 
         public Vector3 Wander(int multiplier)
@@ -151,30 +173,6 @@ namespace AmeisenBotX.Core.Movement.Objects
             newRandomPosition.Rotate(rnd.Next(-14, 14));
 
             return Seek(newRandomPosition, multiplier);
-        }
-
-        public Vector3 Seperate(float multiplier)
-        {
-            Vector3 acceleration = new Vector3(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<WowPlayer>(2);
-            acceleration.Limit(MaxAcceleration);
-            acceleration.Multiply(multiplier);
-            return acceleration;
-        }
-
-        public void Update(List<Vector3> forces)
-        {
-            foreach (Vector3 force in forces)
-            {
-                Velocity += (force);
-            }
-
-            Velocity.Limit(MaxVelocity);
-
-            Vector3 currentPosition = GetPosition();
-            currentPosition.Add(Velocity);
-
-            MoveToPosition?.Invoke(currentPosition);
         }
 
         private static Vector3 CalculateFuturePosition(Vector3 position, float targetRotation, float targetVelocity)

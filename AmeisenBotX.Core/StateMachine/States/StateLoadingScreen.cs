@@ -3,7 +3,7 @@ using AmeisenBotX.Memory;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateLoadingScreen : State
+    public class StateLoadingScreen : BasicState
     {
         public StateLoadingScreen(AmeisenBotStateMachine stateMachine, XMemory xMemory, AmeisenBotConfig config, ObjectManager objectManager) : base(stateMachine)
         {
@@ -26,13 +26,13 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (XMemory.Process != null && XMemory.Process.HasExited)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
+                AmeisenBotStateMachine.SetState(BotState.None);
             }
 
             ObjectManager.RefreshIsWorldLoaded();
             if (ObjectManager.IsWorldLoaded)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
         }
 

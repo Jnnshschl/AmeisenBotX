@@ -4,9 +4,6 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
@@ -17,21 +14,21 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string unholyPresenceSpell = "Unholy Presence";
-        private readonly string icyTouchSpell = "Icy Touch";
-        private readonly string scourgeStrikeSpell = "Scourge Strike";
-        private readonly string bloodStrikeSpell = "Blood Strike";
-        private readonly string plagueStrikeSpell = "Plague Strike";
-        private readonly string runeStrikeSpell = "Rune Strike";
-        private readonly string strangulateSpell = "Strangulate";
-        private readonly string mindFreezeSpell = "Mind Freeze";
-        private readonly string summonGargoyleSpell = "Summon Gargoyle";
-        private readonly string frostFeverSpell = "Frost Fever";
+        private readonly string armyOfTheDeadSpell = "Army of the Dead";
         private readonly string bloodPlagueSpell = "Blood Plague";
+        private readonly string bloodStrikeSpell = "Blood Strike";
         private readonly string deathCoilSpell = "Death Coil";
+        private readonly string frostFeverSpell = "Frost Fever";
         private readonly string hornOfWinterSpell = "Horn of Winter";
         private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
-        private readonly string armyOfTheDeadSpell = "Army of the Dead";
+        private readonly string icyTouchSpell = "Icy Touch";
+        private readonly string mindFreezeSpell = "Mind Freeze";
+        private readonly string plagueStrikeSpell = "Plague Strike";
+        private readonly string runeStrikeSpell = "Rune Strike";
+        private readonly string scourgeStrikeSpell = "Scourge Strike";
+        private readonly string strangulateSpell = "Strangulate";
+        private readonly string summonGargoyleSpell = "Summon Gargoyle";
+        private readonly string unholyPresenceSpell = "Unholy Presence";
 
         public DeathknightUnholy(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -54,6 +51,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Deathknight;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
+
+        public override string Displayname => "Deathknight Unholy";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -62,19 +69,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator();
 
-        public override string Displayname => "Deathknight Unholy";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
-
-        public override WowClass Class => WowClass.Deathknight;
-
         public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override string Version => "1.0";
 
         public override void Execute()
         {

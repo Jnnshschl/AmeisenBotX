@@ -33,6 +33,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             LastTargetCheck = DateTime.Now;
         }
 
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Paladin;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Protection Paladin";
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -43,57 +53,47 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool Jumped { get; set; }
 
-        private CharacterManager CharacterManager { get; }
-
-        private bool Dancing { get; set; }
-        
-        private HookManager HookManager { get; }
-        
-        private DateTime LastAvenger { get; set; }
-        
-        private DateTime LastConsecration { get; set; }
-        
-        private DateTime LastDivineShield { get; set; }
-       
-        private DateTime LastGCD { get; set; }
-        
-        private DateTime LastHammer { get; set; }
-        
-        private DateTime LastHolyShield { get; set; }
-        
-        private Vector3 LastPlayerPosition { get; set; }
-
-        private DateTime LastProtection { get; set; }
-        
-        private DateTime LastSacrifice { get; set; }
-        
-        private DateTime LastTargetCheck { get; set; }
-        
-        private Vector3 LastTargetPosition { get; set; }
-        
-        private DateTime LastWisdom { get; set; }
-        
-        private DefaultMovementEngine MovementEngine { get; set; }
-        
-        private ObjectManager ObjectManager { get; }
-        
-        private IPathfindingHandler PathfindingHandler { get; set; }
-        
-        private double GCDTime { get; set; }
-
-        public string Displayname => "Protection Paladin";
+        public CombatClassRole Role => CombatClassRole.Tank;
 
         public string Version => "1.0";
 
-        public string Author => "einTyp";
+        private CharacterManager CharacterManager { get; }
 
-        public string Description => "...";
+        private bool Dancing { get; set; }
 
-        public WowClass Class => WowClass.Paladin;
+        private double GCDTime { get; set; }
 
-        public CombatClassRole Role => CombatClassRole.Tank;
+        private HookManager HookManager { get; }
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        private DateTime LastAvenger { get; set; }
+
+        private DateTime LastConsecration { get; set; }
+
+        private DateTime LastDivineShield { get; set; }
+
+        private DateTime LastGCD { get; set; }
+
+        private DateTime LastHammer { get; set; }
+
+        private DateTime LastHolyShield { get; set; }
+
+        private Vector3 LastPlayerPosition { get; set; }
+
+        private DateTime LastProtection { get; set; }
+
+        private DateTime LastSacrifice { get; set; }
+
+        private DateTime LastTargetCheck { get; set; }
+
+        private Vector3 LastTargetPosition { get; set; }
+
+        private DateTime LastWisdom { get; set; }
+
+        private DefaultMovementEngine MovementEngine { get; set; }
+
+        private ObjectManager ObjectManager { get; }
+
+        private IPathfindingHandler PathfindingHandler { get; set; }
 
         public void Execute()
         {

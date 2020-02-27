@@ -58,26 +58,26 @@ namespace AmeisenBotX.Core.StateMachine
             LastGhostCheck = DateTime.Now;
             LastEventPull = DateTime.Now;
 
-            LastState = AmeisenBotState.None;
+            LastState = BotState.None;
             UnitLootList = new Queue<ulong>();
 
-            States = new Dictionary<AmeisenBotState, State>()
+            States = new Dictionary<BotState, BasicState>()
             {
-                { AmeisenBotState.None, new StateNone(this, config) },
-                { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
-                { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager) },
-                { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, xMemory, config, objectManager) },
-                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass, UnitLootList) },
-                { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager) },
-                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, movementSettings, combatClass) },
-                { AmeisenBotState.Repairing, new StateRepairing(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Selling, new StateSelling(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Healing, new StateEating(this, config, objectManager, characterManager) },
-                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
-                { AmeisenBotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) }
+                { BotState.None, new StateNone(this, config) },
+                { BotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
+                { BotState.Login, new StateLogin(this, config, offsetList, characterManager) },
+                { BotState.LoadingScreen, new StateLoadingScreen(this, xMemory, config, objectManager) },
+                { BotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass, UnitLootList) },
+                { BotState.Dead, new StateDead(this, config, objectManager, hookManager) },
+                { BotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
+                { BotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
+                { BotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, movementSettings, combatClass) },
+                { BotState.Repairing, new StateRepairing(this, config, objectManager, hookManager, characterManager, movementEngine) },
+                { BotState.Selling, new StateSelling(this, config, objectManager, hookManager, characterManager, movementEngine) },
+                { BotState.Healing, new StateEating(this, config, objectManager, characterManager) },
+                { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
+                { BotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
+                { BotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) }
             };
 
             CurrentState = States.First();
@@ -94,19 +94,19 @@ namespace AmeisenBotX.Core.StateMachine
 
         public string BotDataPath { get; }
 
-        public KeyValuePair<AmeisenBotState, State> CurrentState { get; private set; }
+        public KeyValuePair<BotState, BasicState> CurrentState { get; private set; }
 
-        public AmeisenBotState LastState { get; private set; }
+        public BotState LastState { get; private set; }
 
         public string PlayerName { get; internal set; }
 
-        internal IOffsetList OffsetList { get; }
+        internal BattlegroundEngine BattlegroundEngine { get; }
 
-        internal XMemory XMemory { get; }
+        internal IOffsetList OffsetList { get; }
 
         internal Queue<ulong> UnitLootList { get; set; }
 
-        internal BattlegroundEngine BattlegroundEngine { get; }
+        internal XMemory XMemory { get; }
 
         private IAmeisenBotCache BotCache { get; }
 
@@ -124,25 +124,25 @@ namespace AmeisenBotX.Core.StateMachine
 
         private DateTime LastObjectUpdate { get; set; }
 
+        private IMovementEngine MovementEngine { get; set; }
+
         private ObjectManager ObjectManager { get; }
 
-        private Dictionary<AmeisenBotState, State> States { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
+        private Dictionary<BotState, BasicState> States { get; }
 
         public void Execute()
         {
             if (XMemory.Process == null || XMemory.Process.HasExited)
             {
                 AmeisenLogger.Instance.Log("WoW crashed...", LogLevel.Verbose);
-                SetState(AmeisenBotState.None);
+                SetState(BotState.None);
             }
 
             if (ObjectManager != null)
             {
                 if (!ObjectManager.IsWorldLoaded)
                 {
-                    SetState(AmeisenBotState.LoadingScreen);
+                    SetState(BotState.LoadingScreen);
                     MovementEngine.Reset();
                 }
 
@@ -152,23 +152,17 @@ namespace AmeisenBotX.Core.StateMachine
                 {
                     HandlePlayerDeadOrGhostState();
 
-                    if (CurrentState.Key != AmeisenBotState.Dead && CurrentState.Key != AmeisenBotState.Ghost)
+                    if (CurrentState.Key != BotState.Dead && CurrentState.Key != BotState.Ghost)
                     {
                         if (Config.AutoDodgeAoeSpells
                             && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
                         {
-                            SetState(AmeisenBotState.InsideAoeDamage);
+                            SetState(BotState.InsideAoeDamage);
                         }
 
-                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat() || (BattlegroundEngine != null && (BattlegroundEngine != null && !BattlegroundEngine.ForceCombat)))
+                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
                         {
-                            if(BattlegroundEngine != null && BattlegroundEngine.ForceCombat && ObjectManager.GetNearEnemies(50.0).Count() == 0)
-                            {
-                                BattlegroundEngine.ForceCombat = false;
-                                return;
-                            }
-
-                            SetState(AmeisenBotState.Attacking);
+                            SetState(BotState.Attacking);
                         }
                     }
                 }
@@ -182,6 +176,11 @@ namespace AmeisenBotX.Core.StateMachine
             CurrentState.Value.Execute();
         }
 
+        internal bool IsAnyPartymemberInCombat()
+            => ObjectManager.WowObjects.OfType<WowPlayer>()
+            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
+            .Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < 60 && r.IsInCombat);
+
         internal bool IsOnBattleground()
             => ObjectManager.MapId == 30
             || ObjectManager.MapId == 489
@@ -189,12 +188,7 @@ namespace AmeisenBotX.Core.StateMachine
             || ObjectManager.MapId == 566
             || ObjectManager.MapId == 607;
 
-        internal bool IsAnyPartymemberInCombat()
-            => ObjectManager.WowObjects.OfType<WowPlayer>()
-            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-            .Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < 60 && r.IsInCombat);
-
-        internal void SetState(AmeisenBotState state)
+        internal void SetState(BotState state)
         {
             if (CurrentState.Key == state)
             {
@@ -223,10 +217,10 @@ namespace AmeisenBotX.Core.StateMachine
         private void HandleObjectUpdates()
         {
             if (LastObjectUpdate - TimeSpan.FromMilliseconds(Config.ObjectUpdateMs) < DateTime.Now
-                && CurrentState.Key != AmeisenBotState.None
-                && CurrentState.Key != AmeisenBotState.StartWow
-                && CurrentState.Key != AmeisenBotState.Login
-                && CurrentState.Key != AmeisenBotState.LoadingScreen)
+                && CurrentState.Key != BotState.None
+                && CurrentState.Key != BotState.StartWow
+                && CurrentState.Key != BotState.Login
+                && CurrentState.Key != BotState.LoadingScreen)
             {
                 ObjectManager.UpdateWowObjects();
                 LastObjectUpdate = DateTime.Now;
@@ -237,7 +231,7 @@ namespace AmeisenBotX.Core.StateMachine
         {
             if (ObjectManager.Player.IsDead)
             {
-                SetState(AmeisenBotState.Dead);
+                SetState(BotState.Dead);
             }
             else
             {
@@ -248,7 +242,7 @@ namespace AmeisenBotX.Core.StateMachine
 
                     if (isGhost)
                     {
-                        SetState(AmeisenBotState.Ghost);
+                        SetState(BotState.Ghost);
                     }
                 }
             }

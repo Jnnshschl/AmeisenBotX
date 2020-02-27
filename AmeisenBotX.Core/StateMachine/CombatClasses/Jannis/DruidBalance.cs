@@ -1,14 +1,10 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,32 +17,31 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string moonkinFormSpell = "Moonkin Form";
-        private readonly string markOfTheWildSpell = "Mark of the Wild";
-        private readonly string innervateSpell = "Innervate";
-        private readonly string moonfireSpell = "Moonfire";
-        private readonly string insectSwarmSpell = "Insect Swarm";
-        private readonly string starfallSpell = "Starfall";
-        private readonly string forceOfNatureSpell = "Force of Nature";
-        private readonly string wrathSpell = "Wrath";
-        private readonly string starfireSpell = "Starfire";
-        private readonly string faerieFireSpell = "Faerie Fire";
-        private readonly string eclipseSolarSpell = "Eclipse (Solar)";
-        private readonly string eclipseLunarSpell = "Eclipse (Lunar)";
         private readonly string barkskinSpell = "Barkskin";
-
         private readonly int eclipseCheckTime = 1;
+        private readonly string eclipseLunarSpell = "Eclipse (Lunar)";
+        private readonly string eclipseSolarSpell = "Eclipse (Solar)";
+        private readonly string faerieFireSpell = "Faerie Fire";
+        private readonly string forceOfNatureSpell = "Force of Nature";
+        private readonly string innervateSpell = "Innervate";
+        private readonly string insectSwarmSpell = "Insect Swarm";
+        private readonly string markOfTheWildSpell = "Mark of the Wild";
+        private readonly string moonfireSpell = "Moonfire";
+        private readonly string moonkinFormSpell = "Moonkin Form";
+        private readonly string starfallSpell = "Starfall";
+        private readonly string starfireSpell = "Starfire";
+        private readonly string wrathSpell = "Wrath";
 
         public DruidBalance(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, true) },
-                { markOfTheWildSpell, () => 
+                { markOfTheWildSpell, () =>
                     {
                         HookManager.TargetGuid(ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(markOfTheWildSpell, true); 
-                    } 
+                        return CastSpellIfPossible(markOfTheWildSpell, true);
+                    }
                 }
             };
 
@@ -62,6 +57,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Druid;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
+
+        public override string Displayname => "Druid Balance";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -70,25 +75,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
-        public bool SolarEclipse { get; set; }
+        public DateTime LastEclipseCheck { get; private set; }
 
         public bool LunarEclipse { get; set; }
 
-        public override string Displayname => "Druid Balance";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
-
-        public override WowClass Class => WowClass.Druid;
-
         public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public bool SolarEclipse { get; set; }
 
-        public DateTime LastEclipseCheck { get; private set; }
+        public override string Version => "1.0";
 
         public override void Execute()
         {

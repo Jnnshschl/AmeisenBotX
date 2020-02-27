@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
@@ -9,14 +8,13 @@ using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    internal class StateAttacking : State
+    internal class StateAttacking : BasicState
     {
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, MovementSettings movementSettings, ICombatClass combatClass) : base(stateMachine)
         {
@@ -24,10 +22,10 @@ namespace AmeisenBotX.Core.StateMachine.States
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
-            PathfindingHandler = pathfindingHandler;
             MovementEngine = movementEngine;
-            MovementSettings = movementSettings;
             CombatClass = combatClass;
+
+            Enemies = new List<WowUnit>();
 
             // default distance values
             DistanceToTarget = combatClass == null || combatClass.IsMelee ? 3.0 : 25.0;
@@ -41,9 +39,9 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private AmeisenBotConfig Config { get; }
 
-        private HookManager HookManager { get; }
+        private List<WowUnit> Enemies { get; set; }
 
-        private MovementSettings MovementSettings { get; }
+        private HookManager HookManager { get; }
 
         private DateTime LastRotationCheck { get; set; }
 
@@ -53,10 +51,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private ObjectManager ObjectManager { get; }
 
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private int TryCount { get; set; }
-
         public override void Enter()
         {
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
@@ -64,9 +58,9 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat() && !(AmeisenBotStateMachine.BattlegroundEngine != null && AmeisenBotStateMachine.BattlegroundEngine.ForceCombat))
+            if (IsTargetInValid() && !ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat())
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -85,54 +79,53 @@ namespace AmeisenBotX.Core.StateMachine.States
                     ObjectManager.UpdateObject(ObjectManager.Target);
 
                     // do we need to clear our target
-                    if (DateTime.Now - LastValidTargetCheck > TimeSpan.FromMilliseconds(1000)
-                        && ObjectManager.TargetGuid > 0
-                        && (ObjectManager.Target.IsDead
-                        || HookManager.GetUnitReaction(ObjectManager.Player, ObjectManager.Target) == WowUnitReaction.Friendly))
+                    if (DateTime.Now - LastValidTargetCheck > TimeSpan.FromMilliseconds(250))
                     {
-                        HookManager.ClearTarget();
-                        ObjectManager.UpdateObject(ObjectManager.Player);
+                        if (IsTargetInValid())
+                        {
+                            HookManager.ClearTarget();
+                            ObjectManager.UpdateObject(ObjectManager.Player);
+
+                            // select a new target if our current target is invalid
+                            if (SelectTargetToAttack(out WowUnit target))
+                            {
+                                HookManager.TargetGuid(target.Guid);
+
+                                ObjectManager.UpdateObject(ObjectManager.Player);
+                                ObjectManager.UpdateObject(ObjectManager.Target);
+                            }
+                        }
+
+                        LastValidTargetCheck = DateTime.Now;
                     }
-                    LastValidTargetCheck = DateTime.Now;
 
-                    // select a new target if our current target is invalid
-                    if ((ObjectManager.TargetGuid == 0
-                        || (ObjectManager.Target == null || ObjectManager.Target.Guid == ObjectManager.PlayerGuid))
-                        && SelectTargetToAttack(out WowUnit target))
+                    // use the default MovementEngine to move if the CombatClass doesnt
+                    if ((CombatClass == null || !CombatClass.HandlesMovement) && ObjectManager.Target != null)
                     {
-                        HookManager.TargetGuid(target.Guid);
-
-                        ObjectManager.UpdateObject(ObjectManager.Player);
-                        ObjectManager.UpdateObject(ObjectManager.Target);
+                        HandleMovement(ObjectManager.Target);
                     }
-                }
 
-                // use the default MovementEngine to move if the CombatClass doesnt
-                if ((CombatClass == null || !CombatClass.HandlesMovement) && ObjectManager.Target != null)
-                {
-                    HandleMovement(ObjectManager.Target);
-                }
-
-                // if no CombatClass is loaded, just autoattack
-                if (CombatClass != null)
-                {
-                    CombatClass.Execute();
-                }
-                else
-                {
-                    if (!ObjectManager.Player.IsAutoAttacking)
+                    // if no CombatClass is loaded, just autoattack
+                    if (CombatClass != null)
                     {
-                        HookManager.StartAutoAttack();
+                        CombatClass.Execute();
+                    }
+                    else
+                    {
+                        if (!ObjectManager.Player.IsAutoAttacking)
+                        {
+                            HookManager.StartAutoAttack();
+                        }
                     }
                 }
             }
-
-            TryCount = 0;
         }
 
         public override void Exit()
         {
             MovementEngine.Reset();
+
+            Enemies.Clear();
 
             // set our normal maxfps
             AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
@@ -193,6 +186,12 @@ namespace AmeisenBotX.Core.StateMachine.States
                 MovementEngine.Execute();
             }
         }
+
+        private bool IsTargetInValid()
+                            => !BotUtils.IsValidUnit(ObjectManager.Target)
+                || ObjectManager.Target.Guid == ObjectManager.PlayerGuid
+                || ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) > 50
+                || HookManager.GetUnitReaction(ObjectManager.Player, ObjectManager.Target) == WowUnitReaction.Friendly;
 
         private bool SelectTargetToAttack(out WowUnit target)
         {

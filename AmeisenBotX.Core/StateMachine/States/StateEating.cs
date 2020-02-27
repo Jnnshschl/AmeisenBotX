@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Data;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateEating : State
+    public class StateEating : BasicState
     {
         public StateEating(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
         {
@@ -24,7 +24,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-
         }
 
         public override void Exit()

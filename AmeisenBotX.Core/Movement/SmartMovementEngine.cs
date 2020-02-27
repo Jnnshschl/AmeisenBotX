@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Pathfinding.Objects;
+using System;
+using System.Collections.Generic;
 using static AmeisenBotX.Core.Movement.Objects.BasicVehicle;
 
 namespace AmeisenBotX.Core.Movement
 {
     public class SmartMovementEngine : IMovementEngine
     {
-        public delegate List<Vector3> GeneratePathFunction(Vector3 start, Vector3 end);
-
         public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, JumpFunction jumpFunction, ObjectManager objectManager, MovementSettings movementSettings)
         {
             State = MovementEngineState.None;
@@ -32,43 +27,45 @@ namespace AmeisenBotX.Core.Movement
             PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, jumpFunction, objectManager, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
         }
 
-        public MovementEngineState State { get; private set; }
+        public delegate List<Vector3> GeneratePathFunction(Vector3 start, Vector3 end);
 
         public Queue<Vector3> CurrentPath { get; private set; }
 
-        public Vector3 TargetPosition { get; private set; }
-
         public Vector3 CurrentPathTargetPosition { get; private set; }
 
-        public Vector3 LastPosition { get; private set; }
+        public GeneratePathFunction GeneratePath { get; set; }
 
-        public Vector3 LastTargetPosition { get; private set; }
+        public GetPositionFunction GetPosition { get; set; }
+
+        public GetRotationFunction GetRotation { get; set; }
+
+        public bool HasMoved { get; private set; }
+
+        public JumpFunction Jump { get; set; }
 
         public DateTime LastJumpCheck { get; private set; }
 
         public DateTime LastLastPositionUpdate { get; private set; }
 
-        public bool HasMoved { get; private set; }
+        public Vector3 LastPosition { get; private set; }
 
-        public int TryCount { get; private set; }
+        public Vector3 LastTargetPosition { get; private set; }
 
-        public float TargetRotation { get; private set; }
-
-        public ObjectManager ObjectManager { get; }
-
-        public JumpFunction Jump { get; set; }
+        public MovementSettings MovementSettings { get; private set; }
 
         public MoveToPositionFunction MoveToPosition { get; set; }
 
-        public GetRotationFunction GetRotation { get; set; }
-
-        public GetPositionFunction GetPosition { get; set; }
-
-        public GeneratePathFunction GeneratePath { get; set; }
+        public ObjectManager ObjectManager { get; }
 
         public BasicVehicle PlayerVehicle { get; private set; }
 
-        public MovementSettings MovementSettings { get; private set; }
+        public MovementEngineState State { get; private set; }
+
+        public Vector3 TargetPosition { get; private set; }
+
+        public float TargetRotation { get; private set; }
+
+        public int TryCount { get; private set; }
 
         public void Execute()
         {
@@ -185,18 +182,13 @@ namespace AmeisenBotX.Core.Movement
             HasMoved = true;
         }
 
-        private Vector3 MoveAhead(Vector3 targetPosition, double offset)
+        public void Reset()
         {
-            float rotation = GetRotation.Invoke();
-            double x = targetPosition.X + (Math.Cos(rotation) * offset);
-            double y = targetPosition.Y + (Math.Sin(rotation) * offset);
-
-            return new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = targetPosition.Z
-            };
+            State = MovementEngineState.None;
+            CurrentPath = new Queue<Vector3>();
+            HasMoved = false;
+            TryCount = 0;
+            LastLastPositionUpdate = DateTime.Now;
         }
 
         public void SetState(MovementEngineState state, Vector3 position, float targetRotation = 0f)
@@ -211,13 +203,18 @@ namespace AmeisenBotX.Core.Movement
             TargetRotation = targetRotation;
         }
 
-        public void Reset()
+        private Vector3 MoveAhead(Vector3 targetPosition, double offset)
         {
-            State = MovementEngineState.None;
-            CurrentPath = new Queue<Vector3>();
-            HasMoved = false;
-            TryCount = 0;
-            LastLastPositionUpdate = DateTime.Now;
+            float rotation = GetRotation.Invoke();
+            double x = targetPosition.X + (Math.Cos(rotation) * offset);
+            double y = targetPosition.Y + (Math.Sin(rotation) * offset);
+
+            return new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = targetPosition.Z
+            };
         }
     }
 }

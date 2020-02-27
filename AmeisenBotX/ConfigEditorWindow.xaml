@@ -297,7 +297,7 @@
         </RadioButton>
         <Label x:Name="labelHeader_Copy" Content="Gameplay" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" FontSize="16" Margin="384,39,0,0" BorderThickness="0,0,0,1" Width="384">
             <Label.BorderBrush>
-                <SolidColorBrush Color="{DynamicResource DarkAccent1}"/>
+                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
             </Label.BorderBrush>
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -305,7 +305,7 @@
         </Label>
         <Label x:Name="labelHeader_Copy1" Content="Bot" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" FontSize="16" Margin="10,39,0,0" BorderThickness="0,0,0,1" Width="329">
             <Label.BorderBrush>
-                <SolidColorBrush Color="{DynamicResource DarkAccent1}"/>
+                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
             </Label.BorderBrush>
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -322,19 +322,19 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </CheckBox.Background>
         </CheckBox>
-        <Slider x:Name="sliderMinFollowDistance" HorizontalAlignment="Left" Margin="608,98,0,0" VerticalAlignment="Top" Width="160" Maximum="200" Minimum="3" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFollowDistance_ValueChanged"/>
+        <Slider x:Name="sliderMinFollowDistance" HorizontalAlignment="Left" Margin="608,98,0,0" VerticalAlignment="Top" Width="160" Maximum="200" Minimum="3" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFollowDistance_ValueChanged" />
         <Label x:Name="labelMinFollowDistance" Content="Min Follow Distance: " HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" Margin="604,74,0,0">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Slider x:Name="sliderMaxFollowDistance" HorizontalAlignment="Left" Margin="608,149,0,0" VerticalAlignment="Top" Width="160" Maximum="256" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFollowDistance_ValueChanged"/>
+        <Slider x:Name="sliderMaxFollowDistance" HorizontalAlignment="Left" Margin="608,149,0,0" VerticalAlignment="Top" Width="160" Maximum="256" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFollowDistance_ValueChanged" />
         <Label x:Name="labelMaxFollowDistance" Content="Max Follow Distance:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" Margin="604,125,0,0">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Slider x:Name="sliderMaxFps" HorizontalAlignment="Left" Margin="608,257,0,0" VerticalAlignment="Top" Width="160" Maximum="200" Minimum="8" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFps_ValueChanged"/>
+        <Slider x:Name="sliderMaxFps" HorizontalAlignment="Left" Margin="608,257,0,0" VerticalAlignment="Top" Width="160" Maximum="200" Minimum="8" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFps_ValueChanged" />
         <Label x:Name="labelMaxFps" Content="Max FPS:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" Margin="604,233,0,0">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -345,13 +345,13 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Slider x:Name="sliderMaxFpsCombat" HorizontalAlignment="Left" Margin="608,308,0,0" VerticalAlignment="Top" Width="160" Maximum="200" Minimum="8" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFpsCombat_ValueChanged"/>
+        <Slider x:Name="sliderMaxFpsCombat" HorizontalAlignment="Left" Margin="608,308,0,0" VerticalAlignment="Top" Width="160" Maximum="200" Minimum="8" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFpsCombat_ValueChanged" />
         <Label x:Name="labelLootRadius" Content="Loot Radius:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Unispace" Margin="604,180,0,0">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Slider x:Name="sliderLootRadius" HorizontalAlignment="Left" Margin="608,204,0,0" VerticalAlignment="Top" Width="160" Maximum="100" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderLootRadius_ValueChanged"/>
+        <Slider x:Name="sliderLootRadius" HorizontalAlignment="Left" Margin="608,204,0,0" VerticalAlignment="Top" Width="160" Maximum="100" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderLootRadius_ValueChanged" />
         <TextBox x:Name="textboxNavmeshServerIp" HorizontalAlignment="Left" Height="18" Margin="174,286,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="128" FontFamily="Unispace" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
             <TextBox.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />

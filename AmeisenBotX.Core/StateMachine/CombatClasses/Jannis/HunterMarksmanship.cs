@@ -1,17 +1,11 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +18,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
+        private readonly string aimedShotSpell = "Aimed Shot";
         private readonly string arcaneShotSpell = "Arcane Shot";
         private readonly string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
         private readonly string callPetSpell = "Call Pet";
+        private readonly string chimeraShotSpell = "Chimera Shot";
         private readonly string concussiveShotSpell = "Concussive Shot";
         private readonly string deterrenceSpell = "Deterrence";
         private readonly string disengageSpell = "Disengage";
@@ -36,21 +32,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string killCommandSpell = "Kill Command";
         private readonly string killShotSpell = "Kill Shot";
         private readonly string mendPetSpell = "Mend Pet";
+        private readonly string mongooseBiteSpell = "Mongoose Bite";
+        private readonly string multiShotSpell = "Multi-Shot";
         private readonly string rapidFireSpell = "Rapid Fire";
+        private readonly string raptorStrikeSpell = "Raptor Strike";
         private readonly string revivePetSpell = "Revive Pet";
         private readonly string serpentStingSpell = "Serpent Sting";
+        private readonly string silencingShotSpell = "Silencing Shot";
         private readonly string steadyShotSpell = "Steady Shot";
-        private readonly string aimedShotSpell = "Aimed Shot";
-        private readonly string chimeraShotSpell = "Chimera Shot";
-        private readonly string silencingShotSpell = "Silencing Shot"; 
-        private readonly string multiShotSpell = "Multi-Shot";
-        private readonly string raptorStrikeSpell = "Raptor Strike";
-        private readonly string mongooseBiteSpell = "Mongoose Bite";
 
         public HunterMarksmanship(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
             PetManager = new PetManager(
-                   ObjectManager.Pet, 
+                   ObjectManager.Pet,
                    TimeSpan.FromSeconds(15),
                    () => CastSpellIfPossible(mendPetSpell, true),
                    () => CastSpellIfPossible(callPetSpell),
@@ -73,6 +67,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Hunter;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Marksmanship Hunter spec.";
+
+        public override string Displayname => "Hunter Marksmanship";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -81,25 +85,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
 
+        public override CombatClassRole Role => CombatClassRole.Dps;
+
+        public override string Version => "1.0";
+
         private bool DisengagePrepared { get; set; } = false;
 
         private bool InFrostTrapCombo { get; set; } = false;
 
         private PetManager PetManager { get; set; }
-
-        public override string Displayname => "Hunter Marksmanship";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Marksmanship Hunter spec.";
-
-        public override WowClass Class => WowClass.Hunter;
-
-        public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override void Execute()
         {

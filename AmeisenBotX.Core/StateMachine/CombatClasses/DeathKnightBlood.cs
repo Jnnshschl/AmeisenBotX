@@ -21,6 +21,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             HookManager = hookManager;
         }
 
+        public string Author => "Jamsbaer";
+
+        public WowClass Class => WowClass.Deathknight;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
+
+        public string Displayname => "[WIP] Blood Deathknight";
+
         public bool HandlesMovement => false;
 
         public bool HandlesTargetSelection => false;
@@ -28,6 +38,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool IsMelee => true;
 
         public IWowItemComparator ItemComparator => null;
+
+        public CombatClassRole Role => CombatClassRole.Tank;
+
+        public string Version => "1.0";
 
         private CharacterManager CharacterManager { get; }
 
@@ -38,20 +52,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private Vector3 LastPosition { get; set; }
 
         private ObjectManager ObjectManager { get; }
-
-        public string Displayname => "[WIP] Blood Deathknight";
-
-        public string Version => "1.0";
-
-        public string Author => "Jamsbaer";
-
-        public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
-
-        public WowClass Class => WowClass.Deathknight;
-
-        public CombatClassRole Role => CombatClassRole.Tank;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -71,7 +71,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-
         }
 
         private void HandleAttacking(WowUnit target)
@@ -131,17 +130,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.CastSpell("Icy Touch");
             }
-
-
-
         }
 
         private bool IsOneOfAllRunesReady()
-            => HookManager.IsRuneReady(0) 
-            || HookManager.IsRuneReady(1) 
-            && HookManager.IsRuneReady(2) 
-            || HookManager.IsRuneReady(3) 
-            && HookManager.IsRuneReady(4) 
+            => HookManager.IsRuneReady(0)
+            || HookManager.IsRuneReady(1)
+            && HookManager.IsRuneReady(2)
+            || HookManager.IsRuneReady(3)
+            && HookManager.IsRuneReady(4)
             || HookManager.IsRuneReady(5);
     }
 }

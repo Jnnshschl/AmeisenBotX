@@ -17,22 +17,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class WarriorFury : ICombatClass
     {
-        private readonly WarriorFurySpells spells;
-
         private readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
-
+        private readonly WarriorFurySpells spells;
         private readonly string[] standingEmotes = { "/chug", "/pick", "/whistle", "/shimmy", "/dance", "/twiddle", "/bored", "/violin", "/highfive", "/bow" };
 
+        private bool computeNewRoute = false;
         private double distanceToTarget = 0;
 
         private double distanceTraveled = 0;
 
-        private bool multipleTargets = false;
-
-        private bool computeNewRoute = false;
-
         private bool hasTargetMoved = false;
-
+        private bool multipleTargets = false;
         private bool standing = false;
 
         public WarriorFury(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
@@ -45,6 +40,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             spells = new WarriorFurySpells(hookManager, objectManager);
         }
 
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Warrior;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Fury Warrior";
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -52,6 +57,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         public bool IsMelee => true;
 
         public IWowItemComparator ItemComparator => new FurySwordItemComparator();
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public string Version => "1.0";
 
         private CharacterManager CharacterManager { get; }
 
@@ -68,20 +77,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private ObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
-
-        public string Displayname => "Fury Warrior";
-
-        public string Version => "1.0";
-
-        public string Author => "einTyp";
-
-        public string Description => "...";
-
-        public WowClass Class => WowClass.Warrior;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -318,6 +313,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private static readonly string ShatteringThrow = "Shattering Throw";
             private static readonly string Slam = "Slam";
             private static readonly string Whirlwind = "Whirlwind";
+
             private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
             {
                 { BattleShout, DateTime.Now },

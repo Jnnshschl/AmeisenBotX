@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Memory.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace AmeisenBotX.Core

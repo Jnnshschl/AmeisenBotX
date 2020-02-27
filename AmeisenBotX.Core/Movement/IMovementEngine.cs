@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement
 {

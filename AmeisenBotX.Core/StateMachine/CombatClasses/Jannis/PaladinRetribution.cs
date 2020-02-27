@@ -1,19 +1,10 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
@@ -23,22 +14,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string blessingOfMightSpell = "Blessing of Might";
-        private readonly string retributionAuraSpell = "Retribution Aura";
         private readonly string avengingWrathSpell = "Avenging Wrath";
-        private readonly string sealOfVengeanceSpell = "Seal of Vengeance";
-        private readonly string hammerOfWrathSpell = "Hammer of Wrath";
-        private readonly string hammerOfJusticeSpell = "Hammer of Justice";
-        private readonly string judgementOfLightSpell = "Judgement of Light";
-        private readonly string crusaderStrikeSpell = "Crusader Strike";
-        private readonly string divineStormSpell = "Divine Storm";
+        private readonly string blessingOfMightSpell = "Blessing of Might";
         private readonly string consecrationSpell = "Consecration";
-        private readonly string exorcismSpell = "Exorcism";
-        private readonly string holyWrathSpell = "Holy Wrath";
+        private readonly string crusaderStrikeSpell = "Crusader Strike";
         private readonly string divinePleaSpell = "Divine Plea";
+        private readonly string divineStormSpell = "Divine Storm";
+        private readonly string exorcismSpell = "Exorcism";
+        private readonly string hammerOfJusticeSpell = "Hammer of Justice";
+        private readonly string hammerOfWrathSpell = "Hammer of Wrath";
         private readonly string holyLightSpell = "Holy Light";
+        private readonly string holyWrathSpell = "Holy Wrath";
+        private readonly string judgementOfLightSpell = "Judgement of Light";
         private readonly string layOnHandsSpell = "Lay on Hands";
-        
+        private readonly string retributionAuraSpell = "Retribution Aura";
+        private readonly string sealOfVengeanceSpell = "Seal of Vengeance";
+
         public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -59,6 +50,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Paladin;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Retribution Paladin spec.";
+
+        public override string Displayname => "Paladin Retribution";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -67,19 +68,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator();
 
-        public override string Displayname => "Paladin Retribution";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Retribution Paladin spec.";
-
-        public override WowClass Class => WowClass.Paladin;
-
         public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override string Version => "1.0";
 
         public override void Execute()
         {

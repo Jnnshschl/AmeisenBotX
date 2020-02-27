@@ -1,17 +1,10 @@
 ﻿using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
 using static AmeisenBotX.Core.StateMachine.Utils.InterruptManager;
 
@@ -21,15 +14,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string stealthSpell = "Stealth";
-        private readonly string hungerForBloodSpell = "Hunger for Blood";
-        private readonly string sliceAndDiceSpell = "Slice and Dice";
-        private readonly string mutilateSpell = "Mutilate";
+        private readonly string cloakOfShadowsSpell = "Cloak of Shadows";
         private readonly string coldBloodSpell = "Cold Blood";
         private readonly string eviscerateSpell = "Eviscerate";
-        private readonly string cloakOfShadowsSpell = "Cloak of Shadows";
+        private readonly string hungerForBloodSpell = "Hunger for Blood";
         private readonly string kickSpell = "Kick";
+        private readonly string mutilateSpell = "Mutilate";
+        private readonly string sliceAndDiceSpell = "Slice and Dice";
         private readonly string sprintSpell = "Sprint";
+        private readonly string stealthSpell = "Stealth";
 
         public RogueAssassination(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
         {
@@ -45,6 +38,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             };
         }
 
+        public override string Author => "Jannis";
+
+        public override WowClass Class => WowClass.Rogue;
+
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public override string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
+
+        public override string Displayname => "[WIP] Rogue Assasination";
+
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
@@ -53,19 +56,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicAgilityComparator();
 
-        public override string Displayname => "[WIP] Rogue Assasination";
-
-        public override string Version => "1.0";
-
-        public override string Author => "Jannis";
-
-        public override string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
-
-        public override WowClass Class => WowClass.Rogue;
-
         public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override string Version => "1.0";
 
         public override void Execute()
         {
@@ -106,7 +99,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-
         }
     }
 }

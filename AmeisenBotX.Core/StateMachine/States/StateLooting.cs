@@ -1,6 +1,4 @@
 ﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
@@ -8,16 +6,13 @@ using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateLooting : State
+    public class StateLooting : BasicState
     {
         public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, Queue<ulong> unitLootList) : base(stateMachine)
         {
@@ -38,6 +33,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private HookManager HookManager { get; }
 
+        private int LootTryCount { get; set; }
+
         private IMovementEngine MovementEngine { get; set; }
 
         private ObjectManager ObjectManager { get; }
@@ -46,11 +43,9 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private IPathfindingHandler PathfindingHandler { get; }
 
-        private List<ulong> UnitsAlreadyLootedList { get; }
-
         private Queue<ulong> UnitLootList { get; }
 
-        private int LootTryCount { get; set; }
+        private List<ulong> UnitsAlreadyLootedList { get; }
 
         public override void Enter()
         {
@@ -61,7 +56,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (UnitLootList.Count == 0)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
             else
             {
@@ -80,7 +75,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                         MovementEngine.Execute();
                         LootTryCount++;
 
-                        if(LootTryCount == 16)
+                        if (LootTryCount == 64)
                         {
                             UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
                         }
@@ -91,7 +86,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                         {
                             HookManager.RightClickUnit(selectedUnit);
                             LootTryCount++;
-                            Task.Delay(500).GetAwaiter().GetResult();
+                            Task.Delay(1000).GetAwaiter().GetResult();
                         } while (AmeisenBotStateMachine.XMemory.ReadByte(OffsetList.LootWindowOpen, out byte lootOpen)
                                  && lootOpen == 0
                                  && LootTryCount < 2);
@@ -108,7 +103,6 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

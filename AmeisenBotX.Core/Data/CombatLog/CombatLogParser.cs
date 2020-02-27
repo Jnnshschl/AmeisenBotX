@@ -2,11 +2,7 @@
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Data.CombatLog
 {
@@ -17,7 +13,7 @@ namespace AmeisenBotX.Core.Data.CombatLog
             AmeisenBotCache = ameisenBotCache;
         }
 
-        IAmeisenBotCache AmeisenBotCache { get; }
+        private IAmeisenBotCache AmeisenBotCache { get; }
 
         public void Parse(long timestamp, List<string> args)
         {

@@ -10,9 +10,9 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr AutolootPointer { get; } = new IntPtr(0xBD0914);
 
-        public IntPtr BattlegroundStatus { get; } = new IntPtr(0xBEA4D0);
-
         public IntPtr BattlegroundFinished { get; } = new IntPtr(0xBEA588);
+
+        public IntPtr BattlegroundStatus { get; } = new IntPtr(0xBEA4D0);
 
         public IntPtr CharacterSlotSelected { get; } = new IntPtr(0xAC436C);
 
@@ -216,18 +216,18 @@ namespace AmeisenBotX.Core.OffsetLists
 
         public IntPtr WowObjectDescriptor { get; } = new IntPtr(0x8);
 
+        public IntPtr WowObjectEntryId { get; } = new IntPtr(0x18);
+
         public IntPtr WowObjectGuid { get; } = new IntPtr(0x30);
 
         public IntPtr WowObjectPosition { get; } = new IntPtr(0xE8);
+
+        public IntPtr WowObjectScale { get; } = new IntPtr(0x1C);
 
         public IntPtr WowObjectType { get; } = new IntPtr(0x14);
 
         public IntPtr WowUnitPosition { get; } = new IntPtr(0x798);
 
         public IntPtr ZoneId { get; } = new IntPtr(0xAF4E48);
-
-        public IntPtr WowObjectEntryId { get; } = new IntPtr(0x18);
-
-        public IntPtr WowObjectScale { get; } = new IntPtr(0x1C);
     }
 }

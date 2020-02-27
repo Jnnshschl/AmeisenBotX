@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AmeisenBotX.Core.Character.Comparators.Objects;
+﻿using AmeisenBotX.Core.Character.Comparators.Objects;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {

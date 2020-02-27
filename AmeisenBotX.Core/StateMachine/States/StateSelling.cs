@@ -1,32 +1,24 @@
 ﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateSelling : State
+    public class StateSelling : BasicState
     {
-        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookmanager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookmanager, CharacterManager characterManager, IMovementEngine movementEngine) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
             HookManager = hookmanager;
             CharacterManager = characterManager;
-            PathfindingHandler = pathfindingHandler;
             MovementEngine = movementEngine;
         }
 
@@ -34,17 +26,14 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private AmeisenBotConfig Config { get; }
 
+        private HookManager HookManager { get; }
+
         private IMovementEngine MovementEngine { get; set; }
 
         private ObjectManager ObjectManager { get; }
 
-        private HookManager HookManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
-
         public override void Enter()
         {
-
         }
 
         public override void Execute()
@@ -52,7 +41,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (HookManager.GetFreeBagSlotCount() > 4
                || !CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -92,13 +81,12 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
         }
 
         public override void Exit()
         {
-
         }
     }
 }

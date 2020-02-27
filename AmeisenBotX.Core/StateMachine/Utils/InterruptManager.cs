@@ -1,9 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.StateMachine.Utils
 {
@@ -17,9 +13,9 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         public delegate bool CastInterruptFunction();
 
-        private WowUnit UnitToWatch { get; set; }
-
         public SortedList<int, CastInterruptFunction> InterruptSpells { get; set; }
+
+        private WowUnit UnitToWatch { get; set; }
 
         public bool Tick()
         {

@@ -160,6 +160,6 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label x:Name="labelBgObjective" Content="BGObjective: None" HorizontalAlignment="Left" Margin="146,32,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="labelBgObjective" Content="BGObjective: None" HorizontalAlignment="Left" Margin="146,32,0,0" VerticalAlignment="Top" Foreground="White" />
     </Grid>
 </Window>

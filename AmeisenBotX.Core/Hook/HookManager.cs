@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
@@ -60,18 +59,6 @@ namespace AmeisenBotX.Core.Hook
 
         public byte[] OriginalEndsceneBytes { get; private set; }
 
-        public void RightClickObject(WowObject flagObject)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {flagObject.BaseAddress.ToInt32()}",
-                $"CALL 0x711140",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
-
         public IntPtr ReturnValueAddress { get; private set; }
 
         private IAmeisenBotCache BotCache { get; }
@@ -82,19 +69,16 @@ namespace AmeisenBotX.Core.Hook
 
         private XMemory XMemory { get; }
 
-        public void AcceptPartyInvite()
-        {
-            LuaDoString("AcceptGroup();");
-            SendChatMessage("/click StaticPopup1Button1");
-        }
-
         public void AcceptBattlegroundInvite()
         {
             SendChatMessage("/click StaticPopup1Button1");
         }
 
-        public void LeaveBattleground()
-            => SendChatMessage("/click WorldStateScoreFrameLeaveButton");
+        public void AcceptPartyInvite()
+        {
+            LuaDoString("AcceptGroup();");
+            SendChatMessage("/click StaticPopup1Button1");
+        }
 
         public void AcceptResurrect()
         {
@@ -106,12 +90,6 @@ namespace AmeisenBotX.Core.Hook
         {
             LuaDoString("ConfirmSummon();");
             SendChatMessage("/click StaticPopup1Button1");
-        }
-
-        public void AttackUnit(WowUnit unit)
-        {
-            XMemory.Write(OffsetList.ClickToMoveGuid, unit.Guid);
-            WriteCtmValues(unit.Position, ClickToMoveType.AttackGuid);
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
@@ -127,23 +105,6 @@ namespace AmeisenBotX.Core.Hook
                 LuaDoString($"CastSpellByName(\"{name}\");");
             }
         }
-
-        public int GetFreeBagSlotCount()
-        {
-            LuaDoString("abFreeBagSlots=0 for i=1,5 do abFreeBagSlots=abFreeBagSlots+GetContainerNumFreeSlots(i-1)end");
-
-            if (int.TryParse(GetLocalizedText("abFreeBagSlots"), out int bagSlots))
-            {
-                return bagSlots;
-            }
-            else
-            {
-                return 100;
-            }
-        }
-
-        public void SellAllItems()
-            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
 
         public void CastSpellById(int spellId)
         {
@@ -164,12 +125,6 @@ namespace AmeisenBotX.Core.Hook
                 InjectAndExecute(asm, false);
             }
         }
-
-        public void QueuBattlegroundByName(string bgName)
-            => SendChatMessage($"/run for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
-
-        public void UseItemByBagAndSlot(int bagId, int bagSlot)
-            => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
 
         public void ClearTarget()
             => SendChatMessage("/cleartarget");
@@ -280,6 +235,20 @@ namespace AmeisenBotX.Core.Hook
             return GetLocalizedText("abotEquipmentResult");
         }
 
+        public int GetFreeBagSlotCount()
+        {
+            LuaDoString("abFreeBagSlots=0 for i=1,5 do abFreeBagSlots=abFreeBagSlots+GetContainerNumFreeSlots(i-1)end");
+
+            if (int.TryParse(GetLocalizedText("abFreeBagSlots"), out int bagSlots))
+            {
+                return bagSlots;
+            }
+            else
+            {
+                return 100;
+            }
+        }
+
         public string GetInventoryItems()
         {
             string command = "abotInventoryResult=\"[\"for a=0,4 do containerSlots=GetContainerNumSlots(a)for b=1,containerSlots do abId=GetContainerItemID(a,b)if string.len(tostring(abId or\"\"))>0 then abItemLink=GetContainerItemLink(a,b)abCurrentDurability,abMaxDurability=GetContainerItemDurability(a,b)abCooldownStart,abCooldownEnd=GetContainerItemCooldown(a,b)abIcon,abItemCount,abLocked,abQuality,abReadable,abLootable,abItemLink,isFiltered=GetContainerItemInfo(a,b)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abItemLink)abstats=GetItemStats(abItemLink)statsResult={}for c,d in pairs(abstats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;abotInventoryResult=abotInventoryResult..\"{\"..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abItemCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": \"'..tostring(abCooldownEnd or 0)..'\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"lootable\": \"'..tostring(abLootable or 0)..'\",'..'\"readable\": \"'..tostring(abReadable or 0)..'\",'..'\"link\": \"'..tostring(abItemLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..\"}\"abotInventoryResult=abotInventoryResult..\",\"end end end;abotInventoryResult=abotInventoryResult..\"]\"";
@@ -359,6 +328,29 @@ namespace AmeisenBotX.Core.Hook
             return GetLocalizedText("abMoney");
         }
 
+        public Dictionary<RuneType, int> GetRunesReady(int runeId)
+        {
+            Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
+            {
+                { RuneType.Blood, 0 },
+                { RuneType.Frost, 0 },
+                { RuneType.Unholy, 0 },
+                { RuneType.Death, 0 }
+            };
+
+            for (int i = 0; i < 6; ++i)
+            {
+                if (XMemory.Read(OffsetList.RuneType + (4 * i), out RuneType type)
+                    && XMemory.ReadByte(OffsetList.Runes, out byte runeStatus)
+                    && ((1 << runeId) & runeStatus) != 0)
+                {
+                    runes[type]++;
+                }
+            }
+
+            return runes;
+        }
+
         public List<string> GetSkills()
         {
             LuaDoString("abSkillList=\"\"abSkillCount=GetNumSkillLines()for a=1,abSkillCount do local b,c=GetSkillLineInfo(a)if not c then abSkillList=abSkillList..b;if a<abSkillCount then abSkillList=abSkillList..\"; \"end end end");
@@ -411,64 +403,6 @@ namespace AmeisenBotX.Core.Hook
             }
 
             return (string.Empty, 0);
-        }
-
-        public void StopClickToMove(WowUnit unit)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionStopClickToMove}",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
-
-        public bool IsCtmMoving(WowUnit unit)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionStopClickToMove}",
-                "RETN",
-            };
-
-            return InjectAndExecute(asm, true)[0] == 0x1;
-        }
-
-        public void SetFacing(WowUnit unit, float angle)
-        {
-            string[] asm = new string[]
-            {
-                $"PUSH {angle}",
-                $"PUSH {Environment.TickCount}",
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionSetFacing}",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
-
-        public void UseItemByName(string itemName)
-            => SellItemsByName(itemName);
-
-        public void SellItemsByName(string itemName)
-            => LuaDoString($"for bag = 0,4,1 do for slot = 1, GetContainerNumSlots(bag), 1 do local name = GetContainerItemLink(bag,slot); if name and string.find(name,\"{itemName}\") then UseContainerItem(bag,slot) end end end");
-
-        public void SendMovementPacket(WowUnit unit, int opcode)
-        {
-            string[] asm = new string[]
-            {
-                $"PUSH {opcode}",
-                $"PUSH {Environment.TickCount}",
-                $"MOV ECX, {unit.BaseAddress.ToInt32()}",
-                $"CALL {OffsetList.FunctionSendMovementPacket.ToInt32()}",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
         }
 
         public WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
@@ -528,6 +462,14 @@ namespace AmeisenBotX.Core.Hook
             }
 
             return reaction;
+        }
+
+        public bool HasUnitStealableBuffs(WowLuaUnit luaUnit)
+        {
+            LuaDoString($"abIsStealableStuffThere=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,isStealable=UnitAura(\"{luaUnit}\",i);if isStealable==1 then abIsStealableStuffThere=1;end end");
+            string rawValue = GetLocalizedText("abIsStealableStuffThere");
+
+            return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
         public byte[] InjectAndExecute(string[] asm, bool readReturnBytes)
@@ -628,6 +570,14 @@ namespace AmeisenBotX.Core.Hook
             return returnBytes.ToArray();
         }
 
+        public bool IsBgInviteReady()
+        {
+            LuaDoString("abBgQueueIsReady = 0;for i=1,2 do local x = GetBattlefieldPortExpiration(i) if x > 0 then abBgQueueIsReady = 1 end end");
+            string rawValue = GetLocalizedText("abBgQueueIsReady");
+
+            return int.TryParse(rawValue, out int result) ? result == 1 : false;
+        }
+
         public bool IsClickToMovePending()
         {
             if (XMemory.Read(OffsetList.ClickToMovePendingMovement, out byte ctmPending))
@@ -636,6 +586,18 @@ namespace AmeisenBotX.Core.Hook
             }
 
             return false;
+        }
+
+        public bool IsCtmMoving(WowUnit unit)
+        {
+            string[] asm = new string[]
+            {
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionStopClickToMove}",
+                "RETN",
+            };
+
+            return InjectAndExecute(asm, true)[0] == 0x1;
         }
 
         public bool IsGhost(string unit)
@@ -663,29 +625,6 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public Dictionary<RuneType, int> GetRunesReady(int runeId)
-        {
-            Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
-            {
-                { RuneType.Blood, 0 },
-                { RuneType.Frost, 0 },
-                { RuneType.Unholy, 0 },
-                { RuneType.Death, 0 }
-            };
-
-            for (int i = 0; i < 6; ++i)
-            {
-                if (XMemory.Read(OffsetList.RuneType + (4 * i), out RuneType type)
-                    && XMemory.ReadByte(OffsetList.Runes, out byte runeStatus)
-                    && ((1 << runeId) & runeStatus) != 0)
-                {
-                    runes[type]++;
-                }
-            }
-
-            return runes;
-        }
-
         public bool IsSpellKnown(int spellId, bool isPetSpell = false)
         {
             LuaDoString($"abIsSpellKnown = IsSpellKnown({spellId}, {isPetSpell});");
@@ -696,6 +635,12 @@ namespace AmeisenBotX.Core.Hook
 
         public void KickNpcsOutOfMammoth()
             => LuaDoString("for i = 1, 2 do EjectPassengerFromSeat(i) end");
+
+        public void LearnAllAvaiableSpells()
+            => LuaDoString("/run LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e = 0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
+
+        public void LeaveBattleground()
+            => SendChatMessage("/click WorldStateScoreFrameLeaveButton");
 
         public void LootEveryThing()
             => LuaDoString("abLootCount=GetNumLootItems();for i = abLootCount,1,-1 do LootSlot(i); ConfirmLootSlot(i); end");
@@ -733,6 +678,9 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void QueuBattlegroundByName(string bgName)
+            => SendChatMessage($"/run for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
+
         public void ReleaseSpirit()
             => LuaDoString("RepopMe();");
 
@@ -755,6 +703,18 @@ namespace AmeisenBotX.Core.Hook
 
         public void RetrieveCorpse()
             => LuaDoString("RetrieveCorpse();");
+
+        public void RightClickObject(WowObject gObject)
+        {
+            string[] asm = new string[]
+            {
+                $"MOV ECX, {gObject.BaseAddress.ToInt32()}",
+                $"CALL 0x711140",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
 
         public void RightClickUnit(WowUnit wowUnit)
         {
@@ -782,11 +742,42 @@ namespace AmeisenBotX.Core.Hook
         public void SellAllGrayItems()
             => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
 
+        public void SellAllItems()
+                                    => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
+
+        public void SellItemsByName(string itemName)
+            => LuaDoString($"for bag = 0,4,1 do for slot = 1, GetContainerNumSlots(bag), 1 do local name = GetContainerItemLink(bag,slot); if name and string.find(name,\"{itemName}\") then UseContainerItem(bag,slot) end end end");
+
         public void SendChatMessage(string message)
             => LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
 
-        public void LearnAllAvaiableSpells()
-            => LuaDoString("/run LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e = 0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
+        public void SendMovementPacket(WowUnit unit, int opcode)
+        {
+            string[] asm = new string[]
+            {
+                $"PUSH {opcode}",
+                $"PUSH {Environment.TickCount}",
+                $"MOV ECX, {unit.BaseAddress.ToInt32()}",
+                $"CALL {OffsetList.FunctionSendMovementPacket.ToInt32()}",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
+
+        public void SetFacing(WowUnit unit, float angle)
+        {
+            string[] asm = new string[]
+            {
+                $"PUSH {angle}",
+                $"PUSH {Environment.TickCount}",
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionSetFacing}",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
 
         public void SetMaxFps(byte maxFps)
         {
@@ -907,9 +898,21 @@ namespace AmeisenBotX.Core.Hook
         public void StartAutoAttack()
             => SendChatMessage("/startattack");
 
+        public void StopClickToMove(WowUnit unit)
+        {
+            string[] asm = new string[]
+            {
+                $"MOV ECX, {unit.BaseAddress}",
+                $"CALL {OffsetList.FunctionStopClickToMove}",
+                "RETN",
+            };
+
+            InjectAndExecute(asm, false);
+        }
+
         public void TargetGuid(ulong guid)
         {
-            if(guid == 0)
+            if (guid == 0)
             {
                 return;
             }
@@ -933,30 +936,11 @@ namespace AmeisenBotX.Core.Hook
         public void TargetNearestEnemy()
             => SendChatMessage("/targetenemy [harm][nodead]");
 
-        public void WriteCtmValues(Vector3 targetPosition, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float distance = 1.5f)
-        {
-            XMemory.Write(OffsetList.ClickToMoveX, targetPosition.X);
-            XMemory.Write(OffsetList.ClickToMoveY, targetPosition.Y);
-            XMemory.Write(OffsetList.ClickToMoveZ, targetPosition.Z);
-            XMemory.Write(OffsetList.ClickToMoveDistance, distance);
-            XMemory.Write(OffsetList.ClickToMoveAction, clickToMoveType);
-        }
+        public void UseItemByBagAndSlot(int bagId, int bagSlot)
+                                                                                                    => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
 
-        public bool HasUnitStealableBuffs(WowLuaUnit luaUnit)
-        {
-            LuaDoString($"abIsStealableStuffThere=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,isStealable=UnitAura(\"{luaUnit}\",i);if isStealable==1 then abIsStealableStuffThere=1;end end");
-            string rawValue = GetLocalizedText("abIsStealableStuffThere");
-
-            return int.TryParse(rawValue, out int result) ? result == 1 : false;
-        }
-
-        public bool IsBgInviteReady()
-        {
-            LuaDoString("abBgQueueIsReady = 0;for i=1,2 do local x = GetBattlefieldPortExpiration(i) if x > 0 then abBgQueueIsReady = 1 end end");
-            string rawValue = GetLocalizedText("abBgQueueIsReady");
-
-            return int.TryParse(rawValue, out int result) ? result == 1 : false;
-        }
+        public void UseItemByName(string itemName)
+            => SellItemsByName(itemName);
 
         private bool AllocateCodeCaves()
         {

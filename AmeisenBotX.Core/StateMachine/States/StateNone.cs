@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.StateMachine.States
 {
-    public class StateNone : State
+    public class StateNone : BasicState
     {
         public StateNone(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config) : base(stateMachine)
         {
@@ -13,15 +13,15 @@
         {
             if (Config.AutostartWow)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.StartWow);
+                AmeisenBotStateMachine.SetState(BotState.StartWow);
             }
             else if (Config.AutoLogin)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Login);
+                AmeisenBotStateMachine.SetState(BotState.Login);
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                AmeisenBotStateMachine.SetState(BotState.Idle);
             }
         }
 

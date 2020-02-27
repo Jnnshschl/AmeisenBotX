@@ -17,21 +17,27 @@ namespace AmeisenBotX.Core.StateMachine.Utils
             GetDebuffs = getDebuffsFunction;
         }
 
+        public AuraManager()
+        {
+            Buffs = new List<string>();
+            Debuffs = new List<string>();
+        }
+
         public delegate bool CastFunction();
+
         public delegate bool DispellBuffsFunction();
+
         public delegate bool DispellDebuffsFunction();
+
         public delegate List<string> GetBuffsFunction();
+
         public delegate List<string> GetDebuffsFunction();
-
-        public TimeSpan MinUpdateTime { get; private set; }
-
-        public DateTime LastBuffUpdate { get; private set; }
 
         public List<string> Buffs { get; private set; }
 
-        public List<string> Debuffs { get; private set; }
-
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
+
+        public List<string> Debuffs { get; private set; }
 
         public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 
@@ -43,11 +49,9 @@ namespace AmeisenBotX.Core.StateMachine.Utils
 
         public GetDebuffsFunction GetDebuffs { get; set; }
 
-        public AuraManager()
-        {
-            Buffs = new List<string>();
-            Debuffs = new List<string>();
-        }
+        public DateTime LastBuffUpdate { get; private set; }
+
+        public TimeSpan MinUpdateTime { get; private set; }
 
         public bool Tick(bool forceUpdate = false)
         {
