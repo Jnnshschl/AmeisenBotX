@@ -48,10 +48,18 @@ namespace AmeisenBotX.Core.Battleground
 
         public void Execute()
         {
+            List<WowGameobject> flagObjects = ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position)).ToList();
+
             if (BattlegroundProfile == null)
             {
                 TryLoadProfile(ObjectManager.MapId);
-                CurrentState = BattlegroundProfile.States.First();
+
+                if (BattlegroundProfile != null)
+                {
+                    CurrentState = BattlegroundProfile.States.First();
+                }
             }
             else
             {
@@ -109,14 +117,11 @@ namespace AmeisenBotX.Core.Battleground
             }
         }
 
-        internal IEnumerable<WowGameobject> GetBattlegroundFlags()
-        {
-            IEnumerable<WowGameobject> flagObjects = ObjectManager.WowObjects
+        internal IEnumerable<WowGameobject> GetBattlegroundFlags(bool onlyEnemy = true)
+            => ObjectManager.WowObjects
                 .OfType<WowGameobject>()
-                .Where(e => e.GameobjectType == WowGameobjectType.Flagdrop || e.GameobjectType == WowGameobjectType.Flagstand);
-
-            return flagObjects;
-        }
+                // 5912 Alliance Flag / 5913 Horde Flag
+                .Where(e => onlyEnemy ? (!ObjectManager.Player.IsAlliance() && e.DisplayId == 5912) || (ObjectManager.Player.IsAlliance() && e.DisplayId == 5913) : e.DisplayId == 5912 || e.DisplayId == 5913);
 
         internal void SetState(BattlegroundState state)
         {

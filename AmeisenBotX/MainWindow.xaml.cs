@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -158,7 +159,19 @@ namespace AmeisenBotX
                 // debug label stuff
                 if (AmeisenBot.BattlegroundEngine != null)
                 {
-                    labelBgObjective.Content = $"BGEngine State: {AmeisenBot.BattlegroundEngine.CurrentState.Key}\nBGEngine Last State: {AmeisenBot.BattlegroundEngine.LastState}";
+                    string ownCarrier = string.Empty;
+                    string enemyCarrier = string.Empty;
+                    bool isMeCarrier = false;
+
+                    if (AmeisenBot.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
+                    {
+                        ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.BattlegroundEngine.BattlegroundProfile;
+                        ownCarrier = ctfBattlegroundProfile.OwnFlagCarrierPlayer?.Name;
+                        enemyCarrier = ctfBattlegroundProfile.EnemyFlagCarrierPlayer?.Name;
+                        isMeCarrier = ctfBattlegroundProfile.IsMeFlagCarrier;
+                    }
+
+                    labelBgObjective.Content = $"BGEngine State: {AmeisenBot.BattlegroundEngine.CurrentState.Key}\nBGEngine Last State: {AmeisenBot.BattlegroundEngine.LastState}\n\nBGOwnFlagCarrier: {ownCarrier}\nBGEnemyFlagCarrier: {enemyCarrier}\nisMeCarrier: {isMeCarrier}";
                 }
 
                 // update health and secodary power bar and

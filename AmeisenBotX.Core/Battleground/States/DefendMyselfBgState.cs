@@ -11,6 +11,7 @@ namespace AmeisenBotX.Core.Battleground.States
     {
         public DefendMyselfBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager) : base(battlegroundEngine)
         {
+            ObjectManager = objectManager;
         }
 
         private ObjectManager ObjectManager { get; }
@@ -47,7 +48,17 @@ namespace AmeisenBotX.Core.Battleground.States
 
         private void DoCtfLogic(int enemyCount, int friendCount)
         {
-            if (enemyCount > friendCount + 2)
+            bool isMeFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier;
+
+            IEnumerable<WowGameobject> flags = BattlegroundEngine.GetBattlegroundFlags();
+            if (flags.Count() > 0
+                && !isMeFlagCarrier)
+            {
+                BattlegroundEngine.SetState(BattlegroundState.PickupEnemyFlag);
+                return;
+            }
+            
+            if (enemyCount > friendCount + 2 || isMeFlagCarrier)
             {
                 // flee to base
                 BattlegroundEngine.SetState(BattlegroundState.MoveToOwnBase);

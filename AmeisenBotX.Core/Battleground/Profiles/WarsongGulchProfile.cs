@@ -6,14 +6,16 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Pathfinding.Objects;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Battleground.Profiles
 {
-    public class WarsongGulchProfile : IBattlegroundProfile
+    public class WarsongGulchProfile : ICtfBattlegroundProfile
     {
         public WarsongGulchProfile(bool isAlliance, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine, BattlegroundEngine battlegroundEngine)
         {
             ObjectManager = objectManager;
+            HookManager = hookManager;
             IsAlliance = isAlliance;
             IsMeFlagCarrier = false;
 
@@ -52,13 +54,13 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         public Vector3 EnemyBasePosition => WsgDataset.EnemyFlagPosition;
 
-        public WowPlayer EnemyFlagCarrier { get; private set; }
+        public WowPlayer EnemyFlagCarrierPlayer { get; private set; }
 
         public bool IsMeFlagCarrier { get; private set; }
 
         public Vector3 OwnBasePosition => WsgDataset.OwnFlagPosition;
 
-        public WowPlayer OwnFlagCarrier { get; private set; }
+        public WowPlayer OwnFlagCarrierPlayer { get; private set; }
 
         public Dictionary<BattlegroundState, BasicBattlegroundState> States { get; private set; }
 
@@ -70,41 +72,45 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         private ObjectManager ObjectManager { get; set; }
 
+        private HookManager HookManager { get; set; }
+
         private IWsgDataset WsgDataset { get; set; }
 
-        public void AllianceFlagWasDropped(string playername) => UnsetFlagCarrier(IsAlliance, playername);
+        public bool IsBattlegroundRunning => IsAlliance;
 
-        public void AllianceFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
+        public void AllianceFlagWasDropped(string playername) => UnsetFlagCarrier(!IsAlliance, playername);
 
-        public void HordeFlagWasDropped(string playername) => UnsetFlagCarrier(!IsAlliance, playername);
+        public void AllianceFlagWasPickedUp(string playername) => SetFlagCarrier(!IsAlliance, playername);
 
-        public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(!IsAlliance, playername);
+        public void HordeFlagWasDropped(string playername) => UnsetFlagCarrier(IsAlliance, playername);
+
+        public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
 
         private void SetFlagCarrier(bool own, string playername)
         {
             if (own)
             {
-                OwnFlagCarrier = ObjectManager.GetWowPlayerByName(playername);
+                OwnFlagCarrierPlayer = ObjectManager.GetWowPlayerByName(playername);
+                IsMeFlagCarrier = playername.ToUpper() == ObjectManager.Player.Name.ToUpper();
             }
             else
             {
-                EnemyFlagCarrier = ObjectManager.GetWowPlayerByName(playername);
+                EnemyFlagCarrierPlayer = ObjectManager.GetWowPlayerByName(playername);
             }
-
-            IsMeFlagCarrier = playername.ToUpper() == ObjectManager.Player.Name.ToUpper();
         }
 
         private void UnsetFlagCarrier(bool own, string playername)
         {
             if (own)
             {
-                LastOwnFlagCarrier = OwnFlagCarrier;
-                OwnFlagCarrier = null;
+                LastOwnFlagCarrier = OwnFlagCarrierPlayer;
+                OwnFlagCarrierPlayer = null;
+                IsMeFlagCarrier = false;
             }
             else
             {
-                LastEnemyFlagCarrier = EnemyFlagCarrier;
-                EnemyFlagCarrier = null;
+                LastEnemyFlagCarrier = EnemyFlagCarrierPlayer;
+                EnemyFlagCarrierPlayer = null;
             }
         }
 

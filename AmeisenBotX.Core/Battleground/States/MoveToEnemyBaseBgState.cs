@@ -14,6 +14,9 @@ namespace AmeisenBotX.Core.Battleground.States
     {
         public MoveToEnemyBaseBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, IMovementEngine movementEngine, Vector3 enemyBasePosition) : base(battlegroundEngine)
         {
+            ObjectManager = objectManager;
+            MovementEngine = movementEngine;
+            EnemyBasePosition = enemyBasePosition;
         }
 
         private Vector3 EnemyBasePosition { get; }
@@ -40,7 +43,7 @@ namespace AmeisenBotX.Core.Battleground.States
                 }
             }
 
-            if (ObjectManager.Player.Position.GetDistance(EnemyBasePosition) > 10)
+            if (ObjectManager.Player.Position.GetDistance(EnemyBasePosition) > 5)
             {
                 MovementEngine.SetState(MovementEngineState.Moving, EnemyBasePosition);
                 MovementEngine.Execute();

@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Battleground.States
                     return;
                 }
 
-                if (ObjectManager.Player.Position.GetDistance(OwnBasePosition) > 10)
+                if (ObjectManager.Player.Position.GetDistance(OwnBasePosition) > 5)
                 {
                     MovementEngine.SetState(MovementEngineState.Moving, OwnBasePosition);
                     MovementEngine.Execute();

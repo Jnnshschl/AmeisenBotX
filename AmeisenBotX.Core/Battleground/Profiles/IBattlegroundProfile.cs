@@ -8,6 +8,8 @@ namespace AmeisenBotX.Core.Battleground.Profiles
     {
         BattlegroundType BattlegroundType { get; }
 
+        bool IsBattlegroundRunning { get; }
+
         Dictionary<BattlegroundState, BasicBattlegroundState> States { get; }
     }
 }

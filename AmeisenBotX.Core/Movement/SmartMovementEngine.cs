@@ -97,7 +97,7 @@ namespace AmeisenBotX.Core.Movement
             List<Vector3> forces = new List<Vector3>();
             Vector3 currentPosition = GetPosition.Invoke();
             Vector3 targetPosition = CurrentPath.Peek();
-            double distanceToTargetPosition = currentPosition.GetDistance2D(targetPosition);
+            double distanceToTargetPosition = currentPosition.GetDistance(targetPosition);
 
             if (distanceToTargetPosition > 128)
             {
