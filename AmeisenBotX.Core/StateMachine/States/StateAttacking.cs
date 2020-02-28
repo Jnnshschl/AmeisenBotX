@@ -79,21 +79,23 @@ namespace AmeisenBotX.Core.StateMachine.States
                     ObjectManager.UpdateObject(ObjectManager.Target);
 
                     // do we need to clear our target
-                    if (DateTime.Now - LastValidTargetCheck > TimeSpan.FromMilliseconds(250))
+                    if (IsTargetInValid())
                     {
-                        if (IsTargetInValid())
+                        HookManager.ClearTarget();
+                        ObjectManager.UpdateObject(ObjectManager.Player);
+
+                        if (!ObjectManager.Player.IsInCombat)
                         {
-                            HookManager.ClearTarget();
+                            return;
+                        }
+
+                        // select a new target if our current target is invalid
+                        if (SelectTargetToAttack(out WowUnit target))
+                        {
+                            HookManager.TargetGuid(target.Guid);
+
                             ObjectManager.UpdateObject(ObjectManager.Player);
-
-                            // select a new target if our current target is invalid
-                            if (SelectTargetToAttack(out WowUnit target))
-                            {
-                                HookManager.TargetGuid(target.Guid);
-
-                                ObjectManager.UpdateObject(ObjectManager.Player);
-                                ObjectManager.UpdateObject(ObjectManager.Target);
-                            }
+                            ObjectManager.UpdateObject(ObjectManager.Target);
                         }
 
                         LastValidTargetCheck = DateTime.Now;
@@ -145,14 +147,13 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private void HandleMovement(WowUnit target)
         {
-            // we cant move to a null target
-            if (target == null || target.IsDead || target.IsNotAttackable)
-            {
-                return;
-            }
-
-            // we don't want to move when we are casting or channeling something
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            // we cant move to a null target and we don't want to
+            // move when we are casting or channeling something
+            if (target == null
+                || target.IsDead
+                || target.IsNotAttackable
+                || ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
             {
                 return;
             }

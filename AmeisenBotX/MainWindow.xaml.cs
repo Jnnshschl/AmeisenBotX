@@ -286,7 +286,7 @@ namespace AmeisenBotX
             else
             {
                 labelCurrentTickTime.Foreground = currentTickTimeBadBrush;
-                AmeisenLogger.Instance.Log("High executionMs, something blocks our thread or CPU is to slow...", LogLevel.Warning);
+                AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow...", LogLevel.Warning);
             }
         }
 

@@ -70,25 +70,25 @@ namespace AmeisenBotX.Core.Event
                             }
                             catch (Exception e)
                             {
-                                AmeisenLogger.Instance.Log($"Failed to invoke {rawEvent.EventName}:\n{e.ToString()}", LogLevel.Error);
+                                AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.EventName}:\n{e.ToString()}", LogLevel.Error);
                             }
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log($"Failed to parse events:\neventJson: {eventJson}\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log("EventHook", $"Failed to parse events:\neventJson: {eventJson}\n{e.ToString()}", LogLevel.Error);
                 }
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed to read events:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed to read events:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
         public void Start()
         {
-            AmeisenLogger.Instance.Log($"Starting EventHookManager...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("EventHook", $"Starting EventHookManager...", LogLevel.Verbose);
             if (!IsSetUp)
             {
                 IsSetUp = true;
@@ -98,20 +98,20 @@ namespace AmeisenBotX.Core.Event
 
         public void Stop()
         {
-            AmeisenLogger.Instance.Log($"Stopping EventHookManager...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager...", LogLevel.Verbose);
             HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
             HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
         }
 
         public void Subscribe(string eventName, OnEventFired onEventFired)
         {
-            AmeisenLogger.Instance.Log($"Subscribing to event: {eventName}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("EventHook", $"Subscribing to event: {eventName}", LogLevel.Verbose);
             SubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
         public void Unsubscribe(string eventName)
         {
-            AmeisenLogger.Instance.Log($"Unsubscribing from event: {eventName}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
             UnsubscribeQueue.Enqueue(eventName);
         }
 
@@ -128,7 +128,7 @@ namespace AmeisenBotX.Core.Event
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed subscribe to event:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed subscribe to event:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
@@ -145,13 +145,13 @@ namespace AmeisenBotX.Core.Event
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed unsubscribe from event:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed unsubscribe from event:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
         private void SetupEventHook()
         {
-            AmeisenLogger.Instance.Log($"Setting up the EventHookManager...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("EventHook", $"Setting up the EventHookManager...", LogLevel.Verbose);
 
             StringBuilder luaStuff = new StringBuilder();
             luaStuff.Append("abFrame = CreateFrame(\"FRAME\", \"AbotEventFrame\") ");

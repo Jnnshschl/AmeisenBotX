@@ -5,7 +5,6 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding;
 using System.Linq;
 using System.Threading.Tasks;
 

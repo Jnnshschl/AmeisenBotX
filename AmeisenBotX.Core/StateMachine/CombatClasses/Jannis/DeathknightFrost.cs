@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (!ObjectManager.Player.IsAutoAttacking)
             {
                 HookManager.StartAutoAttack();
-                AmeisenLogger.Instance.Log($"[{Displayname}]: Started Auto-Attacking", LogLevel.Verbose);
+                AmeisenLogger.Instance.Log(Displayname, $"Started Auto-Attacking", LogLevel.Verbose);
             }
 
             if (MyAuraManager.Tick()

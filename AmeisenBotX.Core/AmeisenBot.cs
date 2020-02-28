@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.OffsetLists;
@@ -44,18 +45,18 @@ namespace AmeisenBotX.Core
         public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config)
         {
             SetupLogging(botDataPath, accountName);
-            AmeisenLogger.Instance.Log("AmeisenBot starting...", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", "AmeisenBot starting...", LogLevel.Master);
 
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            AmeisenLogger.Instance.Log($"version: {version}", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"version: {version}", LogLevel.Master);
 
             Config = config;
 
             AccountName = accountName;
-            AmeisenLogger.Instance.Log($"AccountName: {botDataPath}", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {botDataPath}", LogLevel.Master);
 
             BotDataPath = botDataPath;
-            AmeisenLogger.Instance.Log($"BotDataPath: {botDataPath}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
             CurrentExecutionMs = 0;
             CurrentExecutionCount = 0;
@@ -65,7 +66,7 @@ namespace AmeisenBotX.Core
             StateMachineTimer.Elapsed += StateMachineTimerTick;
 
             OffsetList = new OffsetList335a();
-            AmeisenLogger.Instance.Log($"Using OffsetList: {OffsetList.GetType().ToString()}", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {OffsetList.GetType().ToString()}", LogLevel.Master);
 
             XMemory = new XMemory();
             BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, accountName, "cache.bin"));
@@ -87,11 +88,12 @@ namespace AmeisenBotX.Core
                 ObjectManager,
                 MovementSettings);
             BattlegroundEngine = new BattlegroundEngine(HookManager, ObjectManager, MovemenEngine);
+            JobEngine = new JobEngine(ObjectManager, MovemenEngine, HookManager, CharacterManager);
 
             if (!Directory.Exists(BotDataPath))
             {
                 Directory.CreateDirectory(BotDataPath);
-                AmeisenLogger.Instance.Log($"Creating folder {botDataPath}", LogLevel.Verbose);
+                AmeisenLogger.Instance.Log("AmeisenBot", $"Creating folder {botDataPath}", LogLevel.Verbose);
             }
 
             if (config.UseBuiltInCombatClass)
@@ -110,7 +112,26 @@ namespace AmeisenBotX.Core
                 CharacterManager.ItemComparator = CombatClass.ItemComparator;
             }
 
-            StateMachine = new AmeisenBotStateMachine(BotDataPath, WowProcess, Config, XMemory, OffsetList, ObjectManager, CharacterManager, HookManager, EventHookManager, BotCache, PathfindingHandler, MovemenEngine, MovementSettings, CombatClass, BattlegroundEngine);
+            StateMachine = new AmeisenBotStateMachine
+            (
+                BotDataPath,
+                WowProcess,
+                Config,
+                XMemory,
+                OffsetList,
+                ObjectManager,
+                CharacterManager,
+                HookManager,
+                EventHookManager,
+                BotCache,
+                PathfindingHandler,
+                MovemenEngine,
+                MovementSettings,
+                CombatClass,
+                BattlegroundEngine,
+                JobEngine
+            );
+
             StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
         }
 
@@ -157,6 +178,8 @@ namespace AmeisenBotX.Core
 
         public bool IsRunning { get; private set; }
 
+        public JobEngine JobEngine { get; set; }
+
         public IMovementEngine MovemenEngine { get; set; }
 
         public MovementSettings MovementSettings { get; set; }
@@ -179,17 +202,20 @@ namespace AmeisenBotX.Core
 
         public void Pause()
         {
+            AmeisenLogger.Instance.Log("AmeisenBot", "Pausing", LogLevel.Warning);
             IsRunning = false;
         }
 
         public void Resume()
         {
+            AmeisenLogger.Instance.Log("AmeisenBot", "Resuming", LogLevel.Warning);
             IsRunning = true;
             stateMachineTimerBusy = 0;
         }
 
         public void Start()
         {
+            AmeisenLogger.Instance.Log("AmeisenBot", "Starting", LogLevel.Warning);
             StateMachineTimer.Start();
             BotCache.Load();
             SubscribeToWowEvents();
@@ -198,6 +224,7 @@ namespace AmeisenBotX.Core
 
         public void Stop()
         {
+            AmeisenLogger.Instance.Log("AmeisenBot", "Stopping", LogLevel.Warning);
             StateMachineTimer.Stop();
 
             HookManager.DisposeHook();
@@ -220,10 +247,11 @@ namespace AmeisenBotX.Core
 
             if (Config.AutocloseWow)
             {
+                AmeisenLogger.Instance.Log("AmeisenBot", "Killing WoW process", LogLevel.Warning);
                 XMemory.Process.Kill();
             }
 
-            AmeisenLogger.Instance.Log($"Stopping AmeisenBot...", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Stopping AmeisenBot...", LogLevel.Master);
             AmeisenLogger.Instance.Stop();
         }
 
@@ -290,22 +318,23 @@ namespace AmeisenBotX.Core
                     if (Config.BotWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
                         XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, Config.BotWindowRect);
-                        AmeisenLogger.Instance.Log($"Loaded bot window position: {Config.BotWindowRect}", LogLevel.Verbose);
+                        AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded bot window position: {Config.BotWindowRect}", LogLevel.Verbose);
                     }
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log($"Failed to set bot window position:\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set bot window position:\n{e.ToString()}", LogLevel.Error);
                 }
             }
         }
 
         private void LoadCustomCombatClass()
         {
-            AmeisenLogger.Instance.Log($"Loading custom CombatClass: {Config.CustomCombatClassFile}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading custom CombatClass: {Config.CustomCombatClassFile}", LogLevel.Verbose);
             if (Config.CustomCombatClassFile.Length == 0
                 || !File.Exists(Config.CustomCombatClassFile))
             {
+                AmeisenLogger.Instance.Log("AmeisenBot", "Loading default CombatClass", LogLevel.Warning);
                 LoadDefaultCombatClass();
             }
             else
@@ -314,9 +343,11 @@ namespace AmeisenBotX.Core
                 {
                     CombatClass = CompileCustomCombatClass();
                     OnCombatClassCompilationStatusChanged?.Invoke(true, string.Empty, string.Empty);
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Compiling custom CombatClass successful", LogLevel.Warning);
                 }
                 catch (Exception e)
                 {
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Compiling custom CombatClass failed:\n{e}", LogLevel.Warning);
                     OnCombatClassCompilationStatusChanged?.Invoke(false, e.GetType().Name, e.ToString());
                     LoadDefaultCombatClass();
                 }
@@ -325,7 +356,7 @@ namespace AmeisenBotX.Core
 
         private void LoadDefaultCombatClass()
         {
-            AmeisenLogger.Instance.Log($"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
             CombatClass = (Config.BuiltInCombatClassName.ToUpper()) switch
             {
                 "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
@@ -366,19 +397,19 @@ namespace AmeisenBotX.Core
                     if (Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
                         XMemory.SetWindowPosition(XMemory.Process.MainWindowHandle, Config.WowWindowRect);
-                        AmeisenLogger.Instance.Log($"Loaded wow window position: {Config.WowWindowRect}", LogLevel.Verbose);
+                        AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded wow window position: {Config.WowWindowRect}", LogLevel.Verbose);
                     }
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log($"Failed to set wow window position:\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set wow window position:\n{e.ToString()}", LogLevel.Error);
                 }
             }
         }
 
         private void OnBagChanged(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
 
             CharacterManager.Inventory.Update();
             CharacterManager.UpdateCharacterGear();
@@ -387,12 +418,12 @@ namespace AmeisenBotX.Core
 
         private void OnBattlegroundScoreUpdate(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnBattlegroundScoreUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBattlegroundScoreUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
 
         private void OnBgAllianceMessage(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnBgAllianceMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBgAllianceMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
 
             if (args.Count > 1)
             {
@@ -402,7 +433,7 @@ namespace AmeisenBotX.Core
 
         private void OnBgHordeMessage(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnBgHordeMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBgHordeMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
 
             if (args.Count > 1)
             {
@@ -412,7 +443,7 @@ namespace AmeisenBotX.Core
 
         private void OnBgNeutralMessage(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnBgNeutralMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBgNeutralMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
 
             if (args.Count > 1)
             {
@@ -422,19 +453,19 @@ namespace AmeisenBotX.Core
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.CofirmBop();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnEquipmentChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnEquipmentChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             CharacterManager.Equipment.Update();
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
 
             if (int.TryParse(args[0], out int rollId))
             {
@@ -445,7 +476,7 @@ namespace AmeisenBotX.Core
 
                 if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                 {
-                    AmeisenLogger.Instance.Log($"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
+                    AmeisenLogger.Instance.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
                     HookManager.RollOnItem(rollId, RollType.Need);
                     return;
                 }
@@ -456,42 +487,42 @@ namespace AmeisenBotX.Core
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.LootEveryThing();
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnPartyInvitation: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnPartyInvitation: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.AcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnPvpQueueShow: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnPvpQueueShow: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnReadyCheck: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnReadyCheck: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.CofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnResurrectRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnResurrectRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.AcceptResurrect();
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnSummonRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnSummonRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             HookManager.AcceptSummon();
         }
 
         private void OnWorldStateUpdate(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log($"Event OnWorldStateUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnWorldStateUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
 
         private void ProcessBgMessage(string message, string arg1)
@@ -526,7 +557,7 @@ namespace AmeisenBotX.Core
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed to save bot window position:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save bot window position:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
@@ -538,7 +569,7 @@ namespace AmeisenBotX.Core
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed to save wow window position:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save wow window position:\n{e.ToString()}", LogLevel.Error);
             }
         }
 
@@ -586,7 +617,7 @@ namespace AmeisenBotX.Core
             EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
             EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnBgNeutralMessage);
 
-            EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", CombatLogParser.Parse);
+            // EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", CombatLogParser.Parse);
         }
     }
 }

@@ -169,7 +169,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             HookManager.CastSpell(spellName);
             CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-            AmeisenLogger.Instance.Log($"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
         }
 
         private bool IsInRange(Spell spell, Vector3 position)
@@ -185,7 +185,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         private void PrepareCast(string spellName)
         {
-            AmeisenLogger.Instance.Log($"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
 
             if (!Spells.ContainsKey(spellName))
             {

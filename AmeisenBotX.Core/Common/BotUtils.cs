@@ -43,6 +43,9 @@ namespace AmeisenBotX.Core.Common
             return $"{value}";
         }
 
+        public static string Capitalize(string input)
+            => input.First().ToString().ToUpper() + input.Substring(1);
+
         public static void HoldKey(IntPtr windowHandle, IntPtr key)
         {
             SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));

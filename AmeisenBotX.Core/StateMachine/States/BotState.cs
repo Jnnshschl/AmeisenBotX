@@ -17,6 +17,7 @@
         Looting,
         Repairing,
         Selling,
-        Battleground
+        Battleground,
+        Job
     }
 }

@@ -85,11 +85,11 @@ namespace AmeisenBotX.Logging
             catch { }
         }
 
-        public void Log(string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
+        public void Log(string tag, string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
             if (logLevel <= ActiveLogLevel)
             {
-                LogQueue.Enqueue(new LogEntry(logLevel, message, Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+                LogQueue.Enqueue(new LogEntry(logLevel, $"[{tag}] {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
             }
         }
 

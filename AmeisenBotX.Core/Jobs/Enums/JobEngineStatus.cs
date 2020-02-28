@@ -6,6 +6,7 @@
         Searching,
         Found,
         Gathering,
-        Mounting
+        Mailbox,
+        Sending
     }
 }

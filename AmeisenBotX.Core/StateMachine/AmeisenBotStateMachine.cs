@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.OffsetLists;
@@ -39,9 +40,10 @@ namespace AmeisenBotX.Core.StateMachine
             IMovementEngine movementEngine,
             MovementSettings movementSettings,
             ICombatClass combatClass,
-            BattlegroundEngine battlegroundEngine)
+            BattlegroundEngine battlegroundEngine,
+            JobEngine jobEngine)
         {
-            AmeisenLogger.Instance.Log("Starting AmeisenBotStateMachine...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("StateMachine", "Starting AmeisenBotStateMachine...", LogLevel.Verbose);
 
             BotDataPath = botDataPath;
             Config = config;
@@ -77,7 +79,8 @@ namespace AmeisenBotX.Core.StateMachine
                 { BotState.Healing, new StateEating(this, config, objectManager, characterManager) },
                 { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
                 { BotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
-                { BotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) }
+                { BotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) },
+                { BotState.Job, new StateJob(this, jobEngine) }
             };
 
             CurrentState = States.First();
@@ -134,7 +137,7 @@ namespace AmeisenBotX.Core.StateMachine
         {
             if (XMemory.Process == null || XMemory.Process.HasExited)
             {
-                AmeisenLogger.Instance.Log("WoW crashed...", LogLevel.Verbose);
+                AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
                 SetState(BotState.None);
             }
 
@@ -165,7 +168,7 @@ namespace AmeisenBotX.Core.StateMachine
 
                             if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
                             {
-                                SetState(BotState.Attacking);
+                                SetState(BotState.Attacking, true);
                             }
                         }
                     }
@@ -191,7 +194,7 @@ namespace AmeisenBotX.Core.StateMachine
             || ObjectManager.MapId == 566
             || ObjectManager.MapId == 607;
 
-        internal void SetState(BotState state)
+        internal void SetState(BotState state, bool ignoreExit = false)
         {
             if (CurrentState.Key == state)
             {
@@ -200,7 +203,12 @@ namespace AmeisenBotX.Core.StateMachine
             }
 
             LastState = CurrentState.Key;
-            CurrentState.Value.Exit();
+
+            if (!ignoreExit)
+            {
+                CurrentState.Value.Exit();
+            }
+
             CurrentState = States.First(s => s.Key == state);
             CurrentState.Value.Enter();
 

@@ -243,7 +243,7 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateAll()
         {
-            AmeisenLogger.Instance.Log($"Updating full character...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CharacterManager", $"Updating full character...", LogLevel.Verbose);
 
             Inventory.Update();
             Equipment.Update();
