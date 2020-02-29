@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.Profiles;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
@@ -12,16 +14,19 @@ namespace AmeisenBotX.Core.Battleground.States
 {
     public class MoveToOwnBaseBgState : BasicBattlegroundState
     {
-        public MoveToOwnBaseBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, IMovementEngine movementEngine, Vector3 ownBasePosition) : base(battlegroundEngine)
+        public MoveToOwnBaseBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, HookManager hookManager, IMovementEngine movementEngine, Vector3 ownBasePosition) : base(battlegroundEngine)
         {
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
             OwnBasePosition = ownBasePosition;
+            HookManager = hookManager;
         }
 
         private IMovementEngine MovementEngine { get; }
 
         private ObjectManager ObjectManager { get; }
+
+        private HookManager HookManager { get; }
 
         private Vector3 OwnBasePosition { get; }
 
@@ -31,14 +36,16 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Execute()
         {
-            // CTF flag priority
             if (BattlegroundEngine.BattlegroundProfile.BattlegroundType == BattlegroundType.CaptureTheFlag)
             {
-                IEnumerable<WowGameobject> flags = BattlegroundEngine.GetBattlegroundFlags();
-                if (flags.Count() > 0
-                    && !((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
+                if (BattlegroundEngine.BattlegroundProfile.HanldeInterruptStates())
                 {
-                    BattlegroundEngine.SetState(BattlegroundState.PickupEnemyFlag);
+                    return;
+                }
+
+                if (BattlegroundEngine.AttackNearEnemies())
+                {
+                    BattlegroundEngine.ForceCombat = true;
                     return;
                 }
 
@@ -58,6 +65,8 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
+            BattlegroundEngine.ForceCombat = false;
         }
     }
 }

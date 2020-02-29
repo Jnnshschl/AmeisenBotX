@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.Profiles;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
@@ -12,11 +14,12 @@ namespace AmeisenBotX.Core.Battleground.States
 {
     public class MoveToEnemyBaseBgState : BasicBattlegroundState
     {
-        public MoveToEnemyBaseBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, IMovementEngine movementEngine, Vector3 enemyBasePosition) : base(battlegroundEngine)
+        public MoveToEnemyBaseBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, HookManager hookManager, IMovementEngine movementEngine, Vector3 enemyBasePosition) : base(battlegroundEngine)
         {
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
             EnemyBasePosition = enemyBasePosition;
+            HookManager = hookManager;
         }
 
         private Vector3 EnemyBasePosition { get; }
@@ -24,6 +27,8 @@ namespace AmeisenBotX.Core.Battleground.States
         private IMovementEngine MovementEngine { get; }
 
         private ObjectManager ObjectManager { get; }
+
+        private HookManager HookManager { get; }
 
         public override void Enter()
         {
@@ -34,30 +39,35 @@ namespace AmeisenBotX.Core.Battleground.States
             // CTF flag priority
             if (BattlegroundEngine.BattlegroundProfile.BattlegroundType == BattlegroundType.CaptureTheFlag)
             {
-                IEnumerable<WowGameobject> flags = BattlegroundEngine.GetBattlegroundFlags();
-                if (flags.Count() > 0
-                    && !((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
+                if (BattlegroundEngine.BattlegroundProfile.HanldeInterruptStates())
                 {
-                    BattlegroundEngine.SetState(BattlegroundState.PickupEnemyFlag);
                     return;
                 }
-            }
 
-            if (ObjectManager.Player.Position.GetDistance(EnemyBasePosition) > 5)
-            {
-                MovementEngine.SetState(MovementEngineState.Moving, EnemyBasePosition);
-                MovementEngine.Execute();
-                return;
-            }
-            else
-            {
-                BattlegroundEngine.SetState(BattlegroundState.DefendMyself);
-                return;
+                if (BattlegroundEngine.AttackNearEnemies())
+                {
+                    BattlegroundEngine.ForceCombat = true;
+                    return;
+                }
+
+                if (ObjectManager.Player.Position.GetDistance(EnemyBasePosition) > 5)
+                {
+                    MovementEngine.SetState(MovementEngineState.Moving, EnemyBasePosition);
+                    MovementEngine.Execute();
+                    return;
+                }
+                else
+                {
+                    BattlegroundEngine.SetState(BattlegroundState.DefendMyself);
+                    return;
+                }
             }
         }
 
         public override void Exit()
         {
+            MovementEngine.Reset();
+            BattlegroundEngine.ForceCombat = false;
         }
     }
 }

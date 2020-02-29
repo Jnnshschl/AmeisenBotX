@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             if (BattlegroundEngine.BattlegroundProfile.BattlegroundType == BattlegroundType.CaptureTheFlag)
             {
-                IEnumerable<WowGameobject> flags = BattlegroundEngine.GetBattlegroundFlags();
+                IEnumerable<WowGameobject> flags = BattlegroundEngine.GetBattlegroundFlags(false);
                 if (flags.Count() > 0)
                 {
                     if (!((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
@@ -63,6 +63,7 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
         }
     }
 }

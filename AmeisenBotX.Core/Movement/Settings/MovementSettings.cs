@@ -20,6 +20,6 @@
 
         public double SeperationDistance { get; set; } = 4;
 
-        public double WaypointCheckThreshold { get; set; } = 1.5;
+        public double WaypointCheckThreshold { get; set; } = 3;
     }
 }

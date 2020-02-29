@@ -16,6 +16,7 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
+            HookManager = hookManager;
         }
 
         private HookManager HookManager { get; }
@@ -32,12 +33,17 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             if (BattlegroundEngine.BattlegroundProfile.BattlegroundType == BattlegroundType.CaptureTheFlag)
             {
-                WowPlayer ownFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer;
-                IEnumerable<WowPlayer> nearEnemies = ObjectManager.GetNearEnemies(ownFlagCarrier.Position, 25);
-
-                if (ownFlagCarrier != null
-                    && nearEnemies.Count() > 1)
+                if (BattlegroundEngine.BattlegroundProfile.HanldeInterruptStates())
                 {
+                    return;
+                }
+
+                if (((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer != null)
+                {
+                    ulong ownFlagCarrierGuid = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer.Guid;
+                    WowPlayer ownFlagCarrier = ObjectManager.GetWowObjectByGuid<WowPlayer>(ownFlagCarrierGuid);
+                    IEnumerable<WowPlayer> nearEnemies = ObjectManager.GetNearEnemies(ownFlagCarrier.Position, 25);
+
                     if (ObjectManager.Player.Position.GetDistance(ownFlagCarrier.Position) > 10)
                     {
                         MovementEngine.SetState(MovementEngineState.Moving, ownFlagCarrier.Position);
@@ -50,6 +56,8 @@ namespace AmeisenBotX.Core.Battleground.States
                         {
                             HookManager.TargetGuid(target.Guid);
                             HookManager.StartAutoAttack();
+                            HookManager.FacePosition(ObjectManager.Player, target.Position);
+                            BattlegroundEngine.ForceCombat = true;
                         }
                     }
                 }
@@ -64,6 +72,8 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
+            BattlegroundEngine.ForceCombat = false;
         }
     }
 }

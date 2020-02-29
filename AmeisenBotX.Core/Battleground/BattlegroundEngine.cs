@@ -1,9 +1,12 @@
 ﻿using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Battleground.States;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,6 +19,8 @@ namespace AmeisenBotX.Core.Battleground
             HookManager = hookManager;
             ObjectManager = objectManager;
             MovementEngine = movementEngine;
+
+            ForceCombat = false;
         }
 
         public IBattlegroundProfile BattlegroundProfile { get; private set; }
@@ -23,6 +28,8 @@ namespace AmeisenBotX.Core.Battleground
         public KeyValuePair<BattlegroundState, BasicBattlegroundState> CurrentState { get; private set; }
 
         public BattlegroundState LastState { get; private set; }
+
+        public bool ForceCombat { get; internal set; }
 
         private HookManager HookManager { get; set; }
 
@@ -44,6 +51,34 @@ namespace AmeisenBotX.Core.Battleground
             {
                 ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasPickedUp(playername);
             }
+        }
+
+        public bool AttackNearEnemies(double range = 25)
+        {
+            IEnumerable<WowPlayer> nearEnemies = ObjectManager.GetNearEnemies(ObjectManager.Player.Position, range);
+
+            if (nearEnemies.Count() > 0)
+            {
+                WowPlayer target = nearEnemies.FirstOrDefault(e => BotUtils.IsValidUnit(e));
+
+                if (target != null)
+                {
+                    if (ObjectManager.Player.Position.GetDistance(target.Position) > 10)
+                    {
+                        MovementEngine.SetState(MovementEngineState.Moving, target.Position);
+                        MovementEngine.Execute();
+                        return true;
+                    }
+                    else
+                    {
+                        HookManager.TargetGuid(target.Guid);
+                        HookManager.StartAutoAttack();
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public void Execute()

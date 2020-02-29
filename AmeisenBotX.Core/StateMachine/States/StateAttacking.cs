@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
+﻿using AmeisenBotX.Core.Battleground;
+using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -16,7 +17,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateAttacking : BasicState
     {
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, MovementSettings movementSettings, ICombatClass combatClass) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, BattlegroundEngine battlegroundEngine, IMovementEngine movementEngine, MovementSettings movementSettings, ICombatClass combatClass) : base(stateMachine)
         {
             Config = config;
             ObjectManager = objectManager;
@@ -24,6 +25,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             HookManager = hookManager;
             MovementEngine = movementEngine;
             CombatClass = combatClass;
+            BattlegroundEngine = battlegroundEngine;
 
             Enemies = new List<WowUnit>();
 
@@ -34,6 +36,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         public double DistanceToTarget { get; private set; }
 
         private CharacterManager CharacterManager { get; }
+
+        private BattlegroundEngine BattlegroundEngine { get; }
 
         private ICombatClass CombatClass { get; }
 
@@ -58,7 +62,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (IsTargetInValid() && !ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat())
+            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat() && (BattlegroundEngine == null || BattlegroundEngine.ForceCombat))
             {
                 AmeisenBotStateMachine.SetState(BotState.Idle);
                 return;
@@ -79,7 +83,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                     ObjectManager.UpdateObject(ObjectManager.Target);
 
                     // do we need to clear our target
-                    if (IsTargetInValid())
+                    if (IsTargetInvalid())
                     {
                         HookManager.ClearTarget();
                         ObjectManager.UpdateObject(ObjectManager.Player);
@@ -182,7 +186,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
         }
 
-        private bool IsTargetInValid()
+        private bool IsTargetInvalid()
             => !BotUtils.IsValidUnit(ObjectManager.Target)
                 || ObjectManager.Target.IsDead
                 || ObjectManager.Target.Guid == ObjectManager.PlayerGuid
@@ -199,7 +203,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 .ToList();
 
             // remove all invalid, dead units
-            nonFriendlyUnits = nonFriendlyUnits.Where(e => BotUtils.IsValidUnit(e)).ToList();
+            nonFriendlyUnits = nonFriendlyUnits.Where(e => BotUtils.IsValidUnit(e) || e.IsDead).ToList();
 
             // if there are no non Friendly units, we can't attack anything
             if (nonFriendlyUnits.Count > 0)

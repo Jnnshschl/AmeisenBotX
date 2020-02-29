@@ -17,6 +17,7 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             ObjectManager = objectManager;
             HookManager = hookManager;
             IsAlliance = isAlliance;
+            BattlegroundEngine = battlegroundEngine;
             IsMeFlagCarrier = false;
 
             if (isAlliance)
@@ -31,8 +32,8 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             States = new Dictionary<BattlegroundState, BasicBattlegroundState>()
             {
                 { BattlegroundState.WaitingForStart, new WaitingForStartBgState(battlegroundEngine) },
-                { BattlegroundState.MoveToEnemyBase, new MoveToEnemyBaseBgState(battlegroundEngine, objectManager, movementEngine, WsgDataset.EnemyFlagPosition) },
-                { BattlegroundState.MoveToOwnBase, new MoveToOwnBaseBgState(battlegroundEngine, objectManager, movementEngine, WsgDataset.OwnFlagPosition) },
+                { BattlegroundState.MoveToEnemyBase, new MoveToEnemyBaseBgState(battlegroundEngine, objectManager, hookManager, movementEngine, WsgDataset.EnemyFlagPosition) },
+                { BattlegroundState.MoveToOwnBase, new MoveToOwnBaseBgState(battlegroundEngine, objectManager, hookManager, movementEngine, WsgDataset.OwnFlagPosition) },
                 { BattlegroundState.MoveToEnemyFlagCarrier, new MoveToEnemyFlagCarrierBgState(battlegroundEngine, objectManager, movementEngine, hookManager) },
                 { BattlegroundState.AssistOwnFlagCarrier, new AssistOwnFlagCarrierBgState(battlegroundEngine, objectManager, movementEngine, hookManager) },
                 { BattlegroundState.DefendMyself, new DefendMyselfBgState(battlegroundEngine, objectManager) },
@@ -72,6 +73,8 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         private ObjectManager ObjectManager { get; set; }
 
+        private BattlegroundEngine BattlegroundEngine { get; set; }
+
         private HookManager HookManager { get; set; }
 
         private IWsgDataset WsgDataset { get; set; }
@@ -85,6 +88,28 @@ namespace AmeisenBotX.Core.Battleground.Profiles
         public void HordeFlagWasDropped(string playername) => UnsetFlagCarrier(IsAlliance, playername);
 
         public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
+
+        public bool HanldeInterruptStates()
+        {
+            IEnumerable<WowGameobject> enemyflags = BattlegroundEngine.GetBattlegroundFlags();
+            if (enemyflags.Count() > 0
+                && !((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
+            {
+                BattlegroundEngine.SetState(BattlegroundState.PickupEnemyFlag);
+                return true;
+            }
+
+            IEnumerable<WowGameobject> ownFlags = BattlegroundEngine.GetBattlegroundFlags(false);
+            if (ownFlags.Count() > 0
+                && !((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier
+                && ownFlags.FirstOrDefault()?.Position.GetDistance(WsgDataset.OwnFlagPosition) > 4)
+            {
+                BattlegroundEngine.SetState(BattlegroundState.PickupOwnFlag);
+                return true;
+            }
+
+            return false;
+        }
 
         private void SetFlagCarrier(bool own, string playername)
         {

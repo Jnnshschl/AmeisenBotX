@@ -31,10 +31,16 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             if (BattlegroundEngine.BattlegroundProfile.BattlegroundType == BattlegroundType.CaptureTheFlag)
             {
-                WowPlayer enemyFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).EnemyFlagCarrierPlayer;
-
-                if (enemyFlagCarrier != null)
+                if (BattlegroundEngine.BattlegroundProfile.HanldeInterruptStates())
                 {
+                    return;
+                }
+
+                if (((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).EnemyFlagCarrierPlayer != null)
+                {
+                    ulong enemyFlagCarrierGuid = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).EnemyFlagCarrierPlayer.Guid;
+                    WowPlayer enemyFlagCarrier = ObjectManager.GetWowObjectByGuid<WowPlayer>(enemyFlagCarrierGuid);
+
                     if (ObjectManager.Player.Position.GetDistance(enemyFlagCarrier.Position) > 10)
                     {
                         MovementEngine.SetState(MovementEngineState.Moving, enemyFlagCarrier.Position);
@@ -46,6 +52,8 @@ namespace AmeisenBotX.Core.Battleground.States
                         {
                             HookManager.TargetGuid(enemyFlagCarrier.Guid);
                             HookManager.StartAutoAttack();
+                            HookManager.FacePosition(ObjectManager.Player, target.Position);
+                            BattlegroundEngine.ForceCombat = true;
                         }
                     }
                 }
@@ -60,6 +68,8 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
+            BattlegroundEngine.ForceCombat = false;
         }
     }
 }

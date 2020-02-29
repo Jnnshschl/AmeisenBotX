@@ -11,5 +11,7 @@ namespace AmeisenBotX.Core.Battleground.Profiles
         bool IsBattlegroundRunning { get; }
 
         Dictionary<BattlegroundState, BasicBattlegroundState> States { get; }
+
+        bool HanldeInterruptStates();
     }
 }

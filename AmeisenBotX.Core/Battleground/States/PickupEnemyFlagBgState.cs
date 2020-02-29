@@ -63,6 +63,7 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
+            MovementEngine.Reset();
         }
     }
 }

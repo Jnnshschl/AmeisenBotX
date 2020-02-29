@@ -44,12 +44,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                    || (CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell)),
                 null);
 
-            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
-            {
-                { felArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, true) },
-                { demonArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, true) },
-                { demonSkinSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, true) }
-            };
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();            
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
@@ -58,6 +53,24 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 { unstableAfflictionSpell, () => CastSpellIfPossible(unstableAfflictionSpell, true) },
                 { hauntSpell, () => CastSpellIfPossible(hauntSpell, true) }
             };
+
+            characterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
+        }
+
+        private void SpellBook_OnSpellBookUpdate()
+        {
+            if (CharacterManager.SpellBook.IsSpellKnown(felArmorSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(felArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, true));
+            }
+            else if (CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(demonArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, true));
+            }
+            else if (CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(demonSkinSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, true));
+            }
         }
 
         public override string Author => "Jannis";

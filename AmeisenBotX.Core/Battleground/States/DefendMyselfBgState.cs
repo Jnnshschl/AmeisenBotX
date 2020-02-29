@@ -50,47 +50,48 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             bool isMeFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier;
 
-            IEnumerable<WowGameobject> flags = BattlegroundEngine.GetBattlegroundFlags();
-            if (flags.Count() > 0
-                && !isMeFlagCarrier)
+            // CTF flag priority
+            if (BattlegroundEngine.BattlegroundProfile.BattlegroundType == BattlegroundType.CaptureTheFlag)
             {
-                BattlegroundEngine.SetState(BattlegroundState.PickupEnemyFlag);
-                return;
-            }
-            
-            if (enemyCount > friendCount + 2 || isMeFlagCarrier)
-            {
-                // flee to base
-                BattlegroundEngine.SetState(BattlegroundState.MoveToOwnBase);
-            }
-            else if (enemyCount == 0)
-            {
-                WowPlayer enemyFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).EnemyFlagCarrierPlayer;
-                WowPlayer ownFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer;
+                if (BattlegroundEngine.BattlegroundProfile.HanldeInterruptStates())
+                {
+                    return;
+                }
 
-                if (enemyFlagCarrier != null && ownFlagCarrier != null)
+                if (enemyCount > friendCount + 2 || isMeFlagCarrier)
                 {
-                    // move to enemy flag carrier
-                    BattlegroundEngine.SetState(BattlegroundState.MoveToEnemyFlagCarrier);
+                    // flee to base
+                    BattlegroundEngine.SetState(BattlegroundState.MoveToOwnBase);
                 }
-                else if (enemyFlagCarrier != null && ownFlagCarrier == null)
+                else if (enemyCount == 0)
                 {
-                    // get the enemies flag
-                    BattlegroundEngine.SetState(BattlegroundState.MoveToEnemyBase);
-                }
-                else
-                {
-                    if (ownFlagCarrier != null)
+                    WowPlayer enemyFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).EnemyFlagCarrierPlayer;
+                    WowPlayer ownFlagCarrier = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer;
+
+                    if (enemyFlagCarrier != null && ownFlagCarrier != null)
                     {
-                        // help our flag carrier to get the flag to the base
-                        BattlegroundEngine.SetState(BattlegroundState.AssistOwnFlagCarrier);
+                        // move to enemy flag carrier
+                        BattlegroundEngine.SetState(BattlegroundState.MoveToEnemyFlagCarrier);
+                    }
+                    else if (enemyFlagCarrier != null && ownFlagCarrier == null)
+                    {
+                        // get the enemies flag
+                        BattlegroundEngine.SetState(BattlegroundState.MoveToEnemyBase);
                     }
                     else
                     {
-                        // try to get the enemies flag
-                        BattlegroundEngine.SetState(BattlegroundState.MoveToEnemyBase);
+                        if (ownFlagCarrier != null)
+                        {
+                            // help our flag carrier to get the flag to the base
+                            BattlegroundEngine.SetState(BattlegroundState.AssistOwnFlagCarrier);
+                        }
+                        else
+                        {
+                            // try to get the enemies flag
+                            BattlegroundEngine.SetState(BattlegroundState.MoveToEnemyBase);
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }
