@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Battleground.States
                         {
                             HookManager.TargetGuid(enemyFlagCarrier.Guid);
                             HookManager.StartAutoAttack();
-                            HookManager.FacePosition(ObjectManager.Player, target.Position);
+                            HookManager.FacePosition(ObjectManager.Player, enemyFlagCarrier.Position);
                             BattlegroundEngine.ForceCombat = true;
                         }
                     }
