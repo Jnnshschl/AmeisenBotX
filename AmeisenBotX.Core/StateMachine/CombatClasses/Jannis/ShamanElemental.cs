@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
 using System;
@@ -34,12 +31,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string waterShieldSpell = "Water Shield";
         private readonly string windShearSpell = "Wind Shear";
 
-        public ShamanElemental(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { lightningShieldSpell, () => ObjectManager.Player.ManaPercentage > 0.8 && CastSpellIfPossible(lightningShieldSpell, true) },
-                { waterShieldSpell, () => ObjectManager.Player.ManaPercentage < 0.2 && CastSpellIfPossible(waterShieldSpell, true) }
+                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 0.8 && CastSpellIfPossible(lightningShieldSpell, true) },
+                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 0.2 && CastSpellIfPossible(waterShieldSpell, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -83,7 +80,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -95,27 +92,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if (ObjectManager.Player.HealthPercentage < 30
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                 && CastSpellIfPossible(hexSpell, true))
             {
                 HexedTarget = true;
                 return;
             }
 
-            if (ObjectManager.Player.HealthPercentage < 30
-                && (!CharacterManager.SpellBook.IsSpellKnown(hexSpell)
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 30
+                && (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(hexSpell)
                 || HexedTarget)
                 && CastSpellIfPossible(lesserHealingWaveSpell, true))
             {
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                if ((ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) < 6
+                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
                         && CastSpellIfPossible(thunderstormSpell, true))
-                    || (ObjectManager.Target.MaxHealth > 10000000
-                        && ObjectManager.Target.HealthPercentage < 25
+                    || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
+                        && WowInterface.ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(heroismSpell))
                     || CastSpellIfPossible(lavaBurstSpell, true)
                     || CastSpellIfPossible(elementalMasterySpell))
@@ -123,7 +120,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     return;
                 }
 
-                if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, true))
+                if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, true))
                     || CastSpellIfPossible(lightningBoltSpell, true))
                 {
                     return;
@@ -150,15 +147,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             if (!Spells.ContainsKey(ancestralSpiritSpell))
             {
-                Spells.Add(ancestralSpiritSpell, CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
+                Spells.Add(ancestralSpiritSpell, WowInterface.CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
             }
 
             if (Spells[ancestralSpiritSpell] != null
                 && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
-                && Spells[ancestralSpiritSpell].Costs < ObjectManager.Player.Mana)
+                && Spells[ancestralSpiritSpell].Costs < WowInterface.ObjectManager.Player.Mana)
             {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
 
                 if (groupPlayers.Count > 0)
                 {

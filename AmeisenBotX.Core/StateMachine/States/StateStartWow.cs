@@ -1,35 +1,31 @@
-﻿using AmeisenBotX.Memory;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading;
 
 namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateStartWow : BasicState
     {
-        public StateStartWow(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, Process wowProcess, XMemory xMemory) : base(stateMachine)
+        public StateStartWow(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            WowProcess = wowProcess;
-            XMemory = xMemory;
+            WowInterface = wowInterface;
         }
 
         private AmeisenBotConfig Config { get; }
 
-        private Process WowProcess { get; set; }
-
-        private XMemory XMemory { get; }
+        private WowInterface WowInterface { get; set; }
 
         public override void Enter()
         {
-            WowProcess = Process.Start(Config.PathToWowExe);
-            WowProcess.WaitForInputIdle();
+            WowInterface.WowProcess = Process.Start(Config.PathToWowExe);
+            WowInterface.WowProcess.WaitForInputIdle();
             Thread.Sleep(1000);
-            XMemory.Attach(WowProcess);
+            WowInterface.XMemory.Attach(WowInterface.WowProcess);
         }
 
         public override void Execute()
         {
-            if (WowProcess.HasExited)
+            if (WowInterface.WowProcess.HasExited)
             {
                 AmeisenBotStateMachine.SetState(BotState.None);
                 return;

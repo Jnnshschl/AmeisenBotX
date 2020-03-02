@@ -1,22 +1,13 @@
-﻿using AmeisenBotX.Core.Data;
-using AmeisenBotX.Memory;
-
-namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateLoadingScreen : BasicState
     {
-        public StateLoadingScreen(AmeisenBotStateMachine stateMachine, XMemory xMemory, AmeisenBotConfig config, ObjectManager objectManager) : base(stateMachine)
+        public StateLoadingScreen(AmeisenBotStateMachine stateMachine, WowInterface wowInterface) : base(stateMachine)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            XMemory = xMemory;
+            WowInterface = wowInterface;
         }
 
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private XMemory XMemory { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -24,13 +15,13 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (XMemory.Process != null && XMemory.Process.HasExited)
+            if (WowInterface.XMemory.Process != null && WowInterface.WowProcess.HasExited)
             {
                 AmeisenBotStateMachine.SetState(BotState.None);
             }
 
-            ObjectManager.RefreshIsWorldLoaded();
-            if (ObjectManager.IsWorldLoaded)
+            WowInterface.ObjectManager.RefreshIsWorldLoaded();
+            if (WowInterface.ObjectManager.IsWorldLoaded)
             {
                 AmeisenBotStateMachine.SetState(BotState.Idle);
             }

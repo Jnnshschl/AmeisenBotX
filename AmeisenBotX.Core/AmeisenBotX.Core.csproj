@@ -84,6 +84,7 @@
     <Compile Include="Character\Comparators\TankItemComparator.cs" />
     <Compile Include="Character\Comparators\ItemLevelComparator.cs" />
     <Compile Include="Character\Comparators\IWowItemComparator.cs" />
+    <Compile Include="Character\ICharacterManager.cs" />
     <Compile Include="Character\Inventory\CharacterEquipment.cs" />
     <Compile Include="Character\Inventory\CharacterInventory.cs" />
     <Compile Include="Character\Inventory\Enums\ArmorType.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Data\Enums\ShapeshiftForm.cs" />
     <Compile Include="Data\Enums\WowGender.cs" />
     <Compile Include="Data\Enums\WowPowertype.cs" />
+    <Compile Include="Data\IObjectManager.cs" />
     <Compile Include="Data\ObjectManager.cs" />
     <Compile Include="Data\Enums\HerbNode.cs" />
     <Compile Include="Data\Enums\OreNode.cs" />
@@ -152,6 +154,7 @@
     <Compile Include="Event\EventHookManager.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
     <Compile Include="Hook\HookManager.cs" />
+    <Compile Include="Hook\IHookManager.cs" />
     <Compile Include="Jobs\Enums\JobEngineStatus.cs" />
     <Compile Include="Jobs\Enums\JobType.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
@@ -227,6 +230,7 @@
     <Compile Include="StateMachine\CombatClasses\WarriorFury.cs" />
     <Compile Include="StateMachine\Utils\InterruptManager.cs" />
     <Compile Include="StateMachine\Utils\PetManager.cs" />
+    <Compile Include="WowInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">

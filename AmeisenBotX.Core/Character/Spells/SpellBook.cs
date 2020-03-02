@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
@@ -12,11 +11,12 @@ namespace AmeisenBotX.Core.Character.Spells
 {
     public class SpellBook
     {
-        public SpellBook(HookManager hookManager)
+        public SpellBook(WowInterface wowInterface)
         {
+            WowInterface = wowInterface;
+
             Spells = new List<Spell>();
 
-            HookManager = hookManager;
             Update();
         }
 
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public List<Spell> Spells { get; private set; }
 
-        private HookManager HookManager { get; }
+        private WowInterface WowInterface { get; }
 
         public Spell GetSpellByName(string spellname)
             => Spells.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
-            string rawSpells = HookManager.GetSpells()
+            string rawSpells = WowInterface.HookManager.GetSpells()
                 .Replace(".799999237061", ""); // weird druid bug kekw
 
             try

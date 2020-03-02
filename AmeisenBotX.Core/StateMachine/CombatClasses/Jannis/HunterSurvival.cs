@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
 using System;
@@ -43,10 +40,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string wingClipSpell = "Wing Clip";
         private readonly string wyvernStingSpell = "Wyvern Sting";
 
-        public HunterSurvival(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public HunterSurvival(WowInterface wowInterface) : base(wowInterface)
         {
             PetManager = new PetManager(
-                ObjectManager.Pet,
+                WowInterface.ObjectManager.Pet,
                 TimeSpan.FromSeconds(15),
                 () => CastSpellIfPossible(mendPetSpell, true),
                 () => CastSpellIfPossible(callPetSpell),
@@ -101,13 +98,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting
-                || ObjectManager.TargetGuid == ObjectManager.PlayerGuid)
+            if (WowInterface.ObjectManager.Player.IsCasting
+                || WowInterface.ObjectManager.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
             {
                 return;
             }
 
-            if (!ObjectManager.Player.IsAutoAttacking)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 HookManager.StartAutoAttack();
             }
@@ -120,11 +117,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                double distanceToTarget = ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position);
+                double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                if (ObjectManager.Player.HealthPercentage < 15
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 15
                     && CastSpellIfPossible(feignDeathSpell))
                 {
                     return;
@@ -139,7 +136,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                         return;
                     }
 
-                    if (ObjectManager.Player.HealthPercentage < 30
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                         && CastSpellIfPossible(deterrenceSpell, true))
                     {
                         return;
@@ -167,7 +164,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                         return;
                     }
 
-                    if (ObjectManager.Target.HealthPercentage < 20
+                    if (WowInterface.ObjectManager.Target.HealthPercentage < 20
                         && CastSpellIfPossible(killShotSpell, true))
                     {
                         return;
@@ -176,7 +173,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     CastSpellIfPossible(killCommandSpell, true);
                     CastSpellIfPossible(rapidFireSpell);
 
-                    if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, true))
+                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, true))
                         || CastSpellIfPossible(explosiveShotSpell, true)
                         || CastSpellIfPossible(aimedShotSpell, true)
                         || CastSpellIfPossible(steadyShotSpell, true))

@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
 using System;
@@ -31,14 +28,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string vampiricEmbraceSpell = "Vampiric Embrace";
         private readonly string vampiricTouchSpell = "Vampiric Touch";
 
-        public PriestShadow(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public PriestShadow(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { shadowformSpell, () => CastSpellIfPossible(shadowformSpell, true) },
                 { powerWordFortitudeSpell, () =>
                     {
-                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(powerWordFortitudeSpell, true);
                     }
                 },
@@ -81,7 +78,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -92,26 +89,26 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercentage < 30
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
                 && CastSpellIfPossible(hymnOfHopeSpell))
             {
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercentage < 90
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
                 && CastSpellIfPossible(shadowfiendSpell))
             {
                 return;
             }
 
-            if (ObjectManager.Player.HealthPercentage < 70
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 70
                 && CastSpellIfPossible(flashHealSpell))
             {
                 HookManager.CastSpell(flashHealSpell);
                 return;
             }
 
-            if (!ObjectManager.Player.IsCasting
+            if (!WowInterface.ObjectManager.Player.IsCasting
                 && CastSpellIfPossible(mindFlaySpell, true))
             {
                 return;
@@ -136,15 +133,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             if (!Spells.ContainsKey(resurrectionSpell))
             {
-                Spells.Add(resurrectionSpell, CharacterManager.SpellBook.GetSpellByName(resurrectionSpell));
+                Spells.Add(resurrectionSpell, WowInterface.CharacterManager.SpellBook.GetSpellByName(resurrectionSpell));
             }
 
             if (Spells[resurrectionSpell] != null
                 && !CooldownManager.IsSpellOnCooldown(resurrectionSpell)
-                && Spells[resurrectionSpell].Costs < ObjectManager.Player.Mana)
+                && Spells[resurrectionSpell].Costs < WowInterface.ObjectManager.Player.Mana)
             {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
 
                 if (groupPlayers.Count > 0)
                 {

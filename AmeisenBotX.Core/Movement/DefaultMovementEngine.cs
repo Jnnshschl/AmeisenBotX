@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Movement
 {
     public class DefaultMovementEngine
     {
-        public DefaultMovementEngine(ObjectManager objectManager, MovementSettings settings = null)
+        public DefaultMovementEngine(IObjectManager objectManager, MovementSettings settings = null)
         {
             ObjectManager = objectManager;
 
@@ -34,14 +34,14 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 Velocity { get; private set; }
 
-        private ObjectManager ObjectManager { get; }
+        private IObjectManager ObjectManager { get; }
 
         public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
         {
             positionToGoTo = new Vector3(0, 0, 0);
             needToJump = false;
 
-            double distance = currentPosition.GetDistance2D(CurrentPath.Peek());
+            double distance = currentPosition.GetDistance(CurrentPath.Peek());
             if ((CurrentPath == null || CurrentPath.Count == 0)
                 || (CurrentPath.Peek() != new Vector3(0, 0, 0) && distance > 1024))
             {
@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Movement
                 heightDiff *= -1;
             }
 
-            double distanceTraveled = currentPosition.GetDistance2D(LastPosition);
+            double distanceTraveled = currentPosition.GetDistance(LastPosition);
             needToJump = LastPosition != new Vector3(0, 0, 0) && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
             LastPosition = currentPosition;
             return true;

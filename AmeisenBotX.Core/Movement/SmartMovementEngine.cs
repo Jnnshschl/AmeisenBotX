@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Settings;
@@ -11,7 +12,7 @@ namespace AmeisenBotX.Core.Movement
 {
     public class SmartMovementEngine : IMovementEngine
     {
-        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, JumpFunction jumpFunction, ObjectManager objectManager, MovementSettings movementSettings)
+        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, JumpFunction jumpFunction, IObjectManager objectManager, MovementSettings movementSettings)
         {
             State = MovementEngineState.None;
             GetPosition = getPositionFunction;
@@ -55,7 +56,7 @@ namespace AmeisenBotX.Core.Movement
 
         public MoveToPositionFunction MoveToPosition { get; set; }
 
-        public ObjectManager ObjectManager { get; }
+        public IObjectManager ObjectManager { get; }
 
         public BasicVehicle PlayerVehicle { get; private set; }
 
@@ -116,7 +117,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            Vector3 positionToGoTo = MoveAhead(targetPosition, 4);
+            Vector3 positionToGoTo = BotUtils.MoveAhead(GetRotation.Invoke(), targetPosition, 4);
             bool updateForces = true;
 
             switch (State)
@@ -201,20 +202,6 @@ namespace AmeisenBotX.Core.Movement
 
             TargetPosition = position;
             TargetRotation = targetRotation;
-        }
-
-        private Vector3 MoveAhead(Vector3 targetPosition, double offset)
-        {
-            float rotation = GetRotation.Invoke();
-            double x = targetPosition.X + (Math.Cos(rotation) * offset);
-            double y = targetPosition.Y + (Math.Sin(rotation) * offset);
-
-            return new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = targetPosition.Z
-            };
         }
     }
 }

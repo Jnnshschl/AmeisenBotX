@@ -1,9 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Movement;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,26 +7,17 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateFollowing : BasicState
     {
-        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
         }
-
-        private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
 
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
-
         private WowPlayer PlayerToFollow { get; set; }
+
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -38,7 +25,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            List<WowPlayer> wowPlayers = ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
+            List<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
             if (wowPlayers.Count > 0)
             {
                 if (Config.FollowSpecificCharacter)
@@ -50,14 +37,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                 // check the group/raid leader
                 if (PlayerToFollow == null && Config.FollowGroupLeader)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid);
                     PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
                 }
 
                 // check the group members
                 if (PlayerToFollow == null && Config.FollowGroupMembers)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
                     PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
                 }
             }
@@ -70,20 +57,20 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            ObjectManager.UpdateObject(PlayerToFollow.Type, PlayerToFollow.BaseAddress);
-            double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+            WowInterface.ObjectManager.UpdateObject(PlayerToFollow.Type, PlayerToFollow.BaseAddress);
+            double distance = PlayerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
                 AmeisenBotStateMachine.SetState(BotState.Idle);
             }
 
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (WowInterface.ObjectManager.Player.CurrentlyCastingSpellId > 0 || WowInterface.ObjectManager.Player.CurrentlyChannelingSpellId > 0)
             {
                 return;
             }
 
-            MovementEngine.SetState(MovementEngineState.Following, PlayerToFollow.Position);
-            MovementEngine.Execute();
+            WowInterface.MovementEngine.SetState(MovementEngineState.Following, PlayerToFollow.Position);
+            WowInterface.MovementEngine.Execute();
         }
 
         public override void Exit()
@@ -94,7 +81,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (playerToFollow != null)
             {
-                double distance = playerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
                 if (UnitIsOutOfRange(distance))
                 {
                     playerToFollow = null;

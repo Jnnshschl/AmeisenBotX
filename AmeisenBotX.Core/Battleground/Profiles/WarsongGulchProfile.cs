@@ -1,9 +1,6 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.States;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +9,14 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 {
     public class WarsongGulchProfile : ICtfBattlegroundProfile
     {
-        public WarsongGulchProfile(bool isAlliance, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine, BattlegroundEngine battlegroundEngine)
+        public WarsongGulchProfile(WowInterface wowInterface, BattlegroundEngine battlegroundEngine)
         {
-            ObjectManager = objectManager;
-            HookManager = hookManager;
-            IsAlliance = isAlliance;
+            WowInterface = wowInterface;
+            IsAlliance = wowInterface.ObjectManager.Player.IsAlliance();
             BattlegroundEngine = battlegroundEngine;
             IsMeFlagCarrier = false;
 
-            if (isAlliance)
+            if (IsAlliance)
             {
                 WsgDataset = new AllianceWsgDataset();
             }
@@ -32,13 +28,13 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             States = new Dictionary<BattlegroundState, BasicBattlegroundState>()
             {
                 { BattlegroundState.WaitingForStart, new WaitingForStartBgState(battlegroundEngine) },
-                { BattlegroundState.MoveToEnemyBase, new MoveToEnemyBaseBgState(battlegroundEngine, objectManager, hookManager, movementEngine, WsgDataset.EnemyFlagPosition) },
-                { BattlegroundState.MoveToOwnBase, new MoveToOwnBaseBgState(battlegroundEngine, objectManager, hookManager, movementEngine, WsgDataset.OwnFlagPosition) },
-                { BattlegroundState.MoveToEnemyFlagCarrier, new MoveToEnemyFlagCarrierBgState(battlegroundEngine, objectManager, movementEngine, hookManager) },
-                { BattlegroundState.AssistOwnFlagCarrier, new AssistOwnFlagCarrierBgState(battlegroundEngine, objectManager, movementEngine, hookManager) },
-                { BattlegroundState.DefendMyself, new DefendMyselfBgState(battlegroundEngine, objectManager) },
-                { BattlegroundState.PickupEnemyFlag, new PickupEnemyFlagBgState(battlegroundEngine, objectManager, movementEngine, hookManager) },
-                { BattlegroundState.PickupOwnFlag, new PickupOwnFlagBgState(battlegroundEngine, objectManager, movementEngine, hookManager) },
+                { BattlegroundState.MoveToEnemyBase, new MoveToEnemyBaseBgState(battlegroundEngine,WowInterface, WsgDataset.EnemyFlagPosition) },
+                { BattlegroundState.MoveToOwnBase, new MoveToOwnBaseBgState(battlegroundEngine, WowInterface, WsgDataset.OwnFlagPosition) },
+                { BattlegroundState.MoveToEnemyFlagCarrier, new MoveToEnemyFlagCarrierBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.AssistOwnFlagCarrier, new AssistOwnFlagCarrierBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.DefendMyself, new DefendMyselfBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.PickupEnemyFlag, new PickupEnemyFlagBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.PickupOwnFlag, new PickupOwnFlagBgState(battlegroundEngine, WowInterface) },
                 { BattlegroundState.PickupBuff, new PickupBuffBgState(battlegroundEngine) },
                 { BattlegroundState.ExitBattleground, new ExitBattlegroundBgState(battlegroundEngine) }
             };
@@ -57,6 +53,8 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         public WowPlayer EnemyFlagCarrierPlayer { get; private set; }
 
+        public bool IsBattlegroundRunning => IsAlliance;
+
         public bool IsMeFlagCarrier { get; private set; }
 
         public Vector3 OwnBasePosition => WsgDataset.OwnFlagPosition;
@@ -65,29 +63,21 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         public Dictionary<BattlegroundState, BasicBattlegroundState> States { get; private set; }
 
+        private BattlegroundEngine BattlegroundEngine { get; set; }
+
         private bool IsAlliance { get; set; }
 
         private WowPlayer LastEnemyFlagCarrier { get; set; }
 
         private WowPlayer LastOwnFlagCarrier { get; set; }
 
-        private ObjectManager ObjectManager { get; set; }
+        private WowInterface WowInterface { get; }
 
-        private BattlegroundEngine BattlegroundEngine { get; set; }
-
-        private HookManager HookManager { get; set; }
-
-        private IWsgDataset WsgDataset { get; set; }
-
-        public bool IsBattlegroundRunning => IsAlliance;
+        private IWsgDataset WsgDataset { get; }
 
         public void AllianceFlagWasDropped(string playername) => UnsetFlagCarrier(!IsAlliance, playername);
 
         public void AllianceFlagWasPickedUp(string playername) => SetFlagCarrier(!IsAlliance, playername);
-
-        public void HordeFlagWasDropped(string playername) => UnsetFlagCarrier(IsAlliance, playername);
-
-        public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
 
         public bool HanldeInterruptStates()
         {
@@ -111,16 +101,20 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             return false;
         }
 
+        public void HordeFlagWasDropped(string playername) => UnsetFlagCarrier(IsAlliance, playername);
+
+        public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
+
         private void SetFlagCarrier(bool own, string playername)
         {
             if (own)
             {
-                OwnFlagCarrierPlayer = ObjectManager.GetWowPlayerByName(playername);
-                IsMeFlagCarrier = playername.ToUpper() == ObjectManager.Player.Name.ToUpper();
+                OwnFlagCarrierPlayer = WowInterface.ObjectManager.GetWowPlayerByName(playername);
+                IsMeFlagCarrier = playername.ToUpper() == WowInterface.ObjectManager.Player.Name.ToUpper();
             }
             else
             {
-                EnemyFlagCarrierPlayer = ObjectManager.GetWowPlayerByName(playername);
+                EnemyFlagCarrierPlayer = WowInterface.ObjectManager.GetWowPlayerByName(playername);
             }
         }
 

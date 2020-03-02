@@ -1,19 +1,13 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Movement;
-
-namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateJob : BasicState
     {
-        public StateJob(AmeisenBotStateMachine stateMachine, JobEngine jobEngine) : base(stateMachine)
+        public StateJob(AmeisenBotStateMachine stateMachine, WowInterface wowInterface) : base(stateMachine)
         {
-            JobEngine = jobEngine;
+            WowInterface = wowInterface;
         }
 
-        private JobEngine JobEngine { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -21,12 +15,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            JobEngine.Execute();
+            WowInterface.JobEngine.Execute();
         }
 
         public override void Exit()
         {
-            JobEngine.Reset();
+            WowInterface.JobEngine.Reset();
         }
     }
 }

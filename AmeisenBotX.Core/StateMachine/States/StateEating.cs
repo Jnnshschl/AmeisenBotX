@@ -1,22 +1,16 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Data;
-
-namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateEating : BasicState
     {
-        public StateEating(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager) : base(stateMachine)
+        public StateEating(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
+            WowInterface = wowInterface;
         }
-
-        private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
 
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {

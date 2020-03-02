@@ -1,34 +1,20 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
-using AmeisenBotX.Core.Battleground.Profiles;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Battleground.States
 {
     public class MoveToOwnBaseBgState : BasicBattlegroundState
     {
-        public MoveToOwnBaseBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, HookManager hookManager, IMovementEngine movementEngine, Vector3 ownBasePosition) : base(battlegroundEngine)
+        public MoveToOwnBaseBgState(BattlegroundEngine battlegroundEngine, WowInterface wowInterface, Vector3 ownBasePosition) : base(battlegroundEngine)
         {
-            ObjectManager = objectManager;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
             OwnBasePosition = ownBasePosition;
-            HookManager = hookManager;
         }
 
-        private IMovementEngine MovementEngine { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private HookManager HookManager { get; }
-
         private Vector3 OwnBasePosition { get; }
+
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -49,10 +35,10 @@ namespace AmeisenBotX.Core.Battleground.States
                     return;
                 }
 
-                if (ObjectManager.Player.Position.GetDistance(OwnBasePosition) > 5)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(OwnBasePosition) > 5)
                 {
-                    MovementEngine.SetState(MovementEngineState.Moving, OwnBasePosition);
-                    MovementEngine.Execute();
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, OwnBasePosition);
+                    WowInterface.MovementEngine.Execute();
                     return;
                 }
                 else
@@ -65,7 +51,7 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
-            MovementEngine.Reset();
+            WowInterface.MovementEngine.Reset();
             BattlegroundEngine.ForceCombat = false;
         }
     }

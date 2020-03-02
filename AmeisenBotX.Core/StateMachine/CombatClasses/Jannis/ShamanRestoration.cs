@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
 using System;
@@ -29,7 +26,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string tidalForceSpell = "Tidal Force";
         private readonly string waterShieldSpell = "Water Shield";
 
-        public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public ShamanRestoration(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
@@ -74,7 +71,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -82,11 +79,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player.Type, WowInterface.ObjectManager.Player.BaseAddress);
 
-                if (ObjectManager.Target != null)
+                if (WowInterface.ObjectManager.Target != null)
                 {
-                    if (ObjectManager.Target.HealthPercentage < 25
+                    if (WowInterface.ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(earthShieldSpell, true))
                     {
                         return;
@@ -105,7 +102,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                         return;
                     }
 
-                    double healthDifference = ObjectManager.Target.MaxHealth - ObjectManager.Target.Health;
+                    double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
                     List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
@@ -140,15 +137,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             if (!Spells.ContainsKey(ancestralSpiritSpell))
             {
-                Spells.Add(ancestralSpiritSpell, CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
+                Spells.Add(ancestralSpiritSpell, WowInterface.CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
             }
 
             if (Spells[ancestralSpiritSpell] != null
                 && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
-                && Spells[ancestralSpiritSpell].Costs < ObjectManager.Player.Mana)
+                && Spells[ancestralSpiritSpell].Costs < WowInterface.ObjectManager.Player.Mana)
             {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
 
                 if (groupPlayers.Count > 0)
                 {
@@ -170,10 +167,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
         {
-            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
+            IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 35).ToList();
 
-            groupPlayers.Add(ObjectManager.Player);
+            groupPlayers.Add(WowInterface.ObjectManager.Player);
 
             playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
 

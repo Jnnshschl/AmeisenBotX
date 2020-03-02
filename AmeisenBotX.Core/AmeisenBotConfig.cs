@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core
 
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
+        public bool AutojoinBg { get; set; } = false;
+
         public bool AutoLogin { get; set; } = false;
 
         public bool AutostartWow { get; set; } = false;

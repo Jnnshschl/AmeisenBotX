@@ -1,8 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -32,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string strangulateSpell = "Strangulate";
         private readonly string unbreakableArmorSpell = "Unbreakable Armor";
 
-        public DeathknightFrost(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public DeathknightFrost(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
@@ -78,12 +75,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
-            if (!ObjectManager.Player.IsAutoAttacking)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 HookManager.StartAutoAttack();
                 AmeisenLogger.Instance.Log(Displayname, $"Started Auto-Attacking", LogLevel.Verbose);
@@ -92,13 +89,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick()
-                || (ObjectManager.Player.HealthPercentage < 60
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 60
                     && CastSpellIfPossibleDk(iceboundFortitudeSpell, true))
                 || CastSpellIfPossibleDk(unbreakableArmorSpell, false, false, true)
                 || CastSpellIfPossibleDk(obliterateSpell, false, false, true, true)
                 || CastSpellIfPossibleDk(bloodStrikeSpell, false, true)
                 || CastSpellIfPossibleDk(deathCoilSpell, true)
-                || (ObjectManager.Player.Runeenergy > 60
+                || (WowInterface.ObjectManager.Player.Runeenergy > 60
                     && CastSpellIfPossibleDk(runeStrikeSpell)))
             {
                 return;

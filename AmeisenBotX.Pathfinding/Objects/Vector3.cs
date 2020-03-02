@@ -81,9 +81,6 @@ namespace AmeisenBotX.Pathfinding.Objects
                        + ((Y - b.Y) * (Y - b.Y))
                        + ((Z - b.Z) * (Z - b.Z)));
 
-        public double GetDistance2D(Vector3 b)
-            => Math.Sqrt(Math.Pow(X - b.X, 2) + Math.Pow(Y - b.Y, 2));
-
         public override int GetHashCode()
         {
             unchecked

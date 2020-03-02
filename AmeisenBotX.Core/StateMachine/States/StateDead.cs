@@ -1,22 +1,16 @@
-﻿using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Hook;
-
-namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateDead : BasicState
     {
-        public StateDead(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookManager) : base(stateMachine)
+        public StateDead(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            ObjectManager = objectManager;
-            HookManager = hookManager;
+            WowInterface = wowInterface;
         }
 
         private AmeisenBotConfig Config { get; }
 
-        private HookManager HookManager { get; }
-
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -24,11 +18,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (ObjectManager.Player.IsDead)
+            if (WowInterface.ObjectManager.Player.IsDead)
             {
-                HookManager.ReleaseSpirit();
+                WowInterface.HookManager.ReleaseSpirit();
             }
-            else if (HookManager.IsGhost("player"))
+            else if (WowInterface.HookManager.IsGhost("player"))
             {
                 AmeisenBotStateMachine.SetState(BotState.Ghost);
             }

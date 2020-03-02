@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 {
     public class DeathknightBlood : ICombatClass
     {
-        public DeathknightBlood(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DeathknightBlood(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -43,15 +43,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public string Version => "1.0";
 
-        private CharacterManager CharacterManager { get; }
+        private ICharacterManager CharacterManager { get; }
 
         private DateTime HeroicStrikeLastUsed { get; set; }
 
-        private HookManager HookManager { get; }
+        private IHookManager HookManager { get; }
 
         private Vector3 LastPosition { get; set; }
 
-        private ObjectManager ObjectManager { get; }
+        private IObjectManager ObjectManager { get; }
 
         public void Execute()
         {
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             List<WowUnit> unitsNearPlayer = ObjectManager.WowObjects
                 .OfType<WowUnit>()
-                .Where(e => e.Position.GetDistance2D(ObjectManager.Player.Position) <= 10)
+                .Where(e => e.Position.GetDistance(ObjectManager.Player.Position) <= 10)
                 .ToList();
 
             if (unitsNearPlayer.Count > 2 &&
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             List<WowUnit> unitsNearTarget = ObjectManager.WowObjects
                 .OfType<WowUnit>()
-                .Where(e => e.Position.GetDistance2D(target.Position) <= 30)
+                .Where(e => e.Position.GetDistance(target.Position) <= 30)
                 .ToList();
 
             if (unitsNearTarget.Count > 2 &&

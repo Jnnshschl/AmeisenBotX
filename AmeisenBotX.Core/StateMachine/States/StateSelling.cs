@@ -1,9 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,24 +8,15 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateSelling : BasicState
     {
-        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookmanager, CharacterManager characterManager, IMovementEngine movementEngine) : base(stateMachine)
+        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            ObjectManager = objectManager;
-            HookManager = hookmanager;
-            CharacterManager = characterManager;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
         }
-
-        private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
 
-        private HookManager HookManager { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -37,44 +24,44 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (HookManager.GetFreeBagSlotCount() > 4
-               || !CharacterManager.Inventory.Items.Any(e => e.Price > 0))
+            if (WowInterface.HookManager.GetFreeBagSlotCount() > 4
+               || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
                 AmeisenBotStateMachine.SetState(BotState.Idle);
                 return;
             }
 
-            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
-                .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position))
+            WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
-                    && HookManager.GetUnitReaction(ObjectManager.Player, e) == WowUnitReaction.Friendly
+                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
                     && e.IsRepairVendor
-                    && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
-                double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
+                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
                 if (distance > 3.0)
                 {
-                    MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                    MovementEngine.Execute();
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
+                    WowInterface.MovementEngine.Execute();
                 }
                 else
                 {
-                    HookManager.RightClickUnit(selectedUnit);
+                    WowInterface.HookManager.RightClickUnit(selectedUnit);
                     Task.Delay(1000).GetAwaiter().GetResult();
 
-                    HookManager.SellAllGrayItems();
-                    foreach (IWowItem item in CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                    WowInterface.HookManager.SellAllGrayItems();
+                    foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
                     {
                         IWowItem itemToSell = item;
-                        if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                        if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                         {
                             itemToSell = itemToReplace;
-                            HookManager.ReplaceItem(null, item);
+                            WowInterface.HookManager.ReplaceItem(null, item);
                         }
 
-                        HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                        WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
                     }
                 }
             }

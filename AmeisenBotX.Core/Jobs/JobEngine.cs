@@ -1,12 +1,7 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -19,14 +14,11 @@ namespace AmeisenBotX.Core.Jobs
 {
     public class JobEngine
     {
-        public JobEngine(ObjectManager objectManager, IMovementEngine movementEngine, HookManager hookManager, CharacterManager characterManager)
+        public JobEngine(WowInterface wowInterface)
         {
             AmeisenLogger.Instance.Log("JobEngine", $"Initializing", LogLevel.Verbose);
 
-            ObjectManager = objectManager;
-            MovementEngine = movementEngine;
-            HookManager = hookManager;
-            CharacterManager = characterManager;
+            WowInterface = wowInterface;
 
             MailboxItemQueue = new Queue<string>();
 
@@ -39,17 +31,11 @@ namespace AmeisenBotX.Core.Jobs
 
         private int CurrentNodeAt { get; set; }
 
-        private HookManager HookManager { get; }
-
-        private CharacterManager CharacterManager { get; }
+        private Queue<string> MailboxItemQueue { get; }
 
         private bool MailboxMode { get; set; }
 
-        private IMovementEngine MovementEngine { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private Queue<string> MailboxItemQueue { get; }
+        private WowInterface WowInterface { get; }
 
         public void Execute()
         {
@@ -76,7 +62,7 @@ namespace AmeisenBotX.Core.Jobs
             if (gatheringProfile.Path.Count > 0)
             {
                 // check wether we gather something
-                if (ObjectManager.Player.IsCasting)
+                if (WowInterface.ObjectManager.Player.IsCasting)
                 {
                     return;
                 }
@@ -85,21 +71,22 @@ namespace AmeisenBotX.Core.Jobs
                     && gatheringProfile.MailItems != null
                     && gatheringProfile.MailItems.Count > 0
                     && gatheringProfile.MailReceiver.Length > 0
-                    && HookManager.GetFreeBagSlotCount() == 0)
+                    && WowInterface.HookManager.GetFreeBagSlotCount() == 0)
                     || MailboxMode)
                 {
                     JobEngineStatus = JobEngineStatus.Mailbox;
 
-                    if (gatheringProfile.MailboxPosition.GetDistance(ObjectManager.Player.Position) > 6)
+                    if (gatheringProfile.MailboxPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 6)
                     {
                         // move towards mailbox
-                        MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.MailboxPosition);
-                        MovementEngine.Execute();
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.MailboxPosition);
+                        WowInterface.MovementEngine.Execute();
                     }
                     else
                     {
                         // get the mailbox
-                        WowGameobject mailbox = ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Mailbox);
+                        WowGameobject mailbox = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                            .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Mailbox);
 
                         if (mailbox != null)
                         {
@@ -119,27 +106,28 @@ namespace AmeisenBotX.Core.Jobs
                 }
 
                 // scan for nearby nodes
-                IEnumerable<WowGameobject> nearNodes = ObjectManager.WowObjects.OfType<WowGameobject>().Where(e => gatheringProfile.DisplayIds.Contains(e.DisplayId));
+                IEnumerable<WowGameobject> nearNodes = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                    .Where(e => gatheringProfile.DisplayIds.Contains(e.DisplayId));
 
                 if (nearNodes.Count() > 0)
                 {
                     JobEngineStatus = JobEngineStatus.Found;
 
                     // select the nearest node
-                    WowGameobject selectedNode = nearNodes.OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position)).First();
+                    WowGameobject selectedNode = nearNodes.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
 
-                    if (selectedNode.Position.GetDistance(ObjectManager.Player.Position) > 6)
+                    if (selectedNode.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 6)
                     {
                         // move to it until we are close enough
-                        MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.Path[CurrentNodeAt]);
-                        MovementEngine.Execute();
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.Path[CurrentNodeAt]);
+                        WowInterface.MovementEngine.Execute();
                     }
                     else
                     {
                         JobEngineStatus = JobEngineStatus.Gathering;
 
                         // gather it
-                        HookManager.RightClickObject(selectedNode);
+                        WowInterface.HookManager.RightClickObject(selectedNode);
                         AmeisenLogger.Instance.Log("JobEngine", $"Trying to gather gObject with GUID: {selectedNode.Guid}", LogLevel.Verbose);
                     }
                 }
@@ -147,11 +135,11 @@ namespace AmeisenBotX.Core.Jobs
                 {
                     JobEngineStatus = JobEngineStatus.Searching;
 
-                    if (gatheringProfile.Path[CurrentNodeAt].GetDistance(ObjectManager.Player.Position) > 6)
+                    if (gatheringProfile.Path[CurrentNodeAt].GetDistance(WowInterface.ObjectManager.Player.Position) > 6)
                     {
                         // move towards next node
-                        MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.Path[CurrentNodeAt]);
-                        MovementEngine.Execute();
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.Path[CurrentNodeAt]);
+                        WowInterface.MovementEngine.Execute();
                     }
                     else
                     {
@@ -161,6 +149,15 @@ namespace AmeisenBotX.Core.Jobs
                     }
                 }
             }
+        }
+
+        public void Reset()
+        {
+            AmeisenLogger.Instance.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
+            JobEngineStatus = JobEngineStatus.None;
+            CurrentNodeAt = 0;
+            MailboxMode = false;
+            MailboxItemQueue.Clear();
         }
 
         private void SendItemMails(List<string> items, string receiver, WowGameobject mailbox)
@@ -177,20 +174,20 @@ namespace AmeisenBotX.Core.Jobs
             }
 
             // open mailbox
-            HookManager.RightClickObject(mailbox);
+            WowInterface.HookManager.RightClickObject(mailbox);
             Task.Delay(1000).GetAwaiter().GetResult();
             AmeisenLogger.Instance.Log("JobEngine", $"Rightclicked Mailbox", LogLevel.Verbose);
 
             JobEngineStatus = JobEngineStatus.Sending;
 
             // send stuff to character
-            HookManager.SendItemMailToCharacter(MailboxItemQueue.Peek(), receiver);
+            WowInterface.HookManager.SendItemMailToCharacter(MailboxItemQueue.Peek(), receiver);
             Task.Delay(1000).GetAwaiter().GetResult();
             AmeisenLogger.Instance.Log("JobEngine", $"Sent Mail with \"{MailboxItemQueue.Peek()}\" to \"{receiver}\"", LogLevel.Verbose);
 
             // remove item from mail list if we have no units left in our bags
-            CharacterManager.Inventory.Update();
-            if (!CharacterManager.Inventory.Items.Any(e=>e.Name.ToUpper() == MailboxItemQueue.Peek().ToUpper()))
+            WowInterface.CharacterManager.Inventory.Update();
+            if (!WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.ToUpper() == MailboxItemQueue.Peek().ToUpper()))
             {
                 AmeisenLogger.Instance.Log("JobEngine", $"Finished sending \"{MailboxItemQueue.Peek()}\"", LogLevel.Verbose);
                 MailboxItemQueue.Dequeue();
@@ -203,15 +200,6 @@ namespace AmeisenBotX.Core.Jobs
             {
                 AmeisenLogger.Instance.Log("JobEngine", $"Leaving MailboxMode", LogLevel.Verbose);
             }
-        }
-
-        public void Reset()
-        {
-            AmeisenLogger.Instance.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
-            JobEngineStatus = JobEngineStatus.None;
-            CurrentNodeAt = 0;
-            MailboxMode = false;
-            MailboxItemQueue.Clear();
         }
     }
 }

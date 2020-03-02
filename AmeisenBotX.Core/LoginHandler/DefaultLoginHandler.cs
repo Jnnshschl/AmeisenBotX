@@ -1,6 +1,4 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Memory;
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -10,30 +8,27 @@ namespace AmeisenBotX.Core.LoginHandler
 {
     public class DefaultLoginHandler : ILoginHandler
     {
-        public DefaultLoginHandler(XMemory xMemory, IOffsetList offsetList)
+        public DefaultLoginHandler(WowInterface wowInterface)
         {
-            XMemory = xMemory;
-            OffsetList = offsetList;
+            WowInterface = wowInterface;
         }
 
-        private IOffsetList OffsetList { get; }
-
-        private XMemory XMemory { get; }
+        private WowInterface WowInterface { get; }
 
         public bool Login(Process wowProcess, string username, string password, int characterSlot)
         {
             int count = 0;
 
-            if (XMemory.ReadInt(OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            if (WowInterface.XMemory.ReadInt(WowInterface.OffsetList.IsWorldLoaded, out int isWorldLoaded))
             {
-                while (!XMemory.Process.HasExited && isWorldLoaded == 0)
+                while (!WowInterface.XMemory.Process.HasExited && isWorldLoaded == 0)
                 {
                     if (count == 7)
                     {
                         return false;
                     }
 
-                    if (XMemory.ReadString(OffsetList.GameState, Encoding.ASCII, out string gameState, 10))
+                    if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string gameState, 10))
                     {
                         switch (gameState)
                         {
@@ -56,12 +51,12 @@ namespace AmeisenBotX.Core.LoginHandler
                         count++;
                     }
 
-                    XMemory.ReadInt(OffsetList.IsWorldLoaded, out isWorldLoaded);
+                    WowInterface.XMemory.ReadInt(WowInterface.OffsetList.IsWorldLoaded, out isWorldLoaded);
                 }
 
-                if (XMemory.Process != null && !XMemory.Process.HasExited)
+                if (WowInterface.XMemory.Process != null && !WowInterface.XMemory.Process.HasExited)
                 {
-                    XMemory.Process?.WaitForInputIdle();
+                    WowInterface.XMemory.Process?.WaitForInputIdle();
                 }
 
                 return true;
@@ -72,17 +67,17 @@ namespace AmeisenBotX.Core.LoginHandler
 
         private void HandleCharSelect(int characterSlot)
         {
-            if (XMemory.ReadInt(OffsetList.CharacterSlotSelected, out int currentSlot))
+            if (WowInterface.XMemory.ReadInt(WowInterface.OffsetList.CharacterSlotSelected, out int currentSlot))
             {
                 bool failed = false;
                 while (!failed && currentSlot != characterSlot)
                 {
-                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x28));
+                    BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x28));
                     Thread.Sleep(1000);
-                    failed = XMemory.ReadInt(OffsetList.CharacterSlotSelected, out currentSlot);
+                    failed = WowInterface.XMemory.ReadInt(WowInterface.OffsetList.CharacterSlotSelected, out currentSlot);
                 }
 
-                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
+                BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
             }
         }
 
@@ -90,12 +85,12 @@ namespace AmeisenBotX.Core.LoginHandler
         {
             foreach (char c in username)
             {
-                BotUtils.SendKeyShift(XMemory.Process.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
+                BotUtils.SendKeyShift(WowInterface.WowProcess.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
                 Thread.Sleep(50);
             }
 
             Thread.Sleep(100);
-            BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x09));
+            BotUtils.SendKey(WowInterface.WowProcess.MainWindowHandle, new IntPtr(0x09));
             Thread.Sleep(100);
 
             bool firstTime = true;
@@ -106,22 +101,22 @@ namespace AmeisenBotX.Core.LoginHandler
             {
                 if (!firstTime)
                 {
-                    BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
+                    BotUtils.SendKey(WowInterface.WowProcess.MainWindowHandle, new IntPtr(0x0D));
                 }
 
                 foreach (char c in password)
                 {
-                    BotUtils.SendKeyShift(XMemory.Process.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
+                    BotUtils.SendKeyShift(WowInterface.WowProcess.MainWindowHandle, new IntPtr(c), char.IsUpper(c));
                     Thread.Sleep(10);
                 }
 
                 Thread.Sleep(500);
-                BotUtils.SendKey(XMemory.Process.MainWindowHandle, new IntPtr(0x0D));
+                BotUtils.SendKey(WowInterface.WowProcess.MainWindowHandle, new IntPtr(0x0D));
                 Thread.Sleep(5000);
 
                 firstTime = false;
 
-                result = XMemory.ReadString(OffsetList.GameState, Encoding.ASCII, out gameState, 10);
+                result = WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out gameState, 10);
             } while (result && gameState == "login");
         }
     }

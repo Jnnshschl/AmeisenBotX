@@ -1,7 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
@@ -18,18 +16,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 {
     public abstract class BasicCombatClass : ICombatClass
     {
-        protected BasicCombatClass(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        protected BasicCombatClass(WowInterface wowInterface)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            WowInterface = wowInterface;
+            CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
 
             Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
                 Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
+                foreach (Spell spell in WowInterface.CharacterManager.SpellBook.Spells)
                 {
                     Spells.Add(spell.Name, spell);
                 }
@@ -53,12 +49,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 DispellBuffsFunction,
                 null);
 
-            TargetInterruptManager = new InterruptManager(ObjectManager.Target, null);
+            TargetInterruptManager = new InterruptManager(WowInterface.ObjectManager.Target, null);
         }
 
         public abstract string Author { get; }
-
-        public CharacterManager CharacterManager { get; internal set; }
 
         public abstract WowClass Class { get; }
 
@@ -78,15 +72,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public abstract bool HandlesTargetSelection { get; }
 
-        public HookManager HookManager { get; internal set; }
+        public IHookManager HookManager { get; internal set; }
 
         public abstract bool IsMelee { get; }
 
         public abstract IWowItemComparator ItemComparator { get; set; }
 
         public AuraManager MyAuraManager { get; internal set; }
-
-        public ObjectManager ObjectManager { get; internal set; }
 
         public abstract CombatClassRole Role { get; }
 
@@ -98,6 +90,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
         public abstract string Version { get; }
 
+        public WowInterface WowInterface { get; internal set; }
+
         public abstract void Execute();
 
         public abstract void OutOfCombatExecute();
@@ -106,12 +100,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             if (currentResourceAmount == 0)
             {
-                currentResourceAmount = ObjectManager.Player.Class switch
+                currentResourceAmount = WowInterface.ObjectManager.Player.Class switch
                 {
-                    WowClass.Deathknight => ObjectManager.Player.Runeenergy,
-                    WowClass.Rogue => ObjectManager.Player.Energy,
-                    WowClass.Warrior => ObjectManager.Player.Rage,
-                    _ => ObjectManager.Player.Mana,
+                    WowClass.Deathknight => WowInterface.ObjectManager.Player.Runeenergy,
+                    WowClass.Rogue => WowInterface.ObjectManager.Player.Energy,
+                    WowClass.Warrior => WowInterface.ObjectManager.Player.Rage,
+                    _ => WowInterface.ObjectManager.Player.Mana,
                 };
             }
 
@@ -120,7 +114,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
-                && (ObjectManager.Target != null && IsInRange(Spells[spellName], ObjectManager.Target.Position)))
+                && (WowInterface.ObjectManager.Target != null && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position)))
             {
                 CastSpell(spellName);
                 return true;
@@ -135,11 +129,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsRuneenergy || Spells[spellName].Costs < ObjectManager.Player.Runeenergy)
+                && (!needsRuneenergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Runeenergy)
                 && (!needsBloodrune || (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
                 && (!needsFrostrune || (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
                 && (!needsUnholyrune || (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5)))
-                && IsInRange(Spells[spellName], ObjectManager.Target.Position))
+                && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position))
             {
                 CastSpell(spellName);
                 return true;
@@ -154,9 +148,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsEnergy || Spells[spellName].Costs < ObjectManager.Player.Energy)
-                && (!needsCombopoints || ObjectManager.Player.ComboPoints >= requiredCombopoints)
-                && IsInRange(Spells[spellName], ObjectManager.Target.Position))
+                && (!needsEnergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Energy)
+                && (!needsCombopoints || WowInterface.ObjectManager.Player.ComboPoints >= requiredCombopoints)
+                && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position))
             {
                 CastSpell(spellName);
                 return true;
@@ -169,7 +163,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         {
             HookManager.CastSpell(spellName);
             CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
         }
 
         private bool IsInRange(Spell spell, Vector3 position)
@@ -179,17 +173,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return true;
             }
 
-            double distance = ObjectManager.Player.Position.GetDistance(position);
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
             return distance > spell.MinRange && distance < spell.MaxRange;
         }
 
         private void PrepareCast(string spellName)
         {
-            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Trying to cast \"{spellName}\" on \"{ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Trying to cast \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
 
             if (!Spells.ContainsKey(spellName))
             {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
+                Spells.Add(spellName, WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName));
             }
         }
     }

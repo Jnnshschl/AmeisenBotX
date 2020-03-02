@@ -1,12 +1,8 @@
 ﻿using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Battleground.States;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,11 +10,9 @@ namespace AmeisenBotX.Core.Battleground
 {
     public class BattlegroundEngine
     {
-        public BattlegroundEngine(HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine)
+        public BattlegroundEngine(WowInterface wowInterface)
         {
-            HookManager = hookManager;
-            ObjectManager = objectManager;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
 
             ForceCombat = false;
         }
@@ -27,15 +21,11 @@ namespace AmeisenBotX.Core.Battleground
 
         public KeyValuePair<BattlegroundState, BasicBattlegroundState> CurrentState { get; private set; }
 
-        public BattlegroundState LastState { get; private set; }
-
         public bool ForceCombat { get; internal set; }
 
-        private HookManager HookManager { get; set; }
+        public BattlegroundState LastState { get; private set; }
 
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; set; }
+        private WowInterface WowInterface { get; }
 
         public void AllianceFlagWasDropped(string playername)
         {
@@ -55,7 +45,7 @@ namespace AmeisenBotX.Core.Battleground
 
         public bool AttackNearEnemies(double range = 25)
         {
-            IEnumerable<WowPlayer> nearEnemies = ObjectManager.GetNearEnemies(ObjectManager.Player.Position, range);
+            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies(WowInterface.ObjectManager.Player.Position, range);
 
             if (nearEnemies.Count() > 0)
             {
@@ -63,16 +53,16 @@ namespace AmeisenBotX.Core.Battleground
 
                 if (target != null)
                 {
-                    if (ObjectManager.Player.Position.GetDistance(target.Position) > 10)
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) > 10)
                     {
-                        MovementEngine.SetState(MovementEngineState.Moving, target.Position);
-                        MovementEngine.Execute();
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, target.Position);
+                        WowInterface.MovementEngine.Execute();
                         return true;
                     }
                     else
                     {
-                        HookManager.TargetGuid(target.Guid);
-                        HookManager.StartAutoAttack();
+                        WowInterface.HookManager.TargetGuid(target.Guid);
+                        WowInterface.HookManager.StartAutoAttack();
                         return true;
                     }
                 }
@@ -83,13 +73,13 @@ namespace AmeisenBotX.Core.Battleground
 
         public void Execute()
         {
-            List<WowGameobject> flagObjects = ObjectManager.WowObjects
+            List<WowGameobject> flagObjects = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>()
-                .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position)).ToList();
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();
 
             if (BattlegroundProfile == null)
             {
-                TryLoadProfile(ObjectManager.MapId);
+                TryLoadProfile(WowInterface.ObjectManager.MapId);
 
                 if (BattlegroundProfile != null)
                 {
@@ -132,7 +122,7 @@ namespace AmeisenBotX.Core.Battleground
                     return false;
 
                 case 489:
-                    BattlegroundProfile = new WarsongGulchProfile(ObjectManager.Player.IsAlliance(), HookManager, ObjectManager, MovementEngine, this);
+                    BattlegroundProfile = new WarsongGulchProfile(WowInterface, this);
                     return true;
 
                 case 529:
@@ -153,10 +143,12 @@ namespace AmeisenBotX.Core.Battleground
         }
 
         internal IEnumerable<WowGameobject> GetBattlegroundFlags(bool onlyEnemy = true)
-            => ObjectManager.WowObjects
+            => WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>()
                 // 5912 Alliance Flag / 5913 Horde Flag
-                .Where(e => onlyEnemy ? (!ObjectManager.Player.IsAlliance() && e.DisplayId == 5912) || (ObjectManager.Player.IsAlliance() && e.DisplayId == 5913) : e.DisplayId == 5912 || e.DisplayId == 5913);
+                .Where(e => onlyEnemy ? (!WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == 5912)
+                        || (WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == 5913)
+                    : e.DisplayId == 5912 || e.DisplayId == 5913);
 
         internal void SetState(BattlegroundState state)
         {

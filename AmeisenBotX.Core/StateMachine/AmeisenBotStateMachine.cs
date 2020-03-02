@@ -1,60 +1,23 @@
-﻿using AmeisenBotX.Core.Battleground;
-using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Data.Persistence;
-using AmeisenBotX.Core.Event;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
 using AmeisenBotX.Core.StateMachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
-using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace AmeisenBotX.Core.StateMachine
 {
     public class AmeisenBotStateMachine
     {
-        public AmeisenBotStateMachine(
-            string botDataPath,
-            Process wowProcess,
-            AmeisenBotConfig config,
-            XMemory xMemory,
-            IOffsetList offsetList,
-            ObjectManager objectManager,
-            CharacterManager characterManager,
-            HookManager hookManager,
-            EventHookManager eventHookManager,
-            IAmeisenBotCache botCache,
-            IPathfindingHandler pathfindingHandler,
-            IMovementEngine movementEngine,
-            MovementSettings movementSettings,
-            ICombatClass combatClass,
-            BattlegroundEngine battlegroundEngine,
-            JobEngine jobEngine)
+        public AmeisenBotStateMachine(string botDataPath, AmeisenBotConfig config, WowInterface wowInterface)
         {
             AmeisenLogger.Instance.Log("StateMachine", "Starting AmeisenBotStateMachine...", LogLevel.Verbose);
 
             BotDataPath = botDataPath;
             Config = config;
-            XMemory = xMemory;
-            OffsetList = offsetList;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            EventHookManager = eventHookManager;
-            BotCache = botCache;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
 
             LastObjectUpdate = DateTime.Now;
             LastGhostCheck = DateTime.Now;
@@ -66,21 +29,21 @@ namespace AmeisenBotX.Core.StateMachine
             States = new Dictionary<BotState, BasicState>()
             {
                 { BotState.None, new StateNone(this, config) },
-                { BotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
-                { BotState.Login, new StateLogin(this, config, offsetList, characterManager) },
-                { BotState.LoadingScreen, new StateLoadingScreen(this, xMemory, config, objectManager) },
-                { BotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass, UnitLootList) },
-                { BotState.Dead, new StateDead(this, config, objectManager, hookManager) },
-                { BotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
-                { BotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { BotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, battlegroundEngine, movementEngine, movementSettings, combatClass) },
-                { BotState.Repairing, new StateRepairing(this, config, objectManager, hookManager, characterManager, movementEngine) },
-                { BotState.Selling, new StateSelling(this, config, objectManager, hookManager, characterManager, movementEngine) },
-                { BotState.Healing, new StateEating(this, config, objectManager, characterManager) },
-                { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { BotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
-                { BotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) },
-                { BotState.Job, new StateJob(this, jobEngine) }
+                { BotState.StartWow, new StateStartWow(this, config, WowInterface) },
+                { BotState.Login, new StateLogin(this, config, WowInterface) },
+                { BotState.LoadingScreen, new StateLoadingScreen(this, WowInterface) },
+                { BotState.Idle, new StateIdle(this, config, WowInterface, UnitLootList) },
+                { BotState.Dead, new StateDead(this, config, WowInterface) },
+                { BotState.Ghost, new StateGhost(this, config, WowInterface) },
+                { BotState.Following, new StateFollowing(this, config, WowInterface) },
+                { BotState.Attacking, new StateAttacking(this, config, WowInterface) },
+                { BotState.Repairing, new StateRepairing(this, config, WowInterface) },
+                { BotState.Selling, new StateSelling(this, config, WowInterface) },
+                { BotState.Healing, new StateEating(this, config, WowInterface) },
+                { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
+                { BotState.Looting, new StateLooting(this, config, WowInterface, UnitLootList) },
+                { BotState.Battleground, new StateBattleground(this, config, WowInterface) },
+                { BotState.Job, new StateJob(this, WowInterface) }
             };
 
             CurrentState = States.First();
@@ -103,23 +66,11 @@ namespace AmeisenBotX.Core.StateMachine
 
         public string PlayerName { get; internal set; }
 
-        internal BattlegroundEngine BattlegroundEngine { get; }
-
-        internal IOffsetList OffsetList { get; }
-
         internal Queue<ulong> UnitLootList { get; set; }
 
-        internal XMemory XMemory { get; }
-
-        private IAmeisenBotCache BotCache { get; }
-
-        private CharacterManager CharacterManager { get; }
+        internal WowInterface WowInterface { get; }
 
         private AmeisenBotConfig Config { get; }
-
-        private EventHookManager EventHookManager { get; }
-
-        private HookManager HookManager { get; }
 
         private DateTime LastEventPull { get; set; }
 
@@ -127,26 +78,22 @@ namespace AmeisenBotX.Core.StateMachine
 
         private DateTime LastObjectUpdate { get; set; }
 
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
         private Dictionary<BotState, BasicState> States { get; }
 
         public void Execute()
         {
-            if (XMemory.Process == null || XMemory.Process.HasExited)
+            if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
             {
                 AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
                 SetState(BotState.None);
             }
 
-            if (ObjectManager != null)
+            if (WowInterface.ObjectManager != null)
             {
-                if (!ObjectManager.IsWorldLoaded)
+                if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
                     SetState(BotState.LoadingScreen);
-                    MovementEngine.Reset();
+                    WowInterface.MovementEngine.Reset();
                     return;
                 }
                 else
@@ -154,19 +101,19 @@ namespace AmeisenBotX.Core.StateMachine
                     HandleObjectUpdates();
                     HandleEventPull();
 
-                    if (ObjectManager.Player != null)
+                    if (WowInterface.ObjectManager.Player != null)
                     {
                         HandlePlayerDeadOrGhostState();
 
                         if (CurrentState.Key != BotState.Dead && CurrentState.Key != BotState.Ghost)
                         {
                             if (Config.AutoDodgeAoeSpells
-                                && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
+                                && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
                             {
                                 SetState(BotState.InsideAoeDamage);
                             }
 
-                            if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
+                            if (WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
                             {
                                 SetState(BotState.Attacking, true);
                             }
@@ -175,7 +122,7 @@ namespace AmeisenBotX.Core.StateMachine
                 }
             }
 
-            CharacterManager.AntiAfk();
+            WowInterface.CharacterManager.AntiAfk();
 
             // used for ui updates
             OnStateMachineTick?.Invoke();
@@ -183,16 +130,16 @@ namespace AmeisenBotX.Core.StateMachine
         }
 
         internal bool IsAnyPartymemberInCombat(double distance = 50)
-            => ObjectManager.WowObjects.OfType<WowPlayer>()
-            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-            .Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < distance && r.IsInCombat);
+            => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
+            .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
+            .Any(r => r.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < distance && r.IsInCombat);
 
         internal bool IsOnBattleground()
-            => ObjectManager.MapId == 30
-            || ObjectManager.MapId == 489
-            || ObjectManager.MapId == 529
-            || ObjectManager.MapId == 566
-            || ObjectManager.MapId == 607;
+            => WowInterface.ObjectManager.MapId == 30
+            || WowInterface.ObjectManager.MapId == 489
+            || WowInterface.ObjectManager.MapId == 529
+            || WowInterface.ObjectManager.MapId == 566
+            || WowInterface.ObjectManager.MapId == 607;
 
         internal void SetState(BotState state, bool ignoreExit = false)
         {
@@ -217,10 +164,10 @@ namespace AmeisenBotX.Core.StateMachine
 
         private void HandleEventPull()
         {
-            if (EventHookManager.IsSetUp
+            if (WowInterface.EventHookManager.IsSetUp
                 && LastEventPull + TimeSpan.FromSeconds(1) < DateTime.Now)
             {
-                EventHookManager.ReadEvents();
+                WowInterface.EventHookManager.ReadEvents();
                 LastEventPull = DateTime.Now;
             }
         }
@@ -233,14 +180,14 @@ namespace AmeisenBotX.Core.StateMachine
                 && CurrentState.Key != BotState.Login
                 && CurrentState.Key != BotState.LoadingScreen)
             {
-                ObjectManager.UpdateWowObjects();
+                WowInterface.ObjectManager.UpdateWowObjects();
                 LastObjectUpdate = DateTime.Now;
             }
         }
 
         private void HandlePlayerDeadOrGhostState()
         {
-            if (ObjectManager.Player.IsDead)
+            if (WowInterface.ObjectManager.Player.IsDead)
             {
                 SetState(BotState.Dead);
             }
@@ -248,7 +195,7 @@ namespace AmeisenBotX.Core.StateMachine
             {
                 if (LastGhostCheck + TimeSpan.FromSeconds(8) < DateTime.Now)
                 {
-                    bool isGhost = HookManager.IsGhost("player");
+                    bool isGhost = WowInterface.HookManager.IsGhost("player");
                     LastGhostCheck = DateTime.Now;
 
                     if (isGhost)

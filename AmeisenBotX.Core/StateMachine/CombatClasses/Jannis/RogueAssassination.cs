@@ -1,8 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
@@ -24,7 +21,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string sprintSpell = "Sprint";
         private readonly string stealthSpell = "Stealth";
 
-        public RogueAssassination(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public RogueAssassination(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
@@ -63,27 +60,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
-            if (!ObjectManager.Player.IsAutoAttacking)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 HookManager.StartAutoAttack();
             }
 
             if (MyAuraManager.Tick()
                 || TargetInterruptManager.Tick()
-                || (ObjectManager.Player.HealthPercentage < 20
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossibleRogue(cloakOfShadowsSpell, true)))
             {
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                if ((ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) > 16
+                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
                         && CastSpellIfPossibleRogue(sprintSpell, true)))
                 {
                     return;

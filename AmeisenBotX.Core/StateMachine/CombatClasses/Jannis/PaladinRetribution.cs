@@ -1,8 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
@@ -30,13 +27,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string retributionAuraSpell = "Retribution Aura";
         private readonly string sealOfVengeanceSpell = "Seal of Vengeance";
 
-        public PaladinRetribution(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public PaladinRetribution(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { blessingOfMightSpell, () =>
                     {
-                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(blessingOfMightSpell, true);
                     }
                 },
@@ -75,12 +72,12 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
-            if (!ObjectManager.Player.IsAutoAttacking)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 HookManager.StartAutoAttack();
             }
@@ -89,20 +86,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 || TargetInterruptManager.Tick()
                 || (MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLower())
                     && CastSpellIfPossible(judgementOfLightSpell))
-                || (ObjectManager.Player.HealthPercentage < 20
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossible(layOnHandsSpell))
-                || (ObjectManager.Player.HealthPercentage < 60
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 60
                     && CastSpellIfPossible(holyLightSpell, true))
                 || CastSpellIfPossible(avengingWrathSpell, true)
-                || (ObjectManager.Player.ManaPercentage < 80
+                || (WowInterface.ObjectManager.Player.ManaPercentage < 80
                     && CastSpellIfPossible(divinePleaSpell, true)))
             {
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                if ((ObjectManager.Player.HealthPercentage < 20
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
                         && CastSpellIfPossible(hammerOfWrathSpell, true))
                     || CastSpellIfPossible(crusaderStrikeSpell, true)
                     || CastSpellIfPossible(divineStormSpell, true)

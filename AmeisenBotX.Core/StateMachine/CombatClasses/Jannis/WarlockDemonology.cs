@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using AmeisenBotX.Core.StateMachine.Utils;
 using System;
@@ -43,14 +40,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string summonFelguardSpell = "Summon Felguard";
         private readonly string summonImpSpell = "Summon Imp";
 
-        public WarlockDemonology(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public WarlockDemonology(WowInterface wowInterface) : base(wowInterface)
         {
             PetManager = new PetManager(
-                ObjectManager.Pet,
+                WowInterface.ObjectManager.Pet,
                 TimeSpan.FromSeconds(1),
                 null,
-                () => (CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell))
-                   || (CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell)),
+                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell))
+                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell)),
                 null);
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
@@ -60,25 +57,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 { corruptionSpell, () => CastSpellIfPossible(corruptionSpell, true) },
                 { curseOftheElementsSpell, () => CastSpellIfPossible(curseOftheElementsSpell, true) },
                 { immolateSpell, () => CastSpellIfPossible(immolateSpell, true) }
-            }; 
-            
-            characterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
-        }
+            };
 
-        private void SpellBook_OnSpellBookUpdate()
-        {
-            if (CharacterManager.SpellBook.IsSpellKnown(felArmorSpell))
-            {
-                MyAuraManager.BuffsToKeepActive.Add(felArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, true));
-            }
-            else if (CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell))
-            {
-                MyAuraManager.BuffsToKeepActive.Add(demonArmorSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, true));
-            }
-            else if (CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell))
-            {
-                MyAuraManager.BuffsToKeepActive.Add(demonSkinSpell, () => CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, true));
-            }
+            WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
         }
 
         public override string Author => "Jannis";
@@ -112,36 +93,36 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
             if (MyAuraManager.Tick()
                 || TargetAuraManager.Tick()
-                || ObjectManager.Player.ManaPercentage < 20
-                    && ObjectManager.Player.HealthPercentage > 60
+                || WowInterface.ObjectManager.Player.ManaPercentage < 20
+                    && WowInterface.ObjectManager.Player.HealthPercentage > 60
                     && CastSpellIfPossible(lifeTapSpell)
-                || (ObjectManager.Player.HealthPercentage < 80
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 80
                     && CastSpellIfPossible(deathCoilSpell, true))
-                || (ObjectManager.Player.HealthPercentage < 50
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 50
                     && CastSpellIfPossible(drainLifeSpell, true))
                 || (DateTime.Now - LastDamageBuffCheck > TimeSpan.FromSeconds(damageBuffCheckTime)
                     && HandleDamageBuffing())
                 || CastSpellIfPossible(metamorphosisSpell)
-                || (ObjectManager.Pet != null && CastSpellIfPossible(demonicEmpowermentSpell)))
+                || (WowInterface.ObjectManager.Pet != null && CastSpellIfPossible(demonicEmpowermentSpell)))
             {
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                if (ObjectManager.Target.GetType() == typeof(WowPlayer))
+                if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
                 {
                     if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
-                        && ((ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) < 6
+                        && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
                             && CastSpellIfPossible(howlOfTerrorSpell, true))
-                        || (ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) < 12
+                        || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
                             && CastSpellIfPossible(fearSpell, true))))
                     {
                         LastFearAttempt = DateTime.Now;
@@ -149,9 +130,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                     }
                 }
 
-                if (!ObjectManager.Player.IsCasting
-                    && CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                    && ObjectManager.Target.HealthPercentage < 8
+                if (!WowInterface.ObjectManager.Player.IsCasting
+                    && WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
+                    && WowInterface.ObjectManager.Target.HealthPercentage < 8
                     && CastSpellIfPossible(drainSoulSpell, true))
                 {
                     return;
@@ -197,6 +178,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
             LastDamageBuffCheck = DateTime.Now;
             return false;
+        }
+
+        private void SpellBook_OnSpellBookUpdate()
+        {
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(felArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, true));
+            }
+            else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(demonArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, true));
+            }
+            else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(demonSkinSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, true));
+            }
         }
     }
 }

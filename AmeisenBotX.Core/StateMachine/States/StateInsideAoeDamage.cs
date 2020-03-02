@@ -1,9 +1,5 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Movement;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -13,16 +9,11 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     public class StateInsideAoeDamage : BasicState
     {
-        public StateInsideAoeDamage(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateInsideAoeDamage(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
         }
-
-        private CharacterManager CharacterManager { get; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -30,11 +21,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             0
         };
 
-        private IMovementEngine MovementEngine { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -42,12 +29,12 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (ObjectManager != null
-                && ObjectManager.Player != null)
+            if (WowInterface.ObjectManager != null
+                && WowInterface.ObjectManager.Player != null)
             {
                 // TODO: exclude friendly spells like Circle of Healing
-                WowDynobject aoeSpellObject = ObjectManager.WowObjects.OfType<WowDynobject>()
-                    .FirstOrDefault(e => FriendlySpells.Contains(e.SpellId) && e.Position.GetDistance2D(ObjectManager.Player.Position) < e.Radius + 1);
+                WowDynobject aoeSpellObject = WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
+                    .FirstOrDefault(e => FriendlySpells.Contains(e.SpellId) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 1);
 
                 if (aoeSpellObject == null)
                 {
@@ -57,8 +44,8 @@ namespace AmeisenBotX.Core.StateMachine.States
 
                 Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
 
-                MovementEngine.SetState(MovementEngineState.Moving, targetPosition);
-                MovementEngine.Execute();
+                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, targetPosition);
+                WowInterface.MovementEngine.Execute();
             }
         }
 
@@ -68,21 +55,21 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)
         {
-            double angleX = ObjectManager.Player.Position.X - aoePosition.X;
-            double angleY = ObjectManager.Player.Position.Y - aoePosition.Y;
+            double angleX = WowInterface.ObjectManager.Player.Position.X - aoePosition.X;
+            double angleY = WowInterface.ObjectManager.Player.Position.Y - aoePosition.Y;
 
             double angle = Math.Atan2(angleX, angleY);
 
-            double distanceToMove = aoeRadius - ObjectManager.Player.Position.GetDistance2D(aoePosition) + 3;
+            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 3;
 
-            double x = ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
-            double y = ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);
+            double x = WowInterface.ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
+            double y = WowInterface.ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);
 
             return new Vector3()
             {
                 X = Convert.ToSingle(x),
                 Y = Convert.ToSingle(y),
-                Z = ObjectManager.Player.Position.Z
+                Z = WowInterface.ObjectManager.Player.Position.Z
             };
         }
     }

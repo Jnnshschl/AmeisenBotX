@@ -9,6 +9,7 @@ using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
+using AmeisenBotX.Core.LoginHandler;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.OffsetLists;
@@ -45,50 +46,27 @@ namespace AmeisenBotX.Core
         public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config)
         {
             SetupLogging(botDataPath, accountName);
-            AmeisenLogger.Instance.Log("AmeisenBot", "AmeisenBot starting...", LogLevel.Master);
-
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            AmeisenLogger.Instance.Log("AmeisenBot", $"version: {version}", LogLevel.Master);
 
             Config = config;
-
             AccountName = accountName;
-            AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {botDataPath}", LogLevel.Master);
-
             BotDataPath = botDataPath;
-            AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
             CurrentExecutionMs = 0;
             CurrentExecutionCount = 0;
             stateMachineTimerBusy = 0;
 
-            StateMachineTimer = new Timer(config.StateMachineTickMs);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"AmeisenBot ({version}) starting...", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
+
+            StateMachineTimer = new Timer(Config.StateMachineTickMs);
             StateMachineTimer.Elapsed += StateMachineTimerTick;
 
-            OffsetList = new OffsetList335a();
-            AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {OffsetList.GetType().ToString()}", LogLevel.Master);
+            WowInterface = new WowInterface();
+            SetupWowInterface();
 
-            XMemory = new XMemory();
-            BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, accountName, "cache.bin"));
-            BotPersonality = new BotPersonality(Path.Combine(BotDataPath, accountName, "personality.bin"));
-            CombatLogParser = new CombatLogParser(BotCache);
-            ObjectManager = new ObjectManager(XMemory, OffsetList, BotCache);
-            HookManager = new HookManager(XMemory, OffsetList, ObjectManager, BotCache);
-            ObjectManager.HookManager = HookManager;
-            CharacterManager = new CharacterManager(XMemory, config, OffsetList, ObjectManager, HookManager);
-            EventHookManager = new EventHookManager(HookManager);
-            PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
-            MovementSettings = new MovementSettings();
-            MovemenEngine = new SmartMovementEngine(
-                () => ObjectManager.Player.Position,
-                () => ObjectManager.Player.Rotation,
-                CharacterManager.MoveToPosition,
-                (Vector3 start, Vector3 end) => PathfindingHandler.GetPath(ObjectManager.MapId, start, end),
-                CharacterManager.Jump,
-                ObjectManager,
-                MovementSettings);
-            BattlegroundEngine = new BattlegroundEngine(HookManager, ObjectManager, MovemenEngine);
-            JobEngine = new JobEngine(ObjectManager, MovemenEngine, HookManager, CharacterManager);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType().ToString()}", LogLevel.Master);
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -107,31 +85,12 @@ namespace AmeisenBotX.Core
 
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
-            if (CombatClass?.ItemComparator != null)
+            if (WowInterface.CombatClass?.ItemComparator != null)
             {
-                CharacterManager.ItemComparator = CombatClass.ItemComparator;
+                WowInterface.CharacterManager.ItemComparator = WowInterface.CombatClass.ItemComparator;
             }
 
-            StateMachine = new AmeisenBotStateMachine
-            (
-                BotDataPath,
-                WowProcess,
-                Config,
-                XMemory,
-                OffsetList,
-                ObjectManager,
-                CharacterManager,
-                HookManager,
-                EventHookManager,
-                BotCache,
-                PathfindingHandler,
-                MovemenEngine,
-                MovementSettings,
-                CombatClass,
-                BattlegroundEngine,
-                JobEngine
-            );
-
+            StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
             StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
         }
 
@@ -141,19 +100,7 @@ namespace AmeisenBotX.Core
 
         public string AccountName { get; }
 
-        public BattlegroundEngine BattlegroundEngine { get; set; }
-
-        public IAmeisenBotCache BotCache { get; set; }
-
         public string BotDataPath { get; }
-
-        public BotPersonality BotPersonality { get; set; }
-
-        public CharacterManager CharacterManager { get; set; }
-
-        public ICombatClass CombatClass { get; set; }
-
-        public CombatLogParser CombatLogParser { get; set; }
 
         public AmeisenBotConfig Config { get; }
 
@@ -172,33 +119,15 @@ namespace AmeisenBotX.Core
             }
         }
 
-        public EventHookManager EventHookManager { get; set; }
-
-        public HookManager HookManager { get; set; }
-
         public bool IsRunning { get; private set; }
-
-        public JobEngine JobEngine { get; set; }
-
-        public IMovementEngine MovemenEngine { get; set; }
-
-        public MovementSettings MovementSettings { get; set; }
-
-        public ObjectManager ObjectManager { get; set; }
-
-        public IOffsetList OffsetList { get; }
-
-        public IPathfindingHandler PathfindingHandler { get; set; }
 
         public AmeisenBotStateMachine StateMachine { get; set; }
 
-        public Process WowProcess { get; }
+        public WowInterface WowInterface { get; set; }
 
         private int CurrentExecutionCount { get; set; }
 
         private Timer StateMachineTimer { get; }
-
-        private XMemory XMemory { get; }
 
         public void Pause()
         {
@@ -217,7 +146,7 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Starting", LogLevel.Warning);
             StateMachineTimer.Start();
-            BotCache.Load();
+            WowInterface.BotCache.Load();
             SubscribeToWowEvents();
             IsRunning = true;
         }
@@ -227,10 +156,10 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", "Stopping", LogLevel.Warning);
             StateMachineTimer.Stop();
 
-            HookManager.DisposeHook();
-            EventHookManager.Stop();
+            WowInterface.HookManager.DisposeHook();
+            WowInterface.EventHookManager.Stop();
 
-            if (ObjectManager.Player?.Name.Length > 0)
+            if (WowInterface.ObjectManager.Player?.Name.Length > 0)
             {
                 if (Config.SaveWowWindowPosition)
                 {
@@ -243,12 +172,12 @@ namespace AmeisenBotX.Core
                 }
             }
 
-            BotCache.Save();
+            WowInterface.BotCache.Save();
 
             if (Config.AutocloseWow)
             {
                 AmeisenLogger.Instance.Log("AmeisenBot", "Killing WoW process", LogLevel.Warning);
-                XMemory.Process.Kill();
+                WowInterface.XMemory.Process.Kill();
             }
 
             AmeisenLogger.Instance.Log("AmeisenBot", $"Stopping AmeisenBot...", LogLevel.Master);
@@ -341,7 +270,7 @@ namespace AmeisenBotX.Core
             {
                 try
                 {
-                    CombatClass = CompileCustomCombatClass();
+                    WowInterface.CombatClass = CompileCustomCombatClass();
                     OnCombatClassCompilationStatusChanged?.Invoke(true, string.Empty, string.Empty);
                     AmeisenLogger.Instance.Log("AmeisenBot", $"Compiling custom CombatClass successful", LogLevel.Warning);
                 }
@@ -357,33 +286,33 @@ namespace AmeisenBotX.Core
         private void LoadDefaultCombatClass()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
-            CombatClass = (Config.BuiltInCombatClassName.ToUpper()) switch
+            WowInterface.CombatClass = (Config.BuiltInCombatClassName.ToUpper()) switch
             {
-                "WARRIORARMS" => new WarriorArms(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
-                "DEATHKNIGHTBLOOD" => new DeathknightBlood(ObjectManager, CharacterManager, HookManager),
-                "DEATHKNIGHTUNHOLY" => new DeathknightUnholy(ObjectManager, CharacterManager, HookManager),
-                "DEATHKNIGHTFROST" => new DeathknightFrost(ObjectManager, CharacterManager, HookManager),
-                "WARRIORFURY" => new WarriorFury(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
-                "PALADINHOLY" => new PaladinHoly(ObjectManager, CharacterManager, HookManager),
-                "PALADINRETRIBUTION" => new PaladinRetribution(ObjectManager, CharacterManager, HookManager),
-                "PALADINPROTECTION" => new PaladinProtection(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
-                "MAGEARCANE" => new MageArcane(ObjectManager, CharacterManager, HookManager),
-                "MAGEFIRE" => new MageFire(ObjectManager, CharacterManager, HookManager),
-                "HUNTERBEASTMASTERY" => new HunterBeastmastery(ObjectManager, CharacterManager, HookManager),
-                "HUNTERMARKSMANSHIP" => new HunterMarksmanship(ObjectManager, CharacterManager, HookManager),
-                "HUNTERSURVIVAL" => new HunterSurvival(ObjectManager, CharacterManager, HookManager),
-                "PRIESTHOLY" => new PriestHoly(ObjectManager, CharacterManager, HookManager),
-                "PRIESTDISCIPLINE" => new PriestDiscipline(ObjectManager, CharacterManager, HookManager),
-                "PRIESTSHADOW" => new PriestShadow(ObjectManager, CharacterManager, HookManager),
-                "WARLOCKAFFLICTION" => new WarlockAffliction(ObjectManager, CharacterManager, HookManager),
-                "WARLOCKDEMONOLOGY" => new WarlockDemonology(ObjectManager, CharacterManager, HookManager),
-                "WARLOCKDESTRUCTION" => new WarlockDestruction(ObjectManager, CharacterManager, HookManager),
-                "DRUIDRESTORATION" => new DruidRestoration(ObjectManager, CharacterManager, HookManager),
-                "DRUIDBALANCE" => new DruidBalance(ObjectManager, CharacterManager, HookManager),
-                "ROGUEASSASSINATION" => new RogueAssassination(ObjectManager, CharacterManager, HookManager),
-                "ALTROGUEASSASSINATION" => new RogueAssassination2(ObjectManager, CharacterManager, HookManager, PathfindingHandler, new DefaultMovementEngine(ObjectManager, MovementSettings)),
-                "SHAMANELEMENTAL" => new ShamanElemental(ObjectManager, CharacterManager, HookManager),
-                "SHAMANRESTORATION" => new ShamanRestoration(ObjectManager, CharacterManager, HookManager),
+                "WARRIORARMS" => new WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                "DEATHKNIGHTBLOOD" => new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
+                "DEATHKNIGHTUNHOLY" => new DeathknightUnholy(WowInterface),
+                "DEATHKNIGHTFROST" => new DeathknightFrost(WowInterface),
+                "WARRIORFURY" => new WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                "PALADINHOLY" => new PaladinHoly(WowInterface),
+                "PALADINRETRIBUTION" => new PaladinRetribution(WowInterface),
+                "PALADINPROTECTION" => new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                "MAGEARCANE" => new MageArcane(WowInterface),
+                "MAGEFIRE" => new MageFire(WowInterface),
+                "HUNTERBEASTMASTERY" => new HunterBeastmastery(WowInterface),
+                "HUNTERMARKSMANSHIP" => new HunterMarksmanship(WowInterface),
+                "HUNTERSURVIVAL" => new HunterSurvival(WowInterface),
+                "PRIESTHOLY" => new PriestHoly(WowInterface),
+                "PRIESTDISCIPLINE" => new PriestDiscipline(WowInterface),
+                "PRIESTSHADOW" => new PriestShadow(WowInterface),
+                "WARLOCKAFFLICTION" => new WarlockAffliction(WowInterface),
+                "WARLOCKDEMONOLOGY" => new WarlockDemonology(WowInterface),
+                "WARLOCKDESTRUCTION" => new WarlockDestruction(WowInterface),
+                "DRUIDRESTORATION" => new DruidRestoration(WowInterface),
+                "DRUIDBALANCE" => new DruidBalance(WowInterface),
+                "ROGUEASSASSINATION" => new RogueAssassination(WowInterface),
+                "ALTROGUEASSASSINATION" => new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                "SHAMANELEMENTAL" => new ShamanElemental(WowInterface),
+                "SHAMANRESTORATION" => new ShamanRestoration(WowInterface),
                 _ => null,
             };
         }
@@ -396,7 +325,7 @@ namespace AmeisenBotX.Core
                 {
                     if (Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
-                        XMemory.SetWindowPosition(XMemory.Process.MainWindowHandle, Config.WowWindowRect);
+                        XMemory.SetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle, Config.WowWindowRect);
                         AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded wow window position: {Config.WowWindowRect}", LogLevel.Verbose);
                     }
                 }
@@ -411,9 +340,9 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
 
-            CharacterManager.Inventory.Update();
-            CharacterManager.UpdateCharacterGear();
-            CharacterManager.Inventory.Update();
+            WowInterface.CharacterManager.Inventory.Update();
+            WowInterface.CharacterManager.UpdateCharacterGear();
+            WowInterface.CharacterManager.Inventory.Update();
         }
 
         private void OnBattlegroundScoreUpdate(long timestamp, List<string> args)
@@ -454,13 +383,13 @@ namespace AmeisenBotX.Core
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.CofirmBop();
+            WowInterface.HookManager.CofirmBop();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnEquipmentChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            CharacterManager.Equipment.Update();
+            WowInterface.CharacterManager.Equipment.Update();
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)
@@ -469,32 +398,32 @@ namespace AmeisenBotX.Core
 
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemName = HookManager.GetLootRollItemLink(rollId);
-                string json = HookManager.GetItemByNameOrLink(itemName);
+                string itemName = WowInterface.HookManager.GetLootRollItemLink(rollId);
+                string json = WowInterface.HookManager.GetItemByNameOrLink(itemName);
                 WowBasicItem item = ItemFactory.ParseItem(json);
                 item = ItemFactory.BuildSpecificItem(item);
 
-                if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                 {
                     AmeisenLogger.Instance.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
-                    HookManager.RollOnItem(rollId, RollType.Need);
+                    WowInterface.HookManager.RollOnItem(rollId, RollType.Need);
                     return;
                 }
             }
 
-            HookManager.RollOnItem(rollId, RollType.Pass);
+            WowInterface.HookManager.RollOnItem(rollId, RollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.LootEveryThing();
+            WowInterface.HookManager.LootEveryThing();
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnPartyInvitation: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.AcceptPartyInvite();
+            WowInterface.HookManager.AcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
@@ -505,19 +434,19 @@ namespace AmeisenBotX.Core
         private void OnReadyCheck(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnReadyCheck: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.CofirmReadyCheck(true);
+            WowInterface.HookManager.CofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnResurrectRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.AcceptResurrect();
+            WowInterface.HookManager.AcceptResurrect();
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnSummonRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-            HookManager.AcceptSummon();
+            WowInterface.HookManager.AcceptSummon();
         }
 
         private void OnWorldStateUpdate(long timestamp, List<string> args)
@@ -529,23 +458,23 @@ namespace AmeisenBotX.Core
         {
             if (message.ToUpper().Contains("ALLIANCE FLAG WAS PICKED UP"))
             {
-                BattlegroundEngine.AllianceFlagWasPickedUp(arg1);
+                WowInterface.BattlegroundEngine.AllianceFlagWasPickedUp(arg1);
             }
             else if (message.ToUpper().Contains("HORDE FLAG WAS PICKED UP"))
             {
-                BattlegroundEngine.HordeFlagWasPickedUp(arg1);
+                WowInterface.BattlegroundEngine.HordeFlagWasPickedUp(arg1);
             }
             else if (message.ToUpper().Contains("ALLIANCE FLAG WAS DROPPED")
                 || message.ToUpper().Contains("CAPTURED THE ALLIANCE FLAG")
                 || message.ToUpper().Contains("THE ALLIANCE FLAG IS NOW PLACED AT ITS BASE"))
             {
-                BattlegroundEngine.AllianceFlagWasDropped(arg1);
+                WowInterface.BattlegroundEngine.AllianceFlagWasDropped(arg1);
             }
             else if (message.ToUpper().Contains("HORDE FLAG WAS DROPPED")
                 || message.ToUpper().Contains("CAPTURED THE HORDE FLAG")
                 || message.ToUpper().Contains("THE HORDE FLAG IS NOW PLACED AT ITS BASE"))
             {
-                BattlegroundEngine.HordeFlagWasDropped(arg1);
+                WowInterface.BattlegroundEngine.HordeFlagWasDropped(arg1);
             }
         }
 
@@ -565,12 +494,46 @@ namespace AmeisenBotX.Core
         {
             try
             {
-                Config.WowWindowRect = XMemory.GetWindowPosition(XMemory.Process.MainWindowHandle);
+                Config.WowWindowRect = XMemory.GetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle);
             }
             catch (Exception e)
             {
                 AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save wow window position:\n{e.ToString()}", LogLevel.Error);
             }
+        }
+
+        private void SetupWowInterface()
+        {
+            WowInterface.OffsetList = new OffsetList335a();
+            WowInterface.XMemory = new XMemory();
+
+            WowInterface.LoginHandler = new DefaultLoginHandler(WowInterface);
+
+            WowInterface.BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, AccountName, "cache.bin"));
+            WowInterface.BotPersonality = new BotPersonality(Path.Combine(BotDataPath, AccountName, "personality.bin"));
+
+            WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
+
+            WowInterface.ObjectManager = new ObjectManager(WowInterface);
+            WowInterface.HookManager = new HookManager(WowInterface);
+            WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
+            WowInterface.EventHookManager = new EventHookManager(WowInterface);
+
+            WowInterface.BattlegroundEngine = new BattlegroundEngine(WowInterface);
+            WowInterface.JobEngine = new JobEngine(WowInterface);
+
+            WowInterface.PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
+            WowInterface.MovementSettings = new MovementSettings();
+            WowInterface.MovementEngine = new SmartMovementEngine
+            (
+                () => WowInterface.ObjectManager.Player.Position,
+                () => WowInterface.ObjectManager.Player.Rotation,
+                WowInterface.CharacterManager.MoveToPosition,
+                (Vector3 start, Vector3 end) => WowInterface.PathfindingHandler.GetPath(WowInterface.ObjectManager.MapId, start, end),
+                WowInterface.CharacterManager.Jump,
+                WowInterface.ObjectManager,
+                WowInterface.MovementSettings
+            );
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)
@@ -597,27 +560,28 @@ namespace AmeisenBotX.Core
 
         private void SubscribeToWowEvents()
         {
-            EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
-            EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
-            EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
-            EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
+            WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
+            WowInterface.EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
+            WowInterface.EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
+            WowInterface.EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
 
-            EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
-            EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
-            EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
-            EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
-            EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
-            EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
-            //// EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
+            WowInterface.EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
+            WowInterface.EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
+            WowInterface.EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
+            WowInterface.EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
+            WowInterface.EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
+            WowInterface.EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
 
-            EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnBattlegroundScoreUpdate);
-            EventHookManager.Subscribe("UPDATE_WORLD_STATES", OnWorldStateUpdate);
-            EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
-            EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnBgAllianceMessage);
-            EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
-            EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnBgNeutralMessage);
+            // WowInterface.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
-            // EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", CombatLogParser.Parse);
+            WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnBattlegroundScoreUpdate);
+            WowInterface.EventHookManager.Subscribe("UPDATE_WORLD_STATES", OnWorldStateUpdate);
+            WowInterface.EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnBgAllianceMessage);
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnBgNeutralMessage);
+
+            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", CombatLogParser.Parse);
         }
     }
 }

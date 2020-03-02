@@ -1,9 +1,6 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.Profiles;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +9,12 @@ namespace AmeisenBotX.Core.Battleground.States
 {
     public class PickupEnemyFlagBgState : BasicBattlegroundState
     {
-        public PickupEnemyFlagBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, IMovementEngine movementEngine, HookManager hookManager) : base(battlegroundEngine)
+        public PickupEnemyFlagBgState(BattlegroundEngine battlegroundEngine, WowInterface wowInterface) : base(battlegroundEngine)
         {
-            ObjectManager = objectManager;
-            HookManager = hookManager;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
         }
 
-        private HookManager HookManager { get; }
-
-        private IMovementEngine MovementEngine { get; }
-
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -39,14 +30,14 @@ namespace AmeisenBotX.Core.Battleground.States
                     if (!((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
                     {
                         WowGameobject flagObject = flags.First();
-                        if (flagObject != null && flagObject.Position.GetDistance(ObjectManager.Player.Position) < 8)
+                        if (flagObject != null && flagObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 8)
                         {
-                            HookManager.RightClickObject(flagObject);
+                            WowInterface.HookManager.RightClickObject(flagObject);
                         }
                         else
                         {
-                            MovementEngine.SetState(MovementEngineState.Moving, flagObject.Position);
-                            MovementEngine.Execute();
+                            WowInterface.MovementEngine.SetState(MovementEngineState.Moving, flagObject.Position);
+                            WowInterface.MovementEngine.Execute();
                         }
                     }
                     else
@@ -63,7 +54,7 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
-            MovementEngine.Reset();
+            WowInterface.MovementEngine.Reset();
         }
     }
 }

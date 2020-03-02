@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -9,19 +8,19 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public class CharacterInventory
     {
-        public CharacterInventory(HookManager hookManager)
+        public CharacterInventory(WowInterface wowInterface)
         {
-            HookManager = hookManager;
+            WowInterface = wowInterface;
             Items = new List<IWowItem>();
         }
 
         public List<IWowItem> Items { get; private set; }
 
-        private HookManager HookManager { get; }
+        private WowInterface WowInterface { get; }
 
         public void Update()
         {
-            string resultJson = HookManager.GetInventoryItems();
+            string resultJson = WowInterface.HookManager.GetInventoryItems();
 
             try
             {

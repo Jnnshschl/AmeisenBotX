@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool multipleTargets = false;
         private bool standing = false;
 
-        public WarriorFury(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public WarriorFury(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -62,11 +62,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public string Version => "1.0";
 
-        private CharacterManager CharacterManager { get; }
+        private ICharacterManager CharacterManager { get; }
 
         private bool Dancing { get; set; }
 
-        private HookManager HookManager { get; }
+        private IHookManager HookManager { get; }
 
         private Vector3 LastPlayerPosition { get; set; }
 
@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DefaultMovementEngine MovementEngine { get; set; }
 
-        private ObjectManager ObjectManager { get; }
+        private IObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
 
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 bool targetDistanceChanged = false;
                 if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
-                    distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
                     LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (targetDistanceChanged)
                 {
-                    distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                 }
 
                 HandleMovement(target);
@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
             {
-                distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
                 LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
             }
 
@@ -162,7 +162,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         hasTargetMoved = true;
                         LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                        distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                     }
                     else
                     {
@@ -254,7 +254,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < 100.0)
                     {
                         if (tmpDistance < 6.0)
@@ -339,7 +339,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private bool askedForHeal = false;
             private bool askedForHelp = false;
 
-            public WarriorFurySpells(HookManager hookManager, ObjectManager objectManager)
+            public WarriorFurySpells(IHookManager hookManager, IObjectManager objectManager)
             {
                 HookManager = hookManager;
                 ObjectManager = objectManager;
@@ -350,7 +350,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 NextCast = DateTime.Now;
             }
 
-            private HookManager HookManager { get; set; }
+            private IHookManager HookManager { get; set; }
 
             private bool IsInBerserkerStance { get; set; }
 
@@ -360,7 +360,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             private DateTime NextStance { get; set; }
 
-            private ObjectManager ObjectManager { get; set; }
+            private IObjectManager ObjectManager { get; set; }
 
             private WowPlayer Player { get; set; }
 

@@ -52,12 +52,25 @@ namespace AmeisenBotX.Core.Common
         }
 
         public static bool IsPositionInsideAoeSpell(Vector3 position, List<WowDynobject> wowDynobjects)
-            => wowDynobjects.Any(e => e.Position.GetDistance2D(position) < e.Radius + 1);
+            => wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 1);
 
         public static bool IsValidUnit(WowUnit unit)
         {
             return unit != null
                 && !unit.IsNotAttackable;
+        }
+
+        public static Vector3 MoveAhead(float rotation, Vector3 targetPosition, double offset)
+        {
+            double x = targetPosition.X + (Math.Cos(rotation) * offset);
+            double y = targetPosition.Y + (Math.Sin(rotation) * offset);
+
+            return new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = targetPosition.Z
+            };
         }
 
         public static void RealeaseKey(IntPtr windowHandle, IntPtr key)

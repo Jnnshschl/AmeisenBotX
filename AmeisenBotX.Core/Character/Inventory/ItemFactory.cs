@@ -8,8 +8,7 @@ namespace AmeisenBotX.Core.Character.Inventory
     public static class ItemFactory
     {
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
-        {
-            return (basicItem.Type.ToUpper()) switch
+            => (basicItem.Type.ToUpper()) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
                 "CONSUMEABLE" => new WowConsumable(basicItem),
@@ -27,7 +26,6 @@ namespace AmeisenBotX.Core.Character.Inventory
                 "WEAPON" => new WowWeapon(basicItem),
                 _ => basicItem,
             };
-        }
 
         public static WowBasicItem ParseItem(string json)
         {

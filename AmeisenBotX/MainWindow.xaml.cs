@@ -76,7 +76,7 @@ namespace AmeisenBotX
                 string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
                 AmeisenBot = new AmeisenBot(BotDataPath, playername, Config);
 
-                AmeisenBot.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
+                AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
                 AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
 
                 LastStateMachineTickUpdate = DateTime.Now;
@@ -93,7 +93,7 @@ namespace AmeisenBotX
 
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.BotCache.Clear();
+            AmeisenBot.WowInterface.BotCache.Clear();
         }
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e) => new ConfigEditorWindow(BotDataPath, Config).ShowDialog();
@@ -102,8 +102,8 @@ namespace AmeisenBotX
 
         private void ButtonFaceTarget_Click(object sender, RoutedEventArgs e)
         {
-            float angle = BotMath.GetFacingAngle(AmeisenBot.ObjectManager.Player.Position, AmeisenBot.ObjectManager.Target.Position);
-            AmeisenBot.HookManager.SetFacing(AmeisenBot.ObjectManager.Player, angle);
+            float angle = BotMath.GetFacingAngle(AmeisenBot.WowInterface.ObjectManager.Player.Position, AmeisenBot.WowInterface.ObjectManager.Target.Position);
+            AmeisenBot.WowInterface.HookManager.SetFacing(AmeisenBot.WowInterface.ObjectManager.Player, angle);
         }
 
         private void ButtonSettings_Click(object sender, RoutedEventArgs e) => new SettingsWindow(Config).ShowDialog();
@@ -157,65 +157,65 @@ namespace AmeisenBotX
             Dispatcher.InvokeAsync(() =>
             {
                 // debug label stuff
-                if (AmeisenBot.BattlegroundEngine != null)
+                if (AmeisenBot.WowInterface.BattlegroundEngine != null)
                 {
                     string ownCarrier = string.Empty;
                     string enemyCarrier = string.Empty;
                     bool isMeCarrier = false;
 
-                    if (AmeisenBot.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
+                    if (AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
                     {
-                        ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.BattlegroundEngine.BattlegroundProfile;
+                        ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile;
                         ownCarrier = ctfBattlegroundProfile.OwnFlagCarrierPlayer?.Name;
                         enemyCarrier = ctfBattlegroundProfile.EnemyFlagCarrierPlayer?.Name;
                         isMeCarrier = ctfBattlegroundProfile.IsMeFlagCarrier;
                     }
 
-                    labelBgObjective.Content = $"BGEngine State: {AmeisenBot.BattlegroundEngine.CurrentState.Key}\nBGEngine Last State: {AmeisenBot.BattlegroundEngine.LastState}\n\nBGOwnFlagCarrier: {ownCarrier}\nBGEnemyFlagCarrier: {enemyCarrier}\nisMeCarrier: {isMeCarrier}";
+                    labelBgObjective.Content = $"BGEngine State: {AmeisenBot.WowInterface.BattlegroundEngine.CurrentState.Key}\nBGEngine Last State: {AmeisenBot.WowInterface.BattlegroundEngine.LastState}\n\nBGOwnFlagCarrier: {ownCarrier}\nBGEnemyFlagCarrier: {enemyCarrier}\nisMeCarrier: {isMeCarrier}";
                 }
 
                 // update health and secodary power bar and
                 // the colors corresponding to the class
-                switch (AmeisenBot.ObjectManager.Player.Class)
+                switch (AmeisenBot.WowInterface.ObjectManager.Player.Class)
                 {
                     case WowClass.Deathknight:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxRuneenergy, AmeisenBot.ObjectManager.Player.Runeenergy, dkPrimaryBrush, dkSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxRuneenergy, AmeisenBot.WowInterface.ObjectManager.Player.Runeenergy, dkPrimaryBrush, dkSecondaryBrush);
                         break;
 
                     case WowClass.Druid:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, druidPrimaryBrush, druidSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, druidPrimaryBrush, druidSecondaryBrush);
                         break;
 
                     case WowClass.Hunter:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, hunterPrimaryBrush, hunterSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, hunterPrimaryBrush, hunterSecondaryBrush);
                         break;
 
                     case WowClass.Mage:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, magePrimaryBrush, mageSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, magePrimaryBrush, mageSecondaryBrush);
                         break;
 
                     case WowClass.Paladin:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, paladinPrimaryBrush, paladinSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, paladinPrimaryBrush, paladinSecondaryBrush);
                         break;
 
                     case WowClass.Priest:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, priestPrimaryBrush, priestSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, priestPrimaryBrush, priestSecondaryBrush);
                         break;
 
                     case WowClass.Rogue:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxEnergy, AmeisenBot.ObjectManager.Player.Energy, roguePrimaryBrush, rogueSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxEnergy, AmeisenBot.WowInterface.ObjectManager.Player.Energy, roguePrimaryBrush, rogueSecondaryBrush);
                         break;
 
                     case WowClass.Shaman:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, shamanPrimaryBrush, shamanSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, shamanPrimaryBrush, shamanSecondaryBrush);
                         break;
 
                     case WowClass.Warlock:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxMana, AmeisenBot.ObjectManager.Player.Mana, warlockPrimaryBrush, warlockSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, warlockPrimaryBrush, warlockSecondaryBrush);
                         break;
 
                     case WowClass.Warrior:
-                        UpdateBotInfo(AmeisenBot.ObjectManager.Player.MaxRage, AmeisenBot.ObjectManager.Player.Rage, warriorPrimaryBrush, warriorSecondaryBrush);
+                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxRage, AmeisenBot.WowInterface.ObjectManager.Player.Rage, warriorPrimaryBrush, warriorSecondaryBrush);
                         break;
                 }
 
@@ -227,7 +227,7 @@ namespace AmeisenBotX
                 }
 
                 // update the object count label
-                labelCurrentObjectCount.Content = AmeisenBot.ObjectManager.WowObjects.Count;
+                labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.WowObjects.Count;
             });
         }
 
@@ -250,21 +250,21 @@ namespace AmeisenBotX
         private void UpdateBotInfo(int secondary, int maxSecondary, Brush primaryBrush, Brush secondaryBrush)
         {
             // generic stuff
-            labelPlayerName.Content = AmeisenBot.ObjectManager.Player.Name;
+            labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
 
-            labelCurrentLevel.Content = $"lvl. {AmeisenBot.ObjectManager.Player.Level}";
-            labelCurrentRace.Content = $"{AmeisenBot.ObjectManager.Player.Gender} {AmeisenBot.ObjectManager.Player.Race}";
-            labelCurrentClass.Content = $"{AmeisenBot.ObjectManager.Player.Class} [{AmeisenBot.ObjectManager.Player.PowerType}]";
+            labelCurrentLevel.Content = $"lvl. {AmeisenBot.WowInterface.ObjectManager.Player.Level}";
+            labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Gender} {AmeisenBot.WowInterface.ObjectManager.Player.Race}";
+            labelCurrentClass.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Class} [{AmeisenBot.WowInterface.ObjectManager.Player.PowerType}]";
 
-            progressbarExp.Maximum = AmeisenBot.ObjectManager.Player.MaxExp;
-            progressbarExp.Value = AmeisenBot.ObjectManager.Player.Exp;
-            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Exp)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxExp)}";
+            progressbarExp.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.MaxExp;
+            progressbarExp.Value = AmeisenBot.WowInterface.ObjectManager.Player.Exp;
+            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Exp)}/{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.MaxExp)}";
 
-            progressbarHealth.Maximum = AmeisenBot.ObjectManager.Player.MaxHealth;
-            progressbarHealth.Value = AmeisenBot.ObjectManager.Player.Health;
-            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.ObjectManager.Player.MaxHealth)}";
+            progressbarHealth.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.MaxHealth;
+            progressbarHealth.Value = AmeisenBot.WowInterface.ObjectManager.Player.Health;
+            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.MaxHealth)}";
 
-            labelCurrentCombatclass.Content = AmeisenBot.CombatClass == null ? $"No CombatClass" : $"{AmeisenBot.CombatClass.GetType().Name}";
+            labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : $"{AmeisenBot.WowInterface.CombatClass.GetType().Name}";
 
             // class specific stuff
             progressbarSecondary.Maximum = maxSecondary;

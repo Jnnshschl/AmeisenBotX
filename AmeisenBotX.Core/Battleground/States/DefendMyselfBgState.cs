@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.Profiles;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +8,12 @@ namespace AmeisenBotX.Core.Battleground.States
 {
     public class DefendMyselfBgState : BasicBattlegroundState
     {
-        public DefendMyselfBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager) : base(battlegroundEngine)
+        public DefendMyselfBgState(BattlegroundEngine battlegroundEngine, WowInterface wowInterface) : base(battlegroundEngine)
         {
-            ObjectManager = objectManager;
+            WowInterface = wowInterface;
         }
 
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -24,8 +23,8 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             // at the beginning of the BG, move to the enemies base
             // TODO: maybe handle speedbuff here
-            IEnumerable<WowPlayer> nearEnemies = ObjectManager.GetNearEnemies(ObjectManager.Player.Position, 30);
-            IEnumerable<WowPlayer> nearFriends = ObjectManager.GetNearFriends(ObjectManager.Player.Position, 30);
+            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies(WowInterface.ObjectManager.Player.Position, 30);
+            IEnumerable<WowPlayer> nearFriends = WowInterface.ObjectManager.GetNearFriends(WowInterface.ObjectManager.Player.Position, 30);
 
             int enemyCount = nearEnemies.Count();
             int friendCount = nearFriends.Count();

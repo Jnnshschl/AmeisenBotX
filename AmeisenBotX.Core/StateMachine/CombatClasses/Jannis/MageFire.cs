@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.StateMachine.Utils.AuraManager;
@@ -29,13 +26,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string scorchSpell = "Scorch";
         private readonly string spellStealSpell = "Spellsteal";
 
-        public MageFire(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public MageFire(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { arcaneIntellectSpell, () =>
                     {
-                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(arcaneIntellectSpell, true);
                     }
                 },
@@ -82,7 +79,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -94,13 +91,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
                 if (CastSpellIfPossible(mirrorImageSpell, true)
-                    || (ObjectManager.Player.HealthPercentage < 16
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 16
                         && CastSpellIfPossible(iceBlockSpell, true))
                     || (MyAuraManager.Buffs.Contains(hotstreakSpell.ToLower()) && CastSpellIfPossible(pyroblastSpell, true))
-                    || (ObjectManager.Player.ManaPercentage < 40
+                    || (WowInterface.ObjectManager.Player.ManaPercentage < 40
                         && CastSpellIfPossible(evocationSpell, true))
                     || CastSpellIfPossible(fireballSpell, true))
                 {

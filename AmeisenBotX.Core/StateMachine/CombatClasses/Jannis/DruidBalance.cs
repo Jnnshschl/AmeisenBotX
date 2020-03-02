@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.StateMachine.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,14 +29,14 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         private readonly string starfireSpell = "Starfire";
         private readonly string wrathSpell = "Wrath";
 
-        public DruidBalance(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager) : base(objectManager, characterManager, hookManager)
+        public DruidBalance(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, true) },
                 { markOfTheWildSpell, () =>
                     {
-                        HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(markOfTheWildSpell, true);
                     }
                 }
@@ -88,7 +85,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
@@ -98,15 +95,15 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 || TargetInterruptManager.Tick()
                 || (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
                     && CheckForEclipseProcs())
-                || (ObjectManager.Player.ManaPercentage < 30
+                || (WowInterface.ObjectManager.Player.ManaPercentage < 30
                     && CastSpellIfPossible(innervateSpell))
-                || (ObjectManager.Player.HealthPercentage < 70
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
                     && CastSpellIfPossible(barkskinSpell, true))
                 || (LunarEclipse
                     && CastSpellIfPossible(starfireSpell, true))
                 || (SolarEclipse
                     && CastSpellIfPossible(wrathSpell, true))
-                || (ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
+                || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
                     && CastSpellIfPossible(starfallSpell, true)))
             {
                 return;
@@ -114,7 +111,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
             if (CastSpellIfPossible(forceOfNatureSpell, true))
             {
-                HookManager.ClickOnTerrain(ObjectManager.Player.Position);
+                HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
             }
         }
 

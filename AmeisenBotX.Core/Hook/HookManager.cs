@@ -1,13 +1,9 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Data.Persistence;
-using AmeisenBotX.Core.OffsetLists;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
@@ -18,16 +14,13 @@ using System.Threading;
 
 namespace AmeisenBotX.Core.Hook
 {
-    public class HookManager
+    public class HookManager : IHookManager
     {
         private const int ENDSCENE_HOOK_OFFSET = 0x2;
 
-        public HookManager(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager, IAmeisenBotCache botCache)
+        public HookManager(WowInterface wowInterface)
         {
-            XMemory = xMemory;
-            OffsetList = offsetList;
-            ObjectManager = objectManager;
-            BotCache = botCache;
+            WowInterface = wowInterface;
         }
 
         public IntPtr CodecaveForCheck { get; private set; }
@@ -46,7 +39,7 @@ namespace AmeisenBotX.Core.Hook
         {
             get
             {
-                if (XMemory.ReadByte(EndsceneAddress, out byte c))
+                if (WowInterface.XMemory.ReadByte(EndsceneAddress, out byte c))
                 {
                     return c == 0xE9;
                 }
@@ -61,13 +54,7 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr ReturnValueAddress { get; private set; }
 
-        private IAmeisenBotCache BotCache { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IOffsetList OffsetList { get; }
-
-        private XMemory XMemory { get; }
+        private WowInterface WowInterface { get; }
 
         public void AcceptBattlegroundInvite()
         {
@@ -118,7 +105,7 @@ namespace AmeisenBotX.Core.Hook
                     "PUSH 0",
                     "PUSH 0",
                     $"PUSH {spellId}",
-                    $"CALL {OffsetList.FunctionCastSpellById.ToInt32()}",
+                    $"CALL {WowInterface.OffsetList.FunctionCastSpellById.ToInt32()}",
                     "ADD ESP, 0x10",
                 };
 
@@ -134,40 +121,40 @@ namespace AmeisenBotX.Core.Hook
 
         public void ClickOnTerrain(Vector3 position)
         {
-            if (XMemory.AllocateMemory(20, out IntPtr codeCaveVector3))
+            if (WowInterface.XMemory.AllocateMemory(20, out IntPtr codeCaveVector3))
             {
-                XMemory.Write<ulong>(codeCaveVector3, 0);
-                XMemory.Write(IntPtr.Add(codeCaveVector3, 0x8), position);
+                WowInterface.XMemory.Write<ulong>(codeCaveVector3, 0);
+                WowInterface.XMemory.Write(IntPtr.Add(codeCaveVector3, 0x8), position);
 
                 string[] asm = new string[]
                 {
                     $"PUSH {codeCaveVector3.ToInt32()}",
-                    $"CALL {OffsetList.FunctionHandleTerrainClick.ToInt32()}",
+                    $"CALL {WowInterface.OffsetList.FunctionHandleTerrainClick.ToInt32()}",
                     "ADD ESP, 0x4",
                     "RETN",
                 };
 
                 InjectAndExecute(asm, false);
-                XMemory.FreeMemory(codeCaveVector3);
+                WowInterface.XMemory.FreeMemory(codeCaveVector3);
             }
         }
 
         public void ClickToMove(IntPtr playerBase, Vector3 position)
         {
-            if (XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            if (WowInterface.XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
-                XMemory.Write(codeCaveVector3, position);
+                WowInterface.XMemory.Write(codeCaveVector3, position);
 
                 string[] asm = new string[]
                 {
                     $"PUSH {codeCaveVector3.ToInt32()}",
                     $"MOV ECX, {playerBase.ToInt32()}",
-                    $"CALL {OffsetList.FunctionClickToMove.ToInt32()}",
+                    $"CALL {WowInterface.OffsetList.FunctionClickToMove.ToInt32()}",
                     "RETN",
                 };
 
                 InjectAndExecute(asm, false);
-                XMemory.FreeMemory(codeCaveVector3);
+                WowInterface.XMemory.FreeMemory(codeCaveVector3);
             }
         }
 
@@ -187,26 +174,26 @@ namespace AmeisenBotX.Core.Hook
             if (IsWoWHooked)
             {
                 AmeisenLogger.Instance.Log("HookManager", "Disposing EnsceneHook...", LogLevel.Verbose);
-                XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
+                WowInterface.XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
 
                 if (CodecaveForCheck != null)
                 {
-                    XMemory.FreeMemory(CodecaveForCheck);
+                    WowInterface.XMemory.FreeMemory(CodecaveForCheck);
                 }
 
                 if (CodecaveForExecution != null)
                 {
-                    XMemory.FreeMemory(CodecaveForExecution);
+                    WowInterface.XMemory.FreeMemory(CodecaveForExecution);
                 }
 
                 if (CodeToExecuteAddress != null)
                 {
-                    XMemory.FreeMemory(CodeToExecuteAddress);
+                    WowInterface.XMemory.FreeMemory(CodeToExecuteAddress);
                 }
 
                 if (ReturnValueAddress != null)
                 {
-                    XMemory.FreeMemory(ReturnValueAddress);
+                    WowInterface.XMemory.FreeMemory(ReturnValueAddress);
                 }
             }
         }
@@ -288,9 +275,9 @@ namespace AmeisenBotX.Core.Hook
             if (variable.Length > 0)
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(variable);
-                if (XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
+                if (WowInterface.XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
                 {
-                    XMemory.WriteBytes(memAlloc, bytes);
+                    WowInterface.XMemory.WriteBytes(memAlloc, bytes);
 
                     if (memAlloc == IntPtr.Zero)
                     {
@@ -299,16 +286,16 @@ namespace AmeisenBotX.Core.Hook
 
                     string[] asm = new string[]
                     {
-                        $"CALL {OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
                         "MOV ECX, EAX",
                         "PUSH -1",
                         $"PUSH {memAlloc.ToInt32()}",
-                        $"CALL {OffsetList.FunctionGetLocalizedText.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionGetLocalizedText.ToInt32()}",
                         "RETN",
                     };
 
                     string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
-                    XMemory.FreeMemory(memAlloc);
+                    WowInterface.XMemory.FreeMemory(memAlloc);
                     return result;
                 }
             }
@@ -340,8 +327,8 @@ namespace AmeisenBotX.Core.Hook
 
             for (int i = 0; i < 6; ++i)
             {
-                if (XMemory.Read(OffsetList.RuneType + (4 * i), out RuneType type)
-                    && XMemory.ReadByte(OffsetList.Runes, out byte runeStatus)
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.RuneType + (4 * i), out RuneType type)
+                    && WowInterface.XMemory.ReadByte(WowInterface.OffsetList.Runes, out byte runeStatus)
                     && ((1 << runeId) & runeStatus) != 0)
                 {
                     runes[type]++;
@@ -414,27 +401,27 @@ namespace AmeisenBotX.Core.Hook
                 return reaction;
             }
 
-            if (BotCache.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
+            if (WowInterface.BotCache.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
             {
                 return cachedReaction;
             }
 
             // integer to save the reaction
-            XMemory.AllocateMemory(4, out IntPtr memAlloc);
-            XMemory.Write(memAlloc, 0);
+            WowInterface.XMemory.AllocateMemory(4, out IntPtr memAlloc);
+            WowInterface.XMemory.Write(memAlloc, 0);
 
             string[] asm = new string[]
             {
                 $"PUSH {wowUnitA.BaseAddress}",
                 $"MOV ECX, {wowUnitB.BaseAddress}",
-                $"CALL {OffsetList.FunctionGetUnitReaction}",
+                $"CALL {WowInterface.OffsetList.FunctionGetUnitReaction}",
                 $"MOV [{memAlloc}], EAX",
                 "RETN",
             };
 
             // we need this, to be very accurate, otherwise wow will crash
-            if (XMemory.ReadStruct(IntPtr.Add(wowUnitA.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsA)
-                && XMemory.ReadStruct(IntPtr.Add(wowUnitB.DescriptorAddress, OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsB))
+            if (WowInterface.XMemory.ReadStruct(IntPtr.Add(wowUnitA.DescriptorAddress, WowInterface.OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsA)
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(wowUnitB.DescriptorAddress, WowInterface.OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsB))
             {
                 wowUnitA.UnitFlags = unitFlagsA;
                 wowUnitB.UnitFlags = unitFlagsB;
@@ -452,13 +439,13 @@ namespace AmeisenBotX.Core.Hook
             try
             {
                 InjectAndExecute(asm, true);
-                XMemory.Read(memAlloc, out reaction);
+                WowInterface.XMemory.Read(memAlloc, out reaction);
 
-                BotCache.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
+                WowInterface.BotCache.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
             }
             finally
             {
-                XMemory.FreeMemory(memAlloc);
+                WowInterface.XMemory.FreeMemory(memAlloc);
             }
 
             return reaction;
@@ -478,7 +465,7 @@ namespace AmeisenBotX.Core.Hook
 
             List<byte> returnBytes = new List<byte>();
 
-            if (!ObjectManager.IsWorldLoaded)
+            if (!WowInterface.ObjectManager.IsWorldLoaded)
             {
                 return returnBytes.ToArray();
             }
@@ -502,26 +489,26 @@ namespace AmeisenBotX.Core.Hook
                 IsInjectionUsed = true;
 
                 // preparing to inject the given ASM
-                XMemory.Fasm.Clear();
+                WowInterface.XMemory.Fasm.Clear();
 
                 // add all lines
                 foreach (string s in asm)
                 {
-                    XMemory.Fasm.AddLine(s);
+                    WowInterface.XMemory.Fasm.AddLine(s);
                 }
 
                 // inject it
-                XMemory.SuspendMainThread();
-                XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
-                XMemory.ResumeMainThread();
+                WowInterface.XMemory.SuspendMainThread();
+                WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
+                WowInterface.XMemory.ResumeMainThread();
 
                 // now there is code to be executed
-                XMemory.Write(CodeToExecuteAddress, 1);
+                WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
 
                 timeoutCounter = 0;
 
                 // wait for the code to be executed
-                while (XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
+                while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
                 {
                     if (timeoutCounter == 5000)
                     {
@@ -538,15 +525,15 @@ namespace AmeisenBotX.Core.Hook
                 {
                     try
                     {
-                        XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
+                        WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
 
                         // read all parameter-bytes until we the buffer is 0
-                        XMemory.ReadByte(dwAddress, out byte buffer);
+                        WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
                         while (buffer != 0)
                         {
                             returnBytes.Add(buffer);
                             dwAddress = IntPtr.Add(dwAddress, 1);
-                            XMemory.ReadByte(dwAddress, out buffer);
+                            WowInterface.XMemory.ReadByte(dwAddress, out buffer);
                         }
                     }
                     catch (Exception e)
@@ -562,9 +549,9 @@ namespace AmeisenBotX.Core.Hook
                 AmeisenLogger.Instance.Log("HookManager", $"Failed to inject:\n{e.ToString()}", LogLevel.Error);
 
                 // now there is no more code to be executed
-                XMemory.Write(CodeToExecuteAddress, 0);
+                WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
                 IsInjectionUsed = false;
-                XMemory.ResumeMainThread();
+                WowInterface.XMemory.ResumeMainThread();
             }
 
             return returnBytes.ToArray();
@@ -580,7 +567,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsClickToMovePending()
         {
-            if (XMemory.Read(OffsetList.ClickToMovePendingMovement, out byte ctmPending))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMovePendingMovement, out byte ctmPending))
             {
                 return ctmPending == 2;
             }
@@ -593,7 +580,7 @@ namespace AmeisenBotX.Core.Hook
             string[] asm = new string[]
             {
                 $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionStopClickToMove}",
+                $"CALL {WowInterface.OffsetList.FunctionStopClickToMove}",
                 "RETN",
             };
 
@@ -615,7 +602,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsRuneReady(int runeId)
         {
-            if (XMemory.ReadByte(OffsetList.Runes, out byte runeStatus))
+            if (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.Runes, out byte runeStatus))
             {
                 return ((1 << runeId) & runeStatus) != 0;
             }
@@ -652,9 +639,9 @@ namespace AmeisenBotX.Core.Hook
             if (command.Length > 0)
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(command);
-                if (XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
+                if (WowInterface.XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
                 {
-                    XMemory.WriteBytes(memAlloc, bytes);
+                    WowInterface.XMemory.WriteBytes(memAlloc, bytes);
 
                     if (memAlloc == IntPtr.Zero)
                     {
@@ -667,18 +654,18 @@ namespace AmeisenBotX.Core.Hook
                         "PUSH 0",
                         "PUSH EAX",
                         "PUSH EAX",
-                        $"CALL {OffsetList.FunctionLuaDoString.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
                         "ADD ESP, 0xC",
                         "RETN",
                     };
 
                     InjectAndExecute(asm, false);
-                    XMemory.FreeMemory(memAlloc);
+                    WowInterface.XMemory.FreeMemory(memAlloc);
                 }
             }
         }
 
-        public void QueuBattlegroundByName(string bgName)
+        public void QueueBattlegroundByName(string bgName)
             => SendChatMessage($"/run for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
 
         public void ReleaseSpirit()
@@ -764,7 +751,7 @@ namespace AmeisenBotX.Core.Hook
                 $"PUSH {opcode}",
                 $"PUSH {Environment.TickCount}",
                 $"MOV ECX, {unit.BaseAddress.ToInt32()}",
-                $"CALL {OffsetList.FunctionSendMovementPacket.ToInt32()}",
+                $"CALL {WowInterface.OffsetList.FunctionSendMovementPacket.ToInt32()}",
                 "RETN",
             };
 
@@ -778,7 +765,7 @@ namespace AmeisenBotX.Core.Hook
                 $"PUSH {angle}",
                 $"PUSH {Environment.TickCount}",
                 $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionSetFacing}",
+                $"CALL {WowInterface.OffsetList.FunctionSetFacing}",
                 "RETN",
             };
 
@@ -787,7 +774,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void SetMaxFps(byte maxFps)
         {
-            XMemory.Write(OffsetList.CvarMaxFps, maxFps);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
         }
 
         public bool SetupEndsceneHook()
@@ -810,7 +797,7 @@ namespace AmeisenBotX.Core.Hook
             }
             else
             {
-                if (XMemory.ReadBytes(EndsceneAddress, 5, out byte[] bytes))
+                if (WowInterface.XMemory.ReadBytes(EndsceneAddress, 5, out byte[] bytes))
                 {
                     OriginalEndsceneBytes = bytes;
                 }
@@ -820,50 +807,50 @@ namespace AmeisenBotX.Core.Hook
                     return false;
                 }
 
-                XMemory.Fasm.Clear();
+                WowInterface.XMemory.Fasm.Clear();
 
                 // save registers
-                XMemory.Fasm.AddLine("PUSHFD");
-                XMemory.Fasm.AddLine("PUSHAD");
+                WowInterface.XMemory.Fasm.AddLine("PUSHFD");
+                WowInterface.XMemory.Fasm.AddLine("PUSHAD");
 
                 // check for code to be executed
-                XMemory.Fasm.AddLine($"MOV EBX, [{CodeToExecuteAddress.ToInt32()}]");
-                XMemory.Fasm.AddLine("TEST EBX, 1");
-                XMemory.Fasm.AddLine("JE @out");
+                WowInterface.XMemory.Fasm.AddLine($"MOV EBX, [{CodeToExecuteAddress.ToInt32()}]");
+                WowInterface.XMemory.Fasm.AddLine("TEST EBX, 1");
+                WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // set register back to zero
-                XMemory.Fasm.AddLine("XOR EBX, EBX");
+                WowInterface.XMemory.Fasm.AddLine("XOR EBX, EBX");
 
                 // check for world to be loaded
                 // we dont want to execute code in
                 // the loadingscreen, cause that
                 // mostly results in crashes
-                XMemory.Fasm.AddLine($"MOV EBX, [{OffsetList.IsWorldLoaded.ToInt32()}]");
-                XMemory.Fasm.AddLine("TEST EBX, 1");
-                XMemory.Fasm.AddLine("JE @out");
+                WowInterface.XMemory.Fasm.AddLine($"MOV EBX, [{WowInterface.OffsetList.IsWorldLoaded.ToInt32()}]");
+                WowInterface.XMemory.Fasm.AddLine("TEST EBX, 1");
+                WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // execute our stuff and get return address
-                XMemory.Fasm.AddLine($"MOV EDX, {CodecaveForExecution.ToInt32()}");
-                XMemory.Fasm.AddLine("CALL EDX");
-                XMemory.Fasm.AddLine($"MOV [{ReturnValueAddress.ToInt32()}], EAX");
+                WowInterface.XMemory.Fasm.AddLine($"MOV EDX, {CodecaveForExecution.ToInt32()}");
+                WowInterface.XMemory.Fasm.AddLine("CALL EDX");
+                WowInterface.XMemory.Fasm.AddLine($"MOV [{ReturnValueAddress.ToInt32()}], EAX");
 
                 // finish up our execution
-                XMemory.Fasm.AddLine("@out:");
-                XMemory.Fasm.AddLine("MOV EDX, 0");
-                XMemory.Fasm.AddLine($"MOV [{CodeToExecuteAddress.ToInt32()}], EDX");
+                WowInterface.XMemory.Fasm.AddLine("@out:");
+                WowInterface.XMemory.Fasm.AddLine("MOV EDX, 0");
+                WowInterface.XMemory.Fasm.AddLine($"MOV [{CodeToExecuteAddress.ToInt32()}], EDX");
 
                 // restore registers
-                XMemory.Fasm.AddLine("POPAD");
-                XMemory.Fasm.AddLine("POPFD");
+                WowInterface.XMemory.Fasm.AddLine("POPAD");
+                WowInterface.XMemory.Fasm.AddLine("POPFD");
 
-                byte[] asmBytes = XMemory.Fasm.Assemble();
+                byte[] asmBytes = WowInterface.XMemory.Fasm.Assemble();
 
                 // needed to determine the position where the original
                 // asm is going to be placed
                 int asmLenght = asmBytes.Length;
 
                 // inject the instructions into our codecave
-                XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32());
+                WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32());
 
                 // ---------------------------------------------------
                 // End of the code that checks if there is asm to be
@@ -871,17 +858,17 @@ namespace AmeisenBotX.Core.Hook
                 // ---------------------------------------------------
 
                 // Prepare to replace the instructions inside WoW
-                XMemory.Fasm.Clear();
+                WowInterface.XMemory.Fasm.Clear();
 
                 // do the original EndScene stuff after we restored the registers
                 // and insert it after our code
-                XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), OriginalEndsceneBytes);
+                WowInterface.XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), OriginalEndsceneBytes);
                 AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OriginalEndsceneBytes: {JsonConvert.SerializeObject(OriginalEndsceneBytes)}", LogLevel.Verbose);
 
                 // return to original function after we're done with our stuff
-                XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}");
-                XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32() + (uint)asmLenght + 5);
-                XMemory.Fasm.Clear();
+                WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}");
+                WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32() + (uint)asmLenght + 5);
+                WowInterface.XMemory.Fasm.Clear();
 
                 // ---------------------------------------------------
                 // End of doing the original stuff and returning to
@@ -889,8 +876,8 @@ namespace AmeisenBotX.Core.Hook
                 // ---------------------------------------------------
 
                 // modify original EndScene instructions to start the hook
-                XMemory.Fasm.AddLine($"JMP {CodecaveForCheck.ToInt32()}");
-                XMemory.Fasm.Inject((uint)EndsceneAddress.ToInt32());
+                WowInterface.XMemory.Fasm.AddLine($"JMP {CodecaveForCheck.ToInt32()}");
+                WowInterface.XMemory.Fasm.Inject((uint)EndsceneAddress.ToInt32());
 
                 AmeisenLogger.Instance.Log("HookManager", "EndsceneHook Successful...", LogLevel.Verbose);
 
@@ -909,7 +896,7 @@ namespace AmeisenBotX.Core.Hook
             string[] asm = new string[]
             {
                 $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {OffsetList.FunctionStopClickToMove}",
+                $"CALL {WowInterface.OffsetList.FunctionStopClickToMove}",
                 "RETN",
             };
 
@@ -928,7 +915,7 @@ namespace AmeisenBotX.Core.Hook
             {
                 $"PUSH {BitConverter.ToUInt32(guidBytes, 4)}",
                 $"PUSH {BitConverter.ToUInt32(guidBytes, 0)}",
-                $"CALL {OffsetList.FunctionSetTarget.ToInt32()}",
+                $"CALL {WowInterface.OffsetList.FunctionSetTarget.ToInt32()}",
                 "ADD ESP, 0x8",
                 "RETN"
             };
@@ -943,7 +930,7 @@ namespace AmeisenBotX.Core.Hook
             => SendChatMessage("/targetenemy [harm][nodead]");
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)
-                                                                                                    => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
+            => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
 
         public void UseItemByName(string itemName)
             => SellItemsByName(itemName);
@@ -953,27 +940,27 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", "Allocating Codecaves for the EndsceneHook...", LogLevel.Verbose);
 
             // integer to check if there is code waiting to be executed
-            if (!XMemory.AllocateMemory(4, out IntPtr codeToExecuteAddress))
+            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr codeToExecuteAddress))
             {
                 return false;
             }
 
             CodeToExecuteAddress = codeToExecuteAddress;
-            XMemory.Write(CodeToExecuteAddress, 0);
+            WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
             AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: {codeToExecuteAddress.ToString("X")}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
-            if (!XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
+            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
             {
                 return false;
             }
 
             ReturnValueAddress = returnValueAddress;
-            XMemory.Write(ReturnValueAddress, 0);
+            WowInterface.XMemory.Write(ReturnValueAddress, 0);
             AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {returnValueAddress.ToString("X")}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
-            if (!XMemory.AllocateMemory(128, out IntPtr codecaveForCheck))
+            if (!WowInterface.XMemory.AllocateMemory(128, out IntPtr codecaveForCheck))
             {
                 return false;
             }
@@ -982,7 +969,7 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck: {codecaveForCheck.ToString("X")}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
-            if (!XMemory.AllocateMemory(2048, out IntPtr codecaveForExecution))
+            if (!WowInterface.XMemory.AllocateMemory(2048, out IntPtr codecaveForExecution))
             {
                 return false;
             }
@@ -995,10 +982,10 @@ namespace AmeisenBotX.Core.Hook
 
         private IntPtr GetEndScene()
         {
-            if (XMemory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
-                && XMemory.Read(IntPtr.Add(pDevice, OffsetList.EndSceneOffsetDevice.ToInt32()), out IntPtr pEnd)
-                && XMemory.Read(pEnd, out IntPtr pScene)
-                && XMemory.Read(IntPtr.Add(pScene, OffsetList.EndSceneOffset.ToInt32()), out IntPtr pEndscene))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
+                && WowInterface.XMemory.Read(IntPtr.Add(pDevice, WowInterface.OffsetList.EndSceneOffsetDevice.ToInt32()), out IntPtr pEnd)
+                && WowInterface.XMemory.Read(pEnd, out IntPtr pScene)
+                && WowInterface.XMemory.Read(IntPtr.Add(pScene, WowInterface.OffsetList.EndSceneOffset.ToInt32()), out IntPtr pEndscene))
             {
                 return pEndscene;
             }

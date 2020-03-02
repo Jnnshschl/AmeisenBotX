@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Event.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
@@ -11,12 +10,13 @@ namespace AmeisenBotX.Core.Event
 {
     public class EventHookManager
     {
-        public EventHookManager(HookManager hookManager)
+        public EventHookManager(WowInterface wowInterface)
         {
+            WowInterface = wowInterface;
+
             EventDictionary = new Dictionary<string, OnEventFired>();
             SubscribeQueue = new Queue<(string, OnEventFired)>();
             UnsubscribeQueue = new Queue<string>();
-            HookManager = hookManager;
             IsSetUp = false;
         }
 
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Event
 
         public Queue<string> UnsubscribeQueue { get; }
 
-        private HookManager HookManager { get; }
+        private WowInterface WowInterface { get; }
 
         public void ReadEvents()
         {
@@ -40,8 +40,8 @@ namespace AmeisenBotX.Core.Event
             try
             {
                 // Unminified lua code can be found im my github repo "WowLuaStuff"
-                HookManager.LuaDoString("abEventJson='['for a,b in pairs(abEventTable)do abEventJson=abEventJson..'{'for c,d in pairs(b)do if type(d)==\"table\"then abEventJson=abEventJson..'\"args\": ['for e,f in pairs(d)do abEventJson=abEventJson..'\"'..f..'\"'if e<=table.getn(d)then abEventJson=abEventJson..','end end;abEventJson=abEventJson..']}'if a<table.getn(abEventTable)then abEventJson=abEventJson..','end else if type(d)==\"string\"then abEventJson=abEventJson..'\"event\": \"'..d..'\",'else abEventJson=abEventJson..'\"time\": \"'..d..'\",'end end end end;abEventJson=abEventJson..']'abEventTable={}");
-                string eventJson = HookManager.GetLocalizedText("abEventJson");
+                WowInterface.HookManager.LuaDoString("abEventJson='['for a,b in pairs(abEventTable)do abEventJson=abEventJson..'{'for c,d in pairs(b)do if type(d)==\"table\"then abEventJson=abEventJson..'\"args\": ['for e,f in pairs(d)do abEventJson=abEventJson..'\"'..f..'\"'if e<=table.getn(d)then abEventJson=abEventJson..','end end;abEventJson=abEventJson..']}'if a<table.getn(abEventTable)then abEventJson=abEventJson..','end else if type(d)==\"string\"then abEventJson=abEventJson..'\"event\": \"'..d..'\",'else abEventJson=abEventJson..'\"time\": \"'..d..'\",'end end end end;abEventJson=abEventJson..']'abEventTable={}");
+                string eventJson = WowInterface.HookManager.GetLocalizedText("abEventJson");
 
                 List<WowEvent> rawEvents = new List<WowEvent>();
                 try
@@ -99,8 +99,8 @@ namespace AmeisenBotX.Core.Event
         public void Stop()
         {
             AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager...", LogLevel.Verbose);
-            HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
-            HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
+            WowInterface.HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
+            WowInterface.HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
         }
 
         public void Subscribe(string eventName, OnEventFired onEventFired)
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Event
                 if (IsSetUp && SubscribeQueue.Count > 0)
                 {
                     (string, OnEventFired) queueElement = SubscribeQueue.Dequeue();
-                    HookManager.LuaDoString($"abFrame:RegisterEvent(\"{queueElement.Item1}\");");
+                    WowInterface.HookManager.LuaDoString($"abFrame:RegisterEvent(\"{queueElement.Item1}\");");
                     EventDictionary.Add(queueElement.Item1, queueElement.Item2);
                 }
             }
@@ -139,7 +139,7 @@ namespace AmeisenBotX.Core.Event
                 if (IsSetUp && UnsubscribeQueue.Count > 0)
                 {
                     string queueElement = UnsubscribeQueue.Dequeue();
-                    HookManager.LuaDoString($"abFrame:UnregisterEvent(\"{queueElement}\");");
+                    WowInterface.HookManager.LuaDoString($"abFrame:UnregisterEvent(\"{queueElement}\");");
                     EventDictionary.Remove(queueElement);
                 }
             }
@@ -160,7 +160,7 @@ namespace AmeisenBotX.Core.Event
             luaStuff.Append("table.insert(abEventTable, {time(), event, {...}}) end ");
             luaStuff.Append("if abFrame:GetScript(\"OnEvent\") == nil then ");
             luaStuff.Append("abFrame:SetScript(\"OnEvent\", abEventHandler) end");
-            HookManager.LuaDoString(luaStuff.ToString());
+            WowInterface.HookManager.LuaDoString(luaStuff.ToString());
         }
     }
 }

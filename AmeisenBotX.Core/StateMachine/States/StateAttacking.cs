@@ -1,14 +1,7 @@
-﻿using AmeisenBotX.Core.Battleground;
-using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
-using AmeisenBotX.Pathfinding;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,78 +10,64 @@ namespace AmeisenBotX.Core.StateMachine.States
 {
     internal class StateAttacking : BasicState
     {
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, BattlegroundEngine battlegroundEngine, IMovementEngine movementEngine, MovementSettings movementSettings, ICombatClass combatClass) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
         {
             Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            MovementEngine = movementEngine;
-            CombatClass = combatClass;
-            BattlegroundEngine = battlegroundEngine;
+            WowInterface = wowInterface;
 
             Enemies = new List<WowUnit>();
 
             // default distance values
-            DistanceToTarget = combatClass == null || combatClass.IsMelee ? 3.0 : 25.0;
+            DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 25.0;
         }
 
         public double DistanceToTarget { get; private set; }
-
-        private CharacterManager CharacterManager { get; }
-
-        private BattlegroundEngine BattlegroundEngine { get; }
-
-        private ICombatClass CombatClass { get; }
 
         private AmeisenBotConfig Config { get; }
 
         private List<WowUnit> Enemies { get; set; }
 
-        private HookManager HookManager { get; }
-
         private DateTime LastRotationCheck { get; set; }
 
-        private DateTime LastValidTargetCheck { get; set; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
-            AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
         }
 
         public override void Execute()
         {
-            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat() && (BattlegroundEngine == null || BattlegroundEngine.ForceCombat))
+            WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+
+            if (!WowInterface.ObjectManager.Player.IsInCombat
+                && !AmeisenBotStateMachine.IsAnyPartymemberInCombat()
+                && (WowInterface.BattlegroundEngine == null || WowInterface.BattlegroundEngine.ForceCombat))
             {
                 AmeisenBotStateMachine.SetState(BotState.Idle);
                 return;
             }
 
             // we can do nothing until the ObjectManager is initialzed
-            if (ObjectManager != null
-                && ObjectManager.Player != null)
+            if (WowInterface.ObjectManager != null
+                && WowInterface.ObjectManager.Player != null)
             {
                 // use the default Target selection algorithm if the CombatClass doenst
 
                 // Note: this only works for dps classes, tanks and healers need
                 //        to implement their own target selection algorithm
-                if (CombatClass == null || !CombatClass.HandlesTargetSelection)
+                if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesTargetSelection)
                 {
                     // make sure we got both objects refreshed before we check them
-                    ObjectManager.UpdateObject(ObjectManager.Player);
-                    ObjectManager.UpdateObject(ObjectManager.Target);
+                    WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
 
                     // do we need to clear our target
                     if (IsTargetInvalid())
                     {
-                        HookManager.ClearTarget();
-                        ObjectManager.UpdateObject(ObjectManager.Player);
+                        WowInterface.HookManager.ClearTarget();
+                        WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
-                        if (!ObjectManager.Player.IsInCombat)
+                        if (!WowInterface.ObjectManager.Player.IsInCombat)
                         {
                             return;
                         }
@@ -96,31 +75,30 @@ namespace AmeisenBotX.Core.StateMachine.States
                         // select a new target if our current target is invalid
                         if (SelectTargetToAttack(out WowUnit target))
                         {
-                            HookManager.TargetGuid(target.Guid);
+                            WowInterface.HookManager.TargetGuid(target.Guid);
 
-                            ObjectManager.UpdateObject(ObjectManager.Player);
-                            ObjectManager.UpdateObject(ObjectManager.Target);
+                            WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+                            WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
                         }
-
-                        LastValidTargetCheck = DateTime.Now;
                     }
 
                     // use the default MovementEngine to move if the CombatClass doesnt
-                    if ((CombatClass == null || !CombatClass.HandlesMovement) && ObjectManager.Target != null)
+                    if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
+                        && WowInterface.ObjectManager.Target != null)
                     {
-                        HandleMovement(ObjectManager.Target);
+                        HandleMovement(WowInterface.ObjectManager.Target);
                     }
 
                     // if no CombatClass is loaded, just autoattack
-                    if (CombatClass != null)
+                    if (WowInterface.CombatClass != null)
                     {
-                        CombatClass.Execute();
+                        WowInterface.CombatClass.Execute();
                     }
                     else
                     {
-                        if (!ObjectManager.Player.IsAutoAttacking)
+                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                         {
-                            HookManager.StartAutoAttack();
+                            WowInterface.HookManager.StartAutoAttack();
                         }
                     }
                 }
@@ -129,17 +107,17 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Exit()
         {
-            MovementEngine.Reset();
+            WowInterface.MovementEngine.Reset();
 
             Enemies.Clear();
 
             // set our normal maxfps
-            AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFps);
 
             // add nearby Units to the loot List
             if (Config.LootUnits)
             {
-                foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance2D(ObjectManager.Player.Position) < Config.LootUnitsRadius))
+                foreach (WowUnit lootableUnit in WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius))
                 {
                     if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
                     {
@@ -153,44 +131,45 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             // we cant move to a null target and we don't want to
             // move when we are casting or channeling something
-            if (target == null
+            if (!BotUtils.IsValidUnit(target)
                 || target.IsDead
-                || target.IsNotAttackable
-                || ObjectManager.Player.CurrentlyCastingSpellId > 0
-                || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+                || WowInterface.ObjectManager.Player.CurrentlyCastingSpellId > 0
+                || WowInterface.ObjectManager.Player.CurrentlyChannelingSpellId > 0)
             {
                 return;
             }
 
             // if we are close enough, stop movement and start attacking
-            double distance = ObjectManager.Player.Position.GetDistance2D(target.Position);
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
             if (distance <= DistanceToTarget)
             {
                 // do we need to stop movement
-                HookManager.StopClickToMove(ObjectManager.Player);
+                WowInterface.HookManager.StopClickToMove(WowInterface.ObjectManager.Player);
 
                 // perform a facing check every 250ms, should be enough
-                if (target.Guid != ObjectManager.PlayerGuid
-                    && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position)
+                if (target.Guid != WowInterface.ObjectManager.PlayerGuid
+                    && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position)
                     && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(250))
                 {
-                    HookManager.FacePosition(ObjectManager.Player, target.Position);
-                    CharacterManager.Face(target.Position, target.Guid);
+                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    WowInterface.CharacterManager.Face(target.Position, target.Guid);
                     LastRotationCheck = DateTime.Now;
                 }
             }
             else
             {
-                MovementEngine.SetState(MovementEngineState.DirectMoving, target.Position);
-                MovementEngine.Execute();
+                // position to got to should be a bit ahead of the enemy to predict movement hehe xd
+                Vector3 positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, target.Position, 1.5);
+                WowInterface.MovementEngine.SetState(MovementEngineState.DirectMoving, positionToGoTo);
+                WowInterface.MovementEngine.Execute();
             }
         }
 
         private bool IsTargetInvalid()
-            => !BotUtils.IsValidUnit(ObjectManager.Target)
-                || ObjectManager.Target.IsDead
-                || ObjectManager.Target.Guid == ObjectManager.PlayerGuid
-                || ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) > 50;
+            => !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
+                || WowInterface.ObjectManager.Target.IsDead
+                || WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
+                || WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) > 50;
 
         private bool SelectTargetToAttack(out WowUnit target)
         {
@@ -198,8 +177,8 @@ namespace AmeisenBotX.Core.StateMachine.States
             // be friendly there but is attackable
 
             // get all targets that are not friendly to us
-            List<WowUnit> nonFriendlyUnits = ObjectManager.WowObjects.OfType<WowUnit>()
-                .Where(e => e.IsInCombat && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly)
+            List<WowUnit> nonFriendlyUnits = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                .Where(e => e.IsInCombat && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
                 .ToList();
 
             // remove all invalid, dead units
@@ -208,7 +187,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             // if there are no non Friendly units, we can't attack anything
             if (nonFriendlyUnits.Count > 0)
             {
-                List<WowUnit> unitsInCombat = nonFriendlyUnits.OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position)).ToList();
+                List<WowUnit> unitsInCombat = nonFriendlyUnits.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();
                 target = unitsInCombat.FirstOrDefault();
 
                 if (target != null)
@@ -261,10 +240,12 @@ namespace AmeisenBotX.Core.StateMachine.States
                     }*/
 
                     // last fallback, target our nearest enemy
-                    HookManager.TargetNearestEnemy();
-                    ObjectManager.UpdateObject(ObjectManager.Player);
+                    WowInterface.HookManager.TargetNearestEnemy();
+                    WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
-                    target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.Guid == ObjectManager.Player.Guid);
+                    target = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                        .FirstOrDefault(e => e.IsInCombat && e.Guid == WowInterface.ObjectManager.Player.Guid);
+
                     if (BotUtils.IsValidUnit(target)
                         && target.IsInCombat)
                     {

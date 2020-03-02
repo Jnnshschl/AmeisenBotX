@@ -1,9 +1,6 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.Profiles;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +9,12 @@ namespace AmeisenBotX.Core.Battleground.States
 {
     public class AssistOwnFlagCarrierBgState : BasicBattlegroundState
     {
-        public AssistOwnFlagCarrierBgState(BattlegroundEngine battlegroundEngine, ObjectManager objectManager, IMovementEngine movementEngine, HookManager hookManager) : base(battlegroundEngine)
+        public AssistOwnFlagCarrierBgState(BattlegroundEngine battlegroundEngine, WowInterface wowInterface) : base(battlegroundEngine)
         {
-            ObjectManager = objectManager;
-            MovementEngine = movementEngine;
-            HookManager = hookManager;
+            WowInterface = wowInterface;
         }
 
-        private HookManager HookManager { get; }
-
-        private IMovementEngine MovementEngine { get; }
-
-        private ObjectManager ObjectManager { get; }
+        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -41,22 +32,22 @@ namespace AmeisenBotX.Core.Battleground.States
                 if (((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer != null)
                 {
                     ulong ownFlagCarrierGuid = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer.Guid;
-                    WowPlayer ownFlagCarrier = ObjectManager.GetWowObjectByGuid<WowPlayer>(ownFlagCarrierGuid);
-                    IEnumerable<WowPlayer> nearEnemies = ObjectManager.GetNearEnemies(ownFlagCarrier.Position, 25);
+                    WowPlayer ownFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(ownFlagCarrierGuid);
+                    IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies(ownFlagCarrier.Position, 25);
 
-                    if (ObjectManager.Player.Position.GetDistance(ownFlagCarrier.Position) > 10)
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(ownFlagCarrier.Position) > 10)
                     {
-                        MovementEngine.SetState(MovementEngineState.Moving, ownFlagCarrier.Position);
-                        MovementEngine.Execute();
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, ownFlagCarrier.Position);
+                        WowInterface.MovementEngine.Execute();
                     }
                     else
                     {
                         WowPlayer target = nearEnemies.FirstOrDefault();
                         if (target != null)
                         {
-                            HookManager.TargetGuid(target.Guid);
-                            HookManager.StartAutoAttack();
-                            HookManager.FacePosition(ObjectManager.Player, target.Position);
+                            WowInterface.HookManager.TargetGuid(target.Guid);
+                            WowInterface.HookManager.StartAutoAttack();
+                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
                             BattlegroundEngine.ForceCombat = true;
                         }
                     }
@@ -72,7 +63,7 @@ namespace AmeisenBotX.Core.Battleground.States
 
         public override void Exit()
         {
-            MovementEngine.Reset();
+            WowInterface.MovementEngine.Reset();
             BattlegroundEngine.ForceCombat = false;
         }
     }

@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool hasTargetMoved = false;
         private bool multipleTargets = false;
 
-        public PaladinProtection(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public PaladinProtection(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -57,13 +57,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public string Version => "1.0";
 
-        private CharacterManager CharacterManager { get; }
+        private ICharacterManager CharacterManager { get; }
 
         private bool Dancing { get; set; }
 
         private double GCDTime { get; set; }
 
-        private HookManager HookManager { get; }
+        private IHookManager HookManager { get; }
 
         private DateTime LastAvenger { get; set; }
 
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DefaultMovementEngine MovementEngine { get; set; }
 
-        private ObjectManager ObjectManager { get; }
+        private IObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
 
@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (targetDistanceChanged)
                 {
-                    distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                     Console.WriteLine("distanceToTarget: " + distanceToTarget);
                 }
 
@@ -134,7 +134,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            double distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
             if (distanceTraveled < 0.001)
             {
                 ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
@@ -388,7 +388,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < areaToLookAt)
                     {
                         int compHealth = 2147483647;

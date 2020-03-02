@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -10,19 +9,19 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public class CharacterEquipment
     {
-        public CharacterEquipment(HookManager hookManager)
+        public CharacterEquipment(WowInterface wowInterface)
         {
-            HookManager = hookManager;
+            WowInterface = wowInterface;
             Equipment = new Dictionary<EquipmentSlot, IWowItem>();
         }
 
         public Dictionary<EquipmentSlot, IWowItem> Equipment { get; private set; }
 
-        private HookManager HookManager { get; }
+        private WowInterface WowInterface { get; }
 
         public void Update()
         {
-            string resultJson = HookManager.GetEquipmentItems();
+            string resultJson = WowInterface.HookManager.GetEquipmentItems();
             if (resultJson.Length > 1 && resultJson.Substring(resultJson.Length - 2, 2).Equals(",]"))
             {
                 resultJson.Remove(resultJson.Length - 2);
