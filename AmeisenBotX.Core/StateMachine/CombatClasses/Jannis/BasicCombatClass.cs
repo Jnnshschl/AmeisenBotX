@@ -35,8 +35,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
-                () => HookManager.GetBuffs(WowLuaUnit.Player),
-                () => HookManager.GetDebuffs(WowLuaUnit.Player),
+                () => { if (HookManager != null) { return HookManager.GetBuffs(WowLuaUnit.Player); } else { return null; } },
+                () => { if (HookManager != null) { return HookManager.GetDebuffs(WowLuaUnit.Player); } else { return null; } },
                 null,
                 DispellDebuffsFunction);
 
@@ -44,8 +44,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
-                () => HookManager.GetBuffs(WowLuaUnit.Target),
-                () => HookManager.GetDebuffs(WowLuaUnit.Target),
+                () => { if (HookManager != null) { return HookManager.GetBuffs(WowLuaUnit.Target); } else { return null; } },
+                () => { if (HookManager != null) { return HookManager.GetDebuffs(WowLuaUnit.Target); } else { return null; } },
                 DispellBuffsFunction,
                 null);
 

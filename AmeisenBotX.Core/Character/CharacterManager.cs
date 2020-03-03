@@ -49,27 +49,21 @@ namespace AmeisenBotX.Core.Character
 
         private AmeisenBotConfig Config { get; }
 
-        private IHookManager HookManager { get; }
-
         private Dictionary<VirtualKeys, bool> KeyMap { get; set; }
-
-        private IObjectManager ObjectManager { get; }
-
-        private IOffsetList OffsetList { get; }
 
         private WowInterface WowInterface { get; }
 
-        public void AntiAfk() => WowInterface.XMemory.Write(OffsetList.TickCount, Environment.TickCount);
+        public void AntiAfk() => WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
 
         public void Face(Vector3 position, ulong guid)
         {
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveX, position.X);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveY, position.Y);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveZ, position.Z);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveTurnSpeed, 20.9f);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveDistance, 0.1f);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveGuid, guid);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, position.X);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, position.Y);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, position.Z);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, 20.9f);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, 0.1f);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, guid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
         }
 
         public Dictionary<int, int> GetConsumeables()
@@ -77,7 +71,7 @@ namespace AmeisenBotX.Core.Character
 
         public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
         {
-            if (WowInterface.XMemory.Read(OffsetList.ClickToMoveX, out Vector3 currentCtmPos))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveX, out Vector3 currentCtmPos))
             {
                 currentCtmPosition = currentCtmPos;
                 return true;
@@ -103,24 +97,24 @@ namespace AmeisenBotX.Core.Character
 
         public void InteractWithObject(WowObject obj, float turnSpeed = 20.9f, float distance = 3f)
         {
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveX, obj.Position.X);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveY, obj.Position.Y);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveZ, obj.Position.Z);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveDistance, distance);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveGuid, obj.Guid);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.InteractObject);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, obj.Position.X);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, obj.Position.Y);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, obj.Position.Z);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, obj.Guid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.InteractObject);
         }
 
         public void InteractWithUnit(WowUnit unit, float turnSpeed = 20.9f, float distance = 3f)
         {
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveX, unit.Position.X);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveY, unit.Position.Y);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveZ, unit.Position.Z);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveDistance, distance);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveGuid, unit.Guid);
-            WowInterface.XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Interact);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, unit.Position.X);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, unit.Position.Y);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, unit.Position.Z);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, unit.Guid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Interact);
         }
 
         public bool IsAbleToUseArmor(WowArmor item)
@@ -209,13 +203,13 @@ namespace AmeisenBotX.Core.Character
 
             if (Config.UseClickToMove)
             {
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveX, pos.X);
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveY, pos.Y);
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveZ, pos.Z);
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveDistance, distance);
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveGuid, ObjectManager.PlayerGuid);
-                WowInterface.XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos.X);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, pos.Y);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, pos.Z);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
+                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
             }
             else
             {
@@ -268,7 +262,7 @@ namespace AmeisenBotX.Core.Character
                         {
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
-                                HookManager.ReplaceItem(null, item);
+                                WowInterface.HookManager.ReplaceItem(null, item);
                                 Equipment.Update();
                                 break;
                             }
@@ -276,7 +270,7 @@ namespace AmeisenBotX.Core.Character
                     }
                     else
                     {
-                        HookManager.ReplaceItem(null, itemsLikeEquipped.First());
+                        WowInterface.HookManager.ReplaceItem(null, itemsLikeEquipped.First());
                         Equipment.Update();
                     }
                 }
@@ -326,7 +320,7 @@ namespace AmeisenBotX.Core.Character
 
         private void HandleInputSimulationMovement(Vector3 positionToMoveTo)
         {
-            double angleDiff = BotMath.GetFacingAngle(ObjectManager.Player.Position, positionToMoveTo);
+            double angleDiff = BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, positionToMoveTo);
         }
 
         private string SlotToEquipLocation(int slot)
@@ -405,7 +399,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            string rawMoney = HookManager.GetMoney();
+            string rawMoney = WowInterface.HookManager.GetMoney();
             if (int.TryParse(rawMoney, out int money))
             {
                 Money = money;
@@ -414,7 +408,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateSkills()
         {
-            Skills = HookManager.GetSkills();
+            Skills = WowInterface.HookManager.GetSkills();
         }
     }
 }

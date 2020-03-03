@@ -328,24 +328,12 @@ namespace AmeisenBotX.Core.Data
             WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
             switch (wowObjectType)
             {
-                case WowObjectType.Container:
-                    WowObjects.Add((WowContainer)ReadWowObject(baseAddress, wowObjectType));
-                    break;
-
-                case WowObjectType.Corpse:
-                    WowObjects.Add((WowCorpse)ReadWowObject(baseAddress, wowObjectType));
-                    break;
-
                 case WowObjectType.Dynobject:
                     WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
                     break;
 
                 case WowObjectType.Gameobject:
                     WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
-                    break;
-
-                case WowObjectType.Item:
-                    WowObjects.Add((WowItem)ReadWowObject(baseAddress, wowObjectType));
                     break;
 
                 case WowObjectType.Player:
@@ -421,11 +409,8 @@ namespace AmeisenBotX.Core.Data
                 WowObjectType wowObjectType = (WowObjectType)objectType;
                 WowObject obj = wowObjectType switch
                 {
-                    WowObjectType.Container => (WowContainer)ReadWowObject(activeObject, wowObjectType),
-                    WowObjectType.Corpse => (WowCorpse)ReadWowObject(activeObject, wowObjectType),
                     WowObjectType.Dynobject => ReadWowDynobject(activeObject, wowObjectType),
                     WowObjectType.Gameobject => ReadWowGameobject(activeObject, wowObjectType),
-                    WowObjectType.Item => (WowItem)ReadWowObject(activeObject, wowObjectType),
                     WowObjectType.Player => ReadWowPlayer(activeObject, wowObjectType),
                     WowObjectType.Unit => ReadWowUnit(activeObject, wowObjectType),
                     _ => ReadWowObject(activeObject, wowObjectType),
