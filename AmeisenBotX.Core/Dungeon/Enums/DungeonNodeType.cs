@@ -3,6 +3,9 @@
     public enum DungeonNodeType
     {
         Normal,
-        Boss
+        Boss,
+        Use,
+        Collect,
+        Door
     }
 }

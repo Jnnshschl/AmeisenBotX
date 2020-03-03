@@ -44,7 +44,8 @@ namespace AmeisenBotX.Core.Dungeon
             if (DungeonProfile != null)
             {
                 // we are fighting
-                if (WowInterface.ObjectManager.Player.IsInCombat && StateMachine.IsAnyPartymemberInCombat())
+                if ((WowInterface.ObjectManager.Player.IsInCombat && StateMachine.IsAnyPartymemberInCombat())
+                    || WowInterface.ObjectManager.Player.IsCasting)
                 {
                     return;
                 }
@@ -73,6 +74,22 @@ namespace AmeisenBotX.Core.Dungeon
                         }
                         else
                         {
+                            DungeonNode dungeonNode = CurrentNodes.Peek();
+
+                            if (dungeonNode.Type == Enums.DungeonNodeType.Door
+                                || dungeonNode.Type == Enums.DungeonNodeType.Collect
+                                || dungeonNode.Type == Enums.DungeonNodeType.Use)
+                            {
+                                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                                    .FirstOrDefault();
+
+                                if (obj != null)
+                                {
+                                    WowInterface.CharacterManager.InteractWithObject(obj);
+                                }
+                            }
+
                             CompletedNodes.Add(CurrentNodes.Dequeue());
                             Progress = (CompletedNodes.Count / TotalNodes) * 100;
                         }
