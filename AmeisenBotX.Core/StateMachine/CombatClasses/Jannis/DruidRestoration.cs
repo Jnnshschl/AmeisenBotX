@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { treeOfLifeSpell, () => CastSpellIfPossible(treeOfLifeSpell, true) },
                 { markOfTheWildSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(markOfTheWildSpell, true);
                     }
                 }
@@ -105,7 +105,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target != null)
                 {
                     WowInterface.ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-                    List<string> targetBuffs = HookManager.GetBuffs(WowLuaUnit.Target);
+                    List<string> targetBuffs = WowInterface.HookManager.GetBuffs(WowLuaUnit.Target);
 
                     if ((target.HealthPercentage < 15
                             && CastSpellIfPossible(naturesSwiftnessSpell, true))
@@ -173,9 +173,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (groupPlayers.Count > 0)
                 {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(reviveSpell);
-                    CooldownManager.SetSpellCooldown(reviveSpell, (int)HookManager.GetSpellCooldown(reviveSpell));
+                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
+                    WowInterface.HookManager.CastSpell(reviveSpell);
+                    CooldownManager.SetSpellCooldown(reviveSpell, (int)WowInterface.HookManager.GetSpellCooldown(reviveSpell));
                     return true;
                 }
             }
@@ -190,7 +190,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (target != null)
             {
-                HookManager.TargetGuid(target.Guid);
+                WowInterface.HookManager.TargetGuid(target.Guid);
             }
         }
 

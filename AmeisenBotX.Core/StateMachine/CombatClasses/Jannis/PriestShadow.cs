@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { shadowformSpell, () => CastSpellIfPossible(shadowformSpell, true) },
                 { powerWordFortitudeSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(powerWordFortitudeSpell, true);
                     }
                 },
@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (WowInterface.ObjectManager.Player.HealthPercentage < 70
                 && CastSpellIfPossible(flashHealSpell))
             {
-                HookManager.CastSpell(flashHealSpell);
+                WowInterface.HookManager.CastSpell(flashHealSpell);
                 return;
             }
 
@@ -145,9 +145,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (groupPlayers.Count > 0)
                 {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(resurrectionSpell);
-                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
+                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
+                    WowInterface.HookManager.CastSpell(resurrectionSpell);
+                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)WowInterface.HookManager.GetSpellCooldown(resurrectionSpell));
                 }
             }
 

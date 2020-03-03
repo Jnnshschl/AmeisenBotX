@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
-                && (WowInterface.BattlegroundEngine == null || WowInterface.BattlegroundEngine.ForceCombat))
+                && (WowInterface.BattlegroundEngine == null || !WowInterface.BattlegroundEngine.ForceCombat))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;

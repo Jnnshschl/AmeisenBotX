@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
-                HookManager.StartAutoAttack();
+                WowInterface.HookManager.StartAutoAttack();
             }
 
             if (MyAuraManager.Tick()

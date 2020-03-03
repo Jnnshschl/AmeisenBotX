@@ -1,8 +1,11 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Dungeon.Objects;
+using AmeisenBotX.Core.Dungeon.Profiles.Classic;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,7 +44,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public void Execute()
         {
-            if (DungeonProfile != null)
+            if (DungeonProfile != null && CurrentNodes.Count > 0)
             {
                 // we are fighting
                 if ((WowInterface.ObjectManager.Player.IsInCombat && StateMachine.IsAnyPartymemberInCombat())
@@ -96,7 +99,18 @@ namespace AmeisenBotX.Core.Dungeon
                     }
                 }
             }
+            else
+            {
+                LoadProfile(TryLoadProfile());
+            }
         }
+
+        private IDungeonProfile TryLoadProfile()
+            => WowInterface.ObjectManager.MapId switch
+            {
+                MapId.Deadmines => new DeadminesProfile(),
+                _ => null
+            };
 
         public void LoadProfile(IDungeonProfile profile)
         {
@@ -122,7 +136,7 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private bool AreAllPlayersPresent()
-            => WowInterface.ObjectManager.GetNearFriends(WowInterface.ObjectManager.Player.Position, 50).Count() >= DungeonProfile.GroupSize;
+            => WowInterface.ObjectManager.GetNearFriends(WowInterface.ObjectManager.Player.Position, 50).Count() >= WowInterface.ObjectManager.Partymembers.Count;
 
         private bool ShouldWaitForGroup()
         {
@@ -136,7 +150,7 @@ namespace AmeisenBotX.Core.Dungeon
             }
 
             // are my group members not in range of the CurrentNode
-            if (WowInterface.ObjectManager.GetNearFriends(CurrentNodes.Peek().Position, 30).Count() < DungeonProfile.GroupSize)
+            if (WowInterface.ObjectManager.GetNearFriends(CurrentNodes.Peek().Position, 30).Count() < WowInterface.ObjectManager.Partymembers.Count)
             {
                 return true;
             }

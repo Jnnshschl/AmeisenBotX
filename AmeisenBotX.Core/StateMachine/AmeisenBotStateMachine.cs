@@ -96,7 +96,6 @@ namespace AmeisenBotX.Core.Statemachine
                 {
                     SetState(BotState.LoadingScreen);
                     WowInterface.MovementEngine.Reset();
-                    return;
                 }
                 else
                 {
@@ -137,9 +136,7 @@ namespace AmeisenBotX.Core.Statemachine
             .Any(r => r.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < distance && r.IsInCombat);
 
         internal bool IsInDungeon()
-        {
-            return false;
-        }
+            => WowInterface.ObjectManager.MapId == MapId.Deadmines;
 
         internal bool IsOnBattleground()
             => WowInterface.ObjectManager.MapId == MapId.AlteracValley

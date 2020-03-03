@@ -156,7 +156,7 @@
     <Compile Include="Dungeon\DungeonEngine.cs" />
     <Compile Include="Dungeon\Enums\DungeonFactionType.cs" />
     <Compile Include="Dungeon\Enums\DungeonNodeType.cs" />
-    <Compile Include="Dungeon\Profiles\Classic\Deadmines.cs" />
+    <Compile Include="Dungeon\Profiles\Classic\DeadminesProfile.cs" />
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />
     <Compile Include="Event\EventHook.cs" />

@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, true) },
                 { markOfTheWildSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(markOfTheWildSpell, true);
                     }
                 }
@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (CastSpellIfPossible(forceOfNatureSpell, true))
             {
-                HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
+                WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
             }
         }
 
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CheckForEclipseProcs()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
+            List<string> myBuffs = WowInterface.HookManager.GetBuffs(WowLuaUnit.Player);
 
             if (myBuffs.Any(e => e.Equals(eclipseLunarSpell, StringComparison.OrdinalIgnoreCase)))
             {

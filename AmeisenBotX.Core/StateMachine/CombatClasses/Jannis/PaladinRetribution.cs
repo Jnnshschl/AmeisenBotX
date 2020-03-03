@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { blessingOfMightSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(blessingOfMightSpell, true);
                     }
                 },
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
-                HookManager.StartAutoAttack();
+                WowInterface.HookManager.StartAutoAttack();
             }
 
             if (MyAuraManager.Tick()

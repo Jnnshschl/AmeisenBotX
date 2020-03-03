@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 {
-    public class Deadmines : IDungeonProfile
+    public class DeadminesProfile : IDungeonProfile
     {
         public string Author { get; } = "Jannis";
 

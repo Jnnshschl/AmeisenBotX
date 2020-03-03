@@ -35,8 +35,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
-                () => { if (HookManager != null) { return HookManager.GetBuffs(WowLuaUnit.Player); } else { return null; } },
-                () => { if (HookManager != null) { return HookManager.GetDebuffs(WowLuaUnit.Player); } else { return null; } },
+                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetBuffs(WowLuaUnit.Player); } else { return null; } },
+                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetDebuffs(WowLuaUnit.Player); } else { return null; } },
                 null,
                 DispellDebuffsFunction);
 
@@ -44,8 +44,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
-                () => { if (HookManager != null) { return HookManager.GetBuffs(WowLuaUnit.Target); } else { return null; } },
-                () => { if (HookManager != null) { return HookManager.GetDebuffs(WowLuaUnit.Target); } else { return null; } },
+                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetBuffs(WowLuaUnit.Target); } else { return null; } },
+                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetDebuffs(WowLuaUnit.Target); } else { return null; } },
                 DispellBuffsFunction,
                 null);
 
@@ -71,8 +71,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public abstract bool HandlesMovement { get; }
 
         public abstract bool HandlesTargetSelection { get; }
-
-        public IHookManager HookManager { get; internal set; }
 
         public abstract bool IsMelee { get; }
 
@@ -130,9 +128,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsRuneenergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Runeenergy)
-                && (!needsBloodrune || (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
-                && (!needsFrostrune || (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
-                && (!needsUnholyrune || (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5)))
+                && (!needsBloodrune || (WowInterface.HookManager.IsRuneReady(0) || WowInterface.HookManager.IsRuneReady(1)))
+                && (!needsFrostrune || (WowInterface.HookManager.IsRuneReady(2) || WowInterface.HookManager.IsRuneReady(3)))
+                && (!needsUnholyrune || (WowInterface.HookManager.IsRuneReady(4) || WowInterface.HookManager.IsRuneReady(5)))
                 && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position))
             {
                 CastSpell(spellName);
@@ -161,8 +159,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private void CastSpell(string spellName)
         {
-            HookManager.CastSpell(spellName);
-            CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
+            WowInterface.HookManager.CastSpell(spellName);
+            CooldownManager.SetSpellCooldown(spellName, (int)WowInterface.HookManager.GetSpellCooldown(spellName));
             AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
         }
 

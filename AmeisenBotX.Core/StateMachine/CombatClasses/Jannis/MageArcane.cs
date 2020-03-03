@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { arcaneIntellectSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(arcaneIntellectSpell, true);
                     }
                 },
@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
             };
 
-            TargetAuraManager.DispellBuffs = () => HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
+            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {

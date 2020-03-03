@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { blessingOfWisdomSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(blessingOfWisdomSpell, true);
                     }
                 },
@@ -143,7 +143,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (target != null)
             {
-                HookManager.TargetGuid(target.Guid);
+                WowInterface.HookManager.TargetGuid(target.Guid);
             }
         }
 

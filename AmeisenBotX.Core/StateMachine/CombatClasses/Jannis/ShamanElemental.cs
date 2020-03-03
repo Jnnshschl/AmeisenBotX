@@ -159,9 +159,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (groupPlayers.Count > 0)
                 {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(ancestralSpiritSpell);
-                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)HookManager.GetSpellCooldown(ancestralSpiritSpell));
+                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
+                    WowInterface.HookManager.CastSpell(ancestralSpiritSpell);
+                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)WowInterface.HookManager.GetSpellCooldown(ancestralSpiritSpell));
                     return true;
                 }
             }

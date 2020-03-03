@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { powerWordFortitudeSpell, () =>
                     {
-                        HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
                         return CastSpellIfPossible(powerWordFortitudeSpell, true);
                     }
                 },
@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         return;
                     }
 
-                    List<string> targetBuffs = HookManager.GetAuras(WowLuaUnit.Target);
+                    List<string> targetBuffs = WowInterface.HookManager.GetAuras(WowLuaUnit.Target);
 
                     if ((target.HealthPercentage < 85
                             && !targetBuffs.Any(e => e.Equals(weakenedSoulSpell, StringComparison.OrdinalIgnoreCase))
@@ -181,9 +181,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (groupPlayers.Count > 0)
                 {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(resurrectionSpell);
-                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
+                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
+                    WowInterface.HookManager.CastSpell(resurrectionSpell);
+                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)WowInterface.HookManager.GetSpellCooldown(resurrectionSpell));
                     return true;
                 }
             }
@@ -194,7 +194,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
         {
             // select the one with lowest hp
-            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
+            WowInterface.HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
         }
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
