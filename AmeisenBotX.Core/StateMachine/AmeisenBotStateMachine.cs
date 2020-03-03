@@ -1,13 +1,14 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.StateMachine.States;
+using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine
+namespace AmeisenBotX.Core.Statemachine
 {
     public class AmeisenBotStateMachine
     {
@@ -28,22 +29,23 @@ namespace AmeisenBotX.Core.StateMachine
 
             States = new Dictionary<BotState, BasicState>()
             {
-                { BotState.None, new StateNone(this, config) },
-                { BotState.StartWow, new StateStartWow(this, config, WowInterface) },
-                { BotState.Login, new StateLogin(this, config, WowInterface) },
-                { BotState.LoadingScreen, new StateLoadingScreen(this, WowInterface) },
-                { BotState.Idle, new StateIdle(this, config, WowInterface, UnitLootList) },
-                { BotState.Dead, new StateDead(this, config, WowInterface) },
-                { BotState.Ghost, new StateGhost(this, config, WowInterface) },
-                { BotState.Following, new StateFollowing(this, config, WowInterface) },
+                { BotState.None, new StateNone(this, config, WowInterface) },
                 { BotState.Attacking, new StateAttacking(this, config, WowInterface) },
+                { BotState.Battleground, new StateBattleground(this, config, WowInterface) },
+                { BotState.Dead, new StateDead(this, config, WowInterface) },
+                { BotState.Dungeon, new StateDungeon(this, config, WowInterface) },
+                { BotState.Eating, new StateEating(this, config, WowInterface) },
+                { BotState.Following, new StateFollowing(this, config, WowInterface) },
+                { BotState.Ghost, new StateGhost(this, config, WowInterface) },
+                { BotState.Idle, new StateIdle(this, config, WowInterface, UnitLootList) },
+                { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
+                { BotState.Job, new StateJob(this, config, WowInterface) },
+                { BotState.LoadingScreen, new StateLoadingScreen(this, config, WowInterface) },
+                { BotState.Login, new StateLogin(this, config, WowInterface) },
+                { BotState.Looting, new StateLooting(this, config, WowInterface, UnitLootList) },
                 { BotState.Repairing, new StateRepairing(this, config, WowInterface) },
                 { BotState.Selling, new StateSelling(this, config, WowInterface) },
-                { BotState.Healing, new StateEating(this, config, WowInterface) },
-                { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
-                { BotState.Looting, new StateLooting(this, config, WowInterface, UnitLootList) },
-                { BotState.Battleground, new StateBattleground(this, config, WowInterface) },
-                { BotState.Job, new StateJob(this, WowInterface) }
+                { BotState.StartWow, new StateStartWow(this, config, WowInterface) }
             };
 
             CurrentState = States.First();
@@ -134,12 +136,17 @@ namespace AmeisenBotX.Core.StateMachine
             .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
             .Any(r => r.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < distance && r.IsInCombat);
 
+        internal bool IsInDungeon()
+        {
+            return false;
+        }
+
         internal bool IsOnBattleground()
-            => WowInterface.ObjectManager.MapId == 30
-            || WowInterface.ObjectManager.MapId == 489
-            || WowInterface.ObjectManager.MapId == 529
-            || WowInterface.ObjectManager.MapId == 566
-            || WowInterface.ObjectManager.MapId == 607;
+            => WowInterface.ObjectManager.MapId == MapId.AlteracValley
+            || WowInterface.ObjectManager.MapId == MapId.WarsongGulch
+            || WowInterface.ObjectManager.MapId == MapId.ArathiBasin
+            || WowInterface.ObjectManager.MapId == MapId.EyeOfTheStorm
+            || WowInterface.ObjectManager.MapId == MapId.StrandOfTheAncients;
 
         internal void SetState(BotState state, bool ignoreExit = false)
         {
@@ -151,6 +158,8 @@ namespace AmeisenBotX.Core.StateMachine
 
             LastState = CurrentState.Key;
 
+            // this is used by the combat state because
+            // it will override any existing state
             if (!ignoreExit)
             {
                 CurrentState.Value.Exit();

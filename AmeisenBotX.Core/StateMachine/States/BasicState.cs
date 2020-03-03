@@ -1,13 +1,19 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
     public abstract class BasicState
     {
-        public BasicState(AmeisenBotStateMachine stateMachine)
+        public BasicState(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface)
         {
-            AmeisenBotStateMachine = stateMachine;
+            StateMachine = stateMachine;
+            Config = config;
+            WowInterface = wowInterface;
         }
 
-        internal AmeisenBotStateMachine AmeisenBotStateMachine { get; }
+        internal AmeisenBotConfig Config { get; }
+
+        internal AmeisenBotStateMachine StateMachine { get; }
+
+        internal WowInterface WowInterface { get; }
 
         public abstract void Enter();
 

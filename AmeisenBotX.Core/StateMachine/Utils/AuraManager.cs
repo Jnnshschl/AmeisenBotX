@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.Utils
+namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class AuraManager
     {

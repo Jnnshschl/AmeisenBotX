@@ -1,16 +1,10 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateEating : BasicState
     {
-        public StateEating(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateEating(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
-
-        private AmeisenBotConfig Config { get; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {

@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
-    internal class WowCorpse
+    public class WowCorpse : WowObject
     {
     }
 }

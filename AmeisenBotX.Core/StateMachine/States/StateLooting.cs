@@ -4,27 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateLooting : BasicState
     {
-        public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface, Queue<ulong> unitLootList) : base(stateMachine)
+        public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface, Queue<ulong> unitLootList) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
             UnitLootList = unitLootList;
             UnitsAlreadyLootedList = new List<ulong>();
         }
-
-        private AmeisenBotConfig Config { get; }
 
         private int LootTryCount { get; set; }
 
         private Queue<ulong> UnitLootList { get; }
 
         private List<ulong> UnitsAlreadyLootedList { get; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -35,7 +29,7 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (UnitLootList.Count == 0)
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
             else
             {

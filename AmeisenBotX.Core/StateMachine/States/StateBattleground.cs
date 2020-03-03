@@ -1,16 +1,10 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateBattleground : BasicState
     {
-        public StateBattleground(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateBattleground(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
-
-        private AmeisenBotConfig Config { get; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -21,7 +15,7 @@
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 0)
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 

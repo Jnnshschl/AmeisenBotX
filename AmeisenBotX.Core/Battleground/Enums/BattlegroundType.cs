@@ -2,8 +2,8 @@
 {
     public enum BattlegroundType
     {
-        CaptureTheFlag,
         CaptureTheBase,
+        CaptureTheFlag,
         Invasion,
         Siege
     }

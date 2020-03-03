@@ -21,8 +21,6 @@ namespace AmeisenBotX.Core.Data
 
             IsWorldLoaded = true;
             WowObjects = new List<WowObject>();
-
-            EnableClickToMove();
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
@@ -33,7 +31,7 @@ namespace AmeisenBotX.Core.Data
 
         public ulong LastTargetGuid { get; private set; }
 
-        public int MapId { get; private set; }
+        public MapId MapId { get; private set; }
 
         public ulong PartyleaderGuid { get; private set; }
 
@@ -330,20 +328,32 @@ namespace AmeisenBotX.Core.Data
             WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
             switch (wowObjectType)
             {
-                case WowObjectType.Gameobject:
-                    WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
+                case WowObjectType.Container:
+                    WowObjects.Add((WowContainer)ReadWowObject(baseAddress, wowObjectType));
+                    break;
+
+                case WowObjectType.Corpse:
+                    WowObjects.Add((WowCorpse)ReadWowObject(baseAddress, wowObjectType));
                     break;
 
                 case WowObjectType.Dynobject:
                     WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
                     break;
 
-                case WowObjectType.Unit:
-                    WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
+                case WowObjectType.Gameobject:
+                    WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
+                    break;
+
+                case WowObjectType.Item:
+                    WowObjects.Add((WowItem)ReadWowObject(baseAddress, wowObjectType));
                     break;
 
                 case WowObjectType.Player:
                     WowObjects.Add(ReadWowPlayer(baseAddress, wowObjectType));
+                    break;
+
+                case WowObjectType.Unit:
+                    WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
                     break;
 
                 default:
@@ -354,10 +364,14 @@ namespace AmeisenBotX.Core.Data
 
         public void UpdateWowObjects()
         {
-            if (!WowInterface.XMemory.Read(WowInterface.OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.IsWorldLoaded, out int isWorldLoaded))
             {
                 IsWorldLoaded = isWorldLoaded == 1;
-                return;
+
+                if (!IsWorldLoaded)
+                {
+                    return;
+                }
             }
 
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.PlayerGuid, out ulong playerGuid))
@@ -385,7 +399,7 @@ namespace AmeisenBotX.Core.Data
                 PlayerBase = playerbase;
             }
 
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.MapId, out int mapId))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.MapId, out MapId mapId))
             {
                 MapId = mapId;
             }
@@ -395,7 +409,7 @@ namespace AmeisenBotX.Core.Data
                 ZoneId = zoneId;
             }
 
-            WowObjects = new List<WowObject>();
+            WowObjects.Clear();
             WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
             WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
 
@@ -407,10 +421,13 @@ namespace AmeisenBotX.Core.Data
                 WowObjectType wowObjectType = (WowObjectType)objectType;
                 WowObject obj = wowObjectType switch
                 {
-                    WowObjectType.Gameobject => ReadWowGameobject(activeObject, wowObjectType),
+                    WowObjectType.Container => (WowContainer)ReadWowObject(activeObject, wowObjectType),
+                    WowObjectType.Corpse => (WowCorpse)ReadWowObject(activeObject, wowObjectType),
                     WowObjectType.Dynobject => ReadWowDynobject(activeObject, wowObjectType),
-                    WowObjectType.Unit => ReadWowUnit(activeObject, wowObjectType),
+                    WowObjectType.Gameobject => ReadWowGameobject(activeObject, wowObjectType),
+                    WowObjectType.Item => (WowItem)ReadWowObject(activeObject, wowObjectType),
                     WowObjectType.Player => ReadWowPlayer(activeObject, wowObjectType),
+                    WowObjectType.Unit => ReadWowUnit(activeObject, wowObjectType),
                     _ => ReadWowObject(activeObject, wowObjectType),
                 };
 
@@ -439,18 +456,6 @@ namespace AmeisenBotX.Core.Data
             PartymemberGuids = ReadPartymemberGuids();
 
             OnObjectUpdateComplete?.Invoke(WowObjects);
-        }
-
-        private void EnableClickToMove()
-        {
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
-                && WowInterface.XMemory.Read(IntPtr.Add(ctmPointer, WowInterface.OffsetList.ClickToMoveEnabled.ToInt32()), out int ctmEnabled))
-            {
-                if (ctmEnabled != 1)
-                {
-                    WowInterface.XMemory.Write(IntPtr.Add(ctmPointer, WowInterface.OffsetList.ClickToMoveEnabled.ToInt32()), 1);
-                }
-            }
         }
 
         private string ReadPlayerName(ulong guid)

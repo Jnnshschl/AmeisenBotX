@@ -8,9 +8,9 @@ using System.Text;
 
 namespace AmeisenBotX.Core.Event
 {
-    public class EventHookManager
+    public class EventHook
     {
-        public EventHookManager(WowInterface wowInterface)
+        public EventHook(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
 
@@ -63,14 +63,14 @@ namespace AmeisenBotX.Core.Event
                         {
                             try
                             {
-                                if (EventDictionary.ContainsKey(rawEvent.EventName))
+                                if (EventDictionary.ContainsKey(rawEvent.Name))
                                 {
-                                    EventDictionary[rawEvent.EventName].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
+                                    EventDictionary[rawEvent.Name].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
                                 }
                             }
                             catch (Exception e)
                             {
-                                AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.EventName}:\n{e.ToString()}", LogLevel.Error);
+                                AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.Name}:\n{e.ToString()}", LogLevel.Error);
                             }
                         }
                     }

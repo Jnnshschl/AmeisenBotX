@@ -3,15 +3,16 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Persistence;
+using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.LoginHandler;
+using AmeisenBotX.Core.Autologin;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
+using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
 using System.Diagnostics;
@@ -32,7 +33,9 @@ namespace AmeisenBotX.Core
 
         public CombatLogParser CombatLogParser { get; set; }
 
-        public EventHookManager EventHookManager { get; set; }
+        public DungeonEngine DungeonEngine { get; set; }
+
+        public EventHook EventHookManager { get; set; }
 
         public IHookManager HookManager { get; set; }
 

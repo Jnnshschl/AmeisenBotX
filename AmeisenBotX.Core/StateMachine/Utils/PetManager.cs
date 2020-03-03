@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 
-namespace AmeisenBotX.Core.StateMachine.Utils
+namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class PetManager
     {

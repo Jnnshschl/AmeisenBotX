@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 
-namespace AmeisenBotX.Core.LoginHandler
+namespace AmeisenBotX.Core.Autologin
 {
     public class DefaultLoginHandler : ILoginHandler
     {

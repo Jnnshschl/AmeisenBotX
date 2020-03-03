@@ -5,10 +5,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     [Flags]
     public enum WowGameobjectFlags : int
     {
-        InUse = 0x01,
-        Locked = 0x02,
-        ConditionalInteraction = 0x04,
-        Transport = 0x08,
+        InUse = 0x1,
+        Locked = 0x2,
+        ConditionalInteraction = 0x4,
+        Transport = 0x8,
         DoesNotDespawn = 0x20,
         Triggered = 0x40,
     }

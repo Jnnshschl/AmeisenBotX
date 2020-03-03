@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.StateMachine.Utils
+namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class CooldownManager
     {

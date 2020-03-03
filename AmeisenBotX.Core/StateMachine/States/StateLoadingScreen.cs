@@ -1,13 +1,10 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateLoadingScreen : BasicState
     {
-        public StateLoadingScreen(AmeisenBotStateMachine stateMachine, WowInterface wowInterface) : base(stateMachine)
+        public StateLoadingScreen(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            WowInterface = wowInterface;
         }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -17,13 +14,13 @@
         {
             if (WowInterface.XMemory.Process != null && WowInterface.WowProcess.HasExited)
             {
-                AmeisenBotStateMachine.SetState(BotState.None);
+                StateMachine.SetState(BotState.None);
             }
 
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
             if (WowInterface.ObjectManager.IsWorldLoaded)
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 

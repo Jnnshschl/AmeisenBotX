@@ -2,19 +2,19 @@
 {
     public enum ClickToMoveType : int
     {
-        None = 0,
-        FaceTarget = 1,
-        FaceDestination = 2,
-        Stop = 3,
-        Move = 4,
-        Interact = 5,
-        Loot = 6,
-        InteractObject = 7,
-        FaceOther = 8,
-        Skin = 9,
-        AttackPos = 10,
-        AttackGuid = 11,
         Attack = 16,
+        AttackGuid = 11,
+        AttackPos = 10,
+        FaceDestination = 2,
+        FaceOther = 8,
+        FaceTarget = 1,
+        Interact = 5,
+        InteractObject = 7,
+        Loot = 6,
+        Move = 4,
+        None = 0,
+        Skin = 9,
+        Stop = 3,
         WalkAndRotate = 19
     }
 }

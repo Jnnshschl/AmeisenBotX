@@ -5,23 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateInsideAoeDamage : BasicState
     {
-        public StateInsideAoeDamage(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateInsideAoeDamage(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
 
-        private AmeisenBotConfig Config { get; }
-
-        private List<int> FriendlySpells { get; } = new List<int>() {
+        private List<int> FriendlySpells { get; } = new List<int>()
+        {
             0
         };
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -38,7 +33,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
                 if (aoeSpellObject == null)
                 {
-                    AmeisenBotStateMachine.SetState(AmeisenBotStateMachine.LastState);
+                    StateMachine.SetState(StateMachine.LastState);
                     return;
                 }
 

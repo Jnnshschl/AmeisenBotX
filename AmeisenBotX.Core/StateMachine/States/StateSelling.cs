@@ -4,19 +4,13 @@ using AmeisenBotX.Core.Movement.Enums;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateSelling : BasicState
     {
-        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
-
-        private AmeisenBotConfig Config { get; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -27,7 +21,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             if (WowInterface.HookManager.GetFreeBagSlotCount() > 4
                || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -67,7 +61,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             }
             else
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 

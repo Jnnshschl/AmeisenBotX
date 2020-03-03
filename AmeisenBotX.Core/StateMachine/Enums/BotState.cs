@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
     public enum BotState
     {
@@ -10,7 +10,7 @@
         Ghost,
         Following,
         Attacking,
-        Healing,
+        Eating,
         LoadingScreen,
         InsideAoeDamage,
         Unstuck,
@@ -18,6 +18,7 @@
         Repairing,
         Selling,
         Battleground,
-        Job
+        Job,
+        Dungeon
     }
 }

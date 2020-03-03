@@ -9,7 +9,7 @@ using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Pathfinding.Objects;
@@ -71,6 +71,9 @@ namespace AmeisenBotX.Core.Character
             WowInterface.XMemory.Write(OffsetList.ClickToMoveGuid, guid);
             WowInterface.XMemory.Write(OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
         }
+
+        public Dictionary<int, int> GetConsumeables()
+            => Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
 
         public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
         {
@@ -197,10 +200,7 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
-        public void MoveToPosition(Vector3 pos)
-            => MoveToPosition(pos, 20.9f, 0.5f);
-
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 3f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
         {
             if (pos == new Vector3(0, 0, 0))
             {
@@ -253,7 +253,7 @@ namespace AmeisenBotX.Core.Character
             Equipment.Update();
             foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
             {
-                if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
+                if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Items.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
                 {
                     continue;
                 }
@@ -262,7 +262,7 @@ namespace AmeisenBotX.Core.Character
 
                 if (itemsLikeEquipped.Count > 0)
                 {
-                    if (Equipment.Equipment.TryGetValue(slot, out IWowItem equippedItem))
+                    if (Equipment.Items.TryGetValue(slot, out IWowItem equippedItem))
                     {
                         foreach (IWowItem item in itemsLikeEquipped)
                         {
@@ -373,7 +373,7 @@ namespace AmeisenBotX.Core.Character
 
         private void TryAddItem(EquipmentSlot slot, List<IWowItem> matchedItems)
         {
-            if (Equipment.Equipment.TryGetValue(slot, out IWowItem ammoItem))
+            if (Equipment.Items.TryGetValue(slot, out IWowItem ammoItem))
             {
                 matchedItems.Add(ammoItem);
             }

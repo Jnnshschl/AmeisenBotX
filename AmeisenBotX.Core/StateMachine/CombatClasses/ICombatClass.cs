@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public interface ICombatClass
     {

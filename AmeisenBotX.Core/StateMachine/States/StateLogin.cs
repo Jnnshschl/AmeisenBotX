@@ -2,19 +2,13 @@
 using System;
 using System.Threading;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateLogin : BasicState
     {
-        public StateLogin(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateLogin(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
-
-        private AmeisenBotConfig Config { get; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -34,13 +28,13 @@ namespace AmeisenBotX.Core.StateMachine.States
                 }
                 else
                 {
-                    AmeisenBotStateMachine.SetState(BotState.Idle);
+                    StateMachine.SetState(BotState.Idle);
                 }
             }
             else
             {
                 WowInterface.XMemory.Process.Kill();
-                AmeisenBotStateMachine.SetState(BotState.None);
+                StateMachine.SetState(BotState.None);
             }
         }
 

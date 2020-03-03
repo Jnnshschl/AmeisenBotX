@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace AmeisenBotX.Core.LoginHandler
+namespace AmeisenBotX.Core.Autologin
 {
     public interface ILoginHandler
     {

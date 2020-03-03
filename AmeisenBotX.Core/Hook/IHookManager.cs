@@ -37,6 +37,8 @@ namespace AmeisenBotX.Core.Hook
 
         void DisposeHook();
 
+        void EnableClickToMove();
+
         void FacePosition(WowPlayer player, Vector3 positionToFace);
 
         List<string> GetAuras(WowLuaUnit luaunit);

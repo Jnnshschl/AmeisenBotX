@@ -198,6 +198,18 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void EnableClickToMove()
+        {
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
+                && WowInterface.XMemory.Read(IntPtr.Add(ctmPointer, WowInterface.OffsetList.ClickToMoveEnabled.ToInt32()), out int ctmEnabled))
+            {
+                if (ctmEnabled != 1)
+                {
+                    WowInterface.XMemory.Write(IntPtr.Add(ctmPointer, WowInterface.OffsetList.ClickToMoveEnabled.ToInt32()), 1);
+                }
+            }
+        }
+
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);

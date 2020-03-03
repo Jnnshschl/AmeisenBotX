@@ -6,18 +6,19 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Persistence;
+using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.LoginHandler;
+using AmeisenBotX.Core.Autologin;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Core.OffsetLists;
+using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
-using AmeisenBotX.Core.StateMachine;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
-using AmeisenBotX.Core.StateMachine.CombatClasses.Jannis;
-using AmeisenBotX.Core.StateMachine.States;
+using AmeisenBotX.Core.Statemachine;
+using AmeisenBotX.Core.Statemachine.CombatClasses;
+using AmeisenBotX.Core.Statemachine.CombatClasses.Jannis;
+using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -517,10 +518,11 @@ namespace AmeisenBotX.Core
             WowInterface.ObjectManager = new ObjectManager(WowInterface);
             WowInterface.HookManager = new HookManager(WowInterface);
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
-            WowInterface.EventHookManager = new EventHookManager(WowInterface);
+            WowInterface.EventHookManager = new EventHook(WowInterface);
 
             WowInterface.BattlegroundEngine = new BattlegroundEngine(WowInterface);
             WowInterface.JobEngine = new JobEngine(WowInterface);
+            WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
 
             WowInterface.PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();
@@ -528,8 +530,8 @@ namespace AmeisenBotX.Core
             (
                 () => WowInterface.ObjectManager.Player.Position,
                 () => WowInterface.ObjectManager.Player.Rotation,
-                WowInterface.CharacterManager.MoveToPosition,
-                (Vector3 start, Vector3 end) => WowInterface.PathfindingHandler.GetPath(WowInterface.ObjectManager.MapId, start, end),
+                (Vector3 pos) => WowInterface.CharacterManager.MoveToPosition(pos),
+                (Vector3 start, Vector3 end) => WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, start, end),
                 WowInterface.CharacterManager.Jump,
                 WowInterface.ObjectManager,
                 WowInterface.MovementSettings

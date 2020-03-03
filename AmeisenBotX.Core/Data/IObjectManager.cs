@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace AmeisenBotX.Core.Data
 
         ulong LastTargetGuid { get; }
 
-        int MapId { get; }
+        MapId MapId { get; }
 
         ulong PartyleaderGuid { get; }
 

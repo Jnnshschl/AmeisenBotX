@@ -6,15 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     internal class StateAttacking : BasicState
     {
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
-
             Enemies = new List<WowUnit>();
 
             // default distance values
@@ -23,13 +20,9 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public double DistanceToTarget { get; private set; }
 
-        private AmeisenBotConfig Config { get; }
-
         private List<WowUnit> Enemies { get; set; }
 
         private DateTime LastRotationCheck { get; set; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -41,10 +34,10 @@ namespace AmeisenBotX.Core.StateMachine.States
             WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
             if (!WowInterface.ObjectManager.Player.IsInCombat
-                && !AmeisenBotStateMachine.IsAnyPartymemberInCombat()
+                && !StateMachine.IsAnyPartymemberInCombat()
                 && (WowInterface.BattlegroundEngine == null || WowInterface.BattlegroundEngine.ForceCombat))
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -119,9 +112,9 @@ namespace AmeisenBotX.Core.StateMachine.States
             {
                 foreach (WowUnit lootableUnit in WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius))
                 {
-                    if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
+                    if (!StateMachine.UnitLootList.Contains(lootableUnit.Guid))
                     {
-                        AmeisenBotStateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
+                        StateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
                     }
                 }
             }

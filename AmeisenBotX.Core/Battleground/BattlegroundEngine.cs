@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Battleground.States;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
@@ -113,27 +114,27 @@ namespace AmeisenBotX.Core.Battleground
             BattlegroundProfile = null;
         }
 
-        public bool TryLoadProfile(int mapId)
+        public bool TryLoadProfile(MapId mapId)
         {
             switch (mapId)
             {
-                case 30:
+                case MapId.AlteracValley:
                     // Alterac Valley
                     return false;
 
-                case 489:
+                case MapId.WarsongGulch:
                     BattlegroundProfile = new WarsongGulchProfile(WowInterface, this);
                     return true;
 
-                case 529:
+                case MapId.ArathiBasin:
                     // Arathi Basin
                     return false;
 
-                case 566:
+                case MapId.EyeOfTheStorm:
                     // Eye of the Storm
                     return false;
 
-                case 607:
+                case MapId.StrandOfTheAncients:
                     // Strand of the Ancients
                     return false;
 
@@ -145,10 +146,9 @@ namespace AmeisenBotX.Core.Battleground
         internal IEnumerable<WowGameobject> GetBattlegroundFlags(bool onlyEnemy = true)
             => WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>()
-                // 5912 Alliance Flag / 5913 Horde Flag
-                .Where(e => onlyEnemy ? (!WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == 5912)
-                        || (WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == 5913)
-                    : e.DisplayId == 5912 || e.DisplayId == 5913);
+                .Where(e => onlyEnemy ? (!WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag)
+                        || (WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
+                    : e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag);
 
         internal void SetState(BattlegroundState state)
         {

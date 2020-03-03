@@ -1,13 +1,10 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateJob : BasicState
     {
-        public StateJob(AmeisenBotStateMachine stateMachine, WowInterface wowInterface) : base(stateMachine)
+        public StateJob(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            WowInterface = wowInterface;
         }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {

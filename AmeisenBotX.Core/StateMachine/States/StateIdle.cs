@@ -4,18 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateIdle : BasicState
     {
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface, Queue<ulong> unitLootList) : base(stateMachine)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface, Queue<ulong> unitLootList) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
             UnitLootList = unitLootList;
         }
-
-        private AmeisenBotConfig Config { get; }
 
         private DateTime LastBagSlotCheck { get; set; }
 
@@ -23,18 +19,17 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         private Queue<ulong> UnitLootList { get; }
 
-        private WowInterface WowInterface { get; }
-
         public override void Enter()
         {
             // first start
             if (!WowInterface.HookManager.IsWoWHooked)
             {
                 WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
-                AmeisenBotStateMachine.PlayerName = playerName;
+                StateMachine.PlayerName = playerName;
 
                 WowInterface.HookManager.SetupEndsceneHook();
                 WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
+                WowInterface.HookManager.EnableClickToMove();
 
                 WowInterface.EventHookManager.Start();
 
@@ -44,27 +39,37 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            CheckForBattlegroundInvites();
+            if (Config.AutojoinBg)
+            {
+                CheckForBattlegroundInvites();
+            }
 
             // we are on a battleground
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3)
             {
-                AmeisenBotStateMachine.SetState(BotState.Battleground);
+                StateMachine.SetState(BotState.Battleground);
+                return;
+            }
+
+            // we are in a dungeon
+            if (StateMachine.IsInDungeon())
+            {
+                StateMachine.SetState(BotState.Dungeon);
                 return;
             }
 
             // do i need to loot units
             if (UnitLootList.Count > 0)
             {
-                AmeisenBotStateMachine.SetState(BotState.Looting);
+                StateMachine.SetState(BotState.Looting);
                 return;
             }
 
             // do i need to follow someone
             if (IsUnitToFollowThere())
             {
-                AmeisenBotStateMachine.SetState(BotState.Following);
+                StateMachine.SetState(BotState.Following);
                 return;
             }
 
@@ -74,9 +79,9 @@ namespace AmeisenBotX.Core.StateMachine.States
                 LastRepairCheck = DateTime.Now;
 
                 if (IsRepairNpcNear()
-                    && WowInterface.CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.2))
+                    && WowInterface.CharacterManager.Equipment.Items.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.2))
                 {
-                    AmeisenBotStateMachine.SetState(BotState.Repairing);
+                    StateMachine.SetState(BotState.Repairing);
                     return;
                 }
             }
@@ -90,7 +95,7 @@ namespace AmeisenBotX.Core.StateMachine.States
                 if (IsVendorNpcNear()
                     && WowInterface.HookManager.GetFreeBagSlotCount() < 4)
                 {
-                    AmeisenBotStateMachine.SetState(BotState.Selling);
+                    StateMachine.SetState(BotState.Selling);
                     return;
                 }
             }

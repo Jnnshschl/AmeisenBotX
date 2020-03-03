@@ -3,19 +3,13 @@ using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateGhost : BasicState
     {
-        public StateGhost(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateGhost(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
-
-        private AmeisenBotConfig Config { get; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -31,10 +25,10 @@ namespace AmeisenBotX.Core.StateMachine.States
         {
             if (WowInterface.ObjectManager.Player.Health > 1)
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
 
-            if (AmeisenBotStateMachine.IsOnBattleground())
+            if (StateMachine.IsOnBattleground())
             {
                 // just wait for the mass ress
                 return;

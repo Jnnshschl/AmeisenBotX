@@ -3,21 +3,15 @@ using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
     internal class StateFollowing : BasicState
     {
-        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine)
+        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowInterface = wowInterface;
         }
 
-        private AmeisenBotConfig Config { get; }
-
         private WowPlayer PlayerToFollow { get; set; }
-
-        private WowInterface WowInterface { get; }
 
         public override void Enter()
         {
@@ -51,7 +45,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             if (PlayerToFollow == null)
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 
@@ -61,7 +55,7 @@ namespace AmeisenBotX.Core.StateMachine.States
             double distance = PlayerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
-                AmeisenBotStateMachine.SetState(BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
 
             if (WowInterface.ObjectManager.Player.CurrentlyCastingSpellId > 0 || WowInterface.ObjectManager.Player.CurrentlyChannelingSpellId > 0)

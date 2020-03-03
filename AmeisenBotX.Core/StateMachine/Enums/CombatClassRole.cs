@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.StateMachine.Enums
+﻿namespace AmeisenBotX.Core.Statemachine.Enums
 {
     public enum CombatClassRole
     {

@@ -1,0 +1,8 @@
+﻿namespace AmeisenBotX.Core.Dungeon.Enums
+{
+    public enum DungeonNodeType
+    {
+        Normal,
+        Boss
+    }
+}

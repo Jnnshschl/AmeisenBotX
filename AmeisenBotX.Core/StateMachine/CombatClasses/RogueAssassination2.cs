@@ -6,14 +6,14 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.StateMachine.Enums;
+using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Pathfinding;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class RogueAssassination2 : ICombatClass
     {
@@ -283,7 +283,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastBehindTargetPosition);
+                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastBehindTargetPosition);
                     MovementEngine.LoadPath(path);
                     MovementEngine.PostProcessPath();
                 }
