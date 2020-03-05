@@ -7,44 +7,33 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowObject
     {
-        public IntPtr BaseAddress { get; set; }
+        // W.I.P
+        // This is going to reduce the ReadProcessMemory calls a lot
+        public WowObject(IntPtr baseAddress, WowObjectType type)
+        {
+            BaseAddress = baseAddress;
+            Type = type;
+        }
 
-        public virtual int BaseOffset => 0x0;
-
+        public IntPtr BaseAddress { get; private set; }
+        
         public IntPtr DescriptorAddress { get; set; }
 
-        public int EntryId { get; set; }
+        public int EntryId => RawWowObject.EntryId;
 
-        public ulong Guid { get; set; }
+        public ulong Guid => RawWowObject.Guid;
 
         public Vector3 Position { get; set; }
 
-        public float Scale { get; set; }
+        public float Scale => RawWowObject.Scale;
 
-        public WowObjectType Type { get; set; }
+        public WowObjectType Type { get; private set; }
 
-        // W.I.P
-        // This is going to reduce the ReadProcessMemory calls a lot
-        // public WowObject(IntPtr baseAddress, WowObjectType type = WowObjectType.None)
-        // {
-        //     BaseAddress = baseAddress;
-        //     Type = type;
-        // }
-        //
-        // public IntPtr BaseAddress { get; private set; }
-        //
-        // public int EntryId => RawWowObject.EntryId;
-        //
-        // public ulong Guid => RawWowObject.Guid;
-        //
-        // public float Scale => RawWowObject.Scale;
-        //
-        // public WowObjectType Type { get; private set; }
         private RawWowObject RawWowObject { get; set; }
 
-        public virtual WowObject Update(XMemory xMemory)
+        public WowObject UpdateRawWowObject(XMemory xMemory)
         {
-            if (xMemory.ReadStruct(BaseAddress, out RawWowObject rawWowObject))
+            if (xMemory.ReadStruct(DescriptorAddress, out RawWowObject rawWowObject))
             {
                 RawWowObject = rawWowObject;
             }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
@@ -14,7 +15,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public ulong Target;
         public ulong ChannelObject;
         public int ChannelSpell;
-        public fixed byte Bytes0[4];
+        public int Bytes0;
         public int Health;
         public int Power1;
         public int Power2;
@@ -36,8 +37,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public int Level;
         public int FactionTemplate;
         public fixed int VirtualItemSlotId[3];
-        public int Flags1;
-        public int Flags2;
+        public BitVector32 Flags1;
+        public BitVector32 Flags2;
         public int AuraState;
         public fixed int BaseAttackTime[2];
         public int RangeAttackTime;
@@ -50,15 +51,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public float MaxDamage;
         public float MinOffhandDamage;
         public float MaxOffhandDamage;
-        public fixed byte Bytes1[4];
+        public int Bytes1;
         public int PetNumber;
         public int PetNameTimestamp;
         public int PetExperience;
         public int PetNextLevelXp;
-        public int DynamicFlags;
+        public BitVector32 DynamicFlags;
         public float CastSpeed;
         public int CreatedBySpell;
-        public int NpcFlags;
+        public BitVector32 NpcFlags;
         public int NpcEmoteState;
         public int Stat0;
         public int Stat1;

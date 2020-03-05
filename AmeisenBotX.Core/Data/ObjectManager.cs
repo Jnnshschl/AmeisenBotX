@@ -157,73 +157,41 @@ namespace AmeisenBotX.Core.Data
             return partymemberGuids;
         }
 
-        public WowObject ReadWowObject(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.None)
+        public WowObject ReadWowObject(IntPtr activeObject, WowObjectType wowObjectType)
         {
             if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
-                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectGuid.ToInt32()), out ulong guid)
-                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectPosition.ToInt32()), out Vector3 wowPosition))
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectPosition.ToInt32()), out Vector3 position))
             {
-                return new WowObject()
+                WowObject obj = new WowObject(activeObject, wowObjectType)
                 {
-                    BaseAddress = activeObject,
                     DescriptorAddress = descriptorAddress,
-                    Guid = guid,
-                    Type = wowObjectType,
-                    Position = wowPosition
+                    Position = position
                 };
+
+                return obj.UpdateRawWowObject(WowInterface.XMemory);
             }
 
             return null;
         }
 
-        public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Player)
+        public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType)
         {
-            WowUnit wowUnit = ReadWowUnit(activeObject, wowObjectType);
-
-            if (wowUnit != null)
+            if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position))
             {
-                WowPlayer player = new WowPlayer()
+                WowPlayer player = new WowPlayer(activeObject, wowObjectType)
                 {
-                    BaseAddress = activeObject,
-                    CombatReach = wowUnit.CombatReach,
-                    DescriptorAddress = wowUnit.DescriptorAddress,
-                    Guid = wowUnit.Guid,
-                    Type = wowObjectType,
-                    Name = ReadPlayerName(wowUnit.Guid),
-                    TargetGuid = wowUnit.TargetGuid,
-                    Position = wowUnit.Position,
-                    Rotation = wowUnit.Rotation,
-                    FactionTemplate = wowUnit.FactionTemplate,
-                    UnitFlags = wowUnit.UnitFlags,
-                    UnitFlagsDynamic = wowUnit.UnitFlagsDynamic,
-                    Health = wowUnit.Health,
-                    MaxHealth = wowUnit.MaxHealth,
-                    Mana = wowUnit.Mana,
-                    MaxMana = wowUnit.MaxMana,
-                    Energy = wowUnit.Energy,
-                    MaxEnergy = wowUnit.MaxEnergy,
-                    Rage = wowUnit.Rage,
-                    MaxRage = wowUnit.MaxRage,
-                    Runeenergy = wowUnit.Runeenergy,
-                    MaxRuneenergy = wowUnit.MaxRuneenergy,
-                    Level = wowUnit.Level,
-                    Race = wowUnit.Race,
-                    Class = wowUnit.Class,
-                    Gender = wowUnit.Gender,
-                    PowerType = wowUnit.PowerType,
-                    IsAutoAttacking = wowUnit.IsAutoAttacking,
-                    CurrentlyCastingSpellId = wowUnit.CurrentlyCastingSpellId,
-                    CurrentlyChannelingSpellId = wowUnit.CurrentlyChannelingSpellId
+                    DescriptorAddress = descriptorAddress,
+                    Position = position
                 };
 
-                if (PlayerGuid != 0 && wowUnit.Guid == PlayerGuid)
+                player.Name = ReadPlayerName(player.Guid);
+                player.UpdateRawWowPlayer(WowInterface.XMemory);
+
+                if (PlayerGuid != 0 && player.Guid == PlayerGuid)
                 {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, WowInterface.OffsetList.DescriptorExp.ToInt32()), out int exp)
-                        && WowInterface.XMemory.Read(IntPtr.Add(wowUnit.DescriptorAddress, WowInterface.OffsetList.DescriptorMaxExp.ToInt32()), out int maxExp)
-                        && WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
+                    if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
                     {
-                        player.Exp = exp;
-                        player.MaxExp = maxExp;
                         player.ComboPoints = comboPoints;
                     }
 
@@ -236,69 +204,23 @@ namespace AmeisenBotX.Core.Data
             return null;
         }
 
-        public WowUnit ReadWowUnit(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Unit)
+        public WowUnit ReadWowUnit(IntPtr activeObject, WowObjectType wowObjectType)
         {
-            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
-
-            if (wowObject != null
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorTargetGuid.ToInt32()), out ulong targetGuid)
-                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 wowPosition)
+            if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position)
                 && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.PlayerRotation.ToInt32()), out float rotation)
-                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.IsAutoAttacking.ToInt32()), out int isAutoAttacking)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorCombatReach.ToInt32()), out float combatReach)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorFactionTemplate.ToInt32()), out int factionTemplate)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlags)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorUnitFlagsDynamic.ToInt32()), out BitVector32 dynamicUnitFlags)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorNpcFlags.ToInt32()), out BitVector32 npcFlags)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorHealth.ToInt32()), out int health)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorMaxHealth.ToInt32()), out int maxHealth)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorMana.ToInt32()), out int mana)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorMaxMana.ToInt32()), out int maxMana)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorRage.ToInt32()), out int rage)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorMaxRage.ToInt32()), out int maxRage)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorEnergy.ToInt32()), out int energy)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorMaxEnergy.ToInt32()), out int maxEnergy)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorRuneenergy.ToInt32()), out int runeenergy)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorMaxRuneenergy.ToInt32()), out int maxRuneenergy)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorLevel.ToInt32()), out int level)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.DescriptorInfoFlags.ToInt32()), out int infoFlags)
-                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int currentlyCastingSpellId)
-                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int currentlyChannelingSpellId))
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.IsAutoAttacking.ToInt32()), out int isAutoAttacking))
             {
-                return new WowUnit()
+                WowUnit unit = new WowUnit(activeObject, wowObjectType)
                 {
-                    BaseAddress = activeObject,
-                    CombatReach = combatReach,
-                    DescriptorAddress = wowObject.DescriptorAddress,
-                    Guid = wowObject.Guid,
-                    Type = wowObjectType,
-                    Name = ReadUnitName(activeObject, wowObject.Guid),
-                    TargetGuid = targetGuid,
-                    Position = wowPosition,
+                    DescriptorAddress = descriptorAddress,
+                    Position = position,
                     Rotation = rotation,
-                    FactionTemplate = factionTemplate,
-                    UnitFlags = unitFlags,
-                    UnitFlagsDynamic = dynamicUnitFlags,
-                    Health = health,
-                    MaxHealth = maxHealth,
-                    Mana = mana,
-                    MaxMana = maxMana,
-                    NpcFlags = npcFlags,
-                    Energy = energy,
-                    MaxEnergy = maxEnergy,
-                    Rage = rage / 10,
-                    MaxRage = maxRage / 10,
-                    Runeenergy = runeenergy / 10,
-                    MaxRuneenergy = maxRuneenergy / 10,
-                    Level = level,
-                    Race = Enum.IsDefined(typeof(WowRace), (WowRace)((infoFlags >> 0) & 0xFF)) ? (WowRace)((infoFlags >> 0) & 0xFF) : WowRace.Unknown,
-                    Class = Enum.IsDefined(typeof(WowClass), (WowClass)((infoFlags >> 8) & 0xFF)) ? (WowClass)((infoFlags >> 8) & 0xFF) : WowClass.Unknown,
-                    Gender = Enum.IsDefined(typeof(WowGender), (WowGender)((infoFlags >> 16) & 0xFF)) ? (WowGender)((infoFlags >> 16) & 0xFF) : WowGender.Unknown,
-                    PowerType = Enum.IsDefined(typeof(WowPowertype), (WowPowertype)((infoFlags >> 24) & 0xFF)) ? (WowPowertype)((infoFlags >> 24) & 0xFF) : WowPowertype.Unknown,
-                    IsAutoAttacking = isAutoAttacking == 1,
-                    CurrentlyCastingSpellId = currentlyCastingSpellId,
-                    CurrentlyChannelingSpellId = currentlyChannelingSpellId
+                    IsAutoAttacking = isAutoAttacking == 1
                 };
+
+                unit.Name = ReadUnitName(activeObject, unit.Guid);
+                return unit.UpdateRawWowUnit(WowInterface.XMemory);
             }
 
             return null;
@@ -399,10 +321,10 @@ namespace AmeisenBotX.Core.Data
                 ZoneId = zoneId;
             }
 
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.GameState, out GameState gamestate))
-            {
-                GameState = gamestate;
-            }
+            //if (WowInterface.XMemory.Read(WowInterface.OffsetList.GameState, out GameState gamestate))
+            //{
+            //    GameState = gamestate;
+            //}
 
             WowObjects.Clear();
             WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
@@ -527,26 +449,16 @@ namespace AmeisenBotX.Core.Data
 
         private WowDynobject ReadWowDynobject(IntPtr activeObject, WowObjectType wowObjectType)
         {
-            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
-
-            if (wowObject != null
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowDynobjectCasterGuid.ToInt32()), out ulong casterGuid)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowDynobjectSpellId.ToInt32()), out int spellId)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowDynobjectRadius.ToInt32()), out float radius)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowDynobjectFacing.ToInt32()), out float facing))
+            if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectPosition.ToInt32()), out Vector3 position))
             {
-                return new WowDynobject()
+                WowDynobject dynObject = new WowDynobject(activeObject, wowObjectType)
                 {
-                    BaseAddress = activeObject,
-                    DescriptorAddress = wowObject.DescriptorAddress,
-                    Guid = wowObject.Guid,
-                    Position = wowObject.Position,
-                    Type = wowObjectType,
-                    CasterGuid = casterGuid,
-                    SpellId = spellId,
-                    Radius = radius,
-                    Facing = facing
+                    DescriptorAddress = descriptorAddress,
+                    Position = position
                 };
+
+                return dynObject.UpdateRawWowDynobject(WowInterface.XMemory);
             }
 
             return null;
@@ -554,25 +466,16 @@ namespace AmeisenBotX.Core.Data
 
         private WowGameobject ReadWowGameobject(IntPtr activeObject, WowObjectType wowObjectType)
         {
-            WowObject wowObject = ReadWowObject(activeObject, wowObjectType);
-
-            if (wowObject != null
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowGameobjectType.ToInt32()), out WowGameobjectType gameobjectType)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowGameobjectLevel.ToInt32()), out int level)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowObject.DescriptorAddress, WowInterface.OffsetList.WowGameobjectDisplayId.ToInt32()), out int displayId)
-                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowGameobjectPosition.ToInt32()), out Vector3 wowPosition))
+            if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowGameobjectPosition.ToInt32()), out Vector3 position))
             {
-                return new WowGameobject()
+                WowGameobject dynObject = new WowGameobject(activeObject, wowObjectType)
                 {
-                    BaseAddress = activeObject,
-                    DescriptorAddress = wowObject.DescriptorAddress,
-                    Guid = wowObject.Guid,
-                    Position = wowPosition,
-                    Type = wowObjectType,
-                    DisplayId = displayId,
-                    Level = level,
-                    GameobjectType = gameobjectType,
+                    DescriptorAddress = descriptorAddress,
+                    Position = position
                 };
+
+                return dynObject.UpdateRawWowGameobject(WowInterface.XMemory);
             }
 
             return null;

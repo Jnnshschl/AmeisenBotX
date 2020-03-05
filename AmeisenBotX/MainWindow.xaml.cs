@@ -247,18 +247,20 @@ namespace AmeisenBotX
             }
         }
 
-        private void UpdateBotInfo(int secondary, int maxSecondary, Brush primaryBrush, Brush secondaryBrush)
+        private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
             // generic stuff
             labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
+
+            labelGamestate.Content = AmeisenBot.WowInterface.ObjectManager.GameState;
 
             labelCurrentLevel.Content = $"lvl. {AmeisenBot.WowInterface.ObjectManager.Player.Level}";
             labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Gender} {AmeisenBot.WowInterface.ObjectManager.Player.Race}";
             labelCurrentClass.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Class} [{AmeisenBot.WowInterface.ObjectManager.Player.PowerType}]";
 
-            progressbarExp.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.MaxExp;
-            progressbarExp.Value = AmeisenBot.WowInterface.ObjectManager.Player.Exp;
-            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Exp)}/{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.MaxExp)}";
+            progressbarExp.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.NextLevelXp;
+            progressbarExp.Value = AmeisenBot.WowInterface.ObjectManager.Player.Xp;
+            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Xp)}/{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.NextLevelXp)}";
 
             progressbarHealth.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.MaxHealth;
             progressbarHealth.Value = AmeisenBot.WowInterface.ObjectManager.Player.Health;

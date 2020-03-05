@@ -414,18 +414,6 @@ namespace AmeisenBotX.Core.Hook
                 "RETN",
             };
 
-            // we need this, to be very accurate, otherwise wow will crash
-            if (WowInterface.XMemory.ReadStruct(IntPtr.Add(wowUnitA.DescriptorAddress, WowInterface.OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsA)
-                && WowInterface.XMemory.ReadStruct(IntPtr.Add(wowUnitB.DescriptorAddress, WowInterface.OffsetList.DescriptorUnitFlags.ToInt32()), out BitVector32 unitFlagsB))
-            {
-                wowUnitA.UnitFlags = unitFlagsA;
-                wowUnitB.UnitFlags = unitFlagsB;
-            }
-            else
-            {
-                return reaction;
-            }
-
             if (wowUnitA.IsDead || wowUnitB.IsDead)
             {
                 return reaction;

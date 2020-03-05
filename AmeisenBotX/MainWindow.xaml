@@ -135,7 +135,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="4,163,0,0" VerticalAlignment="Top" FontFamily="Unispace">
+        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="4,156,0,0" VerticalAlignment="Top" FontFamily="Unispace">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -161,5 +161,10 @@
             </Button.Foreground>
         </Button>
         <Label x:Name="labelBgObjective" Content="BGObjective: None" HorizontalAlignment="Left" Margin="146,32,0,0" VerticalAlignment="Top" Foreground="White" />
+        <Label x:Name="labelGamestate" Content="GameState" HorizontalAlignment="Left" Margin="4,177,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="10">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
     </Grid>
 </Window>

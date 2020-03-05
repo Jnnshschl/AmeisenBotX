@@ -163,7 +163,7 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.DisposeHook();
             WowInterface.EventHookManager.Stop();
 
-            if (WowInterface.ObjectManager.Player?.Name.Length > 0)
+            if (WowInterface.ObjectManager.Player?.Name?.Length > 0)
             {
                 if (Config.SaveWowWindowPosition)
                 {

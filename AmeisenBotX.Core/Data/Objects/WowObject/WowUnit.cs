@@ -1,31 +1,35 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
+using System;
 using System.Collections.Specialized;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowUnit : WowObject
     {
-        public override int BaseOffset => RawWowObject.EndOffset;
+        public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        {
 
-        public WowClass Class { get; set; }
+        }
 
-        public float CombatReach { get; set; }
+        public WowClass Class => Enum.IsDefined(typeof(WowClass), (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF)) ? (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF) : WowClass.Unknown;
 
-        public int CurrentlyCastingSpellId { get; set; }
+        public float CombatReach => RawWowUnit.CombatReach;
 
-        public int CurrentlyChannelingSpellId { get; set; }
+        public int CurrentlyCastingSpellId => RawWowUnit.ChannelSpell;
 
-        public int Energy { get; set; }
+        public int CurrentlyChannelingSpellId => RawWowUnit.ChannelSpell;
+
+        public int Energy => RawWowUnit.Power3;
 
         public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
 
-        public int FactionTemplate { get; set; }
+        public int FactionTemplate => RawWowUnit.FactionTemplate;
 
-        public WowGender Gender { get; set; }
+        public WowGender Gender => Enum.IsDefined(typeof(WowGender), (WowGender)((RawWowUnit.Bytes0 >> 16) & 0xFF)) ? (WowGender)((RawWowUnit.Bytes0 >> 16) & 0xFF) : WowGender.Unknown;
 
-        public int Health { get; set; }
+        public int Health => RawWowUnit.Health;
 
         public double HealthPercentage => ReturnPercentage(Health, MaxHealth);
 
@@ -129,51 +133,53 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsVendor => NpcFlags[(int)WowUnitNpcFlags.Vendor];
 
-        public int Level { get; set; }
+        public int Level => RawWowUnit.Level;
 
-        public int Mana { get; set; }
+        public int Mana => RawWowUnit.Power1;
 
         public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
 
-        public int MaxEnergy { get; set; }
+        public int MaxEnergy => RawWowUnit.MaxPower3;
 
-        public int MaxHealth { get; set; }
+        public int MaxHealth => RawWowUnit.MaxHealth;
 
-        public int MaxMana { get; set; }
+        public int MaxMana => RawWowUnit.MaxPower1;
 
-        public int MaxRage { get; set; }
+        public int MaxRage => RawWowUnit.MaxPower2 / 10;
 
-        public int MaxRuneenergy { get; set; }
+        public int MaxRuneenergy => RawWowUnit.MaxPower7 / 10;
 
         public string Name { get; set; }
 
-        public BitVector32 NpcFlags { get; set; }
+        public BitVector32 NpcFlags => RawWowUnit.NpcFlags;
 
-        public WowPowertype PowerType { get; set; }
+        public WowPowertype PowerType => Enum.IsDefined(typeof(WowPowertype), (WowPowertype)((RawWowUnit.Bytes0 >> 24) & 0xFF)) ? (WowPowertype)((RawWowUnit.Bytes0 >> 24) & 0xFF) : WowPowertype.Unknown;
 
-        public WowRace Race { get; set; }
+        public WowRace Race => Enum.IsDefined(typeof(WowRace), (WowRace)((RawWowUnit.Bytes0 >> 0) & 0xFF)) ? (WowRace)((RawWowUnit.Bytes0 >> 0) & 0xFF) : WowRace.Unknown;
 
-        public int Rage { get; set; }
+        public int Rage => RawWowUnit.Power2 / 10;
 
         public double RagePercentage => ReturnPercentage(Rage, MaxRage);
 
         public float Rotation { get; set; }
 
-        public int Runeenergy { get; set; }
+        public int Runeenergy => RawWowUnit.Power7 / 10;
 
         public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
 
-        public ulong TargetGuid { get; set; }
+        public ulong TargetGuid => RawWowUnit.Target;
 
-        public BitVector32 UnitFlags { get; set; }
+        public BitVector32 UnitFlags => RawWowUnit.Flags1;
 
-        public BitVector32 UnitFlagsDynamic { get; set; }
+        public BitVector32 UnitFlagsDynamic => RawWowUnit.DynamicFlags;
 
         private RawWowUnit RawWowUnit { get; set; }
 
-        public override WowObject Update(XMemory xMemory)
+        public WowUnit UpdateRawWowUnit(XMemory xMemory)
         {
-            if (xMemory.ReadStruct(BaseAddress, out RawWowUnit rawWowUnit))
+            UpdateRawWowObject(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit rawWowUnit))
             {
                 RawWowUnit = rawWowUnit;
             }

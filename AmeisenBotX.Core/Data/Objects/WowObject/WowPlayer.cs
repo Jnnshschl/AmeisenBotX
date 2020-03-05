@@ -1,18 +1,22 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
+using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowPlayer : WowUnit
     {
-        public override int BaseOffset => RawWowObject.EndOffset + RawWowUnit.EndOffset;
+        public WowPlayer(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        {
+
+        }
 
         public int ComboPoints { get; set; }
 
-        public int Exp { get; set; }
+        public int Xp => RawWowPlayer.Xp;
 
-        public int MaxExp { get; set; }
+        public int NextLevelXp => RawWowPlayer.NextLevelXp;
 
         private RawWowPlayer RawWowPlayer { get; set; }
 
@@ -30,9 +34,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             || Race == WowRace.Tauren
             || Race == WowRace.Undead;
 
-        public override WowObject Update(XMemory xMemory)
+        public WowPlayer UpdateRawWowPlayer(XMemory xMemory)
         {
-            if (xMemory.ReadStruct(BaseAddress, out RawWowPlayer rawWowPlayer))
+            UpdateRawWowUnit(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer rawWowPlayer))
             {
                 RawWowPlayer = rawWowPlayer;
             }

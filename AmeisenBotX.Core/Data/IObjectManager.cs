@@ -12,6 +12,8 @@ namespace AmeisenBotX.Core.Data
     {
         event ObjectUpdateComplete OnObjectUpdateComplete;
 
+        GameState GameState { get; }
+
         bool IsWorldLoaded { get; }
 
         WowUnit LastTarget { get; }

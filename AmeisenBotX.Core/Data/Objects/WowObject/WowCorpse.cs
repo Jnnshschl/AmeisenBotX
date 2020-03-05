@@ -1,17 +1,23 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
+using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowCorpse : WowObject
     {
-        public override int BaseOffset => RawWowObject.EndOffset;
+        public WowCorpse(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        {
+
+        }
 
         private RawWowCorpse RawWowCorpse { get; set; }
 
-        public override WowObject Update(XMemory xMemory)
+        public WowCorpse UpdateRawWowCorpse(XMemory xMemory)
         {
-            if (xMemory.ReadStruct(BaseAddress, out RawWowCorpse rawWowCorpse))
+            UpdateRawWowObject(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse rawWowCorpse))
             {
                 RawWowCorpse = rawWowCorpse;
             }

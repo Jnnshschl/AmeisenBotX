@@ -1,25 +1,29 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
+using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowDynobject : WowObject
     {
-        public override int BaseOffset => RawWowObject.EndOffset;
+        public WowDynobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        {
 
-        public ulong CasterGuid { get; set; }
+        }
+        
+        public ulong Caster => RawWowDynobject.Caster;
 
-        public float Facing { get; set; }
+        public float Radius => RawWowDynobject.Radius;
 
-        public float Radius { get; set; }
-
-        public int SpellId { get; set; }
+        public int SpellId => RawWowDynobject.SpellId;
 
         private RawWowDynobject RawWowDynobject { get; set; }
 
-        public override WowObject Update(XMemory xMemory)
+        public WowDynobject UpdateRawWowDynobject(XMemory xMemory)
         {
-            if (xMemory.ReadStruct(BaseAddress, out RawWowDynobject rawWowDynobject))
+            UpdateRawWowObject(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject rawWowDynobject))
             {
                 RawWowDynobject = rawWowDynobject;
             }

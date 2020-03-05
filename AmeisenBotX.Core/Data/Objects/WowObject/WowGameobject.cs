@@ -1,12 +1,16 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
+using System;
 using System.Collections.Specialized;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowGameobject : WowObject
     {
-        public override int BaseOffset => base.BaseOffset + RawWowObject.EndOffset;
+        public WowGameobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        {
+
+        }
 
         public int DisplayId { get; set; }
 
@@ -28,9 +32,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         private RawWowGameobject RawWowGameobject { get; set; }
 
-        public override WowObject Update(XMemory xMemory)
+        public WowGameobject UpdateRawWowGameobject(XMemory xMemory)
         {
-            if (xMemory.ReadStruct(BaseAddress, out RawWowGameobject rawWowGameobject))
+            UpdateRawWowObject(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject rawWowGameobject))
             {
                 RawWowGameobject = rawWowGameobject;
             }
