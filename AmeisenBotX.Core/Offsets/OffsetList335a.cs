@@ -4,6 +4,12 @@ namespace AmeisenBotX.Core.Offsets
 {
     public class OffsetList335a : IOffsetList
     {
+        /* Notes:
+         *
+         * IsIngame: 0xBD0792
+         *
+         */
+
         public IntPtr AccountName { get; } = new IntPtr(0xB6AA40);
 
         public IntPtr AutolootEnabled { get; } = new IntPtr(0x30);
@@ -98,7 +104,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x13C);
 
-        public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8);
+        public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8); // maybe use 0xAC, Clear function
 
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);
 
@@ -110,13 +116,11 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr FunctionCastSpellById { get; } = new IntPtr(0x80DA40);
 
-        public IntPtr FunctionClickToMove { get; } = new IntPtr(0x727400);
+        public IntPtr FunctionGameobjectOnRightClick { get; } = new IntPtr(0x711140);
 
         public IntPtr FunctionGetActivePlayerObject { get; } = new IntPtr(0x4038F0);
 
         public IntPtr FunctionGetLocalizedText { get; } = new IntPtr(0x7225E0);
-
-        public IntPtr FunctionGetUnitReaction { get; } = new IntPtr(0x7251C0);
 
         public IntPtr FunctionHandleTerrainClick { get; } = new IntPtr(0x80C340);
 
@@ -124,15 +128,25 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr FunctionLuaDoString { get; } = new IntPtr(0x819210);
 
+        public IntPtr FunctionObjectGetPosition { get; } = new IntPtr(0x4D5EA0);
+
+        public IntPtr FunctionPlayerClickToMove { get; } = new IntPtr(0x727400);
+
+        public IntPtr FunctionPlayerClickToMoveStop { get; } = new IntPtr(0x72B3A0);
+
+        public IntPtr FunctionPlayerIsClickMoving { get; } = new IntPtr(0x721F90);
+
         public IntPtr FunctionRenderWorld { get; } = new IntPtr(0x4FAF90);
-
-        public IntPtr FunctionSendMovementPacket { get; } = new IntPtr(0x7413F0);
-
-        public IntPtr FunctionSetFacing { get; } = new IntPtr(0x72EA50);
 
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
 
-        public IntPtr FunctionStopClickToMove { get; } = new IntPtr(0x72B3A0);
+        public IntPtr FunctionUnitGetReaction { get; } = new IntPtr(0x7251C0);
+
+        public IntPtr FunctionUnitOnRightClick { get; } = new IntPtr(0x731260);
+
+        public IntPtr FunctionUnitSendMovementPacket { get; } = new IntPtr(0x7413F0);
+
+        public IntPtr FunctionUnitSetFacing { get; } = new IntPtr(0x72EA50);
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 

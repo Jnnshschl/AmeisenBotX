@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
 
-        public double ObjectUpdateMs { get; set; } = 0;
+        public double EventPullMs { get; set; } = 1000;
 
         public string Password { get; set; } = string.Empty;
 

@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player.Type, WowInterface.ObjectManager.Player.BaseAddress);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                 if (WowInterface.ObjectManager.Target != null)
                 {

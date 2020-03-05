@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Battleground.States
                         WowGameobject flagObject = flags.First();
                         if (flagObject != null && flagObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 8)
                         {
-                            WowInterface.HookManager.RightClickObject(flagObject);
+                            WowInterface.HookManager.GameobjectOnRightClick(flagObject);
                         }
                         else
                         {

@@ -57,27 +57,16 @@ namespace AmeisenBotX.Core.Hook
         private WowInterface WowInterface { get; }
 
         public void AcceptBattlegroundInvite()
-        {
-            SendChatMessage("/click StaticPopup1Button1");
-        }
+            => SendChatMessage("/click StaticPopup1Button1");
 
         public void AcceptPartyInvite()
-        {
-            LuaDoString("AcceptGroup();");
-            SendChatMessage("/click StaticPopup1Button1");
-        }
+            => LuaDoString("AcceptGroup();");
 
         public void AcceptResurrect()
-        {
-            LuaDoString("AcceptResurrect();");
-            SendChatMessage("/click StaticPopup1Button1");
-        }
+            => LuaDoString("AcceptResurrect();");
 
         public void AcceptSummon()
-        {
-            LuaDoString("ConfirmSummon();");
-            SendChatMessage("/click StaticPopup1Button1");
-        }
+            => LuaDoString("ConfirmSummon();");
 
         public void CastSpell(string name, bool castOnSelf = false)
         {
@@ -129,7 +118,7 @@ namespace AmeisenBotX.Core.Hook
                 string[] asm = new string[]
                 {
                     $"PUSH {codeCaveVector3.ToInt32()}",
-                    $"CALL {WowInterface.OffsetList.FunctionHandleTerrainClick.ToInt32()}",
+                    $"CALL {WowInterface.OffsetList.FunctionHandleTerrainClick}",
                     "ADD ESP, 0x4",
                     "RETN",
                 };
@@ -139,21 +128,13 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public void ClickToMove(IntPtr playerBase, Vector3 position)
+        public void ClickToMove(WowPlayer player, Vector3 position)
         {
             if (WowInterface.XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
                 WowInterface.XMemory.Write(codeCaveVector3, position);
 
-                string[] asm = new string[]
-                {
-                    $"PUSH {codeCaveVector3.ToInt32()}",
-                    $"MOV ECX, {playerBase.ToInt32()}",
-                    $"CALL {WowInterface.OffsetList.FunctionClickToMove.ToInt32()}",
-                    "RETN",
-                };
-
-                InjectAndExecute(asm, false);
+                CallObjectFunction(player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMove, new List<object>() { codeCaveVector3.ToInt32() });
                 WowInterface.XMemory.FreeMemory(codeCaveVector3);
             }
         }
@@ -165,9 +146,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public void CofirmReadyCheck(bool isReady)
-        {
-            LuaDoString($"ConfirmReadyCheck({isReady});");
-        }
+            => LuaDoString($"ConfirmReadyCheck({isReady});");
 
         public void DisposeHook()
         {
@@ -217,6 +196,9 @@ namespace AmeisenBotX.Core.Hook
             // buggy atm
             //// SendMovementPacket(player, 0xDA);
         }
+
+        public void GameobjectOnRightClick(WowObject gameobject)
+            => CallObjectFunction(gameobject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
 
         public List<string> GetAuras(WowLuaUnit luaunit)
             => ReadAuras(luaunit, "UnitAura");
@@ -422,11 +404,12 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.AllocateMemory(4, out IntPtr memAlloc);
             WowInterface.XMemory.Write(memAlloc, 0);
 
+            // TODO: refactor this
             string[] asm = new string[]
             {
                 $"PUSH {wowUnitA.BaseAddress}",
                 $"MOV ECX, {wowUnitB.BaseAddress}",
-                $"CALL {WowInterface.OffsetList.FunctionGetUnitReaction}",
+                $"CALL {WowInterface.OffsetList.FunctionUnitGetReaction}",
                 $"MOV [{memAlloc}], EAX",
                 "RETN",
             };
@@ -587,18 +570,6 @@ namespace AmeisenBotX.Core.Hook
             return false;
         }
 
-        public bool IsCtmMoving(WowUnit unit)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {WowInterface.OffsetList.FunctionStopClickToMove}",
-                "RETN",
-            };
-
-            return InjectAndExecute(asm, true)[0] == 0x1;
-        }
-
         public bool IsGhost(string unit)
         {
             LuaDoString($"isGhost = UnitIsGhost(\"{unit}\");");
@@ -703,30 +674,6 @@ namespace AmeisenBotX.Core.Hook
         public void RetrieveCorpse()
             => LuaDoString("RetrieveCorpse();");
 
-        public void RightClickObject(WowObject gObject)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {gObject.BaseAddress.ToInt32()}",
-                $"CALL 0x711140",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
-
-        public void RightClickUnit(WowUnit wowUnit)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {wowUnit.BaseAddress.ToInt32()}",
-                $"CALL 0x731260",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
-
         /// <summary>
         /// Roll something on a dropped item
         /// </summary>
@@ -742,7 +689,7 @@ namespace AmeisenBotX.Core.Hook
             => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
 
         public void SellAllItems()
-                                    => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
+            => LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
 
         public void SellItemsByName(string itemName)
             => LuaDoString($"for bag = 0,4,1 do for slot = 1, GetContainerNumSlots(bag), 1 do local name = GetContainerItemLink(bag,slot); if name and string.find(name,\"{itemName}\") then UseContainerItem(bag,slot) end end end");
@@ -757,37 +704,12 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public void SendMovementPacket(WowUnit unit, int opcode)
-        {
-            string[] asm = new string[]
-            {
-                $"PUSH {opcode}",
-                $"PUSH {Environment.TickCount}",
-                $"MOV ECX, {unit.BaseAddress.ToInt32()}",
-                $"CALL {WowInterface.OffsetList.FunctionSendMovementPacket.ToInt32()}",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
+            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSendMovementPacket, new List<object>() { opcode, Environment.TickCount });
 
         public void SetFacing(WowUnit unit, float angle)
-        {
-            string[] asm = new string[]
-            {
-                $"PUSH {angle}",
-                $"PUSH {Environment.TickCount}",
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {WowInterface.OffsetList.FunctionSetFacing}",
-                "RETN",
-            };
+            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle, Environment.TickCount });
 
-            InjectAndExecute(asm, false);
-        }
-
-        public void SetMaxFps(byte maxFps)
-        {
-            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
-        }
+        public void SetMaxFps(byte maxFps) => WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
 
         public bool SetupEndsceneHook()
         {
@@ -900,28 +822,12 @@ namespace AmeisenBotX.Core.Hook
             return false;
         }
 
-        public void StartAutoAttack()
-            => SendChatMessage("/startattack");
+        public void StartAutoAttack() => SendChatMessage("/startattack");
 
-        public void StopClickToMove(WowUnit unit)
-        {
-            string[] asm = new string[]
-            {
-                $"MOV ECX, {unit.BaseAddress}",
-                $"CALL {WowInterface.OffsetList.FunctionStopClickToMove}",
-                "RETN",
-            };
-
-            InjectAndExecute(asm, false);
-        }
+        public void StopClickToMove(WowPlayer player) => CallObjectFunction(player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
 
         public void TargetGuid(ulong guid)
         {
-            if (guid == 0)
-            {
-                return;
-            }
-
             byte[] guidBytes = BitConverter.GetBytes(guid);
             string[] asm = new string[]
             {
@@ -940,6 +846,9 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetNearestEnemy()
             => SendChatMessage("/targetenemy [harm][nodead]");
+
+        public void UnitOnRightClick(WowUnit unit)
+            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)
             => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
@@ -990,6 +899,25 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution: {codecaveForExecution.ToString("X")}", LogLevel.Verbose);
 
             return true;
+        }
+
+        private byte[] CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null, bool readReturnBytes = false)
+        {
+            List<string> asm = new List<string>();
+
+            if (args != null)
+            {
+                foreach (object arg in args)
+                {
+                    asm.Add($"PUSH {arg}");
+                }
+            }
+
+            asm.Add($"MOV ECX, {objectBaseAddress}");
+            asm.Add($"CALL {functionAddress}");
+            asm.Add("RETN");
+
+            return InjectAndExecute(asm.ToArray(), readReturnBytes);
         }
 
         private IntPtr GetEndScene()

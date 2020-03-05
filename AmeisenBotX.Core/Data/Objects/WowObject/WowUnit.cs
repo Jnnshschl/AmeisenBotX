@@ -1,10 +1,14 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+using AmeisenBotX.Memory;
 using System.Collections.Specialized;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowUnit : WowObject
     {
+        public override int BaseOffset => RawWowObject.EndOffset;
+
         public WowClass Class { get; set; }
 
         public float CombatReach { get; set; }
@@ -164,6 +168,18 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public BitVector32 UnitFlags { get; set; }
 
         public BitVector32 UnitFlagsDynamic { get; set; }
+
+        private RawWowUnit RawWowUnit { get; set; }
+
+        public override WowObject Update(XMemory xMemory)
+        {
+            if (xMemory.ReadStruct(BaseAddress, out RawWowUnit rawWowUnit))
+            {
+                RawWowUnit = rawWowUnit;
+            }
+
+            return this;
+        }
 
         private double ReturnPercentage(int value, int max)
         {

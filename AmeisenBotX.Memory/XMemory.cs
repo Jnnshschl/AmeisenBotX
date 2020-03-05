@@ -41,12 +41,9 @@ namespace AmeisenBotX.Memory
 
         public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
         {
-            if (rect.Left > 0
-                && rect.Right > 0
-                && rect.Top > 0
-                && rect.Bottom > 0)
+            if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                MoveWindow(windowHandle, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, true);
+                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)(WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder));
             }
         }
 
@@ -279,7 +276,7 @@ namespace AmeisenBotX.Memory
             if (MainThreadHandle == IntPtr.Zero)
             {
                 ProcessThread mainThread = GetMainThread();
-                MainThreadHandle = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)mainThread.Id);
+                MainThreadHandle = OpenThread(ThreadAccess.SuspendResume, false, (uint)mainThread.Id);
                 return MainThreadHandle != null && MainThreadHandle != IntPtr.Zero;
             }
 

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Core.Autologin;
+using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
@@ -7,7 +8,6 @@ using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Autologin;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;

@@ -110,13 +110,11 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionCastSpellById { get; }
 
-        IntPtr FunctionClickToMove { get; }
+        IntPtr FunctionGameobjectOnRightClick { get; }
 
         IntPtr FunctionGetActivePlayerObject { get; }
 
         IntPtr FunctionGetLocalizedText { get; }
-
-        IntPtr FunctionGetUnitReaction { get; }
 
         IntPtr FunctionHandleTerrainClick { get; }
 
@@ -124,15 +122,25 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionLuaDoString { get; }
 
+        IntPtr FunctionObjectGetPosition { get; }
+
+        IntPtr FunctionPlayerClickToMove { get; }
+
+        IntPtr FunctionPlayerClickToMoveStop { get; }
+
+        IntPtr FunctionPlayerIsClickMoving { get; }
+
         IntPtr FunctionRenderWorld { get; }
-
-        IntPtr FunctionSendMovementPacket { get; }
-
-        IntPtr FunctionSetFacing { get; }
 
         IntPtr FunctionSetTarget { get; }
 
-        IntPtr FunctionStopClickToMove { get; }
+        IntPtr FunctionUnitGetReaction { get; }
+
+        IntPtr FunctionUnitOnRightClick { get; }
+
+        IntPtr FunctionUnitSendMovementPacket { get; }
+
+        IntPtr FunctionUnitSetFacing { get; }
 
         IntPtr GameState { get; }
 

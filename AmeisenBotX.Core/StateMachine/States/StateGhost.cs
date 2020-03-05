@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (spiritHealer != null)
             {
-                WowInterface.HookManager.RightClickUnit(spiritHealer);
+                WowInterface.HookManager.UnitOnRightClick(spiritHealer);
             }
         }
 

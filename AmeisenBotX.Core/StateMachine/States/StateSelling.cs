@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
                 else
                 {
-                    WowInterface.HookManager.RightClickUnit(selectedUnit);
+                    WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                     Task.Delay(1000).GetAwaiter().GetResult();
 
                     WowInterface.HookManager.SellAllGrayItems();

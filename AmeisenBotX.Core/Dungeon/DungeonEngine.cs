@@ -5,7 +5,6 @@ using AmeisenBotX.Core.Dungeon.Profiles.Classic;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -105,13 +104,6 @@ namespace AmeisenBotX.Core.Dungeon
             }
         }
 
-        private IDungeonProfile TryLoadProfile()
-            => WowInterface.ObjectManager.MapId switch
-            {
-                MapId.Deadmines => new DeadminesProfile(),
-                _ => null
-            };
-
         public void LoadProfile(IDungeonProfile profile)
         {
             Reset();
@@ -158,5 +150,12 @@ namespace AmeisenBotX.Core.Dungeon
             // go ahead
             return false;
         }
+
+        private IDungeonProfile TryLoadProfile()
+                                            => WowInterface.ObjectManager.MapId switch
+                                            {
+                                                MapId.Deadmines => new DeadminesProfile(),
+                                                _ => null
+                                            };
     }
 }

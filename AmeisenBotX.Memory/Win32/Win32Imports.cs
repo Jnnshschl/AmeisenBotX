@@ -22,14 +22,14 @@ namespace AmeisenBotX.Memory.Win32
         [Flags]
         public enum MemoryProtection
         {
+            NoAccess = 0x1,
+            ReadOnly = 0x2,
+            ReadWrite = 0x4,
+            WriteCopy = 0x8,
             Execute = 0x10,
             ExecuteRead = 0x20,
             ExecuteReadWrite = 0x40,
             ExecuteWriteCopy = 0x80,
-            NoAccess = 0x01,
-            ReadOnly = 0x02,
-            ReadWrite = 0x04,
-            WriteCopy = 0x08,
             GuardModifierflag = 0x100,
             NoCacheModifierflag = 0x200,
             WriteCombineModifierflag = 0x400
@@ -38,33 +38,53 @@ namespace AmeisenBotX.Memory.Win32
         [Flags]
         public enum ProcessAccessFlags : uint
         {
-            All = 0x001F0FFF,
-            Terminate = 0x00000001,
-            CreateThread = 0x00000002,
-            VirtualMemoryOperation = 0x00000008,
-            VirtualMemoryRead = 0x00000010,
-            VirtualMemoryWrite = 0x00000020,
-            DuplicateHandle = 0x00000040,
-            CreateProcess = 0x000000080,
-            SetQuota = 0x00000100,
-            SetInformation = 0x00000200,
-            QueryInformation = 0x00000400,
-            QueryLimitedInformation = 0x00001000,
-            Synchronize = 0x00100000
+            All = 0x1F0FFF,
+            Terminate = 0x1,
+            CreateThread = 0x2,
+            VirtualMemoryOperation = 0x8,
+            VirtualMemoryRead = 0x10,
+            VirtualMemoryWrite = 0x20,
+            DuplicateHandle = 0x40,
+            CreateProcess = 0x80,
+            SetQuota = 0x100,
+            SetInformation = 0x200,
+            QueryInformation = 0x400,
+            QueryLimitedInformation = 0x1000,
+            Synchronize = 0x100000
         }
 
         [Flags]
         public enum ThreadAccess : int
         {
-            TERMINATE = (0x0001),
-            SUSPEND_RESUME = (0x0002),
-            GET_CONTEXT = (0x0008),
-            SET_CONTEXT = (0x0010),
-            SET_INFORMATION = (0x0020),
-            QUERY_INFORMATION = (0x0040),
-            SET_THREAD_TOKEN = (0x0080),
-            IMPERSONATE = (0x0100),
-            DIRECT_IMPERSONATION = (0x0200)
+            Terminate = 0x1,
+            SuspendResume = 0x2,
+            GetContext = 0x8,
+            SetContext = 0x10,
+            SetInformation = 0x20,
+            QueryInformation = 0x40,
+            SetThreadToken = 0x80,
+            Impersonate = 0x100,
+            DirectImpersonation = 0x200
+        }
+
+        [Flags]
+        public enum WindowFlags : int
+        {
+            NoSize = 0x1,
+            NoMove = 0x2,
+            NoZOrder = 0x4,
+            NoRedraw = 0x8,
+            NoActivate = 0x10,
+            DrawFrame = 0x20,
+            FrameChanged = 0x20,
+            SHowWindow = 0x40,
+            HideWindow = 0x80,
+            NoCopyBits = 0x100,
+            NoOwnerZOrder = 0x200,
+            NoReposition = 0x200,
+            NoSendChanging = 0x400,
+            Defererase = 0x2000,
+            AsyncWindowPos = 0x4000
         }
 
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
@@ -93,6 +113,9 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32.dll")]
         public static extern int ResumeThread(IntPtr threadHandle);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+        public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
         [DllImport("kernel32.dll")]
         public static extern uint SuspendThread(IntPtr threadHandle);

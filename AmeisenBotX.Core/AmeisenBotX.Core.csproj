@@ -121,6 +121,7 @@
     <Compile Include="Data\Enums\CreatureType.cs" />
     <Compile Include="Data\Enums\DungeonDifficulty.cs" />
     <Compile Include="Data\Enums\GameobjectDisplayId.cs" />
+    <Compile Include="Data\Enums\GameState.cs" />
     <Compile Include="Data\Enums\MapId.cs" />
     <Compile Include="Data\Enums\RaidDifficulty.cs" />
     <Compile Include="Data\Enums\RollType.cs" />
@@ -133,6 +134,14 @@
     <Compile Include="Data\Enums\HerbNode.cs" />
     <Compile Include="Data\Enums\OreNode.cs" />
     <Compile Include="Data\Enums\WowClass.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowDynobject.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowGameobject.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowCorpse.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowItem.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowContainer.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowObject.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowPlayer.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\RawWowUnit.cs" />
     <Compile Include="Data\Objects\WowObject\WowContainer.cs" />
     <Compile Include="Data\Objects\WowObject\WowItem.cs" />
     <Compile Include="Data\Objects\WowObject\WowCorpse.cs" />

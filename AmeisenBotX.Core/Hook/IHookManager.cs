@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Hook
@@ -29,7 +28,7 @@ namespace AmeisenBotX.Core.Hook
 
         void ClickOnTerrain(Vector3 position);
 
-        void ClickToMove(IntPtr playerBase, Vector3 position);
+        void ClickToMove(WowPlayer player, Vector3 position);
 
         void CofirmBop();
 
@@ -40,6 +39,8 @@ namespace AmeisenBotX.Core.Hook
         void EnableClickToMove();
 
         void FacePosition(WowPlayer player, Vector3 positionToFace);
+
+        void GameobjectOnRightClick(WowObject gObject);
 
         List<string> GetAuras(WowLuaUnit luaunit);
 
@@ -85,8 +86,6 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsClickToMovePending();
 
-        bool IsCtmMoving(WowUnit unit);
-
         bool IsGhost(string unit);
 
         bool IsRuneReady(int runeId);
@@ -113,10 +112,6 @@ namespace AmeisenBotX.Core.Hook
 
         void RetrieveCorpse();
 
-        void RightClickObject(WowObject gObject);
-
-        void RightClickUnit(WowUnit wowUnit);
-
         void RollOnItem(int rollId, RollType rollType);
 
         void SellAllGrayItems();
@@ -139,13 +134,15 @@ namespace AmeisenBotX.Core.Hook
 
         void StartAutoAttack();
 
-        void StopClickToMove(WowUnit unit);
+        void StopClickToMove(WowPlayer player);
 
         void TargetGuid(ulong guid);
 
         void TargetLuaUnit(WowLuaUnit unit);
 
         void TargetNearestEnemy();
+
+        void UnitOnRightClick(WowUnit wowUnit);
 
         void UseItemByBagAndSlot(int bagId, int bagSlot);
 

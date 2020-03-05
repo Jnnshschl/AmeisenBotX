@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            WowInterface.ObjectManager.UpdateObject(PlayerToFollow.Type, PlayerToFollow.BaseAddress);
+            WowInterface.ObjectManager.UpdateObject(PlayerToFollow);
             double distance = PlayerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {

@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Jobs
                         JobEngineStatus = JobEngineStatus.Gathering;
 
                         // gather it
-                        WowInterface.HookManager.RightClickObject(selectedNode);
+                        WowInterface.HookManager.GameobjectOnRightClick(selectedNode);
                         AmeisenLogger.Instance.Log("JobEngine", $"Trying to gather gObject with GUID: {selectedNode.Guid}", LogLevel.Verbose);
                     }
                 }
@@ -174,7 +174,7 @@ namespace AmeisenBotX.Core.Jobs
             }
 
             // open mailbox
-            WowInterface.HookManager.RightClickObject(mailbox);
+            WowInterface.HookManager.GameobjectOnRightClick(mailbox);
             Task.Delay(1000).GetAwaiter().GetResult();
             AmeisenLogger.Instance.Log("JobEngine", $"Rightclicked Mailbox", LogLevel.Verbose);
 

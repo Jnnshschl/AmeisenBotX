@@ -27,6 +27,8 @@ namespace AmeisenBotX.Core.Data
 
         public bool IsWorldLoaded { get; private set; }
 
+        public GameState GameState { get; private set; }
+
         public WowUnit LastTarget { get; private set; }
 
         public ulong LastTargetGuid { get; private set; }
@@ -133,7 +135,7 @@ namespace AmeisenBotX.Core.Data
                 partymemberGuids.Add(partyMember4);
 
                 // try to add raidmembers
-                for (uint p = 0; p < 40; p++)
+                for (uint p = 0; p < 40; ++p)
                 {
                     try
                     {
@@ -397,23 +399,28 @@ namespace AmeisenBotX.Core.Data
                 ZoneId = zoneId;
             }
 
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.GameState, out GameState gamestate))
+            {
+                GameState = gamestate;
+            }
+
             WowObjects.Clear();
             WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
             WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
 
-            WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObject);
-            WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectType.ToInt32()), out int objectType);
+            WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
+            WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out int activeObjectType);
 
-            while (isWorldLoaded == 1 && (objectType <= 7 && objectType > 0))
+            while (isWorldLoaded == 1 && (activeObjectType <= 7 && activeObjectType > 0))
             {
-                WowObjectType wowObjectType = (WowObjectType)objectType;
+                WowObjectType wowObjectType = (WowObjectType)activeObjectType;
                 WowObject obj = wowObjectType switch
                 {
-                    WowObjectType.Dynobject => ReadWowDynobject(activeObject, wowObjectType),
-                    WowObjectType.Gameobject => ReadWowGameobject(activeObject, wowObjectType),
-                    WowObjectType.Player => ReadWowPlayer(activeObject, wowObjectType),
-                    WowObjectType.Unit => ReadWowUnit(activeObject, wowObjectType),
-                    _ => ReadWowObject(activeObject, wowObjectType),
+                    WowObjectType.Dynobject => ReadWowDynobject(activeObjectBaseAddress, wowObjectType),
+                    WowObjectType.Gameobject => ReadWowGameobject(activeObjectBaseAddress, wowObjectType),
+                    WowObjectType.Player => ReadWowPlayer(activeObjectBaseAddress, wowObjectType),
+                    WowObjectType.Unit => ReadWowUnit(activeObjectBaseAddress, wowObjectType),
+                    _ => ReadWowObject(activeObjectBaseAddress, wowObjectType),
                 };
 
                 WowObjects.Add(obj);
@@ -433,8 +440,8 @@ namespace AmeisenBotX.Core.Data
                     LastTarget = (WowUnit)obj;
                 }
 
-                WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.NextObject.ToInt32()), out activeObject);
-                WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectType.ToInt32()), out objectType);
+                WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
+                WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out activeObjectType);
             }
 
             PartyleaderGuid = ReadPartyLeaderGuid();

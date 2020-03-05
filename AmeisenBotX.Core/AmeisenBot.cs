@@ -61,6 +61,8 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
+            Stopwatch = new Stopwatch();
+
             StateMachineTimer = new Timer(Config.StateMachineTickMs);
             StateMachineTimer.Elapsed += StateMachineTimerTick;
 
@@ -129,6 +131,7 @@ namespace AmeisenBotX.Core
         private int CurrentExecutionCount { get; set; }
 
         private Timer StateMachineTimer { get; }
+        public Stopwatch Stopwatch { get; private set; }
 
         public void Pause()
         {
@@ -549,9 +552,9 @@ namespace AmeisenBotX.Core
 
             try
             {
-                Stopwatch watch = Stopwatch.StartNew();
+                Stopwatch.Restart();
                 StateMachine.Execute();
-                CurrentExecutionMs = watch.ElapsedMilliseconds;
+                CurrentExecutionMs = Stopwatch.ElapsedMilliseconds;
                 CurrentExecutionCount++;
             }
             finally

@@ -20,7 +20,6 @@ namespace AmeisenBotX.Core.Statemachine
             Config = config;
             WowInterface = wowInterface;
 
-            LastObjectUpdate = DateTime.Now;
             LastGhostCheck = DateTime.Now;
             LastEventPull = DateTime.Now;
 
@@ -78,8 +77,6 @@ namespace AmeisenBotX.Core.Statemachine
 
         private DateTime LastGhostCheck { get; set; }
 
-        private DateTime LastObjectUpdate { get; set; }
-
         private Dictionary<BotState, BasicState> States { get; }
 
         public void Execute()
@@ -90,11 +87,12 @@ namespace AmeisenBotX.Core.Statemachine
                 SetState(BotState.None);
             }
 
-            if (WowInterface.ObjectManager != null)
+            if (WowInterface.ObjectManager != null && CurrentState.Key != BotState.LoadingScreen)
             {
                 if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
-                    SetState(BotState.LoadingScreen);
+                    AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
+                    SetState(BotState.LoadingScreen, true);
                     WowInterface.MovementEngine.Reset();
                 }
                 else
@@ -111,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine
                             if (Config.AutoDodgeAoeSpells
                                 && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
                             {
-                                SetState(BotState.InsideAoeDamage);
+                                SetState(BotState.InsideAoeDamage, true);
                             }
 
                             if (WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
@@ -123,17 +121,17 @@ namespace AmeisenBotX.Core.Statemachine
                 }
             }
 
-            WowInterface.CharacterManager.AntiAfk();
+            // execute the State
+            CurrentState.Value.Execute();
 
             // used for ui updates
             OnStateMachineTick?.Invoke();
-            CurrentState.Value.Execute();
         }
 
-        internal bool IsAnyPartymemberInCombat(double distance = 50)
+        internal bool IsAnyPartymemberInCombat()
             => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
             .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
-            .Any(r => r.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < distance && r.IsInCombat);
+            .Any(r => r.IsInCombat);
 
         internal bool IsInDungeon()
             => WowInterface.ObjectManager.MapId == MapId.Deadmines;
@@ -171,23 +169,24 @@ namespace AmeisenBotX.Core.Statemachine
         private void HandleEventPull()
         {
             if (WowInterface.EventHookManager.IsSetUp
-                && LastEventPull + TimeSpan.FromSeconds(1) < DateTime.Now)
+                && LastEventPull + TimeSpan.FromSeconds(Config.EventPullMs) < DateTime.Now)
             {
                 WowInterface.EventHookManager.ReadEvents();
                 LastEventPull = DateTime.Now;
+
+                // anti AFK
+                WowInterface.CharacterManager.AntiAfk();
             }
         }
 
         private void HandleObjectUpdates()
         {
-            if (LastObjectUpdate - TimeSpan.FromMilliseconds(Config.ObjectUpdateMs) < DateTime.Now
-                && CurrentState.Key != BotState.None
+            if (CurrentState.Key != BotState.None
                 && CurrentState.Key != BotState.StartWow
                 && CurrentState.Key != BotState.Login
                 && CurrentState.Key != BotState.LoadingScreen)
             {
                 WowInterface.ObjectManager.UpdateWowObjects();
-                LastObjectUpdate = DateTime.Now;
             }
         }
 

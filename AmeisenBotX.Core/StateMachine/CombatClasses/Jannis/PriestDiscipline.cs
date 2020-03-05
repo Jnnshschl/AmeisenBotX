@@ -88,12 +88,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player.Type, WowInterface.ObjectManager.Player.BaseAddress);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                 WowUnit target = WowInterface.ObjectManager.Target;
                 if (target != null)
                 {
-                    WowInterface.ObjectManager.UpdateObject(target.Type, target.BaseAddress);
+                    WowInterface.ObjectManager.UpdateObject(target);
 
                     if (playersThatNeedHealing.Count > 4
                         && CastSpellIfPossible(prayerOfHealingSpell, true))

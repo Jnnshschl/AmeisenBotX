@@ -93,7 +93,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
             {
                 HandleTargetSelection(playersThatNeedHealing);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player.Type, WowInterface.ObjectManager.Player.BaseAddress);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                 if (playersThatNeedHealing.Count > 4
                     && CastSpellIfPossible(tranquilitySpell, true))
@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowUnit target = WowInterface.ObjectManager.Target;
                 if (target != null)
                 {
-                    WowInterface.ObjectManager.UpdateObject(target.Type, target.BaseAddress);
+                    WowInterface.ObjectManager.UpdateObject(target);
                     List<string> targetBuffs = WowInterface.HookManager.GetBuffs(WowLuaUnit.Target);
 
                     if ((target.HealthPercentage < 15

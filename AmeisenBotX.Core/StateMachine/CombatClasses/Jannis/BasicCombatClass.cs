@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using AmeisenBotX.Logging;

@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         do
                         {
-                            WowInterface.HookManager.RightClickUnit(selectedUnit);
+                            WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                             LootTryCount++;
                             Task.Delay(1000).GetAwaiter().GetResult();
                         } while (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)

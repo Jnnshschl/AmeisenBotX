@@ -60,11 +60,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.ClearTarget();
                         WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
-                        if (!WowInterface.ObjectManager.Player.IsInCombat)
-                        {
-                            return;
-                        }
-
                         // select a new target if our current target is invalid
                         if (SelectTargetToAttack(out WowUnit target))
                         {
@@ -72,6 +67,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                             WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
                             WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
+                        }
+                        else
+                        {
+                            // there is no valid target to attack
+                            return;
                         }
                     }
 
