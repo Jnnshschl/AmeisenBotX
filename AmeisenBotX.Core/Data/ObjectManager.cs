@@ -21,6 +21,7 @@ namespace AmeisenBotX.Core.Data
             IsWorldLoaded = true;
             WowObjects = new List<WowObject>();
             ZoneName = string.Empty;
+            PartymemberGuids = new List<ulong>();
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;

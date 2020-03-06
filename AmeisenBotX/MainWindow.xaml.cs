@@ -235,7 +235,7 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                labelCurrentState.Content = $"<{AmeisenBot.StateMachine.CurrentState.Key}>";
+                labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}";
             });
         }
 
@@ -254,9 +254,9 @@ namespace AmeisenBotX
 
             labelGamestate.Content = AmeisenBot.WowInterface.ObjectManager.GameState;
 
-            labelCurrentLevel.Content = $"lvl. {AmeisenBot.WowInterface.ObjectManager.Player.Level}";
-            labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Gender} {AmeisenBot.WowInterface.ObjectManager.Player.Race}";
-            labelCurrentClass.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Class} [{AmeisenBot.WowInterface.ObjectManager.Player.PowerType}]";
+            labelCurrentLevel.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Level}";
+            labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Race} {AmeisenBot.WowInterface.ObjectManager.Player.Gender}";
+            labelCurrentClass.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Class}";
 
             progressbarExp.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.NextLevelXp;
             progressbarExp.Value = AmeisenBot.WowInterface.ObjectManager.Player.Xp;
@@ -281,6 +281,11 @@ namespace AmeisenBotX
             if (progressbarSecondary.Foreground != secondaryBrush)
             {
                 progressbarSecondary.Foreground = secondaryBrush;
+            }
+
+            if (labelCurrentClass.Foreground != primaryBrush)
+            {
+                labelCurrentClass.Foreground = primaryBrush;
             }
         }
 

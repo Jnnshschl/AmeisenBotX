@@ -124,6 +124,9 @@ namespace AmeisenBotX.Core.Statemachine
             // execute the State
             CurrentState.Value.Execute();
 
+            // anti AFK
+            WowInterface.CharacterManager.AntiAfk();
+
             // used for ui updates
             OnStateMachineTick?.Invoke();
         }
@@ -178,9 +181,6 @@ namespace AmeisenBotX.Core.Statemachine
             {
                 WowInterface.EventHookManager.ReadEvents();
                 LastEventPull = DateTime.Now;
-
-                // anti AFK
-                WowInterface.CharacterManager.AntiAfk();
             }
         }
 
