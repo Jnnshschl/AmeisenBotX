@@ -54,9 +54,7 @@ namespace AmeisenBotX.Core.Character
 
         public void Face(Vector3 position, ulong guid)
         {
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, position.X);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, position.Y);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, position.Z);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, new Vector3(position.X, position.Y, position.Z));
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, 20.9f);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, 0.1f);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, guid);

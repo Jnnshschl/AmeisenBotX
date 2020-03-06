@@ -134,6 +134,8 @@
     <Compile Include="Data\Enums\HerbNode.cs" />
     <Compile Include="Data\Enums\OreNode.cs" />
     <Compile Include="Data\Enums\WowClass.cs" />
+    <Compile Include="Data\Objects\Enums\AuraFlags.cs" />
+    <Compile Include="Data\Objects\Structs\WowAura.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowDynobject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowGameobject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowCorpse.cs" />
@@ -196,6 +198,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Raid\RaidEngine.cs" />
     <Compile Include="Raid\Profiles\IRaidProfile.cs" />
+    <Compile Include="Relaxing\RelaxEngine.cs" />
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
     <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
@@ -219,8 +222,10 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\PriestShadow.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\RogueAssassination.cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
+    <Compile Include="Statemachine\States\StateRelaxing.cs" />
     <Compile Include="Statemachine\States\StateDungeon.cs" />
     <Compile Include="Statemachine\States\StateJob.cs" />
+    <Compile Include="Statemachine\States\ZoneId.cs" />
     <Compile Include="Statemachine\Utils\AuraManager.cs" />
     <Compile Include="Statemachine\Utils\CooldownManager.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarlockDestruction.cs" />

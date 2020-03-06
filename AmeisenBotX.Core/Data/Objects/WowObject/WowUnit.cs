@@ -10,7 +10,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
-
         }
 
         public WowClass Class => Enum.IsDefined(typeof(WowClass), (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF)) ? (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF) : WowClass.Unknown;

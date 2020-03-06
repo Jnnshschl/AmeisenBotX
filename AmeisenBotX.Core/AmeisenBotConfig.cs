@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = "";
 
+        public double EventPullMs { get; set; } = 1000;
+
         public bool FollowGroupLeader { get; set; } = false;
 
         public bool FollowGroupMembers { get; set; } = false;
@@ -49,8 +51,6 @@ namespace AmeisenBotX.Core
         public int NameshServerPort { get; set; } = 47110;
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
-
-        public double EventPullMs { get; set; } = 1000;
 
         public string Password { get; set; } = string.Empty;
 

@@ -58,46 +58,6 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr CvarMaxFps { get; }
 
-        IntPtr DescriptorCombatReach { get; }
-
-        IntPtr DescriptorEnergy { get; }
-
-        IntPtr DescriptorExp { get; }
-
-        IntPtr DescriptorFactionTemplate { get; }
-
-        IntPtr DescriptorHealth { get; }
-
-        IntPtr DescriptorInfoFlags { get; }
-
-        IntPtr DescriptorLevel { get; }
-
-        IntPtr DescriptorMana { get; }
-
-        IntPtr DescriptorMaxEnergy { get; }
-
-        IntPtr DescriptorMaxExp { get; }
-
-        IntPtr DescriptorMaxHealth { get; }
-
-        IntPtr DescriptorMaxMana { get; }
-
-        IntPtr DescriptorMaxRage { get; }
-
-        IntPtr DescriptorMaxRuneenergy { get; }
-
-        IntPtr DescriptorNpcFlags { get; }
-
-        IntPtr DescriptorRage { get; }
-
-        IntPtr DescriptorRuneenergy { get; }
-
-        IntPtr DescriptorTargetGuid { get; }
-
-        IntPtr DescriptorUnitFlags { get; }
-
-        IntPtr DescriptorUnitFlagsDynamic { get; }
-
         IntPtr EndSceneOffset { get; }
 
         IntPtr EndSceneOffsetDevice { get; }
@@ -144,8 +104,6 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr GameState { get; }
 
-        IntPtr IsAutoAttacking { get; }
-
         IntPtr IsWorldLoaded { get; }
 
         IntPtr LastTargetGuid { get; }
@@ -181,8 +139,6 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr PlayerGuid { get; }
 
         IntPtr PlayerName { get; }
-
-        IntPtr PlayerRotation { get; }
 
         IntPtr RaidGroupPlayer { get; }
 
@@ -234,8 +190,14 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr WowObjectType { get; }
 
+        IntPtr WowUnitIsAutoAttacking { get; }
+
         IntPtr WowUnitPosition { get; }
 
+        IntPtr WowUnitRotation { get; }
+
         IntPtr ZoneId { get; }
+
+        IntPtr ZoneNamePointer { get; }
     }
 }

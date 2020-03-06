@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Core.Autologin;
+using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -10,11 +11,11 @@ using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Autologin;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
+using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Core.Statemachine.CombatClasses.Jannis;
@@ -126,12 +127,13 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotStateMachine StateMachine { get; set; }
 
+        public Stopwatch Stopwatch { get; private set; }
+
         public WowInterface WowInterface { get; set; }
 
         private int CurrentExecutionCount { get; set; }
 
         private Timer StateMachineTimer { get; }
-        public Stopwatch Stopwatch { get; private set; }
 
         public void Pause()
         {
@@ -526,6 +528,7 @@ namespace AmeisenBotX.Core
             WowInterface.BattlegroundEngine = new BattlegroundEngine(WowInterface);
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
+            WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
 
             WowInterface.PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();

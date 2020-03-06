@@ -9,14 +9,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowPlayer(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
-
         }
 
         public int ComboPoints { get; set; }
 
-        public int Xp => RawWowPlayer.Xp;
-
         public int NextLevelXp => RawWowPlayer.NextLevelXp;
+
+        public int Xp => RawWowPlayer.Xp;
 
         private RawWowPlayer RawWowPlayer { get; set; }
 

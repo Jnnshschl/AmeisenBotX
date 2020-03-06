@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Dungeon
                 {
                     if (!ShouldWaitForGroup())
                     {
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > 6)
+                        if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > 2)
                         {
                             WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CurrentNodes.Peek().Position);
                             WowInterface.MovementEngine.Execute();

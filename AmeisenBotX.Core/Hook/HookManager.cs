@@ -8,7 +8,6 @@ using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text;
 using System.Threading;
 

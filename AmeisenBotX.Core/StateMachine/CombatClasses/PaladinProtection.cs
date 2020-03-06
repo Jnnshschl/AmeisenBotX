@@ -137,7 +137,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
@@ -421,7 +421,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             if (target == null || target.IsDead)
             {
                 HookManager.ClearTarget();
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 if (leaderGuid != ObjectManager.PlayerGuid)
                 {
                     WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);

@@ -183,7 +183,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {

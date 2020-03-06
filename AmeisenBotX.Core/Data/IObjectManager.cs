@@ -50,21 +50,9 @@ namespace AmeisenBotX.Core.Data
 
         public IEnumerable<WowPlayer> GetNearFriends(Vector3 position, int distance);
 
-        public WowObject GetWowObjectByGuid(ulong guid);
-
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 
         public WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
-
-        public ulong ReadPartyLeaderGuid();
-
-        public List<ulong> ReadPartymemberGuids();
-
-        public WowObject ReadWowObject(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.None);
-
-        public WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Player);
-
-        public WowUnit ReadWowUnit(IntPtr activeObject, WowObjectType wowObjectType = WowObjectType.Unit);
 
         public bool RefreshIsWorldLoaded();
 

@@ -133,6 +133,11 @@ namespace AmeisenBotX.Core.Statemachine
             .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
             .Any(r => r.IsInCombat);
 
+        internal bool IsInCapitalCity()
+        {
+            return false;
+        }
+
         internal bool IsInDungeon()
             => WowInterface.ObjectManager.MapId == MapId.Deadmines;
 

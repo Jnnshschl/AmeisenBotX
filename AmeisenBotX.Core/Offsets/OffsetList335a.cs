@@ -64,46 +64,6 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
 
-        public IntPtr DescriptorCombatReach { get; } = new IntPtr(0x108);
-
-        public IntPtr DescriptorEnergy { get; } = new IntPtr(0x70);
-
-        public IntPtr DescriptorExp { get; } = new IntPtr(0x1E3C);
-
-        public IntPtr DescriptorFactionTemplate { get; } = new IntPtr(0xDC);
-
-        public IntPtr DescriptorHealth { get; } = new IntPtr(0x60);
-
-        public IntPtr DescriptorInfoFlags { get; } = new IntPtr(0x5C);
-
-        public IntPtr DescriptorLevel { get; } = new IntPtr(0xD8);
-
-        public IntPtr DescriptorMana { get; } = new IntPtr(0x64);
-
-        public IntPtr DescriptorMaxEnergy { get; } = new IntPtr(0x90);
-
-        public IntPtr DescriptorMaxExp { get; } = new IntPtr(0x1E40);
-
-        public IntPtr DescriptorMaxHealth { get; } = new IntPtr(0x80);
-
-        public IntPtr DescriptorMaxMana { get; } = new IntPtr(0x84);
-
-        public IntPtr DescriptorMaxRage { get; } = new IntPtr(0x88);
-
-        public IntPtr DescriptorMaxRuneenergy { get; } = new IntPtr(0x9C);
-
-        public IntPtr DescriptorNpcFlags { get; } = new IntPtr(0x148);
-
-        public IntPtr DescriptorRage { get; } = new IntPtr(0x68);
-
-        public IntPtr DescriptorRuneenergy { get; } = new IntPtr(0x7C);
-
-        public IntPtr DescriptorTargetGuid { get; } = new IntPtr(0x48);
-
-        public IntPtr DescriptorUnitFlags { get; } = new IntPtr(0xEC);
-
-        public IntPtr DescriptorUnitFlagsDynamic { get; } = new IntPtr(0x13C);
-
         public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8); // maybe use 0xAC, Clear function
 
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);
@@ -150,8 +110,6 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 
-        public IntPtr IsAutoAttacking { get; } = new IntPtr(0xA20);
-
         public IntPtr IsWorldLoaded { get; } = new IntPtr(0xBEBA40);
 
         public IntPtr LastTargetGuid { get; } = new IntPtr(0xBD07B8);
@@ -187,8 +145,6 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr PlayerGuid { get; } = new IntPtr(0xCA1238);
 
         public IntPtr PlayerName { get; } = new IntPtr(0xC79D18);
-
-        public IntPtr PlayerRotation { get; } = new IntPtr(0x7A8);
 
         public IntPtr RaidGroupPlayer { get; } = new IntPtr(0x50);
 
@@ -240,8 +196,14 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr WowObjectType { get; } = new IntPtr(0x14);
 
+        public IntPtr WowUnitIsAutoAttacking { get; } = new IntPtr(0xA20);
+
         public IntPtr WowUnitPosition { get; } = new IntPtr(0x798);
 
+        public IntPtr WowUnitRotation { get; } = new IntPtr(0x7A8);
+
         public IntPtr ZoneId { get; } = new IntPtr(0xAF4E48);
+
+        public IntPtr ZoneNamePointer { get; } = new IntPtr(0xBD0780);
     }
 }

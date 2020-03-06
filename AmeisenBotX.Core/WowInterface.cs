@@ -12,6 +12,7 @@ using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
+using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Pathfinding;
@@ -52,6 +53,8 @@ namespace AmeisenBotX.Core
         public IOffsetList OffsetList { get; set; }
 
         public IPathfindingHandler PathfindingHandler { get; set; }
+
+        public RelaxEngine RelaxEngine { get; set; }
 
         public Process WowProcess { get; set; }
 
