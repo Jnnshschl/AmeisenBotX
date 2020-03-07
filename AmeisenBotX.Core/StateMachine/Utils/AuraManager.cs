@@ -11,10 +11,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             BuffsToKeepActive = buffsToKeepActive;
             DebuffsToKeepActive = debuffsToKeepActive;
             MinUpdateTime = minUpdateTime;
-            DispellBuffs = dispellBuffsFunction;
-            DispellDebuffs = dispellDebuffsFunction;
             GetBuffs = getBuffsFunction;
             GetDebuffs = getDebuffsFunction;
+            DispellBuffs = dispellBuffsFunction;
+            DispellDebuffs = dispellDebuffsFunction;
         }
 
         public AuraManager()
@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
                 {
-                    if (!Buffs.Any(e => e.Contains(keyValuePair.Key.ToLower())))
+                    if (!Buffs.Any(e => e.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase)))
                     {
                         if (keyValuePair.Value.Invoke())
                         {
@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in DebuffsToKeepActive)
                 {
-                    if (!Debuffs.Any(e => e.Contains(keyValuePair.Key.ToLower())))
+                    if (!Debuffs.Any(e => e.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase)))
                     {
                         if (keyValuePair.Value.Invoke())
                         {

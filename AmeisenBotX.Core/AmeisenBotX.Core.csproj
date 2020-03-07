@@ -135,7 +135,8 @@
     <Compile Include="Data\Enums\OreNode.cs" />
     <Compile Include="Data\Enums\WowClass.cs" />
     <Compile Include="Data\Objects\Enums\AuraFlags.cs" />
-    <Compile Include="Data\Objects\Structs\WowAura.cs" />
+    <Compile Include="Data\Objects\Structs\RawWowAura.cs" />
+    <Compile Include="Data\Objects\WowAura.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowDynobject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowGameobject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowCorpse.cs" />

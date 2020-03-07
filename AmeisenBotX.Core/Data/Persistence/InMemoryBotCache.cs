@@ -24,6 +24,8 @@ namespace AmeisenBotX.Core.Data.Persistence
 
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
 
+        public Dictionary<int, string> SpellNameCache { get; private set; }
+
         public void CacheName(ulong guid, string name)
         {
             if (!NameCache.ContainsKey(guid))
@@ -40,10 +42,19 @@ namespace AmeisenBotX.Core.Data.Persistence
             }
         }
 
+        public void CacheSpellName(int spellId, string name)
+        {
+            if (!SpellNameCache.ContainsKey(spellId))
+            {
+                SpellNameCache.Add(spellId, name);
+            }
+        }
+
         public void Clear()
         {
             NameCache = new Dictionary<ulong, string>();
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
+            SpellNameCache = new Dictionary<int, string>();
             CombatLogEntries = new List<BasicCombatLogEntry>();
         }
 
@@ -67,6 +78,7 @@ namespace AmeisenBotX.Core.Data.Persistence
                     {
                         NameCache = loadedCache.NameCache ?? new Dictionary<ulong, string>();
                         ReactionCache = loadedCache.ReactionCache ?? new Dictionary<(int, int), WowUnitReaction>();
+                        SpellNameCache = loadedCache.SpellNameCache ?? new Dictionary<int, string>();
                         CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
                     }
                     else
@@ -95,18 +107,6 @@ namespace AmeisenBotX.Core.Data.Persistence
             binaryFormatter.Serialize(stream, this);
         }
 
-        public bool TryGetName(ulong guid, out string name)
-        {
-            if (NameCache.ContainsKey(guid))
-            {
-                name = NameCache[guid];
-                return true;
-            }
-
-            name = "";
-            return false;
-        }
-
         public bool TryGetReaction(int a, int b, out WowUnitReaction reaction)
         {
             if (ReactionCache.ContainsKey((a, b)))
@@ -121,6 +121,30 @@ namespace AmeisenBotX.Core.Data.Persistence
             }
 
             reaction = WowUnitReaction.Unknown;
+            return false;
+        }
+
+        public bool TryGetSpellName(int spellId, out string name)
+        {
+            if (SpellNameCache.ContainsKey(spellId))
+            {
+                name = SpellNameCache[spellId];
+                return true;
+            }
+
+            name = "";
+            return false;
+        }
+
+        public bool TryGetUnitName(ulong guid, out string name)
+        {
+            if (NameCache.ContainsKey(guid))
+            {
+                name = NameCache[guid];
+                return true;
+            }
+
+            name = "";
             return false;
         }
     }

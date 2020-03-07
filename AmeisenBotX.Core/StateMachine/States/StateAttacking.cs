@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Logging;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -13,12 +15,15 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             Enemies = new List<WowUnit>();
+            CombatClassStopwatch = new Stopwatch();
 
             // default distance values
             DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 25.0;
         }
 
         public double DistanceToTarget { get; private set; }
+
+        private Stopwatch CombatClassStopwatch { get; set; }
 
         private List<WowUnit> Enemies { get; set; }
 
@@ -85,7 +90,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                     // if no CombatClass is loaded, just autoattack
                     if (WowInterface.CombatClass != null)
                     {
+                        CombatClassStopwatch.Restart();
+
                         WowInterface.CombatClass.Execute();
+
+                        CombatClassStopwatch.Stop();
+                        AmeisenLogger.Instance.Log("CombatClass", $"Execution took: {CombatClassStopwatch.ElapsedMilliseconds}ms");
                     }
                     else
                     {

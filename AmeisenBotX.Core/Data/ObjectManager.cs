@@ -20,13 +20,12 @@ namespace AmeisenBotX.Core.Data
 
             IsWorldLoaded = true;
             WowObjects = new List<WowObject>();
-            ZoneName = string.Empty;
             PartymemberGuids = new List<ulong>();
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
 
-        public GameState GameState { get; private set; }
+        public string GameState { get; private set; }
 
         public bool IsWorldLoaded { get; private set; }
 
@@ -79,6 +78,8 @@ namespace AmeisenBotX.Core.Data
         public int ZoneId { get; private set; }
 
         public string ZoneName { get; private set; }
+
+        public string ZoneSubName { get; private set; }
 
         private WowInterface WowInterface { get; }
 
@@ -174,15 +175,20 @@ namespace AmeisenBotX.Core.Data
             PlayerBase = UpdateGlobalVar<IntPtr>(WowInterface.OffsetList.PlayerBase);
 
             MapId = UpdateGlobalVar<MapId>(WowInterface.OffsetList.MapId);
+
             ZoneId = UpdateGlobalVar<int>(WowInterface.OffsetList.ZoneId);
 
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneNamePointer, out IntPtr zoneNamePointer)
-                && WowInterface.XMemory.ReadString(zoneNamePointer, Encoding.UTF8, out string zoneName))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneText, out IntPtr zoneNamePointer))
             {
-                ZoneName = zoneName;
+                ZoneName = UpdateGlobalVarString(zoneNamePointer);
             }
 
-            // GameState = UpdateGlobalVar<GameState>(WowInterface.OffsetList.GameState);
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer))
+            {
+                ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
+            }
+
+            GameState = UpdateGlobalVarString(WowInterface.OffsetList.GameState);
 
             WowObjects.Clear();
 
@@ -286,7 +292,7 @@ namespace AmeisenBotX.Core.Data
 
         private string ReadPlayerName(ulong guid)
         {
-            if (WowInterface.BotCache.TryGetName(guid, out string cachedName))
+            if (WowInterface.BotCache.TryGetUnitName(guid, out string cachedName))
             {
                 return cachedName;
             }
@@ -334,7 +340,7 @@ namespace AmeisenBotX.Core.Data
 
         private string ReadUnitName(IntPtr activeObject, ulong guid)
         {
-            if (WowInterface.BotCache.TryGetName(guid, out string cachedName))
+            if (WowInterface.BotCache.TryGetUnitName(guid, out string cachedName))
             {
                 return cachedName;
             }
@@ -475,6 +481,7 @@ namespace AmeisenBotX.Core.Data
                 // First read the descriptor, then lookup the Name by GUID
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
                 player.Name = ReadPlayerName(player.Guid);
+                player.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
 
                 if (PlayerGuid != 0 && player.Guid == PlayerGuid)
                 {
@@ -510,6 +517,7 @@ namespace AmeisenBotX.Core.Data
                 // First read the descriptor, then lookup the Name by GUID
                 unit.UpdateRawWowUnit(WowInterface.XMemory);
                 unit.Name = ReadUnitName(activeObject, unit.Guid);
+                unit.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
 
                 return unit;
             }
@@ -519,5 +527,8 @@ namespace AmeisenBotX.Core.Data
 
         private T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
             => WowInterface.XMemory.Read(address, out T v) ? v : default;
+
+        private string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
+            => WowInterface.XMemory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
     }
 }

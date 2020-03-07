@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -8,6 +10,7 @@ using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -193,7 +196,7 @@ namespace AmeisenBotX.Core.Hook
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
             SetFacing(player, angle);
             // buggy atm
-            //// SendMovementPacket(player, 0xDA);
+            // SendMovementPacket(player, 0xDA);
         }
 
         public void GameobjectOnRightClick(WowObject gameobject)
@@ -359,11 +362,64 @@ namespace AmeisenBotX.Core.Hook
             return -1;
         }
 
+        public string GetSpellNameById(int spellId)
+        {
+            LuaDoString($"abotSpellName=GetSpellInfo({spellId});");
+            return GetLocalizedText("abotSpellName");
+        }
+
         public string GetSpells()
         {
             string command = "abotSpellResult='['tabCount=GetNumSpellTabs()for a=1,tabCount do tabName,tabTexture,tabOffset,numEntries=GetSpellTabInfo(a)for b=tabOffset+1,tabOffset+numEntries do abSpellName,abSpellRank=GetSpellName(b,\"BOOKTYPE_SPELL\")if abSpellName then abName,abRank,_,abCosts,_,_,abCastTime,abMinRange,abMaxRange=GetSpellInfo(abSpellName,abSpellRank)abotSpellResult=abotSpellResult..'{'..'\"spellbookName\": \"'..tostring(tabName or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring(abSpellName or 0)..'\",'..'\"rank\": \"'..tostring(abRank or 0)..'\",'..'\"castTime\": \"'..tostring(abCastTime or 0)..'\",'..'\"minRange\": \"'..tostring(abMinRange or 0)..'\",'..'\"maxRange\": \"'..tostring(abMaxRange or 0)..'\",'..'\"costs\": \"'..tostring(abCosts or 0)..'\"'..'}'if a<tabCount or b<tabOffset+numEntries then abotSpellResult=abotSpellResult..','end end end end;abotSpellResult=abotSpellResult..']'";
             LuaDoString(command);
             return GetLocalizedText("abotSpellResult");
+        }
+
+        public List<WowAura> GetUnitAuras(IntPtr baseAddress)
+        {
+            List<WowAura> buffs = new List<WowAura>();
+            if (WowInterface.XMemory.Read(baseAddress + 0xC30, out int buffTable))
+            {
+                IntPtr buffBase;
+                if (buffTable == 0)
+                {
+                    buffBase = IntPtr.Add(baseAddress, 0xC38);
+                }
+                else
+                {
+                    buffBase = IntPtr.Add(baseAddress, 0xC30);
+                }
+
+                int count = 1;
+
+                do
+                {
+                    if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * count), out RawWowAura aura))
+                    {
+                        if (aura.SpellId > 0)
+                        {
+                            if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
+                            {
+                                name = GetSpellNameById(aura.SpellId);
+                                WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
+                            }
+
+                            if (name.Length > 0 && !buffs.Any(e => e.Name == name))
+                            {
+                                buffs.Add(new WowAura(aura, name));
+                            }
+                        }
+
+                        count++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                } while (count < 32);
+            }
+
+            return buffs;
         }
 
         /// <summary>
@@ -694,7 +750,7 @@ namespace AmeisenBotX.Core.Hook
             => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSendMovementPacket, new List<object>() { opcode, Environment.TickCount });
 
         public void SetFacing(WowUnit unit, float angle)
-            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle, Environment.TickCount });
+            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString().Replace(',', '.'), Environment.TickCount });
 
         public void SetMaxFps(byte maxFps) => WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
 

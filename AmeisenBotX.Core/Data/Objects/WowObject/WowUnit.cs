@@ -2,7 +2,9 @@
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
@@ -11,6 +13,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
         }
+
+        public List<WowAura> Auras { get; set; }
 
         public WowClass Class => Enum.IsDefined(typeof(WowClass), (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF)) ? (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF) : WowClass.Unknown;
 
@@ -174,6 +178,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         private RawWowUnit RawWowUnit { get; set; }
 
+        public bool HasBuffByName(string name)
+            => Auras.Any(e => e.Name == name);
+
         public WowUnit UpdateRawWowUnit(XMemory xMemory)
         {
             UpdateRawWowObject(xMemory);
@@ -186,7 +193,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return this;
         }
 
-        private double ReturnPercentage(int value, int max)
+        internal double ReturnPercentage(int value, int max)
         {
             if (value == 0 || max == 0)
             {

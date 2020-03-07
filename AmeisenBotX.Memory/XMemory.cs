@@ -39,11 +39,13 @@ namespace AmeisenBotX.Memory
             return rect;
         }
 
-        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
+        public static void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
+            WindowFlags flags = resizeWindow ? (WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder) : (WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoSize);
+
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)(WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder));
+                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 

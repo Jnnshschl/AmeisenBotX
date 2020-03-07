@@ -1,7 +1,9 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Hook
@@ -73,6 +75,8 @@ namespace AmeisenBotX.Core.Hook
         double GetSpellCooldown(string spellName);
 
         string GetSpells();
+
+        List<WowAura> GetUnitAuras(IntPtr baseAddress);
 
         (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
 

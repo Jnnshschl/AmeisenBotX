@@ -108,6 +108,20 @@ namespace AmeisenBotX
 
         private void ButtonSettings_Click(object sender, RoutedEventArgs e) => new SettingsWindow(Config).ShowDialog();
 
+        private void ButtonStartAutopilot_Click(object sender, RoutedEventArgs e)
+        {
+            if (AmeisenBot.IsAutopilot)
+            {
+                AmeisenBot.IsAutopilot = false;
+                buttonStartAutopilot.Foreground = darkForegroundBrush;
+            }
+            else
+            {
+                AmeisenBot.IsAutopilot = true;
+                buttonStartAutopilot.Foreground = currentTickTimeGoodBrush;
+            }
+        }
+
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
         {
             if (AmeisenBot.IsRunning)
@@ -253,25 +267,28 @@ namespace AmeisenBotX
             labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
 
             labelGamestate.Content = AmeisenBot.WowInterface.ObjectManager.GameState;
+            labelMapName.Content = AmeisenBot.WowInterface.ObjectManager.MapId.ToString();
+            labelZoneName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneName;
+            labelZoneSubName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneSubName;
 
-            labelCurrentLevel.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Level}";
+            labelCurrentLevel.Content = AmeisenBot.WowInterface.ObjectManager.Player.Level;
             labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Race} {AmeisenBot.WowInterface.ObjectManager.Player.Gender}";
-            labelCurrentClass.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Class}";
+            labelCurrentClass.Content = AmeisenBot.WowInterface.ObjectManager.Player.Class;
 
             progressbarExp.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.NextLevelXp;
             progressbarExp.Value = AmeisenBot.WowInterface.ObjectManager.Player.Xp;
-            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Xp)}/{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.NextLevelXp)}";
+            labelCurrentExp.Content = $"{Math.Round(AmeisenBot.WowInterface.ObjectManager.Player.XpPercentage)}%";
 
             progressbarHealth.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.MaxHealth;
             progressbarHealth.Value = AmeisenBot.WowInterface.ObjectManager.Player.Health;
-            labelCurrentHealth.Content = $"{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Health)}/{BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.MaxHealth)}";
+            labelCurrentHealth.Content = BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Health);
 
-            labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : $"{AmeisenBot.WowInterface.CombatClass.GetType().Name}";
+            labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.GetType().Name;
 
             // class specific stuff
             progressbarSecondary.Maximum = maxSecondary;
             progressbarSecondary.Value = secondary;
-            labelCurrentSecondary.Content = $"{BotUtils.BigValueToString(secondary)}/{BotUtils.BigValueToString(maxSecondary)}";
+            labelCurrentSecondary.Content = BotUtils.BigValueToString(secondary);
 
             if (progressbarHealth.Foreground != primaryBrush)
             {

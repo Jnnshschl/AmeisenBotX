@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Movement
                     break;
 
                 case MovementEngineState.DirectMoving:
-                    PlayerVehicle.MoveToPosition(positionToGoTo);
+                    PlayerVehicle.MoveToPosition(targetPosition);
                     updateForces = false;
                     break;
 

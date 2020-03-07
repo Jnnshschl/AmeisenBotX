@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Dungeon
                 {
                     if (!ShouldWaitForGroup())
                     {
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > 2)
+                        if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > 5)
                         {
                             WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CurrentNodes.Peek().Position);
                             WowInterface.MovementEngine.Execute();
@@ -152,10 +152,10 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private IDungeonProfile TryLoadProfile()
-                                            => WowInterface.ObjectManager.MapId switch
-                                            {
-                                                MapId.Deadmines => new DeadminesProfile(),
-                                                _ => null
-                                            };
+            => WowInterface.ObjectManager.MapId switch
+            {
+                MapId.Deadmines => new DeadminesProfile(),
+                _ => null
+            };
     }
 }

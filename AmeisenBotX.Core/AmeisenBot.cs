@@ -123,6 +123,8 @@ namespace AmeisenBotX.Core
             }
         }
 
+        public bool IsAutopilot { get; set; }
+
         public bool IsRunning { get; private set; }
 
         public AmeisenBotStateMachine StateMachine { get; set; }
@@ -252,7 +254,7 @@ namespace AmeisenBotX.Core
                 {
                     if (Config.BotWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
-                        XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, Config.BotWindowRect);
+                        XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, Config.BotWindowRect, false);
                         AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded bot window position: {Config.BotWindowRect}", LogLevel.Verbose);
                     }
                 }

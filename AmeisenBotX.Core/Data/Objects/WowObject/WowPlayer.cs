@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Xp => RawWowPlayer.Xp;
 
+        public double XpPercentage => ReturnPercentage(Xp, NextLevelXp);
+
         private RawWowPlayer RawWowPlayer { get; set; }
 
         public bool IsAlliance()

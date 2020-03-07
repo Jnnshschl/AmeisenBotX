@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Data
     {
         event ObjectUpdateComplete OnObjectUpdateComplete;
 
-        GameState GameState { get; }
+        string GameState { get; }
 
         bool IsWorldLoaded { get; }
 
@@ -45,6 +45,10 @@ namespace AmeisenBotX.Core.Data
         List<WowObject> WowObjects { get; }
 
         int ZoneId { get; }
+
+        string ZoneName { get; }
+
+        string ZoneSubName { get; }
 
         public IEnumerable<WowPlayer> GetNearEnemies(Vector3 position, double distance);
 

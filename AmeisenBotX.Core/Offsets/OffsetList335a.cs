@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
 
-        public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8); // maybe use 0xAC, Clear function
+        public IntPtr EndSceneOffset { get; } = new IntPtr(0xAC); // maybe use 0xA8, Clear function
 
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);
 
@@ -99,6 +99,8 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr FunctionRenderWorld { get; } = new IntPtr(0x4FAF90);
 
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
+
+        public IntPtr FunctionSpellGetSpellCooldown { get; } = new IntPtr(0x807980);
 
         public IntPtr FunctionUnitGetReaction { get; } = new IntPtr(0x7251C0);
 
@@ -138,6 +140,8 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr PartyPlayer4 { get; } = new IntPtr(0xBD1960);
 
+        public IntPtr PerformanceCounter { get; } = new IntPtr(0x86AE20);
+
         public IntPtr PetGuid { get; } = new IntPtr(0xC234D0);
 
         public IntPtr PlayerBase { get; } = new IntPtr(0xD38AE4);
@@ -159,6 +163,10 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr Runes { get; } = new IntPtr(0xC24388);
 
         public IntPtr RuneType { get; } = new IntPtr(0xC24304);
+
+        public IntPtr SpellbookCount { get; } = new IntPtr(0xBE8D9C);
+
+        public IntPtr SpellbookSpells { get; } = new IntPtr(0xBE5D88);
 
         public IntPtr TargetGuid { get; } = new IntPtr(0xBD07B0);
 
@@ -202,8 +210,10 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr WowUnitRotation { get; } = new IntPtr(0x7A8);
 
-        public IntPtr ZoneId { get; } = new IntPtr(0xAF4E48);
+        public IntPtr ZoneId { get; } = new IntPtr(0xBD080C); // 0xAF4E48
 
-        public IntPtr ZoneNamePointer { get; } = new IntPtr(0xBD0780);
+        public IntPtr ZoneSubText { get; } = new IntPtr(0xBD0784);
+
+        public IntPtr ZoneText { get; } = new IntPtr(0xBD0788);
     }
 }

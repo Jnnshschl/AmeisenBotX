@@ -105,7 +105,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target != null)
                 {
                     WowInterface.ObjectManager.UpdateObject(target);
-                    List<string> targetBuffs = WowInterface.HookManager.GetBuffs(WowLuaUnit.Target);
+                    List<string> targetBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
 
                     if ((target.HealthPercentage < 15
                             && CastSpellIfPossible(naturesSwiftnessSpell, true))

@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using AmeisenBotX.Logging;
@@ -9,6 +8,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
@@ -34,8 +34,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
-                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetBuffs(WowLuaUnit.Player); } else { return null; } },
-                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetDebuffs(WowLuaUnit.Player); } else { return null; } },
+                () => { if (WowInterface.ObjectManager.Player != null) { return WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList(); } else { return null; } },
+                () => { if (WowInterface.ObjectManager.Player != null) { return WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList(); } else { return null; } },
                 null,
                 DispellDebuffsFunction);
 
@@ -43,8 +43,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
-                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetBuffs(WowLuaUnit.Target); } else { return null; } },
-                () => { if (WowInterface.HookManager != null) { return WowInterface.HookManager.GetDebuffs(WowLuaUnit.Target); } else { return null; } },
+                () => { if (WowInterface.ObjectManager.Target != null) { return WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList(); } else { return null; } },
+                () => { if (WowInterface.ObjectManager.Target != null) { return WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList(); } else { return null; } },
                 DispellBuffsFunction,
                 null);
 
@@ -149,6 +149,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && (!needsCombopoints || WowInterface.ObjectManager.Player.ComboPoints >= requiredCombopoints)
                 && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position))
             {
+                AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Trying to cast \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
                 CastSpell(spellName);
                 return true;
             }
@@ -176,8 +177,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private void PrepareCast(string spellName)
         {
-            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Trying to cast \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-
             if (!Spells.ContainsKey(spellName))
             {
                 Spells.Add(spellName, WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName));

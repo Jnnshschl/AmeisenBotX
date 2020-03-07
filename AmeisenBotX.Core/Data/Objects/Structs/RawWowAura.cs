@@ -3,10 +3,10 @@
 namespace AmeisenBotX.Core.Data.Objects.Structs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct WowAura
+    public struct RawWowAura
     {
         public ulong Creator;
-        public int AuraId;
+        public int SpellId;
         public byte Flags;
         public byte Level;
         public ushort StackCount;

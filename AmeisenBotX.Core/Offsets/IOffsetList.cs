@@ -94,6 +94,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionSetTarget { get; }
 
+        IntPtr FunctionSpellGetSpellCooldown { get; }
+
         IntPtr FunctionUnitGetReaction { get; }
 
         IntPtr FunctionUnitOnRightClick { get; }
@@ -132,6 +134,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr PartyPlayer4 { get; }
 
+        IntPtr PerformanceCounter { get; }
+
         IntPtr PetGuid { get; }
 
         IntPtr PlayerBase { get; }
@@ -153,6 +157,10 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr Runes { get; }
 
         IntPtr RuneType { get; }
+
+        IntPtr SpellbookCount { get; }
+
+        IntPtr SpellbookSpells { get; }
 
         IntPtr TargetGuid { get; }
 
@@ -198,6 +206,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr ZoneId { get; }
 
-        IntPtr ZoneNamePointer { get; }
+        IntPtr ZoneSubText { get; }
+
+        IntPtr ZoneText { get; }
     }
 }

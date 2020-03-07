@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool HandleDamageBuffing()
         {
-            List<string> myBuffs = WowInterface.HookManager.GetBuffs(WowLuaUnit.Player);
+            List<string> myBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
 
             if (myBuffs.Any(e => e.Equals(decimationSpell, StringComparison.OrdinalIgnoreCase)))
             {
