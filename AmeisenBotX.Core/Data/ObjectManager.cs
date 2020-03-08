@@ -83,16 +83,16 @@ namespace AmeisenBotX.Core.Data
 
         private WowInterface WowInterface { get; }
 
-        public IEnumerable<WowPlayer> GetNearEnemies(Vector3 position, double distance)
-            => WowObjects.OfType<WowPlayer>()
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
+            => WowObjects.OfType<T>()
                 .Where(e => e.Guid != PlayerGuid
                 && !e.IsDead
                 && !e.IsNotAttackable
                 && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
                 && e.Position.GetDistance(position) < distance);
 
-        public IEnumerable<WowPlayer> GetNearFriends(Vector3 position, int distance)
-            => WowObjects.OfType<WowPlayer>()
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, int distance) where T : WowUnit
+            => WowObjects.OfType<T>()
                 .Where(e => e.Guid != PlayerGuid
                 && !e.IsDead
                 && !e.IsNotAttackable
@@ -124,40 +124,43 @@ namespace AmeisenBotX.Core.Data
 
         public void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress)
         {
-            WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
-            switch (wowObjectType)
+            if (WowObjects.Count > 0)
             {
-                case WowObjectType.Dynobject:
-                    WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
-                    break;
+                WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
+                switch (wowObjectType)
+                {
+                    case WowObjectType.Dynobject:
+                        WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
+                        break;
 
-                case WowObjectType.Gameobject:
-                    WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
-                    break;
+                    case WowObjectType.Gameobject:
+                        WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
+                        break;
 
-                case WowObjectType.Player:
-                    WowObjects.Add(ReadWowPlayer(baseAddress, wowObjectType));
-                    break;
+                    case WowObjectType.Player:
+                        WowObjects.Add(ReadWowPlayer(baseAddress, wowObjectType));
+                        break;
 
-                case WowObjectType.Unit:
-                    WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
-                    break;
+                    case WowObjectType.Unit:
+                        WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
+                        break;
 
-                case WowObjectType.Corpse:
-                    WowObjects.Add(ReadWowCorpse(baseAddress, wowObjectType));
-                    break;
+                    case WowObjectType.Corpse:
+                        WowObjects.Add(ReadWowCorpse(baseAddress, wowObjectType));
+                        break;
 
-                case WowObjectType.Container:
-                    WowObjects.Add(ReadWowContainer(baseAddress, wowObjectType));
-                    break;
+                    case WowObjectType.Container:
+                        WowObjects.Add(ReadWowContainer(baseAddress, wowObjectType));
+                        break;
 
-                case WowObjectType.Item:
-                    WowObjects.Add(ReadWowItem(baseAddress, wowObjectType));
-                    break;
+                    case WowObjectType.Item:
+                        WowObjects.Add(ReadWowItem(baseAddress, wowObjectType));
+                        break;
 
-                default:
-                    WowObjects.Add(ReadWowObject(baseAddress, wowObjectType));
-                    break;
+                    default:
+                        WowObjects.Add(ReadWowObject(baseAddress, wowObjectType));
+                        break;
+                }
             }
         }
 
@@ -517,7 +520,11 @@ namespace AmeisenBotX.Core.Data
                 // First read the descriptor, then lookup the Name by GUID
                 unit.UpdateRawWowUnit(WowInterface.XMemory);
                 unit.Name = ReadUnitName(activeObject, unit.Guid);
-                unit.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
+
+                if (unit.Guid == TargetGuid)
+                {
+                    unit.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
+                }
 
                 return unit;
             }

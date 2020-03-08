@@ -88,6 +88,8 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsBgInviteReady();
 
+        bool IsClickToMoveActive();
+
         bool IsClickToMovePending();
 
         bool IsGhost(string unit);

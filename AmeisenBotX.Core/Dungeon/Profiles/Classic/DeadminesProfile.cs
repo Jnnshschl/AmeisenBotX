@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
             new DungeonNode(new Vector3(-21, -731, 8), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-6, -742, 9), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(3, -755, 9), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-1, -777, -10), DungeonNodeType.Boss),
+            new DungeonNode(new Vector3(-1, -777, 11), DungeonNodeType.Boss),
             new DungeonNode(new Vector3(-20, -796, 19), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-29, -802, 19), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-37, -790, 19), DungeonNodeType.Normal),
@@ -98,16 +98,16 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
             new DungeonNode(new Vector3(-101, -780, 22), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-84, -776, 27), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-81, -787, 26), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-104, 790, 28), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-102, 801, 30), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-104, -790, 28), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-102, -801, 30), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-97, -805, 30), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-79, 793, 39), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-79, -793, 39), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-63, -789, 40), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-41, 794, 40), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-41, -794, 40), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-45, -807, 42), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-59, -812, 42), DungeonNodeType.Boss),
             new DungeonNode(new Vector3(-80, -820, 40), DungeonNodeType.Boss),
-            new DungeonNode(new Vector3(-64, 821, 41), DungeonNodeType.Normal)
+            new DungeonNode(new Vector3(-64, -821, 41), DungeonNodeType.Normal)
         };
 
         public int RequiredItemLevel { get; } = 10;

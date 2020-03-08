@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public void Execute()
         {
-            if (DungeonProfile != null && CurrentNodes.Count > 0)
+            if (!HasFinishedDungeon && DungeonProfile != null && CurrentNodes.Count > 0)
             {
                 // we are fighting
                 if ((WowInterface.ObjectManager.Player.IsInCombat && StateMachine.IsAnyPartymemberInCombat())
@@ -93,25 +93,43 @@ namespace AmeisenBotX.Core.Dungeon
                             }
 
                             CompletedNodes.Add(CurrentNodes.Dequeue());
-                            Progress = (CompletedNodes.Count / TotalNodes) * 100;
+                            Progress = ((double)CompletedNodes.Count / (double)TotalNodes) * 100;
+                            HasFinishedDungeon = Progress >= 100.0;
                         }
                     }
                 }
             }
-            else
+            else if(!HasFinishedDungeon && DungeonProfile == null && CurrentNodes.Count == 0)
             {
                 LoadProfile(TryLoadProfile());
+            }
+            else
+            {
+                // find a way to exit the dungeon, mabe hearthstone
             }
         }
 
         public void LoadProfile(IDungeonProfile profile)
         {
             Reset();
-
             DungeonProfile = profile;
+
+            // filter out already checked nodes
+            DungeonNode closestDungeonNode = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            bool shouldAddNodes = closestDungeonNode == null;
+
             foreach (DungeonNode d in DungeonProfile.Path)
             {
-                CurrentNodes.Enqueue(d);
+                // skip all already completed nodes
+                if (!shouldAddNodes && d == closestDungeonNode)
+                {
+                    shouldAddNodes = true;
+                }
+
+                if (shouldAddNodes)
+                {
+                    CurrentNodes.Enqueue(d);
+                }
             }
 
             TotalNodes = CurrentNodes.Count;
@@ -128,7 +146,7 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private bool AreAllPlayersPresent()
-            => WowInterface.ObjectManager.GetNearFriends(WowInterface.ObjectManager.Player.Position, 50).Count() >= WowInterface.ObjectManager.Partymembers.Count;
+            => WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 50).Count() >= WowInterface.ObjectManager.Partymembers.Count;
 
         private bool ShouldWaitForGroup()
         {
@@ -142,7 +160,7 @@ namespace AmeisenBotX.Core.Dungeon
             }
 
             // are my group members not in range of the CurrentNode
-            if (WowInterface.ObjectManager.GetNearFriends(CurrentNodes.Peek().Position, 30).Count() < WowInterface.ObjectManager.Partymembers.Count)
+            if (WowInterface.ObjectManager.GetNearFriends<WowPlayer>(CurrentNodes.Peek().Position, 30).Count() < WowInterface.ObjectManager.Partymembers.Count)
             {
                 return true;
             }

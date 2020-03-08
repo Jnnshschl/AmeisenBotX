@@ -25,8 +25,6 @@ namespace AmeisenBotX.Core.Character
 
         void AntiAfk();
 
-        void Face(Vector3 position, ulong guid);
-
         bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition);
 
         void HoldKey(VirtualKeys key);

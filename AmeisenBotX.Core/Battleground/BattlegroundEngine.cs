@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Battleground
 
         public bool AttackNearEnemies(double range = 25)
         {
-            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies(WowInterface.ObjectManager.Player.Position, range);
+            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, range);
 
             if (nearEnemies.Count() > 0)
             {

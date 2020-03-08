@@ -8,16 +8,15 @@ namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateIdle : BasicState
     {
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface, Queue<ulong> unitLootList) : base(stateMachine, config, wowInterface)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            UnitLootList = unitLootList;
         }
 
         private DateTime LastBagSlotCheck { get; set; }
 
-        private DateTime LastRepairCheck { get; set; }
+        private DateTime LastLoot { get; set; }
 
-        private Queue<ulong> UnitLootList { get; }
+        private DateTime LastRepairCheck { get; set; }
 
         public override void Enter()
         {
@@ -44,6 +43,18 @@ namespace AmeisenBotX.Core.Statemachine.States
                 CheckForBattlegroundInvites();
             }
 
+            // do we need to repair our equipment
+            if (DateTime.Now - LastLoot > TimeSpan.FromSeconds(1))
+            {
+                LastLoot = DateTime.Now;
+
+                if (StateMachine.GetNearLootableUnits().Count() > 0)
+                {
+                    StateMachine.SetState(BotState.Looting);
+                    return;
+                }
+            }
+
             // we are on a battleground
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3)
@@ -56,13 +67,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (StateMachine.IsInDungeon())
             {
                 StateMachine.SetState(BotState.Dungeon);
-                return;
-            }
-
-            // do i need to loot units
-            if (UnitLootList.Count > 0)
-            {
-                StateMachine.SetState(BotState.Looting);
                 return;
             }
 

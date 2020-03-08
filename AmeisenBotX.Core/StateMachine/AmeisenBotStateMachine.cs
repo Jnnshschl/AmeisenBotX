@@ -24,7 +24,6 @@ namespace AmeisenBotX.Core.Statemachine
             LastEventPull = DateTime.Now;
 
             LastState = BotState.None;
-            UnitLootList = new Queue<ulong>();
 
             States = new Dictionary<BotState, BasicState>()
             {
@@ -36,12 +35,12 @@ namespace AmeisenBotX.Core.Statemachine
                 { BotState.Eating, new StateEating(this, config, WowInterface) },
                 { BotState.Following, new StateFollowing(this, config, WowInterface) },
                 { BotState.Ghost, new StateGhost(this, config, WowInterface) },
-                { BotState.Idle, new StateIdle(this, config, WowInterface, UnitLootList) },
+                { BotState.Idle, new StateIdle(this, config, WowInterface) },
                 { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
                 { BotState.Job, new StateJob(this, config, WowInterface) },
                 { BotState.LoadingScreen, new StateLoadingScreen(this, config, WowInterface) },
                 { BotState.Login, new StateLogin(this, config, WowInterface) },
-                { BotState.Looting, new StateLooting(this, config, WowInterface, UnitLootList) },
+                { BotState.Looting, new StateLooting(this, config, WowInterface) },
                 { BotState.Repairing, new StateRepairing(this, config, WowInterface) },
                 { BotState.Selling, new StateSelling(this, config, WowInterface) },
                 { BotState.StartWow, new StateStartWow(this, config, WowInterface) }
@@ -67,8 +66,6 @@ namespace AmeisenBotX.Core.Statemachine
 
         public string PlayerName { get; internal set; }
 
-        internal Queue<ulong> UnitLootList { get; set; }
-
         internal WowInterface WowInterface { get; }
 
         private AmeisenBotConfig Config { get; }
@@ -84,6 +81,8 @@ namespace AmeisenBotX.Core.Statemachine
             if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
             {
                 AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
+                WowInterface.MovementEngine.Reset();
+                WowInterface.ObjectManager.WowObjects.Clear();
                 SetState(BotState.None);
             }
 
@@ -131,8 +130,14 @@ namespace AmeisenBotX.Core.Statemachine
             OnStateMachineTick?.Invoke();
         }
 
+        internal IEnumerable<WowUnit> GetNearLootableUnits()
+            => WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+            .Where(e => e.IsLootable
+                && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
+                && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
+
         internal bool IsAnyPartymemberInCombat()
-            => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
+                    => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
             .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
             .Any(r => r.IsInCombat);
 

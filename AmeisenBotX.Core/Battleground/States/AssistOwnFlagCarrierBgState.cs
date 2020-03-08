@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Battleground.States
                 {
                     ulong ownFlagCarrierGuid = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).OwnFlagCarrierPlayer.Guid;
                     WowPlayer ownFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(ownFlagCarrierGuid);
-                    IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies(ownFlagCarrier.Position, 25);
+                    IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(ownFlagCarrier.Position, 25);
 
                     if (WowInterface.ObjectManager.Player.Position.GetDistance(ownFlagCarrier.Position) > 10)
                     {

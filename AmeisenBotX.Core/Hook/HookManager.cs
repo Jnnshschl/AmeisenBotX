@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Character.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
@@ -603,6 +604,11 @@ namespace AmeisenBotX.Core.Hook
             return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
+        public bool IsClickToMoveActive()
+            => WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveAction, out int ctmState)
+            && (ClickToMoveType)ctmState != ClickToMoveType.None
+            && (ClickToMoveType)ctmState != ClickToMoveType.Stop;
+
         public bool IsClickToMovePending()
         {
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMovePendingMovement, out byte ctmPending))
@@ -867,7 +873,13 @@ namespace AmeisenBotX.Core.Hook
 
         public void StartAutoAttack() => SendChatMessage("/startattack");
 
-        public void StopClickToMove(WowPlayer player) => CallObjectFunction(player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
+        public void StopClickToMove(WowPlayer player)
+        {
+            if (IsClickToMoveActive())
+            {
+                CallObjectFunction(player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
+            }
+        }
 
         public void TargetGuid(ulong guid)
         {

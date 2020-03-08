@@ -50,9 +50,9 @@ namespace AmeisenBotX.Core.Data
 
         string ZoneSubName { get; }
 
-        public IEnumerable<WowPlayer> GetNearEnemies(Vector3 position, double distance);
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
 
-        public IEnumerable<WowPlayer> GetNearFriends(Vector3 position, int distance);
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, int distance) where T : WowUnit;
 
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 

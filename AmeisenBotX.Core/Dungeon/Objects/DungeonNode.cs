@@ -3,7 +3,7 @@ using AmeisenBotX.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Dungeon.Objects
 {
-    public struct DungeonNode
+    public class DungeonNode
     {
         public DungeonNode(Vector3 position, DungeonNodeType type, string extra = "")
         {
@@ -12,10 +12,10 @@ namespace AmeisenBotX.Core.Dungeon.Objects
             Extra = extra;
         }
 
+        public string Extra { get; }
+
         public Vector3 Position { get; }
 
         public DungeonNodeType Type { get; }
-
-        public string Extra { get; }
     }
 }

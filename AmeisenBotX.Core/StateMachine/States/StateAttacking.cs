@@ -79,30 +79,30 @@ namespace AmeisenBotX.Core.Statemachine.States
                             return;
                         }
                     }
+                }
 
-                    // use the default MovementEngine to move if the CombatClass doesnt
-                    if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
+                // use the default MovementEngine to move if the CombatClass doesnt
+                if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                         && WowInterface.ObjectManager.Target != null)
-                    {
-                        HandleMovement(WowInterface.ObjectManager.Target);
-                    }
+                {
+                    HandleMovement(WowInterface.ObjectManager.Target);
+                }
 
-                    // if no CombatClass is loaded, just autoattack
-                    if (WowInterface.CombatClass != null)
-                    {
-                        CombatClassStopwatch.Restart();
+                // if no CombatClass is loaded, just autoattack
+                if (WowInterface.CombatClass != null)
+                {
+                    CombatClassStopwatch.Restart();
 
-                        WowInterface.CombatClass.Execute();
+                    WowInterface.CombatClass.Execute();
 
-                        CombatClassStopwatch.Stop();
-                        AmeisenLogger.Instance.Log("CombatClass", $"Execution took: {CombatClassStopwatch.ElapsedMilliseconds}ms");
-                    }
-                    else
+                    CombatClassStopwatch.Stop();
+                    AmeisenLogger.Instance.Log("CombatClass", $"Execution took: {CombatClassStopwatch.ElapsedMilliseconds}ms");
+                }
+                else
+                {
+                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                     {
-                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
-                        {
-                            WowInterface.HookManager.StartAutoAttack();
-                        }
+                        WowInterface.HookManager.StartAutoAttack();
                     }
                 }
             }
@@ -116,18 +116,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // set our normal maxfps
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFps);
-
-            // add nearby Units to the loot List
-            if (Config.LootUnits)
-            {
-                foreach (WowUnit lootableUnit in WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius))
-                {
-                    if (!StateMachine.UnitLootList.Contains(lootableUnit.Guid))
-                    {
-                        StateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
-                    }
-                }
-            }
         }
 
         private void HandleMovement(WowUnit target)
@@ -155,15 +143,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                     && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(250))
                 {
                     WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
-                    WowInterface.CharacterManager.Face(target.Position, target.Guid);
                     LastRotationCheck = DateTime.Now;
                 }
             }
             else
             {
                 // position to got to should be a bit ahead of the enemy to predict movement hehe xd
-                Vector3 positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, target.Position, 1.5);
-                WowInterface.MovementEngine.SetState(MovementEngineState.DirectMoving, positionToGoTo);
+                Vector3 positionToGoTo = target.Position;
+                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, positionToGoTo);
                 WowInterface.MovementEngine.Execute();
             }
         }

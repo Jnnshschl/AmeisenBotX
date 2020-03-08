@@ -23,8 +23,8 @@ namespace AmeisenBotX.Core.Battleground.States
         {
             // at the beginning of the BG, move to the enemies base
             // TODO: maybe handle speedbuff here
-            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies(WowInterface.ObjectManager.Player.Position, 30);
-            IEnumerable<WowPlayer> nearFriends = WowInterface.ObjectManager.GetNearFriends(WowInterface.ObjectManager.Player.Position, 30);
+            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30);
+            IEnumerable<WowPlayer> nearFriends = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30);
 
             int enemyCount = nearEnemies.Count();
             int friendCount = nearFriends.Count();

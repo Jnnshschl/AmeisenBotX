@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,6 +126,42 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (MyAuraManager.Tick())
                 {
                     return;
+                }
+
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
+
+                // basic auto attack defending
+                if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
+                {
+                    IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Where(e => e.IsInCombat);
+
+                    if (nearEnemies.Count() > 0)
+                    {
+                        WowUnit target = nearEnemies.FirstOrDefault();
+                        if (target != null)
+                        {
+                            WowInterface.HookManager.TargetGuid(target.Guid);
+                            WowInterface.MovementEngine.Reset();
+                        }
+                    }
+                }
+                else
+                {
+                    if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 4)
+                    {
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, WowInterface.ObjectManager.Target.Position);
+                        WowInterface.MovementEngine.Execute();
+                    }
+                    else
+                    {
+                        WowInterface.HookManager.StartAutoAttack();
+
+                        if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.ObjectManager.Target.Position))
+                        {
+                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
+                        }
+                    }
                 }
             }
         }

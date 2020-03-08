@@ -1,75 +1,96 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateLooting : BasicState
     {
-        public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface, Queue<ulong> unitLootList) : base(stateMachine, config, wowInterface)
+        public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            UnitLootList = unitLootList;
+            UnitLootQueue = new Queue<ulong>();
             UnitsAlreadyLootedList = new List<ulong>();
+            LastOpenLootTry = DateTime.Now;
         }
 
-        private int LootTryCount { get; set; }
+        public List<ulong> UnitsAlreadyLootedList { get; private set; }
 
-        private Queue<ulong> UnitLootList { get; }
+        private DateTime LastOpenLootTry { get; set; }
 
-        private List<ulong> UnitsAlreadyLootedList { get; }
+        private Queue<ulong> UnitLootQueue { get; set; }
 
         public override void Enter()
         {
-            LootTryCount = 0;
         }
 
         public override void Execute()
         {
-            if (UnitLootList.Count == 0)
+            // add nearby Units to the loot List
+            if (Config.LootUnits)
+            {
+                foreach (WowUnit lootableUnit in StateMachine.GetNearLootableUnits())
+                {
+                    if (!UnitLootQueue.Contains(lootableUnit.Guid))
+                    {
+                        UnitLootQueue.Enqueue(lootableUnit.Guid);
+                    }
+                }
+            }
+
+            if (UnitLootQueue.Count == 0)
             {
                 StateMachine.SetState(BotState.Idle);
             }
             else
             {
-                if (UnitsAlreadyLootedList.Contains(UnitLootList.Peek()))
+                if (UnitsAlreadyLootedList.Contains(UnitLootQueue.Peek()))
                 {
-                    UnitLootList.Dequeue();
+                    if (UnitLootQueue.Count > 0)
+                    {
+                        UnitLootQueue.Dequeue();
+                    }
+
                     return;
                 }
 
-                WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == UnitLootList.Peek());
+                WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
+
                 if (selectedUnit != null && selectedUnit.IsDead && selectedUnit.IsLootable)
                 {
                     if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.0)
                     {
                         WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
                         WowInterface.MovementEngine.Execute();
-                        LootTryCount++;
-
-                        if (LootTryCount == 64)
-                        {
-                            UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
-                        }
                     }
-                    else
+                    else if (DateTime.Now - LastOpenLootTry > TimeSpan.FromSeconds(1))
                     {
-                        do
-                        {
-                            WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                            LootTryCount++;
-                            Task.Delay(1000).GetAwaiter().GetResult();
-                        } while (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
-                                 && lootOpen == 0
-                                 && LootTryCount < 2);
+                        WowInterface.HookManager.StopClickToMove(WowInterface.ObjectManager.Player);
 
-                        UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
+                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        if (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
+                             && lootOpen > 0)
+                        {
+                            WowInterface.HookManager.LootEveryThing();
+                            UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
+                            LastOpenLootTry = DateTime.Now;
+
+                            if (UnitLootQueue.Count > 0)
+                            {
+                                UnitLootQueue.Dequeue();
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    UnitLootList.Dequeue();
+                    if (UnitLootQueue.Count > 0)
+                    {
+                        UnitLootQueue.Dequeue();
+                    }
                 }
             }
         }

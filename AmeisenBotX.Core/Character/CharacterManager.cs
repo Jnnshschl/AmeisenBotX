@@ -52,15 +52,6 @@ namespace AmeisenBotX.Core.Character
 
         public void AntiAfk() => WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
 
-        public void Face(Vector3 position, ulong guid)
-        {
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, new Vector3(position.X, position.Y, position.Z));
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, 20.9f);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, 0.1f);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, guid);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.FaceTarget);
-        }
-
         public Dictionary<int, int> GetConsumeables()
             => Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
 

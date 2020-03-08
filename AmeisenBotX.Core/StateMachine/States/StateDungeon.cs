@@ -12,7 +12,7 @@
 
         public override void Execute()
         {
-            if (!WowInterface.DungeonEngine.HasFinishedDungeon && StateMachine.IsInDungeon())
+            if (StateMachine.IsInDungeon())
             {
                 WowInterface.DungeonEngine.Execute();
             }
