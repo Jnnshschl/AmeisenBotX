@@ -1,7 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -11,14 +10,29 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
+        public Vector3 CorpsePosition { get; private set; }
+
+        public bool NeedToEnterPortal { get; private set; }
+
         public override void Enter()
         {
-            WowUnit spiritHealer = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Name.ToUpper().Contains("SPIRIT HEALER"));
-
-            if (spiritHealer != null)
+            if (StateMachine.IsDungeonMap(StateMachine.MapIDiedOn))
             {
-                WowInterface.HookManager.UnitOnRightClick(spiritHealer);
+                CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                NeedToEnterPortal = true;
             }
+            else
+            {
+                WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
+                CorpsePosition = corpsePosition;
+            }
+
+            // WowUnit spiritHealer = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Name.ToUpper().Contains("SPIRIT HEALER"));
+            //
+            // if (spiritHealer != null)
+            // {
+            //     WowInterface.HookManager.UnitOnRightClick(spiritHealer);
+            // }
         }
 
         public override void Execute()
@@ -28,26 +42,37 @@ namespace AmeisenBotX.Core.Statemachine.States
                 StateMachine.SetState(BotState.Idle);
             }
 
-            if (StateMachine.IsOnBattleground())
+            if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))
             {
                 // just wait for the mass ress
                 return;
             }
 
-            if (WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition)
-                && WowInterface.ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(CorpsePosition) > 8)
             {
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, corpsePosition);
+                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CorpsePosition);
                 WowInterface.MovementEngine.Execute();
             }
             else
             {
-                WowInterface.HookManager.RetrieveCorpse();
+                if (NeedToEnterPortal)
+                {
+                    // move into portal
+                    CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 4);
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CorpsePosition);
+                    WowInterface.MovementEngine.Execute();
+                }
+                else
+                {
+                    WowInterface.HookManager.RetrieveCorpse();
+                }
             }
         }
 
         public override void Exit()
         {
+            CorpsePosition = default;
+            NeedToEnterPortal = false;
         }
     }
 }

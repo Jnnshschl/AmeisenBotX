@@ -9,6 +9,8 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 {
     public class DeadminesProfile : IDungeonProfile
     {
+        private const string defiasGunPowderName = "Defias Gunpowder";
+
         public string Author { get; } = "Jannis";
 
         public string Description { get; } = "Profile for the Dungeon in Westfall, made for Level 15 to 18.";
@@ -36,21 +38,21 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
             new DungeonNode(new Vector3(-182, -418, 54), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-193, -444, 54), DungeonNodeType.Boss),
             new DungeonNode(new Vector3(-191, -457, 54), DungeonNodeType.Door),
-            new DungeonNode(new Vector3(-188, -485, 54), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-188, -485, 54), DungeonNodeType.Door),
             new DungeonNode(new Vector3(-193, -505, 53), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-218, -497, 49), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-243, -482, 49), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-260, -482, 49), DungeonNodeType.Door),
-            new DungeonNode(new Vector3(-278, -484, 49), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-278, -484, 49), DungeonNodeType.Door),
             new DungeonNode(new Vector3(-284, -497, 49), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-290, -520, 50), DungeonNodeType.Boss),
             new DungeonNode(new Vector3(-290, -534, 49), DungeonNodeType.Door),
-            new DungeonNode(new Vector3(-290, -558, 49), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-290, -558, 49), DungeonNodeType.Door),
             new DungeonNode(new Vector3(-304, -597, 48), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-286, -602, 49), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-269, -578, 50), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-245, -579, 51), DungeonNodeType.Door),
-            new DungeonNode(new Vector3(-230, -579, 51), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-230, -579, 51), DungeonNodeType.Door),
             new DungeonNode(new Vector3(-217, -556, 51), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-192, -555, 51), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-178, -578, 47), DungeonNodeType.Normal),
@@ -66,16 +68,16 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
             new DungeonNode(new Vector3(-192, -553, 19), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-179, -573, 19), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-170, -580, 19), DungeonNodeType.Door),
-            new DungeonNode(new Vector3(-154, -580, 19), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-154, -580, 19), DungeonNodeType.Door),
             new DungeonNode(new Vector3(-135, -582, 18), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-132, -596, 17), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-132, -614, 13), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-107, -617, 14), DungeonNodeType.Collect, "Defias Gunpowder"),
+            new DungeonNode(new Vector3(-107, -617, 14), DungeonNodeType.Collect, defiasGunPowderName),
             new DungeonNode(new Vector3(-132, -621, 13), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-124, -637, 13), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-106, -648, 7), DungeonNodeType.Normal),
-            new DungeonNode(new Vector3(-105, -658, 7), DungeonNodeType.Use, "Defias Gunpowder"),
-            new DungeonNode(new Vector3(-98, -678, 7 ), DungeonNodeType.Normal),
+            new DungeonNode(new Vector3(-105, -658, 7), DungeonNodeType.Use, defiasGunPowderName),
+            new DungeonNode(new Vector3(-98, -678, 7 ), DungeonNodeType.Use, defiasGunPowderName),
             new DungeonNode(new Vector3(-97, -691, 8), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-97, -704, 8), DungeonNodeType.Normal),
             new DungeonNode(new Vector3(-97, -717, 9), DungeonNodeType.Normal),

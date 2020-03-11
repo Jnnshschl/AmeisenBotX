@@ -83,10 +83,10 @@ namespace AmeisenBotX.Core.Dungeon
                                 || dungeonNode.Type == Enums.DungeonNodeType.Use)
                             {
                                 WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                                    .OrderBy(e => e.Position.GetDistance(dungeonNode.Position))
                                     .FirstOrDefault();
 
-                                if (obj != null)
+                                if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 5)
                                 {
                                     WowInterface.CharacterManager.InteractWithObject(obj);
                                 }
@@ -99,13 +99,13 @@ namespace AmeisenBotX.Core.Dungeon
                     }
                 }
             }
-            else if(!HasFinishedDungeon && DungeonProfile == null && CurrentNodes.Count == 0)
+            else if (!HasFinishedDungeon && DungeonProfile == null && CurrentNodes.Count == 0)
             {
                 LoadProfile(TryLoadProfile());
             }
             else
             {
-                // find a way to exit the dungeon, mabe hearthstone
+                // find a way to exit the dungeon, maybe hearthstone
             }
         }
 
@@ -146,7 +146,8 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private bool AreAllPlayersPresent()
-            => WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 50).Count() >= WowInterface.ObjectManager.Partymembers.Count;
+            => WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 50)
+            .Count() >= WowInterface.ObjectManager.Partymembers.Count;
 
         private bool ShouldWaitForGroup()
         {

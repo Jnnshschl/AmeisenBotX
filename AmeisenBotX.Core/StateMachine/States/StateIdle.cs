@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // we are in a dungeon
-            if (StateMachine.IsInDungeon())
+            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
             {
                 StateMachine.SetState(BotState.Dungeon);
                 return;

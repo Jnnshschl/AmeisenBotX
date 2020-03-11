@@ -122,6 +122,7 @@
     <Compile Include="Data\Enums\DungeonDifficulty.cs" />
     <Compile Include="Data\Enums\GameobjectDisplayId.cs" />
     <Compile Include="Data\Enums\GameState.cs" />
+    <Compile Include="Data\Enums\ItemSubClass.cs" />
     <Compile Include="Data\Enums\MapId.cs" />
     <Compile Include="Data\Enums\RaidDifficulty.cs" />
     <Compile Include="Data\Enums\RollType.cs" />
@@ -135,6 +136,9 @@
     <Compile Include="Data\Enums\OreNode.cs" />
     <Compile Include="Data\Enums\WowClass.cs" />
     <Compile Include="Data\Objects\Enums\AuraFlags.cs" />
+    <Compile Include="Data\Enums\SkillId.cs" />
+    <Compile Include="Data\Objects\Enums\WowItemFlags.cs" />
+    <Compile Include="Data\Objects\Structs\RawPlayerSkillInfo.cs" />
     <Compile Include="Data\Objects\Structs\RawWowAura.cs" />
     <Compile Include="Data\Objects\WowAura.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowDynobject.cs" />

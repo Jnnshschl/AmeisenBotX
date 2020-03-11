@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Test
@@ -15,9 +16,9 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             int rawWowContainerSize = Marshal.SizeOf(typeof(RawWowContainer));
 
-            WowContainer wowContainer = new WowContainer();
+            WowContainer wowContainer = new WowContainer(IntPtr.Zero, WowObjectType.Container);
 
-            Assert.AreEqual(wowContainer.BaseOffset + RawWowContainer.EndOffset, rawWowObjectSize + rawWowContainerSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowContainer.EndOffset, rawWowObjectSize + rawWowContainerSize);
         }
 
         [TestMethod]
@@ -27,9 +28,9 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             int rawWowCorpseSize = Marshal.SizeOf(typeof(RawWowCorpse));
 
-            WowCorpse wowCorpse = new WowCorpse();
+            WowCorpse wowCorpse = new WowCorpse(IntPtr.Zero, WowObjectType.Corpse);
 
-            Assert.AreEqual(wowCorpse.BaseOffset + RawWowCorpse.EndOffset, rawWowObjectSize + rawWowCorpseSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowCorpse.EndOffset, rawWowObjectSize + rawWowCorpseSize);
         }
 
         [TestMethod]
@@ -39,9 +40,9 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             int rawWowDynobjectSize = Marshal.SizeOf(typeof(RawWowDynobject));
 
-            WowDynobject wowDynobject = new WowDynobject();
+            WowDynobject wowDynobject = new WowDynobject(IntPtr.Zero, WowObjectType.Dynobject);
 
-            Assert.AreEqual(wowDynobject.BaseOffset + RawWowDynobject.EndOffset, rawWowObjectSize + rawWowDynobjectSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowDynobject.EndOffset, rawWowObjectSize + rawWowDynobjectSize);
         }
 
         [TestMethod]
@@ -51,9 +52,9 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             int rawWowGameobjectSize = Marshal.SizeOf(typeof(RawWowGameobject));
 
-            WowGameobject wowGameobject = new WowGameobject();
+            WowGameobject wowGameobject = new WowGameobject(IntPtr.Zero, WowObjectType.Gameobject);
 
-            Assert.AreEqual(wowGameobject.BaseOffset + RawWowGameobject.EndOffset, rawWowObjectSize + rawWowGameobjectSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowGameobject.EndOffset, rawWowObjectSize + rawWowGameobjectSize);
         }
 
         [TestMethod]
@@ -63,9 +64,9 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             int rawWowItemSize = Marshal.SizeOf(typeof(RawWowItem));
 
-            WowItem wowItem = new WowItem();
+            WowItem wowItem = new WowItem(IntPtr.Zero, WowObjectType.Item);
 
-            Assert.AreEqual(wowItem.BaseOffset + RawWowItem.EndOffset, rawWowObjectSize + rawWowItemSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowItem.EndOffset, rawWowObjectSize + rawWowItemSize);
         }
 
         [TestMethod]
@@ -74,9 +75,9 @@ namespace AmeisenBotX.Test
             // >> WowObject
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
 
-            WowObject wowObject = new WowObject();
+            WowObject wowObject = new WowObject(IntPtr.Zero, WowObjectType.None);
 
-            Assert.AreEqual(wowObject.BaseOffset + RawWowObject.EndOffset, rawWowObjectSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowObject.EndOffset, rawWowObjectSize);
         }
 
         [TestMethod]
@@ -86,9 +87,9 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             int rawWowUnitSize = Marshal.SizeOf(typeof(RawWowUnit));
 
-            WowUnit wowUnit = new WowUnit();
+            WowUnit wowUnit = new WowUnit(IntPtr.Zero, WowObjectType.Unit);
 
-            Assert.AreEqual(wowUnit.BaseOffset + RawWowUnit.EndOffset, rawWowObjectSize + rawWowUnitSize);
+            Assert.AreEqual(RawWowObject.EndOffset + RawWowUnit.EndOffset, rawWowObjectSize + rawWowUnitSize);
         }
 
         // [TestMethod]
@@ -101,7 +102,7 @@ namespace AmeisenBotX.Test
         //
         //     WowPlayer wowPlayer = new WowPlayer();
         //
-        //     Assert.AreEqual(wowPlayer.BaseOffset + RawWowPlayer.EndOffset, rawWowObjectSize + rawWowUnitSize + rawWowPlayerSize);
+        //     Assert.AreEqual(RawWowObject.EndOffset + RawWowUnit.EndOffset + RawWowPlayer.EndOffset, rawWowObjectSize + rawWowUnitSize + rawWowPlayerSize);
         // }
     }
 }

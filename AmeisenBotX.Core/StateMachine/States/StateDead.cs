@@ -14,6 +14,7 @@
         {
             if (WowInterface.ObjectManager.Player.IsDead)
             {
+                StateMachine.MapIDiedOn = WowInterface.ObjectManager.MapId;
                 WowInterface.HookManager.ReleaseSpirit();
             }
             else if (WowInterface.HookManager.IsGhost("player"))

@@ -74,7 +74,9 @@ namespace AmeisenBotX.Core.Statemachine
 
         private DateTime LastGhostCheck { get; set; }
 
-        private Dictionary<BotState, BasicState> States { get; }
+        public Dictionary<BotState, BasicState> States { get; private set; }
+
+        public MapId MapIDiedOn { get; internal set; }
 
         public void Execute()
         {
@@ -146,15 +148,15 @@ namespace AmeisenBotX.Core.Statemachine
             return false;
         }
 
-        internal bool IsInDungeon()
-            => WowInterface.ObjectManager.MapId == MapId.Deadmines;
+        internal bool IsDungeonMap(MapId map)
+            => map == MapId.Deadmines;
 
-        internal bool IsOnBattleground()
-            => WowInterface.ObjectManager.MapId == MapId.AlteracValley
-            || WowInterface.ObjectManager.MapId == MapId.WarsongGulch
-            || WowInterface.ObjectManager.MapId == MapId.ArathiBasin
-            || WowInterface.ObjectManager.MapId == MapId.EyeOfTheStorm
-            || WowInterface.ObjectManager.MapId == MapId.StrandOfTheAncients;
+        internal bool IsBattlegroundMap(MapId map)
+            => map == MapId.AlteracValley
+            || map == MapId.WarsongGulch
+            || map == MapId.ArathiBasin
+            || map == MapId.EyeOfTheStorm
+            || map == MapId.StrandOfTheAncients;
 
         internal void SetState(BotState state, bool ignoreExit = false)
         {

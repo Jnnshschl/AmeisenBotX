@@ -12,7 +12,7 @@
 
         public override void Execute()
         {
-            if (StateMachine.IsInDungeon())
+            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
             {
                 WowInterface.DungeonEngine.Execute();
             }
