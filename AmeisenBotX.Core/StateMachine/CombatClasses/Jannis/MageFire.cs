@@ -30,27 +30,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { arcaneIntellectSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(arcaneIntellectSpell, true);
-                    }
-                },
-                { moltenArmorSpell, () => CastSpellIfPossible(moltenArmorSpell, true) },
-                { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
+                { arcaneIntellectSpell, () => CastSpellIfPossible(arcaneIntellectSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { moltenArmorSpell, () => CastSpellIfPossible(moltenArmorSpell, 0, true) },
+                { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { scorchSpell, () => CastSpellIfPossible(scorchSpell, true) },
-                { livingBombSpell, () => CastSpellIfPossible(livingBombSpell, true) }
+                { scorchSpell, () => CastSpellIfPossible(scorchSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { livingBombSpell, () => CastSpellIfPossible(livingBombSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
-            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
+            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, WowInterface.ObjectManager.TargetGuid, true);
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(counterspellSpell, true) }
+                { 0, () => CastSpellIfPossible(counterspellSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
         }
 
@@ -93,13 +88,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (WowInterface.ObjectManager.Target != null)
             {
-                if (CastSpellIfPossible(mirrorImageSpell, true)
+                if (CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 16
-                        && CastSpellIfPossible(iceBlockSpell, true))
-                    || (MyAuraManager.Buffs.Contains(hotstreakSpell.ToLower()) && CastSpellIfPossible(pyroblastSpell, true))
+                        && CastSpellIfPossible(iceBlockSpell, 0, true))
+                    || (MyAuraManager.Buffs.Contains(hotstreakSpell.ToLower()) && CastSpellIfPossible(pyroblastSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || (WowInterface.ObjectManager.Player.ManaPercentage < 40
-                        && CastSpellIfPossible(evocationSpell, true))
-                    || CastSpellIfPossible(fireballSpell, true))
+                        && CastSpellIfPossible(evocationSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }

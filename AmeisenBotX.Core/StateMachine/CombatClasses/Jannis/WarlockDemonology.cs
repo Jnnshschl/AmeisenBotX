@@ -46,17 +46,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.ObjectManager.Pet,
                 TimeSpan.FromSeconds(1),
                 null,
-                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell))
-                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell)),
+                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell, 0))
+                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0)),
                 null);
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { corruptionSpell, () => CastSpellIfPossible(corruptionSpell, true) },
-                { curseOftheElementsSpell, () => CastSpellIfPossible(curseOftheElementsSpell, true) },
-                { immolateSpell, () => CastSpellIfPossible(immolateSpell, true) }
+                { corruptionSpell, () => CastSpellIfPossible(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { curseOftheElementsSpell, () => CastSpellIfPossible(curseOftheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { immolateSpell, () => CastSpellIfPossible(immolateSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
@@ -102,15 +102,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 || TargetAuraManager.Tick()
                 || WowInterface.ObjectManager.Player.ManaPercentage < 20
                     && WowInterface.ObjectManager.Player.HealthPercentage > 60
-                    && CastSpellIfPossible(lifeTapSpell)
+                    && CastSpellIfPossible(lifeTapSpell, 0)
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 80
-                    && CastSpellIfPossible(deathCoilSpell, true))
+                    && CastSpellIfPossible(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 50
-                    && CastSpellIfPossible(drainLifeSpell, true))
+                    && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || (DateTime.Now - LastDamageBuffCheck > TimeSpan.FromSeconds(damageBuffCheckTime)
                     && HandleDamageBuffing())
-                || CastSpellIfPossible(metamorphosisSpell)
-                || (WowInterface.ObjectManager.Pet != null && CastSpellIfPossible(demonicEmpowermentSpell)))
+                || CastSpellIfPossible(metamorphosisSpell, 0)
+                || (WowInterface.ObjectManager.Pet != null && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
             {
                 return;
             }
@@ -121,9 +121,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
                         && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
-                            && CastSpellIfPossible(howlOfTerrorSpell, true))
+                            && CastSpellIfPossible(howlOfTerrorSpell, 0, true))
                         || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
-                            && CastSpellIfPossible(fearSpell, true))))
+                            && CastSpellIfPossible(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
                     {
                         LastFearAttempt = DateTime.Now;
                         return;
@@ -133,13 +133,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (!WowInterface.ObjectManager.Player.IsCasting
                     && WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
                     && WowInterface.ObjectManager.Target.HealthPercentage < 8
-                    && CastSpellIfPossible(drainSoulSpell, true))
+                    && CastSpellIfPossible(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
             }
 
-            if (CastSpellIfPossible(incinerateSpell, true))
+            if (CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }
@@ -161,17 +161,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (myBuffs.Any(e => e.Equals(decimationSpell, StringComparison.OrdinalIgnoreCase)))
             {
                 if (myBuffs.Any(e => e.Equals(moltenCoreSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(soulfireSpell, true))
+                    && CastSpellIfPossible(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return true;
                 }
-                else if (CastSpellIfPossible(soulfireSpell, true))
+                else if (CastSpellIfPossible(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return true;
                 }
             }
             else if (myBuffs.Any(e => e.Equals(moltenCoreSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(incinerateSpell, true))
+                    && CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return true;
             }
@@ -184,15 +184,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell))
             {
-                MyAuraManager.BuffsToKeepActive.Add(felArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, true));
+                MyAuraManager.BuffsToKeepActive.Add(felArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, 0, true));
             }
             else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell))
             {
-                MyAuraManager.BuffsToKeepActive.Add(demonArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, true));
+                MyAuraManager.BuffsToKeepActive.Add(demonArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, 0, true));
             }
             else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell))
             {
-                MyAuraManager.BuffsToKeepActive.Add(demonSkinSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, true));
+                MyAuraManager.BuffsToKeepActive.Add(demonSkinSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, 0, true));
             }
         }
     }

@@ -33,24 +33,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, true) },
-                { markOfTheWildSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(markOfTheWildSpell, true);
-                    }
-                }
+                { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell,0, true) },
+                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { moonfireSpell, () => LunarEclipse && CastSpellIfPossible(moonfireSpell, true) },
-                { insectSwarmSpell, () => SolarEclipse && CastSpellIfPossible(insectSwarmSpell, true) }
+                { moonfireSpell, () => LunarEclipse && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { insectSwarmSpell, () => SolarEclipse && CastSpellIfPossible(insectSwarmSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(faerieFireSpell, true) },
+                { 0, () => CastSpellIfPossible(faerieFireSpell, WowInterface.ObjectManager.TargetGuid, true) },
             };
         }
 
@@ -96,20 +91,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 || (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
                     && CheckForEclipseProcs())
                 || (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                    && CastSpellIfPossible(innervateSpell))
+                    && CastSpellIfPossible(innervateSpell, 0))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(barkskinSpell, true))
+                    && CastSpellIfPossible(barkskinSpell, 0, true))
                 || (LunarEclipse
-                    && CastSpellIfPossible(starfireSpell, true))
+                    && CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || (SolarEclipse
-                    && CastSpellIfPossible(wrathSpell, true))
+                    && CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                    && CastSpellIfPossible(starfallSpell, true)))
+                    && CastSpellIfPossible(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
             {
                 return;
             }
 
-            if (CastSpellIfPossible(forceOfNatureSpell, true))
+            if (CastSpellIfPossible(forceOfNatureSpell, 0, true))
             {
                 WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
             }

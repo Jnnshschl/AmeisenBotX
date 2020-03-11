@@ -33,20 +33,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { frostPresenceSpell, () => CastSpellIfPossibleDk(frostPresenceSpell) },
-                { hornOfWinterSpell, () => CastSpellIfPossibleDk(hornOfWinterSpell, true) }
+                { frostPresenceSpell, () => CastSpellIfPossibleDk(frostPresenceSpell, 0) },
+                { hornOfWinterSpell, () => CastSpellIfPossibleDk(hornOfWinterSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { frostFeverSpell, () => CastSpellIfPossibleDk(icyTouchSpell, false, false, false, true) },
-                { bloodPlagueSpell, () => CastSpellIfPossibleDk(plagueStrikeSpell, false, false, false, true) }
+                { frostFeverSpell, () => CastSpellIfPossibleDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) },
+                { bloodPlagueSpell, () => CastSpellIfPossibleDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossibleDk(mindFreezeSpell, true) },
-                { 1, () => CastSpellIfPossibleDk(strangulateSpell, false, true) }
+                { 0, () => CastSpellIfPossibleDk(mindFreezeSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { 1, () => CastSpellIfPossibleDk(strangulateSpell, WowInterface.ObjectManager.TargetGuid, false, true) }
             };
         }
 
@@ -90,13 +90,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossibleDk(iceboundFortitudeSpell, true))
-                || CastSpellIfPossibleDk(unbreakableArmorSpell, false, false, true)
-                || CastSpellIfPossibleDk(obliterateSpell, false, false, true, true)
-                || CastSpellIfPossibleDk(bloodStrikeSpell, false, true)
-                || CastSpellIfPossibleDk(deathCoilSpell, true)
+                    && CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true))
+                || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
+                || CastSpellIfPossibleDk(obliterateSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
+                || CastSpellIfPossibleDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
+                || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
                 || (WowInterface.ObjectManager.Player.Runeenergy > 60
-                    && CastSpellIfPossibleDk(runeStrikeSpell)))
+                    && CastSpellIfPossibleDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
             {
                 return;
             }

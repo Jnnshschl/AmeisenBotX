@@ -31,19 +31,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { blessingOfMightSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(blessingOfMightSpell, true);
-                    }
-                },
-                { retributionAuraSpell, () => CastSpellIfPossible(retributionAuraSpell, true) },
-                { sealOfVengeanceSpell, () => CastSpellIfPossible(sealOfVengeanceSpell, true) }
+                { blessingOfMightSpell, () => CastSpellIfPossible(blessingOfMightSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { retributionAuraSpell, () => CastSpellIfPossible(retributionAuraSpell, 0, true) },
+                { sealOfVengeanceSpell, () => CastSpellIfPossible(sealOfVengeanceSpell, 0, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(hammerOfJusticeSpell, true) }
+                { 0, () => CastSpellIfPossible(hammerOfJusticeSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
         }
 
@@ -85,14 +80,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLower())
-                    && CastSpellIfPossible(judgementOfLightSpell))
+                    && CastSpellIfPossible(judgementOfLightSpell, 0))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossible(layOnHandsSpell))
+                    && CastSpellIfPossible(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossible(holyLightSpell, true))
-                || CastSpellIfPossible(avengingWrathSpell, true)
+                    && CastSpellIfPossible(holyLightSpell, WowInterface.ObjectManager.PlayerGuid, true))
+                || CastSpellIfPossible(avengingWrathSpell, 0, true)
                 || (WowInterface.ObjectManager.Player.ManaPercentage < 80
-                    && CastSpellIfPossible(divinePleaSpell, true)))
+                    && CastSpellIfPossible(divinePleaSpell, 0, true)))
             {
                 return;
             }
@@ -100,13 +95,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (WowInterface.ObjectManager.Target != null)
             {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
-                        && CastSpellIfPossible(hammerOfWrathSpell, true))
-                    || CastSpellIfPossible(crusaderStrikeSpell, true)
-                    || CastSpellIfPossible(divineStormSpell, true)
-                    || CastSpellIfPossible(divineStormSpell, true)
-                    || CastSpellIfPossible(consecrationSpell, true)
-                    || CastSpellIfPossible(exorcismSpell, true)
-                    || CastSpellIfPossible(holyWrathSpell, true))
+                        && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossible(crusaderStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(divineStormSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(exorcismSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(holyWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }

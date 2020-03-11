@@ -33,13 +33,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { treeOfLifeSpell, () => CastSpellIfPossible(treeOfLifeSpell, true) },
-                { markOfTheWildSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(markOfTheWildSpell, true);
-                    }
-                }
+                { treeOfLifeSpell, () => CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -85,7 +80,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             if (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                && CastSpellIfPossible(innervateSpell, true))
+                && CastSpellIfPossible(innervateSpell, WowInterface.ObjectManager.PlayerGuid, true))
             {
                 return;
             }
@@ -96,7 +91,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                 if (playersThatNeedHealing.Count > 4
-                    && CastSpellIfPossible(tranquilitySpell, true))
+                    && CastSpellIfPossible(tranquilitySpell, 0, true))
                 {
                     return;
                 }
@@ -108,20 +103,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     List<string> targetBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
 
                     if ((target.HealthPercentage < 15
-                            && CastSpellIfPossible(naturesSwiftnessSpell, true))
+                            && CastSpellIfPossible(naturesSwiftnessSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 90
                             && !targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(rejuvenationSpell, true))
+                            && CastSpellIfPossible(rejuvenationSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 85
                             && !targetBuffs.Any(e => e.Equals(wildGrowthSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(wildGrowthSpell, true))
+                            && CastSpellIfPossible(wildGrowthSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 85
                             && !targetBuffs.Any(e => e.Equals(lifebloomSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(reviveSpell, true))
+                            && CastSpellIfPossible(reviveSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 70
                             && (targetBuffs.Any(e => e.Equals(regrowthSpell, StringComparison.OrdinalIgnoreCase))
                                 || targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(swiftmendSpell, true))))
+                            && CastSpellIfPossible(swiftmendSpell, WowInterface.ObjectManager.TargetGuid, true))))
                     {
                         return;
                     }
@@ -131,7 +126,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             break;
                         }

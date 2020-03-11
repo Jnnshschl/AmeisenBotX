@@ -45,25 +45,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             PetManager = new PetManager(
                 WowInterface.ObjectManager.Pet,
                 TimeSpan.FromSeconds(15),
-                () => CastSpellIfPossible(mendPetSpell, true),
-                () => CastSpellIfPossible(callPetSpell),
-                () => CastSpellIfPossible(revivePetSpell));
+                () => CastSpellIfPossible(mendPetSpell, 0, true),
+                () => CastSpellIfPossible(callPetSpell, 0),
+                () => CastSpellIfPossible(revivePetSpell, 0));
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { aspectOfTheDragonhawkSpell, () => CastSpellIfPossible(aspectOfTheDragonhawkSpell, true) }
+                { aspectOfTheDragonhawkSpell, () => CastSpellIfPossible(aspectOfTheDragonhawkSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { huntersMarkSpell, () => CastSpellIfPossible(huntersMarkSpell, true) },
-                { serpentStingSpell, () => CastSpellIfPossible(serpentStingSpell, true) }
+                { huntersMarkSpell, () => CastSpellIfPossible(huntersMarkSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { serpentStingSpell, () => CastSpellIfPossible(serpentStingSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(scatterShotSpell, true) },
-                { 1, () => CastSpellIfPossible(intimidationSpell, true) }
+                { 0, () => CastSpellIfPossible(scatterShotSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { 1, () => CastSpellIfPossible(intimidationSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
         }
 
@@ -122,14 +122,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 15
-                    && CastSpellIfPossible(feignDeathSpell))
+                    && CastSpellIfPossible(feignDeathSpell, 0))
                 {
                     return;
                 }
 
                 if (distanceToTarget < 3)
                 {
-                    if (CastSpellIfPossible(frostTrapSpell, true))
+                    if (CastSpellIfPossible(frostTrapSpell, 0, true))
                     {
                         InFrostTrapCombo = true;
                         DisengagePrepared = true;
@@ -137,13 +137,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 30
-                        && CastSpellIfPossible(deterrenceSpell, true))
+                        && CastSpellIfPossible(deterrenceSpell, 0, true))
                     {
                         return;
                     }
 
-                    if (CastSpellIfPossible(raptorStrikeSpell, true)
-                        || CastSpellIfPossible(mongooseBiteSpell, true))
+                    if (CastSpellIfPossible(raptorStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(mongooseBiteSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
@@ -151,32 +151,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 else
                 {
                     if (DisengagePrepared
-                        && CastSpellIfPossible(concussiveShotSpell, true))
+                        && CastSpellIfPossible(concussiveShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         DisengagePrepared = false;
                         return;
                     }
 
                     if (InFrostTrapCombo
-                        && CastSpellIfPossible(disengageSpell, true))
+                        && CastSpellIfPossible(disengageSpell, 0, true))
                     {
                         InFrostTrapCombo = false;
                         return;
                     }
 
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 20
-                        && CastSpellIfPossible(killShotSpell, true))
+                        && CastSpellIfPossible(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
-                    CastSpellIfPossible(killCommandSpell, true);
-                    CastSpellIfPossible(beastialWrathSpell, true);
-                    CastSpellIfPossible(rapidFireSpell);
+                    CastSpellIfPossible(killCommandSpell, WowInterface.ObjectManager.TargetGuid, true);
+                    CastSpellIfPossible(beastialWrathSpell, WowInterface.ObjectManager.TargetGuid, true);
+                    CastSpellIfPossible(rapidFireSpell, 0);
 
-                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, true))
-                        || CastSpellIfPossible(arcaneShotSpell, true)
-                        || CastSpellIfPossible(steadyShotSpell, true))
+                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }

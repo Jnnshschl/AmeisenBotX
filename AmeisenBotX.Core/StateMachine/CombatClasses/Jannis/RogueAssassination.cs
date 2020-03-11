@@ -25,13 +25,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { sliceAndDiceSpell, () => CastSpellIfPossibleRogue(sliceAndDiceSpell, true, true, 1) },
-                { coldBloodSpell, () => CastSpellIfPossibleRogue(coldBloodSpell, true) }
+                { sliceAndDiceSpell, () => CastSpellIfPossibleRogue(sliceAndDiceSpell, 0, true, true, 1) },
+                { coldBloodSpell, () => CastSpellIfPossibleRogue(coldBloodSpell, 0, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossibleRogue(kickSpell, true) }
+                { 0, () => CastSpellIfPossibleRogue(kickSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
         }
 
@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossibleRogue(cloakOfShadowsSpell, true)))
+                    && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
             {
                 return;
             }
@@ -81,14 +81,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (WowInterface.ObjectManager.Target != null)
             {
                 if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
-                        && CastSpellIfPossibleRogue(sprintSpell, true)))
+                        && CastSpellIfPossibleRogue(sprintSpell, 0, true)))
                 {
                     return;
                 }
             }
 
-            if (CastSpellIfPossibleRogue(eviscerateSpell, true, true, 5)
-                || CastSpellIfPossibleRogue(mutilateSpell, true))
+            if (CastSpellIfPossibleRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
+                || CastSpellIfPossibleRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }

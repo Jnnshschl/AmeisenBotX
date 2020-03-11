@@ -34,13 +34,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { powerWordFortitudeSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(powerWordFortitudeSpell, true);
-                    }
-                },
-                { innerFireSpell, () => CastSpellIfPossible(innerFireSpell, true) }
+                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { innerFireSpell, () => CastSpellIfPossible(innerFireSpell, 0, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -96,7 +91,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     WowInterface.ObjectManager.UpdateObject(target);
 
                     if (playersThatNeedHealing.Count > 4
-                        && CastSpellIfPossible(prayerOfHealingSpell, true))
+                        && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
@@ -104,19 +99,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (target.Guid != WowInterface.ObjectManager.PlayerGuid
                         && target.HealthPercentage < 70
                         && WowInterface.ObjectManager.Player.HealthPercentage < 70
-                        && CastSpellIfPossible(bindingHealSpell, true))
+                        && CastSpellIfPossible(bindingHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
                     if (WowInterface.ObjectManager.Player.ManaPercentage < 50
-                        && CastSpellIfPossible(hymnOfHopeSpell))
+                        && CastSpellIfPossible(hymnOfHopeSpell, 0))
                     {
                         return;
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 20
-                        && CastSpellIfPossible(desperatePrayerSpell))
+                        && CastSpellIfPossible(desperatePrayerSpell, 0))
                     {
                         return;
                     }
@@ -126,10 +121,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if ((target.HealthPercentage < 85
                             && !targetBuffs.Any(e => e.Equals(weakenedSoulSpell, StringComparison.OrdinalIgnoreCase))
                             && !targetBuffs.Any(e => e.Equals(powerWordShieldSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(powerWordShieldSpell, true))
+                            && CastSpellIfPossible(powerWordShieldSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 80
                             && !targetBuffs.Any(e => e.Equals(renewSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(renewSpell, true)))
+                            && CastSpellIfPossible(renewSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
                         return;
                     }
@@ -139,7 +134,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;
                         }

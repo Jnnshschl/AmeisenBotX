@@ -31,21 +31,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { arcaneIntellectSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(arcaneIntellectSpell, true);
-                    }
-                },
-                { mageArmorSpell, () => CastSpellIfPossible(mageArmorSpell, true) },
-                { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, true) }
+                { arcaneIntellectSpell, () => CastSpellIfPossible(arcaneIntellectSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { mageArmorSpell, () => CastSpellIfPossible(mageArmorSpell, 0, true) },
+                { manaShieldSpell, () => CastSpellIfPossible(manaShieldSpell, 0, true) }
             };
 
-            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, true);
+            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && CastSpellIfPossible(spellStealSpell, WowInterface.ObjectManager.TargetGuid, true);
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(counterspellSpell, true) }
+                { 0, () => CastSpellIfPossible(counterspellSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
         }
 
@@ -91,13 +86,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (WowInterface.ObjectManager.Target != null)
             {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 16
-                        && CastSpellIfPossible(iceBlockSpell))
+                        && CastSpellIfPossible(iceBlockSpell, 0))
                     || (WowInterface.ObjectManager.Player.ManaPercentage < 40
-                        && CastSpellIfPossible(evocationSpell, true))
-                    || CastSpellIfPossible(mirrorImageSpell, true)
-                    || (MyAuraManager.Buffs.Contains(missileBarrageSpell.ToLower()) && CastSpellIfPossible(arcaneMissilesSpell, true))
-                    || CastSpellIfPossible(arcaneBarrageSpell, true)
-                    || CastSpellIfPossible(arcaneBlastSpell, true))
+                        && CastSpellIfPossible(evocationSpell, 0, true))
+                    || CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || (MyAuraManager.Buffs.Contains(missileBarrageSpell.ToLower()) && CastSpellIfPossible(arcaneMissilesSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossible(arcaneBarrageSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(arcaneBlastSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }

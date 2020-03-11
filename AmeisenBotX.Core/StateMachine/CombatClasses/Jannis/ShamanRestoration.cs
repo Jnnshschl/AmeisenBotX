@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, true) }
+                { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, 0, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -84,20 +84,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Target != null)
                 {
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 25
-                        && CastSpellIfPossible(earthShieldSpell, true))
+                        && CastSpellIfPossible(earthShieldSpell, 0, true))
                     {
                         return;
                     }
 
                     if (playersThatNeedHealing.Count > 4
-                        && CastSpellIfPossible(chainHealSpell, true))
+                        && CastSpellIfPossible(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
                     if (playersThatNeedHealing.Count > 6
-                        && (CastSpellIfPossible(naturesSwiftnessSpell, true)
-                        || CastSpellIfPossible(tidalForceSpell, true)))
+                        && (CastSpellIfPossible(naturesSwiftnessSpell, 0, true)
+                        || CastSpellIfPossible(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
                         return;
                     }
@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;
                         }

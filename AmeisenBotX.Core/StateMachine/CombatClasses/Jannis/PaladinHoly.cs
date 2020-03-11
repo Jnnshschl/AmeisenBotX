@@ -28,13 +28,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { blessingOfWisdomSpell, () =>
-                    {
-                        WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
-                        return CastSpellIfPossible(blessingOfWisdomSpell, true);
-                    }
-                },
-                { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, true) }
+                { blessingOfWisdomSpell, () => CastSpellIfPossible(blessingOfWisdomSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -78,7 +73,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             if (WowInterface.ObjectManager.Player.ManaPercentage < 80
-                && CastSpellIfPossible(divinePleaSpell, true))
+                && CastSpellIfPossible(divinePleaSpell, WowInterface.ObjectManager.PlayerGuid, true))
             {
                 return;
             }
@@ -93,20 +88,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
 
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 12
-                        && CastSpellIfPossible(layOnHandsSpell))
+                        && CastSpellIfPossible(layOnHandsSpell, 0))
                     {
                         return;
                     }
 
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 50)
                     {
-                        CastSpellIfPossible(divineFavorSpell, true);
+                        CastSpellIfPossible(divineFavorSpell, WowInterface.ObjectManager.TargetGuid, true);
                     }
 
                     if (WowInterface.ObjectManager.Player.ManaPercentage < 50
                        && WowInterface.ObjectManager.Player.ManaPercentage > 20)
                     {
-                        CastSpellIfPossible(divineIlluminationSpell, true);
+                        CastSpellIfPossible(divineIlluminationSpell, 0, true);
                     }
 
                     double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
@@ -114,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             break;
                         }
