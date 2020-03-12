@@ -31,6 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
+            WowInterface.HookManager.ClearTarget();
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
         }
 
@@ -110,6 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+            WowInterface.HookManager.ClearTarget();
             WowInterface.MovementEngine.Reset();
 
             Enemies.Clear();
@@ -187,10 +189,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                 else
                 {
                     // maybe we are able to assist our partymembers
-                    /*if (ObjectManager.PartymemberGuids.Count > 0)
+                    if (WowInterface.ObjectManager.PartymemberGuids.Count > 0)
                     {
                         Dictionary<ulong, int> partymemberTargets = new Dictionary<ulong, int>();
-                        ObjectManager.Partymembers.ForEach(e =>
+                        WowInterface.ObjectManager.Partymembers.ForEach(e =>
                         {
                             ulong targetGuid = ((WowUnit)e).TargetGuid;
                             if (targetGuid > 0)
@@ -210,15 +212,18 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                         // filter out invalid, not in combat and friendly units
                         WowUnit validTarget = null;
-
                         selectedTargets.ForEach(e =>
                         {
-                            WowUnit target = (WowUnit)ObjectManager.GetWowObjectByGuid(e.Key);
-                            if (BotUtils.IsValidUnit(target)
-                                && target.IsInCombat
-                                && HookManager.GetUnitReaction(ObjectManager.Player, target) != WowUnitReaction.Friendly)
+                            if (validTarget == null)
                             {
-                                validTarget = target;
+                                WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Key);
+
+                                if (BotUtils.IsValidUnit(target)
+                                    && target.IsInCombat
+                                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, target) != WowUnitReaction.Friendly)
+                                {
+                                    validTarget = target;
+                                }
                             }
                         });
 
@@ -227,7 +232,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                             target = validTarget;
                             return true;
                         }
-                    }*/
+                    }
 
                     // last fallback, target our nearest enemy
                     WowInterface.HookManager.TargetNearestEnemy();

@@ -184,7 +184,7 @@ namespace AmeisenBotX.Core.Statemachine
         private void HandleEventPull()
         {
             if (WowInterface.EventHookManager.IsSetUp
-                && LastEventPull + TimeSpan.FromSeconds(Config.EventPullMs) < DateTime.Now)
+                && LastEventPull + TimeSpan.FromMilliseconds(Config.EventPullMs) < DateTime.Now)
             {
                 WowInterface.EventHookManager.ReadEvents();
                 LastEventPull = DateTime.Now;
