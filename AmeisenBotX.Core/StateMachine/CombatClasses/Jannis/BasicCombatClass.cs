@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using AmeisenBotX.Logging;
@@ -95,6 +96,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         internal bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0)
         {
+            if (!PrepareCast(spellName))
+            {
+                return false;
+            }
+
+            WowUnit target = null;
+            if (guid != 0)
+            {
+                target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
+
+                if (target == null)
+                {
+                    return false;
+                }
+            }
+
             if (currentResourceAmount == 0)
             {
                 currentResourceAmount = WowInterface.ObjectManager.Player.Class switch
@@ -106,12 +123,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 };
             }
 
-            PrepareCast(spellName);
-
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
-                && (WowInterface.ObjectManager.Target != null && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position)))
+                && (target == null || IsInRange(Spells[spellName], target.Position)))
             {
                 if (guid != 0 && WowInterface.ObjectManager.TargetGuid != guid)
                 {
@@ -127,7 +142,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         internal bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false)
         {
-            PrepareCast(spellName);
+            if (!PrepareCast(spellName))
+            {
+                return false;
+            }
+
+            WowUnit target = null;
+            if (guid != 0)
+            {
+                target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
+
+                if (target == null)
+                {
+                    return false;
+                }
+            }
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
@@ -135,9 +164,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && (!needsBloodrune || (WowInterface.HookManager.IsRuneReady(0) || WowInterface.HookManager.IsRuneReady(1)))
                 && (!needsFrostrune || (WowInterface.HookManager.IsRuneReady(2) || WowInterface.HookManager.IsRuneReady(3)))
                 && (!needsUnholyrune || (WowInterface.HookManager.IsRuneReady(4) || WowInterface.HookManager.IsRuneReady(5)))
-                && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position))
+                && (target == null || IsInRange(Spells[spellName], target.Position)))
             {
-                if (guid != 0 && WowInterface.ObjectManager.TargetGuid != guid)
+                if (guid != 0 && WowInterface.ObjectManager.Target.Guid != guid)
                 {
                     WowInterface.HookManager.TargetGuid(guid);
                 }
@@ -151,13 +180,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         internal bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1)
         {
-            PrepareCast(spellName);
+            if (!PrepareCast(spellName))
+            {
+                return false;
+            }
+
+            WowUnit target = null;
+            if (guid != 0)
+            {
+                target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
+
+                if (target == null)
+                {
+                    return false;
+                }
+            }
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsEnergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Energy)
                 && (!needsCombopoints || WowInterface.ObjectManager.Player.ComboPoints >= requiredCombopoints)
-                && IsInRange(Spells[spellName], WowInterface.ObjectManager.Target.Position))
+                && (target == null || IsInRange(Spells[spellName], target.Position)))
             {
                 if (guid != 0 && WowInterface.ObjectManager.TargetGuid != guid)
                 {
@@ -189,12 +232,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return distance > spell.MinRange && distance < spell.MaxRange;
         }
 
-        private void PrepareCast(string spellName)
+        private bool PrepareCast(string spellName)
         {
             if (!Spells.ContainsKey(spellName))
             {
-                Spells.Add(spellName, WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName));
+                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                if (spell != null)
+                {
+                    Spells.Add(spellName, spell);
+                    return true;
+                }
             }
+
+            return false;
         }
     }
 }
