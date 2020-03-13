@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Views;
 using Microsoft.Win32;
 using System;
@@ -11,21 +12,22 @@ using System.Windows.Media;
 
 namespace AmeisenBotX
 {
-    /// <summary>
-    /// Interaktionslogik für ConfigEditorWindow.xaml
-    /// </summary>
     public partial class ConfigEditorWindow : Window
     {
         public SolidColorBrush errorBorderBrush;
         public SolidColorBrush normalBorderBrush;
 
-        public ConfigEditorWindow(string dataDir, AmeisenBotConfig initialConfig = null)
+        public ConfigEditorWindow(string dataDir, AmeisenBot ameisenBot, AmeisenBotConfig initialConfig = null, string initialConfigName = "")
         {
             InitializeComponent();
 
             DataDir = dataDir;
             NewConfig = initialConfig == null;
             Config = initialConfig ?? new AmeisenBotConfig();
+            AmeisenBot = ameisenBot;
+            ConfigName = initialConfigName;
+
+            SaveConfig = NewConfig;
 
             normalBorderBrush = new SolidColorBrush((Color)FindResource("DarkBorder"));
             errorBorderBrush = new SolidColorBrush((Color)FindResource("DarkError"));
@@ -33,39 +35,25 @@ namespace AmeisenBotX
 
         public AmeisenBotConfig Config { get; private set; }
 
+        public AmeisenBot AmeisenBot { get; private set; }
+
         public string ConfigName { get; private set; }
 
         public string DataDir { get; }
 
         public bool NewConfig { get; }
 
+        public bool SaveConfig { get; private set; }
+
         private void AddDefaultCombatClasses()
         {
             comboboxBuiltInCombatClass.Items.Add("None");
-            comboboxBuiltInCombatClass.Items.Add("WarriorArms");
-            comboboxBuiltInCombatClass.Items.Add("DeathknightBlood");
-            comboboxBuiltInCombatClass.Items.Add("DeathknightUnholy");
-            comboboxBuiltInCombatClass.Items.Add("DeathknightFrost");
-            comboboxBuiltInCombatClass.Items.Add("WarriorFury");
-            comboboxBuiltInCombatClass.Items.Add("PaladinHoly");
-            comboboxBuiltInCombatClass.Items.Add("PaladinRetribution");
-            comboboxBuiltInCombatClass.Items.Add("PaladinProtection");
-            comboboxBuiltInCombatClass.Items.Add("MageArcane");
-            comboboxBuiltInCombatClass.Items.Add("MageFire");
-            comboboxBuiltInCombatClass.Items.Add("HunterBeastmastery");
-            comboboxBuiltInCombatClass.Items.Add("HunterMarksmanship");
-            comboboxBuiltInCombatClass.Items.Add("HunterSurvival");
-            comboboxBuiltInCombatClass.Items.Add("PriestHoly");
-            comboboxBuiltInCombatClass.Items.Add("PriestDiscipline");
-            comboboxBuiltInCombatClass.Items.Add("PriestShadow");
-            comboboxBuiltInCombatClass.Items.Add("WarlockAffliction");
-            comboboxBuiltInCombatClass.Items.Add("WarlockDemonology");
-            comboboxBuiltInCombatClass.Items.Add("WarlockDestruction");
-            comboboxBuiltInCombatClass.Items.Add("DruidRestoration");
-            comboboxBuiltInCombatClass.Items.Add("DruidBalance");
-            comboboxBuiltInCombatClass.Items.Add("RogueAssasination");
-            comboboxBuiltInCombatClass.Items.Add("ShamanElemental");
-            comboboxBuiltInCombatClass.Items.Add("ShamanRestoration");
+
+            foreach (ICombatClass combatClass in AmeisenBot.CombatClasses)
+            {
+                comboboxBuiltInCombatClass.Items.Add(combatClass.ToString());
+            }
+
             comboboxBuiltInCombatClass.SelectedIndex = 0;
         }
 
@@ -90,7 +78,7 @@ namespace AmeisenBotX
                     Username = textboxUsername.Text,
                     Password = textboxPassword.Password,
                     CharacterSlot = int.Parse(textboxCharacterSlot.Text),
-                    BuiltInCombatClassName = comboboxBuiltInCombatClass.Text,
+                    BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem.ToString(),
                     UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true),
                     CustomCombatClassFile = textboxCombatClassFile.Text,
                     AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false),
@@ -117,6 +105,7 @@ namespace AmeisenBotX
                     NameshServerPort = int.Parse(textboxNavmeshServerPort.Text)
                 };
 
+                SaveConfig = true;
                 Close();
             }
         }
@@ -354,8 +343,7 @@ namespace AmeisenBotX
             Regex regex = new Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$");
 
             if (textboxConfigName.Text.Length == 0
-                || regex.IsMatch(textboxConfigName.Text)
-                || Directory.Exists(Path.Combine(DataDir, textboxConfigName.Text)))
+                || regex.IsMatch(textboxConfigName.Text))
             {
                 textboxConfigName.BorderBrush = errorBorderBrush;
                 failed = true;
@@ -375,7 +363,7 @@ namespace AmeisenBotX
             failed = ValidateAutoLogin(failed);
             failed = ValidateAutostartWow(failed);
             failed = ValidateSpecificFollow(failed);
-            failed = ValidateCombatClass(failed);
+            // failed = ValidateCombatClass(failed);
             failed = ValidateNavmeshServer(failed);
             return !failed;
         }
@@ -432,9 +420,19 @@ namespace AmeisenBotX
             if (!NewConfig)
             {
                 textboxConfigName.IsEnabled = false;
+                textboxConfigName.Text = ConfigName;
+                AddDefaultCombatClasses();
+            }
+            else
+            {
+                buttonOpenCombatClassFile.Visibility = Visibility.Hidden;
+                comboboxBuiltInCombatClass.Visibility = Visibility.Hidden;
+                checkboxCustomCombatClass.Visibility = Visibility.Hidden;
+                labelCombatClassHeader.Visibility = Visibility.Hidden;
+                textboxCombatClassFile.Visibility = Visibility.Hidden;
+                checkboxBuiltinCombatClass.Visibility = Visibility.Hidden;
             }
 
-            AddDefaultCombatClasses();
             LoadConfigToUi();
         }
 

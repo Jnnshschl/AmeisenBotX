@@ -96,7 +96,18 @@ namespace AmeisenBotX
             AmeisenBot.WowInterface.BotCache.Clear();
         }
 
-        private void ButtonConfig_Click(object sender, RoutedEventArgs e) => new ConfigEditorWindow(BotDataPath, Config).ShowDialog();
+        private void ButtonConfig_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigEditorWindow configWindow = new ConfigEditorWindow(BotDataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            configWindow.ShowDialog();
+
+            if (configWindow.SaveConfig)
+            {
+                AmeisenBot.Config = configWindow.Config;
+                AmeisenBot.ReloadConfig();
+                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(configWindow.Config, Formatting.Indented));
+            }
+        }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
 
@@ -257,7 +268,7 @@ namespace AmeisenBotX
         {
             if (!string.IsNullOrEmpty(ConfigPath) && Config != null)
             {
-                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
+                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(AmeisenBot.Config, Formatting.Indented));
             }
         }
 
@@ -283,7 +294,7 @@ namespace AmeisenBotX
             progressbarHealth.Value = AmeisenBot.WowInterface.ObjectManager.Player.Health;
             labelCurrentHealth.Content = BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Health);
 
-            labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.GetType().Name;
+            labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.ToString();
 
             // class specific stuff
             progressbarSecondary.Maximum = maxSecondary;

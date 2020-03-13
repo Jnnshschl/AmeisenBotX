@@ -23,10 +23,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (KeyValuePair<int, CastInterruptFunction> keyValuePair in InterruptSpells)
                 {
-                    if (keyValuePair.Value.Invoke())
-                    {
-                        return true;
-                    }
+                    return keyValuePair.Value.Invoke();
                 }
             }
 

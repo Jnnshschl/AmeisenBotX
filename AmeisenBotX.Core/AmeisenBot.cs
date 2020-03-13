@@ -33,6 +33,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -78,6 +79,7 @@ namespace AmeisenBotX.Core
                 AmeisenLogger.Instance.Log("AmeisenBot", $"Creating folder {botDataPath}", LogLevel.Verbose);
             }
 
+            InitCombatClasses();
             if (config.UseBuiltInCombatClass)
             {
                 LoadDefaultCombatClass();
@@ -106,7 +108,9 @@ namespace AmeisenBotX.Core
 
         public string BotDataPath { get; }
 
-        public AmeisenBotConfig Config { get; }
+        public List<ICombatClass> CombatClasses { get; private set; }
+
+        public AmeisenBotConfig Config { get; set; }
 
         public double CurrentExecutionMs
         {
@@ -120,6 +124,20 @@ namespace AmeisenBotX.Core
             private set
             {
                 currentExecutionMs = value;
+            }
+        }
+
+        public void ReloadConfig()
+        {
+            StateMachineTimer.Interval = Config.StateMachineTickMs;
+
+            if (Config.UseBuiltInCombatClass)
+            {
+                LoadDefaultCombatClass();
+            }
+            else
+            {
+                LoadCustomCombatClass();
             }
         }
 
@@ -246,6 +264,40 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void InitCombatClasses()
+        {
+            CombatClasses = new List<ICombatClass>
+            {
+                new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
+                new DeathknightFrost(WowInterface),
+                new DeathknightUnholy(WowInterface),
+                new DruidBalance(WowInterface),
+                new DruidRestoration(WowInterface),
+                new HunterBeastmastery(WowInterface),
+                new HunterMarksmanship(WowInterface),
+                new HunterSurvival(WowInterface),
+                new MageArcane(WowInterface),
+                new MageFire(WowInterface),
+                new PaladinHoly(WowInterface),
+                new PaladinRetribution(WowInterface),
+                new PriestDiscipline(WowInterface),
+                new PriestHoly(WowInterface),
+                new PriestShadow(WowInterface),
+                new RogueAssassination(WowInterface),
+                new ShamanElemental(WowInterface),
+                new ShamanRestoration(WowInterface),
+                new WarlockAffliction(WowInterface),
+                new WarlockDemonology(WowInterface),
+                new WarlockDestruction(WowInterface),
+                new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface),
+                new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface),
+                new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                new Statemachine.CombatClasses.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                new Statemachine.CombatClasses.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings))
+            };
+        }
+
         private void LoadBotWindowPosition()
         {
             if (AccountName.Length > 0)
@@ -294,37 +346,7 @@ namespace AmeisenBotX.Core
         private void LoadDefaultCombatClass()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
-            WowInterface.CombatClass = (Config.BuiltInCombatClassName.ToUpper()) switch
-            {
-                "ALTROGUEASSASSINATION" => new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                "DEATHKNIGHTBLOOD" => new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
-                "JDEATHKNIGHTFROST" => new DeathknightFrost(WowInterface),
-                "JDEATHKNIGHTUNHOLY" => new DeathknightUnholy(WowInterface),
-                "JDRUIDBALANCE" => new DruidBalance(WowInterface),
-                "JDRUIDRESTORATION" => new DruidRestoration(WowInterface),
-                "JHUNTERBEASTMASTERY" => new HunterBeastmastery(WowInterface),
-                "JHUNTERMARKSMANSHIP" => new HunterMarksmanship(WowInterface),
-                "JHUNTERSURVIVAL" => new HunterSurvival(WowInterface),
-                "JMAGEARCANE" => new MageArcane(WowInterface),
-                "JMAGEFIRE" => new MageFire(WowInterface),
-                "JPALADINHOLY" => new PaladinHoly(WowInterface),
-                "JPALADINRETRIBUTION" => new PaladinRetribution(WowInterface),
-                "JPRIESTDISCIPLINE" => new PriestDiscipline(WowInterface),
-                "JPRIESTHOLY" => new PriestHoly(WowInterface),
-                "JPRIESTSHADOW" => new PriestShadow(WowInterface),
-                "JROGUEASSASSINATION" => new RogueAssassination(WowInterface),
-                "JSHAMANELEMENTAL" => new ShamanElemental(WowInterface),
-                "JSHAMANRESTORATION" => new ShamanRestoration(WowInterface),
-                "JWARLOCKAFFLICTION" => new WarlockAffliction(WowInterface),
-                "JWARLOCKDEMONOLOGY" => new WarlockDemonology(WowInterface),
-                "JWARLOCKDESTRUCTION" => new WarlockDestruction(WowInterface),
-                "JWARRIORARMS" => new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface),
-                "JWARRIORFURY" => new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface),
-                "PALADINPROTECTION" => new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                "WARRIORARMS" => new Statemachine.CombatClasses.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                "WARRIORFURY" => new Statemachine.CombatClasses.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                _ => null,
-            };
+            WowInterface.CombatClass = CombatClasses.FirstOrDefault(e => e.ToString().Equals(Config.BuiltInCombatClassName, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadWowWindowPosition()

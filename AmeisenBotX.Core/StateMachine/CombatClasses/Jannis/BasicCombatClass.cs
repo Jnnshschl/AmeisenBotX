@@ -247,5 +247,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             return false;
         }
+
+        public override string ToString() => $"[{Class}] [{Role}] {Displayname}";
     }
 }

@@ -408,7 +408,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             {
                 HookManager = hookManager;
                 ObjectManager = objectManager;
-                Player = ObjectManager.Player;
+                Player = ObjectManager?.Player;
                 NextGCDSpell = DateTime.Now;
                 NextCast = DateTime.Now;
             }

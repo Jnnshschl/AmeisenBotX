@@ -26,6 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private readonly string mirrorImageSpell = "Mirror Image";
         private readonly string missileBarrageSpell = "Missile Barrage";
         private readonly string spellStealSpell = "Spellsteal";
+        private readonly string fireballSpell = "Fireball";
 
         public MageArcane(WowInterface wowInterface) : base(wowInterface)
         {
@@ -92,7 +93,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     || CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || (MyAuraManager.Buffs.Contains(missileBarrageSpell.ToLower()) && CastSpellIfPossible(arcaneMissilesSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || CastSpellIfPossible(arcaneBarrageSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(arcaneBlastSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossible(arcaneBlastSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
