@@ -209,6 +209,8 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightFrost.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DruidRestoration.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\WarriorFury.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\WarriorArms.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\HunterSurvival.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\HunterMarksmanship.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\HunterBeastmastery.cs" />
