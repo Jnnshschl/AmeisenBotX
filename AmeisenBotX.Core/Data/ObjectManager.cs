@@ -39,8 +39,8 @@ namespace AmeisenBotX.Core.Data
 
         public List<ulong> PartymemberGuids { get; private set; }
 
-        public List<WowObject> Partymembers
-            => WowObjects.Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
+        public List<WowUnit> Partymembers
+            => WowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
 
         public WowUnit Pet { get; private set; }
 

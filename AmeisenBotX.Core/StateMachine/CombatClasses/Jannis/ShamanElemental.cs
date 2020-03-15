@@ -25,6 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private readonly string hexSpell = "Hex";
         private readonly string lavaBurstSpell = "Lava Burst";
         private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
+        private readonly string healingWaveSpell = "Healing Wave";
         private readonly string lightningBoltSpell = "Lightning Bolt";
         private readonly string lightningShieldSpell = "Lightning Shield";
         private readonly string thunderstormSpell = "Thunderstorm";
@@ -33,6 +34,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
         {
+            RessurrectionTargets = new Dictionary<string, DateTime>();
+
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 0.8 && CastSpellIfPossible(lightningShieldSpell, 0, true) },
@@ -73,6 +76,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
+        private Dictionary<string, DateTime> RessurrectionTargets { get; set; }
+
         private bool HexedTarget { get; set; }
 
         private DateTime LastDeadPartymembersCheck { get; set; }
@@ -93,16 +98,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             if (WowInterface.ObjectManager.Player.HealthPercentage < 30
+                && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
                 && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 HexedTarget = true;
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 30
-                && (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(hexSpell)
-                || HexedTarget)
-                && CastSpellIfPossible(lesserHealingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
             {
                 return;
             }
@@ -159,9 +163,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (groupPlayers.Count > 0)
                 {
-                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
-                    WowInterface.HookManager.CastSpell(ancestralSpiritSpell);
-                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)WowInterface.HookManager.GetSpellCooldown(ancestralSpiritSpell));
+                    WowPlayer player = groupPlayers.FirstOrDefault(e => RessurrectionTargets.ContainsKey(e.Name) ? RessurrectionTargets[e.Name] < DateTime.Now : true);
+
+                    if (player != null)
+                    {
+                        if (!RessurrectionTargets.ContainsKey(player.Name))
+                        {
+                            RessurrectionTargets.Add(player.Name, DateTime.Now + TimeSpan.FromSeconds(2));
+                            return false;
+                        }
+
+                        if (RessurrectionTargets[player.Name] < DateTime.Now)
+                        {
+                            return CastSpellIfPossible(ancestralSpiritSpell, player.Guid, true);
+                        }
+                    }
+
                     return true;
                 }
             }

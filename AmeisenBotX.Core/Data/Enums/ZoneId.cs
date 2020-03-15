@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Statemachine.States
+﻿namespace AmeisenBotX.Core.Data.Enums
 {
     public enum ZoneId
     {

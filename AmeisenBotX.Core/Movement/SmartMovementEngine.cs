@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            Vector3 positionToGoTo = BotUtils.MoveAhead(GetRotation.Invoke(), targetPosition, 1);
+            Vector3 positionToGoTo = BotUtils.MoveAhead(GetRotation.Invoke(), targetPosition, 2);
             bool updateForces = true;
 
             switch (State)

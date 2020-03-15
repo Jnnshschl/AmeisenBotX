@@ -128,8 +128,11 @@
     <Compile Include="Data\Enums\RollType.cs" />
     <Compile Include="Data\Enums\RuneType.cs" />
     <Compile Include="Data\Enums\ShapeshiftForm.cs" />
+    <Compile Include="Data\Enums\WowFood.cs" />
     <Compile Include="Data\Enums\WowGender.cs" />
     <Compile Include="Data\Enums\WowPowertype.cs" />
+    <Compile Include="Data\Enums\WowRefreshment.cs" />
+    <Compile Include="Data\Enums\WowWater.cs" />
     <Compile Include="Data\IObjectManager.cs" />
     <Compile Include="Data\ObjectManager.cs" />
     <Compile Include="Data\Enums\HerbNode.cs" />
@@ -232,7 +235,7 @@
     <Compile Include="Statemachine\States\StateRelaxing.cs" />
     <Compile Include="Statemachine\States\StateDungeon.cs" />
     <Compile Include="Statemachine\States\StateJob.cs" />
-    <Compile Include="Statemachine\States\ZoneId.cs" />
+    <Compile Include="Data\Enums\ZoneId.cs" />
     <Compile Include="Statemachine\Utils\AuraManager.cs" />
     <Compile Include="Statemachine\Utils\CooldownManager.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarlockDestruction.cs" />

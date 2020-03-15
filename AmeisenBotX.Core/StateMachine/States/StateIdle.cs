@@ -16,6 +16,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private DateTime LastLoot { get; set; }
 
+        private DateTime LastEatCheck { get; set; }
+
         private DateTime LastRepairCheck { get; set; }
 
         public override void Enter()
@@ -51,6 +53,20 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (StateMachine.GetNearLootableUnits().Count() > 0)
                 {
                     StateMachine.SetState(BotState.Looting);
+                    return;
+                }
+            }
+
+            // do we need to repair our equipment
+            if (DateTime.Now - LastEatCheck > TimeSpan.FromSeconds(2))
+            {
+                LastEatCheck = DateTime.Now;
+
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && StateMachine.HasRefreshmentInBag())
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && StateMachine.HasFoodInBag())
+                    || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && StateMachine.HasWaterInBag()))
+                {
+                    StateMachine.SetState(BotState.Eating);
                     return;
                 }
             }

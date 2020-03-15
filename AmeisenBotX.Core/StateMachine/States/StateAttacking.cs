@@ -32,6 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Enter()
         {
             WowInterface.HookManager.ClearTarget();
+            WowInterface.MovementEngine.Reset();
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
         }
 
@@ -64,12 +65,15 @@ namespace AmeisenBotX.Core.Statemachine.States
                     if (IsTargetInvalid())
                     {
                         WowInterface.HookManager.ClearTarget();
+                        WowInterface.MovementEngine.Reset();
+
                         WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                         // select a new target if our current target is invalid
                         if (SelectTargetToAttack(out WowUnit target))
                         {
                             WowInterface.HookManager.TargetGuid(target.Guid);
+                            WowInterface.MovementEngine.Reset();
 
                             WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
                             WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
@@ -191,41 +195,34 @@ namespace AmeisenBotX.Core.Statemachine.States
                     // maybe we are able to assist our partymembers
                     if (WowInterface.ObjectManager.PartymemberGuids.Count > 0)
                     {
-                        Dictionary<ulong, int> partymemberTargets = new Dictionary<ulong, int>();
+                        Dictionary<WowUnit, int> partymemberTargets = new Dictionary<WowUnit, int>();
                         WowInterface.ObjectManager.Partymembers.ForEach(e =>
                         {
-                            ulong targetGuid = ((WowUnit)e).TargetGuid;
-                            if (targetGuid > 0)
+                            if (e.TargetGuid > 0)
                             {
-                                if (partymemberTargets.ContainsKey(targetGuid))
-                                {
-                                    partymemberTargets[targetGuid]++;
-                                }
-                                else
-                                {
-                                    partymemberTargets.Add(targetGuid, 1);
-                                }
-                            }
-                        });
+                                WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.TargetGuid);
 
-                        List<KeyValuePair<ulong, int>> selectedTargets = partymemberTargets.OrderByDescending(e => e.Value).ToList();
-
-                        // filter out invalid, not in combat and friendly units
-                        WowUnit validTarget = null;
-                        selectedTargets.ForEach(e =>
-                        {
-                            if (validTarget == null)
-                            {
-                                WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Key);
-
-                                if (BotUtils.IsValidUnit(target)
+                                if (target != null
+                                    && BotUtils.IsValidUnit(e)
                                     && target.IsInCombat
                                     && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, target) != WowUnitReaction.Friendly)
                                 {
-                                    validTarget = target;
+                                    if (partymemberTargets.ContainsKey(target))
+                                    {
+                                        partymemberTargets[target]++;
+                                    }
+                                    else
+                                    {
+                                        partymemberTargets.Add(target, 1);
+                                    }
                                 }
                             }
                         });
+
+                        List<KeyValuePair<WowUnit, int>> selectedTargets = partymemberTargets.OrderByDescending(e => e.Value).ToList();
+
+                        // filter out invalid, not in combat and friendly units
+                        WowUnit validTarget = selectedTargets.First().Key;
 
                         if (validTarget != null)
                         {

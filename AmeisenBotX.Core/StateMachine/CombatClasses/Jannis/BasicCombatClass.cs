@@ -241,11 +241,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (spell != null)
                 {
                     Spells.Add(spellName, spell);
-                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         public override string ToString() => $"[{Class}] [{Role}] {Displayname}";

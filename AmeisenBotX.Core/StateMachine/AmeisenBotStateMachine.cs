@@ -158,6 +158,15 @@ namespace AmeisenBotX.Core.Statemachine
             || map == MapId.EyeOfTheStorm
             || map == MapId.StrandOfTheAncients;
 
+        internal bool HasFoodInBag()
+            => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
+
+        internal bool HasWaterInBag()
+            => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowWater), e));
+
+        internal bool HasRefreshmentInBag()
+            => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowRefreshment), e));
+
         internal void SetState(BotState state, bool ignoreExit = false)
         {
             if (CurrentState.Key == state)

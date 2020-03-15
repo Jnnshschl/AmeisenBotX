@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Data
 
         List<ulong> PartymemberGuids { get; }
 
-        List<WowObject> Partymembers { get; }
+        List<WowUnit> Partymembers { get; }
 
         WowUnit Pet { get; }
 

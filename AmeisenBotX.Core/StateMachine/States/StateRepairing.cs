@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,8 +12,13 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
+        private bool IsAtNpc { get; set; }
+
+        private DateTime RepairActionGo { get; set; }
+
         public override void Enter()
         {
+            IsAtNpc = false;
         }
 
         public override void Execute()
@@ -32,27 +38,32 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
-                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                if (distance > 5.0)
+                if (!IsAtNpc)
                 {
-                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                    WowInterface.MovementEngine.Execute();
-                }
-                else
-                {
-                    if (distance > 3)
+                    double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
+                    if (distance > 5.0)
                     {
-                        WowInterface.CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 0.2f);
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
+                        WowInterface.MovementEngine.Execute();
                     }
                     else
                     {
-                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                        Task.Delay(1000).GetAwaiter().GetResult();
-
-                        WowInterface.HookManager.RepairAllItems();
-                        WowInterface.HookManager.SellAllGrayItems();
-                        Task.Delay(1000).GetAwaiter().GetResult();
+                        if (distance > 3)
+                        {
+                            WowInterface.CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 0.2f);
+                        }
+                        else
+                        {
+                            WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                            RepairActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
+                            IsAtNpc = true;
+                        }
                     }
+                }
+                else if(DateTime.Now > RepairActionGo)
+                {
+                    WowInterface.HookManager.RepairAllItems();
+                    WowInterface.HookManager.SellAllGrayItems();
                 }
             }
             else
