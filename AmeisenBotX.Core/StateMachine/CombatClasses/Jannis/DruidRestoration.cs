@@ -146,36 +146,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (MyAuraManager.Tick()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                    && HandleDeadPartymembers()))
+                    && HandleDeadPartymembers(reviveSpell)))
             {
                 return;
             }
-        }
-
-        private bool HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(reviveSpell))
-            {
-                Spells.Add(reviveSpell, WowInterface.CharacterManager.SpellBook.GetSpellByName(reviveSpell));
-            }
-
-            if (Spells[reviveSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(reviveSpell)
-                && Spells[reviveSpell].Costs < WowInterface.ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
-                    WowInterface.HookManager.CastSpell(reviveSpell);
-                    CooldownManager.SetSpellCooldown(reviveSpell, (int)WowInterface.HookManager.GetSpellCooldown(reviveSpell));
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)

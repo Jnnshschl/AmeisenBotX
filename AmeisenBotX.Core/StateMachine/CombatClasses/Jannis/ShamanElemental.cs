@@ -34,8 +34,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
         {
-            RessurrectionTargets = new Dictionary<string, DateTime>();
-
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 0.8 && CastSpellIfPossible(lightningShieldSpell, 0, true) },
@@ -75,8 +73,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
-
-        private Dictionary<string, DateTime> RessurrectionTargets { get; set; }
 
         private bool HexedTarget { get; set; }
 
@@ -136,7 +132,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (MyAuraManager.Tick()
                 || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                    && HandleDeadPartymembers())
+                && HandleDeadPartymembers(ancestralSpiritSpell))
             {
                 return;
             }
@@ -145,45 +141,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 HexedTarget = false;
             }
-        }
-
-        private bool HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(ancestralSpiritSpell))
-            {
-                Spells.Add(ancestralSpiritSpell, WowInterface.CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
-            }
-
-            if (Spells[ancestralSpiritSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
-                && Spells[ancestralSpiritSpell].Costs < WowInterface.ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    WowPlayer player = groupPlayers.FirstOrDefault(e => RessurrectionTargets.ContainsKey(e.Name) ? RessurrectionTargets[e.Name] < DateTime.Now : true);
-
-                    if (player != null)
-                    {
-                        if (!RessurrectionTargets.ContainsKey(player.Name))
-                        {
-                            RessurrectionTargets.Add(player.Name, DateTime.Now + TimeSpan.FromSeconds(2));
-                            return false;
-                        }
-
-                        if (RessurrectionTargets[player.Name] < DateTime.Now)
-                        {
-                            return CastSpellIfPossible(ancestralSpiritSpell, player.Guid, true);
-                        }
-                    }
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        }        
     }
 }

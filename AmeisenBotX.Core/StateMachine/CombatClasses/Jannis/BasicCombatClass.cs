@@ -20,6 +20,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             WowInterface = wowInterface;
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
+            RessurrectionTargets = new Dictionary<string, DateTime>();
 
             Spells = new Dictionary<string, Spell>();
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
@@ -59,6 +60,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public abstract Dictionary<string, dynamic> Configureables { get; set; }
 
         public CooldownManager CooldownManager { get; internal set; }
+
+        public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
         public abstract string Description { get; }
 
@@ -209,6 +212,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 CastSpell(spellName);
                 return true;
+            }
+
+            return false;
+        }
+
+        internal bool HandleDeadPartymembers(string SpellName)
+        {
+            if (!Spells.ContainsKey(SpellName))
+            {
+                Spells.Add(SpellName, WowInterface.CharacterManager.SpellBook.GetSpellByName(SpellName));
+            }
+
+            if (Spells[SpellName] != null
+                && !CooldownManager.IsSpellOnCooldown(SpellName)
+                && Spells[SpellName].Costs < WowInterface.ObjectManager.Player.Mana)
+            {
+                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+
+                if (groupPlayers.Count > 0)
+                {
+                    WowPlayer player = groupPlayers.FirstOrDefault(e => RessurrectionTargets.ContainsKey(e.Name) ? RessurrectionTargets[e.Name] < DateTime.Now : true);
+
+                    if (player != null)
+                    {
+                        if (!RessurrectionTargets.ContainsKey(player.Name))
+                        {
+                            RessurrectionTargets.Add(player.Name, DateTime.Now + TimeSpan.FromSeconds(2));
+                            return false;
+                        }
+
+                        if (RessurrectionTargets[player.Name] < DateTime.Now)
+                        {
+                            return CastSpellIfPossible(SpellName, player.Guid, true);
+                        }
+                    }
+
+                    return true;
+                }
             }
 
             return false;

@@ -127,36 +127,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (MyAuraManager.Tick()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers()))
+                && HandleDeadPartymembers(ancestralSpiritSpell)))
             {
                 return;
             }
-        }
-
-        private bool HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(ancestralSpiritSpell))
-            {
-                Spells.Add(ancestralSpiritSpell, WowInterface.CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
-            }
-
-            if (Spells[ancestralSpiritSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
-                && Spells[ancestralSpiritSpell].Costs < WowInterface.ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    WowInterface.HookManager.TargetGuid(groupPlayers.First().Guid);
-                    WowInterface.HookManager.CastSpell(ancestralSpiritSpell);
-                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)WowInterface.HookManager.GetSpellCooldown(ancestralSpiritSpell));
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private void HandleTargetSelection(List<WowPlayer> possibleTargets)
