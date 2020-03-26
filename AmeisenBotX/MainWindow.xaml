@@ -23,7 +23,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonExit" Content="X" Margin="0,0,0,0" Click="ButtonExit_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}">
+        <Button x:Name="buttonExit" Content="X" Margin="0,0,0,0" Click="ButtonExit_Click" BorderThickness="1,0,0,0" Padding="1,1,1,3" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="14">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
@@ -97,17 +97,17 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonSettings" Content="⚒" Margin="0,0,20,0" Click="ButtonSettings_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10" Style="{DynamicResource ButtonStyleDark}" IsEnabled="False">
+        <Button x:Name="buttonSettings" Content="⚒" Margin="0,0,28.333,0" Click="ButtonSettings_Click" BorderThickness="1,0,0,0" Padding="1" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" IsEnabled="False">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Rectangle Margin="0,0,0.333,24.333" Height="1" VerticalAlignment="Bottom">
+        <Rectangle Margin="0,0,0,24" Height="1" VerticalAlignment="Bottom">
             <Rectangle.Fill>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Rectangle HorizontalAlignment="Left" Margin="0,27,0,0" Width="198" Height="1" VerticalAlignment="Top">
+        <Rectangle Margin="0,27,0,0" Height="1" VerticalAlignment="Top">
             <Rectangle.Fill>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
@@ -146,12 +146,12 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonConfig" Content="🔧" Margin="0,0,40,0" Click="ButtonConfig_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Right" Width="20" Height="20" VerticalAlignment="Top" FontFamily="Verdana" FontSize="10" Style="{DynamicResource ButtonStyleDark}">
+        <Button x:Name="buttonConfig" Content="🔧" Margin="0,0,56.333,0" Click="ButtonConfig_Click" BorderThickness="1,0,0,0" Padding="1" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonStartPause" Content="||" Margin="145,0,0,0" BorderThickness="1,0,1,1" Padding="0,-3,0,0" Height="28" VerticalAlignment="Top" FontFamily="Verdana" FontSize="16" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28">
+        <Button x:Name="buttonStartPause" Content="||" Margin="145,0,0,0" BorderThickness="1,0" Padding="1,0,0,2" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28" Height="27" VerticalAlignment="Top">
             <Button.BorderBrush>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Button.BorderBrush>
@@ -220,7 +220,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonStartAutopilot" Content="🤖" Margin="172,0,0,0" BorderThickness="1,0,1,1" Padding="0,-3,0,0" Height="28" VerticalAlignment="Top" FontFamily="Verdana" FontSize="16" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartAutopilot_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28" IsEnabled="False">
+        <Button x:Name="buttonStartAutopilot" Content="🤖" Margin="172,0,0,0" BorderThickness="1,0" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartAutopilot_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28" IsEnabled="False">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
