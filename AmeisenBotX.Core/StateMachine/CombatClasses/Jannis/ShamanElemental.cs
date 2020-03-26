@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +21,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private readonly string elementalMasterySpell = "Elemental Mastery";
         private readonly string flameShockSpell = "Flame Shock";
         private readonly string flametoungueWeaponSpell = "Flametoungue Weapon";
+        private readonly string healingWaveSpell = "Healing Wave";
         private readonly string heroismSpell = "Heroism";
         private readonly string hexSpell = "Hex";
         private readonly string lavaBurstSpell = "Lava Burst";
         private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
-        private readonly string healingWaveSpell = "Healing Wave";
         private readonly string lightningBoltSpell = "Lightning Bolt";
         private readonly string lightningShieldSpell = "Lightning Shield";
         private readonly string thunderstormSpell = "Thunderstorm";
@@ -34,11 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
         {
-            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
-            {
-                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 0.8 && CastSpellIfPossible(lightningShieldSpell, 0, true) },
-                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 0.2 && CastSpellIfPossible(waterShieldSpell, 0, true) }
-            };
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
@@ -68,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
@@ -89,6 +85,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick())
+            {
+                return;
+            }
+
+            if ((!WowInterface.ObjectManager.Player.HasBuffByName(lightningShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0))
+                || !WowInterface.ObjectManager.Player.HasBuffByName(waterShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0))
             {
                 return;
             }
@@ -141,6 +143,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 HexedTarget = false;
             }
-        }        
+        }
     }
 }

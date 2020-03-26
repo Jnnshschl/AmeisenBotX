@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -80,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
@@ -90,19 +91,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool InFrostTrapCombo { get; set; } = false;
 
+        private DateTime LastAutoAttackCheck { get; set; }
+
         private PetManager PetManager { get; set; }
 
         public override void Execute()
         {
             // we dont want to do anything if we are casting something...
-            if (WowInterface.ObjectManager.Player.IsCasting
-                || WowInterface.ObjectManager.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
+            if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && !WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
+                LastAutoAttackCheck = DateTime.Now;
                 WowInterface.HookManager.StartAutoAttack();
             }
 

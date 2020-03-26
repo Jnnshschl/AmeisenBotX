@@ -65,7 +65,7 @@ namespace AmeisenBotX.Logging
                 Directory.CreateDirectory(logFolderPath);
             }
 
-            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now.ToString("dd.MM.yyyy")}-{DateTime.Now.ToString("HH.mm")}.txt";
+            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now:dd.MM.yyyy}-{DateTime.Now:HH.mm}.txt";
         }
 
         public void DeleteOldLogs(int daysToKeep = 1)

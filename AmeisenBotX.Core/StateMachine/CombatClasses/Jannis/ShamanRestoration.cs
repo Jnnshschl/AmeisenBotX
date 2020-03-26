@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
@@ -137,6 +137,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             // select the one with lowest hp
             WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
+
+            if (target != null)
+            {
+                WowInterface.HookManager.TargetGuid(target.Guid);
+            }
         }
 
         private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)

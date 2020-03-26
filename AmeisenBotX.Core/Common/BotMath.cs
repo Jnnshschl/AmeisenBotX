@@ -5,6 +5,19 @@ namespace AmeisenBotX.Core.Common
 {
     public class BotMath
     {
+        public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, double distanceToMove = 2.0)
+        {
+            double x = position.X + (distanceToMove * Math.Cos(rotation + Math.PI));
+            double y = position.Y + (distanceToMove * Math.Sin(rotation + Math.PI));
+
+            return new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = position.Z
+            };
+        }
+
         /// <summary>
         /// Caps a Vector3's values to the given max value
         /// </summary>

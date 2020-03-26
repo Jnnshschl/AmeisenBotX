@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -23,8 +22,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (WowInterface.CharacterManager.Equipment.Items.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) > 0.2))
+            if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
             {
+                WowInterface.CharacterManager.Equipment.Update();
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
@@ -60,14 +60,16 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
                     }
                 }
-                else if(DateTime.Now > RepairActionGo)
+                else if (DateTime.Now > RepairActionGo)
                 {
                     WowInterface.HookManager.RepairAllItems();
                     WowInterface.HookManager.SellAllGrayItems();
+                    WowInterface.CharacterManager.Equipment.Update();
                 }
             }
             else
             {
+                WowInterface.CharacterManager.Equipment.Update();
                 StateMachine.SetState(BotState.Idle);
             }
         }

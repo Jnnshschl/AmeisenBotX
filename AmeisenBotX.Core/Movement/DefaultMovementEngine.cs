@@ -108,21 +108,6 @@ namespace AmeisenBotX.Core.Movement
             CurrentPath.Clear();
         }
 
-        private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)
-        {
-            double x = currentPosition.X + Math.Cos(currentRotation + Math.PI);
-            double y = currentPosition.Y + Math.Sin(currentRotation + Math.PI);
-
-            Vector3 destination = new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = currentPosition.Z
-            };
-
-            return destination;
-        }
-
         private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
         {
             return false;

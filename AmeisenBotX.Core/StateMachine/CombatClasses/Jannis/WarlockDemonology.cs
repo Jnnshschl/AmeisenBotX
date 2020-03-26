@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -78,7 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
         public PetManager PetManager { get; private set; }
 
@@ -107,8 +108,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && CastSpellIfPossible(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 50
                     && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
-                || (DateTime.Now - LastDamageBuffCheck > TimeSpan.FromSeconds(damageBuffCheckTime)
-                    && HandleDamageBuffing())
                 || CastSpellIfPossible(metamorphosisSpell, 0)
                 || (WowInterface.ObjectManager.Pet != null && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
             {
@@ -152,32 +151,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
-        }
-
-        private bool HandleDamageBuffing()
-        {
-            List<string> myBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
-
-            if (myBuffs.Any(e => e.Equals(decimationSpell, StringComparison.OrdinalIgnoreCase)))
-            {
-                if (myBuffs.Any(e => e.Equals(moltenCoreSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return true;
-                }
-                else if (CastSpellIfPossible(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return true;
-                }
-            }
-            else if (myBuffs.Any(e => e.Equals(moltenCoreSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return true;
-            }
-
-            LastDamageBuffCheck = DateTime.Now;
-            return false;
         }
 
         private void SpellBook_OnSpellBookUpdate()

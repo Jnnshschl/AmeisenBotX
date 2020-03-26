@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -27,20 +26,21 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (WowInterface.HookManager.GetFreeBagSlotCount() > 4
                || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
+                WowInterface.CharacterManager.Inventory.Update();
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
-            if (!IsAtNpc)
-            {
-                WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                    .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
-                        && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
-                        && e.IsRepairVendor
-                        && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+            WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
+                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
+                    && e.IsRepairVendor
+                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
 
-                if (selectedUnit != null && !selectedUnit.IsDead)
+            if (selectedUnit != null && !selectedUnit.IsDead)
+            {
+                if (!IsAtNpc)
                 {
                     double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
                     if (distance > 3.0)
@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         IsAtNpc = true;
                     }
                 }
-                else if(DateTime.Now > SellActionGo)
+                else if (DateTime.Now > SellActionGo)
                 {
                     WowInterface.HookManager.SellAllGrayItems();
                     foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
@@ -73,6 +73,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else
             {
+                WowInterface.CharacterManager.Inventory.Update();
                 StateMachine.SetState(BotState.Idle);
             }
         }

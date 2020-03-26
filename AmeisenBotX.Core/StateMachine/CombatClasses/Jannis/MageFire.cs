@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -65,7 +66,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
@@ -91,7 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 16
                         && CastSpellIfPossible(iceBlockSpell, 0, true))
-                    || (MyAuraManager.Buffs.Contains(hotstreakSpell.ToLower()) && CastSpellIfPossible(pyroblastSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.ObjectManager.Player.HasBuffByName(hotstreakSpell.ToLower()) && CastSpellIfPossible(pyroblastSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || (WowInterface.ObjectManager.Player.ManaPercentage < 40
                         && CastSpellIfPossible(evocationSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))

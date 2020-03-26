@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
@@ -100,22 +100,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target != null)
                 {
                     WowInterface.ObjectManager.UpdateObject(target);
-                    List<string> targetBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
-
                     if ((target.HealthPercentage < 15
                             && CastSpellIfPossible(naturesSwiftnessSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 90
-                            && !targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
                             && CastSpellIfPossible(rejuvenationSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 85
-                            && !targetBuffs.Any(e => e.Equals(wildGrowthSpell, StringComparison.OrdinalIgnoreCase))
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(wildGrowthSpell)
                             && CastSpellIfPossible(wildGrowthSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (target.HealthPercentage < 85
-                            && !targetBuffs.Any(e => e.Equals(lifebloomSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(reviveSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 70
-                            && (targetBuffs.Any(e => e.Equals(regrowthSpell, StringComparison.OrdinalIgnoreCase))
-                                || targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
+                            && (WowInterface.ObjectManager.Target.HasBuffByName(regrowthSpell)
+                                || WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
                             && CastSpellIfPossible(swiftmendSpell, WowInterface.ObjectManager.TargetGuid, true))))
                     {
                         return;
@@ -169,7 +164,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
 
             groupPlayers.Add(WowInterface.ObjectManager.Player);
-
             playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
 
             return playersThatNeedHealing.Count > 0;

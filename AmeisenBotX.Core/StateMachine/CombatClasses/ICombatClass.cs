@@ -31,6 +31,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         void Execute();
 
-        void OutOfCombatExecute();        
+        void OutOfCombatExecute();
     }
 }

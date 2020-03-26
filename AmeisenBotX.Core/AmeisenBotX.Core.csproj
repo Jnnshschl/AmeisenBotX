@@ -72,9 +72,11 @@
     <Compile Include="Battleground\States\PickupOwnFlagBgState.cs" />
     <Compile Include="Battleground\States\WaitingForStartBgState.cs" />
     <Compile Include="Character\CharacterManager.cs" />
+    <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
+    <Compile Include="Character\Comparators\BasicArmorComparator.cs" />
     <Compile Include="Character\Enums\ClickToMoveType.cs" />
     <Compile Include="Character\Comparators\AssassinationItemComparator.cs" />
-    <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
+    <Compile Include="Character\Comparators\BasicComparator.cs" />
     <Compile Include="Character\Comparators\BasicIntellectComparator.cs" />
     <Compile Include="Character\Comparators\BasicSpiritComparator.cs" />
     <Compile Include="Character\Comparators\BasicStrengthComparator.cs" />
@@ -222,6 +224,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\MageFire.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinHoly.cs" />
     <Compile Include="Statemachine\CombatClasses\ICombatClass.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\WarriorProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightUnholy.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinRetribution.cs" />

@@ -18,7 +18,6 @@ using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
-using AmeisenBotX.Core.Statemachine.CombatClasses.Jannis;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -71,7 +70,7 @@ namespace AmeisenBotX.Core
             WowInterface = new WowInterface();
             SetupWowInterface();
 
-            AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType().ToString()}", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -127,20 +126,6 @@ namespace AmeisenBotX.Core
             }
         }
 
-        public void ReloadConfig()
-        {
-            StateMachineTimer.Interval = Config.StateMachineTickMs;
-
-            if (Config.UseBuiltInCombatClass)
-            {
-                LoadDefaultCombatClass();
-            }
-            else
-            {
-                LoadCustomCombatClass();
-            }
-        }
-
         public bool IsAutopilot { get; set; }
 
         public bool IsRunning { get; private set; }
@@ -159,6 +144,20 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Pausing", LogLevel.Warning);
             IsRunning = false;
+        }
+
+        public void ReloadConfig()
+        {
+            StateMachineTimer.Interval = Config.StateMachineTickMs;
+
+            if (Config.UseBuiltInCombatClass)
+            {
+                LoadDefaultCombatClass();
+            }
+            else
+            {
+                LoadCustomCombatClass();
+            }
         }
 
         public void Resume()
@@ -270,28 +269,29 @@ namespace AmeisenBotX.Core
             {
                 new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
-                new DeathknightFrost(WowInterface),
-                new DeathknightUnholy(WowInterface),
-                new DruidBalance(WowInterface),
-                new DruidRestoration(WowInterface),
-                new HunterBeastmastery(WowInterface),
-                new HunterMarksmanship(WowInterface),
-                new HunterSurvival(WowInterface),
-                new MageArcane(WowInterface),
-                new MageFire(WowInterface),
-                new PaladinHoly(WowInterface),
-                new PaladinRetribution(WowInterface),
-                new PriestDiscipline(WowInterface),
-                new PriestHoly(WowInterface),
-                new PriestShadow(WowInterface),
-                new RogueAssassination(WowInterface),
-                new ShamanElemental(WowInterface),
-                new ShamanRestoration(WowInterface),
-                new WarlockAffliction(WowInterface),
-                new WarlockDemonology(WowInterface),
-                new WarlockDestruction(WowInterface),
+                new Statemachine.CombatClasses.Jannis.DeathknightFrost(WowInterface),
+                new Statemachine.CombatClasses.Jannis.DeathknightUnholy(WowInterface),
+                new Statemachine.CombatClasses.Jannis.DruidBalance(WowInterface),
+                new Statemachine.CombatClasses.Jannis.DruidRestoration(WowInterface),
+                new Statemachine.CombatClasses.Jannis.HunterBeastmastery(WowInterface),
+                new Statemachine.CombatClasses.Jannis.HunterMarksmanship(WowInterface),
+                new Statemachine.CombatClasses.Jannis.HunterSurvival(WowInterface),
+                new Statemachine.CombatClasses.Jannis.MageArcane(WowInterface),
+                new Statemachine.CombatClasses.Jannis.MageFire(WowInterface),
+                new Statemachine.CombatClasses.Jannis.PaladinHoly(WowInterface),
+                new Statemachine.CombatClasses.Jannis.PaladinRetribution(WowInterface),
+                new Statemachine.CombatClasses.Jannis.PriestDiscipline(WowInterface),
+                new Statemachine.CombatClasses.Jannis.PriestHoly(WowInterface),
+                new Statemachine.CombatClasses.Jannis.PriestShadow(WowInterface),
+                new Statemachine.CombatClasses.Jannis.RogueAssassination(WowInterface),
+                new Statemachine.CombatClasses.Jannis.ShamanElemental(WowInterface),
+                new Statemachine.CombatClasses.Jannis.ShamanRestoration(WowInterface),
+                new Statemachine.CombatClasses.Jannis.WarlockAffliction(WowInterface),
+                new Statemachine.CombatClasses.Jannis.WarlockDemonology(WowInterface),
+                new Statemachine.CombatClasses.Jannis.WarlockDestruction(WowInterface),
                 new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface),
                 new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface),
+                new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface),
                 new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new Statemachine.CombatClasses.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new Statemachine.CombatClasses.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings))
@@ -312,7 +312,7 @@ namespace AmeisenBotX.Core
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set bot window position:\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set bot window position:\n{e}", LogLevel.Error);
                 }
             }
         }
@@ -363,7 +363,7 @@ namespace AmeisenBotX.Core
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set wow window position:\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set wow window position:\n{e}", LogLevel.Error);
                 }
             }
         }
@@ -518,7 +518,7 @@ namespace AmeisenBotX.Core
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save bot window position:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save bot window position:\n{e}", LogLevel.Error);
             }
         }
 
@@ -530,7 +530,7 @@ namespace AmeisenBotX.Core
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save wow window position:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save wow window position:\n{e}", LogLevel.Error);
             }
         }
 

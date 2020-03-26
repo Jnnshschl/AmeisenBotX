@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
@@ -119,11 +119,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     List<string> targetBuffs = WowInterface.HookManager.GetAuras(WowLuaUnit.Target);
 
                     if ((target.HealthPercentage < 85
-                            && !targetBuffs.Any(e => e.Equals(weakenedSoulSpell, StringComparison.OrdinalIgnoreCase))
-                            && !targetBuffs.Any(e => e.Equals(powerWordShieldSpell, StringComparison.OrdinalIgnoreCase))
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(weakenedSoulSpell)
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(powerWordShieldSpell)
                             && CastSpellIfPossible(powerWordShieldSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 80
-                            && !targetBuffs.Any(e => e.Equals(renewSpell, StringComparison.OrdinalIgnoreCase))
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(renewSpell)
                             && CastSpellIfPossible(renewSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
                         return;
@@ -172,7 +172,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 35).ToList();
 
             groupPlayers.Add(WowInterface.ObjectManager.Player);
-
             playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
 
             return playersThatNeedHealing.Count > 0;

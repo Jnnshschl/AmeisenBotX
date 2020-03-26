@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                     else if (DateTime.Now - LastOpenLootTry > TimeSpan.FromSeconds(1))
                     {
-                        WowInterface.HookManager.StopClickToMove(WowInterface.ObjectManager.Player);
+                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
 
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                         if (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)

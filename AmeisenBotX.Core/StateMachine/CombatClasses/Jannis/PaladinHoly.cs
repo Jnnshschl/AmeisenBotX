@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -56,11 +58,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator();
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
         public override string Version => "1.0";
+
+        private DateTime LastAutoAttackCheck { get; set; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
@@ -150,7 +154,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
                     else
                     {
-                        WowInterface.HookManager.StartAutoAttack();
+                        if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && !WowInterface.ObjectManager.Player.IsAutoAttacking)
+                        {
+                            LastAutoAttackCheck = DateTime.Now;
+                            WowInterface.HookManager.StartAutoAttack();
+                        }
 
                         if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.ObjectManager.Target.Position))
                         {

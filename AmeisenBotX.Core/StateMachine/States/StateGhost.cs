@@ -16,17 +16,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            if (StateMachine.IsDungeonMap(StateMachine.MapIDiedOn))
-            {
-                CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
-                NeedToEnterPortal = true;
-            }
-            else
-            {
-                WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
-                CorpsePosition = corpsePosition;
-            }
-
             // WowUnit spiritHealer = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Name.ToUpper().Contains("SPIRIT HEALER"));
             //
             // if (spiritHealer != null)
@@ -42,10 +31,20 @@ namespace AmeisenBotX.Core.Statemachine.States
                 StateMachine.SetState(BotState.Idle);
             }
 
-            if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))
+            if (StateMachine.IsDungeonMap(StateMachine.MapIDiedOn))
+            {
+                CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                NeedToEnterPortal = true;
+            }
+            else if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))
             {
                 // just wait for the mass ress
                 return;
+            }
+            else
+            {
+                WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
+                CorpsePosition = corpsePosition;
             }
 
             if (WowInterface.ObjectManager.Player.Position.GetDistance(CorpsePosition) > 8)

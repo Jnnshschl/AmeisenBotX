@@ -61,8 +61,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public CooldownManager CooldownManager { get; internal set; }
 
-        public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
-
         public abstract string Description { get; }
 
         public DispellBuffsFunction DispellBuffsFunction { get; internal set; }
@@ -81,6 +79,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public AuraManager MyAuraManager { get; internal set; }
 
+        public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
+
         public abstract CombatClassRole Role { get; }
 
         public Dictionary<string, Spell> Spells { get; internal set; }
@@ -97,7 +97,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract void OutOfCombatExecute();
 
-        internal bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0)
+        public override string ToString() => $"[{Class}] [{Role}] {Displayname}";
+
+        internal bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
             if (!PrepareCast(spellName))
             {
@@ -108,7 +110,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (guid != 0)
             {
                 target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
-
                 if (target == null)
                 {
                     return false;
@@ -126,6 +127,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 };
             }
 
+            bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
+
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
@@ -133,17 +136,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (guid != 0 && WowInterface.ObjectManager.TargetGuid != guid)
                 {
-                    WowInterface.HookManager.TargetGuid(guid);
+                    // we dont need to switch target when casting spell on self
+                    if (forceTargetSwitch || !isTargetMyself)
+                    {
+                        WowInterface.HookManager.TargetGuid(guid);
+                    }
                 }
 
-                CastSpell(spellName);
+                CastSpell(spellName, isTargetMyself);
                 return true;
             }
 
             return false;
         }
 
-        internal bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false)
+        internal bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
             if (!PrepareCast(spellName))
             {
@@ -160,6 +167,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return false;
                 }
             }
+
+            bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
@@ -169,19 +178,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && (!needsUnholyrune || (WowInterface.HookManager.IsRuneReady(4) || WowInterface.HookManager.IsRuneReady(5)))
                 && (target == null || IsInRange(Spells[spellName], target.Position)))
             {
-                if (guid != 0 && WowInterface.ObjectManager.Target.Guid != guid)
+                if (guid != 0 && WowInterface.ObjectManager.TargetGuid != guid)
                 {
-                    WowInterface.HookManager.TargetGuid(guid);
+                    // we dont need to switch target when casting spell on self
+                    if (forceTargetSwitch || !isTargetMyself)
+                    {
+                        WowInterface.HookManager.TargetGuid(guid);
+                    }
                 }
 
-                CastSpell(spellName);
+                CastSpell(spellName, isTargetMyself);
                 return true;
             }
 
             return false;
         }
 
-        internal bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1)
+        internal bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
         {
             if (!PrepareCast(spellName))
             {
@@ -199,6 +212,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
 
+            bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
+
             if (Spells[spellName] != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && (!needsEnergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Energy)
@@ -207,10 +222,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (guid != 0 && WowInterface.ObjectManager.TargetGuid != guid)
                 {
-                    WowInterface.HookManager.TargetGuid(guid);
+                    // we dont need to switch target when casting spell on self
+                    if (forceTargetSwitch || !isTargetMyself)
+                    {
+                        WowInterface.HookManager.TargetGuid(guid);
+                    }
                 }
 
-                CastSpell(spellName);
+                CastSpell(spellName, isTargetMyself);
                 return true;
             }
 
@@ -256,9 +275,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return false;
         }
 
-        private void CastSpell(string spellName)
+        private void CastSpell(string spellName, bool castOnSelf)
         {
-            WowInterface.HookManager.CastSpell(spellName);
+            WowInterface.HookManager.CastSpell(spellName, castOnSelf);
             CooldownManager.SetSpellCooldown(spellName, (int)WowInterface.HookManager.GetSpellCooldown(spellName));
             AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
         }
@@ -271,7 +290,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
-            return distance > spell.MinRange && distance < spell.MaxRange;
+            return distance >= spell.MinRange && distance <= spell.MaxRange;
         }
 
         private bool PrepareCast(string spellName)
@@ -292,7 +311,5 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             return true;
         }
-
-        public override string ToString() => $"[{Class}] [{Role}] {Displayname}";
     }
 }

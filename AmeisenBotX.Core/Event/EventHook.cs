@@ -49,40 +49,43 @@ namespace AmeisenBotX.Core.Event
                     List<WowEvent> finalEvents = new List<WowEvent>();
                     rawEvents = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson);
 
-                    foreach (WowEvent rawEvent in rawEvents)
+                    if (rawEvents != null)
                     {
-                        if (!finalEvents.Contains(rawEvent))
+                        foreach (WowEvent rawEvent in rawEvents)
                         {
-                            finalEvents.Add(rawEvent);
-                        }
-                    }
-
-                    if (finalEvents.Count > 0)
-                    {
-                        foreach (WowEvent rawEvent in finalEvents)
-                        {
-                            try
+                            if (!finalEvents.Contains(rawEvent))
                             {
-                                if (EventDictionary.ContainsKey(rawEvent.Name))
-                                {
-                                    EventDictionary[rawEvent.Name].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
-                                }
+                                finalEvents.Add(rawEvent);
                             }
-                            catch (Exception e)
+                        }
+
+                        if (finalEvents.Count > 0)
+                        {
+                            foreach (WowEvent rawEvent in finalEvents)
                             {
-                                AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.Name}:\n{e.ToString()}", LogLevel.Error);
+                                try
+                                {
+                                    if (EventDictionary.ContainsKey(rawEvent.Name))
+                                    {
+                                        EventDictionary[rawEvent.Name].Invoke(rawEvent.Timestamp, rawEvent.Arguments);
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.Name}:\n{e}", LogLevel.Error);
+                                }
                             }
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.Instance.Log("EventHook", $"Failed to parse events:\neventJson: {eventJson}\n{e.ToString()}", LogLevel.Error);
+                    AmeisenLogger.Instance.Log("EventHook", $"Failed to parse events:\neventJson: {eventJson}\n{e}", LogLevel.Error);
                 }
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("EventHook", $"Failed to read events:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed to read events:\n{e}", LogLevel.Error);
             }
         }
 
@@ -128,7 +131,7 @@ namespace AmeisenBotX.Core.Event
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("EventHook", $"Failed subscribe to event:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed subscribe to event:\n{e}", LogLevel.Error);
             }
         }
 
@@ -145,7 +148,7 @@ namespace AmeisenBotX.Core.Event
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("EventHook", $"Failed unsubscribe from event:\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed unsubscribe from event:\n{e}", LogLevel.Error);
             }
         }
 

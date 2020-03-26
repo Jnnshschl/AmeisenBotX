@@ -187,20 +187,11 @@ namespace AmeisenBotX.Core.Character
                 return;
             }
 
-            if (Config.UseClickToMove)
-            {
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos.X);
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, pos.Y);
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, pos.Z);
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
-            }
-            else
-            {
-                HandleInputSimulationMovement(pos);
-            }
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
         }
 
         public void ReleaseKey(VirtualKeys key)
@@ -302,11 +293,6 @@ namespace AmeisenBotX.Core.Character
             }
 
             return true;
-        }
-
-        private void HandleInputSimulationMovement(Vector3 positionToMoveTo)
-        {
-            double angleDiff = BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, positionToMoveTo);
         }
 
         private string SlotToEquipLocation(int slot)
