@@ -7,6 +7,5 @@ namespace AmeisenBotX.Pathfinding.Enums
     {
         None = 0,
         ChaikinCurve = 1 << 0,
-        NaturalSteeringBehavior = 1 << 1
     }
 }

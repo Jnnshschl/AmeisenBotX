@@ -1,11 +1,13 @@
 ﻿using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace AmeisenBotX.Core.Data.Persistence
+namespace AmeisenBotX.Core.Data.Cache
 {
     [Serializable]
     public class InMemoryBotCache : IAmeisenBotCache
@@ -16,6 +18,8 @@ namespace AmeisenBotX.Core.Data.Persistence
             Clear();
         }
 
+        public Dictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
+
         public List<BasicCombatLogEntry> CombatLogEntries { get; private set; }
 
         public string FilePath { get; }
@@ -25,6 +29,18 @@ namespace AmeisenBotX.Core.Data.Persistence
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
 
         public Dictionary<int, string> SpellNameCache { get; private set; }
+
+        public void CacheBlacklistPosition(int mapId, Vector3 node)
+        {
+            if (!BlacklistNodes.ContainsKey(mapId))
+            {
+                BlacklistNodes.Add(mapId, new List<Vector3>() { node });
+            }
+            else if (!BlacklistNodes[mapId].Contains(node))
+            {
+                BlacklistNodes[mapId].Add(node);
+            }
+        }
 
         public void CacheName(ulong guid, string name)
         {
@@ -105,6 +121,17 @@ namespace AmeisenBotX.Core.Data.Persistence
             using Stream stream = File.Open(FilePath, FileMode.Create);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(stream, this);
+        }
+
+        public bool TryGetBlacklistPosition(int mapId, Vector3 position, double maxRadius, out List<Vector3> nodes)
+        {
+            if (BlacklistNodes.ContainsKey(mapId))
+            {
+                BlacklistNodes[mapId].Where(e => e.GetDistance(position) < maxRadius);
+            }
+
+            nodes = new List<Vector3>();
+            return false;
         }
 
         public bool TryGetReaction(int a, int b, out WowUnitReaction reaction)

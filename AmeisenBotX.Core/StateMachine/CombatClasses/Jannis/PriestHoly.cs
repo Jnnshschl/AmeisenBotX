@@ -77,10 +77,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                HandleTargetSelection(playersThatNeedHealing);
+                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
                 WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+
+                if (unitsToHeal.Count > 3
+                    && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
 
                 if (WowInterface.ObjectManager.Target != null)
                 {
@@ -88,12 +94,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(guardianSpiritSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    {
-                        return;
-                    }
-
-                    if (playersThatNeedHealing.Count > 4
-                        && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }

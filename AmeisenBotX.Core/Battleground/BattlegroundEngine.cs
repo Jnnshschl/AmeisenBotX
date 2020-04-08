@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Battleground
                     else
                     {
                         WowInterface.HookManager.TargetGuid(target.Guid);
-                        WowInterface.HookManager.StartAutoAttack();
+                        WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                         return true;
                     }
                 }

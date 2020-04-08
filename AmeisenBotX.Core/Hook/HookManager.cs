@@ -115,13 +115,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public void ClearTarget()
-            => SendChatMessage("/cleartarget");
-
-        public void ClearTargetIfDead()
-            => SendChatMessage("/cleartarget [dead]");
-
-        public void ClearTargetIfDeadOrFriendly()
-            => SendChatMessage("/cleartarget [dead][noharm]");
+            => TargetGuid(0);
 
         public void ClickOnTerrain(Vector3 position)
         {
@@ -207,7 +201,10 @@ namespace AmeisenBotX.Core.Hook
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
         {
             float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
-            SetFacing(player, angle);
+            if ((int)angle != (int)player.Rotation)
+            {
+                SetFacing(player, angle);
+            }
             // buggy atm
             // SendMovementPacket(player, 0xDA);
         }
@@ -471,40 +468,22 @@ namespace AmeisenBotX.Core.Hook
                 return cachedReaction;
             }
 
-            // integer to save the reaction
-            WowInterface.XMemory.AllocateMemory(4, out IntPtr memAlloc);
-            WowInterface.XMemory.Write(memAlloc, 0);
-
-            // TODO: refactor this
-            string[] asm = new string[]
-            {
-                $"PUSH {wowUnitA.BaseAddress}",
-                $"MOV ECX, {wowUnitB.BaseAddress}",
-                $"CALL {WowInterface.OffsetList.FunctionUnitGetReaction}",
-                $"MOV [{memAlloc}], EAX",
-                "RETN",
-            };
-
             WowInterface.ObjectManager.UpdateObject(wowUnitA);
             WowInterface.ObjectManager.UpdateObject(wowUnitB);
 
-            if (wowUnitA.IsDead || wowUnitB.IsDead)
+            if (wowUnitA.Health == 0 || wowUnitB.Health == 0 || wowUnitA.Guid == 0 || wowUnitB.Guid == 0)
             {
                 return reaction;
             }
 
             AmeisenLogger.Instance.Log("HookManager", $"Getting Reaction of {wowUnitA} and {wowUnitB}", LogLevel.Verbose);
 
-            try
-            {
-                InjectAndExecute(asm, true);
-                WowInterface.XMemory.Read(memAlloc, out reaction);
+            byte[] returnBytes = CallObjectFunction(wowUnitA.BaseAddress, WowInterface.OffsetList.FunctionUnitGetReaction, new List<object>() { wowUnitB.BaseAddress }, true);
 
-                WowInterface.BotCache.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
-            }
-            finally
+            if (returnBytes.Length > 0)
             {
-                WowInterface.XMemory.FreeMemory(memAlloc);
+                reaction = (WowUnitReaction)BitConverter.ToInt32(returnBytes, 0);
+                WowInterface.BotCache.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
             }
 
             return reaction;
@@ -588,11 +567,19 @@ namespace AmeisenBotX.Core.Hook
 
                         // read all parameter-bytes until we the buffer is 0
                         WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
-                        while (buffer != 0)
+
+                        if (buffer != 0)
                         {
-                            returnBytes.Add(buffer);
-                            dwAddress = IntPtr.Add(dwAddress, 1);
-                            WowInterface.XMemory.ReadByte(dwAddress, out buffer);
+                            while (buffer != 0)
+                            {
+                                returnBytes.Add(buffer);
+                                dwAddress = IntPtr.Add(dwAddress, 1);
+                                WowInterface.XMemory.ReadByte(dwAddress, out buffer);
+                            }
+                        }
+                        else
+                        {
+                            returnBytes.AddRange(BitConverter.GetBytes(dwAddress.ToInt32()));
                         }
                     }
                     catch (Exception e)
@@ -891,7 +878,8 @@ namespace AmeisenBotX.Core.Hook
             return false;
         }
 
-        public void StartAutoAttack() => SendChatMessage("/startattack");
+        public void StartAutoAttack(WowUnit wowUnit)
+            => UnitOnRightClick(wowUnit);
 
         public void StopClickToMoveIfActive(WowPlayer player)
         {
@@ -918,9 +906,6 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetLuaUnit(WowLuaUnit unit)
             => LuaDoString($"TargetUnit(\"{unit}\");");
-
-        public void TargetNearestEnemy()
-            => SendChatMessage("/targetenemy [harm][nodead]");
 
         public void UnitOnRightClick(WowUnit unit)
             => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);

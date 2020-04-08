@@ -8,9 +8,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowContainer(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
-
         }
-        
+
         private RawWowContainer RawWowContainer { get; set; }
 
         public WowContainer UpdateRawWowContainer(XMemory xMemory)

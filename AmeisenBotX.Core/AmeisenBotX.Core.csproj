@@ -172,8 +172,8 @@
     <Compile Include="Data\Objects\WowObject\WowPlayer.cs" />
     <Compile Include="Data\Objects\WowObject\WowUnit.cs" />
     <Compile Include="Data\Objects\Enums\WowUnitFlags.cs" />
-    <Compile Include="Data\Persistence\InMemoryBotCache.cs" />
-    <Compile Include="Data\Persistence\IAmeisenBotCache.cs" />
+    <Compile Include="Data\Cache\InMemoryBotCache.cs" />
+    <Compile Include="Data\Cache\IAmeisenBotCache.cs" />
     <Compile Include="Dungeon\DungeonEngine.cs" />
     <Compile Include="Dungeon\Enums\DungeonFactionType.cs" />
     <Compile Include="Dungeon\Enums\DungeonNodeType.cs" />
@@ -266,6 +266,11 @@
     <Compile Include="Statemachine\CombatClasses\WarriorFury.cs" />
     <Compile Include="Statemachine\Utils\InterruptManager.cs" />
     <Compile Include="Statemachine\Utils\PetManager.cs" />
+    <Compile Include="Statemachine\Utils\TargetManager.cs" />
+    <Compile Include="Statemachine\Utils\TargetSelectionLogic\DpsTargetSelectionLogic.cs" />
+    <Compile Include="Statemachine\Utils\TargetSelectionLogic\HealTargetSelectionLogic.cs" />
+    <Compile Include="Statemachine\Utils\TargetSelectionLogic\ITargetSelectionLogic.cs" />
+    <Compile Include="Statemachine\Utils\TargetSelectionLogic\TankTargetSelectionLogic.cs" />
     <Compile Include="WowInterface.cs" />
   </ItemGroup>
   <ItemGroup>

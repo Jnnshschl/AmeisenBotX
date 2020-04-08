@@ -1,9 +1,13 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Pathfinding.Objects;
+using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Persistence
+namespace AmeisenBotX.Core.Data.Cache
 {
     public interface IAmeisenBotCache
     {
+        void CacheBlacklistPosition(int mapId, Vector3 node);
+
         void CacheName(ulong guid, string name);
 
         void CacheReaction(int a, int b, WowUnitReaction reaction);
@@ -15,6 +19,8 @@ namespace AmeisenBotX.Core.Data.Persistence
         void Load();
 
         void Save();
+
+        bool TryGetBlacklistPosition(int mapId, Vector3 position, double maxRadius, out List<Vector3> nodes);
 
         bool TryGetReaction(int a, int b, out WowUnitReaction reaction);
 

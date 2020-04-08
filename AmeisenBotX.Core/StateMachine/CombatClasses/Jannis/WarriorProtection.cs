@@ -92,17 +92,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (IsTargetInvalid())
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
             {
-                WowInterface.HookManager.ClearTarget();
+                WowInterface.HookManager.TargetGuid(targetToTarget.First().Guid);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
             }
 
-            HandleTargetSelection();
+            if (WowInterface.ObjectManager.Target == null || WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
+            {
+                return;
+            }
 
             if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && WowInterface.ObjectManager.TargetGuid > 0 && !WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 LastAutoAttackCheck = DateTime.Now;
-                WowInterface.HookManager.StartAutoAttack();
+                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
             if (MyAuraManager.Tick()
@@ -174,60 +178,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
         }
-
-        private void HandleTargetSelection()
-        {
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if (!WowInterface.ObjectManager.Target.IsDead && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid)
-                {
-                    return;
-                }
-                else
-                {
-                    WowInterface.HookManager.ClearTargetIfDeadOrFriendly();
-                }
-            }
-
-            // get all enemies targeting our group
-            List<WowUnit> enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
-
-            if (enemies.Count > 0)
-            {
-                // filter out enemies already attacking me
-                List<WowUnit> enemiesNotTargetingMe = enemies
-                    .Where(e => e.TargetGuid != WowInterface.ObjectManager.PlayerGuid).ToList();
-
-                if (enemiesNotTargetingMe.Count > 0)
-                {
-                    WowUnit targetUnit = enemiesNotTargetingMe.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
-
-                    if (targetUnit != null && targetUnit.Guid > 0 && WowInterface.ObjectManager.TargetGuid != targetUnit.Guid)
-                    {
-                        // target closest enemy
-                        WowInterface.HookManager.TargetGuid(targetUnit.Guid);
-                    }
-                }
-                else
-                {
-                    WowUnit targetUnit = enemies.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
-
-                    if (targetUnit != null && targetUnit.Guid > 0 && WowInterface.ObjectManager.TargetGuid != targetUnit.Guid)
-                    {
-                        // target closest enemy
-                        WowInterface.HookManager.TargetGuid(targetUnit.Guid);
-                    }
-                }
-            }
-        }
-
-        private bool IsTargetInvalid()
-            => !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
-                || WowInterface.ObjectManager.Target.IsDead
-                || WowInterface.ObjectManager.TargetGuid == WowInterface.ObjectManager.PlayerGuid
-                || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly
-                || WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) > 50;
 
         private bool SwitchStance(string stanceName)
         {

@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -9,32 +8,14 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, JumpFunction jumpFunction, IObjectManager objectManager, float maxSteering, float maxVelocity, float maxAcceleration)
+        public BasicVehicle(WowInterface wowInterface, float maxSteering, float maxVelocity, float maxAcceleration)
         {
+            WowInterface = wowInterface;
             Velocity = new Vector3(0, 0, 0);
             MaxSteering = maxSteering;
             MaxVelocity = maxVelocity;
             MaxAcceleration = maxAcceleration;
-            GetRotation = getRotationFunction;
-            GetPosition = getPositionFunction;
-            MoveToPosition = moveToPositionFunction;
-            ObjectManager = objectManager;
-            Jump = jumpFunction;
         }
-
-        public delegate Vector3 GetPositionFunction();
-
-        public delegate float GetRotationFunction();
-
-        public delegate void JumpFunction();
-
-        public delegate void MoveToPositionFunction(Vector3 position);
-
-        public GetPositionFunction GetPosition { get; set; }
-
-        public GetRotationFunction GetRotation { get; set; }
-
-        public JumpFunction Jump { get; private set; }
 
         public float MaxAcceleration { get; private set; }
 
@@ -42,11 +23,9 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public float MaxVelocity { get; private set; }
 
-        public MoveToPositionFunction MoveToPosition { get; set; }
-
-        public IObjectManager ObjectManager { get; }
-
         public Vector3 Velocity { get; private set; }
+
+        private WowInterface WowInterface { get; }
 
         public Vector3 AvoidObstacles(float multiplier)
         {
@@ -65,7 +44,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Flee(Vector3 position, float multiplier)
         {
-            Vector3 currentPosition = GetPosition();
+            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             Vector3 desired = currentPosition;
             float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
 
@@ -104,7 +83,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Seek(Vector3 position, float multiplier)
         {
-            Vector3 currentPosition = GetPosition();
+            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             Vector3 desired = position;
             float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
 
@@ -139,7 +118,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Unstuck(int multiplier)
         {
-            Vector3 positionBehindMe = CalculatPositionnBehind(GetPosition.Invoke(), GetRotation(), 8);
+            Vector3 positionBehindMe = CalculatPositionnBehind(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, 8);
             return Seek(positionBehindMe, multiplier);
         }
 
@@ -152,10 +131,10 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Velocity.Limit(MaxVelocity);
 
-            Vector3 currentPosition = GetPosition();
+            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             currentPosition.Add(Velocity);
 
-            MoveToPosition?.Invoke(currentPosition);
+            WowInterface.CharacterManager.MoveToPosition(currentPosition);
         }
 
         public Vector3 Wander(int multiplier)
@@ -164,10 +143,10 @@ namespace AmeisenBotX.Core.Movement.Objects
             //       maybe add a very weak force keeping it inside a given circle...
             // TODO: implement some sort of delay so that the target is not constantly walking
             Random rnd = new Random();
-            Vector3 currentPosition = GetPosition();
+            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
 
             Vector3 newRandomPosition = new Vector3(0, 0, 0);
-            newRandomPosition += CalculateFuturePosition(currentPosition, GetRotation.Invoke(), Convert.ToSingle((rnd.NextDouble() * 4) + 4));
+            newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.ObjectManager.Player.Rotation, Convert.ToSingle((rnd.NextDouble() * 4) + 4));
 
             // rotate the vector by  random amount of degrees
             newRandomPosition.Rotate(rnd.Next(-14, 14));
@@ -212,7 +191,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         private Vector3 GetObjectForceAroundMe<T>(double maxDistance = 16) where T : WowObject
         {
             Vector3 force = new Vector3(0, 0, 0);
-            Vector3 vehiclePosition = GetPosition.Invoke();
+            Vector3 vehiclePosition = WowInterface.ObjectManager.Player.Position;
             int count = 0;
 
             List<(Vector3, double)> objectDistances = new List<(Vector3, double)>();
@@ -220,7 +199,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             // we need to know every objects position and distance
             // to later apply a force pushing us back from it that
             // is relational to the objects distance.
-            foreach (WowObject obj in ObjectManager.WowObjects.OfType<T>())
+            foreach (WowObject obj in WowInterface.ObjectManager.WowObjects.OfType<T>())
             {
                 double distance = obj.Position.GetDistance(vehiclePosition);
 

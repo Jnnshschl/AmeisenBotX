@@ -221,7 +221,7 @@ namespace AmeisenBotX.Core.Statemachine
             {
                 if (LastGhostCheck + TimeSpan.FromSeconds(8) < DateTime.Now)
                 {
-                    bool isGhost = WowInterface.HookManager.IsGhost("player");
+                    bool isGhost = WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost("player");
                     LastGhostCheck = DateTime.Now;
 
                     if (isGhost)

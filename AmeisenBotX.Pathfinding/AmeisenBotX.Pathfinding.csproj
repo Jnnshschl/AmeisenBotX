@@ -58,5 +58,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
+      <Project>{AFE27893-225B-4F90-9CFD-87DB2EE0D7DF}</Project>
+      <Name>AmeisenBotX.Logging</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

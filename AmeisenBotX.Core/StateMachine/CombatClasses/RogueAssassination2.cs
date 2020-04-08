@@ -432,7 +432,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
                 if (!ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 Player = ObjectManager.Player;

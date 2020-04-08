@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -81,10 +82,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+            {
+                WowInterface.HookManager.TargetGuid(targetToTarget.First().Guid);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+            }
+
+            if (WowInterface.ObjectManager.Target == null || WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
+            {
+                return;
+            }
+
             if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && !WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 LastAutoAttackCheck = DateTime.Now;
-                WowInterface.HookManager.StartAutoAttack();
+                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
             if (MyAuraManager.Tick()

@@ -353,7 +353,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
                 if (!ObjectManager.Player.IsAutoAttacking)
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 Player = ObjectManager.Player;
@@ -510,7 +510,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                             {
                                 if (!ObjectManager.Player.IsAutoAttacking)
                                 {
-                                    HookManager.StartAutoAttack();
+                                    HookManager.StartAutoAttack(ObjectManager.Target);
                                 }
                             }
                         }

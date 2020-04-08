@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Battleground.States
                         if (target != null)
                         {
                             WowInterface.HookManager.TargetGuid(target.Guid);
-                            WowInterface.HookManager.StartAutoAttack();
+                            WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                             WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
                             BattlegroundEngine.ForceCombat = true;
                         }

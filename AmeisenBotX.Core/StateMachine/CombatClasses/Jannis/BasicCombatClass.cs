@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
+using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Pathfinding.Objects;
@@ -22,6 +23,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
+            ITargetSelectionLogic targetSelectionLogic = Role switch
+            {
+                CombatClassRole.Dps => targetSelectionLogic = new DpsTargetSelectionLogic(wowInterface),
+                CombatClassRole.Heal => targetSelectionLogic = new HealTargetSelectionLogic(wowInterface),
+                CombatClassRole.Tank => targetSelectionLogic = new TankTargetSelectionLogic(wowInterface),
+                _ => null,
+            };
+
+            TargetManager = new TargetManager(targetSelectionLogic, TimeSpan.FromMilliseconds(500));
+
             Spells = new Dictionary<string, Spell>();
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
@@ -32,23 +43,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             };
 
-            MyAuraManager = new AuraManager(
+            MyAuraManager = new AuraManager
+            (
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
                 () => { if (WowInterface.ObjectManager.Player != null) { return WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList(); } else { return null; } },
                 () => { if (WowInterface.ObjectManager.Player != null) { return WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList(); } else { return null; } },
                 null,
-                DispellDebuffsFunction);
+                DispellDebuffsFunction
+            );
 
-            TargetAuraManager = new AuraManager(
+            TargetAuraManager = new AuraManager
+            (
                 null,
                 null,
                 TimeSpan.FromSeconds(1),
                 () => { if (WowInterface.ObjectManager.Target != null) { return WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList(); } else { return null; } },
                 () => { if (WowInterface.ObjectManager.Target != null) { return WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList(); } else { return null; } },
                 DispellBuffsFunction,
-                null);
+                null
+            );
 
             TargetInterruptManager = new InterruptManager(WowInterface.ObjectManager.Target, null);
         }
@@ -88,6 +103,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public AuraManager TargetAuraManager { get; internal set; }
 
         public InterruptManager TargetInterruptManager { get; internal set; }
+
+        public TargetManager TargetManager { get; internal set; }
 
         public abstract string Version { get; }
 

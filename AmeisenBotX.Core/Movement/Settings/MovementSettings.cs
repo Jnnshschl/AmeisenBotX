@@ -2,9 +2,9 @@
 {
     public class MovementSettings
     {
-        public float MaxAcceleration { get; set; } = 3f;
+        public float MaxAcceleration { get; set; } = 1f;
 
-        public float MaxSteering { get; set; } = 1f;
+        public float MaxSteering { get; set; } = 0.7f;
 
         public float MaxVelocity { get; set; } = 5f;
 

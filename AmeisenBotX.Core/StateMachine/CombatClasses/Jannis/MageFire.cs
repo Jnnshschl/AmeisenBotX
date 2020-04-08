@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
+using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
@@ -76,6 +78,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             // we dont want to do anything if we are casting something...
             if (WowInterface.ObjectManager.Player.IsCasting)
+            {
+                return;
+            }
+
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+            {
+                WowInterface.HookManager.TargetGuid(targetToTarget.First().Guid);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+            }
+
+            if (WowInterface.ObjectManager.Target == null || WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
             {
                 return;
             }

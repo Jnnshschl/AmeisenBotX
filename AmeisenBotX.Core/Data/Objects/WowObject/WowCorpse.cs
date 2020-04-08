@@ -8,7 +8,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowCorpse(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
-
         }
 
         private RawWowCorpse RawWowCorpse { get; set; }

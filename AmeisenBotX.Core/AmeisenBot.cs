@@ -4,9 +4,9 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Persistence;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
@@ -24,7 +24,6 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using Microsoft.CSharp;
 using Newtonsoft.Json;
 using System;
@@ -558,16 +557,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();
-            WowInterface.MovementEngine = new SmartMovementEngine
-            (
-                () => WowInterface.ObjectManager.Player.Position,
-                () => WowInterface.ObjectManager.Player.Rotation,
-                (Vector3 pos) => WowInterface.CharacterManager.MoveToPosition(pos),
-                (Vector3 start, Vector3 end) => WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, start, end),
-                WowInterface.CharacterManager.Jump,
-                WowInterface.ObjectManager,
-                WowInterface.MovementSettings
-            );
+            WowInterface.MovementEngine = new SmartMovementEngine(WowInterface, WowInterface.MovementSettings);
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)

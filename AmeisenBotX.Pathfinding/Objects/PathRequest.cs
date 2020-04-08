@@ -4,7 +4,7 @@ namespace AmeisenBotX.Pathfinding.Objects
 {
     public struct PathRequest
     {
-        public PathRequest(Vector3 a, Vector3 b, int mapId, PathRequestFlags flags = PathRequestFlags.None, MovementType movementType = MovementType.MOVE_TO_POSITION)
+        public PathRequest(Vector3 a, Vector3 b, int mapId, PathRequestFlags flags = PathRequestFlags.None, MovementType movementType = MovementType.MoveToPosition)
         {
             A = a;
             B = b;

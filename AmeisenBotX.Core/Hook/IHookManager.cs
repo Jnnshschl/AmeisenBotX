@@ -26,10 +26,6 @@ namespace AmeisenBotX.Core.Hook
 
         void ClearTarget();
 
-        void ClearTargetIfDead();
-
-        void ClearTargetIfDeadOrFriendly();
-
         void ClickOnTerrain(Vector3 position);
 
         void ClickToMove(WowPlayer player, Vector3 position);
@@ -140,15 +136,13 @@ namespace AmeisenBotX.Core.Hook
 
         bool SetupEndsceneHook();
 
-        void StartAutoAttack();
+        void StartAutoAttack(WowUnit wowUnit);
 
         void StopClickToMoveIfActive(WowPlayer player);
 
         void TargetGuid(ulong guid);
 
         void TargetLuaUnit(WowLuaUnit unit);
-
-        void TargetNearestEnemy();
 
         void UnitOnRightClick(WowUnit wowUnit);
 

@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
-using AmeisenBotX.Core.Data.Persistence;
+using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;

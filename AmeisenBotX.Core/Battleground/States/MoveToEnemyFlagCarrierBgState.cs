@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Battleground.States
                         if (enemyFlagCarrier != null)
                         {
                             WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
-                            WowInterface.HookManager.StartAutoAttack();
+                            WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                             WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, enemyFlagCarrier.Position);
                             BattlegroundEngine.ForceCombat = true;
                         }

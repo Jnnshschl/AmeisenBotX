@@ -56,6 +56,59 @@ namespace AmeisenBotX
             comboboxBuiltInCombatClass.SelectedIndex = 0;
         }
 
+        private void ButtonDone_Click(object sender, RoutedEventArgs e)
+        {
+            if (ValidateFields())
+            {
+                ConfigName = textboxConfigName.Text.Trim();
+                Config = new AmeisenBotConfig()
+                {
+                    Username = textboxUsername.Text,
+                    Password = textboxPassword.Password,
+                    CharacterSlot = int.Parse(textboxCharacterSlot.Text),
+                    BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty,
+                    UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true),
+                    CustomCombatClassFile = textboxCombatClassFile.Text,
+                    AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false),
+                    AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false),
+                    AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false),
+                    AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false),
+                    FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false),
+                    FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false),
+                    FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false),
+                    PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false),
+                    PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false),
+                    ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false),
+                    SaveWowWindowPosition = checkboxSaveWowWindowPosition.IsChecked.GetValueOrDefault(false),
+                    SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false),
+                    PathToWowExe = textboxWowPath.Text,
+                    SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text,
+                    LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false),
+                    MaxFps = (int)Math.Round(sliderMaxFps.Value),
+                    MaxFpsCombat = (int)Math.Round(sliderMaxFpsCombat.Value),
+                    MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value),
+                    MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value),
+                    LootUnitsRadius = Math.Round(sliderLootRadius.Value),
+                    NavmeshServerIp = textboxNavmeshServerIp.Text,
+                    NameshServerPort = int.Parse(textboxNavmeshServerPort.Text)
+                };
+
+                SaveConfig = true;
+                Close();
+            }
+        }
+
+        private void ButtonExit_Click(object sender, RoutedEventArgs e)
+        {
+            ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
+            confirmWindow.ShowDialog();
+
+            if (confirmWindow.OkayPressed)
+            {
+                Close();
+            }
+        }
+
         private void ButtonOpenCombatClassFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -384,58 +437,5 @@ namespace AmeisenBotX
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-
-        private void ButtonExit_Click(object sender, RoutedEventArgs e)
-        {
-            ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
-            confirmWindow.ShowDialog();
-
-            if (confirmWindow.OkayPressed)
-            {
-                Close();
-            }
-        }
-
-        private void ButtonDone_Click(object sender, RoutedEventArgs e)
-        {
-            if (ValidateFields())
-            {
-                ConfigName = textboxConfigName.Text.Trim();
-                Config = new AmeisenBotConfig()
-                {
-                    Username = textboxUsername.Text,
-                    Password = textboxPassword.Password,
-                    CharacterSlot = int.Parse(textboxCharacterSlot.Text),
-                    BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty,
-                    UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true),
-                    CustomCombatClassFile = textboxCombatClassFile.Text,
-                    AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false),
-                    AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false),
-                    AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false),
-                    AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false),
-                    FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false),
-                    FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false),
-                    FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false),
-                    PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false),
-                    PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false),
-                    ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false),
-                    SaveWowWindowPosition = checkboxSaveWowWindowPosition.IsChecked.GetValueOrDefault(false),
-                    SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false),
-                    PathToWowExe = textboxWowPath.Text,
-                    SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text,
-                    LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false),
-                    MaxFps = (int)Math.Round(sliderMaxFps.Value),
-                    MaxFpsCombat = (int)Math.Round(sliderMaxFpsCombat.Value),
-                    MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value),
-                    MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value),
-                    LootUnitsRadius = Math.Round(sliderLootRadius.Value),
-                    NavmeshServerIp = textboxNavmeshServerIp.Text,
-                    NameshServerPort = int.Parse(textboxNavmeshServerPort.Text)
-                };
-
-                SaveConfig = true;
-                Close();
-            }
-        }
     }
 }

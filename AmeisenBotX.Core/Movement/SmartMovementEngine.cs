@@ -6,43 +6,27 @@ using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
-using static AmeisenBotX.Core.Movement.Objects.BasicVehicle;
 
 namespace AmeisenBotX.Core.Movement
 {
     public class SmartMovementEngine : IMovementEngine
     {
-        public SmartMovementEngine(GetPositionFunction getPositionFunction, GetRotationFunction getRotationFunction, MoveToPositionFunction moveToPositionFunction, GeneratePathFunction generatePathFunction, JumpFunction jumpFunction, IObjectManager objectManager, MovementSettings movementSettings)
+        public SmartMovementEngine(WowInterface wowInterface, MovementSettings movementSettings)
         {
-            State = MovementEngineState.None;
-            GetPosition = getPositionFunction;
-            GetRotation = getRotationFunction;
-            MoveToPosition = moveToPositionFunction;
-            GeneratePath = generatePathFunction;
+            WowInterface = wowInterface;
             MovementSettings = movementSettings;
-            ObjectManager = objectManager;
-            Jump = jumpFunction;
 
+            State = MovementEngineState.None;
             TryCount = 0;
 
-            PlayerVehicle = new BasicVehicle(getPositionFunction, getRotationFunction, moveToPositionFunction, jumpFunction, objectManager, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
+            PlayerVehicle = new BasicVehicle(wowInterface, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
         }
-
-        public delegate List<Vector3> GeneratePathFunction(Vector3 start, Vector3 end);
 
         public Queue<Vector3> CurrentPath { get; private set; }
 
         public Vector3 CurrentPathTargetPosition { get; private set; }
 
-        public GeneratePathFunction GeneratePath { get; set; }
-
-        public GetPositionFunction GetPosition { get; set; }
-
-        public GetRotationFunction GetRotation { get; set; }
-
         public bool HasMoved { get; private set; }
-
-        public JumpFunction Jump { get; set; }
 
         public DateTime LastJumpCheck { get; private set; }
 
@@ -53,8 +37,6 @@ namespace AmeisenBotX.Core.Movement
         public Vector3 LastTargetPosition { get; private set; }
 
         public MovementSettings MovementSettings { get; private set; }
-
-        public MoveToPositionFunction MoveToPosition { get; set; }
 
         public IObjectManager ObjectManager { get; }
 
@@ -68,9 +50,11 @@ namespace AmeisenBotX.Core.Movement
 
         public int TryCount { get; private set; }
 
+        private WowInterface WowInterface { get; }
+
         public void Execute()
         {
-            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(GetPosition.Invoke()) > 24) || TryCount > 2)
+            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 24) || TryCount > 2)
             {
                 Reset();
                 return;
@@ -79,7 +63,7 @@ namespace AmeisenBotX.Core.Movement
             if (CurrentPath.Count == 0)
             {
                 TryCount = 0;
-                List<Vector3> nodes = GeneratePath.Invoke(GetPosition.Invoke(), TargetPosition);
+                List<Vector3> nodes = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
                 if (nodes.Count == 0)
                 {
@@ -96,7 +80,7 @@ namespace AmeisenBotX.Core.Movement
             }
 
             List<Vector3> forces = new List<Vector3>();
-            Vector3 currentPosition = GetPosition.Invoke();
+            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             Vector3 targetPosition = CurrentPath.Peek();
             double distanceToTargetPosition = currentPosition.GetDistance(targetPosition);
 
@@ -117,13 +101,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            // if the target position is higher than us, jump
-            if (distanceToTargetPosition < 4 && currentPosition.Z + 3 < targetPosition.Z)
-            {
-                Jump.Invoke();
-            }
-
-            Vector3 positionToGoTo = BotUtils.MoveAhead(GetRotation.Invoke(), targetPosition, 2);
+            Vector3 positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, targetPosition, 2);
             bool updateForces = true;
 
             switch (State)
@@ -133,13 +111,13 @@ namespace AmeisenBotX.Core.Movement
                     break;
 
                 case MovementEngineState.DirectMoving:
-                    PlayerVehicle.MoveToPosition(targetPosition);
+                    WowInterface.CharacterManager.MoveToPosition(targetPosition);
                     updateForces = false;
                     break;
 
                 case MovementEngineState.Following:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
-                    forces.Add(PlayerVehicle.Seperate(1));
+                    forces.Add(PlayerVehicle.Seperate(0.5f));
                     break;
 
                 case MovementEngineState.Chasing:
@@ -173,24 +151,30 @@ namespace AmeisenBotX.Core.Movement
 
             if (DateTime.Now - LastJumpCheck > TimeSpan.FromMilliseconds(250))
             {
-                double distanceTraveled = LastPosition.GetDistance(GetPosition.Invoke());
+                double distanceTraveled = LastPosition.GetDistance(WowInterface.ObjectManager.Player.Position);
                 if ((LastPosition.X == 0 && LastPosition.Y == 0 && LastPosition.Z == 0) || distanceTraveled < 0.01)
                 {
-                    TryCount++;
+                    ++TryCount;
                 }
 
                 if (TryCount > 0)
                 {
-                    Jump.Invoke();
+                    WowInterface.CharacterManager.Jump();
                     TryCount = 0;
                 }
 
-                LastPosition = GetPosition.Invoke();
+                LastPosition = WowInterface.ObjectManager.Player.Position;
                 LastLastPositionUpdate = DateTime.Now;
                 LastJumpCheck = DateTime.Now;
             }
 
-            LastTargetPosition = GetPosition.Invoke();
+            // if the target position is higher than us, jump
+            if (distanceToTargetPosition < 4 && currentPosition.Z + 3 < targetPosition.Z)
+            {
+                WowInterface.CharacterManager.Jump();
+            }
+
+            LastTargetPosition = WowInterface.ObjectManager.Player.Position;
             HasMoved = true;
         }
 

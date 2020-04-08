@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 // make sure we're auto attacking
                 if (!ObjectManager.Player.IsAutoAttacking)
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 HandleAttacking(target);

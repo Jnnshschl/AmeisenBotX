@@ -76,9 +76,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                HandleTargetSelection(playersThatNeedHealing);
+                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
                 WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                 if (WowInterface.ObjectManager.Target != null)
@@ -89,13 +89,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         return;
                     }
 
-                    if (playersThatNeedHealing.Count > 4
+                    if (unitsToHeal.Count > 4
                         && CastSpellIfPossible(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (playersThatNeedHealing.Count > 6
+                    if (unitsToHeal.Count > 6
                         && (CastSpellIfPossible(naturesSwiftnessSpell, 0, true)
                         || CastSpellIfPossible(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
@@ -131,29 +131,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
-        }
-
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
-
-            if (target != null)
-            {
-                WowInterface.HookManager.TargetGuid(target.Guid);
-            }
-        }
-
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
-        {
-            IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 35).ToList();
-
-            groupPlayers.Add(WowInterface.ObjectManager.Player);
-
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
         }
     }
 }

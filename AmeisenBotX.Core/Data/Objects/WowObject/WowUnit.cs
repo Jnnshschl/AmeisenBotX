@@ -181,6 +181,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public bool HasBuffByName(string name)
             => Auras.Any(e => e.Name == name);
 
+        public override string ToString()
+            => $"[{Guid}]({Level}) {Name}";
+
         public WowUnit UpdateRawWowUnit(XMemory xMemory)
         {
             UpdateRawWowObject(xMemory);
@@ -204,8 +207,5 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
                 return (double)value / (double)max * 100.0;
             }
         }
-
-        public override string ToString()
-            => $"[{Guid}]({Level}) {Name}";
     }
 }
