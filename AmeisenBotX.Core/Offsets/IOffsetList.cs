@@ -78,8 +78,6 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionHandleTerrainClick { get; }
 
-        IntPtr FunctionIsClickMoving { get; }
-
         IntPtr FunctionLuaDoString { get; }
 
         IntPtr FunctionObjectGetPosition { get; }

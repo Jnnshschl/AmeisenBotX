@@ -266,8 +266,6 @@ namespace AmeisenBotX.Core
         {
             CombatClasses = new List<ICombatClass>
             {
-                new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
                 new Statemachine.CombatClasses.Jannis.DeathknightFrost(WowInterface),
                 new Statemachine.CombatClasses.Jannis.DeathknightUnholy(WowInterface),
                 new Statemachine.CombatClasses.Jannis.DruidBalance(WowInterface),
@@ -292,8 +290,10 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface),
                 new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface),
                 new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new Statemachine.CombatClasses.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new Statemachine.CombatClasses.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings))
+                new WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                new WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
+                new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
             };
         }
 
@@ -605,7 +605,33 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnBgNeutralMessage);
 
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", CombatLogParser.Parse);
+            WowInterface.EventHookManager.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
+            WowInterface.EventHookManager.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
+
+            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+        }
+
+        private void OnLfgProposalShow(long timestamp, List<string> args)
+        {
+            WowInterface.HookManager.SendChatMessage("/click LFDDungeonReadyDialogEnterDungeonButton");
+        }
+
+        private void OnLfgRoleCheckShow(long timestamp, List<string> args)
+        {
+            string selectRoleString = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role switch
+            {
+                Statemachine.Enums.CombatClassRole.Tank => "/click LFDRoleCheckPopupRoleButtonTank",
+                Statemachine.Enums.CombatClassRole.Heal => "/click LFDRoleCheckPopupRoleButtonHealer",
+                Statemachine.Enums.CombatClassRole.Dps => "/click LFDRoleCheckPopupRoleButtonDPS",
+                _ => "/click LFDRoleCheckPopupRoleButtonDPS",
+            } : "/click LFDRoleCheckPopupRoleButtonDPS";
+
+            // do this twice to ensure that we join the queue
+            WowInterface.HookManager.SendChatMessage(selectRoleString);
+            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
+
+            WowInterface.HookManager.SendChatMessage(selectRoleString);
+            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
         }
     }
 }

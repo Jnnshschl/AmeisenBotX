@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                 {
                     if (!Buffs.Any(e => e.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase)))
                     {
-                        if (keyValuePair.Value.Invoke())
+                        if (keyValuePair.Value())
                         {
                             return true;
                         }
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
             if (Buffs?.Count > 0 && DispellBuffs != null)
             {
-                DispellBuffs.Invoke();
+                DispellBuffs();
             }
 
             if (DebuffsToKeepActive?.Count > 0 && Debuffs != null)
@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                 {
                     if (!Debuffs.Any(e => e.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase)))
                     {
-                        if (keyValuePair.Value.Invoke())
+                        if (keyValuePair.Value())
                         {
                             return true;
                         }
@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
             if (Debuffs?.Count > 0 && DispellDebuffs != null)
             {
-                DispellDebuffs.Invoke();
+                DispellDebuffs();
             }
 
             return false;

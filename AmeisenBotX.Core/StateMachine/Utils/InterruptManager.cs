@@ -1,29 +1,35 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class InterruptManager
     {
-        public InterruptManager(WowUnit unitToWatch, SortedList<int, CastInterruptFunction> interruptSpells)
+        public InterruptManager(List<WowUnit> unitsToWatch, SortedList<int, CastInterruptFunction> interruptSpells)
         {
-            UnitToWatch = unitToWatch;
+            UnitsToWatch = unitsToWatch;
             InterruptSpells = interruptSpells;
         }
 
-        public delegate bool CastInterruptFunction();
+        public delegate bool CastInterruptFunction(WowUnit target);
 
         public SortedList<int, CastInterruptFunction> InterruptSpells { get; set; }
 
-        private WowUnit UnitToWatch { get; set; }
+        private List<WowUnit> UnitsToWatch { get; set; }
 
         public bool Tick()
         {
-            if (InterruptSpells != null && InterruptSpells.Count > 0 && UnitToWatch != null && UnitToWatch.IsCasting)
+            if (InterruptSpells != null && InterruptSpells.Count > 0 && UnitsToWatch != null && UnitsToWatch.Count > 0)
             {
-                foreach (KeyValuePair<int, CastInterruptFunction> keyValuePair in InterruptSpells)
+                WowUnit selectedUnit = UnitsToWatch.FirstOrDefault(e => e != null && e.IsCasting);
+
+                if (selectedUnit != null)
                 {
-                    return keyValuePair.Value.Invoke();
+                    foreach (KeyValuePair<int, CastInterruptFunction> keyValuePair in InterruptSpells)
+                    {
+                        return keyValuePair.Value(selectedUnit);
+                    }
                 }
             }
 

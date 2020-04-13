@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(counterspellSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { 0, (x) => CastSpellIfPossible(counterspellSpell, x.Guid, true) }
             };
         }
 
@@ -74,25 +74,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        public override void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (WowInterface.ObjectManager.Player.IsCasting)
-            {
-                return;
-            }
-
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
-            {
-                WowInterface.HookManager.TargetGuid(targetToTarget.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-            }
-
-            if (WowInterface.ObjectManager.Target == null || WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
-            {
-                return;
-            }
-
             if (MyAuraManager.Tick()
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick())

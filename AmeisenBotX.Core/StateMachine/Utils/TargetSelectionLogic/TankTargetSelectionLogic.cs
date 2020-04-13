@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,16 +18,12 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
         }
 
-        public bool SelectTarget(out List<WowUnit> targetToSelect)
+        public bool SelectTarget(out List<WowUnit> possibleTargets)
         {
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if (!WowInterface.ObjectManager.Target.IsDead && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid)
-                {
-                    targetToSelect = null;
-                    return false;
-                }
-            }
+            bool insertCurrentTargetToTop = WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0
+                && !WowInterface.ObjectManager.Target.IsDead && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
+                && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Target, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly;
 
             // get all enemies targeting our group
             List<WowUnit> enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
@@ -40,29 +37,44 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
                 if (enemiesNotTargetingMe.Count > 0)
                 {
-                    WowUnit targetUnit = enemiesNotTargetingMe.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+                    List<WowUnit> targetUnits = enemiesNotTargetingMe
+                        .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
+                        .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();
 
-                    if (targetUnit != null && targetUnit.Guid > 0 && WowInterface.ObjectManager.TargetGuid != targetUnit.Guid)
+                    if (targetUnits != null && targetUnits.Count > 0)
                     {
+                        if(insertCurrentTargetToTop)
+                        {
+                            targetUnits.Insert(0, WowInterface.ObjectManager.Target);
+                        }
+
                         // target closest enemy
-                        targetToSelect = new List<WowUnit>() { targetUnit };
+                        possibleTargets = targetUnits;
                         return true;
                     }
                 }
                 else
                 {
-                    WowUnit targetUnit = enemies.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+                    // target the unit with the most health, likely to be the boss
+                    List<WowUnit> targetUnits = enemies
+                        .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
+                        .OrderBy(e => e.Health).ToList();
 
-                    if (targetUnit != null && targetUnit.Guid > 0 && WowInterface.ObjectManager.TargetGuid != targetUnit.Guid)
+                    if (targetUnits != null && targetUnits.Count > 0)
                     {
+                        if (insertCurrentTargetToTop)
+                        {
+                            targetUnits.Insert(0, WowInterface.ObjectManager.Target);
+                        }
+
                         // target closest enemy
-                        targetToSelect = new List<WowUnit>() { targetUnit };
+                        possibleTargets = targetUnits;
                         return true;
                     }
                 }
             }
 
-            targetToSelect = null;
+            possibleTargets = null;
             return false;
         }
     }

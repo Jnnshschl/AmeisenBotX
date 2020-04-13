@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Spells.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -22,6 +23,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             WowInterface = wowInterface;
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
+
+            ActionDelay = TimeSpan.FromMilliseconds(250);
 
             ITargetSelectionLogic targetSelectionLogic = Role switch
             {
@@ -65,7 +68,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null
             );
 
-            TargetInterruptManager = new InterruptManager(WowInterface.ObjectManager.Target, null);
+            TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
         }
 
         public abstract string Author { get; }
@@ -108,15 +111,67 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract string Version { get; }
 
+        public bool UseDefaultTargetSelection { get; protected set; } = true;
+
         public WowInterface WowInterface { get; internal set; }
 
-        public abstract void Execute();
+        public void Execute()
+        {
+            if (!ShouldPerformNextAction())
+            {
+                return;
+            }
+
+            // we dont want to do anything if we are casting something...
+            if (WowInterface.ObjectManager.Player.IsCasting)
+            {
+                return;
+            }
+
+            if (UseDefaultTargetSelection)
+            {
+                if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+                {
+                    ulong guid = targetToTarget.First().Guid;
+
+                    if (WowInterface.ObjectManager.Player.TargetGuid != guid)
+                    {
+                        WowInterface.HookManager.TargetGuid(guid);
+                        WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+                    }
+                }
+
+                if (WowInterface.ObjectManager.Target == null || WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
+                {
+                    return;
+                }
+            }
+
+            ExecuteCC();
+        }
+
+        public abstract void ExecuteCC();
 
         public abstract void OutOfCombatExecute();
 
         public override string ToString() => $"[{Class}] [{Role}] {Displayname}";
 
-        internal bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
+        public DateTime LastAction { get; set; }
+
+        public TimeSpan ActionDelay { get; set; }
+
+        protected bool ShouldPerformNextAction()
+        {
+            if (DateTime.Now - LastAction > ActionDelay)
+            {
+                LastAction = DateTime.Now;
+                return true;
+            }
+
+            return false;
+        }
+
+        protected bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
             if (!PrepareCast(spellName))
             {
@@ -167,7 +222,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return false;
         }
 
-        internal bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
+        protected bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
             if (!PrepareCast(spellName))
             {
@@ -211,7 +266,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return false;
         }
 
-        internal bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
+        protected bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
         {
             if (!PrepareCast(spellName))
             {
@@ -253,7 +308,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return false;
         }
 
-        internal bool HandleDeadPartymembers(string SpellName)
+        protected bool HandleDeadPartymembers(string SpellName)
         {
             if (!Spells.ContainsKey(SpellName))
             {

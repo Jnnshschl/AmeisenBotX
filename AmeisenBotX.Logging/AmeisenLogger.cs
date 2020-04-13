@@ -21,7 +21,7 @@ namespace AmeisenBotX.Logging
             ActiveLogLevel = LogLevel.Debug;
 
             // default log path
-            ChangeLogFolder(AppDomain.CurrentDomain.BaseDirectory + "log/");
+            ChangeLogFolder(AppDomain.CurrentDomain.BaseDirectory + "log/", false);
 
             if (deleteOldLogs)
             {
@@ -57,15 +57,20 @@ namespace AmeisenBotX.Logging
 
         private Thread LogWorker { get; set; }
 
-        public void ChangeLogFolder(string logFolderPath)
+        public void ChangeLogFolder(string logFolderPath, bool createFolder = true, bool deleteOldLogs = true)
         {
             LogFileFolder = logFolderPath;
-            if (!Directory.Exists(logFolderPath))
+            if (createFolder && !Directory.Exists(logFolderPath))
             {
                 Directory.CreateDirectory(logFolderPath);
             }
 
             LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now:dd.MM.yyyy}-{DateTime.Now:HH.mm}.txt";
+
+            if (deleteOldLogs)
+            {
+                DeleteOldLogs();
+            }
         }
 
         public void DeleteOldLogs(int daysToKeep = 1)

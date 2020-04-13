@@ -33,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>8.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="fasmdll_managed, Version=1.0.5080.15965, Culture=neutral, processorArchitecture=x86">
@@ -180,6 +181,7 @@
     <Compile Include="Dungeon\Profiles\Classic\DeadminesProfile.cs" />
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />
+    <Compile Include="Dungeon\Profiles\WotLK\UtgardeKeepProfile.cs" />
     <Compile Include="Event\EventHook.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
     <Compile Include="Hook\HookManager.cs" />
@@ -292,7 +294,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Dungeon\Profiles\TBC\" />
-    <Folder Include="Dungeon\Profiles\WotLK\" />
     <Folder Include="Jobs\Profiles\Gathering\Herbs\" />
     <Folder Include="Jobs\Profiles\Gathering\Mining\" />
     <Folder Include="Raid\Profiles\Classic\" />

@@ -6,10 +6,16 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 {
     public class HealTargetSelectionLogic : ITargetSelectionLogic
     {
-        public HealTargetSelectionLogic(WowInterface wowInterface)
+        public HealTargetSelectionLogic(WowInterface wowInterface, int healthThreshold = 90, bool groupOnly = true)
         {
             WowInterface = wowInterface;
+            HealthThreshold = healthThreshold;
+            GroupOnly = groupOnly;
         }
+
+        public bool GroupOnly { get; set; }
+
+        public int HealthThreshold { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -17,28 +23,30 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
         }
 
-        public bool SelectTarget(out List<WowUnit> targetToSelect)
+        public bool SelectTarget(out List<WowUnit> possibleTargets)
         {
-            if (NeedToHealSomeone(out targetToSelect))
+            if (NeedToHealSomeone(out possibleTargets))
             {
                 // select the one with lowest hp
-                targetToSelect = targetToSelect.OrderBy(e => e.HealthPercentage).ToList();
+                possibleTargets = possibleTargets.OrderBy(e => e.HealthPercentage).ToList();
                 return true;
             }
 
-            targetToSelect = null;
+            possibleTargets = null;
             return false;
         }
 
         private bool NeedToHealSomeone(out List<WowUnit> playersThatNeedHealing)
         {
             IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead
+                && e.Health > 1
+                && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
+                && (!GroupOnly || WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))).ToList();
 
             groupPlayers.Add(WowInterface.ObjectManager.Player);
 
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).OfType<WowUnit>().ToList();
-
+            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < HealthThreshold).OfType<WowUnit>().ToList();
             return playersThatNeedHealing.Count > 0;
         }
     }

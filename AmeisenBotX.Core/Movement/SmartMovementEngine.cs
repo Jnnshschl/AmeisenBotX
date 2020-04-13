@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Movement
 
         public void Execute()
         {
-            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 24) || TryCount > 2)
+            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 16) || TryCount > 2)
             {
                 Reset();
                 return;

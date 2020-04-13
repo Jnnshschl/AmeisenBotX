@@ -85,6 +85,7 @@ namespace AmeisenBotX.Core.Statemachine
                 AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
                 WowInterface.MovementEngine.Reset();
                 WowInterface.ObjectManager.WowObjects.Clear();
+                WowInterface.EventHookManager.Stop();
                 SetState(BotState.None);
             }
 
@@ -160,7 +161,8 @@ namespace AmeisenBotX.Core.Statemachine
             || map == MapId.StrandOfTheAncients;
 
         internal bool IsDungeonMap(MapId map)
-            => map == MapId.Deadmines;
+            => map == MapId.Deadmines
+            || map == MapId.UtgardeKeep;
 
         internal bool IsInCapitalCity()
         {

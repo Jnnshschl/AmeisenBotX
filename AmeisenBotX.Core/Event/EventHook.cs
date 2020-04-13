@@ -101,6 +101,7 @@ namespace AmeisenBotX.Core.Event
 
         public void Stop()
         {
+            IsSetUp = false;
             AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager...", LogLevel.Verbose);
             WowInterface.HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
             WowInterface.HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");

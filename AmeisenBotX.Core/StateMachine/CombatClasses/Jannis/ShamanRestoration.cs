@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public ShamanRestoration(WowInterface wowInterface) : base(wowInterface)
         {
+            UseDefaultTargetSelection = false;
+
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, 0, true) }
@@ -68,14 +70,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public override void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (WowInterface.ObjectManager.Player.IsCasting)
-            {
-                return;
-            }
-
             if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);

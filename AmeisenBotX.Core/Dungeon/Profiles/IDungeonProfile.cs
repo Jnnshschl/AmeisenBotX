@@ -8,26 +8,28 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 {
     public interface IDungeonProfile
     {
-        public string Author { get; }
+        string Author { get; }
 
-        public string Description { get; }
+        string Description { get; }
 
-        public DungeonFactionType FactionType { get; }
+        DungeonFactionType FactionType { get; }
 
-        public int GroupSize { get; }
+        int GroupSize { get; }
 
-        public MapId MapId { get; }
+        MapId MapId { get; }
 
-        public int MaxLevel { get; }
+        MapId WorldEntryMapId { get; }
 
-        public string Name { get; }
+        int MaxLevel { get; }
 
-        public List<DungeonNode> Path { get; }
+        string Name { get; }
 
-        public int RequiredItemLevel { get; }
+        List<DungeonNode> Path { get; }
 
-        public int RequiredLevel { get; }
+        int RequiredItemLevel { get; }
 
-        public Vector3 WorldEntry { get; }
+        int RequiredLevel { get; }
+
+        Vector3 WorldEntry { get; }
     }
 }

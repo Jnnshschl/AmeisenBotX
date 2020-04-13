@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && WowInterface.ObjectManager.Player != null)
             {
                 // use the default MovementEngine to move if the CombatClass doesnt
-                if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement))
+                if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
                     // we cant move to a target that not exists
                     if (LastTarget == null || WowInterface.ObjectManager.Target.Guid != LastTarget.Guid)
@@ -88,10 +88,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
             if (distance <= DistanceToTarget)
             {
-                WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
-
                 if (DateTime.Now - LastFacingCheck > TimeSpan.FromSeconds(1) && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
                 {
+                    WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
                     LastFacingCheck = DateTime.Now;
                     WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
                 }

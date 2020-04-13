@@ -29,6 +29,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public PaladinHoly(WowInterface wowInterface) : base(wowInterface)
         {
+            UseDefaultTargetSelection = false;
+
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { blessingOfWisdomSpell, () => CastSpellIfPossible(blessingOfWisdomSpell, WowInterface.ObjectManager.PlayerGuid, true) },
@@ -67,16 +69,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private DateTime LastAutoAttackCheck { get; set; }
 
+        private DateTime LastHealAction { get; set; }
+
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public override void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (WowInterface.ObjectManager.Player.IsCasting)
-            {
-                return;
-            }
-
             if (WowInterface.ObjectManager.Player.ManaPercentage < 80
                 && CastSpellIfPossible(divinePleaSpell, WowInterface.ObjectManager.PlayerGuid, true))
             {
@@ -120,8 +118,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         }
                     }
                 }
+
+                LastHealAction = DateTime.Now;
             }
-            else
+            else if (DateTime.Now - LastHealAction > TimeSpan.FromSeconds(3)) // after 3 seconds of no healing we are going to attack stuff
             {
                 if (MyAuraManager.Tick())
                 {

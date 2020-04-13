@@ -2,9 +2,11 @@
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Dungeon.Profiles.Classic;
+using AmeisenBotX.Core.Dungeon.Profiles.WotLK;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,6 +36,12 @@ namespace AmeisenBotX.Core.Dungeon
         public double Progress { get; private set; }
 
         public int TotalNodes { get; private set; }
+
+        public bool Waiting { get; private set; }
+
+        public bool IgnoreEatDrink { get; private set; }
+
+        public DateTime WaitingSince { get; private set; }
 
         private List<DungeonNode> CompletedNodes { get; set; }
 
@@ -66,36 +74,46 @@ namespace AmeisenBotX.Core.Dungeon
                 }
                 else
                 {
-                    if (!ShouldWaitForGroup())
+                    bool isMePartyleader = WowInterface.ObjectManager.Player.Guid == WowInterface.ObjectManager.PartyleaderGuid;
+                    double completionDistance = isMePartyleader ? 5 : 25;
+
+                    if (isMePartyleader)
                     {
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > 5)
+                        if (!ShouldWaitForGroup())
                         {
-                            WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CurrentNodes.Peek().Position);
-                            WowInterface.MovementEngine.Execute();
-                            return;
-                        }
-                        else
-                        {
-                            DungeonNode dungeonNode = CurrentNodes.Peek();
-
-                            if (dungeonNode.Type == Enums.DungeonNodeType.Door
-                                || dungeonNode.Type == Enums.DungeonNodeType.Collect
-                                || dungeonNode.Type == Enums.DungeonNodeType.Use)
+                            if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > completionDistance)
                             {
-                                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                                    .OrderBy(e => e.Position.GetDistance(dungeonNode.Position))
-                                    .FirstOrDefault();
-
-                                if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 5)
-                                {
-                                    WowInterface.CharacterManager.InteractWithObject(obj);
-                                }
+                                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CurrentNodes.Peek().Position);
+                                WowInterface.MovementEngine.Execute();
+                                return;
                             }
+                            else
+                            {
+                                DungeonNode dungeonNode = CurrentNodes.Peek();
 
-                            CompletedNodes.Add(CurrentNodes.Dequeue());
-                            Progress = ((double)CompletedNodes.Count / (double)TotalNodes) * 100;
-                            HasFinishedDungeon = Progress >= 100.0;
+                                if (dungeonNode.Type == Enums.DungeonNodeType.Door
+                                    || dungeonNode.Type == Enums.DungeonNodeType.Collect
+                                    || dungeonNode.Type == Enums.DungeonNodeType.Use)
+                                {
+                                    WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                                        .OrderBy(e => e.Position.GetDistance(dungeonNode.Position))
+                                        .FirstOrDefault();
+
+                                    if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < completionDistance)
+                                    {
+                                        WowInterface.CharacterManager.InteractWithObject(obj);
+                                    }
+                                }
+
+                                CompletedNodes.Add(CurrentNodes.Dequeue());
+                                Progress = ((double)CompletedNodes.Count / (double)TotalNodes) * 100;
+                                HasFinishedDungeon = Progress >= 100.0;
+                            }
                         }
+                    }
+                    else
+                    {
+                        NeedToMoveToGroupLeader();
                     }
                 }
             }
@@ -109,8 +127,26 @@ namespace AmeisenBotX.Core.Dungeon
             }
         }
 
+        private bool NeedToMoveToGroupLeader()
+        {
+            WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
+            if (partyLeader != null && WowInterface.ObjectManager.Player.Position.GetDistance(partyLeader.Position) > 5)
+            {
+                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
+                WowInterface.MovementEngine.Execute();
+                return true;
+            }
+
+            return false;
+        }
+
         public void LoadProfile(IDungeonProfile profile)
         {
+            if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.ObjectManager.Player.Position.GetDistance(profile.WorldEntry) < 16)
+            {
+                return;
+            }
+
             Reset();
             DungeonProfile = profile;
 
@@ -151,22 +187,38 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool ShouldWaitForGroup()
         {
-            // we need to be prepared for the bossfight
-            double minPercentages = CurrentNodes.Peek().Type == Enums.DungeonNodeType.Boss ? 100.0 : 75.0;
-
-            // do we need to wait for some members to regen life or mana
-            if (WowInterface.ObjectManager.Partymembers.OfType<WowUnit>().Any(e => e.HealthPercentage < minPercentages || e.ManaPercentage < minPercentages))
+            if (!IgnoreEatDrink)
             {
-                return true;
+                // we need to be prepared for the bossfight
+                double minPercentages = CurrentNodes.Peek().Type == Enums.DungeonNodeType.Boss ? 100.0 : 75.0;
+
+                // wait for guys to start eating
+                if (DateTime.Now - WaitingSince > TimeSpan.FromSeconds(3)
+                    && !WowInterface.ObjectManager.Partymembers.Any(e => e.HasBuffByName("Food") || e.HasBuffByName("Drink")))
+                {
+                    IgnoreEatDrink = true;
+                }
+
+                // do we need to wait for some members to regen life or mana
+                if (WowInterface.ObjectManager.Partymembers.OfType<WowUnit>().Any(e => e.HealthPercentage < minPercentages))
+                {
+                    Waiting = true;
+                    WaitingSince = DateTime.Now;
+                    return true;
+                }
             }
 
             // are my group members not in range of the CurrentNode
-            if (WowInterface.ObjectManager.GetNearFriends<WowPlayer>(CurrentNodes.Peek().Position, 30).Count() < WowInterface.ObjectManager.Partymembers.Count)
+            List<WowPlayer> nearUnits = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(CurrentNodes.Peek().Position, 30).ToList();
+            if (nearUnits.Count() < WowInterface.ObjectManager.PartymemberGuids.Count - 1)
             {
+                Waiting = true;
+                WaitingSince = DateTime.Now;
                 return true;
             }
 
             // go ahead
+            Waiting = false;
             return false;
         }
 
@@ -174,6 +226,7 @@ namespace AmeisenBotX.Core.Dungeon
             => WowInterface.ObjectManager.MapId switch
             {
                 MapId.Deadmines => new DeadminesProfile(),
+                MapId.UtgardeKeep => new UtgardeKeepProfile(),
                 _ => null
             };
     }

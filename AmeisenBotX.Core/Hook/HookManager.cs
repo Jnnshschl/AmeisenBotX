@@ -20,6 +20,7 @@ namespace AmeisenBotX.Core.Hook
     public class HookManager : IHookManager
     {
         private const int ENDSCENE_HOOK_OFFSET = 0x2;
+        private readonly object hookLock = new object();
 
         public HookManager(WowInterface wowInterface)
         {
@@ -499,108 +500,97 @@ namespace AmeisenBotX.Core.Hook
 
         public byte[] InjectAndExecute(string[] asm, bool readReturnBytes)
         {
-            AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
-
-            List<byte> returnBytes = new List<byte>();
-
-            if (!WowInterface.ObjectManager.IsWorldLoaded)
+            lock (hookLock)
             {
-                return returnBytes.ToArray();
-            }
+                AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
 
-            try
-            {
-                int timeoutCounter = 0;
-
-                // wait for the code to be executed
-                while (IsInjectionUsed)
+                List<byte> returnBytes = new List<byte>();
+                if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
-                    if (timeoutCounter == 5000)
+                    return returnBytes.ToArray();
+                }
+
+                try
+                {
+                    // wait for the code to be executed
+                    while (IsInjectionUsed)
                     {
-                        return Array.Empty<byte>();
+                        Thread.Sleep(1);
                     }
 
-                    timeoutCounter++;
-                    Thread.Sleep(1);
-                }
+                    IsInjectionUsed = true;
 
-                IsInjectionUsed = true;
+                    // preparing to inject the given ASM
+                    WowInterface.XMemory.Fasm.Clear();
 
-                // preparing to inject the given ASM
-                WowInterface.XMemory.Fasm.Clear();
-
-                // add all lines
-                foreach (string s in asm)
-                {
-                    WowInterface.XMemory.Fasm.AddLine(s);
-                }
-
-                // inject it
-                WowInterface.XMemory.SuspendMainThread();
-                WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
-                WowInterface.XMemory.ResumeMainThread();
-
-                // now there is code to be executed
-                WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
-
-                timeoutCounter = 0;
-
-                // wait for the code to be executed
-                while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
-                {
-                    if (timeoutCounter == 5000)
+                    // add all lines
+                    foreach (string s in asm)
                     {
-                        return Array.Empty<byte>();
+                        WowInterface.XMemory.Fasm.AddLine(s);
                     }
 
-                    timeoutCounter++;
-                    IsInjectionUsed = false;
-                    Thread.Sleep(1);
-                }
+                    // inject it
+                    WowInterface.XMemory.SuspendMainThread();
+                    WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
 
-                // if we want to read the return value do it otherwise we're done
-                if (readReturnBytes)
-                {
-                    try
+                    // now there is code to be executed
+                    WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
+                    WowInterface.XMemory.ResumeMainThread();
+
+                    // wait for the code to be executed
+                    while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
                     {
-                        WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
+                        Thread.Sleep(1);
+                    }
 
-                        // read all parameter-bytes until we the buffer is 0
-                        WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
+                    // if we want to read the return value do it otherwise we're done
+                    if (readReturnBytes)
+                    {
+                        WowInterface.XMemory.SuspendMainThread();
 
-                        if (buffer != 0)
+                        try
                         {
-                            while (buffer != 0)
+                            WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
+
+                            // read all parameter-bytes until we the buffer is 0
+                            WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
+
+                            if (buffer != 0)
                             {
-                                returnBytes.Add(buffer);
-                                dwAddress = IntPtr.Add(dwAddress, 1);
-                                WowInterface.XMemory.ReadByte(dwAddress, out buffer);
+                                while (buffer != 0)
+                                {
+                                    returnBytes.Add(buffer);
+                                    dwAddress = IntPtr.Add(dwAddress, 1);
+                                    WowInterface.XMemory.ReadByte(dwAddress, out buffer);
+                                }
+                            }
+                            else
+                            {
+                                returnBytes.AddRange(BitConverter.GetBytes(dwAddress.ToInt32()));
                             }
                         }
-                        else
+                        catch (Exception e)
                         {
-                            returnBytes.AddRange(BitConverter.GetBytes(dwAddress.ToInt32()));
+                            AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
                         }
+
+                        WowInterface.XMemory.ResumeMainThread();
                     }
-                    catch (Exception e)
-                    {
-                        AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
-                    }
+
+                    IsInjectionUsed = false;
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.Instance.Log("HookManager", $"Failed to inject:\n{e}", LogLevel.Error);
+
+                    // now there is no more code to be executed
+                    WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
+                    IsInjectionUsed = false;
+                    WowInterface.XMemory.ResumeMainThread();
                 }
 
-                IsInjectionUsed = false;
+                return returnBytes.ToArray();
             }
-            catch (Exception e)
-            {
-                AmeisenLogger.Instance.Log("HookManager", $"Failed to inject:\n{e}", LogLevel.Error);
-
-                // now there is no more code to be executed
-                WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-                IsInjectionUsed = false;
-                WowInterface.XMemory.ResumeMainThread();
-            }
-
-            return returnBytes.ToArray();
         }
 
         public bool IsBgInviteReady()
@@ -611,7 +601,7 @@ namespace AmeisenBotX.Core.Hook
             return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
-        public bool IsClickToMoveActive()
+        public bool IsClickToMoveActive(WowPlayer player)
             => WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveAction, out int ctmState)
             && (ClickToMoveType)ctmState != ClickToMoveType.None
             && (ClickToMoveType)ctmState != ClickToMoveType.Stop;
@@ -883,7 +873,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void StopClickToMoveIfActive(WowPlayer player)
         {
-            if (IsClickToMoveActive())
+            if (IsClickToMoveActive(player))
             {
                 CallObjectFunction(player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
             }
@@ -891,6 +881,11 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetGuid(ulong guid)
         {
+            if (guid < 0)
+            {
+                return;
+            }
+
             byte[] guidBytes = BitConverter.GetBytes(guid);
             string[] asm = new string[]
             {
@@ -908,7 +903,14 @@ namespace AmeisenBotX.Core.Hook
             => LuaDoString($"TargetUnit(\"{unit}\");");
 
         public void UnitOnRightClick(WowUnit unit)
-            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
+        {
+            if (unit == null || unit.Guid == 0)
+            {
+                return;
+            }
+
+            CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
+        }
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)
             => LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
@@ -963,6 +965,11 @@ namespace AmeisenBotX.Core.Hook
 
         private byte[] CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null, bool readReturnBytes = false)
         {
+            if (objectBaseAddress == IntPtr.Zero || functionAddress == IntPtr.Zero)
+            {
+                return null;
+            }
+
             List<string> asm = new List<string>();
 
             if (args != null)

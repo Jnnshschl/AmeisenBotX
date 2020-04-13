@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, () => CastSpellIfPossible(intimidatingShoutSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { 0, (x) => CastSpellIfPossible(intimidatingShoutSpell, x.Guid, true) }
             };
         }
 
@@ -73,25 +73,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private DateTime LastAutoAttackCheck { get; set; }
 
-        public override void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (WowInterface.ObjectManager.Player.IsCasting)
-            {
-                return;
-            }
-
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
-            {
-                WowInterface.HookManager.TargetGuid(targetToTarget.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-            }
-
-            if (WowInterface.ObjectManager.Target == null || WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
-            {
-                return;
-            }
-
             if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && !WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
                 LastAutoAttackCheck = DateTime.Now;

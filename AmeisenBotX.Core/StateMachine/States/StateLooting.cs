@@ -76,13 +76,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                         {
                             WowInterface.HookManager.LootEveryThing();
                             UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
-                            LastOpenLootTry = DateTime.Now;
 
                             if (UnitLootQueue.Count > 0)
                             {
                                 UnitLootQueue.Dequeue();
                             }
                         }
+
+                        LastOpenLootTry = DateTime.Now;
                     }
                 }
                 else
