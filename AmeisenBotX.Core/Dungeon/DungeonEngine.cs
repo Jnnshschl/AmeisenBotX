@@ -33,13 +33,13 @@ namespace AmeisenBotX.Core.Dungeon
 
         public bool HasFinishedDungeon { get; private set; }
 
+        public bool IgnoreEatDrink { get; private set; }
+
         public double Progress { get; private set; }
 
         public int TotalNodes { get; private set; }
 
         public bool Waiting { get; private set; }
-
-        public bool IgnoreEatDrink { get; private set; }
 
         public DateTime WaitingSince { get; private set; }
 
@@ -127,19 +127,6 @@ namespace AmeisenBotX.Core.Dungeon
             }
         }
 
-        private bool NeedToMoveToGroupLeader()
-        {
-            WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
-            if (partyLeader != null && WowInterface.ObjectManager.Player.Position.GetDistance(partyLeader.Position) > 5)
-            {
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
-                WowInterface.MovementEngine.Execute();
-                return true;
-            }
-
-            return false;
-        }
-
         public void LoadProfile(IDungeonProfile profile)
         {
             if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.ObjectManager.Player.Position.GetDistance(profile.WorldEntry) < 16)
@@ -184,6 +171,19 @@ namespace AmeisenBotX.Core.Dungeon
         private bool AreAllPlayersPresent()
             => WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 50)
             .Count() >= WowInterface.ObjectManager.Partymembers.Count;
+
+        private bool NeedToMoveToGroupLeader()
+        {
+            WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
+            if (partyLeader != null && WowInterface.ObjectManager.Player.Position.GetDistance(partyLeader.Position) > 5)
+            {
+                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
+                WowInterface.MovementEngine.Execute();
+                return true;
+            }
+
+            return false;
+        }
 
         private bool ShouldWaitForGroup()
         {

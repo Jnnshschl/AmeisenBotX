@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
                     if (targetUnits != null && targetUnits.Count > 0)
                     {
-                        if(insertCurrentTargetToTop)
+                        if (insertCurrentTargetToTop)
                         {
                             targetUnits.Insert(0, WowInterface.ObjectManager.Target);
                         }

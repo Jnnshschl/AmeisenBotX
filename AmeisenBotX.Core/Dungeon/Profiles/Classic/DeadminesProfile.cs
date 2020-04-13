@@ -21,8 +21,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public MapId MapId { get; } = MapId.Deadmines;
 
-        public MapId WorldEntryMapId { get; } = MapId.EasternKingdoms;
-
         public int MaxLevel { get; } = 18;
 
         public string Name { get; } = "[15-18] Deadmines";
@@ -119,5 +117,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
         public int RequiredLevel { get; } = 15;
 
         public Vector3 WorldEntry { get; } = new Vector3(-11208, 1680, 24);
+
+        public MapId WorldEntryMapId { get; } = MapId.EasternKingdoms;
     }
 }

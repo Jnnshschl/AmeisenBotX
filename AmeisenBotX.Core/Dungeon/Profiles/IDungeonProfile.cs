@@ -18,8 +18,6 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         MapId MapId { get; }
 
-        MapId WorldEntryMapId { get; }
-
         int MaxLevel { get; }
 
         string Name { get; }
@@ -31,5 +29,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles
         int RequiredLevel { get; }
 
         Vector3 WorldEntry { get; }
+
+        MapId WorldEntryMapId { get; }
     }
 }

@@ -423,6 +423,29 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager.Equipment.Update();
         }
 
+        private void OnLfgProposalShow(long timestamp, List<string> args)
+        {
+            WowInterface.HookManager.SendChatMessage("/click LFDDungeonReadyDialogEnterDungeonButton");
+        }
+
+        private void OnLfgRoleCheckShow(long timestamp, List<string> args)
+        {
+            string selectRoleString = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role switch
+            {
+                Statemachine.Enums.CombatClassRole.Tank => "/click LFDRoleCheckPopupRoleButtonTank",
+                Statemachine.Enums.CombatClassRole.Heal => "/click LFDRoleCheckPopupRoleButtonHealer",
+                Statemachine.Enums.CombatClassRole.Dps => "/click LFDRoleCheckPopupRoleButtonDPS",
+                _ => "/click LFDRoleCheckPopupRoleButtonDPS",
+            } : "/click LFDRoleCheckPopupRoleButtonDPS";
+
+            // do this twice to ensure that we join the queue
+            WowInterface.HookManager.SendChatMessage(selectRoleString);
+            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
+
+            WowInterface.HookManager.SendChatMessage(selectRoleString);
+            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
+        }
+
         private void OnLootRollStarted(long timestamp, List<string> args)
         {
             AmeisenLogger.Instance.Log("WoWEvents", $"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
@@ -609,29 +632,6 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
 
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
-        }
-
-        private void OnLfgProposalShow(long timestamp, List<string> args)
-        {
-            WowInterface.HookManager.SendChatMessage("/click LFDDungeonReadyDialogEnterDungeonButton");
-        }
-
-        private void OnLfgRoleCheckShow(long timestamp, List<string> args)
-        {
-            string selectRoleString = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role switch
-            {
-                Statemachine.Enums.CombatClassRole.Tank => "/click LFDRoleCheckPopupRoleButtonTank",
-                Statemachine.Enums.CombatClassRole.Heal => "/click LFDRoleCheckPopupRoleButtonHealer",
-                Statemachine.Enums.CombatClassRole.Dps => "/click LFDRoleCheckPopupRoleButtonDPS",
-                _ => "/click LFDRoleCheckPopupRoleButtonDPS",
-            } : "/click LFDRoleCheckPopupRoleButtonDPS";
-
-            // do this twice to ensure that we join the queue
-            WowInterface.HookManager.SendChatMessage(selectRoleString);
-            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
-
-            WowInterface.HookManager.SendChatMessage(selectRoleString);
-            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
         }
     }
 }

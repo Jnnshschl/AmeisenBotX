@@ -71,6 +71,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
         }
 
+        public TimeSpan ActionDelay { get; set; }
+
         public abstract string Author { get; }
 
         public abstract WowClass Class { get; }
@@ -95,6 +97,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract IWowItemComparator ItemComparator { get; set; }
 
+        public DateTime LastAction { get; set; }
+
         public AuraManager MyAuraManager { get; internal set; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
@@ -109,9 +113,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public TargetManager TargetManager { get; internal set; }
 
-        public abstract string Version { get; }
-
         public bool UseDefaultTargetSelection { get; protected set; } = true;
+
+        public abstract string Version { get; }
 
         public WowInterface WowInterface { get; internal set; }
 
@@ -155,21 +159,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public abstract void OutOfCombatExecute();
 
         public override string ToString() => $"[{Class}] [{Role}] {Displayname}";
-
-        public DateTime LastAction { get; set; }
-
-        public TimeSpan ActionDelay { get; set; }
-
-        protected bool ShouldPerformNextAction()
-        {
-            if (DateTime.Now - LastAction > ActionDelay)
-            {
-                LastAction = DateTime.Now;
-                return true;
-            }
-
-            return false;
-        }
 
         protected bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
@@ -342,6 +331,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     return true;
                 }
+            }
+
+            return false;
+        }
+
+        protected bool ShouldPerformNextAction()
+        {
+            if (DateTime.Now - LastAction > ActionDelay)
+            {
+                LastAction = DateTime.Now;
+                return true;
             }
 
             return false;

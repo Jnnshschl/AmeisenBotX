@@ -19,8 +19,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
 
         public MapId MapId { get; } = MapId.UtgardeKeep;
 
-        public MapId WorldEntryMapId { get; } = MapId.Northrend;
-
         public int MaxLevel { get; } = 80;
 
         public string Name { get; } = "[68-80] Utgarde Keep";
@@ -376,5 +374,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
         public int RequiredLevel { get; } = 68;
 
         public Vector3 WorldEntry { get; } = new Vector3(1238, -4860, 41);
+
+        public MapId WorldEntryMapId { get; } = MapId.Northrend;
     }
 }
