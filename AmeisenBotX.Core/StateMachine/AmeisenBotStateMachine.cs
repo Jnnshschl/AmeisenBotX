@@ -68,6 +68,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         public string PlayerName { get; internal set; }
 
+        public bool WowCrashed { get; internal set; }
+
         public Dictionary<BotState, BasicState> States { get; private set; }
 
         internal WowInterface WowInterface { get; }
@@ -83,9 +85,12 @@ namespace AmeisenBotX.Core.Statemachine
             if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
             {
                 AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
+                WowCrashed = true;
+
                 WowInterface.MovementEngine.Reset();
                 WowInterface.ObjectManager.WowObjects.Clear();
                 WowInterface.EventHookManager.Stop();
+
                 SetState(BotState.None);
             }
 

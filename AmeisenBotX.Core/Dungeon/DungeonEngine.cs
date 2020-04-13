@@ -124,6 +124,7 @@ namespace AmeisenBotX.Core.Dungeon
             else
             {
                 // find a way to exit the dungeon, maybe hearthstone
+                WowInterface.HookManager.SendChatMessage("/run LFGTeleport(IsInLFGDungeon())");
             }
         }
 

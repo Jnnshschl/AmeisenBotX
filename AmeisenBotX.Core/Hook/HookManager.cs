@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
@@ -498,14 +499,15 @@ namespace AmeisenBotX.Core.Hook
             return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
-        public byte[] InjectAndExecute(string[] asm, bool readReturnBytes)
+        public byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
             lock (hookLock)
             {
+                AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ...", LogLevel.Verbose);
                 AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
 
                 List<byte> returnBytes = new List<byte>();
-                if (!WowInterface.ObjectManager.IsWorldLoaded)
+                if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.XMemory.Process.HasExited)
                 {
                     return returnBytes.ToArray();
                 }
@@ -537,15 +539,20 @@ namespace AmeisenBotX.Core.Hook
                     WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
                     WowInterface.XMemory.ResumeMainThread();
 
+                    AmeisenLogger.Instance.Log("HookManager", $"Injection completed...", LogLevel.Verbose);
+
                     // wait for the code to be executed
                     while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
                     {
                         Thread.Sleep(1);
                     }
 
+                    AmeisenLogger.Instance.Log("HookManager", $"Execution completed...", LogLevel.Verbose);
+
                     // if we want to read the return value do it otherwise we're done
                     if (readReturnBytes)
                     {
+                        AmeisenLogger.Instance.Log("HookManager", $"Reading return bytes...", LogLevel.Verbose);
                         WowInterface.XMemory.SuspendMainThread();
 
                         try
@@ -679,10 +686,9 @@ namespace AmeisenBotX.Core.Hook
 
                     string[] asm = new string[]
                     {
-                        $"MOV EAX, {memAlloc.ToInt32()}",
                         "PUSH 0",
-                        "PUSH EAX",
-                        "PUSH EAX",
+                        $"PUSH {memAlloc.ToInt32()}",
+                        $"PUSH {memAlloc.ToInt32()}",
                         $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
                         "ADD ESP, 0xC",
                         "RETN",
@@ -753,7 +759,14 @@ namespace AmeisenBotX.Core.Hook
             => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSendMovementPacket, new List<object>() { opcode, Environment.TickCount });
 
         public void SetFacing(WowUnit unit, float angle)
-            => CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString().Replace(',', '.'), Environment.TickCount });
+        {
+            if (angle < 0 || angle > Math.PI * 2)
+            {
+                return;
+            }
+
+            CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString().Replace(',', '.'), Environment.TickCount });
+        }
 
         public void SetMaxFps(byte maxFps) => WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
 

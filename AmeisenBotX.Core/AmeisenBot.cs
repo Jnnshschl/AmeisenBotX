@@ -185,7 +185,7 @@ namespace AmeisenBotX.Core
 
             if (WowInterface.ObjectManager.Player?.Name?.Length > 0)
             {
-                if (Config.SaveWowWindowPosition)
+                if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
                 {
                     SaveWowWindowPosition();
                 }
