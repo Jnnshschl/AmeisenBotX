@@ -182,7 +182,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             => Auras.Any(e => e.Name == name);
 
         public override string ToString()
-            => $"[{Guid}]({Level}) {Name}";
+            => $"Unit: [{Guid}] {Name} lvl. {Level}";
 
         public WowUnit UpdateRawWowUnit(XMemory xMemory)
         {

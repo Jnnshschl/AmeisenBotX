@@ -1,4 +1,6 @@
-﻿namespace AmeisenBotX.Core.Statemachine.States
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateDead : BasicState
     {
@@ -17,7 +19,7 @@
                 StateMachine.MapIDiedOn = WowInterface.ObjectManager.MapId;
                 WowInterface.HookManager.ReleaseSpirit();
             }
-            else if (WowInterface.HookManager.IsGhost("player"))
+            else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
             {
                 StateMachine.SetState(BotState.Ghost);
             }

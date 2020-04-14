@@ -12,7 +12,7 @@
 
         public override void Execute()
         {
-            if (WowInterface.XMemory.Process != null && WowInterface.WowProcess.HasExited)
+            if (WowInterface.XMemory.Process == null || WowInterface.WowProcess.HasExited)
             {
                 StateMachine.SetState(BotState.None);
             }

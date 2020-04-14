@@ -318,6 +318,8 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
             new DungeonNode(new Vector3(241, -325, 180), DungeonNodeType.Normal),
         };
 
+        public List<string> PriorityUnits { get; } = new List<string>() { "Frost Tomb" };
+
         public int RequiredItemLevel { get; } = 100;
 
         public int RequiredLevel { get; } = 68;

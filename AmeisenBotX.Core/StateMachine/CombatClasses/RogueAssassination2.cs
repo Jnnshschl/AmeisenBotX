@@ -69,6 +69,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public IWowItemComparator ItemComparator => new AssassinationItemComparator();
 
+        public List<string> PriorityTargets { get; set; }
+
         public CombatClassRole Role => CombatClassRole.Dps;
 
         public string Version => "1.0";

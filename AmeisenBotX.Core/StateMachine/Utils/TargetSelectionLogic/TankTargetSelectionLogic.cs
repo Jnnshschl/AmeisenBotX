@@ -20,6 +20,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out List<WowUnit> possibleTargets)
         {
+            if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0 && (WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
+            {
+                WowInterface.HookManager.ClearTarget();
+            }
+
             bool insertCurrentTargetToTop = WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0
                 && !WowInterface.ObjectManager.Target.IsDead && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
                 && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
@@ -27,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // get all enemies targeting our group
             List<WowUnit> enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
+                .Where(e => e.TargetGuid != 0 && !e.IsDead && e.IsInCombat && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
 
             if (enemies.Count > 0)
             {

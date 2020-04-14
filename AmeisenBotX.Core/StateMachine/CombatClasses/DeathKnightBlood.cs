@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public IWowItemComparator ItemComparator => null;
 
+        public List<string> PriorityTargets { get; set; }
+
         public CombatClassRole Role => CombatClassRole.Tank;
 
         public string Version => "1.0";

@@ -25,6 +25,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         IWowItemComparator ItemComparator { get; }
 
+        List<string> PriorityTargets { get; set; }
+
         CombatClassRole Role { get; }
 
         string Version { get; }

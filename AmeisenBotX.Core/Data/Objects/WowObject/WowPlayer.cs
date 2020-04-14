@@ -35,6 +35,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             || Race == WowRace.Tauren
             || Race == WowRace.Undead;
 
+        public override string ToString()
+                            => $"Player: [{Guid}] {Name} lvl. {Level}";
+
         public WowPlayer UpdateRawWowPlayer(XMemory xMemory)
         {
             UpdateRawWowUnit(xMemory);

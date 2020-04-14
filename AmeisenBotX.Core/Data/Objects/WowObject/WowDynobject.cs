@@ -8,9 +8,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowDynobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
-
         }
-        
+
         public ulong Caster => RawWowDynobject.Caster;
 
         public float Radius => RawWowDynobject.Radius;
@@ -18,6 +17,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public int SpellId => RawWowDynobject.SpellId;
 
         private RawWowDynobject RawWowDynobject { get; set; }
+
+        public override string ToString()
+            => $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
 
         public WowDynobject UpdateRawWowDynobject(XMemory xMemory)
         {

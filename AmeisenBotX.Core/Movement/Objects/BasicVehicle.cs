@@ -30,9 +30,13 @@ namespace AmeisenBotX.Core.Movement.Objects
         public Vector3 AvoidObstacles(float multiplier)
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<WowObject>(8);
+
+            acceleration += GetObjectForceAroundMe<WowObject>(12);
+            acceleration += GetNearestBlacklistForce(12);
+
             acceleration.Limit(MaxAcceleration);
             acceleration.Multiply(multiplier);
+
             return acceleration;
         }
 
@@ -148,7 +152,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 newRandomPosition = new Vector3(0, 0, 0);
             newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.ObjectManager.Player.Rotation, Convert.ToSingle((rnd.NextDouble() * 4) + 4));
 
-            // rotate the vector by  random amount of degrees
+            // rotate the vector by random amount of degrees
             newRandomPosition.Rotate(rnd.Next(-14, 14));
 
             return Seek(newRandomPosition, multiplier);
@@ -186,6 +190,21 @@ namespace AmeisenBotX.Core.Movement.Objects
                 Y = Convert.ToSingle(y),
                 Z = position.Z
             };
+        }
+
+        private Vector3 GetNearestBlacklistForce(double maxDistance = 12)
+        {
+            Vector3 force = new Vector3(0, 0, 0);
+
+            if (WowInterface.BotCache.TryGetBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, maxDistance, out List<Vector3> nodes))
+            {
+                if (nodes.Count > 0)
+                {
+                    force += Flee(nodes.First(), 1);
+                }
+            }
+
+            return force;
         }
 
         private Vector3 GetObjectForceAroundMe<T>(double maxDistance = 16) where T : WowObject

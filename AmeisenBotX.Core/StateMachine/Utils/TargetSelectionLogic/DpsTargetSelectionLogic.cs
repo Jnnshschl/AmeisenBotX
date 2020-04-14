@@ -24,6 +24,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out List<WowUnit> targetToSelect)
         {
+            if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0 && (WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
+            {
+                WowInterface.HookManager.ClearTarget();
+            }
+
             Enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
                         .Where(e => BotUtils.IsValidUnit(e) && e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
 
@@ -41,10 +46,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // remove all invalid, dead units
-            List<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead || !e.IsNotAttackable).ToList();
+            IEnumerable<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead || e.IsInCombat);
 
             // if there are no non Friendly units, we can't attack anything
-            if (nonFriendlyUnits.Count > 0)
+            if (nonFriendlyUnits.Count() > 0)
             {
                 List<WowUnit> unitsInCombatTargetingUs = nonFriendlyUnits
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();

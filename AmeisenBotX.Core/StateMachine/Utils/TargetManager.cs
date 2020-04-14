@@ -12,9 +12,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils
         {
             TargetSelectionLogic = targetSelectionLogic;
             MinTargetSwitchTime = minTargetSwitchTime;
+
+            PriorityTargets = new List<string>();
         }
 
-        public string PriorityTarget { get; set; }
+        public List<string> PriorityTargets { get; set; }
 
         public ITargetSelectionLogic TargetSelectionLogic { get; }
 
@@ -24,7 +26,6 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public bool GetUnitToTarget(out List<WowUnit> possibleTargets)
         {
-            possibleTargets = null;
             bool result = TargetSelectionLogic != null                      // we cant use the logic if its null
                 && DateTime.Now - LastTargetSwitch > MinTargetSwitchTime;   // limit the target switches by time
 
@@ -34,9 +35,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                 LastTargetSwitch = DateTime.Now;
 
                 // move the priority unit to the start of the list
-                if (!string.IsNullOrEmpty(PriorityTarget))
+                if (PriorityTargets != null && PriorityTargets.Count > 0)
                 {
-                    WowUnit priorityUnit = possibleTargets.FirstOrDefault(e => e.Name == PriorityTarget);
+                    WowUnit priorityUnit = possibleTargetsFromLogic.FirstOrDefault(e => PriorityTargets.Any(x => x.Equals(e.Name, StringComparison.OrdinalIgnoreCase)));
                     if (priorityUnit != null)
                     {
                         int index = possibleTargetsFromLogic.IndexOf(priorityUnit);
@@ -49,6 +50,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                 return true;
             }
 
+            possibleTargets = null;
             return false;
         }
     }

@@ -24,6 +24,8 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         List<DungeonNode> Path { get; }
 
+        List<string> PriorityUnits { get; }
+
         int RequiredItemLevel { get; }
 
         int RequiredLevel { get; }

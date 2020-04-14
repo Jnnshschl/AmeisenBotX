@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
 using System;
 using System.Collections.Specialized;
@@ -9,28 +10,33 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowGameobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
-
         }
 
-        public int DisplayId { get; set; }
+        public int DisplayId => RawWowGameobject.DisplayId;
 
         public BitVector32 DynamicFlags { get; set; }
 
-        public float Facing { get; set; }
+        public int Faction => RawWowGameobject.Faction;
 
-        public int Faction { get; set; }
-
-        public BitVector32 Flags { get; set; }
+        public BitVector32 Flags => new BitVector32(RawWowGameobject.Flags);
 
         public WowGameobjectType GameobjectType { get; set; }
 
-        public int Level { get; set; }
-
-        public float Rotation { get; set; }
-
-        public int State { get; set; }
+        public int Level => RawWowGameobject.Level;
 
         private RawWowGameobject RawWowGameobject { get; set; }
+
+        public override string ToString()
+        {
+            if (Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId))
+            {
+                return $"GameObject: [{EntryId}] ({((GameobjectDisplayId)DisplayId)}:{DisplayId})";
+            }
+            else
+            {
+                return $"GameObject: [{EntryId}] ({DisplayId})";
+            }
+        }
 
         public WowGameobject UpdateRawWowGameobject(XMemory xMemory)
         {

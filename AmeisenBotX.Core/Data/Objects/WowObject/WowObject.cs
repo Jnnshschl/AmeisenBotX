@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         }
 
         public IntPtr BaseAddress { get; private set; }
-        
+
         public IntPtr DescriptorAddress { get; set; }
 
         public int EntryId => RawWowObject.EntryId;
@@ -30,6 +30,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public WowObjectType Type { get; private set; }
 
         private RawWowObject RawWowObject { get; set; }
+
+        public override string ToString()
+            => $"Object: {Guid}";
 
         public WowObject UpdateRawWowObject(XMemory xMemory)
         {

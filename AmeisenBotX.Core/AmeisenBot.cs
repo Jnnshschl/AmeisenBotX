@@ -425,25 +425,25 @@ namespace AmeisenBotX.Core
 
         private void OnLfgProposalShow(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.SendChatMessage("/click LFDDungeonReadyDialogEnterDungeonButton");
+            WowInterface.HookManager.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
         }
 
         private void OnLfgRoleCheckShow(long timestamp, List<string> args)
         {
-            string selectRoleString = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role switch
+            string selectRoleUiElement = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role switch
             {
-                Statemachine.Enums.CombatClassRole.Tank => "/click LFDRoleCheckPopupRoleButtonTank",
-                Statemachine.Enums.CombatClassRole.Heal => "/click LFDRoleCheckPopupRoleButtonHealer",
-                Statemachine.Enums.CombatClassRole.Dps => "/click LFDRoleCheckPopupRoleButtonDPS",
-                _ => "/click LFDRoleCheckPopupRoleButtonDPS",
-            } : "/click LFDRoleCheckPopupRoleButtonDPS";
+                Statemachine.Enums.CombatClassRole.Tank => "LFDRoleCheckPopupRoleButtonTank",
+                Statemachine.Enums.CombatClassRole.Heal => "LFDRoleCheckPopupRoleButtonHealer",
+                Statemachine.Enums.CombatClassRole.Dps => "LFDRoleCheckPopupRoleButtonDPS",
+                _ => "LFDRoleCheckPopupRoleButtonDPS",  // should never happen but in case, queue as DPS
+            } : "LFDRoleCheckPopupRoleButtonDPS";       // no CombatClass loaded, queue as DPS
 
             // do this twice to ensure that we join the queue
-            WowInterface.HookManager.SendChatMessage(selectRoleString);
-            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
+            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
+            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
 
-            WowInterface.HookManager.SendChatMessage(selectRoleString);
-            WowInterface.HookManager.SendChatMessage("/click LFDRoleCheckPopupAcceptButton");
+            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
+            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)

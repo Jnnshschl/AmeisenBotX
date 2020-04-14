@@ -10,7 +10,16 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
+        public int DisplayId => RawWowCorpse.DisplayId;
+
+        public ulong Owner => RawWowCorpse.Owner;
+
+        public ulong Party => RawWowCorpse.Party;
+
         private RawWowCorpse RawWowCorpse { get; set; }
+
+        public override string ToString()
+            => $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
 
         public WowCorpse UpdateRawWowCorpse(XMemory xMemory)
         {

@@ -3,6 +3,8 @@
     public enum GameobjectDisplayId
     {
         WsgAllianceFlag = 5912,
-        WsgHordeFlag = 5913
+        WsgHordeFlag = 5913,
+        DungeonPortalNormal = 8196,
+        DungeonPortalHeroic = 8197,
     }
 }

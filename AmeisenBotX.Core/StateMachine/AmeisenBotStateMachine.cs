@@ -68,9 +68,9 @@ namespace AmeisenBotX.Core.Statemachine
 
         public string PlayerName { get; internal set; }
 
-        public bool WowCrashed { get; internal set; }
-
         public Dictionary<BotState, BasicState> States { get; private set; }
+
+        public bool WowCrashed { get; internal set; }
 
         internal WowInterface WowInterface { get; }
 
@@ -228,7 +228,7 @@ namespace AmeisenBotX.Core.Statemachine
             {
                 if (LastGhostCheck + TimeSpan.FromSeconds(8) < DateTime.Now)
                 {
-                    bool isGhost = WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost("player");
+                    bool isGhost = WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player);
                     LastGhostCheck = DateTime.Now;
 
                     if (isGhost)

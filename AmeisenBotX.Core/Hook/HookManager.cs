@@ -62,24 +62,24 @@ namespace AmeisenBotX.Core.Hook
         private WowInterface WowInterface { get; }
 
         public void AcceptBattlegroundInvite()
-            => SendChatMessage("/click StaticPopup1Button1");
+            => ClickUiElement("StaticPopup1Button1");
 
         public void AcceptPartyInvite()
         {
             LuaDoString("AcceptGroup();");
-            SendChatMessage("/click StaticPopup1Button1");
+            ClickUiElement("StaticPopup1Button1");
         }
 
         public void AcceptResurrect()
         {
             LuaDoString("AcceptResurrect();");
-            SendChatMessage("/click StaticPopup1Button1");
+            ClickUiElement("StaticPopup1Button1");
         }
 
         public void AcceptSummon()
         {
             LuaDoString("ConfirmSummon();");
-            SendChatMessage("/click StaticPopup1Button1");
+            ClickUiElement("StaticPopup1Button1");
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
@@ -150,10 +150,13 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void ClickUiElement(string elementName)
+            => LuaDoString($"{elementName}:Click()");
+
         public void CofirmBop()
         {
             LuaDoString("ConfirmBindOnUse();");
-            SendChatMessage("/click StaticPopup1Button1");
+            ClickUiElement("StaticPopup1Button1");
         }
 
         public void CofirmReadyCheck(bool isReady)
@@ -202,13 +205,13 @@ namespace AmeisenBotX.Core.Hook
 
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
         {
-            float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
-            if ((int)angle != (int)player.Rotation)
+            if (player == null)
             {
-                SetFacing(player, angle);
+                return;
             }
-            // buggy atm
-            // SendMovementPacket(player, 0xDA);
+
+            float angle = BotMath.GetFacingAngle(player.Position, positionToFace);
+            SetFacing(player, angle);
         }
 
         public void GameobjectOnRightClick(WowObject gameobject)
@@ -362,19 +365,17 @@ namespace AmeisenBotX.Core.Hook
 
         public double GetSpellCooldown(string spellName)
         {
-            LuaDoString($"start,duration,enabled = GetSpellCooldown(\"{spellName}\");cdLeft = (start + duration - GetTime());");
-            string result = GetLocalizedText("cdLeft").Replace(".", ",");
+            LuaDoString($"abotCdStart,abotCdDuration,abotCdEnabled = GetSpellCooldown(\"{spellName}\");abotCdLeft = (abotCdStart + abotCdDuration - GetTime()) * 1000;if abotCdLeft < 0 then abotCdLeft = 0 end;");
+            string result = GetLocalizedText("abotCdLeft").Replace(".", ",");
 
             if (double.TryParse(result, out double value))
             {
-                value = Math.Round(value, 3);
-                value = value > 0 ? value * 1000 : 0;
-
+                value = Math.Round(value);
                 AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {value}ms", LogLevel.Verbose);
                 return value;
             }
 
-            return -1;
+            return 0;
         }
 
         public string GetSpellNameById(int spellId)
@@ -499,107 +500,6 @@ namespace AmeisenBotX.Core.Hook
             return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
-        public byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
-        {
-            lock (hookLock)
-            {
-                AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ...", LogLevel.Verbose);
-                AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
-
-                List<byte> returnBytes = new List<byte>();
-                if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.XMemory.Process.HasExited)
-                {
-                    return returnBytes.ToArray();
-                }
-
-                try
-                {
-                    // wait for the code to be executed
-                    while (IsInjectionUsed)
-                    {
-                        Thread.Sleep(1);
-                    }
-
-                    IsInjectionUsed = true;
-
-                    // preparing to inject the given ASM
-                    WowInterface.XMemory.Fasm.Clear();
-
-                    // add all lines
-                    foreach (string s in asm)
-                    {
-                        WowInterface.XMemory.Fasm.AddLine(s);
-                    }
-
-                    // inject it
-                    WowInterface.XMemory.SuspendMainThread();
-                    WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
-
-                    // now there is code to be executed
-                    WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
-                    WowInterface.XMemory.ResumeMainThread();
-
-                    AmeisenLogger.Instance.Log("HookManager", $"Injection completed...", LogLevel.Verbose);
-
-                    // wait for the code to be executed
-                    while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
-                    {
-                        Thread.Sleep(1);
-                    }
-
-                    AmeisenLogger.Instance.Log("HookManager", $"Execution completed...", LogLevel.Verbose);
-
-                    // if we want to read the return value do it otherwise we're done
-                    if (readReturnBytes)
-                    {
-                        AmeisenLogger.Instance.Log("HookManager", $"Reading return bytes...", LogLevel.Verbose);
-                        WowInterface.XMemory.SuspendMainThread();
-
-                        try
-                        {
-                            WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
-
-                            // read all parameter-bytes until we the buffer is 0
-                            WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
-
-                            if (buffer != 0)
-                            {
-                                while (buffer != 0)
-                                {
-                                    returnBytes.Add(buffer);
-                                    dwAddress = IntPtr.Add(dwAddress, 1);
-                                    WowInterface.XMemory.ReadByte(dwAddress, out buffer);
-                                }
-                            }
-                            else
-                            {
-                                returnBytes.AddRange(BitConverter.GetBytes(dwAddress.ToInt32()));
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
-                        }
-
-                        WowInterface.XMemory.ResumeMainThread();
-                    }
-
-                    IsInjectionUsed = false;
-                }
-                catch (Exception e)
-                {
-                    AmeisenLogger.Instance.Log("HookManager", $"Failed to inject:\n{e}", LogLevel.Error);
-
-                    // now there is no more code to be executed
-                    WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-                    IsInjectionUsed = false;
-                    WowInterface.XMemory.ResumeMainThread();
-                }
-
-                return returnBytes.ToArray();
-            }
-        }
-
         public bool IsBgInviteReady()
         {
             LuaDoString("abBgQueueIsReady = 0;for i=1,2 do local x = GetBattlefieldPortExpiration(i) if x > 0 then abBgQueueIsReady = 1 end end");
@@ -613,19 +513,9 @@ namespace AmeisenBotX.Core.Hook
             && (ClickToMoveType)ctmState != ClickToMoveType.None
             && (ClickToMoveType)ctmState != ClickToMoveType.Stop;
 
-        public bool IsClickToMovePending()
+        public bool IsGhost(WowLuaUnit luaUnit)
         {
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMovePendingMovement, out byte ctmPending))
-            {
-                return ctmPending == 2;
-            }
-
-            return false;
-        }
-
-        public bool IsGhost(string unit)
-        {
-            LuaDoString($"isGhost = UnitIsGhost(\"{unit}\");");
+            LuaDoString($"isGhost = UnitIsGhost(\"{luaUnit}\");");
             string result = GetLocalizedText("isGhost");
 
             if (int.TryParse(result, out int isGhost))
@@ -660,10 +550,10 @@ namespace AmeisenBotX.Core.Hook
             => LuaDoString("for i = 1, 2 do EjectPassengerFromSeat(i) end");
 
         public void LearnAllAvaiableSpells()
-            => LuaDoString("/run LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e = 0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
+            => LuaDoString("LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e = 0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
 
         public void LeaveBattleground()
-            => SendChatMessage("/click WorldStateScoreFrameLeaveButton");
+            => ClickUiElement("WorldStateScoreFrameLeaveButton");
 
         public void LootEveryThing()
             => LuaDoString("abLootCount=GetNumLootItems();for i = abLootCount,1,-1 do LootSlot(i); ConfirmLootSlot(i); end");
@@ -701,7 +591,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public void QueueBattlegroundByName(string bgName)
-            => SendChatMessage($"/run for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
+            => LuaDoString($"for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
 
         public void ReleaseSpirit()
             => LuaDoString("RepopMe();");
@@ -734,7 +624,7 @@ namespace AmeisenBotX.Core.Hook
         public void RollOnItem(int rollId, RollType rollType)
         {
             LuaDoString($"RollOnLoot({rollId}, {(int)rollType});");
-            SendChatMessage("/click StaticPopup1Button1");
+            ClickUiElement("StaticPopup1Button1");
         }
 
         public void SellAllGrayItems()
@@ -751,8 +641,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void SendItemMailToCharacter(string itemName, string receiver)
         {
-            SendChatMessage($"/run for b=0,4 do for s=0,36 do I=GetContainerItemLink(b,s) if I and I:find(\"{itemName}\")then UseContainerItem(b,s) end end end SendMailNameEditBox:SetText(\"{receiver}\"))");
-            SendChatMessage($"/run SendMailMailButton:Click()");
+            LuaDoString($"for b=0,4 do for s=0,36 do I=GetContainerItemLink(b,s) if I and I:find(\"{itemName}\")then UseContainerItem(b,s) end end end SendMailNameEditBox:SetText(\"{receiver}\"))");
+            LuaDoString($"SendMailMailButton:Click()");
         }
 
         public void SendMovementPacket(WowUnit unit, int opcode)
@@ -760,7 +650,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void SetFacing(WowUnit unit, float angle)
         {
-            if (angle < 0 || angle > Math.PI * 2)
+            if (unit == null || angle < 0 || angle > Math.PI * 2)
             {
                 return;
             }
@@ -803,28 +693,27 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Fasm.Clear();
 
                 // save registers
-                WowInterface.XMemory.Fasm.AddLine("PUSHFD");
-                WowInterface.XMemory.Fasm.AddLine("PUSHAD");
+                // WowInterface.XMemory.Fasm.AddLine("PUSHAD");
+                // WowInterface.XMemory.Fasm.AddLine("PUSHFD");
 
                 // check for code to be executed
-                WowInterface.XMemory.Fasm.AddLine($"MOV EBX, [{CodeToExecuteAddress.ToInt32()}]");
-                WowInterface.XMemory.Fasm.AddLine("TEST EBX, 1");
+                WowInterface.XMemory.Fasm.AddLine($"MOV EDX, [{CodeToExecuteAddress.ToInt32()}]");
+                WowInterface.XMemory.Fasm.AddLine("TEST EDX, 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // set register back to zero
-                WowInterface.XMemory.Fasm.AddLine("XOR EBX, EBX");
+                // WowInterface.XMemory.Fasm.AddLine("XOR EBX, EBX");
 
                 // check for world to be loaded
                 // we dont want to execute code in
                 // the loadingscreen, cause that
                 // mostly results in crashes
-                WowInterface.XMemory.Fasm.AddLine($"MOV EBX, [{WowInterface.OffsetList.IsWorldLoaded.ToInt32()}]");
-                WowInterface.XMemory.Fasm.AddLine("TEST EBX, 1");
+                WowInterface.XMemory.Fasm.AddLine($"MOV EDX, [{WowInterface.OffsetList.IsWorldLoaded.ToInt32()}]");
+                WowInterface.XMemory.Fasm.AddLine("TEST EDX, 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // execute our stuff and get return address
-                WowInterface.XMemory.Fasm.AddLine($"MOV EDX, {CodecaveForExecution.ToInt32()}");
-                WowInterface.XMemory.Fasm.AddLine("CALL EDX");
+                WowInterface.XMemory.Fasm.AddLine($"CALL {CodecaveForExecution.ToInt32()}");
                 WowInterface.XMemory.Fasm.AddLine($"MOV [{ReturnValueAddress.ToInt32()}], EAX");
 
                 // finish up our execution
@@ -833,8 +722,8 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Fasm.AddLine($"MOV [{CodeToExecuteAddress.ToInt32()}], EDX");
 
                 // restore registers
-                WowInterface.XMemory.Fasm.AddLine("POPAD");
-                WowInterface.XMemory.Fasm.AddLine("POPFD");
+                // WowInterface.XMemory.Fasm.AddLine("POPAD");
+                // WowInterface.XMemory.Fasm.AddLine("POPFD");
 
                 byte[] asmBytes = WowInterface.XMemory.Fasm.Assemble();
 
@@ -1012,6 +901,107 @@ namespace AmeisenBotX.Core.Hook
             else
             {
                 return IntPtr.Zero;
+            }
+        }
+
+        private byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
+        {
+            lock (hookLock)
+            {
+                AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ...", LogLevel.Verbose);
+                AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
+
+                List<byte> returnBytes = new List<byte>();
+                if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.XMemory.Process.HasExited)
+                {
+                    return returnBytes.ToArray();
+                }
+
+                try
+                {
+                    // wait for the code to be executed
+                    while (IsInjectionUsed)
+                    {
+                        Thread.Sleep(1);
+                    }
+
+                    IsInjectionUsed = true;
+
+                    // preparing to inject the given ASM
+                    WowInterface.XMemory.Fasm.Clear();
+
+                    // add all lines
+                    foreach (string s in asm)
+                    {
+                        WowInterface.XMemory.Fasm.AddLine(s);
+                    }
+
+                    // inject it
+                    WowInterface.XMemory.SuspendMainThread();
+                    WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
+
+                    // now there is code to be executed
+                    WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
+                    WowInterface.XMemory.ResumeMainThread();
+
+                    AmeisenLogger.Instance.Log("HookManager", $"Injection completed...", LogLevel.Verbose);
+
+                    // wait for the code to be executed
+                    while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
+                    {
+                        Thread.Sleep(1);
+                    }
+
+                    AmeisenLogger.Instance.Log("HookManager", $"Execution completed...", LogLevel.Verbose);
+
+                    // if we want to read the return value do it otherwise we're done
+                    if (readReturnBytes)
+                    {
+                        AmeisenLogger.Instance.Log("HookManager", $"Reading return bytes...", LogLevel.Verbose);
+                        WowInterface.XMemory.SuspendMainThread();
+
+                        try
+                        {
+                            WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
+
+                            // read all parameter-bytes until we the buffer is 0
+                            WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
+
+                            if (buffer != 0)
+                            {
+                                while (buffer != 0)
+                                {
+                                    returnBytes.Add(buffer);
+                                    dwAddress = IntPtr.Add(dwAddress, 1);
+                                    WowInterface.XMemory.ReadByte(dwAddress, out buffer);
+                                }
+                            }
+                            else
+                            {
+                                returnBytes.AddRange(BitConverter.GetBytes(dwAddress.ToInt32()));
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
+                        }
+
+                        WowInterface.XMemory.ResumeMainThread();
+                    }
+
+                    IsInjectionUsed = false;
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.Instance.Log("HookManager", $"Failed to inject:\n{e}", LogLevel.Error);
+
+                    // now there is no more code to be executed
+                    WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
+                    IsInjectionUsed = false;
+                    WowInterface.XMemory.ResumeMainThread();
+                }
+
+                return returnBytes.ToArray();
             }
         }
 

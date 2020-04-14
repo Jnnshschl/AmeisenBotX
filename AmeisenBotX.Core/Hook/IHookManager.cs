@@ -5,7 +5,6 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace AmeisenBotX.Core.Hook
 {
@@ -30,6 +29,8 @@ namespace AmeisenBotX.Core.Hook
         void ClickOnTerrain(Vector3 position);
 
         void ClickToMove(WowPlayer player, Vector3 position);
+
+        void ClickUiElement(string elementName);
 
         void CofirmBop();
 
@@ -83,15 +84,11 @@ namespace AmeisenBotX.Core.Hook
 
         bool HasUnitStealableBuffs(WowLuaUnit luaUnit);
 
-        byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0);
-
         bool IsBgInviteReady();
 
         bool IsClickToMoveActive(WowPlayer player);
 
-        bool IsClickToMovePending();
-
-        bool IsGhost(string unit);
+        bool IsGhost(WowLuaUnit luaUnit);
 
         bool IsRuneReady(int runeId);
 

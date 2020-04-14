@@ -29,7 +29,7 @@ namespace AmeisenBotX.Logging.Objects
 
         public override string ToString()
         {
-            return $"[{TimeStamp.ToLongTimeString()}] {"[" + LogLevel.ToString() + "]",9} [{CallingClass}:{CallingCodeline}:{CallingFunction}] {Message}";
+            return $"[{TimeStamp.ToLongTimeString()}] {"[" + LogLevel.ToString() + "]",9} {Message}"; // [{CallingClass}:{CallingCodeline}:{CallingFunction}]
         }
     }
 }

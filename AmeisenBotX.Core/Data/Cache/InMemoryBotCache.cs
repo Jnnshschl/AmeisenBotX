@@ -72,6 +72,7 @@ namespace AmeisenBotX.Core.Data.Cache
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
             SpellNameCache = new Dictionary<int, string>();
             CombatLogEntries = new List<BasicCombatLogEntry>();
+            BlacklistNodes = new Dictionary<int, List<Vector3>>();
         }
 
         public void Load()
@@ -96,6 +97,7 @@ namespace AmeisenBotX.Core.Data.Cache
                         ReactionCache = loadedCache.ReactionCache ?? new Dictionary<(int, int), WowUnitReaction>();
                         SpellNameCache = loadedCache.SpellNameCache ?? new Dictionary<int, string>();
                         CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
+                        BlacklistNodes = loadedCache.BlacklistNodes ?? new Dictionary<int, List<Vector3>>();
                     }
                     else
                     {

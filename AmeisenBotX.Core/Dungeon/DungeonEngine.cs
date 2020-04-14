@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.Dungeon
                 }
                 else
                 {
-                    bool isMePartyleader = WowInterface.ObjectManager.Player.Guid == WowInterface.ObjectManager.PartyleaderGuid;
+                    bool isMePartyleader = WowInterface.ObjectManager.Player.Guid == WowInterface.ObjectManager.PartyleaderGuid || WowInterface.ObjectManager.PartyleaderGuid == 0;
                     double completionDistance = isMePartyleader ? 5 : 25;
 
                     if (isMePartyleader)
@@ -124,7 +124,7 @@ namespace AmeisenBotX.Core.Dungeon
             else
             {
                 // find a way to exit the dungeon, maybe hearthstone
-                WowInterface.HookManager.SendChatMessage("/run LFGTeleport(IsInLFGDungeon())");
+                WowInterface.HookManager.LuaDoString("LFGTeleport(true)");
             }
         }
 
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Dungeon
 
             // filter out already checked nodes
             DungeonNode closestDungeonNode = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
-            bool shouldAddNodes = closestDungeonNode == null;
+            bool shouldAddNodes = closestDungeonNode == null || WowInterface.ObjectManager.Player.Position.GetDistance(closestDungeonNode.Position) > 64;
 
             foreach (DungeonNode d in DungeonProfile.Path)
             {
@@ -156,6 +156,7 @@ namespace AmeisenBotX.Core.Dungeon
                 }
             }
 
+            WowInterface.CombatClass.PriorityTargets = profile.PriorityUnits;
             TotalNodes = CurrentNodes.Count;
         }
 

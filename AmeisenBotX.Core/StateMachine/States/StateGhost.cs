@@ -1,6 +1,9 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Pathfinding.Objects;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -31,6 +34,18 @@ namespace AmeisenBotX.Core.Statemachine.States
                 StateMachine.SetState(BotState.Idle);
             }
 
+            WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal
+                            || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 40);
+
+            if (nearestPortal != null)
+            {
+                NeedToEnterPortal = true;
+                CorpsePosition = nearestPortal.Position;
+            }
+
             if (StateMachine.IsDungeonMap(StateMachine.MapIDiedOn))
             {
                 CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
@@ -41,7 +56,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 // just wait for the mass ress
                 return;
             }
-            else
+            else if (!NeedToEnterPortal)
             {
                 WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
                 CorpsePosition = corpsePosition;

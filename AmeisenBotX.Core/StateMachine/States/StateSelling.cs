@@ -68,6 +68,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
 
                         WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                        WowInterface.HookManager.CofirmBop();
                     }
                 }
             }

@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             // default distance values
-            DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 2 : 25.0;
+            DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3 : 25.0;
         }
 
         public double DistanceToTarget { get; private set; }
@@ -82,13 +82,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private void HandleMovement(WowUnit target)
         {
-            if (target == null) { return; }
+            if (target == null || target.Guid == WowInterface.ObjectManager.PlayerGuid) { return; }
 
             // if we are close enough, stop movement and start attacking
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
             if (distance <= DistanceToTarget)
             {
-                if (DateTime.Now - LastFacingCheck > TimeSpan.FromSeconds(1) && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                if (DateTime.Now - LastFacingCheck > TimeSpan.FromMilliseconds(500) && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
                 {
                     WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
                     LastFacingCheck = DateTime.Now;

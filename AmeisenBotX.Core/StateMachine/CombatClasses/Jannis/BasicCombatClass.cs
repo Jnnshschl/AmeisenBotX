@@ -24,7 +24,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
-            ActionDelay = TimeSpan.FromMilliseconds(250);
+            // limit our actions to avoid spamming
+            ActionDelay = TimeSpan.FromMilliseconds(100);
 
             ITargetSelectionLogic targetSelectionLogic = Role switch
             {
@@ -34,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 _ => null,
             };
 
-            TargetManager = new TargetManager(targetSelectionLogic, TimeSpan.FromMilliseconds(500));
+            TargetManager = new TargetManager(targetSelectionLogic, TimeSpan.FromMilliseconds(250));
 
             Spells = new Dictionary<string, Spell>();
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
@@ -101,6 +102,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public AuraManager MyAuraManager { get; internal set; }
 
+        public List<string> PriorityTargets { get { return TargetManager.PriorityTargets; } set { TargetManager.PriorityTargets = value; } }
+
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
         public abstract CombatClassRole Role { get; }
@@ -162,7 +165,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!PrepareCast(spellName))
+            if (!DoIKnowSpell(spellName))
             {
                 return false;
             }
@@ -213,7 +216,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
-            if (!PrepareCast(spellName))
+            if (!DoIKnowSpell(spellName))
             {
                 return false;
             }
@@ -257,7 +260,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
         {
-            if (!PrepareCast(spellName))
+            if (!DoIKnowSpell(spellName))
             {
                 return false;
             }
@@ -347,25 +350,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return false;
         }
 
-        private void CastSpell(string spellName, bool castOnSelf)
+        private bool CastSpell(string spellName, bool castOnSelf)
         {
-            WowInterface.HookManager.CastSpell(spellName, castOnSelf);
-            CooldownManager.SetSpellCooldown(spellName, (int)WowInterface.HookManager.GetSpellCooldown(spellName));
-            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-        }
+            bool result = false;
+            double cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
 
-        private bool IsInRange(Spell spell, Vector3 position)
-        {
-            if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
+            if (cooldown == 0)
             {
-                return true;
+                AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+                WowInterface.HookManager.CastSpell(spellName, castOnSelf);
+                cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
+                result = true;
             }
 
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
-            return distance >= spell.MinRange && distance <= spell.MaxRange;
+            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"", LogLevel.Verbose);
+            CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
+            return result;
         }
 
-        private bool PrepareCast(string spellName)
+        private bool DoIKnowSpell(string spellName)
         {
             if (!Spells.ContainsKey(spellName))
             {
@@ -382,6 +385,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return true;
+        }
+
+        private bool IsInRange(Spell spell, Vector3 position)
+        {
+            if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
+            {
+                return true;
+            }
+
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
+            return distance >= spell.MinRange && distance <= spell.MaxRange;
         }
     }
 }
