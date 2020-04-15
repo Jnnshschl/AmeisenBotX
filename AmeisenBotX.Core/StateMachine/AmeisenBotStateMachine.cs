@@ -154,7 +154,7 @@ namespace AmeisenBotX.Core.Statemachine
             => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowWater), e));
 
         internal bool IsAnyPartymemberInCombat()
-                                    => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
+            => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
             .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
             .Any(r => r.IsInCombat);
 

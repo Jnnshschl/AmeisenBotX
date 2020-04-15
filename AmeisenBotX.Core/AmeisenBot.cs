@@ -18,6 +18,7 @@ using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
+using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -25,7 +26,6 @@ using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Pathfinding;
 using Microsoft.CSharp;
-using Newtonsoft.Json;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -124,8 +124,6 @@ namespace AmeisenBotX.Core
                 currentExecutionMs = value;
             }
         }
-
-        public bool IsAutopilot { get; set; }
 
         public bool IsRunning { get; private set; }
 
@@ -369,8 +367,6 @@ namespace AmeisenBotX.Core
 
         private void OnBagChanged(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBagChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
             WowInterface.CharacterManager.Inventory.Update();
             WowInterface.CharacterManager.UpdateCharacterGear();
             WowInterface.CharacterManager.Inventory.Update();
@@ -378,13 +374,10 @@ namespace AmeisenBotX.Core
 
         private void OnBattlegroundScoreUpdate(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBattlegroundScoreUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
 
         private void OnBgAllianceMessage(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBgAllianceMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
             if (args.Count > 1)
             {
                 ProcessBgMessage(args[0], args[1]);
@@ -393,8 +386,6 @@ namespace AmeisenBotX.Core
 
         private void OnBgHordeMessage(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBgHordeMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
             if (args.Count > 1)
             {
                 ProcessBgMessage(args[0], args[1]);
@@ -403,8 +394,6 @@ namespace AmeisenBotX.Core
 
         private void OnBgNeutralMessage(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnBgNeutralMessage: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
             if (args.Count > 1)
             {
                 ProcessBgMessage(args[0], args[1]);
@@ -413,13 +402,11 @@ namespace AmeisenBotX.Core
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnConfirmBindOnPickup: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.HookManager.CofirmBop();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnEquipmentChanged: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.CharacterManager.Equipment.Update();
         }
 
@@ -430,26 +417,11 @@ namespace AmeisenBotX.Core
 
         private void OnLfgRoleCheckShow(long timestamp, List<string> args)
         {
-            string selectRoleUiElement = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role switch
-            {
-                Statemachine.Enums.CombatClassRole.Tank => "LFDRoleCheckPopupRoleButtonTank",
-                Statemachine.Enums.CombatClassRole.Heal => "LFDRoleCheckPopupRoleButtonHealer",
-                Statemachine.Enums.CombatClassRole.Dps => "LFDRoleCheckPopupRoleButtonDPS",
-                _ => "LFDRoleCheckPopupRoleButtonDPS",  // should never happen but in case, queue as DPS
-            } : "LFDRoleCheckPopupRoleButtonDPS";       // no CombatClass loaded, queue as DPS
-
-            // do this twice to ensure that we join the queue
-            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
-            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
-
-            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
-            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
+            WowInterface.HookManager.SelectLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : CombatClassRole.Dps);
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnLootRollStarted: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
-
             if (int.TryParse(args[0], out int rollId))
             {
                 string itemName = WowInterface.HookManager.GetLootRollItemLink(rollId);
@@ -470,42 +442,35 @@ namespace AmeisenBotX.Core
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnLootWindowOpened: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.HookManager.LootEveryThing();
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnPartyInvitation: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.HookManager.AcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnPvpQueueShow: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnReadyCheck: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.HookManager.CofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnResurrectRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.HookManager.AcceptResurrect();
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnSummonRequest: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
             WowInterface.HookManager.AcceptSummon();
         }
 
         private void OnWorldStateUpdate(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("WoWEvents", $"Event OnWorldStateUpdate: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
 
         private void ProcessBgMessage(string message, string arg1)

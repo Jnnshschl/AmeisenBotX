@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         if (distance > 3)
                         {
-                            WowInterface.CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 0.2f);
+                            WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                         }
                         else
                         {

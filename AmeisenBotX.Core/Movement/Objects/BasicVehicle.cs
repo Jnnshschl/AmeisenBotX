@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             {
                 if (nodes.Count > 0)
                 {
-                    force += Flee(nodes.First(), 1);
+                    force += Flee(nodes.First(), 3);
                 }
             }
 

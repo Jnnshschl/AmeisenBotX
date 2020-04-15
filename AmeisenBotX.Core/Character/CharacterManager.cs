@@ -6,7 +6,6 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Pathfinding.Objects;
@@ -22,8 +21,6 @@ namespace AmeisenBotX.Core.Character
         {
             WowInterface = wowInterface;
             Config = config;
-
-            KeyMap = new Dictionary<VirtualKeys, bool>();
 
             Inventory = new CharacterInventory(WowInterface);
             Equipment = new CharacterEquipment(WowInterface);
@@ -46,62 +43,12 @@ namespace AmeisenBotX.Core.Character
 
         private AmeisenBotConfig Config { get; }
 
-        private Dictionary<VirtualKeys, bool> KeyMap { get; set; }
-
         private WowInterface WowInterface { get; }
 
         public void AntiAfk() => WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
 
         public Dictionary<int, int> GetConsumeables()
             => Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
-
-        public bool GetCurrentClickToMovePoint(out Vector3 currentCtmPosition)
-        {
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveX, out Vector3 currentCtmPos))
-            {
-                currentCtmPosition = currentCtmPos;
-                return true;
-            }
-
-            currentCtmPosition = new Vector3(0, 0, 0);
-            return false;
-        }
-
-        public void HoldKey(VirtualKeys key)
-        {
-            BotUtils.HoldKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)key));
-
-            if (KeyMap.ContainsKey(key))
-            {
-                KeyMap[key] = false;
-            }
-            else
-            {
-                KeyMap.Add(key, false);
-            }
-        }
-
-        public void InteractWithObject(WowObject obj, float turnSpeed = 20.9f, float distance = 3f)
-        {
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, obj.Position.X);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, obj.Position.Y);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, obj.Position.Z);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, obj.Guid);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.InteractObject);
-        }
-
-        public void InteractWithUnit(WowUnit unit, float turnSpeed = 20.9f, float distance = 3f)
-        {
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, unit.Position.X);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveY, unit.Position.Y);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveZ, unit.Position.Z);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, unit.Guid);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Interact);
-        }
 
         public bool IsAbleToUseArmor(WowArmor item)
         {
@@ -192,20 +139,6 @@ namespace AmeisenBotX.Core.Character
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
-        }
-
-        public void ReleaseKey(VirtualKeys key)
-        {
-            BotUtils.RealeaseKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)key));
-
-            if (KeyMap.ContainsKey(key))
-            {
-                KeyMap[key] = true;
-            }
-            else
-            {
-                KeyMap.Add(key, true);
-            }
         }
 
         public void UpdateAll()

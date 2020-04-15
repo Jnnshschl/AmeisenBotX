@@ -41,9 +41,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
                 Spells.Clear();
-                foreach (Spell spell in WowInterface.CharacterManager.SpellBook.Spells)
+                foreach (Spell spell in WowInterface.CharacterManager.SpellBook.Spells.OrderBy(e => e.Rank).GroupBy(e => e.Name).Select(e => e.First()))
                 {
-                    Spells.Add(spell.Name, spell);
+                    if (!Spells.ContainsKey(spell.Name))
+                    {
+                        Spells.Add(spell.Name, spell);
+                    }
                 }
             };
 

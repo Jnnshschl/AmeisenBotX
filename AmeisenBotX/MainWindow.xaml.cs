@@ -121,14 +121,14 @@ namespace AmeisenBotX
 
         private void ButtonStartAutopilot_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot.IsAutopilot)
+            if (AmeisenBot.Config.Autopilot)
             {
-                AmeisenBot.IsAutopilot = false;
+                AmeisenBot.Config.Autopilot = false;
                 buttonStartAutopilot.Foreground = darkForegroundBrush;
             }
             else
             {
-                AmeisenBot.IsAutopilot = true;
+                AmeisenBot.Config.Autopilot = true;
                 buttonStartAutopilot.Foreground = currentTickTimeGoodBrush;
             }
         }
@@ -326,7 +326,6 @@ namespace AmeisenBotX
             }
 
             labelCurrentTickTime.Content = executionMs;
-
             if (executionMs <= Config.StateMachineTickMs)
             {
                 labelCurrentTickTime.Foreground = currentTickTimeGoodBrush;
@@ -335,6 +334,17 @@ namespace AmeisenBotX
             {
                 labelCurrentTickTime.Foreground = currentTickTimeBadBrush;
                 AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow...", LogLevel.Warning);
+            }
+
+            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.CallCount;
+            if (AmeisenBot.WowInterface.HookManager.CallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
+            {
+                labelHookCallCount.Foreground = currentTickTimeGoodBrush;
+            }
+            else
+            {
+                labelHookCallCount.Foreground = currentTickTimeBadBrush;
+                AmeisenLogger.Instance.Log("MainWindow", "High HookCall count, maybe increase your FPS...", LogLevel.Warning);
             }
         }
 

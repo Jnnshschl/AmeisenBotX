@@ -1,5 +1,8 @@
-﻿namespace AmeisenBotX.Core.Data.Objects.Enums
+﻿using System;
+
+namespace AmeisenBotX.Core.Data.Objects.Enums
 {
+    [Flags]
     public enum AuraFlags
     {
         Passive = 0x10,

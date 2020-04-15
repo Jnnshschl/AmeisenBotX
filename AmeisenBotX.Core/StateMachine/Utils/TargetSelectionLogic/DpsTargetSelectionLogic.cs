@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // remove all invalid, dead units
-            IEnumerable<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead || e.IsInCombat);
+            IEnumerable<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead);
 
             // if there are no non Friendly units, we can't attack anything
             if (nonFriendlyUnits.Count() > 0)

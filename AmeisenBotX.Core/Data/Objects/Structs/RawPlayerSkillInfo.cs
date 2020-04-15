@@ -1,12 +1,15 @@
-﻿namespace AmeisenBotX.Core.Data.Objects.Structs
+﻿using System.Runtime.InteropServices;
+
+namespace AmeisenBotX.Core.Data.Objects.Structs
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct RawPlayerSkillInfo
     {
-        private ushort Bonus;
-        private ushort Id;
-        private ushort MaxValue;
-        private short Modifier;
-        private ushort SkillStep;
-        private ushort Value;
+        public ushort Id;
+        public ushort Bonus;
+        public ushort MaxValue;
+        public short Modifier;
+        public ushort SkillStep;
+        public ushort Value;
     }
 }

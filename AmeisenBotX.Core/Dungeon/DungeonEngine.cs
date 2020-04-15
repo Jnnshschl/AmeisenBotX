@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Dungeon
 
                                     if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < completionDistance)
                                     {
-                                        WowInterface.CharacterManager.InteractWithObject(obj);
+                                        WowInterface.HookManager.GameobjectOnRightClick(obj);
                                     }
                                 }
 

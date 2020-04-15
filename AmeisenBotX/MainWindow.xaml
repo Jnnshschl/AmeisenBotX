@@ -55,22 +55,20 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </ProgressBar.Background>
         </ProgressBar>
-        <WrapPanel HorizontalAlignment="Left" Width="129" Margin="6,0,0,4" Height="15" VerticalAlignment="Bottom">
-            <Label x:Name="labelCurrentTickTime" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0">
-                <Label.Foreground>
-                    <SolidColorBrush Color="{DynamicResource TextAccent}" />
-                </Label.Foreground>
-            </Label>
+        <WrapPanel HorizontalAlignment="Left" Width="188" Margin="6,0,0,4.333" Height="15" VerticalAlignment="Bottom">
+            <Label x:Name="labelCurrentTickTime" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0" Foreground="#FFA0FF00"/>
             <Label x:Name="labelCurrentTickTimeDesc" Content="ms" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0">
                 <Label.Foreground>
                     <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                 </Label.Foreground>
             </Label>
-            <Label x:Name="labelCurrentObjectCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0">
+            <Label x:Name="labelHookCallCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0" Foreground="#FFA0FF00"/>
+            <Label x:Name="labelCurrentObjectCountDesc_Copy" Content="Calls" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0">
                 <Label.Foreground>
-                    <SolidColorBrush Color="{DynamicResource TextAccent}" />
+                    <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                 </Label.Foreground>
             </Label>
+            <Label x:Name="labelCurrentObjectCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0" Foreground="#FFA0FF00"/>
             <Label x:Name="labelCurrentObjectCountDesc" Content="Objects" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0">
                 <Label.Foreground>
                     <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -164,7 +162,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label x:Name="labelBgObjective" Content="BGObjective: None" Margin="205,32,3.333,45.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" />
+        <Label x:Name="labelBgObjective" Content="BGObjective: None" Margin="205,33,3.333,45.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" />
         <Label x:Name="labelGamestate" Content="GameState" Margin="205,0,0,28.333" FontFamily="Bahnschrift Light" FontSize="10" Padding="0" HorizontalAlignment="Left" Width="49" Height="12" VerticalAlignment="Bottom">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -220,7 +218,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonStartAutopilot" Content="🤖" Margin="172,0,0,0" BorderThickness="1,0" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartAutopilot_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28" IsEnabled="False">
+        <Button x:Name="buttonStartAutopilot" Content="🤖" Margin="172,0,0,0" BorderThickness="1,0" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartAutopilot_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

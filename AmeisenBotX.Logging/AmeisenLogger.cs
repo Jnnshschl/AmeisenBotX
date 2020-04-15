@@ -94,7 +94,7 @@ namespace AmeisenBotX.Logging
         {
             if (logLevel <= ActiveLogLevel)
             {
-                LogQueue.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",24} {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+                LogQueue.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",-24} {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
             }
         }
 

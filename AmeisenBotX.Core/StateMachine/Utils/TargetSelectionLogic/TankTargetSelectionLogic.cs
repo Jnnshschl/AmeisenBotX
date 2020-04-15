@@ -31,10 +31,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Target, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly;
 
             // get all enemies targeting our group
-            List<WowUnit> enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => e.TargetGuid != 0 && !e.IsDead && e.IsInCombat && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
+            // splitted up the two queries to prevent crash due to changed collections
+            IEnumerable<WowUnit> enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100);
+            enemies = enemies.Where(e => e.TargetGuid != 0 && !e.IsDead && e.IsInCombat && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
 
-            if (enemies.Count > 0)
+            if (enemies.Count() > 0)
             {
                 // filter out enemies already attacking me
                 List<WowUnit> enemiesNotTargetingMe = enemies

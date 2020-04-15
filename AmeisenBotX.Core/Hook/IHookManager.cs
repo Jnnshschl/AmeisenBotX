@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,10 @@ namespace AmeisenBotX.Core.Hook
         public bool IsWoWHooked { get; }
 
         void AcceptBattlegroundInvite();
+
+        ulong CallCount { get; }
+
+        string ExecuteLuaAndRead(string command, string variable);
 
         void AcceptPartyInvite();
 
@@ -115,6 +120,8 @@ namespace AmeisenBotX.Core.Hook
         void RetrieveCorpse();
 
         void RollOnItem(int rollId, RollType rollType);
+
+        void SelectLfgRole(CombatClassRole combatClassRole);
 
         void SellAllGrayItems();
 

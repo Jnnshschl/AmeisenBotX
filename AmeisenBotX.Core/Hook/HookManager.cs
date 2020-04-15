@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Pathfinding.Objects;
@@ -20,12 +21,14 @@ namespace AmeisenBotX.Core.Hook
 {
     public class HookManager : IHookManager
     {
-        private const int ENDSCENE_HOOK_OFFSET = 0x2;
+        private ulong endsceneCalls;
         private readonly object hookLock = new object();
 
         public HookManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
+
+            endsceneCalls = 0;
         }
 
         public IntPtr CodecaveForCheck { get; private set; }
@@ -39,6 +42,16 @@ namespace AmeisenBotX.Core.Hook
         public IntPtr EndsceneReturnAddress { get; private set; }
 
         public bool IsInjectionUsed { get; private set; }
+
+        public ulong CallCount
+        {
+            get
+            {
+                ulong val = endsceneCalls;
+                endsceneCalls = 0;
+                return val;
+            }
+        }
 
         public bool IsWoWHooked
         {
@@ -227,17 +240,11 @@ namespace AmeisenBotX.Core.Hook
             => ReadAuras(luaunit, "UnitDebuff");
 
         public string GetEquipmentItems()
-        {
-            string command = "abotEquipmentResult=\"[\"for a=0,23 do abId=GetInventoryItemID(\"player\",a)if string.len(tostring(abId or\"\"))>0 then abotItemLink=GetInventoryItemLink(\"player\",a)abCount=GetInventoryItemCount(\"player\",a)abCurrentDurability,abMaxDurability=GetInventoryItemDurability(a)abCooldownStart,abCooldownEnd=GetInventoryItemCooldown(\"player\",a)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemLink)abstats=GetItemStats(abotItemLink)statsResult={}for b,c in pairs(abstats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",b,c))end;abotEquipmentResult=abotEquipmentResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equipslot\": \"'..tostring(a or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}'if a<23 then abotEquipmentResult=abotEquipmentResult..\",\"end end end;abotEquipmentResult=abotEquipmentResult..\"]\"";
-            LuaDoString(command);
-            return GetLocalizedText("abotEquipmentResult");
-        }
+            => ExecuteLuaAndRead("abotEquipmentResult=\"[\"for a=0,23 do abId=GetInventoryItemID(\"player\",a)if string.len(tostring(abId or\"\"))>0 then abotItemLink=GetInventoryItemLink(\"player\",a)abCount=GetInventoryItemCount(\"player\",a)abCurrentDurability,abMaxDurability=GetInventoryItemDurability(a)abCooldownStart,abCooldownEnd=GetInventoryItemCooldown(\"player\",a)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemLink)abstats=GetItemStats(abotItemLink)statsResult={}for b,c in pairs(abstats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",b,c))end;abotEquipmentResult=abotEquipmentResult..'{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equipslot\": \"'..tostring(a or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}'if a<23 then abotEquipmentResult=abotEquipmentResult..\",\"end end end;abotEquipmentResult=abotEquipmentResult..\"]\"", "abotEquipmentResult");
 
         public int GetFreeBagSlotCount()
         {
-            LuaDoString("abFreeBagSlots=0 for i=1,5 do abFreeBagSlots=abFreeBagSlots+GetContainerNumFreeSlots(i-1)end");
-
-            if (int.TryParse(GetLocalizedText("abFreeBagSlots"), out int bagSlots))
+            if (int.TryParse(ExecuteLuaAndRead("abFreeBagSlots=0 for i=1,5 do abFreeBagSlots=abFreeBagSlots+GetContainerNumFreeSlots(i-1)end", "abFreeBagSlots"), out int bagSlots))
             {
                 return bagSlots;
             }
@@ -248,36 +255,16 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public string GetInventoryItems()
-        {
-            string command = "abotInventoryResult=\"[\"for a=0,4 do containerSlots=GetContainerNumSlots(a)for b=1,containerSlots do abId=GetContainerItemID(a,b)if string.len(tostring(abId or\"\"))>0 then abItemLink=GetContainerItemLink(a,b)abCurrentDurability,abMaxDurability=GetContainerItemDurability(a,b)abCooldownStart,abCooldownEnd=GetContainerItemCooldown(a,b)abIcon,abItemCount,abLocked,abQuality,abReadable,abLootable,abItemLink,isFiltered=GetContainerItemInfo(a,b)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abItemLink)abstats=GetItemStats(abItemLink)statsResult={}for c,d in pairs(abstats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;abotInventoryResult=abotInventoryResult..\"{\"..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abItemCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": \"'..tostring(abCooldownEnd or 0)..'\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"lootable\": \"'..tostring(abLootable or 0)..'\",'..'\"readable\": \"'..tostring(abReadable or 0)..'\",'..'\"link\": \"'..tostring(abItemLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..\"}\"abotInventoryResult=abotInventoryResult..\",\"end end end;abotInventoryResult=abotInventoryResult..\"]\"";
-            LuaDoString(command);
-
-            return GetLocalizedText("abotInventoryResult");
-        }
+            => ExecuteLuaAndRead("abotInventoryResult=\"[\"for a=0,4 do containerSlots=GetContainerNumSlots(a)for b=1,containerSlots do abId=GetContainerItemID(a,b)if string.len(tostring(abId or\"\"))>0 then abItemLink=GetContainerItemLink(a,b)abCurrentDurability,abMaxDurability=GetContainerItemDurability(a,b)abCooldownStart,abCooldownEnd=GetContainerItemCooldown(a,b)abIcon,abItemCount,abLocked,abQuality,abReadable,abLootable,abItemLink,isFiltered=GetContainerItemInfo(a,b)abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abItemLink)abstats=GetItemStats(abItemLink)statsResult={}for c,d in pairs(abstats)do table.insert(statsResult,string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;abotInventoryResult=abotInventoryResult..\"{\"..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abItemCount or 0)..'\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": \"'..tostring(abCooldownEnd or 0)..'\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"lootable\": \"'..tostring(abLootable or 0)..'\",'..'\"readable\": \"'..tostring(abReadable or 0)..'\",'..'\"link\": \"'..tostring(abItemLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\",'..'\"stats\": '..\"{\"..table.concat(statsResult,\",\")..\"}\"..','..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..\"}\"abotInventoryResult=abotInventoryResult..\",\"end end end;abotInventoryResult=abotInventoryResult..\"]\"", "abotInventoryResult");
 
         public string GetItemByNameOrLink(string itemName)
-        {
-            string command = $"abotItemName=\"{itemName}\";abotItemInfoResult='noItem';abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemName);abotItemInfoResult='{{'..'\"id\": \"0\",'..'\"count\": \"1\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"0\",'..'\"maxDurability\": \"0\",'..'\"cooldownStart\": \"0\",'..'\"cooldownEnd\": \"0\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';";
-
-            LuaDoString(command);
-            return GetLocalizedText("abotItemInfoResult");
-        }
+            => ExecuteLuaAndRead($"abotItemName=\"{itemName}\";abotItemInfoResult='noItem';abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(abotItemName);abotItemInfoResult='{{'..'\"id\": \"0\",'..'\"count\": \"1\",'..'\"quality\": \"'..tostring(abRarity or 0)..'\",'..'\"curDurability\": \"0\",'..'\"maxDurability\": \"0\",'..'\"cooldownStart\": \"0\",'..'\"cooldownEnd\": \"0\",'..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equiplocation\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';", "abotItemInfoResult");
 
         public string GetItemBySlot(int itemslot)
-        {
-            string command = $"abotItemSlot={itemslot};abotItemInfoResult='noItem';abId=GetInventoryItemID('player',abotItemSlot);abCount=GetInventoryItemCount('player',abotItemSlot);abQuality=GetInventoryItemQuality('player',abotItemSlot);abCurrentDurability,abMaxDurability=GetInventoryItemDurability(abotItemSlot);abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',abotItemSlot);abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(GetInventoryItemLink('player',abotItemSlot));abotItemInfoResult='{{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equipslot\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';";
-
-            LuaDoString(command);
-            return GetLocalizedText("abotItemInfoResult");
-        }
+            => ExecuteLuaAndRead($"abotItemSlot={itemslot};abotItemInfoResult='noItem';abId=GetInventoryItemID('player',abotItemSlot);abCount=GetInventoryItemCount('player',abotItemSlot);abQuality=GetInventoryItemQuality('player',abotItemSlot);abCurrentDurability,abMaxDurability=GetInventoryItemDurability(abotItemSlot);abCooldownStart,abCooldownEnd=GetInventoryItemCooldown('player',abotItemSlot);abName,abLink,abRarity,abLevel,abMinLevel,abType,abSubType,abStackCount,abEquipLoc,abIcon,abSellPrice=GetItemInfo(GetInventoryItemLink('player',abotItemSlot));abotItemInfoResult='{{'..'\"id\": \"'..tostring(abId or 0)..'\",'..'\"count\": \"'..tostring(abCount or 0)..'\",'..'\"quality\": \"'..tostring(abQuality or 0)..'\",'..'\"curDurability\": \"'..tostring(abCurrentDurability or 0)..'\",'..'\"maxDurability\": \"'..tostring(abMaxDurability or 0)..'\",'..'\"cooldownStart\": \"'..tostring(abCooldownStart or 0)..'\",'..'\"cooldownEnd\": '..tostring(abCooldownEnd or 0)..','..'\"name\": \"'..tostring(abName or 0)..'\",'..'\"link\": \"'..tostring(abLink or 0)..'\",'..'\"level\": \"'..tostring(abLevel or 0)..'\",'..'\"minLevel\": \"'..tostring(abMinLevel or 0)..'\",'..'\"type\": \"'..tostring(abType or 0)..'\",'..'\"subtype\": \"'..tostring(abSubType or 0)..'\",'..'\"maxStack\": \"'..tostring(abStackCount or 0)..'\",'..'\"equipslot\": \"'..tostring(abEquipLoc or 0)..'\",'..'\"sellprice\": \"'..tostring(abSellPrice or 0)..'\"'..'}}';", "abotItemInfoResult");
 
         public string GetItemStats(string itemLink)
-        {
-            string command = $"abotItemLink=\"{itemLink}\"abotItemStatsResult=''stats={{}}abStats=GetItemStats(abotItemLink,stats)abotItemStatsResult='{{'..'\"stamina\": \"'..tostring(stats[\"ITEM_MOD_STAMINA_SHORT\"]or 0)..'\",'..'\"agility\": \"'..tostring(stats[\"ITEM_MOD_AGILITY_SHORT\"]or 0)..'\",'..'\"strenght\": \"'..tostring(stats[\"ITEM_MOD_STRENGHT_SHORT\"]or 0)..'\",'..'\"intellect\": \"'..tostring(stats[\"ITEM_MOD_INTELLECT_SHORT\"]or 0)..'\",'..'\"spirit\": \"'..tostring(stats[\"ITEM_MOD_SPIRIT_SHORT\"]or 0)..'\",'..'\"attackpower\": \"'..tostring(stats[\"ITEM_MOD_ATTACK_POWER_SHORT\"]or 0)..'\",'..'\"spellpower\": \"'..tostring(stats[\"ITEM_MOD_SPELL_POWER_SHORT\"]or 0)..'\",'..'\"mana\": \"'..tostring(stats[\"ITEM_MOD_MANA_SHORT\"]or 0)..'\"'..'}}'";
-
-            LuaDoString(command);
-            return GetLocalizedText("abotItemStatsResult");
-        }
+            => ExecuteLuaAndRead($"abotItemLink=\"{itemLink}\"abotItemStatsResult=''stats={{}}abStats=GetItemStats(abotItemLink,stats)abotItemStatsResult='{{'..'\"stamina\": \"'..tostring(stats[\"ITEM_MOD_STAMINA_SHORT\"]or 0)..'\",'..'\"agility\": \"'..tostring(stats[\"ITEM_MOD_AGILITY_SHORT\"]or 0)..'\",'..'\"strenght\": \"'..tostring(stats[\"ITEM_MOD_STRENGHT_SHORT\"]or 0)..'\",'..'\"intellect\": \"'..tostring(stats[\"ITEM_MOD_INTELLECT_SHORT\"]or 0)..'\",'..'\"spirit\": \"'..tostring(stats[\"ITEM_MOD_SPIRIT_SHORT\"]or 0)..'\",'..'\"attackpower\": \"'..tostring(stats[\"ITEM_MOD_ATTACK_POWER_SHORT\"]or 0)..'\",'..'\"spellpower\": \"'..tostring(stats[\"ITEM_MOD_SPELL_POWER_SHORT\"]or 0)..'\",'..'\"mana\": \"'..tostring(stats[\"ITEM_MOD_MANA_SHORT\"]or 0)..'\"'..'}}'", "abotItemStatsResult");
 
         public string GetLocalizedText(string variable)
         {
@@ -315,16 +302,10 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public string GetLootRollItemLink(int rollId)
-        {
-            LuaDoString($"abRollItemLink = GetLootRollItemLink({rollId});");
-            return GetLocalizedText("abRollItemLink");
-        }
+            => ExecuteLuaAndRead($"abRollItemLink = GetLootRollItemLink({rollId});", "abRollItemLink");
 
         public string GetMoney()
-        {
-            LuaDoString("abMoney = GetMoney();");
-            return GetLocalizedText("abMoney");
-        }
+            => ExecuteLuaAndRead("abMoney = GetMoney();", "abMoney");
 
         public Dictionary<RuneType, int> GetRunesReady(int runeId)
         {
@@ -351,11 +332,9 @@ namespace AmeisenBotX.Core.Hook
 
         public List<string> GetSkills()
         {
-            LuaDoString("abSkillList=\"\"abSkillCount=GetNumSkillLines()for a=1,abSkillCount do local b,c=GetSkillLineInfo(a)if not c then abSkillList=abSkillList..b;if a<abSkillCount then abSkillList=abSkillList..\"; \"end end end");
-
             try
             {
-                return new List<string>(GetLocalizedText("abSkillList").Split(';'));
+                return new List<string>(ExecuteLuaAndRead("abSkillList=\"\"abSkillCount=GetNumSkillLines()for a=1,abSkillCount do local b,c=GetSkillLineInfo(a)if not c then abSkillList=abSkillList..b;if a<abSkillCount then abSkillList=abSkillList..\"; \"end end end", "abSkillList").Split(';'));
             }
             catch
             {
@@ -365,8 +344,7 @@ namespace AmeisenBotX.Core.Hook
 
         public double GetSpellCooldown(string spellName)
         {
-            LuaDoString($"abotCdStart,abotCdDuration,abotCdEnabled = GetSpellCooldown(\"{spellName}\");abotCdLeft = (abotCdStart + abotCdDuration - GetTime()) * 1000;if abotCdLeft < 0 then abotCdLeft = 0 end;");
-            string result = GetLocalizedText("abotCdLeft").Replace(".", ",");
+            string result = ExecuteLuaAndRead($"abotCdStart,abotCdDuration,abotCdEnabled = GetSpellCooldown(\"{spellName}\");abotCdLeft = (abotCdStart + abotCdDuration - GetTime()) * 1000;if abotCdLeft < 0 then abotCdLeft = 0 end;", "abotCdLeft").Replace(".", ",");
 
             if (double.TryParse(result, out double value))
             {
@@ -379,60 +357,25 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public string GetSpellNameById(int spellId)
-        {
-            LuaDoString($"abotSpellName=GetSpellInfo({spellId});");
-            return GetLocalizedText("abotSpellName");
-        }
+            => ExecuteLuaAndRead($"abotSpellName=GetSpellInfo({spellId});", "abotSpellName");
 
         public string GetSpells()
-        {
-            string command = "abotSpellResult='['tabCount=GetNumSpellTabs()for a=1,tabCount do tabName,tabTexture,tabOffset,numEntries=GetSpellTabInfo(a)for b=tabOffset+1,tabOffset+numEntries do abSpellName,abSpellRank=GetSpellName(b,\"BOOKTYPE_SPELL\")if abSpellName then abName,abRank,_,abCosts,_,_,abCastTime,abMinRange,abMaxRange=GetSpellInfo(abSpellName,abSpellRank)abotSpellResult=abotSpellResult..'{'..'\"spellbookName\": \"'..tostring(tabName or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring(abSpellName or 0)..'\",'..'\"rank\": \"'..tostring(abRank or 0)..'\",'..'\"castTime\": \"'..tostring(abCastTime or 0)..'\",'..'\"minRange\": \"'..tostring(abMinRange or 0)..'\",'..'\"maxRange\": \"'..tostring(abMaxRange or 0)..'\",'..'\"costs\": \"'..tostring(abCosts or 0)..'\"'..'}'if a<tabCount or b<tabOffset+numEntries then abotSpellResult=abotSpellResult..','end end end end;abotSpellResult=abotSpellResult..']'";
-            LuaDoString(command);
-            return GetLocalizedText("abotSpellResult");
-        }
+            => ExecuteLuaAndRead("abotSpellResult='['tabCount=GetNumSpellTabs()for a=1,tabCount do tabName,tabTexture,tabOffset,numEntries=GetSpellTabInfo(a)for b=tabOffset+1,tabOffset+numEntries do abSpellName,abSpellRank=GetSpellName(b,\"BOOKTYPE_SPELL\")if abSpellName then abName,abRank,_,abCosts,_,_,abCastTime,abMinRange,abMaxRange=GetSpellInfo(abSpellName,abSpellRank)abotSpellResult=abotSpellResult..'{'..'\"spellbookName\": \"'..tostring(tabName or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring(abSpellName or 0)..'\",'..'\"rank\": \"'..tostring(abRank or 0)..'\",'..'\"castTime\": \"'..tostring(abCastTime or 0)..'\",'..'\"minRange\": \"'..tostring(abMinRange or 0)..'\",'..'\"maxRange\": \"'..tostring(abMaxRange or 0)..'\",'..'\"costs\": \"'..tostring(abCosts or 0)..'\"'..'}'if a<tabCount or b<tabOffset+numEntries then abotSpellResult=abotSpellResult..','end end end end;abotSpellResult=abotSpellResult..']'", "abotSpellResult");
 
         public List<WowAura> GetUnitAuras(IntPtr baseAddress)
         {
             List<WowAura> buffs = new List<WowAura>();
-            if (WowInterface.XMemory.Read(baseAddress + 0xC30, out int buffTable))
+
+            if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, 0xDD0), out int auraCount1)
+                && auraCount1 > 0)
             {
-                IntPtr buffBase;
-                if (buffTable == 0)
-                {
-                    buffBase = IntPtr.Add(baseAddress, 0xC38);
-                }
-                else
-                {
-                    buffBase = IntPtr.Add(baseAddress, 0xC30);
-                }
+                buffs.AddRange(ReadAuraTable(IntPtr.Add(baseAddress, 0xC50), auraCount1));
+            }
 
-                int count = 1;
-
-                do
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * count), out RawWowAura aura))
-                    {
-                        if (aura.SpellId > 0)
-                        {
-                            if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
-                            {
-                                name = GetSpellNameById(aura.SpellId);
-                                WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
-                            }
-
-                            if (name.Length > 0 && !buffs.Any(e => e.Name == name))
-                            {
-                                buffs.Add(new WowAura(aura, name));
-                            }
-                        }
-
-                        count++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                } while (count < 32);
+            if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, 0xC54), out int auraCount2)
+                && auraCount2 > 0)
+            {
+                buffs.AddRange(ReadAuraTable(IntPtr.Add(baseAddress, 0xC58), auraCount2));
             }
 
             return buffs;
@@ -445,10 +388,8 @@ namespace AmeisenBotX.Core.Hook
         /// <returns>(Spellname, duration)</returns>
         public (string, int) GetUnitCastingInfo(WowLuaUnit luaunit)
         {
-            string command = $"abCastingInfo = \"none,0\"; abSpellName, x, x, x, x, abSpellEndTime = UnitCastingInfo(\"{luaunit}\"); abDuration = ((abSpellEndTime/1000) - GetTime()) * 1000; abCastingInfo = abSpellName..\",\"..abDuration;";
-            LuaDoString(command);
+            string str = ExecuteLuaAndRead($"abCastingInfo = \"none,0\"; abSpellName, x, x, x, x, abSpellEndTime = UnitCastingInfo(\"{luaunit}\"); abDuration = ((abSpellEndTime/1000) - GetTime()) * 1000; abCastingInfo = abSpellName..\",\"..abDuration;", "abCastingInfo");
 
-            string str = GetLocalizedText("abCastingInfo");
             if (double.TryParse(str.Split(',')[1], out double timeRemaining))
             {
                 return (str.Split(',')[0], (int)Math.Round(timeRemaining, 0));
@@ -494,17 +435,13 @@ namespace AmeisenBotX.Core.Hook
 
         public bool HasUnitStealableBuffs(WowLuaUnit luaUnit)
         {
-            LuaDoString($"abIsStealableStuffThere=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,isStealable=UnitAura(\"{luaUnit}\",i);if isStealable==1 then abIsStealableStuffThere=1;end end");
-            string rawValue = GetLocalizedText("abIsStealableStuffThere");
-
+            string rawValue = ExecuteLuaAndRead($"abIsStealableStuffThere=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,isStealable=UnitAura(\"{luaUnit}\",i);if isStealable==1 then abIsStealableStuffThere=1;end end", "abIsStealableStuffThere");
             return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
         public bool IsBgInviteReady()
         {
-            LuaDoString("abBgQueueIsReady = 0;for i=1,2 do local x = GetBattlefieldPortExpiration(i) if x > 0 then abBgQueueIsReady = 1 end end");
-            string rawValue = GetLocalizedText("abBgQueueIsReady");
-
+            string rawValue = ExecuteLuaAndRead("abBgQueueIsReady = 0;for i=1,2 do local x = GetBattlefieldPortExpiration(i) if x > 0 then abBgQueueIsReady = 1 end end", "abBgQueueIsReady");
             return int.TryParse(rawValue, out int result) ? result == 1 : false;
         }
 
@@ -515,8 +452,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsGhost(WowLuaUnit luaUnit)
         {
-            LuaDoString($"isGhost = UnitIsGhost(\"{luaUnit}\");");
-            string result = GetLocalizedText("isGhost");
+            string result = ExecuteLuaAndRead($"isGhost = UnitIsGhost(\"{luaUnit}\");", "isGhost");
 
             if (int.TryParse(result, out int isGhost))
             {
@@ -540,9 +476,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsSpellKnown(int spellId, bool isPetSpell = false)
         {
-            LuaDoString($"abIsSpellKnown = IsSpellKnown({spellId}, {isPetSpell});");
-            string rawValue = GetLocalizedText("abIsSpellKnown");
-
+            string rawValue = ExecuteLuaAndRead($"abIsSpellKnown = IsSpellKnown({spellId}, {isPetSpell});", "abIsSpellKnown");
             return bool.TryParse(rawValue, out bool result) ? result : false;
         }
 
@@ -590,6 +524,48 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public string ExecuteLuaAndRead(string command, string variable)
+        {
+            AmeisenLogger.Instance.Log("HookManager", $"ExecuteLuaAndRead: command: \"{command}\" variable: \"{variable}\"...", LogLevel.Verbose);
+
+            if (command.Length > 0
+                && variable.Length > 0)
+            {
+                byte[] commandBytes = Encoding.UTF8.GetBytes(command);
+                byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
+
+                if (WowInterface.XMemory.AllocateMemory((uint)commandBytes.Length + 1, out IntPtr memAllocCommand)
+                    && WowInterface.XMemory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAllocVariable))
+                {
+                    WowInterface.XMemory.WriteBytes(memAllocCommand, commandBytes);
+                    WowInterface.XMemory.WriteBytes(memAllocVariable, variableBytes);
+
+                    string[] asm = new string[]
+                    {
+                        "PUSH 0",
+                        $"PUSH {memAllocCommand.ToInt32()}",
+                        $"PUSH {memAllocCommand.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
+                        "ADD ESP, 0xC",
+                        "MOV ECX, EAX",
+                        "PUSH -1",
+                        $"PUSH {memAllocVariable.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionGetLocalizedText.ToInt32()}",
+                        "RETN",
+                    };
+
+                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
+
+                    WowInterface.XMemory.FreeMemory(memAllocCommand);
+                    WowInterface.XMemory.FreeMemory(memAllocVariable);
+                    return result;
+                }
+            }
+
+            return string.Empty;
+        }
+
         public void QueueBattlegroundByName(string bgName)
             => LuaDoString($"for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
 
@@ -625,6 +601,24 @@ namespace AmeisenBotX.Core.Hook
         {
             LuaDoString($"RollOnLoot({rollId}, {(int)rollType});");
             ClickUiElement("StaticPopup1Button1");
+        }
+
+        public void SelectLfgRole(CombatClassRole combatClassRole)
+        {
+            string selectRoleUiElement = combatClassRole switch
+            {
+                CombatClassRole.Tank => "LFDRoleCheckPopupRoleButtonTank",
+                CombatClassRole.Heal => "LFDRoleCheckPopupRoleButtonHealer",
+                CombatClassRole.Dps => "LFDRoleCheckPopupRoleButtonDPS",
+                _ => "LFDRoleCheckPopupRoleButtonDPS",  // should never happen but in case, queue as DPS
+            };
+
+            // do this twice to ensure that we join the queue
+            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
+            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
+
+            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
+            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
         }
 
         public void SellAllGrayItems()
@@ -668,10 +662,10 @@ namespace AmeisenBotX.Core.Hook
             // first thing thats 5 bytes big is here
             // we are going to replace this 5 bytes with
             // our JMP instruction (JMP (1 byte) + Address (4 byte))
-            EndsceneAddress = IntPtr.Add(EndsceneAddress, ENDSCENE_HOOK_OFFSET);
-            EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, 0x5);
+            // EndsceneAddress = IntPtr.Add(EndsceneAddress, 0x2);
+            EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, 0x7);
 
-            AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: {EndsceneAddress:X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: {EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
 
             // if WoW is already hooked, unhook it
             if (IsWoWHooked)
@@ -680,7 +674,7 @@ namespace AmeisenBotX.Core.Hook
             }
             else
             {
-                if (WowInterface.XMemory.ReadBytes(EndsceneAddress, 5, out byte[] bytes))
+                if (WowInterface.XMemory.ReadBytes(EndsceneAddress, 7, out byte[] bytes))
                 {
                     OriginalEndsceneBytes = bytes;
                 }
@@ -697,8 +691,7 @@ namespace AmeisenBotX.Core.Hook
                 // WowInterface.XMemory.Fasm.AddLine("PUSHFD");
 
                 // check for code to be executed
-                WowInterface.XMemory.Fasm.AddLine($"MOV EDX, [{CodeToExecuteAddress.ToInt32()}]");
-                WowInterface.XMemory.Fasm.AddLine("TEST EDX, 1");
+                WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{CodeToExecuteAddress.ToInt32()}], 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // set register back to zero
@@ -708,8 +701,7 @@ namespace AmeisenBotX.Core.Hook
                 // we dont want to execute code in
                 // the loadingscreen, cause that
                 // mostly results in crashes
-                WowInterface.XMemory.Fasm.AddLine($"MOV EDX, [{WowInterface.OffsetList.IsWorldLoaded.ToInt32()}]");
-                WowInterface.XMemory.Fasm.AddLine("TEST EDX, 1");
+                WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{WowInterface.OffsetList.IsWorldLoaded.ToInt32()}], 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // execute our stuff and get return address
@@ -718,8 +710,7 @@ namespace AmeisenBotX.Core.Hook
 
                 // finish up our execution
                 WowInterface.XMemory.Fasm.AddLine("@out:");
-                WowInterface.XMemory.Fasm.AddLine("MOV EDX, 0");
-                WowInterface.XMemory.Fasm.AddLine($"MOV [{CodeToExecuteAddress.ToInt32()}], EDX");
+                WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{CodeToExecuteAddress.ToInt32()}], 0");
 
                 // restore registers
                 // WowInterface.XMemory.Fasm.AddLine("POPAD");
@@ -745,11 +736,11 @@ namespace AmeisenBotX.Core.Hook
                 // do the original EndScene stuff after we restored the registers
                 // and insert it after our code
                 WowInterface.XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), OriginalEndsceneBytes);
-                AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OriginalEndsceneBytes: {JsonConvert.SerializeObject(OriginalEndsceneBytes)}", LogLevel.Verbose);
+                AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OriginalEndsceneBytes: {BotUtils.ByteArrayToString(OriginalEndsceneBytes)}", LogLevel.Verbose);
 
                 // return to original function after we're done with our stuff
                 WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}");
-                WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32() + (uint)asmLenght + 5);
+                WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32() + (uint)asmLenght + 7);
                 WowInterface.XMemory.Fasm.Clear();
 
                 // ---------------------------------------------------
@@ -832,7 +823,7 @@ namespace AmeisenBotX.Core.Hook
 
             CodeToExecuteAddress = codeToExecuteAddress;
             WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: {codeToExecuteAddress:X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: {codeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
@@ -842,25 +833,25 @@ namespace AmeisenBotX.Core.Hook
 
             ReturnValueAddress = returnValueAddress;
             WowInterface.XMemory.Write(ReturnValueAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {returnValueAddress:X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {returnValueAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
-            if (!WowInterface.XMemory.AllocateMemory(128, out IntPtr codecaveForCheck))
+            if (!WowInterface.XMemory.AllocateMemory(56, out IntPtr codecaveForCheck))
             {
                 return false;
             }
 
             CodecaveForCheck = codecaveForCheck;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck: {codecaveForCheck:X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck: {codecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
-            if (!WowInterface.XMemory.AllocateMemory(2048, out IntPtr codecaveForExecution))
+            if (!WowInterface.XMemory.AllocateMemory(512, out IntPtr codecaveForExecution))
             {
                 return false;
             }
 
             CodecaveForExecution = codecaveForExecution;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution: {codecaveForExecution:X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution: {codecaveForExecution.ToInt32():X}", LogLevel.Verbose);
 
             return true;
         }
@@ -908,6 +899,7 @@ namespace AmeisenBotX.Core.Hook
         {
             lock (hookLock)
             {
+                ++endsceneCalls;
                 AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ...", LogLevel.Verbose);
                 AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
 
@@ -916,6 +908,8 @@ namespace AmeisenBotX.Core.Hook
                 {
                     return returnBytes.ToArray();
                 }
+
+                bool frozenMainThread = false;
 
                 try
                 {
@@ -937,12 +931,14 @@ namespace AmeisenBotX.Core.Hook
                     }
 
                     // inject it
+                    frozenMainThread = true;
                     WowInterface.XMemory.SuspendMainThread();
                     WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
 
                     // now there is code to be executed
                     WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
                     WowInterface.XMemory.ResumeMainThread();
+                    frozenMainThread = false;
 
                     AmeisenLogger.Instance.Log("HookManager", $"Injection completed...", LogLevel.Verbose);
 
@@ -958,7 +954,6 @@ namespace AmeisenBotX.Core.Hook
                     if (readReturnBytes)
                     {
                         AmeisenLogger.Instance.Log("HookManager", $"Reading return bytes...", LogLevel.Verbose);
-                        WowInterface.XMemory.SuspendMainThread();
 
                         try
                         {
@@ -985,8 +980,6 @@ namespace AmeisenBotX.Core.Hook
                         {
                             AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
                         }
-
-                        WowInterface.XMemory.ResumeMainThread();
                     }
 
                     IsInjectionUsed = false;
@@ -998,7 +991,11 @@ namespace AmeisenBotX.Core.Hook
                     // now there is no more code to be executed
                     WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
                     IsInjectionUsed = false;
-                    WowInterface.XMemory.ResumeMainThread();
+
+                    if (frozenMainThread)
+                    {
+                        WowInterface.XMemory.ResumeMainThread();
+                    }
                 }
 
                 return returnBytes.ToArray();
@@ -1007,10 +1004,7 @@ namespace AmeisenBotX.Core.Hook
 
         private List<string> ReadAuras(WowLuaUnit luaunit, string functionName)
         {
-            string command = $"local a,b={{}},1;local c={functionName}(\"{luaunit}\",b)while c do a[#a+1]=c;b=b+1;c={functionName}(\"{luaunit}\",b)end;if#a<1 then a=\"\"else activeAuras=table.concat(a,\",\")end";
-
-            LuaDoString(command);
-            string[] debuffs = GetLocalizedText("activeAuras").Split(',');
+            string[] debuffs = ExecuteLuaAndRead($"local a,b={{}},1;local c={functionName}(\"{luaunit}\",b)while c do a[#a+1]=c;b=b+1;c={functionName}(\"{luaunit}\",b)end;if#a<1 then a=\"\"else activeAuras=table.concat(a,\",\")end", "activeAuras").Split(',');
 
             List<string> resultLowered = new List<string>();
             foreach (string s in debuffs)
@@ -1019,6 +1013,42 @@ namespace AmeisenBotX.Core.Hook
             }
 
             return resultLowered;
+        }
+
+        private List<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
+        {
+            List<WowAura> buffs = new List<WowAura>();
+
+            if (auraCount > 16)
+            {
+                auraCount = 16;
+            }
+
+            for (int i = 0; i < auraCount; ++i)
+            {
+                if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * i), out RawWowAura aura))
+                {
+                    if (aura.SpellId > 0 && aura.Creator > 0)
+                    {
+                        if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
+                        {
+                            name = GetSpellNameById(aura.SpellId);
+                            WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
+                        }
+
+                        if (name.Length > 0 && !buffs.Any(e => e.Name == name))
+                        {
+                            buffs.Add(new WowAura(aura, name));
+                        }
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return buffs;
         }
     }
 }
