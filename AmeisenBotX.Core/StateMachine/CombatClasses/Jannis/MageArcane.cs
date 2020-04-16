@@ -14,20 +14,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string arcaneBarrageSpell = "Arcane Barrage";
-        private readonly string arcaneBlastSpell = "Arcane Blast";
-        private readonly string arcaneIntellectSpell = "Arcane Intellect";
-        private readonly string arcaneMissilesSpell = "Arcane Missiles";
-        private readonly string counterspellSpell = "Counterspell";
-        private readonly string evocationSpell = "Evocation";
-        private readonly string fireballSpell = "Fireball";
-        private readonly string iceBlockSpell = "Ice Block";
-        private readonly string icyVeinsSpell = "Icy Veins";
-        private readonly string mageArmorSpell = "Mage Armor";
-        private readonly string manaShieldSpell = "Mana Shield";
-        private readonly string mirrorImageSpell = "Mirror Image";
-        private readonly string missileBarrageSpell = "Missile Barrage";
-        private readonly string spellStealSpell = "Spellsteal";
+#pragma warning disable IDE0051
+        private const string arcaneBarrageSpell = "Arcane Barrage";
+        private const string arcaneBlastSpell = "Arcane Blast";
+        private const string arcaneIntellectSpell = "Arcane Intellect";
+        private const string arcaneMissilesSpell = "Arcane Missiles";
+        private const string counterspellSpell = "Counterspell";
+        private const string evocationSpell = "Evocation";
+        private const string fireballSpell = "Fireball";
+        private const string iceBlockSpell = "Ice Block";
+        private const string icyVeinsSpell = "Icy Veins";
+        private const string mageArmorSpell = "Mage Armor";
+        private const string manaShieldSpell = "Mana Shield";
+        private const string mirrorImageSpell = "Mirror Image";
+        private const string missileBarrageSpell = "Missile Barrage";
+        private const string spellStealSpell = "Spellsteal";
+#pragma warning restore IDE0051
 
         public MageArcane(WowInterface wowInterface) : base(wowInterface)
         {

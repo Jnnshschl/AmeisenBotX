@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Battleground.States;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -57,6 +57,10 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         public bool IsMeFlagCarrier { get; private set; }
 
+        public WowPlayer LastEnemyFlagCarrier { get; set; }
+
+        public WowPlayer LastOwnFlagCarrier { get; set; }
+
         public Vector3 OwnBasePosition => WsgDataset.OwnFlagPosition;
 
         public WowPlayer OwnFlagCarrierPlayer { get; private set; }
@@ -67,15 +71,11 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         private bool IsAlliance { get; set; }
 
-        private WowPlayer LastEnemyFlagCarrier { get; set; }
-
-        private WowPlayer LastOwnFlagCarrier { get; set; }
-
         private WowInterface WowInterface { get; }
 
         private IWsgDataset WsgDataset { get; }
 
-        public void AllianceFlagWasDropped(string playername) => UnsetFlagCarrier(!IsAlliance, playername);
+        public void AllianceFlagWasDropped() => UnsetFlagCarrier(!IsAlliance);
 
         public void AllianceFlagWasPickedUp(string playername) => SetFlagCarrier(!IsAlliance, playername);
 
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             return false;
         }
 
-        public void HordeFlagWasDropped(string playername) => UnsetFlagCarrier(IsAlliance, playername);
+        public void HordeFlagWasDropped() => UnsetFlagCarrier(IsAlliance);
 
         public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
 
@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             }
         }
 
-        private void UnsetFlagCarrier(bool own, string playername)
+        private void UnsetFlagCarrier(bool own)
         {
             if (own)
             {

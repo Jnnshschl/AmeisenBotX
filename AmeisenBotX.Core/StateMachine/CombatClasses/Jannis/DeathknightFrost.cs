@@ -13,21 +13,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string armyOfTheDeadSpell = "Army of the Dead";
-        private readonly string bloodPlagueSpell = "Blood Plague";
-        private readonly string bloodStrikeSpell = "Blood Strike";
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string frostFeverSpell = "Frost Fever";
-        private readonly string frostPresenceSpell = "Frost Presence";
-        private readonly string hornOfWinterSpell = "Horn of Winter";
-        private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
-        private readonly string icyTouchSpell = "Icy Touch";
-        private readonly string mindFreezeSpell = "Mind Freeze";
-        private readonly string obliterateSpell = "Obliterate";
-        private readonly string plagueStrikeSpell = "Plague Strike";
-        private readonly string runeStrikeSpell = "Rune Strike";
-        private readonly string strangulateSpell = "Strangulate";
-        private readonly string unbreakableArmorSpell = "Unbreakable Armor";
+#pragma warning disable IDE0051
+        private const string armyOfTheDeadSpell = "Army of the Dead";
+        private const string bloodPlagueSpell = "Blood Plague";
+        private const string bloodStrikeSpell = "Blood Strike";
+        private const string deathCoilSpell = "Death Coil";
+        private const string frostFeverSpell = "Frost Fever";
+        private const string frostPresenceSpell = "Frost Presence";
+        private const string hornOfWinterSpell = "Horn of Winter";
+        private const string iceboundFortitudeSpell = "Icebound Fortitude";
+        private const string icyTouchSpell = "Icy Touch";
+        private const string mindFreezeSpell = "Mind Freeze";
+        private const string obliterateSpell = "Obliterate";
+        private const string plagueStrikeSpell = "Plague Strike";
+        private const string runeStrikeSpell = "Rune Strike";
+        private const string strangulateSpell = "Strangulate";
+        private const string unbreakableArmorSpell = "Unbreakable Armor";
+#pragma warning restore IDE0051
 
         public DeathknightFrost(WowInterface wowInterface) : base(wowInterface)
         {

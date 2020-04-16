@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States

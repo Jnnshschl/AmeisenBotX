@@ -2,8 +2,8 @@
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -79,9 +79,18 @@ namespace AmeisenBotX.Core.Movement
             if (CurrentPath.Count == 0)
             {
                 TryCount = 0;
-                List<Vector3> nodes = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+                List<Vector3> nodes = new List<Vector3>();
 
-                if (nodes.Count == 0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > 30)
+                {
+                    nodes.AddRange(WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition));
+                }
+                else
+                {
+                    nodes.Add(WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition));
+                }
+
+                if (nodes == null || nodes.Count == 0)
                 {
                     // pathfinding was unsuccessful
                     return;
@@ -124,6 +133,7 @@ namespace AmeisenBotX.Core.Movement
             {
                 case MovementEngineState.Moving:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
+                    forces.Add(PlayerVehicle.AvoidObstacles(2));
                     break;
 
                 case MovementEngineState.DirectMoving:
@@ -134,6 +144,7 @@ namespace AmeisenBotX.Core.Movement
                 case MovementEngineState.Following:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     forces.Add(PlayerVehicle.Seperate(0.5f));
+                    forces.Add(PlayerVehicle.AvoidObstacles(2));
                     break;
 
                 case MovementEngineState.Chasing:
@@ -158,11 +169,6 @@ namespace AmeisenBotX.Core.Movement
 
                 default:
                     return;
-            }
-
-            if (updateForces)
-            {
-                PlayerVehicle.Update(forces);
             }
 
             if (DateTime.Now - LastJumpCheck > TimeSpan.FromMilliseconds(250))
@@ -211,6 +217,11 @@ namespace AmeisenBotX.Core.Movement
 
                         StrafeEnd = DateTime.Now + TimeSpan.FromMilliseconds(msToStrafe + 200);
                     }
+                }
+
+                if (updateForces && !Straving)
+                {
+                    PlayerVehicle.Update(forces);
                 }
 
                 LastPosition = WowInterface.ObjectManager.Player.Position;

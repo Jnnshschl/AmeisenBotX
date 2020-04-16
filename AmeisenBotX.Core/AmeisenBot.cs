@@ -12,6 +12,7 @@ using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
@@ -24,7 +25,6 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
-using AmeisenBotX.Pathfinding;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -291,7 +291,7 @@ namespace AmeisenBotX.Core
                 new WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new DeathknightBlood(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager),
+                new DeathknightBlood(WowInterface.ObjectManager, WowInterface.HookManager),
             };
         }
 
@@ -487,13 +487,13 @@ namespace AmeisenBotX.Core
                 || message.ToUpper().Contains("CAPTURED THE ALLIANCE FLAG")
                 || message.ToUpper().Contains("THE ALLIANCE FLAG IS NOW PLACED AT ITS BASE"))
             {
-                WowInterface.BattlegroundEngine.AllianceFlagWasDropped(arg1);
+                WowInterface.BattlegroundEngine.AllianceFlagWasDropped();
             }
             else if (message.ToUpper().Contains("HORDE FLAG WAS DROPPED")
                 || message.ToUpper().Contains("CAPTURED THE HORDE FLAG")
                 || message.ToUpper().Contains("THE HORDE FLAG IS NOW PLACED AT ITS BASE"))
             {
-                WowInterface.BattlegroundEngine.HordeFlagWasDropped(arg1);
+                WowInterface.BattlegroundEngine.HordeFlagWasDropped();
             }
         }
 
@@ -543,7 +543,7 @@ namespace AmeisenBotX.Core
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
 
-            WowInterface.PathfindingHandler = new NavmeshServerClient(Config.NavmeshServerIp, Config.NameshServerPort);
+            WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();
             WowInterface.MovementEngine = new SmartMovementEngine(WowInterface, WowInterface.MovementSettings);
         }

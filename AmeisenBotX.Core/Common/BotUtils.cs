@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace AmeisenBotX.Core.Common
 {
     public class BotUtils
     {
+#pragma warning disable IDE0051
         private const uint MK_CONTROL = 0x8;
         private const uint MK_LBUTTON = 0x1;
         private const uint MK_MBUTTON = 0x10;
@@ -29,6 +31,7 @@ namespace AmeisenBotX.Core.Common
         private const uint WM_RBUTTONDBLCLK = 0x206;
         private const uint WM_RBUTTONDOWN = 0x204;
         private const uint WM_RBUTTONUP = 0x205;
+#pragma warning restore IDE0051
 
         public static string BigValueToString(double value)
         {
@@ -53,6 +56,41 @@ namespace AmeisenBotX.Core.Common
         public static void HoldKey(IntPtr windowHandle, IntPtr key)
         {
             SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
+        }
+
+        public static string CleanString(string input)
+        {
+            StringBuilder sb = new StringBuilder(input.Length);
+
+            foreach (char c in input)
+            {
+                if (c != '\n' && c != '\r' && c != '\t')
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public static bool IsValidJson(string strInput)
+        {
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}"))
+                || (strInput.StartsWith("[") && strInput.EndsWith("]")))
+            {
+                try
+                {
+                    JToken obj = JToken.Parse(strInput);
+                    return true;
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            return false;
         }
 
         public static bool IsPositionInsideAoeSpell(Vector3 position, List<WowDynobject> wowDynobjects)

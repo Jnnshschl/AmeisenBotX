@@ -14,20 +14,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly int deadPartymembersCheckTime = 4;
-        private readonly string healingTouchSpell = "Healing Touch";
-        private readonly string innervateSpell = "Innervate";
-        private readonly string lifebloomSpell = "Lifebloom";
-        private readonly string markOfTheWildSpell = "Mark of the Wild";
-        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
-        private readonly string nourishSpell = "Nourish";
-        private readonly string regrowthSpell = "Regrowth";
-        private readonly string rejuvenationSpell = "Rejuvenation";
-        private readonly string reviveSpell = "Revive";
-        private readonly string swiftmendSpell = "Swiftmend";
-        private readonly string tranquilitySpell = "Tranquility";
-        private readonly string treeOfLifeSpell = "Tree of Life";
-        private readonly string wildGrowthSpell = "Wild Growth";
+#pragma warning disable IDE0051
+        private const int deadPartymembersCheckTime = 4;
+        private const string healingTouchSpell = "Healing Touch";
+        private const string innervateSpell = "Innervate";
+        private const string lifebloomSpell = "Lifebloom";
+        private const string markOfTheWildSpell = "Mark of the Wild";
+        private const string naturesSwiftnessSpell = "Nature's Swiftness";
+        private const string nourishSpell = "Nourish";
+        private const string regrowthSpell = "Regrowth";
+        private const string rejuvenationSpell = "Rejuvenation";
+        private const string reviveSpell = "Revive";
+        private const string swiftmendSpell = "Swiftmend";
+        private const string tranquilitySpell = "Tranquility";
+        private const string treeOfLifeSpell = "Tree of Life";
+        private const string wildGrowthSpell = "Wild Growth";
+#pragma warning restore IDE0051
 
         public DruidRestoration(WowInterface wowInterface) : base(wowInterface)
         {

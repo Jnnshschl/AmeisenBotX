@@ -6,9 +6,9 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Character
             if (((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
                 || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item))))
             {
-                if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out int expectedItemCount))
+                if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out _))
                 {
                     // if we dont have an item in the slot or if we only have 3 of 4 bags
                     if (matchedItems.Count == 0)

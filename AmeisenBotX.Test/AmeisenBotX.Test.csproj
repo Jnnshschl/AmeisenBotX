@@ -72,10 +72,6 @@
       <Project>{6F95990D-D5D9-4242-9992-DEEFBF8D3E60}</Project>
       <Name>AmeisenBotX.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AmeisenBotX.Pathfinding\AmeisenBotX.Pathfinding.csproj">
-      <Project>{BA329AA1-E3DA-42A1-87B4-3A695919767F}</Project>
-      <Name>AmeisenBotX.Pathfinding</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

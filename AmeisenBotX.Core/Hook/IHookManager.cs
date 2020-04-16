@@ -2,8 +2,8 @@
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -11,13 +11,11 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
+        ulong CallCount { get; }
+
         public bool IsWoWHooked { get; }
 
         void AcceptBattlegroundInvite();
-
-        ulong CallCount { get; }
-
-        string ExecuteLuaAndRead(string command, string variable);
 
         void AcceptPartyInvite();
 
@@ -44,6 +42,8 @@ namespace AmeisenBotX.Core.Hook
         void DisposeHook();
 
         void EnableClickToMove();
+
+        string ExecuteLuaAndRead(string command, string variable);
 
         void FacePosition(WowPlayer player, Vector3 positionToFace);
 

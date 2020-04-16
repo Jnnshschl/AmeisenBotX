@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
 
-            acceleration += GetObjectForceAroundMe<WowObject>(12);
+            // acceleration += GetObjectForceAroundMe<WowObject>(12);
             acceleration += GetNearestBlacklistForce(12);
 
             acceleration.Limit(MaxAcceleration);
@@ -192,7 +192,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             };
         }
 
-        private Vector3 GetNearestBlacklistForce(double maxDistance = 12)
+        private Vector3 GetNearestBlacklistForce(double maxDistance = 8)
         {
             Vector3 force = new Vector3(0, 0, 0);
 
@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             {
                 if (nodes.Count > 0)
                 {
-                    force += Flee(nodes.First(), 3);
+                    force += Flee(nodes.First(), 0.5f);
                 }
             }
 

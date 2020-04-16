@@ -171,7 +171,7 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private bool AreAllPlayersPresent()
-            => WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 50)
+            => WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 50)
             .Count() >= WowInterface.ObjectManager.Partymembers.Count;
 
         private bool NeedToMoveToGroupLeader()
@@ -211,7 +211,7 @@ namespace AmeisenBotX.Core.Dungeon
             }
 
             // are my group members not in range of the CurrentNode
-            List<WowPlayer> nearUnits = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(CurrentNodes.Peek().Position, 30).ToList();
+            List<WowPlayer> nearUnits = WowInterface.ObjectManager.GetNearPartymembers(CurrentNodes.Peek().Position, 30).ToList();
             if (nearUnits.Count() < WowInterface.ObjectManager.PartymemberGuids.Count - 1)
             {
                 Waiting = true;

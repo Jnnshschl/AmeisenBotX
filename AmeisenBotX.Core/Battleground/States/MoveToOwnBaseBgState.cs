@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Battleground.States
 {

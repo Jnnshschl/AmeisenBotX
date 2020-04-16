@@ -5,8 +5,6 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,10 +12,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class DeathknightBlood : ICombatClass
     {
-        public DeathknightBlood(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager)
+        public DeathknightBlood(IObjectManager objectManager, IHookManager hookManager)
         {
             ObjectManager = objectManager;
-            CharacterManager = characterManager;
             HookManager = hookManager;
         }
 
@@ -45,13 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public string Version => "1.0";
 
-        private ICharacterManager CharacterManager { get; }
-
-        private DateTime HeroicStrikeLastUsed { get; set; }
-
         private IHookManager HookManager { get; }
-
-        private Vector3 LastPosition { get; set; }
 
         private IObjectManager ObjectManager { get; }
 

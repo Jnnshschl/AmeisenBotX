@@ -32,8 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // get all enemies targeting our group
             // splitted up the two queries to prevent crash due to changed collections
-            IEnumerable<WowUnit> enemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100);
-            enemies = enemies.Where(e => e.TargetGuid != 0 && !e.IsDead && e.IsInCombat && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList();
+            IEnumerable<WowUnit> enemies = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100).ToList();
 
             if (enemies.Count() > 0)
             {

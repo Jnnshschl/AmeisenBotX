@@ -6,9 +6,9 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Pathfinding;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 }
                 else
                 {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
                     {
                         CharacterManager.MoveToPosition(positionToGoTo);
 

@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Common

@@ -15,19 +15,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string battleStanceSpell = "Battle Stance";
-        private readonly string bladestormSpell = "Bladestorm";
-        private readonly string chargeSpell = "Charge";
-        private readonly string commandingShoutSpell = "Commanding Shout";
-        private readonly string disarmSpell = "Disarm";
-        private readonly string executeSpell = "Execute";
-        private readonly string hamstringSpell = "Hamstring";
-        private readonly string heroicStrikeSpell = "Heroic Strike";
-        private readonly string interceptSpell = "Intercept";
-        private readonly string intimidatingShoutSpell = "Intimidating Shout";
-        private readonly string mortalStrikeSpell = "Mortal Strike";
-        private readonly string overpowerSpell = "Overpower";
-        private readonly string rendSpell = "Rend";
+#pragma warning disable IDE0051
+        private const string battleStanceSpell = "Battle Stance";
+        private const string bladestormSpell = "Bladestorm";
+        private const string chargeSpell = "Charge";
+        private const string commandingShoutSpell = "Commanding Shout";
+        private const string disarmSpell = "Disarm";
+        private const string executeSpell = "Execute";
+        private const string hamstringSpell = "Hamstring";
+        private const string heroicStrikeSpell = "Heroic Strike";
+        private const string interceptSpell = "Intercept";
+        private const string intimidatingShoutSpell = "Intimidating Shout";
+        private const string mortalStrikeSpell = "Mortal Strike";
+        private const string overpowerSpell = "Overpower";
+        private const string rendSpell = "Rend";
+#pragma warning restore IDE0051
 
         public WarriorArms(WowInterface wowInterface) : base(wowInterface)
         {

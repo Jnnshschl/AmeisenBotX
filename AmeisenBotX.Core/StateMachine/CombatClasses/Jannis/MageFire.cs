@@ -13,19 +13,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string arcaneIntellectSpell = "Arcane Intellect";
-        private readonly string counterspellSpell = "Counterspell";
-        private readonly string evocationSpell = "Evocation";
-        private readonly string fireballSpell = "Fireball";
-        private readonly string hotstreakSpell = "Hot Streak";
-        private readonly string iceBlockSpell = "Ice Block";
-        private readonly string livingBombSpell = "Living Bomb";
-        private readonly string manaShieldSpell = "Mana Shield";
-        private readonly string mirrorImageSpell = "Mirror Image";
-        private readonly string moltenArmorSpell = "Molten Armor";
-        private readonly string pyroblastSpell = "Pyroblast";
-        private readonly string scorchSpell = "Scorch";
-        private readonly string spellStealSpell = "Spellsteal";
+#pragma warning disable IDE0051
+        private const string arcaneIntellectSpell = "Arcane Intellect";
+        private const string counterspellSpell = "Counterspell";
+        private const string evocationSpell = "Evocation";
+        private const string fireballSpell = "Fireball";
+        private const string hotstreakSpell = "Hot Streak";
+        private const string iceBlockSpell = "Ice Block";
+        private const string livingBombSpell = "Living Bomb";
+        private const string manaShieldSpell = "Mana Shield";
+        private const string mirrorImageSpell = "Mirror Image";
+        private const string moltenArmorSpell = "Molten Armor";
+        private const string pyroblastSpell = "Pyroblast";
+        private const string scorchSpell = "Scorch";
+        private const string spellStealSpell = "Spellsteal";
+#pragma warning restore IDE0051
 
         public MageFire(WowInterface wowInterface) : base(wowInterface)
         {

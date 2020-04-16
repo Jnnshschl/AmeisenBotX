@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Dungeon.Enums;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Jobs.Profiles;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Dungeon.Profiles.Classic

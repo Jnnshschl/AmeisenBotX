@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, int distance) where T : WowUnit
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -101,6 +101,34 @@ namespace AmeisenBotX.Core.Data
                     && !e.IsDead
                     && !e.IsNotAttackable
                     && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
+                    && e.Position.GetDistance(position) < distance);
+            }
+        }
+
+        public IEnumerable<WowPlayer> GetNearPartymembers(Vector3 position, double distance)
+        {
+            lock (queryLock)
+            {
+                return WowObjects.OfType<WowPlayer>()
+                  .Where(e => e != null
+                    && e.Guid != PlayerGuid
+                    && !e.IsDead
+                    && !e.IsNotAttackable
+                    && PartymemberGuids.Contains(e.Guid)
+                    && e.Position.GetDistance(position) < distance);
+            }
+        }
+
+        public IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
+        {
+            lock (queryLock)
+            {
+                return WowObjects.OfType<WowUnit>()
+                  .Where(e => e != null
+                    && e.Guid != PlayerGuid
+                    && !e.IsDead
+                    && !e.IsNotAttackable
+                    && PartymemberGuids.Contains(e.TargetGuid)
                     && e.Position.GetDistance(position) < distance);
             }
         }

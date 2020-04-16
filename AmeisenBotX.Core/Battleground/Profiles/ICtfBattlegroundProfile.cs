@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Battleground.Profiles
 {

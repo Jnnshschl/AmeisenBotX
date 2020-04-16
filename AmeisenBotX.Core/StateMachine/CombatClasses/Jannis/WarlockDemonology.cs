@@ -15,31 +15,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string corruptionSpell = "Corruption";
-        private readonly string curseOftheElementsSpell = "Curse of the Elements";
-        private readonly int damageBuffCheckTime = 1;
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string decimationSpell = "Decimation";
-        private readonly string demonArmorSpell = "Demon Armor";
-        private readonly string demonicEmpowermentSpell = "Demonic Empowerment";
-        private readonly string demonSkinSpell = "Demon Skin";
-        private readonly string drainLifeSpell = "Drain Life";
-        private readonly string drainSoulSpell = "Drain Soul";
-        private readonly int fearAttemptDelay = 5;
-        private readonly string fearSpell = "Fear";
-        private readonly string felArmorSpell = "Fel Armor";
-        private readonly string howlOfTerrorSpell = "Howl of Terror";
-        private readonly string immolateSpell = "Immolate";
-        private readonly string immolationAuraSpell = "Immolation Aura";
-        private readonly string incinerateSpell = "Incinerate";
-        private readonly string lifeTapSpell = "Life Tap";
-        private readonly string metamorphosisSpell = "Metamorphosis";
-        private readonly string moltenCoreSpell = "Molten Core";
-        private readonly string shadowBoltSpell = "Shadow Bolt";
-        private readonly string shadowMasterySpell = "Shadow Mastery";
-        private readonly string soulfireSpell = "Soul Fire";
-        private readonly string summonFelguardSpell = "Summon Felguard";
-        private readonly string summonImpSpell = "Summon Imp";
+#pragma warning disable IDE0051
+        private const string corruptionSpell = "Corruption";
+        private const string curseOftheElementsSpell = "Curse of the Elements";
+        private const string deathCoilSpell = "Death Coil";
+        private const string decimationSpell = "Decimation";
+        private const string demonArmorSpell = "Demon Armor";
+        private const string demonicEmpowermentSpell = "Demonic Empowerment";
+        private const string demonSkinSpell = "Demon Skin";
+        private const string drainLifeSpell = "Drain Life";
+        private const string drainSoulSpell = "Drain Soul";
+        private const int fearAttemptDelay = 5;
+        private const string fearSpell = "Fear";
+        private const string felArmorSpell = "Fel Armor";
+        private const string howlOfTerrorSpell = "Howl of Terror";
+        private const string immolateSpell = "Immolate";
+        private const string immolationAuraSpell = "Immolation Aura";
+        private const string incinerateSpell = "Incinerate";
+        private const string lifeTapSpell = "Life Tap";
+        private const string metamorphosisSpell = "Metamorphosis";
+        private const string moltenCoreSpell = "Molten Core";
+        private const string shadowBoltSpell = "Shadow Bolt";
+        private const string shadowMasterySpell = "Shadow Mastery";
+        private const string soulfireSpell = "Soul Fire";
+        private const string summonFelguardSpell = "Summon Felguard";
+        private const string summonImpSpell = "Summon Imp";
+#pragma warning restore IDE0051
 
         public WarlockDemonology(WowInterface wowInterface) : base(wowInterface)
         {
@@ -86,8 +87,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
-
-        private DateTime LastDamageBuffCheck { get; set; }
 
         private DateTime LastFearAttempt { get; set; }
 

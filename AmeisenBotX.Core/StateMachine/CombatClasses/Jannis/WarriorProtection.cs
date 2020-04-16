@@ -15,30 +15,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string battleStanceSpell = "Battle Stance";
-        private readonly string berserkerRageSpell = "Berserker Rage";
-        private readonly string challengingShoutSpell = "Challenging Shout";
-        private readonly string chargeSpell = "Charge";
-        private readonly string commandingShoutSpell = "Commanding Shout";
-        private readonly string concussionBlowSpell = "Concussion Blow";
-        private readonly string defensiveStanceSpell = "Defensive Stance";
-        private readonly string demoralizingShoutSpell = "Demoralizing Shout";
-        private readonly string devastateSpell = "Devastate";
-        private readonly string disarmSpell = "Disarm";
-        private readonly string executeSpell = "Execute";
-        private readonly string heroicStrikeSpell = "Heroic Strike";
-        private readonly string heroicThrowSpell = "Heroic Throw";
-        private readonly string lastStandSpell = "Last Stand";
-        private readonly string mockingBlowSpell = "Mocking Blow";
-        private readonly string revengeSpell = "Revenge";
-        private readonly string shieldBashSpell = "Shield Bash";
-        private readonly string shieldBlockSpell = "Shield Block";
-        private readonly string shieldSlamSpell = "Shield Slam";
-        private readonly string shieldWallSpell = "Shield Wall";
-        private readonly string shockwaveSpell = "Shockwave";
-        private readonly string spellReflectionSpell = "Spell Reflection";
-        private readonly string tauntSpell = "Taunt";
-        private readonly string thunderClapSpell = "Thunder Clap";
+#pragma warning disable IDE0051
+        private const string battleStanceSpell = "Battle Stance";
+        private const string berserkerRageSpell = "Berserker Rage";
+        private const string challengingShoutSpell = "Challenging Shout";
+        private const string chargeSpell = "Charge";
+        private const string commandingShoutSpell = "Commanding Shout";
+        private const string concussionBlowSpell = "Concussion Blow";
+        private const string defensiveStanceSpell = "Defensive Stance";
+        private const string demoralizingShoutSpell = "Demoralizing Shout";
+        private const string devastateSpell = "Devastate";
+        private const string disarmSpell = "Disarm";
+        private const string executeSpell = "Execute";
+        private const string heroicStrikeSpell = "Heroic Strike";
+        private const string heroicThrowSpell = "Heroic Throw";
+        private const string lastStandSpell = "Last Stand";
+        private const string mockingBlowSpell = "Mocking Blow";
+        private const string revengeSpell = "Revenge";
+        private const string shieldBashSpell = "Shield Bash";
+        private const string shieldBlockSpell = "Shield Block";
+        private const string shieldSlamSpell = "Shield Slam";
+        private const string shieldWallSpell = "Shield Wall";
+        private const string shockwaveSpell = "Shockwave";
+        private const string spellReflectionSpell = "Spell Reflection";
+        private const string tauntSpell = "Taunt";
+        private const string thunderClapSpell = "Thunder Clap";
+#pragma warning restore IDE0051
 
         public WarriorProtection(WowInterface wowInterface) : base(wowInterface)
         {

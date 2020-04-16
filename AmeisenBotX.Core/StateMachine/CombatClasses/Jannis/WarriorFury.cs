@@ -15,21 +15,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string battleStanceSpell = "Battle Stance";
-        private readonly string berserkerStanceSpell = "Berserker Stance";
-        private readonly string bladestormSpell = "Bladestorm";
-        private readonly string bloodthirstSpell = "Bloodthirst";
-        private readonly string chargeSpell = "Charge";
-        private readonly string cleaveSpell = "Cleave";
-        private readonly string commandingShoutSpell = "Commanding Shout";
-        private readonly string disarmSpell = "Disarm";
-        private readonly string executeSpell = "Execute";
-        private readonly string hamstringSpell = "Hamstring";
-        private readonly string heroicStrikeSpell = "Heroic Strike";
-        private readonly string interceptSpell = "Intercept";
-        private readonly string intimidatingShoutSpell = "Intimidating Shout";
-        private readonly string rendSpell = "Rend";
-        private readonly string whirlwindSpell = "Whirlwind";
+#pragma warning disable IDE0051
+        private const string battleStanceSpell = "Battle Stance";
+        private const string berserkerStanceSpell = "Berserker Stance";
+        private const string bladestormSpell = "Bladestorm";
+        private const string bloodthirstSpell = "Bloodthirst";
+        private const string chargeSpell = "Charge";
+        private const string cleaveSpell = "Cleave";
+        private const string commandingShoutSpell = "Commanding Shout";
+        private const string disarmSpell = "Disarm";
+        private const string executeSpell = "Execute";
+        private const string hamstringSpell = "Hamstring";
+        private const string heroicStrikeSpell = "Heroic Strike";
+        private const string interceptSpell = "Intercept";
+        private const string intimidatingShoutSpell = "Intimidating Shout";
+        private const string rendSpell = "Rend";
+        private const string whirlwindSpell = "Whirlwind";
+#pragma warning restore IDE0051
 
         public WarriorFury(WowInterface wowInterface) : base(wowInterface)
         {

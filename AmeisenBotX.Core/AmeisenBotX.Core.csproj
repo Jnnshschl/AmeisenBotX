@@ -116,6 +116,7 @@
     <Compile Include="Character\Spells\SpellBook.cs" />
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
+    <Compile Include="Common\CustomTcpClient.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />
     <Compile Include="Data\CombatLog\CombatLogParser.cs" />
     <Compile Include="Data\CombatLog\Enums\CombatLogEntrySubtype.cs" />
@@ -198,7 +199,13 @@
     <Compile Include="Movement\DefaultMovementEngine.cs" />
     <Compile Include="Movement\Enums\MovementEngineState.cs" />
     <Compile Include="Movement\IMovementEngine.cs" />
+    <Compile Include="Movement\Pathfinding\IPathfindingHandler.cs" />
+    <Compile Include="Movement\Pathfinding\NavmeshServerPathfindingHandler.cs" />
     <Compile Include="Movement\Objects\BasicVehicle.cs" />
+    <Compile Include="Movement\Pathfinding\Enums\MovementType.cs" />
+    <Compile Include="Movement\Pathfinding\Enums\PathRequestFlags.cs" />
+    <Compile Include="Movement\Pathfinding\Objects\PathRequest.cs" />
+    <Compile Include="Movement\Pathfinding\Objects\Vector3.cs" />
     <Compile Include="Movement\Settings\MovementSettings.cs" />
     <Compile Include="Movement\SmartMovementEngine.cs" />
     <Compile Include="Offsets\OffsetList335a.cs" />
@@ -283,10 +290,6 @@
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj">
       <Project>{FF4DC905-1E4E-44A5-A5A7-C65E5CDA1E9A}</Project>
       <Name>AmeisenBotX.Memory</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AmeisenBotX.Pathfinding\AmeisenBotX.Pathfinding.csproj">
-      <Project>{ba329aa1-e3da-42a1-87b4-3a695919767f}</Project>
-      <Name>AmeisenBotX.Pathfinding</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

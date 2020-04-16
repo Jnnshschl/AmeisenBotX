@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Data.CombatLog
 
         public void Parse(long timestamp, List<string> args)
         {
-            AmeisenLogger.Instance.Log("CombatLogParser", $"Parsing CombatLog: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CombatLogParser", $"[{timestamp}] Parsing CombatLog: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
         }
     }
 }

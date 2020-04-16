@@ -16,30 +16,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string arcaneShotSpell = "Arcane Shot";
-        private readonly string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
-        private readonly string beastialWrathSpell = "Beastial Wrath";
-        private readonly string callPetSpell = "Call Pet";
-        private readonly string concussiveShotSpell = "Concussive Shot";
-        private readonly string deterrenceSpell = "Deterrence";
-        private readonly string disengageSpell = "Disengage";
-        private readonly string feignDeathSpell = "Feign Death";
-        private readonly string frostTrapSpell = "Frost Trap";
-        private readonly string huntersMarkSpell = "Hunter's Mark";
-        private readonly string intimidationSpell = "Intimidation";
-        private readonly string killCommandSpell = "Kill Command";
-        private readonly string killShotSpell = "Kill Shot";
-        private readonly string mendPetSpell = "Mend Pet";
-        private readonly string mongooseBiteSpell = "Mongoose Bite";
-        private readonly string multiShotSpell = "Multi-Shot";
-        private readonly int petstatusCheckTime = 2;
-        private readonly string rapidFireSpell = "Rapid Fire";
-        private readonly string raptorStrikeSpell = "Raptor Strike";
-        private readonly string revivePetSpell = "Revive Pet";
-        private readonly string scatterShotSpell = "Scatter Shot";
-        private readonly string serpentStingSpell = "Serpent Sting";
-        private readonly string steadyShotSpell = "Steady Shot";
-        private readonly string wingClipSpell = "Wing Clip";
+#pragma warning disable IDE0051
+        private const string arcaneShotSpell = "Arcane Shot";
+        private const string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
+        private const string beastialWrathSpell = "Beastial Wrath";
+        private const string callPetSpell = "Call Pet";
+        private const string concussiveShotSpell = "Concussive Shot";
+        private const string deterrenceSpell = "Deterrence";
+        private const string disengageSpell = "Disengage";
+        private const string feignDeathSpell = "Feign Death";
+        private const string frostTrapSpell = "Frost Trap";
+        private const string huntersMarkSpell = "Hunter's Mark";
+        private const string intimidationSpell = "Intimidation";
+        private const string killCommandSpell = "Kill Command";
+        private const string killShotSpell = "Kill Shot";
+        private const string mendPetSpell = "Mend Pet";
+        private const string mongooseBiteSpell = "Mongoose Bite";
+        private const string multiShotSpell = "Multi-Shot";
+        private const int petstatusCheckTime = 2;
+        private const string rapidFireSpell = "Rapid Fire";
+        private const string raptorStrikeSpell = "Raptor Strike";
+        private const string revivePetSpell = "Revive Pet";
+        private const string scatterShotSpell = "Scatter Shot";
+        private const string serpentStingSpell = "Serpent Sting";
+        private const string steadyShotSpell = "Steady Shot";
+        private const string wingClipSpell = "Wing Clip";
+#pragma warning restore IDE0051
 
         public HunterBeastmastery(WowInterface wowInterface) : base(wowInterface)
         {

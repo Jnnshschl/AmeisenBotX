@@ -14,17 +14,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string ancestralSpiritSpell = "Ancestral Spirit";
-        private readonly int buffCheckTime = 8;
-        private readonly string chainHealSpell = "Chain Heal";
-        private readonly int deadPartymembersCheckTime = 4;
-        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
-        private readonly string earthShieldSpell = "Earth Shield";
-        private readonly string healingWaveSpell = "Healing Wave";
-        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
-        private readonly string riptideSpell = "Riptide";
-        private readonly string tidalForceSpell = "Tidal Force";
-        private readonly string waterShieldSpell = "Water Shield";
+#pragma warning disable IDE0051
+        private const string ancestralSpiritSpell = "Ancestral Spirit";
+        private const string chainHealSpell = "Chain Heal";
+        private const int deadPartymembersCheckTime = 4;
+        private const string earthlivingWeaponSpell = "Earthliving Weapon";
+        private const string earthShieldSpell = "Earth Shield";
+        private const string healingWaveSpell = "Healing Wave";
+        private const string naturesSwiftnessSpell = "Nature's Swiftness";
+        private const string riptideSpell = "Riptide";
+        private const string tidalForceSpell = "Tidal Force";
+        private const string waterShieldSpell = "Water Shield";
+#pragma warning restore IDE0051
 
         public ShamanRestoration(WowInterface wowInterface) : base(wowInterface)
         {
@@ -63,8 +64,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override CombatClassRole Role => CombatClassRole.Heal;
 
         public override string Version => "1.0";
-
-        private DateTime LastBuffCheck { get; set; }
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 

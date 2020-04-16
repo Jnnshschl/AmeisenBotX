@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Movement
 
         private IObjectManager ObjectManager { get; }
 
-        public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
+        public bool GetNextStep(Vector3 currentPosition, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
         {
             positionToGoTo = new Vector3(0, 0, 0);
             needToJump = false;
@@ -106,11 +106,6 @@ namespace AmeisenBotX.Core.Movement
 
             Acceleration = new Vector3(0, 0, 0);
             CurrentPath.Clear();
-        }
-
-        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
-        {
-            return false;
         }
 
         private Vector3 Seek(Vector3 currentPosition, double distance)

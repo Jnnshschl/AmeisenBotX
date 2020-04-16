@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -9,17 +10,20 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
+        private DateTime WowStart { get; set; }
+
         public override void Enter()
         {
             WowInterface.WowProcess = Process.Start(Config.PathToWowExe);
             WowInterface.WowProcess.WaitForInputIdle();
             Thread.Sleep(1000);
             WowInterface.XMemory.Attach(WowInterface.WowProcess);
+            WowStart = DateTime.Now;
         }
 
         public override void Execute()
         {
-            if (WowInterface.WowProcess.HasExited)
+            if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
             {
                 StateMachine.SetState(BotState.None);
                 return;

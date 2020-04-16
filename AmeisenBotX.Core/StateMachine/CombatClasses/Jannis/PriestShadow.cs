@@ -12,19 +12,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly int deadPartymembersCheckTime = 4;
-        private readonly string devouringPlagueSpell = "Devouring Plague";
-        private readonly string flashHealSpell = "Flash Heal";
-        private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string mindBlastSpell = "Mind Blast";
-        private readonly string mindFlaySpell = "Mind Flay";
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string resurrectionSpell = "Resurrection";
-        private readonly string shadowfiendSpell = "Shadowfiend";
-        private readonly string shadowformSpell = "Shadowform";
-        private readonly string shadowWordPainSpell = "Shadow Word: Pain";
-        private readonly string vampiricEmbraceSpell = "Vampiric Embrace";
-        private readonly string vampiricTouchSpell = "Vampiric Touch";
+#pragma warning disable IDE0051
+        private const int deadPartymembersCheckTime = 4;
+        private const string devouringPlagueSpell = "Devouring Plague";
+        private const string flashHealSpell = "Flash Heal";
+        private const string hymnOfHopeSpell = "Hymn of Hope";
+        private const string mindBlastSpell = "Mind Blast";
+        private const string mindFlaySpell = "Mind Flay";
+        private const string powerWordFortitudeSpell = "Power Word: Fortitude";
+        private const string resurrectionSpell = "Resurrection";
+        private const string shadowfiendSpell = "Shadowfiend";
+        private const string shadowformSpell = "Shadowform";
+        private const string shadowWordPainSpell = "Shadow Word: Pain";
+        private const string vampiricEmbraceSpell = "Vampiric Embrace";
+        private const string vampiricTouchSpell = "Vampiric Touch";
+#pragma warning restore IDE0051
 
         public PriestShadow(WowInterface wowInterface) : base(wowInterface)
         {

@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Dungeon.Enums;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Dungeon.Objects
 {

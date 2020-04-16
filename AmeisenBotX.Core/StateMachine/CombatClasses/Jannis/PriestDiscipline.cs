@@ -14,21 +14,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string bindingHealSpell = "Binding Heal";
-        private readonly int deadPartymembersCheckTime = 4;
-        private readonly string desperatePrayerSpell = "Desperate Prayer";
-        private readonly string flashHealSpell = "Flash Heal";
-        private readonly string greaterHealSpell = "Greater Heal";
-        private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string innerFireSpell = "Inner Fire";
-        private readonly string penanceSpell = "Penance";
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string powerWordShieldSpell = "Power Word: Shield";
-        private readonly string prayerOfHealingSpell = "Prayer of Healing";
-        private readonly string prayerOfMendingSpell = "Prayer of Mending";
-        private readonly string renewSpell = "Renew";
-        private readonly string resurrectionSpell = "Resurrection";
-        private readonly string weakenedSoulSpell = "Weakened Soul";
+#pragma warning disable IDE0051
+        private const string bindingHealSpell = "Binding Heal";
+        private const int deadPartymembersCheckTime = 4;
+        private const string desperatePrayerSpell = "Desperate Prayer";
+        private const string flashHealSpell = "Flash Heal";
+        private const string greaterHealSpell = "Greater Heal";
+        private const string hymnOfHopeSpell = "Hymn of Hope";
+        private const string innerFireSpell = "Inner Fire";
+        private const string penanceSpell = "Penance";
+        private const string powerWordFortitudeSpell = "Power Word: Fortitude";
+        private const string powerWordShieldSpell = "Power Word: Shield";
+        private const string prayerOfHealingSpell = "Prayer of Healing";
+        private const string prayerOfMendingSpell = "Prayer of Mending";
+        private const string renewSpell = "Renew";
+        private const string resurrectionSpell = "Resurrection";
+        private const string weakenedSoulSpell = "Weakened Soul";
+#pragma warning restore IDE0051
 
         public PriestDiscipline(WowInterface wowInterface) : base(wowInterface)
         {

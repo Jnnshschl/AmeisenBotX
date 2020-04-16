@@ -14,19 +14,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string bindingHealSpell = "Binding Heal";
-        private readonly int buffCheckTime = 8;
-        private readonly int deadPartymembersCheckTime = 4;
-        private readonly string flashHealSpell = "Flash Heal";
-        private readonly string greaterHealSpell = "Greater Heal";
-        private readonly string guardianSpiritSpell = "Guardian Spirit";
-        private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string innerFireSpell = "Inner Fire";
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string prayerOfHealingSpell = "Prayer of Healing";
-        private readonly string prayerOfMendingSpell = "Prayer of Mending";
-        private readonly string renewSpell = "Renew";
-        private readonly string resurrectionSpell = "Resurrection";
+#pragma warning disable IDE0051
+        private const string bindingHealSpell = "Binding Heal";
+        private const int deadPartymembersCheckTime = 4;
+        private const string flashHealSpell = "Flash Heal";
+        private const string greaterHealSpell = "Greater Heal";
+        private const string guardianSpiritSpell = "Guardian Spirit";
+        private const string hymnOfHopeSpell = "Hymn of Hope";
+        private const string innerFireSpell = "Inner Fire";
+        private const string powerWordFortitudeSpell = "Power Word: Fortitude";
+        private const string prayerOfHealingSpell = "Prayer of Healing";
+        private const string prayerOfMendingSpell = "Prayer of Mending";
+        private const string renewSpell = "Renew";
+        private const string resurrectionSpell = "Resurrection";
+#pragma warning restore IDE0051
 
         public PriestHoly(WowInterface wowInterface) : base(wowInterface)
         {
@@ -136,28 +137,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
-        }
-
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
-
-            if (target != null)
-            {
-                WowInterface.HookManager.TargetGuid(target.Guid);
-            }
-        }
-
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
-        {
-            IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => e.Health > 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 35).ToList();
-
-            groupPlayers.Add(WowInterface.ObjectManager.Player);
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
         }
     }
 }

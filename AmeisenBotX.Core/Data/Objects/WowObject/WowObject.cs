@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject

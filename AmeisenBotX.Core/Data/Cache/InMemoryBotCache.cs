@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,13 +32,17 @@ namespace AmeisenBotX.Core.Data.Cache
 
         public void CacheBlacklistPosition(int mapId, Vector3 node)
         {
-            if (!BlacklistNodes.ContainsKey(mapId))
+            if (!TryGetBlacklistPosition(mapId, node, 8, out List<Vector3> nodes)
+                || !nodes.Any())
             {
-                BlacklistNodes.Add(mapId, new List<Vector3>() { node });
-            }
-            else if (!BlacklistNodes[mapId].Contains(node))
-            {
-                BlacklistNodes[mapId].Add(node);
+                if (!BlacklistNodes.ContainsKey(mapId))
+                {
+                    BlacklistNodes.Add(mapId, new List<Vector3>() { node });
+                }
+                else if (!BlacklistNodes[mapId].Contains(node))
+                {
+                    BlacklistNodes[mapId].Add(node);
+                }
             }
         }
 
@@ -129,7 +133,8 @@ namespace AmeisenBotX.Core.Data.Cache
         {
             if (BlacklistNodes.ContainsKey(mapId))
             {
-                BlacklistNodes[mapId].Where(e => e.GetDistance(position) < maxRadius);
+                nodes = BlacklistNodes[mapId].Where(e => e.GetDistance(position) < maxRadius).ToList();
+                return true;
             }
 
             nodes = new List<Vector3>();

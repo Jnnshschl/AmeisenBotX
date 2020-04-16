@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -50,20 +50,24 @@ namespace AmeisenBotX.Core.Data
 
         string ZoneSubName { get; }
 
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
 
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, int distance) where T : WowUnit;
+        IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
 
-        public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
+        T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 
-        public WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
+        WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
 
-        public bool RefreshIsWorldLoaded();
+        bool RefreshIsWorldLoaded();
 
-        public void UpdateObject<T>(T wowObject) where T : WowObject;
+        void UpdateObject<T>(T wowObject) where T : WowObject;
 
-        public void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress);
+        void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress);
 
-        public void UpdateWowObjects();
+        void UpdateWowObjects();
+
+        IEnumerable<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
+
+        IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
     }
 }

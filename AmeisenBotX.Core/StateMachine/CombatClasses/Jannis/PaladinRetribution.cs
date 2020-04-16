@@ -13,21 +13,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string avengingWrathSpell = "Avenging Wrath";
-        private readonly string blessingOfMightSpell = "Blessing of Might";
-        private readonly string consecrationSpell = "Consecration";
-        private readonly string crusaderStrikeSpell = "Crusader Strike";
-        private readonly string divinePleaSpell = "Divine Plea";
-        private readonly string divineStormSpell = "Divine Storm";
-        private readonly string exorcismSpell = "Exorcism";
-        private readonly string hammerOfJusticeSpell = "Hammer of Justice";
-        private readonly string hammerOfWrathSpell = "Hammer of Wrath";
-        private readonly string holyLightSpell = "Holy Light";
-        private readonly string holyWrathSpell = "Holy Wrath";
-        private readonly string judgementOfLightSpell = "Judgement of Light";
-        private readonly string layOnHandsSpell = "Lay on Hands";
-        private readonly string retributionAuraSpell = "Retribution Aura";
-        private readonly string sealOfVengeanceSpell = "Seal of Vengeance";
+#pragma warning disable IDE0051
+        private const string avengingWrathSpell = "Avenging Wrath";
+        private const string blessingOfMightSpell = "Blessing of Might";
+        private const string consecrationSpell = "Consecration";
+        private const string crusaderStrikeSpell = "Crusader Strike";
+        private const string divinePleaSpell = "Divine Plea";
+        private const string divineStormSpell = "Divine Storm";
+        private const string exorcismSpell = "Exorcism";
+        private const string hammerOfJusticeSpell = "Hammer of Justice";
+        private const string hammerOfWrathSpell = "Hammer of Wrath";
+        private const string holyLightSpell = "Holy Light";
+        private const string holyWrathSpell = "Holy Wrath";
+        private const string judgementOfLightSpell = "Judgement of Light";
+        private const string layOnHandsSpell = "Lay on Hands";
+        private const string retributionAuraSpell = "Retribution Aura";
+        private const string sealOfVengeanceSpell = "Seal of Vengeance";
+#pragma warning restore IDE0051
 
         public PaladinRetribution(WowInterface wowInterface) : base(wowInterface)
         {

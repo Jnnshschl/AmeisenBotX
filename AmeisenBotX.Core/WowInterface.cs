@@ -2,20 +2,20 @@
 using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Cache;
+using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Pathfinding;
 using System.Diagnostics;
 
 namespace AmeisenBotX.Core

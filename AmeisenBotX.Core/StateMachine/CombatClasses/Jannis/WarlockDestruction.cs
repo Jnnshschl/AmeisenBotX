@@ -15,23 +15,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string chaosBoltSpell = "Chaos Bolt";
-        private readonly string conflagrateSpell = "Conflagrate";
-        private readonly string corruptionSpell = "Corruption";
-        private readonly string curseOftheElementsSpell = "Curse of the Elements";
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string demonArmorSpell = "Demon Armor";
-        private readonly string demonSkinSpell = "Demon Skin";
-        private readonly string drainLifeSpell = "Drain Life";
-        private readonly string drainSoulSpell = "Drain Soul";
-        private readonly int fearAttemptDelay = 5;
-        private readonly string fearSpell = "Fear";
-        private readonly string felArmorSpell = "Fel Armor";
-        private readonly string howlOfTerrorSpell = "Howl of Terror";
-        private readonly string immolateSpell = "Immolate";
-        private readonly string incinerateSpell = "Incinerate";
-        private readonly string lifeTapSpell = "Life Tap";
-        private readonly string summonImpSpell = "Summon Imp";
+#pragma warning disable IDE0051
+        private const string chaosBoltSpell = "Chaos Bolt";
+        private const string conflagrateSpell = "Conflagrate";
+        private const string corruptionSpell = "Corruption";
+        private const string curseOftheElementsSpell = "Curse of the Elements";
+        private const string deathCoilSpell = "Death Coil";
+        private const string demonArmorSpell = "Demon Armor";
+        private const string demonSkinSpell = "Demon Skin";
+        private const string drainLifeSpell = "Drain Life";
+        private const string drainSoulSpell = "Drain Soul";
+        private const int fearAttemptDelay = 5;
+        private const string fearSpell = "Fear";
+        private const string felArmorSpell = "Fel Armor";
+        private const string howlOfTerrorSpell = "Howl of Terror";
+        private const string immolateSpell = "Immolate";
+        private const string incinerateSpell = "Incinerate";
+        private const string lifeTapSpell = "Life Tap";
+        private const string summonImpSpell = "Summon Imp";
+#pragma warning restore IDE0051
 
         public WarlockDestruction(WowInterface wowInterface) : base(wowInterface)
         {

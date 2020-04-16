@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AmeisenBotX.Test

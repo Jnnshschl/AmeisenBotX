@@ -17,15 +17,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string blessingOfWisdomSpell = "Blessing of Wisdom";
-        private readonly string devotionAuraSpell = "Devotion Aura";
-        private readonly string divineFavorSpell = "Divine Favor";
-        private readonly string divineIlluminationSpell = "Divine Illumination";
-        private readonly string divinePleaSpell = "Divine Plea";
-        private readonly string flashOfLightSpell = "Flash of Light";
-        private readonly string holyLightSpell = "Holy Light";
-        private readonly string holyShockSpell = "Holy Shock";
-        private readonly string layOnHandsSpell = "Lay on Hands";
+#pragma warning disable IDE0051
+        private const string blessingOfWisdomSpell = "Blessing of Wisdom";
+        private const string devotionAuraSpell = "Devotion Aura";
+        private const string divineFavorSpell = "Divine Favor";
+        private const string divineIlluminationSpell = "Divine Illumination";
+        private const string divinePleaSpell = "Divine Plea";
+        private const string flashOfLightSpell = "Flash of Light";
+        private const string holyLightSpell = "Holy Light";
+        private const string holyShockSpell = "Holy Shock";
+        private const string layOnHandsSpell = "Lay on Hands";
+#pragma warning restore IDE0051
 
         public PaladinHoly(WowInterface wowInterface) : base(wowInterface)
         {

@@ -15,20 +15,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string barkskinSpell = "Barkskin";
-        private readonly int eclipseCheckTime = 1;
-        private readonly string eclipseLunarSpell = "Eclipse (Lunar)";
-        private readonly string eclipseSolarSpell = "Eclipse (Solar)";
-        private readonly string faerieFireSpell = "Faerie Fire";
-        private readonly string forceOfNatureSpell = "Force of Nature";
-        private readonly string innervateSpell = "Innervate";
-        private readonly string insectSwarmSpell = "Insect Swarm";
-        private readonly string markOfTheWildSpell = "Mark of the Wild";
-        private readonly string moonfireSpell = "Moonfire";
-        private readonly string moonkinFormSpell = "Moonkin Form";
-        private readonly string starfallSpell = "Starfall";
-        private readonly string starfireSpell = "Starfire";
-        private readonly string wrathSpell = "Wrath";
+#pragma warning disable IDE0051
+        private const string barkskinSpell = "Barkskin";
+        private const int eclipseCheckTime = 1;
+        private const string eclipseLunarSpell = "Eclipse (Lunar)";
+        private const string eclipseSolarSpell = "Eclipse (Solar)";
+        private const string faerieFireSpell = "Faerie Fire";
+        private const string forceOfNatureSpell = "Force of Nature";
+        private const string innervateSpell = "Innervate";
+        private const string insectSwarmSpell = "Insect Swarm";
+        private const string markOfTheWildSpell = "Mark of the Wild";
+        private const string moonfireSpell = "Moonfire";
+        private const string moonkinFormSpell = "Moonkin Form";
+        private const string starfallSpell = "Starfall";
+        private const string starfireSpell = "Starfire";
+        private const string wrathSpell = "Wrath";
+#pragma warning restore IDE0051
 
         public DruidBalance(WowInterface wowInterface) : base(wowInterface)
         {

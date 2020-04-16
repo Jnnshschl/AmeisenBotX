@@ -15,22 +15,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string ancestralSpiritSpell = "Ancestral Spirit";
-        private readonly string chainLightningSpell = "Chain Lightning";
-        private readonly int deadPartymembersCheckTime = 4;
-        private readonly string elementalMasterySpell = "Elemental Mastery";
-        private readonly string flameShockSpell = "Flame Shock";
-        private readonly string flametoungueWeaponSpell = "Flametoungue Weapon";
-        private readonly string healingWaveSpell = "Healing Wave";
-        private readonly string heroismSpell = "Heroism";
-        private readonly string hexSpell = "Hex";
-        private readonly string lavaBurstSpell = "Lava Burst";
-        private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
-        private readonly string lightningBoltSpell = "Lightning Bolt";
-        private readonly string lightningShieldSpell = "Lightning Shield";
-        private readonly string thunderstormSpell = "Thunderstorm";
-        private readonly string waterShieldSpell = "Water Shield";
-        private readonly string windShearSpell = "Wind Shear";
+#pragma warning disable IDE0051
+        private const string ancestralSpiritSpell = "Ancestral Spirit";
+        private const string chainLightningSpell = "Chain Lightning";
+        private const int deadPartymembersCheckTime = 4;
+        private const string elementalMasterySpell = "Elemental Mastery";
+        private const string flameShockSpell = "Flame Shock";
+        private const string flametoungueWeaponSpell = "Flametoungue Weapon";
+        private const string healingWaveSpell = "Healing Wave";
+        private const string heroismSpell = "Heroism";
+        private const string hexSpell = "Hex";
+        private const string lavaBurstSpell = "Lava Burst";
+        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
+        private const string lightningBoltSpell = "Lightning Bolt";
+        private const string lightningShieldSpell = "Lightning Shield";
+        private const string thunderstormSpell = "Thunderstorm";
+        private const string waterShieldSpell = "Water Shield";
+        private const string windShearSpell = "Wind Shear";
+#pragma warning restore IDE0051
 
         public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
         {

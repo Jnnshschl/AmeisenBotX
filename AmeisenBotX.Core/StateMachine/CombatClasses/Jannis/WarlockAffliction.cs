@@ -15,22 +15,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string corruptionSpell = "Corruption";
-        private readonly string curseOfAgonySpell = "Curse of Agony";
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string demonArmorSpell = "Demon Armor";
-        private readonly string demonSkinSpell = "Demon Skin";
-        private readonly string drainSoulSpell = "Drain Soul";
-        private readonly int fearAttemptDelay = 5;
-        private readonly string fearSpell = "Fear";
-        private readonly string felArmorSpell = "Fel Armor";
-        private readonly string hauntSpell = "Haunt";
-        private readonly string howlOfTerrorSpell = "Howl of Terror";
-        private readonly string lifeTapSpell = "Life Tap";
-        private readonly string shadowBoltSpell = "Shadow Bolt";
-        private readonly string summonFelhunterSpell = "Summon Felhunter";
-        private readonly string summonImpSpell = "Summon Imp";
-        private readonly string unstableAfflictionSpell = "Unstable Affliction";
+#pragma warning disable IDE0051
+        private const string corruptionSpell = "Corruption";
+        private const string curseOfAgonySpell = "Curse of Agony";
+        private const string deathCoilSpell = "Death Coil";
+        private const string demonArmorSpell = "Demon Armor";
+        private const string demonSkinSpell = "Demon Skin";
+        private const string drainSoulSpell = "Drain Soul";
+        private const int fearAttemptDelay = 5;
+        private const string fearSpell = "Fear";
+        private const string felArmorSpell = "Fel Armor";
+        private const string hauntSpell = "Haunt";
+        private const string howlOfTerrorSpell = "Howl of Terror";
+        private const string lifeTapSpell = "Life Tap";
+        private const string shadowBoltSpell = "Shadow Bolt";
+        private const string summonFelhunterSpell = "Summon Felhunter";
+        private const string summonImpSpell = "Summon Imp";
+        private const string unstableAfflictionSpell = "Unstable Affliction";
+#pragma warning restore IDE0051
 
         public WarlockAffliction(WowInterface wowInterface) : base(wowInterface)
         {

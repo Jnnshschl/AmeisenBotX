@@ -28,11 +28,11 @@ namespace AmeisenBotX.Core.Battleground
 
         private WowInterface WowInterface { get; }
 
-        public void AllianceFlagWasDropped(string playername)
+        public void AllianceFlagWasDropped()
         {
             if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
             {
-                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped(playername);
+                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped();
             }
         }
 
@@ -93,11 +93,11 @@ namespace AmeisenBotX.Core.Battleground
             }
         }
 
-        public void HordeFlagWasDropped(string playername)
+        public void HordeFlagWasDropped()
         {
             if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
             {
-                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped(playername);
+                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped();
             }
         }
 

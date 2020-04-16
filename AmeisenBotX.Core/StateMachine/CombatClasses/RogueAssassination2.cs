@@ -6,9 +6,9 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
+using AmeisenBotX.Core.Movement.Pathfinding;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +34,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         private bool hasTargetMoved = false;
 
         private bool isSneaky = false;
-
-        private bool multipleTargets = false;
 
         private bool standing = false;
 
@@ -291,7 +289,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 }
                 else
                 {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
                     {
                         CharacterManager.MoveToPosition(positionToGoTo);
 
@@ -316,7 +314,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             int targetHealth = (target == null || target.IsDead) ? 0 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
             int targetCount = 0;
-            multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
@@ -345,10 +342,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 HookManager.ClearTarget();
                 newTargetFound = false;
                 target = null;
-            }
-            else if (targetCount > 1)
-            {
-                multipleTargets = true;
             }
 
             if (newTargetFound)
@@ -633,13 +626,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             private bool IsTargetPoisoned()
             {
                 return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("Poison") || e.Contains("poison"));
-            }
-
-            private int UpdateEnergy()
-            {
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
-                Player = ObjectManager.Player;
-                return Player.Energy;
             }
         }
     }

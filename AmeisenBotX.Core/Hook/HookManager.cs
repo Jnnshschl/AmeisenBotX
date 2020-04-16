@@ -5,10 +5,10 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,14 +21,24 @@ namespace AmeisenBotX.Core.Hook
 {
     public class HookManager : IHookManager
     {
-        private ulong endsceneCalls;
         private readonly object hookLock = new object();
+        private ulong endsceneCalls;
 
         public HookManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
 
             endsceneCalls = 0;
+        }
+
+        public ulong CallCount
+        {
+            get
+            {
+                ulong val = endsceneCalls;
+                endsceneCalls = 0;
+                return val;
+            }
         }
 
         public IntPtr CodecaveForCheck { get; private set; }
@@ -42,16 +52,6 @@ namespace AmeisenBotX.Core.Hook
         public IntPtr EndsceneReturnAddress { get; private set; }
 
         public bool IsInjectionUsed { get; private set; }
-
-        public ulong CallCount
-        {
-            get
-            {
-                ulong val = endsceneCalls;
-                endsceneCalls = 0;
-                return val;
-            }
-        }
 
         public bool IsWoWHooked
         {
@@ -214,6 +214,48 @@ namespace AmeisenBotX.Core.Hook
                     WowInterface.XMemory.Write(IntPtr.Add(ctmPointer, WowInterface.OffsetList.ClickToMoveEnabled.ToInt32()), 1);
                 }
             }
+        }
+
+        public string ExecuteLuaAndRead(string command, string variable)
+        {
+            AmeisenLogger.Instance.Log("HookManager", $"ExecuteLuaAndRead: command: \"{command}\" variable: \"{variable}\"...", LogLevel.Verbose);
+
+            if (command.Length > 0
+                && variable.Length > 0)
+            {
+                byte[] commandBytes = Encoding.UTF8.GetBytes(command);
+                byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
+
+                if (WowInterface.XMemory.AllocateMemory((uint)commandBytes.Length + 1, out IntPtr memAllocCommand)
+                    && WowInterface.XMemory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAllocVariable))
+                {
+                    WowInterface.XMemory.WriteBytes(memAllocCommand, commandBytes);
+                    WowInterface.XMemory.WriteBytes(memAllocVariable, variableBytes);
+
+                    string[] asm = new string[]
+                    {
+                        "PUSH 0",
+                        $"PUSH {memAllocCommand.ToInt32()}",
+                        $"PUSH {memAllocCommand.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
+                        "ADD ESP, 0xC",
+                        "MOV ECX, EAX",
+                        "PUSH -1",
+                        $"PUSH {memAllocVariable.ToInt32()}",
+                        $"CALL {WowInterface.OffsetList.FunctionGetLocalizedText.ToInt32()}",
+                        "RETN",
+                    };
+
+                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
+
+                    WowInterface.XMemory.FreeMemory(memAllocCommand);
+                    WowInterface.XMemory.FreeMemory(memAllocVariable);
+                    return result;
+                }
+            }
+
+            return string.Empty;
         }
 
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
@@ -522,48 +564,6 @@ namespace AmeisenBotX.Core.Hook
                     WowInterface.XMemory.FreeMemory(memAlloc);
                 }
             }
-        }
-
-        public string ExecuteLuaAndRead(string command, string variable)
-        {
-            AmeisenLogger.Instance.Log("HookManager", $"ExecuteLuaAndRead: command: \"{command}\" variable: \"{variable}\"...", LogLevel.Verbose);
-
-            if (command.Length > 0
-                && variable.Length > 0)
-            {
-                byte[] commandBytes = Encoding.UTF8.GetBytes(command);
-                byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
-
-                if (WowInterface.XMemory.AllocateMemory((uint)commandBytes.Length + 1, out IntPtr memAllocCommand)
-                    && WowInterface.XMemory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAllocVariable))
-                {
-                    WowInterface.XMemory.WriteBytes(memAllocCommand, commandBytes);
-                    WowInterface.XMemory.WriteBytes(memAllocVariable, variableBytes);
-
-                    string[] asm = new string[]
-                    {
-                        "PUSH 0",
-                        $"PUSH {memAllocCommand.ToInt32()}",
-                        $"PUSH {memAllocCommand.ToInt32()}",
-                        $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
-                        $"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
-                        "ADD ESP, 0xC",
-                        "MOV ECX, EAX",
-                        "PUSH -1",
-                        $"PUSH {memAllocVariable.ToInt32()}",
-                        $"CALL {WowInterface.OffsetList.FunctionGetLocalizedText.ToInt32()}",
-                        "RETN",
-                    };
-
-                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
-
-                    WowInterface.XMemory.FreeMemory(memAllocCommand);
-                    WowInterface.XMemory.FreeMemory(memAllocVariable);
-                    return result;
-                }
-            }
-
-            return string.Empty;
         }
 
         public void QueueBattlegroundByName(string bgName)
@@ -1021,7 +1021,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (auraCount > 16)
             {
-                auraCount = 16;
+                return buffs;
             }
 
             for (int i = 0; i < auraCount; ++i)

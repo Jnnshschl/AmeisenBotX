@@ -56,19 +56,19 @@
             </ProgressBar.Background>
         </ProgressBar>
         <WrapPanel HorizontalAlignment="Left" Width="188" Margin="6,0,0,4.333" Height="15" VerticalAlignment="Bottom">
-            <Label x:Name="labelCurrentTickTime" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0" Foreground="#FFA0FF00"/>
+            <Label x:Name="labelCurrentTickTime" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0" Foreground="#FFA0FF00" />
             <Label x:Name="labelCurrentTickTimeDesc" Content="ms" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0">
                 <Label.Foreground>
                     <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                 </Label.Foreground>
             </Label>
-            <Label x:Name="labelHookCallCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0" Foreground="#FFA0FF00"/>
+            <Label x:Name="labelHookCallCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0" Foreground="#FFA0FF00" />
             <Label x:Name="labelCurrentObjectCountDesc_Copy" Content="Calls" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0,0,5,0">
                 <Label.Foreground>
                     <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                 </Label.Foreground>
             </Label>
-            <Label x:Name="labelCurrentObjectCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0" Foreground="#FFA0FF00"/>
+            <Label x:Name="labelCurrentObjectCount" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="5,0" Foreground="#FFA0FF00" />
             <Label x:Name="labelCurrentObjectCountDesc" Content="Objects" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Background="{x:Null}" Padding="0">
                 <Label.Foreground>
                     <SolidColorBrush Color="{DynamicResource DarkForeground}" />

@@ -13,15 +13,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         // author: Jannis Höschele
 
-        private readonly string cloakOfShadowsSpell = "Cloak of Shadows";
-        private readonly string coldBloodSpell = "Cold Blood";
-        private readonly string eviscerateSpell = "Eviscerate";
-        private readonly string hungerForBloodSpell = "Hunger for Blood";
-        private readonly string kickSpell = "Kick";
-        private readonly string mutilateSpell = "Mutilate";
-        private readonly string sliceAndDiceSpell = "Slice and Dice";
-        private readonly string sprintSpell = "Sprint";
-        private readonly string stealthSpell = "Stealth";
+#pragma warning disable IDE0051
+        private const string cloakOfShadowsSpell = "Cloak of Shadows";
+        private const string coldBloodSpell = "Cold Blood";
+        private const string eviscerateSpell = "Eviscerate";
+        private const string hungerForBloodSpell = "Hunger for Blood";
+        private const string kickSpell = "Kick";
+        private const string mutilateSpell = "Mutilate";
+        private const string sliceAndDiceSpell = "Slice and Dice";
+        private const string sprintSpell = "Sprint";
+        private const string stealthSpell = "Stealth";
+#pragma warning restore IDE0051
 
         public RogueAssassination(WowInterface wowInterface) : base(wowInterface)
         {
