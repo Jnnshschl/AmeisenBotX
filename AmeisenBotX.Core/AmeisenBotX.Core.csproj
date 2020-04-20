@@ -148,6 +148,7 @@
     <Compile Include="Data\Objects\Structs\RawPlayerSkillInfo.cs" />
     <Compile Include="Data\Objects\Structs\RawWowAura.cs" />
     <Compile Include="Data\Objects\WowAura.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\Enums\WowEnchantmentHelper.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowDynobject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowGameobject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowCorpse.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="Data\Objects\WowObject\Structs\RawWowObject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowPlayer.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowUnit.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\SubStructs\ItemEnchantment.cs" />
     <Compile Include="Data\Objects\WowObject\WowContainer.cs" />
     <Compile Include="Data\Objects\WowObject\WowItem.cs" />
     <Compile Include="Data\Objects\WowObject\WowCorpse.cs" />
@@ -223,6 +225,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightFrost.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DruidRestoration.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\ShamanEnhancement.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorFury.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorArms.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\HunterSurvival.cs" />
@@ -233,6 +236,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\MageFire.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinHoly.cs" />
     <Compile Include="Statemachine\CombatClasses\ICombatClass.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightUnholy.cs" />

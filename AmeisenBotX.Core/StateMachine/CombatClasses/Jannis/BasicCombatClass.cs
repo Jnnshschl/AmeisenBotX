@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
@@ -298,6 +299,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 CastSpell(spellName, isTargetMyself);
                 return true;
+            }
+
+            return false;
+        }
+
+        protected bool CheckForWeaponEnchantment(EquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
+        {
+            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            {
+                int itemId = WowInterface.CharacterManager.Equipment.Items[slot].Id;
+
+                if (itemId > 0)
+                {
+                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+
+                    if (item != null
+                        && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
+                        && CastSpellIfPossible(spellToCastEnchantment, 0, true))
+                    {
+                        return true;
+                    }
+                }
             }
 
             return false;

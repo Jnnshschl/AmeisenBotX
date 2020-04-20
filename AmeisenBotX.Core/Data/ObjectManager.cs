@@ -77,6 +77,28 @@ namespace AmeisenBotX.Core.Data
 
         private WowInterface WowInterface { get; }
 
+        public T ExecuteWithQueryLock<T>(Func<T> func)
+        {
+            lock (queryLock)
+            {
+                return func();
+            }
+        }
+
+        public IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
+        {
+            lock (queryLock)
+            {
+                return WowObjects.OfType<WowUnit>()
+                  .Where(e => e != null
+                    && e.Guid != PlayerGuid
+                    && !e.IsDead
+                    && !e.IsNotAttackable
+                    && PartymemberGuids.Contains(e.TargetGuid)
+                    && e.Position.GetDistance(position) < distance);
+            }
+        }
+
         public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
@@ -115,20 +137,6 @@ namespace AmeisenBotX.Core.Data
                     && !e.IsDead
                     && !e.IsNotAttackable
                     && PartymemberGuids.Contains(e.Guid)
-                    && e.Position.GetDistance(position) < distance);
-            }
-        }
-
-        public IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
-        {
-            lock (queryLock)
-            {
-                return WowObjects.OfType<WowUnit>()
-                  .Where(e => e != null
-                    && e.Guid != PlayerGuid
-                    && !e.IsDead
-                    && !e.IsNotAttackable
-                    && PartymemberGuids.Contains(e.TargetGuid)
                     && e.Position.GetDistance(position) < distance);
             }
         }

@@ -11,30 +11,35 @@ using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class ShamanElemental : BasicCombatClass
+    public class ShamanEnhancement : BasicCombatClass
     {
         // author: Jannis Höschele
 
 #pragma warning disable IDE0051
-        private const string ancestralSpiritSpell = "Ancestral Spirit";
-        private const string chainLightningSpell = "Chain Lightning";
         private const int deadPartymembersCheckTime = 4;
-        private const string elementalMasterySpell = "Elemental Mastery";
+        private const string ancestralSpiritSpell = "Ancestral Spirit";
+        private const string earthShockSpell = "Earth Shock";
+        private const string feralSpiritSpell = "Feral Spirit";
         private const string flameShockSpell = "Flame Shock";
-        private const string flametoungueWeaponSpell = "Flametoungue Weapon";
+        private const string flametoungueBuff = "Flametongue ";
+        private const string flametoungueWeaponSpell = "Flametongue Weapon";
         private const string healingWaveSpell = "Healing Wave";
         private const string heroismSpell = "Heroism";
         private const string hexSpell = "Hex";
-        private const string lavaBurstSpell = "Lava Burst";
+        private const string lavaLashSpell = "Lava Lash";
         private const string lesserHealingWaveSpell = "Lesser Healing Wave";
         private const string lightningBoltSpell = "Lightning Bolt";
         private const string lightningShieldSpell = "Lightning Shield";
-        private const string thunderstormSpell = "Thunderstorm";
+        private const string maelstromWeaponSpell = "Mealstrom Weapon";
+        private const string shamanisticRageSpell = "Shamanistic Rage";
+        private const string stormstrikeSpell = "Stormstrike";
         private const string waterShieldSpell = "Water Shield";
+        private const string windfuryBuff = "Windfury ";
+        private const string windfuryWeaponSpell = "Windfury Weapon";
         private const string windShearSpell = "Wind Shear";
 #pragma warning restore IDE0051
 
-        public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
+        public ShamanEnhancement(WowInterface wowInterface) : base(wowInterface)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 
@@ -56,17 +61,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
+        public override string Description => "FCFS based CombatClass for the Enhancement Shaman spec.";
 
-        public override string Displayname => "Shaman Elemental";
+        public override string Displayname => "Shaman Enhancement";
 
         public override bool HandlesMovement => false;
 
         public override bool HandlesTargetSelection => false;
 
-        public override bool IsMelee => false;
+        public override bool IsMelee => true;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
@@ -91,6 +96,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
+                || CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))
+            {
+                return;
+            }
+
             if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                 && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
                 && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -107,19 +118,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (WowInterface.ObjectManager.Target != null)
             {
-                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
-                        && CastSpellIfPossible(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
+                if ((WowInterface.ObjectManager.Target.MaxHealth > 10000000
                         && WowInterface.ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(heroismSpell, 0))
-                    || CastSpellIfPossible(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(elementalMasterySpell, 0))
+                    || CastSpellIfPossible(stormstrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(lavaLashSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(earthShockSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
 
-                if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Player.HasBuffByName(maelstromWeaponSpell)
+                    && WowInterface.ObjectManager.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell)?.StackCount >= 5
+                    && CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -131,6 +142,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                 && HandleDeadPartymembers(ancestralSpiritSpell))
+            {
+                return;
+            }
+
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
+                || CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))
             {
                 return;
             }

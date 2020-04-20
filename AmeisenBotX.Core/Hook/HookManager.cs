@@ -292,7 +292,7 @@ namespace AmeisenBotX.Core.Hook
             }
             else
             {
-                return 100;
+                return 0;
             }
         }
 
@@ -376,7 +376,7 @@ namespace AmeisenBotX.Core.Hook
         {
             try
             {
-                return new List<string>(ExecuteLuaAndRead("abSkillList=\"\"abSkillCount=GetNumSkillLines()for a=1,abSkillCount do local b,c=GetSkillLineInfo(a)if not c then abSkillList=abSkillList..b;if a<abSkillCount then abSkillList=abSkillList..\"; \"end end end", "abSkillList").Split(';'));
+                return new List<string>(ExecuteLuaAndRead("abSkillList=\"\"abSkillCount=GetNumSkillLines()for a=1,abSkillCount do local b,c=GetSkillLineInfo(a)if not c then abSkillList=abSkillList..b;if a<abSkillCount then abSkillList=abSkillList..\"; \"end end end", "abSkillList").Split(';')).Select(s => s.Trim()).ToList();
             }
             catch
             {

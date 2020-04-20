@@ -50,9 +50,15 @@ namespace AmeisenBotX.Core.Data
 
         string ZoneSubName { get; }
 
+        T ExecuteWithQueryLock<T>(Func<T> func);
+
+        IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
+
         IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
 
         IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
+
+        IEnumerable<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
 
         T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 
@@ -65,9 +71,5 @@ namespace AmeisenBotX.Core.Data
         void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress);
 
         void UpdateWowObjects();
-
-        IEnumerable<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
-
-        IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
     }
 }

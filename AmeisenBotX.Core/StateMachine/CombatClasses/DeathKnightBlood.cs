@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;

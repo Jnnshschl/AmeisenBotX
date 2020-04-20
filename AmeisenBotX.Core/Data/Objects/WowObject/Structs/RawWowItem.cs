@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
@@ -11,32 +12,24 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public ulong GiftCreator;
         public int StackCount;
         public int Duration;
-        public fixed int SpellCharges[5];
+        public int SpellCharge1;
+        public int SpellCharge2;
+        public int SpellCharge3;
+        public int SpellCharge4;
+        public int SpellCharge5;
         public int Flags;
-        public fixed int Enchantment1_1[2];
-        public fixed short Enchantment1_3[2];
-        public fixed int Enchantment2_1[2];
-        public fixed short Enchantment2_3[2];
-        public fixed int Enchantment3_1[2];
-        public fixed short Enchantment3_3[2];
-        public fixed int Enchantment4_1[2];
-        public fixed short Enchantment4_3[2];
-        public fixed int Enchantment5_1[2];
-        public fixed short Enchantment5_3[2];
-        public fixed int Enchantment6_1[2];
-        public fixed short Enchantment6_3[2];
-        public fixed int Enchantment7_1[2];
-        public fixed short Enchantment7_3[2];
-        public fixed int Enchantment8_1[2];
-        public fixed short Enchantment8_3[2];
-        public fixed int Enchantment9_1[2];
-        public fixed short Enchantment9_3[2];
-        public fixed int Enchantment10_1[2];
-        public fixed short Enchantment10_3[2];
-        public fixed int Enchantment11_1[2];
-        public fixed short Enchantment11_3[2];
-        public fixed int Enchantment12_1[2];
-        public fixed short Enchantment12_3[2];
+        public ItemEnchantment Enchantment1;
+        public ItemEnchantment Enchantment2;
+        public ItemEnchantment Enchantment3;
+        public ItemEnchantment Enchantment4;
+        public ItemEnchantment Enchantment5;
+        public ItemEnchantment Enchantment6;
+        public ItemEnchantment Enchantment7;
+        public ItemEnchantment Enchantment8;
+        public ItemEnchantment Enchantment9;
+        public ItemEnchantment Enchantment10;
+        public ItemEnchantment Enchantment11;
+        public ItemEnchantment Enchantment12;
         public int PropertySeed;
         public int RandomPropertiesId;
         public int Durability;

@@ -1,53 +1,60 @@
 # AmeisenBotX
+
 Hopefully the last rewrite of my WoW bot. I've learned much during the other 2 attempts so i decided to rewrite it from scratch. The aim of this bot is to create a human like group player that assists you on your adventure. From managing it's equipment to gathering resources the bot should do anything on its own.
 
 Currently supported versions:
 
 * 3.3.5a 12340
 
-## Achievements
+## Supported Stuff
 
-### Dungeons/Raids
+### Dungeons & Raids
+
+#### Classic
+
+**Dungeon** | **Working** |
+------------ | ------------- |
+Deadmines | ⚠️ 90%
+
+#### TBC
 
 None yet...
+
+#### WotLK
+
+**Dungeon** | **Working** |
+------------ | ------------- |
+Utgarde Keep | ✔️ 100%
 
 ### Battlegrounds
 
 **Battleground** | **Working** |
 ------------ | ------------- |
-Warsong Gulch | ⚠️ 25%
+Warsong Gulch | ⚠️ 75%
 Arathi Basin | ❌ 0%
 Alterac Valley | ❌ 0%
 Eye of the Storm | ❌ 0%
 Isle of Conquest | ❌ 0%
 Wintergrasp | ❌ 0%
 
-## Supported Stuff
-
 ### Combat Classes
 
 **Class** | | | |
 ------------ | ------------- | ------------- | -------------
-Druid | ✔️ Balance | ❌ Feral | ✔️ Restoration 
+Druid | ✔️ Balance | ❌/❌ Feral (Bear/Cat) | ✔️ Restoration
 Hunter | ✔️ Marksmanship | ✔️ Beast Mastery | ✔️ Survival
 Mage | ✔️ Fire | ✔️ Frost | ✔️ Arcane
 Paladin | ✔️ Holy | ✔️ Retribution | ✔️ Protection
 Priest | ✔️ Holy | ✔️ Discipline | ✔️ Shadow
 Rogue | ❌ Combat | ⚠️ Assasination | ❌ Sublety
-Shaman | ✔️ Elemental | ❌Enhancement | ✔️ Restoration
+Shaman | ✔️ Elemental | ✔️ Enhancement | ✔️ Restoration
 Warlock | ✔️ Affliction | ✔️ Demonology | ✔️ Destruction
-Warrior | ✔️ Arms | ✔️ Fury | ❌ Protection
+Warrior | ✔️ Arms | ✔️ Fury | ✔️ Protection
 Death Knight | ⚠️ Blood | ✔️Frost | ✔️ Unholy
 
 ❌ Not supported
 ⚠️ Work in Progress
 ✔️ Supported
-
-## Screenshots
-
-![Main Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/mainWindow.PNG "Main Window")
-
-![Config Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/configWindow.PNG "Config Window")
 
 ## Setup Guide
 
@@ -56,6 +63,7 @@ Death Knight | ⚠️ Blood | ✔️Frost | ✔️ Unholy
 #### Prerequisites
 
 Stuff you need:
+
 * **Visual Studio 2019* (if you want to compile the bot)
   * .NET SDK 4.8
 * .NET Runtime 4.8
@@ -67,6 +75,7 @@ Stuff you need:
 #### Compilation
 
 Clone the Project:
+
 ```shell
 git clone https://github.com/Jnnshschl/AmeisenBotX.git
 ```
@@ -88,6 +97,7 @@ The AmeisenNavigation Server is needed to provide pathfinding for the bot, witho
 *Skip this step if you downloaded the binary from releases.*
 
 Stuff you need:
+
 * Visual Studio 2019
   * .NET SDK 4.8
   * Visual C++ SDK
@@ -95,6 +105,7 @@ Stuff you need:
 * 3.3.5a MMAPS (Movement Maps from TrinityCore)
 
 Clone the Project:
+
 ```shell
 git clone https://github.com/Jnnshschl/AmeisenBotX.git
 ```
@@ -220,3 +231,10 @@ AutoDodgeAoeSpells = false;
 **AmeisenBot.Pathfinding** : Pathfinding clients
 
 **AmeisenBot.Test** : Unit-Tests
+
+
+## Screenshots
+
+![Main Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/mainWindow.PNG "Main Window")
+
+![Config Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/configWindow.PNG "Config Window")
