@@ -18,6 +18,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string ancestralSpiritSpell = "Ancestral Spirit";
         private const string chainHealSpell = "Chain Heal";
         private const int deadPartymembersCheckTime = 4;
+        private const string earthlivingBuff = "Earthliving ";
         private const string earthlivingWeaponSpell = "Earthliving Weapon";
         private const string earthShieldSpell = "Earth Shield";
         private const string healingWaveSpell = "Healing Wave";
@@ -114,6 +115,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         return;
                     }
+
+                    if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -123,6 +129,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                 && HandleDeadPartymembers(ancestralSpiritSpell)))
+            {
+                return;
+            }
+
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
                 return;
             }

@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell,0, true) },
-                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
+                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()

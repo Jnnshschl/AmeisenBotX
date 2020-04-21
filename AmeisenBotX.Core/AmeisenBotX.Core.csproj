@@ -224,6 +224,8 @@
     <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightFrost.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\DruidFeralBear.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\DruidFeralCat.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DruidRestoration.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\ShamanEnhancement.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorFury.cs" />

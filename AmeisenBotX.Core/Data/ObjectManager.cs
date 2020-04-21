@@ -534,9 +534,8 @@ namespace AmeisenBotX.Core.Data
                 // First read the descriptor, then lookup the Name by GUID
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
                 player.Name = ReadPlayerName(player.Guid);
-                player.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
 
-                if (PlayerGuid != 0 && player.Guid == PlayerGuid)
+                if (player.Guid == PlayerGuid)
                 {
                     if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
                     {
@@ -544,6 +543,12 @@ namespace AmeisenBotX.Core.Data
                     }
 
                     Player = player;
+                }
+
+                if (player.Guid == TargetGuid
+                    || player.Guid == PlayerGuid)
+                {
+                    player.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
                 }
 
                 return player;

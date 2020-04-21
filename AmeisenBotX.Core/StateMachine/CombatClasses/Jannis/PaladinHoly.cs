@@ -136,9 +136,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 // basic auto attack defending
                 if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
                 {
-                    IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Where(e => e.IsInCombat);
+                    List<WowUnit> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Where(e => e.IsInCombat).ToList();
 
-                    if (nearEnemies.Count() > 0)
+                    if (nearEnemies.Count > 0)
                     {
                         WowUnit target = nearEnemies.FirstOrDefault();
                         if (target != null)

@@ -21,7 +21,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const int deadPartymembersCheckTime = 4;
         private const string elementalMasterySpell = "Elemental Mastery";
         private const string flameShockSpell = "Flame Shock";
-        private const string flametoungueWeaponSpell = "Flametoungue Weapon";
+        private const string flametongueBuff = "Flametongue ";
+        private const string flametongueWeaponSpell = "Flametongue Weapon";
         private const string healingWaveSpell = "Healing Wave";
         private const string heroismSpell = "Heroism";
         private const string hexSpell = "Hex";
@@ -131,6 +132,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick()
                 || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                 && HandleDeadPartymembers(ancestralSpiritSpell))
+            {
+                return;
+            }
+
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametongueBuff, flametongueWeaponSpell))
             {
                 return;
             }

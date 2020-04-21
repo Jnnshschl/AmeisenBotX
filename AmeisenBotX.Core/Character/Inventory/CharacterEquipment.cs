@@ -54,13 +54,16 @@ namespace AmeisenBotX.Core.Character.Inventory
             {
                 List<WowBasicItem> rawEquipment = ItemFactory.ParseItemList(resultJson);
 
-                lock (queryLock)
+                if (rawEquipment != null && rawEquipment.Count > 0)
                 {
-                    Items.Clear();
-                    foreach (WowBasicItem rawItem in rawEquipment)
+                    lock (queryLock)
                     {
-                        IWowItem item = ItemFactory.BuildSpecificItem(rawItem);
-                        Items.Add(item.EquipSlot, item);
+                        Items.Clear();
+                        foreach (WowBasicItem rawItem in rawEquipment)
+                        {
+                            IWowItem item = ItemFactory.BuildSpecificItem(rawItem);
+                            Items.Add(item.EquipSlot, item);
+                        }
                     }
                 }
 

@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             List<WowUnit> Enemies = WowInterface.ObjectManager.ExecuteWithQueryLock(() => WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                        .Where(e => BotUtils.IsValidUnit(e) && e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList());
+                .Where(e => BotUtils.IsValidUnit(e) && e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList());
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
@@ -42,10 +42,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // remove all invalid, dead units
-            IEnumerable<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead);
+            List<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead).ToList();
 
             // if there are no non Friendly units, we can't attack anything
-            if (nonFriendlyUnits.Count() > 0)
+            if (nonFriendlyUnits.Count > 0)
             {
                 List<WowUnit> unitsInCombatTargetingUs = nonFriendlyUnits
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();

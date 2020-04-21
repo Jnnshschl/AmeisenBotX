@@ -46,12 +46,15 @@ namespace AmeisenBotX.Core.Character.Inventory
             {
                 List<WowBasicItem> basicItems = ItemFactory.ParseItemList(resultJson);
 
-                lock (queryLock)
+                if (basicItems != null && basicItems.Count > 0)
                 {
-                    Items.Clear();
-                    foreach (WowBasicItem basicItem in basicItems)
+                    lock (queryLock)
                     {
-                        Items.Add(ItemFactory.BuildSpecificItem(basicItem));
+                        Items.Clear();
+                        foreach (WowBasicItem basicItem in basicItems)
+                        {
+                            Items.Add(ItemFactory.BuildSpecificItem(basicItem));
+                        }
                     }
                 }
             }
