@@ -21,6 +21,8 @@ namespace AmeisenBotX.Core.Hook
 {
     public class HookManager : IHookManager
     {
+        private const int MEM_ALLOC_CHECK_SIZE = 56;
+        private const int MEM_ALLOC_EXECUTION_SIZE = 512;
         private readonly object hookLock = new object();
         private ulong endsceneCalls;
 
@@ -698,9 +700,6 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{CodeToExecuteAddress.ToInt32()}], 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
-                // set register back to zero
-                // WowInterface.XMemory.Fasm.AddLine("XOR EBX, EBX");
-
                 // check for world to be loaded
                 // we dont want to execute code in
                 // the loadingscreen, cause that
@@ -840,7 +839,7 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {returnValueAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
-            if (!WowInterface.XMemory.AllocateMemory(56, out IntPtr codecaveForCheck))
+            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_CHECK_SIZE, out IntPtr codecaveForCheck))
             {
                 return false;
             }
@@ -849,7 +848,7 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck: {codecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
-            if (!WowInterface.XMemory.AllocateMemory(512, out IntPtr codecaveForExecution))
+            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution))
             {
                 return false;
             }
@@ -910,7 +909,7 @@ namespace AmeisenBotX.Core.Hook
                 List<byte> returnBytes = new List<byte>();
 
                 // zero our memory
-                if (WowInterface.XMemory.WriteBytes(CodecaveForExecution, new byte[512]))
+                if (WowInterface.XMemory.ZeroMemory(CodecaveForExecution, MEM_ALLOC_EXECUTION_SIZE))
                 {
                     if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.XMemory.Process.HasExited)
                     {

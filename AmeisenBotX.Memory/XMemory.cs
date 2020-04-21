@@ -244,6 +244,18 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        public bool SetMemory(IntPtr address, int size, int value)
+        {
+            try
+            {
+                address = MemSet(address, value, size);
+                return true;
+            }
+            catch { }
+
+            return false;
+        }
+
         public void SuspendMainThread()
         {
             if (OpenMainThread())
@@ -272,6 +284,9 @@ namespace AmeisenBotX.Memory
 
         public bool WriteBytes(IntPtr address, byte[] bytes)
             => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
+
+        public bool ZeroMemory(IntPtr address, int size)
+                                    => WriteBytes(address, new byte[size]);
 
         private bool OpenMainThread()
         {

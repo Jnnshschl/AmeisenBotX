@@ -41,7 +41,7 @@ Wintergrasp | ❌ 0%
 
 **Class** | | | |
 ------------ | ------------- | ------------- | -------------
-Druid | ✔️ Balance | ❌/❌ Feral (Bear/Cat) | ✔️ Restoration
+Druid | ✔️ Balance | ✔️/✔️ Feral (Bear/Cat) | ✔️ Restoration
 Hunter | ✔️ Marksmanship | ✔️ Beast Mastery | ✔️ Survival
 Mage | ✔️ Fire | ✔️ Frost | ✔️ Arcane
 Paladin | ✔️ Holy | ✔️ Retribution | ✔️ Protection

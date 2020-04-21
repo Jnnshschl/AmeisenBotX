@@ -96,6 +96,9 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("user32.dll")]
         public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
 
+        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+        public static extern IntPtr MemSet(IntPtr dest, int c, int count);
+
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool MoveWindow(IntPtr windowHandle, int x, int y, int width, int height, bool repaint);
 
