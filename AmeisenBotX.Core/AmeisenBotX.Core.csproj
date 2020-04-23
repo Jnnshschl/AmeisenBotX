@@ -157,7 +157,9 @@
     <Compile Include="Data\Objects\WowObject\Structs\RawWowObject.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowPlayer.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowUnit.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\SubStructs\VisibleItemEnchantment.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\SubStructs\ItemEnchantment.cs" />
+    <Compile Include="Data\Objects\WowObject\Structs\SubStructs\QuestlogEntry.cs" />
     <Compile Include="Data\Objects\WowObject\WowContainer.cs" />
     <Compile Include="Data\Objects\WowObject\WowItem.cs" />
     <Compile Include="Data\Objects\WowObject\WowCorpse.cs" />

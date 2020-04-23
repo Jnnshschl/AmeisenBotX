@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -126,7 +125,7 @@ namespace AmeisenBotX.Core.Movement
                 }
             }
 
-            Vector3 positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, targetPosition, 2);
+            Vector3 positionToGoTo = targetPosition;
             bool updateForces = true;
 
             switch (State)

@@ -53,8 +53,6 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr EndsceneReturnAddress { get; private set; }
 
-        public bool IsInjectionUsed { get; private set; }
-
         public bool IsWoWHooked
         {
             get
@@ -370,7 +368,7 @@ namespace AmeisenBotX.Core.Hook
                     && WowInterface.XMemory.ReadByte(WowInterface.OffsetList.Runes, out byte runeStatus)
                     && ((1 << runeId) & runeStatus) != 0)
                 {
-                    runes[type]++;
+                    ++runes[type];
                 }
             }
 
@@ -845,7 +843,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             CodecaveForCheck = codecaveForCheck;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck: {codecaveForCheck.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): {codecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution))
@@ -854,7 +852,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             CodecaveForExecution = codecaveForExecution;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution: {codecaveForExecution.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): {codecaveForExecution.ToInt32():X}", LogLevel.Verbose);
 
             return true;
         }
@@ -866,7 +864,10 @@ namespace AmeisenBotX.Core.Hook
                 return null;
             }
 
-            List<string> asm = new List<string>();
+            List<string> asm = new List<string>
+            {
+                $"MOV ECX, {objectBaseAddress}"
+            };
 
             if (args != null)
             {
@@ -876,7 +877,6 @@ namespace AmeisenBotX.Core.Hook
                 }
             }
 
-            asm.Add($"MOV ECX, {objectBaseAddress}");
             asm.Add($"CALL {functionAddress}");
             asm.Add("RETN");
 
@@ -920,14 +920,6 @@ namespace AmeisenBotX.Core.Hook
 
                     try
                     {
-                        // wait for the code to be executed
-                        while (IsInjectionUsed)
-                        {
-                            Thread.Sleep(1);
-                        }
-
-                        IsInjectionUsed = true;
-
                         // preparing to inject the given ASM
                         WowInterface.XMemory.Fasm.Clear();
 
@@ -938,8 +930,8 @@ namespace AmeisenBotX.Core.Hook
                         }
 
                         // inject it
-                        frozenMainThread = true;
                         WowInterface.XMemory.SuspendMainThread();
+                        frozenMainThread = true;
                         WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution.ToInt32());
 
                         // now there is code to be executed
@@ -971,12 +963,11 @@ namespace AmeisenBotX.Core.Hook
 
                                 if (buffer != 0)
                                 {
-                                    while (buffer != 0)
+                                    do
                                     {
                                         returnBytes.Add(buffer);
-                                        dwAddress = IntPtr.Add(dwAddress, 1);
-                                        WowInterface.XMemory.ReadByte(dwAddress, out buffer);
-                                    }
+                                        dwAddress += 1;
+                                    } while (WowInterface.XMemory.ReadByte(dwAddress, out buffer) && buffer != 0);
                                 }
                                 else
                                 {
@@ -988,8 +979,6 @@ namespace AmeisenBotX.Core.Hook
                                 AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
                             }
                         }
-
-                        IsInjectionUsed = false;
                     }
                     catch (Exception e)
                     {
@@ -997,7 +986,6 @@ namespace AmeisenBotX.Core.Hook
 
                         // now there is no more code to be executed
                         WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-                        IsInjectionUsed = false;
 
                         if (frozenMainThread)
                         {

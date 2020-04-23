@@ -19,26 +19,24 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         private RawWowItem RawWowItem { get; set; }
 
-        public override string ToString()
-            => $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
-
-        public WowItem UpdateRawWowItem(XMemory xMemory)
-        {
-            UpdateRawWowObject(xMemory);
-
-            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem rawWowItem))
-            {
-                RawWowItem = rawWowItem;
-            }
-
-            return this;
-        }
-
         public List<string> GetEnchantmentStrings()
         {
             List<string> enchantments = new List<string>();
 
-            ItemEnchantment[] itemEnchantments =
+            foreach (ItemEnchantment enchant in GetItemEnchantments())
+            {
+                if (WowEnchantmentHelper.TryLookupEnchantment(enchant.Id, out string text))
+                {
+                    enchantments.Add(text);
+                }
+            }
+
+            return enchantments;
+        }
+
+        public List<ItemEnchantment> GetItemEnchantments()
+        {
+            return new List<ItemEnchantment>()
             {
                 RawWowItem.Enchantment1,
                 RawWowItem.Enchantment2,
@@ -53,16 +51,21 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
                 RawWowItem.Enchantment11,
                 RawWowItem.Enchantment12,
             };
+        }
 
-            foreach (ItemEnchantment enchant in itemEnchantments)
+        public override string ToString()
+                            => $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
+
+        public WowItem UpdateRawWowItem(XMemory xMemory)
+        {
+            UpdateRawWowObject(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem rawWowItem))
             {
-                if (WowEnchantmentHelper.TryLookupEnchantment(enchant.Id, out string text))
-                {
-                    enchantments.Add(text);
-                }
+                RawWowItem = rawWowItem;
             }
 
-            return enchantments;
+            return this;
         }
     }
 }

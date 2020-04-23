@@ -2,13 +2,13 @@
 {
     public class MovementSettings
     {
-        public float MaxAcceleration { get; set; } = 1f;
+        public float MaxAcceleration { get; set; } = 3.5f;
 
-        public float MaxSteering { get; set; } = 0.7f;
+        public float MaxSteering { get; set; } = 1.4f;
 
-        public float MaxVelocity { get; set; } = 5f;
+        public float MaxVelocity { get; set; } = 7f;
 
-        public double SeperationDistance { get; set; } = 4;
+        public double SeperationDistance { get; set; } = 8;
 
         public double WaypointCheckThreshold { get; set; } = 4;
     }

@@ -230,6 +230,7 @@ namespace AmeisenBotX.Core.Character
 
         private string SlotToEquipLocation(int slot)
         {
+
             return slot switch
             {
                 0 => "INVTYPE_AMMO",

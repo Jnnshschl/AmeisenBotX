@@ -124,7 +124,7 @@ namespace AmeisenBotX.Core.Dungeon
             else
             {
                 // find a way to exit the dungeon, maybe hearthstone
-                WowInterface.HookManager.LuaDoString("LFGTeleport(true)");
+                WowInterface.HookManager.LuaDoString("LFGTeleport(true);");
             }
         }
 
@@ -177,10 +177,21 @@ namespace AmeisenBotX.Core.Dungeon
         private bool NeedToMoveToGroupLeader()
         {
             WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
-            if (partyLeader != null && WowInterface.ObjectManager.Player.Position.GetDistance(partyLeader.Position) > 5)
+            if (partyLeader != null)
             {
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
-                WowInterface.MovementEngine.Execute();
+                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(partyLeader.Position);
+
+                if (distance < 25)
+                {
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
+                    WowInterface.MovementEngine.Execute();
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault().Position);
+                    WowInterface.MovementEngine.Execute();
+                }
+
                 return true;
             }
 

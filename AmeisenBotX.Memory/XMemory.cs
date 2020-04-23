@@ -41,7 +41,8 @@ namespace AmeisenBotX.Memory
 
         public static void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
-            WindowFlags flags = resizeWindow ? (WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder) : (WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoSize);
+            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
+            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
