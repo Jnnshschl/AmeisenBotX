@@ -50,6 +50,7 @@
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -147,6 +148,14 @@
     <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
       <Project>{AFE27893-225B-4F90-9CFD-87DB2EE0D7DF}</Project>
       <Name>AmeisenBotX.Logging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj">
+      <Project>{FF4DC905-1E4E-44A5-A5A7-C65E5CDA1E9A}</Project>
+      <Name>AmeisenBotX.Memory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AmeisenBotX.Overlay\AmeisenBotX.Overlay.csproj">
+      <Project>{11DD65F8-90C4-429F-8ACD-B87E2954A891}</Project>
+      <Name>AmeisenBotX.Overlay</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

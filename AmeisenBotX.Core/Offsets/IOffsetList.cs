@@ -14,6 +14,10 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr BattlegroundStatus { get; }
 
+        IntPtr CameraOffset { get; }
+
+        IntPtr CameraPointer { get; }
+
         IntPtr CharacterSlotSelected { get; }
 
         IntPtr ChatBuffer { get; }
@@ -94,6 +98,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionSpellGetSpellCooldown { get; }
 
+        IntPtr FunctionTraceline { get; }
+
         IntPtr FunctionUnitGetReaction { get; }
 
         IntPtr FunctionUnitOnRightClick { get; }
@@ -101,6 +107,8 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr FunctionUnitSendMovementPacket { get; }
 
         IntPtr FunctionUnitSetFacing { get; }
+
+        IntPtr FunctionWorldFrameGetActiveCamera { get; }
 
         IntPtr GameState { get; }
 

@@ -18,6 +18,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private DateTime LastFacingCheck { get; set; }
 
+        private DateTime LastLineOfSightCheck { get; set; }
+
         private WowUnit LastTarget { get; set; }
 
         public override void Enter()
@@ -84,9 +86,17 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (target == null || target.Guid == WowInterface.ObjectManager.PlayerGuid) { return; }
 
+            bool isInLos = true;
+
+            if(DateTime.Now - LastLineOfSightCheck > TimeSpan.FromMilliseconds(1000))
+            {
+                isInLos = WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position);
+                LastLineOfSightCheck = DateTime.Now;
+            }
+
             // if we are close enough, stop movement and start attacking
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
-            if (distance <= DistanceToTarget)
+            if (distance <= DistanceToTarget && isInLos)
             {
                 if (DateTime.Now - LastFacingCheck > TimeSpan.FromMilliseconds(500) && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
                 {

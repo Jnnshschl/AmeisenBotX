@@ -76,9 +76,13 @@ namespace AmeisenBotX.Core.Statemachine
 
         private AmeisenBotConfig Config { get; }
 
+        private DateTime LastAntiAfk { get; set; }
+
         private DateTime LastEventPull { get; set; }
 
         private DateTime LastGhostCheck { get; set; }
+
+        private DateTime LastObjectUpdate { get; set; }
 
         public void Execute()
         {
@@ -132,7 +136,11 @@ namespace AmeisenBotX.Core.Statemachine
             CurrentState.Value.Execute();
 
             // anti AFK
-            WowInterface.CharacterManager.AntiAfk();
+            if (DateTime.Now - LastAntiAfk > TimeSpan.FromMilliseconds(Config.AntiAfkMs))
+            {
+                LastAntiAfk = DateTime.Now;
+                WowInterface.CharacterManager.AntiAfk();
+            }
 
             // used for ui updates
             OnStateMachineTick?.Invoke();
@@ -202,18 +210,20 @@ namespace AmeisenBotX.Core.Statemachine
             if (WowInterface.EventHookManager.IsSetUp
                 && LastEventPull + TimeSpan.FromMilliseconds(Config.EventPullMs) < DateTime.Now)
             {
-                WowInterface.EventHookManager.ReadEvents();
                 LastEventPull = DateTime.Now;
+                WowInterface.EventHookManager.ReadEvents();
             }
         }
 
         private void HandleObjectUpdates()
         {
-            if (CurrentState.Key != BotState.None
+            if (DateTime.Now - LastObjectUpdate > TimeSpan.FromMilliseconds(Config.ObjectUpdateMs)
+                && CurrentState.Key != BotState.None
                 && CurrentState.Key != BotState.StartWow
                 && CurrentState.Key != BotState.Login
                 && CurrentState.Key != BotState.LoadingScreen)
             {
+                LastObjectUpdate = DateTime.Now;
                 WowInterface.ObjectManager.UpdateWowObjects();
             }
         }

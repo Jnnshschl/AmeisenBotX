@@ -20,6 +20,10 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr BattlegroundStatus { get; } = new IntPtr(0xBEA4D0);
 
+        public IntPtr CameraOffset { get; } = new IntPtr(0x7E20);
+
+        public IntPtr CameraPointer { get; } = new IntPtr(0xB7436C);
+
         public IntPtr CharacterSlotSelected { get; } = new IntPtr(0xAC436C);
 
         public IntPtr ChatBuffer { get; } = new IntPtr(0xB75A60);
@@ -64,7 +68,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
 
-        public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8); // maybe use 0xAC, Clear function
+        public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8); // maybe use 0xAC, clear function, leads to many crashes
 
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);
 
@@ -100,6 +104,8 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr FunctionSpellGetSpellCooldown { get; } = new IntPtr(0x807980);
 
+        public IntPtr FunctionTraceline { get; } = new IntPtr(0x7A3B70);
+
         public IntPtr FunctionUnitGetReaction { get; } = new IntPtr(0x7251C0);
 
         public IntPtr FunctionUnitOnRightClick { get; } = new IntPtr(0x731260);
@@ -107,6 +113,8 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr FunctionUnitSendMovementPacket { get; } = new IntPtr(0x7413F0);
 
         public IntPtr FunctionUnitSetFacing { get; } = new IntPtr(0x72EA50);
+
+        public IntPtr FunctionWorldFrameGetActiveCamera { get; } = new IntPtr(0x4F5960);
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 

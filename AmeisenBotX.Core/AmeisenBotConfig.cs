@@ -6,6 +6,8 @@ namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
+        public double AntiAfkMs { get; set; } = 1000;
+
         public bool AutocloseWow { get; set; } = false;
 
         public bool AutoDodgeAoeSpells { get; set; } = false;
@@ -51,6 +53,8 @@ namespace AmeisenBotX.Core
         public int NameshServerPort { get; set; } = 47110;
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
+
+        public double ObjectUpdateMs { get; set; } = 250;
 
         public string Password { get; set; } = string.Empty;
 

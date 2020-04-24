@@ -95,6 +95,8 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsGhost(WowLuaUnit luaUnit);
 
+        bool IsInLineOfSight(Vector3 start, Vector3 end);
+
         bool IsRuneReady(int runeId);
 
         bool IsSpellKnown(int spellId, bool isPetSpell = false);
@@ -148,6 +150,8 @@ namespace AmeisenBotX.Core.Hook
         void TargetGuid(ulong guid);
 
         void TargetLuaUnit(WowLuaUnit unit);
+
+        byte TraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171);
 
         void UnitOnRightClick(WowUnit wowUnit);
 

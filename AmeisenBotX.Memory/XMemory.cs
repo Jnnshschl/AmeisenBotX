@@ -12,6 +12,9 @@ namespace AmeisenBotX.Memory
 {
     public class XMemory
     {
+        private ulong rpmCalls;
+        private ulong wpmCalls;
+
         public XMemory()
         {
             SizeCache = new Dictionary<Type, int>();
@@ -29,6 +32,32 @@ namespace AmeisenBotX.Memory
         public Process Process { get; private set; }
 
         public IntPtr ProcessHandle { get; private set; }
+
+        public ulong RpmCallCount
+        {
+            get
+            {
+                unchecked
+                {
+                    ulong val = rpmCalls;
+                    rpmCalls = 0;
+                    return val;
+                }
+            }
+        }
+
+        public ulong WpmCallCount
+        {
+            get
+            {
+                unchecked
+                {
+                    ulong val = wpmCalls;
+                    wpmCalls = 0;
+                    return val;
+                }
+            }
+        }
 
         private Dictionary<Type, int> SizeCache { get; }
 
@@ -71,6 +100,9 @@ namespace AmeisenBotX.Memory
             Fasm = new ManagedFasm(ProcessHandle);
         }
 
+        public void ExtendFrameIntoClientArea(IntPtr handle, ref Margins margins)
+            => DwmExtendFrameIntoClientArea(handle, ref margins);
+
         public bool FreeMemory(IntPtr address)
         {
             try
@@ -82,6 +114,9 @@ namespace AmeisenBotX.Memory
                 return false;
             }
         }
+
+        public IntPtr GetForegroundWindow()
+            => Win32Imports.GetForegroundWindow();
 
         public ProcessThread GetMainThread()
         {
@@ -102,8 +137,19 @@ namespace AmeisenBotX.Memory
             return null;
         }
 
+        public uint GetWindowLong(IntPtr handle, int index)
+            => Win32Imports.GetWindowLong(handle, index);
+
+        public Rect GetWindowRectangle()
+        {
+            Rect rect = new Rect(); ;
+            GetWindowRect(Process.MainWindowHandle, ref rect);
+            return rect;
+        }
+
         public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
         {
+            ++rpmCalls;
             int size = sizeof(T);
             byte[] readBuffer = new byte[size];
 
@@ -129,6 +175,7 @@ namespace AmeisenBotX.Memory
 
         public unsafe bool ReadByte(IntPtr address, out byte buffer)
         {
+            ++rpmCalls;
             byte[] readBuffer = new byte[1];
 
             if (ReadProcessMemory(ProcessHandle, address, readBuffer, 1, out _))
@@ -146,6 +193,7 @@ namespace AmeisenBotX.Memory
 
         public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
         {
+            ++rpmCalls;
             byte[] readBuffer = new byte[size];
 
             if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
@@ -160,6 +208,7 @@ namespace AmeisenBotX.Memory
 
         public unsafe bool ReadInt(IntPtr address, out int value)
         {
+            ++rpmCalls;
             byte[] readBuffer = new byte[4];
 
             try
@@ -184,6 +233,7 @@ namespace AmeisenBotX.Memory
 
         public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
         {
+            ++rpmCalls;
             byte[] readBuffer = new byte[lenght];
 
             try
@@ -217,6 +267,7 @@ namespace AmeisenBotX.Memory
 
         public bool ReadStruct<T>(IntPtr address, out T value)
         {
+            ++rpmCalls;
             int size = SizeOf(typeof(T));
             IntPtr readBuffer = Marshal.AllocHGlobal(size);
 
@@ -245,6 +296,9 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        public void SetLayeredWindowAttributes(IntPtr handle, uint colorKey, uint alpha, uint flags)
+                                                                                                                                    => Win32Imports.SetLayeredWindowAttributes(handle, colorKey, alpha, flags);
+
         public bool SetMemory(IntPtr address, int size, int value)
         {
             try
@@ -257,6 +311,9 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
+        public void SetWindowLong(IntPtr handle, int index, IntPtr exStyle)
+                    => Win32Imports.SetWindowLong(handle, index, exStyle);
+
         public void SuspendMainThread()
         {
             if (OpenMainThread())
@@ -267,6 +324,7 @@ namespace AmeisenBotX.Memory
 
         public bool Write<T>(IntPtr address, T value, int size = 0)
         {
+            ++wpmCalls;
             if (size == 0)
             {
                 size = SizeOf(typeof(T));
@@ -284,10 +342,13 @@ namespace AmeisenBotX.Memory
         }
 
         public bool WriteBytes(IntPtr address, byte[] bytes)
-            => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
+        {
+            ++wpmCalls;
+            return WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
+        }
 
         public bool ZeroMemory(IntPtr address, int size)
-                                    => WriteBytes(address, new byte[size]);
+            => WriteBytes(address, new byte[size]);
 
         private bool OpenMainThread()
         {

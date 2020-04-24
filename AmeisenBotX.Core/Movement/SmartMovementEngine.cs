@@ -82,11 +82,21 @@ namespace AmeisenBotX.Core.Movement
 
                 if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > 30)
                 {
-                    nodes.AddRange(WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition));
+                    List<Vector3> getPathResult = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+
+                    if (getPathResult != null && getPathResult.Count > 0)
+                    {
+                        nodes.AddRange(getPathResult);
+                    }
                 }
                 else
                 {
-                    nodes.Add(WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition));
+                    Vector3 moveAlongSurfaceResult = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+
+                    if (moveAlongSurfaceResult != default && moveAlongSurfaceResult != Vector3.Zero)
+                    {
+                        nodes.Add(moveAlongSurfaceResult);
+                    }
                 }
 
                 if (nodes == null || nodes.Count == 0)

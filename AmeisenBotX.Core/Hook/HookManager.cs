@@ -37,9 +37,12 @@ namespace AmeisenBotX.Core.Hook
         {
             get
             {
-                ulong val = endsceneCalls;
-                endsceneCalls = 0;
-                return val;
+                unchecked
+                {
+                    ulong val = endsceneCalls;
+                    endsceneCalls = 0;
+                    return val;
+                }
             }
         }
 
@@ -507,6 +510,13 @@ namespace AmeisenBotX.Core.Hook
             return false;
         }
 
+        public bool IsInLineOfSight(Vector3 start, Vector3 end)
+        {
+            start.Z += 1.5f;
+            end.Z += 1.5f;
+            return TraceLine(start, end, out _) == 0;
+        }
+
         public bool IsRuneReady(int runeId)
         {
             if (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.Runes, out byte runeStatus))
@@ -795,6 +805,44 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetLuaUnit(WowLuaUnit unit)
             => LuaDoString($"TargetUnit(\"{unit}\");");
+
+        public byte TraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171)
+        {
+            result = Vector3.Zero;
+
+            if (WowInterface.XMemory.AllocateMemory(40, out IntPtr codeCaveVector3))
+            {
+                IntPtr distPointer = codeCaveVector3;
+                IntPtr startPointer = IntPtr.Add(codeCaveVector3, 0x4);
+                IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
+                IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
+
+                WowInterface.XMemory.Write(distPointer, 1f);
+                WowInterface.XMemory.Write(startPointer, start);
+                WowInterface.XMemory.Write(endPointer, end);
+
+                string[] asm = new string[]
+                {
+                    "PUSH 0",
+                    $"PUSH {flags}",
+                    $"PUSH {distPointer}",
+                    $"PUSH {resultPointer}",
+                    $"PUSH {endPointer}",
+                    $"PUSH {startPointer}",
+                    $"CALL {WowInterface.OffsetList.FunctionTraceline}",
+                    "ADD ESP, 0x18",
+                    "RETN",
+                };
+
+                byte returnedByte = InjectAndExecute(asm, true)[0];
+                WowInterface.XMemory.Read(resultPointer, out result);
+                WowInterface.XMemory.FreeMemory(codeCaveVector3);
+
+                return returnedByte;
+            }
+
+            return 0;
+        }
 
         public void UnitOnRightClick(WowUnit unit)
         {

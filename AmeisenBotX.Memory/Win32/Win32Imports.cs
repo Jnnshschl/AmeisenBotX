@@ -90,6 +90,15 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
+        [DllImport("dwmapi.dll", SetLastError = true)]
+        public static extern void DwmExtendFrameIntoClientArea(IntPtr windowHandle, ref Margins margins);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetWindowLong(IntPtr windowHandle, int index);
+
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
 
@@ -116,6 +125,12 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32.dll")]
         public static extern int ResumeThread(IntPtr threadHandle);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetLayeredWindowAttributes(IntPtr windowHandle, uint colorKey, uint alpha, uint flags);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int SetWindowLong(IntPtr windowHandle, int index, IntPtr newLong);
 
         [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
         public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);

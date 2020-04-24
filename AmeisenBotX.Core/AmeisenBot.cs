@@ -44,14 +44,20 @@ namespace AmeisenBotX.Core
         private double currentExecutionMs;
         private int stateMachineTimerBusy;
 
-        public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config)
+        public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config, IntPtr mainWindowHandle = default)
         {
+            if (mainWindowHandle == default)
+            {
+                mainWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
+            }
+
             SetupLogging(botDataPath, accountName);
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             Config = config;
             AccountName = accountName;
             BotDataPath = botDataPath;
+            MainWindowHandle = mainWindowHandle;
 
             CurrentExecutionMs = 0;
             CurrentExecutionCount = 0;
@@ -126,6 +132,8 @@ namespace AmeisenBotX.Core
         }
 
         public bool IsRunning { get; private set; }
+
+        public IntPtr MainWindowHandle { get; private set; }
 
         public AmeisenBotStateMachine StateMachine { get; set; }
 
@@ -307,7 +315,7 @@ namespace AmeisenBotX.Core
                 {
                     if (Config.BotWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
-                        XMemory.SetWindowPosition(Process.GetCurrentProcess().MainWindowHandle, Config.BotWindowRect, false);
+                        XMemory.SetWindowPosition(MainWindowHandle, Config.BotWindowRect, false);
                         AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded bot window position: {Config.BotWindowRect}", LogLevel.Verbose);
                     }
                 }
@@ -505,7 +513,7 @@ namespace AmeisenBotX.Core
         {
             try
             {
-                Config.BotWindowRect = XMemory.GetWindowPosition(Process.GetCurrentProcess().MainWindowHandle);
+                Config.BotWindowRect = XMemory.GetWindowPosition(MainWindowHandle);
             }
             catch (Exception e)
             {

@@ -5,9 +5,12 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Overlay;
+using AmeisenBotX.Overlay.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -15,9 +18,6 @@ using System.Windows.Media;
 
 namespace AmeisenBotX
 {
-    /// <summary>
-    /// Interaktionslogik für MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public readonly string BotDataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
@@ -71,23 +71,18 @@ namespace AmeisenBotX
             darkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
             textAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
 
-            if (Config != null)
-            {
-                string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
-                AmeisenBot = new AmeisenBot(BotDataPath, playername, Config);
-
-                AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
-                AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
-
-                LastStateMachineTickUpdate = DateTime.Now;
-            }
+            DrawOverlay = false;
         }
 
         public AmeisenBotConfig Config { get; private set; }
 
         public string ConfigPath { get; private set; }
 
-        private AmeisenBot AmeisenBot { get; }
+        public AmeisenBotOverlay Overlay { get; private set; }
+
+        private AmeisenBot AmeisenBot { get; set; }
+
+        private bool DrawOverlay { get; set; }
 
         private DateTime LastStateMachineTickUpdate { get; set; }
 
@@ -109,7 +104,11 @@ namespace AmeisenBotX
             }
         }
 
-        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
+        private void ButtonExit_Click(object sender, RoutedEventArgs e)
+        {
+            Overlay?.Exit();
+            Close();
+        }
 
         private void ButtonFaceTarget_Click(object sender, RoutedEventArgs e)
         {
@@ -118,20 +117,6 @@ namespace AmeisenBotX
         }
 
         private void ButtonSettings_Click(object sender, RoutedEventArgs e) => new SettingsWindow(Config).ShowDialog();
-
-        private void ButtonStartAutopilot_Click(object sender, RoutedEventArgs e)
-        {
-            if (AmeisenBot.Config.Autopilot)
-            {
-                AmeisenBot.Config.Autopilot = false;
-                buttonStartAutopilot.Foreground = darkForegroundBrush;
-            }
-            else
-            {
-                AmeisenBot.Config.Autopilot = true;
-                buttonStartAutopilot.Foreground = currentTickTimeGoodBrush;
-            }
-        }
 
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
         {
@@ -146,6 +131,34 @@ namespace AmeisenBotX
                 AmeisenBot.Resume();
                 buttonStartPause.Content = "||";
                 buttonStartPause.Foreground = darkForegroundBrush;
+            }
+        }
+
+        private void ButtonToggleAutopilot_Click(object sender, RoutedEventArgs e)
+        {
+            if (AmeisenBot.Config.Autopilot)
+            {
+                AmeisenBot.Config.Autopilot = false;
+                buttonToggleAutopilot.Foreground = darkForegroundBrush;
+            }
+            else
+            {
+                AmeisenBot.Config.Autopilot = true;
+                buttonToggleAutopilot.Foreground = currentTickTimeGoodBrush;
+            }
+        }
+
+        private void ButtonToggleOverlay_Click(object sender, RoutedEventArgs e)
+        {
+            if (DrawOverlay)
+            {
+                DrawOverlay = false;
+                buttonToggleOverlay.Foreground = darkForegroundBrush;
+            }
+            else
+            {
+                DrawOverlay = true;
+                buttonToggleOverlay.Foreground = currentTickTimeGoodBrush;
             }
         }
 
@@ -195,8 +208,6 @@ namespace AmeisenBotX
                         enemyCarrier = ctfBattlegroundProfile.EnemyFlagCarrierPlayer?.Name;
                         isMeCarrier = ctfBattlegroundProfile.IsMeFlagCarrier;
                     }
-
-                    labelBgObjective.Content = $"BGEngine State: {AmeisenBot.WowInterface.BattlegroundEngine.CurrentState.Key}\nBGEngine Last State: {AmeisenBot.WowInterface.BattlegroundEngine.LastState}\n\nBGOwnFlagCarrier: {ownCarrier}\nBGEnemyFlagCarrier: {enemyCarrier}\nisMeCarrier: {isMeCarrier}";
                 }
 
                 // update health and secodary power bar and
@@ -247,12 +258,29 @@ namespace AmeisenBotX
                 // update the ms label every second
                 if (LastStateMachineTickUpdate + TimeSpan.FromSeconds(1) < DateTime.Now)
                 {
-                    UpdateExecutionMsLabel();
+                    UpdateBottomLabels();
                     LastStateMachineTickUpdate = DateTime.Now;
                 }
 
-                // update the object count label
-                labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.WowObjects.Count;
+                if (DrawOverlay)
+                {
+                    if (AmeisenBot.WowInterface.ObjectManager.Target != null)
+                    {
+                        Memory.Win32.Rect windowRect = AmeisenBot.WowInterface.XMemory.GetWindowRectangle();
+                        if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Player.Position, out Point debugPointMe)
+                        && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Target.Position, out Point debugPointTarget))
+                        {
+                            Overlay.AddLine((int)debugPointMe.X, (int)debugPointMe.Y, (int)debugPointTarget.X, (int)debugPointTarget.Y);
+                        }
+                    }
+
+                    if (Overlay == null)
+                    {
+                        Overlay = new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
+                    }
+
+                    Overlay?.Draw();
+                }
             });
         }
 
@@ -317,7 +345,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void UpdateExecutionMsLabel()
+        private void UpdateBottomLabels()
         {
             double executionMs = AmeisenBot.CurrentExecutionMs;
             if (double.IsNaN(executionMs) || double.IsInfinity(executionMs))
@@ -325,7 +353,10 @@ namespace AmeisenBotX
                 executionMs = 0;
             }
 
-            labelCurrentTickTime.Content = executionMs;
+            // update the object count label
+            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.WowObjects.Count.ToString().PadLeft(4);
+
+            labelCurrentTickTime.Content = executionMs.ToString().PadLeft(4);
             if (executionMs <= Config.StateMachineTickMs)
             {
                 labelCurrentTickTime.Foreground = currentTickTimeGoodBrush;
@@ -336,7 +367,7 @@ namespace AmeisenBotX
                 AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow...", LogLevel.Warning);
             }
 
-            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.CallCount;
+            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.CallCount.ToString().PadLeft(2);
             if (AmeisenBot.WowInterface.HookManager.CallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
                 labelHookCallCount.Foreground = currentTickTimeGoodBrush;
@@ -346,6 +377,9 @@ namespace AmeisenBotX
                 labelHookCallCount.Foreground = currentTickTimeBadBrush;
                 AmeisenLogger.Instance.Log("MainWindow", "High HookCall count, maybe increase your FPS...", LogLevel.Warning);
             }
+
+            labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString().PadLeft(5);
+            labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString().PadLeft(3);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -356,7 +390,21 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.Start();
+            if (Config != null)
+            {
+                string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
+                AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, Process.GetCurrentProcess().MainWindowHandle);
+
+                AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
+                AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
+
+                LastStateMachineTickUpdate = DateTime.Now;
+            }
+
+            if (AmeisenBot != null)
+            {
+                AmeisenBot.Start();
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();

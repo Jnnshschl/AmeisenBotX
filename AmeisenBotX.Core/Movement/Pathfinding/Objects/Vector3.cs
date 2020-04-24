@@ -14,6 +14,10 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             Z = z;
         }
 
+        public Vector3(Vector3 position) : this(position.X, position.Y, position.Z)
+        {
+        }
+
         public float X { get; set; }
 
         public float Y { get; set; }
@@ -32,12 +36,13 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
 
         public static bool operator !=(Vector3 left, Vector3 right)
-        {
-            return !(left == right);
-        }
+            => !(left == right);
 
         public static Vector3 operator *(Vector3 a, float b)
             => new Vector3(a.X * b, a.Y * b, a.Z * b);
+
+        public static Vector3 operator *(Vector3 a, Vector3 b)
+            => new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
 
         public static Vector3 operator /(Vector3 a, float b)
             => new Vector3(a.X / b, a.Y / b, a.Z / b);
@@ -45,10 +50,18 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         public static Vector3 operator +(Vector3 a, Vector3 b)
             => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 
+        public static bool operator <(Vector3 left, Vector3 right)
+            => left.X < right.X
+            && left.Y < right.Y
+            && left.Z < right.Z;
+
         public static bool operator ==(Vector3 left, Vector3 right)
-        {
-            return left.Equals(right);
-        }
+            => left.Equals(right);
+
+        public static bool operator >(Vector3 left, Vector3 right)
+            => left.X > right.X
+            && left.Y > right.Y
+            && left.Z > right.Z;
 
         public void Add(Vector3 vector)
         {
@@ -127,9 +140,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public void Rotate(double degrees)
-        {
-            RotateRadians(degrees * (Math.PI / 180));
-        }
+            => RotateRadians(degrees * (Math.PI / 180));
 
         public void RotateRadians(double radians)
         {
@@ -148,11 +159,6 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public float[] ToArray()
-            => new float[3]
-            {
-                X,
-                Y,
-                Z
-            };
+            => new float[3] { X, Y, Z };
     }
 }

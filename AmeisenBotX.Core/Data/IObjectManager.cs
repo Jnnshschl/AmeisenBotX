@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -11,6 +12,8 @@ namespace AmeisenBotX.Core.Data
     public interface IObjectManager
     {
         event ObjectUpdateComplete OnObjectUpdateComplete;
+
+        CameraInfo Camera { get; }
 
         string GameState { get; }
 

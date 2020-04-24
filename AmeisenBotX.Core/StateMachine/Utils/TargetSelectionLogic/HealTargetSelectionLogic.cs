@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 {
     public class HealTargetSelectionLogic : ITargetSelectionLogic
     {
-        public HealTargetSelectionLogic(WowInterface wowInterface, int healthThreshold = 90, bool groupOnly = true)
+        public HealTargetSelectionLogic(WowInterface wowInterface, int healthThreshold = 80, bool groupOnly = true)
         {
             WowInterface = wowInterface;
             HealthThreshold = healthThreshold;

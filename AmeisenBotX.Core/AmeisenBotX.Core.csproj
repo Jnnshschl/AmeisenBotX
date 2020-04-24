@@ -145,6 +145,9 @@
     <Compile Include="Data\Objects\Enums\AuraFlags.cs" />
     <Compile Include="Data\Enums\SkillId.cs" />
     <Compile Include="Data\Objects\Enums\WowItemFlags.cs" />
+    <Compile Include="Data\Objects\Enums\WowWorldFrameHitFlags.cs" />
+    <Compile Include="Data\Objects\Matrix3x3.cs" />
+    <Compile Include="Data\Objects\Structs\CameraInfo.cs" />
     <Compile Include="Data\Objects\Structs\RawPlayerSkillInfo.cs" />
     <Compile Include="Data\Objects\Structs\RawWowAura.cs" />
     <Compile Include="Data\Objects\WowAura.cs" />

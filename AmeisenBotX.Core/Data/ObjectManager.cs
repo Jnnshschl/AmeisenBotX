@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -25,6 +26,8 @@ namespace AmeisenBotX.Core.Data
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
+
+        public CameraInfo Camera { get; private set; }
 
         public string GameState { get; private set; }
 
@@ -74,6 +77,8 @@ namespace AmeisenBotX.Core.Data
         public string ZoneName { get; private set; }
 
         public string ZoneSubName { get; private set; }
+
+        private IntPtr CurrentObjectManager { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -229,6 +234,12 @@ namespace AmeisenBotX.Core.Data
                 MapId = UpdateGlobalVar<MapId>(WowInterface.OffsetList.MapId);
                 ZoneId = UpdateGlobalVar<int>(WowInterface.OffsetList.ZoneId);
 
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.CameraPointer, out IntPtr cameraPointer)
+                    && WowInterface.XMemory.Read(IntPtr.Add(cameraPointer, WowInterface.OffsetList.CameraOffset.ToInt32()), out cameraPointer))
+                {
+                    Camera = UpdateGlobalVar<CameraInfo>(cameraPointer);
+                }
+
                 if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneText, out IntPtr zoneNamePointer))
                 {
                     ZoneName = UpdateGlobalVarString(zoneNamePointer);
@@ -245,11 +256,15 @@ namespace AmeisenBotX.Core.Data
 
                 // get the current objectmanager
                 // TODO: maybe cache it
-                WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
-                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
+                if (CurrentObjectManager == IntPtr.Zero)
+                {
+                    WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
+                    WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
+                    CurrentObjectManager = currentObjectManager;
+                }
 
                 // read the first object
-                WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
+                WowInterface.XMemory.Read(IntPtr.Add(CurrentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
                 WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out int activeObjectType);
 
                 while (IsWorldLoaded && (activeObjectType <= 7 && activeObjectType > 0))
