@@ -175,7 +175,9 @@ namespace AmeisenBotX.Core.Statemachine
 
         internal bool IsDungeonMap(MapId map)
             => map == MapId.Deadmines
-            || map == MapId.UtgardeKeep;
+            || map == MapId.HellfireRamparts
+            || map == MapId.UtgardeKeep
+            || map == MapId.AzjolNerub;
 
         internal bool IsInCapitalCity()
         {

@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Dungeon.Objects
 {
     public class DungeonNode
     {
-        public DungeonNode(Vector3 position, DungeonNodeType type, string extra = "")
+        public DungeonNode(Vector3 position, DungeonNodeType type = DungeonNodeType.Normal, string extra = "")
         {
             Position = position;
             Type = type;

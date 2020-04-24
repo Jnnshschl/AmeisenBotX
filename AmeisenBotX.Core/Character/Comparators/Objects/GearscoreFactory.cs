@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Character.Comparators.Objects
 
             foreach (KeyValuePair<string, double> keyValuePair in StatMultiplicators)
             {
-                if (item.Stats.TryGetValue(keyValuePair.ToString(), out string stat))
+                if (item.Stats.TryGetValue(keyValuePair.Key, out string stat))
                 {
                     if ((stat.Contains('.') || stat.Contains(',')) && double.TryParse(stat, NumberStyles.Any, CultureInfo.InvariantCulture, out double statDoubleValue))
                     {

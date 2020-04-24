@@ -210,6 +210,11 @@ namespace AmeisenBotX
                     }
                 }
 
+                if(AmeisenBot.WowInterface.ObjectManager?.Player != null)
+                {
+                    labelDebug.Content = AmeisenBot.WowInterface.ObjectManager.Player.Position;
+                }
+
                 // update health and secodary power bar and
                 // the colors corresponding to the class
                 switch (AmeisenBot.WowInterface.ObjectManager.Player.Class)

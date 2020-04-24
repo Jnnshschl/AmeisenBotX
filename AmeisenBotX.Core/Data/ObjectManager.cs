@@ -255,13 +255,10 @@ namespace AmeisenBotX.Core.Data
                 WowObjects.Clear();
 
                 // get the current objectmanager
-                // TODO: maybe cache it
-                if (CurrentObjectManager == IntPtr.Zero)
-                {
-                    WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
-                    WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
-                    CurrentObjectManager = currentObjectManager;
-                }
+                // better not cache it until we switched map
+                WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
+                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
+                CurrentObjectManager = currentObjectManager;
 
                 // read the first object
                 WowInterface.XMemory.Read(IntPtr.Add(CurrentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);

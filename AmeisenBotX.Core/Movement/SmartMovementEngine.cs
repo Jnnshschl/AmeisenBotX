@@ -55,6 +55,8 @@ namespace AmeisenBotX.Core.Movement
 
         public int TryCount { get; private set; }
 
+        private DateTime LastAction { get; set; }
+
         private Random Rnd { get; }
 
         private DateTime StrafeEnd { get; set; }
@@ -63,11 +65,12 @@ namespace AmeisenBotX.Core.Movement
 
         public void Execute()
         {
-            if (BurstCheckDistance)
+            if (DateTime.Now - LastAction < TimeSpan.FromMilliseconds(250))
             {
-                BurstCheckDistance = false;
-                MovementSettings.WaypointCheckThreshold -= 8;
+                return;
             }
+
+            LastAction = DateTime.Now;
 
             if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 16) || TryCount > 2)
             {
@@ -202,8 +205,6 @@ namespace AmeisenBotX.Core.Movement
                 if (TryCount > 2)
                 {
                     WowInterface.BotCache.CacheBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position);
-                    BurstCheckDistance = true;
-                    MovementSettings.WaypointCheckThreshold += 8;
                 }
                 else if (TryCount > 1)
                 {
@@ -239,7 +240,7 @@ namespace AmeisenBotX.Core.Movement
             }
 
             // if the target position is higher than us, jump
-            if (distanceToTargetPosition < 4 && currentPosition.Z + 2 < targetPosition.Z)
+            if (distanceToTargetPosition < 3 && currentPosition.Z + 2 < targetPosition.Z)
             {
                 WowInterface.CharacterManager.Jump();
             }

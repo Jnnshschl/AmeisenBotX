@@ -160,5 +160,8 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         public float[] ToArray()
             => new float[3] { X, Y, Z };
+
+        public override string ToString()
+            => $"X: {X}, Y: {Y}, Z: {Z}";
     }
 }

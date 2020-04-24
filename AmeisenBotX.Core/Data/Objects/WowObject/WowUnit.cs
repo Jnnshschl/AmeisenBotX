@@ -179,7 +179,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         private RawWowUnit RawWowUnit { get; set; }
 
         public bool HasBuffByName(string name)
-            => Auras.Any(e => e.Name == name);
+            => Auras != null && Auras.Any(e => e.Name == name);
 
         public override string ToString()
             => $"Unit: [{Guid}] {Name} lvl. {Level}";

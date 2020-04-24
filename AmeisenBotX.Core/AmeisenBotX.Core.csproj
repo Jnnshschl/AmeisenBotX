@@ -189,6 +189,8 @@
     <Compile Include="Dungeon\Profiles\Classic\DeadminesProfile.cs" />
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />
+    <Compile Include="Dungeon\Profiles\TBC\HellfireRampartsProfile.cs" />
+    <Compile Include="Dungeon\Profiles\WotLK\AzjolNerubProfile.cs" />
     <Compile Include="Dungeon\Profiles\WotLK\UtgardeKeepProfile.cs" />
     <Compile Include="Event\EventHook.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
@@ -307,7 +309,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Dungeon\Profiles\TBC\" />
     <Folder Include="Jobs\Profiles\Gathering\Herbs\" />
     <Folder Include="Jobs\Profiles\Gathering\Mining\" />
     <Folder Include="Raid\Profiles\Classic\" />

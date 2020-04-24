@@ -4,7 +4,6 @@ using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace AmeisenBotX.Core.Event
@@ -44,10 +43,11 @@ namespace AmeisenBotX.Core.Event
                 string eventJson = WowInterface.HookManager.ExecuteLuaAndRead("abEventJson='['for a,b in pairs(abEventTable)do abEventJson=abEventJson..'{'for c,d in pairs(b)do if type(d)==\"table\"then abEventJson=abEventJson..'\"args\": ['for e,f in pairs(d)do abEventJson=abEventJson..'\"'..f..'\"'if e<=table.getn(d)then abEventJson=abEventJson..','end end;abEventJson=abEventJson..']}'if a<table.getn(abEventTable)then abEventJson=abEventJson..','end else if type(d)==\"string\"then abEventJson=abEventJson..'\"event\": \"'..d..'\",'else abEventJson=abEventJson..'\"time\": \"'..d..'\",'end end end end;abEventJson=abEventJson..']'abEventTable={}", "abEventJson");
 
                 // sort out the events fired multiple times
-                List<WowEvent> finalEvents = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson)
-                    .GroupBy(x => x.Name)
-                    .Select(y => y.First())
-                    .ToList();
+                List<WowEvent> finalEvents = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson);
+                // buggy atm, prevents multiple item rolls
+                // .GroupBy(x => x.Name)
+                // .Select(y => y.First())
+                // .ToList();
 
                 if (finalEvents != null && finalEvents.Count > 0)
                 {
