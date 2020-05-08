@@ -2,6 +2,8 @@
 
 Hopefully the last rewrite of my WoW bot. I've learned much during the other 2 attempts so i decided to rewrite it from scratch. The aim of this bot is to create a human like group player that assists you on your adventure. From managing it's equipment to gathering resources the bot should do anything on its own.
 
+If you need more support, visit https://ameisenbotx.de/.
+
 Currently supported versions:
 
 * 3.3.5a 12340
