@@ -71,7 +71,7 @@ namespace AmeisenBotX.Test
             int rawWowObjectSize = Marshal.SizeOf(typeof(RawWowObject));
             _ = new WowObject(IntPtr.Zero, WowObjectType.None);
 
-            Assert.AreEqual(RawWowObject.EndOffset + RawWowObject.EndOffset, rawWowObjectSize);
+            Assert.AreEqual(RawWowObject.EndOffset, rawWowObjectSize);
         }
 
         [TestMethod]
