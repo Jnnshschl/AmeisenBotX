@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -52,7 +53,7 @@ namespace AmeisenBotX.Core
             }
 
             SetupLogging(botDataPath, accountName);
-            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             Config = config;
             AccountName = accountName;

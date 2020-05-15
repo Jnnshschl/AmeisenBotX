@@ -1,4 +1,8 @@
-﻿namespace AmeisenBotX.Core.Statemachine.States
+﻿using AmeisenBotX.Core.Common;
+using System;
+using System.Text;
+
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateLoadingScreen : BasicState
     {
@@ -15,12 +19,22 @@
             if (WowInterface.XMemory.Process == null || WowInterface.WowProcess.HasExited)
             {
                 StateMachine.SetState(BotState.None);
+                return;
+            }
+
+            if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string gameState)
+                && gameState.Contains("login"))
+            {
+                StateMachine.SetState(BotState.Login);
+                BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x1B));
+                return;
             }
 
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
             if (WowInterface.ObjectManager.IsWorldLoaded)
             {
                 StateMachine.SetState(BotState.Idle);
+                return;
             }
         }
 

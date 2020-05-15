@@ -75,7 +75,7 @@ namespace AmeisenBotX.Logging
 
         public void DeleteOldLogs(int daysToKeep = 1)
         {
-            try
+            if (Directory.Exists(LogFileFolder))
             {
                 foreach (string file in Directory.GetFiles(LogFileFolder))
                 {
@@ -87,7 +87,6 @@ namespace AmeisenBotX.Logging
                     }
                 }
             }
-            catch { }
         }
 
         public void Log(string tag, string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)

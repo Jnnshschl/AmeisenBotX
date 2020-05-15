@@ -6,7 +6,7 @@ namespace AmeisenBotX.Memory.Win32
     internal class Win32Imports
     {
         [Flags]
-        public enum AllocationType
+        public enum AllocationType : uint
         {
             Commit = 0x1000,
             Reserve = 0x2000,
@@ -20,7 +20,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum MemoryProtection
+        public enum MemoryProtection : uint
         {
             NoAccess = 0x1,
             ReadOnly = 0x2,
@@ -54,7 +54,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum ThreadAccess : int
+        public enum ThreadAccess : uint
         {
             Terminate = 0x1,
             SuspendResume = 0x2,
@@ -68,7 +68,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum WindowFlags : int
+        public enum WindowFlags : uint
         {
             NoSize = 0x1,
             NoMove = 0x2,
@@ -77,7 +77,7 @@ namespace AmeisenBotX.Memory.Win32
             NoActivate = 0x10,
             DrawFrame = 0x20,
             FrameChanged = 0x20,
-            SHowWindow = 0x40,
+            ShowWindow = 0x40,
             HideWindow = 0x80,
             NoCopyBits = 0x100,
             NoOwnerZOrder = 0x200,
@@ -87,67 +87,58 @@ namespace AmeisenBotX.Memory.Win32
             AsyncWindowPos = 0x4000
         }
 
-        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
-        [DllImport("dwmapi.dll", SetLastError = true)]
+        [DllImport("dwmapi", SetLastError = true)]
         public static extern void DwmExtendFrameIntoClientArea(IntPtr windowHandle, ref Margins margins);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32", SetLastError = true)]
         public static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32", SetLastError = true)]
         public static extern uint GetWindowLong(IntPtr windowHandle, int index);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32", SetLastError = true)]
         public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32", SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
 
-        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+        [DllImport("msvcrt", EntryPoint = "memset", SetLastError = false)]
         public static extern IntPtr MemSet(IntPtr dest, int c, int count);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool MoveWindow(IntPtr windowHandle, int x, int y, int width, int height, bool repaint);
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesRead);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtResumeThread(IntPtr threadHandle, out IntPtr suspendCount);
+
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtSuspendThread(IntPtr threadHandle, out IntPtr previousSuspendCount);
+
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtWriteVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
+
+        [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool inheritHandle, int processId);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr OpenThread(ThreadAccess threadAccess, bool inheritHandle, uint threadId);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(IntPtr processHandle, IntPtr baseAddress, IntPtr buffer, int size, out IntPtr numberOfBytesRead);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(IntPtr processHandle, IntPtr baseAddress, [Out] byte[] buffer, int size, out IntPtr numberOfBytesRead);
-
-        [DllImport("kernel32.dll")]
-        public static extern int ResumeThread(IntPtr threadHandle);
-
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32", SetLastError = true)]
         public static extern bool SetLayeredWindowAttributes(IntPtr windowHandle, uint colorKey, uint alpha, uint flags);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32", SetLastError = true)]
         public static extern int SetWindowLong(IntPtr windowHandle, int index, IntPtr newLong);
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+        [DllImport("user32", SetLastError = true)]
         public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
-        [DllImport("kernel32.dll")]
-        public static extern uint SuspendThread(IntPtr threadHandle);
-
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtection memoryProtection);
 
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr processHandle, IntPtr baseAddress, IntPtr buffer, int size, out IntPtr numberOfBytesWritten);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
     }
 }

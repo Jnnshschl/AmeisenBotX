@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;

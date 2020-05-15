@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             bool isInLos = true;
 
-            if(DateTime.Now - LastLineOfSightCheck > TimeSpan.FromMilliseconds(1000))
+            if (DateTime.Now - LastLineOfSightCheck > TimeSpan.FromMilliseconds(1000))
             {
                 isInLos = WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position);
                 LastLineOfSightCheck = DateTime.Now;

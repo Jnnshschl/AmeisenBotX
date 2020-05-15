@@ -64,6 +64,8 @@ namespace AmeisenBotX.Core
 
         public bool PermanentReactionCache { get; set; } = true;
 
+        public string Realm { get; set; } = "AmeisenRealm";
+
         public bool ReleaseSpirit { get; set; } = false;
 
         public bool SaveBotWindowPosition { get; set; } = false;

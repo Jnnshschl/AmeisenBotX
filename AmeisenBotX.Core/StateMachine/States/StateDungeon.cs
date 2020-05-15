@@ -8,6 +8,7 @@
 
         public override void Enter()
         {
+            WowInterface.MovementEngine.Reset();
         }
 
         public override void Execute()

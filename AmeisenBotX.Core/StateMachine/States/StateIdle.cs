@@ -22,20 +22,17 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            // first start
-            if (!WowInterface.HookManager.IsWoWHooked)
+            WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
+            StateMachine.PlayerName = playerName;
+
+            if (!WowInterface.EventHookManager.IsActive)
             {
-                WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
-                StateMachine.PlayerName = playerName;
-
-                WowInterface.HookManager.SetupEndsceneHook();
-                WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
-                WowInterface.HookManager.EnableClickToMove();
-
                 WowInterface.EventHookManager.Start();
-
-                WowInterface.CharacterManager.UpdateAll();
             }
+
+            WowInterface.CharacterManager.UpdateAll();
+            WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
+            WowInterface.HookManager.EnableClickToMove();
         }
 
         public override void Execute()

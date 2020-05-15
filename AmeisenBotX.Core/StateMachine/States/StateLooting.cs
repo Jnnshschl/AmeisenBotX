@@ -23,6 +23,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
+            WowInterface.MovementEngine.Reset();
         }
 
         public override void Execute()
@@ -71,7 +72,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
 
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                        if (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
+                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
                              && lootOpen > 0)
                         {
                             WowInterface.HookManager.LootEveryThing();

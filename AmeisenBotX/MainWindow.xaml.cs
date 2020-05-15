@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Memory;
 using AmeisenBotX.Overlay;
 using AmeisenBotX.Overlay.Utils;
 using Newtonsoft.Json;
@@ -210,7 +211,7 @@ namespace AmeisenBotX
                     }
                 }
 
-                if(AmeisenBot.WowInterface.ObjectManager?.Player != null)
+                if (AmeisenBot.WowInterface.ObjectManager?.Player != null)
                 {
                     labelDebug.Content = AmeisenBot.WowInterface.ObjectManager.Player.Position;
                 }
@@ -271,7 +272,7 @@ namespace AmeisenBotX
                 {
                     if (AmeisenBot.WowInterface.ObjectManager.Target != null)
                     {
-                        Memory.Win32.Rect windowRect = AmeisenBot.WowInterface.XMemory.GetWindowRectangle();
+                        Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
                         if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Player.Position, out Point debugPointMe)
                         && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Target.Position, out Point debugPointTarget))
                         {
@@ -310,7 +311,6 @@ namespace AmeisenBotX
             // generic stuff
             labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
 
-            labelGamestate.Content = AmeisenBot.WowInterface.ObjectManager.GameState;
             labelMapName.Content = AmeisenBot.WowInterface.ObjectManager.MapId.ToString();
             labelZoneName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneName;
             labelZoneSubName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneSubName;

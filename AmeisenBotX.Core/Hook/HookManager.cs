@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Hook
         {
             get
             {
-                if (WowInterface.XMemory.ReadByte(EndsceneAddress, out byte c))
+                if (WowInterface.XMemory.Read(EndsceneAddress, out byte c))
                 {
                     return c == 0xE9;
                 }
@@ -72,6 +72,10 @@ namespace AmeisenBotX.Core.Hook
         }
 
         public byte[] OriginalEndsceneBytes { get; private set; }
+
+        public bool OverrideWorldCheck { get; private set; }
+
+        public IntPtr OverrideWorldCheckAddress { get; private set; }
 
         public IntPtr ReturnValueAddress { get; private set; }
 
@@ -185,22 +189,27 @@ namespace AmeisenBotX.Core.Hook
                 AmeisenLogger.Instance.Log("HookManager", "Disposing EnsceneHook...", LogLevel.Verbose);
                 WowInterface.XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
 
-                if (CodecaveForCheck != null)
+                if (CodecaveForCheck != IntPtr.Zero)
                 {
                     WowInterface.XMemory.FreeMemory(CodecaveForCheck);
                 }
 
-                if (CodecaveForExecution != null)
+                if (CodecaveForExecution != IntPtr.Zero)
                 {
                     WowInterface.XMemory.FreeMemory(CodecaveForExecution);
                 }
 
-                if (CodeToExecuteAddress != null)
+                if (OverrideWorldCheckAddress != IntPtr.Zero)
+                {
+                    WowInterface.XMemory.FreeMemory(OverrideWorldCheckAddress);
+                }
+
+                if (CodeToExecuteAddress != IntPtr.Zero)
                 {
                     WowInterface.XMemory.FreeMemory(CodeToExecuteAddress);
                 }
 
-                if (ReturnValueAddress != null)
+                if (ReturnValueAddress != IntPtr.Zero)
                 {
                     WowInterface.XMemory.FreeMemory(ReturnValueAddress);
                 }
@@ -368,7 +377,7 @@ namespace AmeisenBotX.Core.Hook
             for (int i = 0; i < 6; ++i)
             {
                 if (WowInterface.XMemory.Read(WowInterface.OffsetList.RuneType + (4 * i), out RuneType type)
-                    && WowInterface.XMemory.ReadByte(WowInterface.OffsetList.Runes, out byte runeStatus)
+                    && WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus)
                     && ((1 << runeId) & runeStatus) != 0)
                 {
                     ++runes[type];
@@ -519,7 +528,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsRuneReady(int runeId)
         {
-            if (WowInterface.XMemory.ReadByte(WowInterface.OffsetList.Runes, out byte runeStatus))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus))
             {
                 return ((1 << runeId) & runeStatus) != 0;
             }
@@ -580,8 +589,20 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void OverrideWorldCheckOff()
+        {
+            OverrideWorldCheck = false;
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
+        }
+
+        public void OverrideWorldCheckOn()
+        {
+            OverrideWorldCheck = true;
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
+        }
+
         public void QueueBattlegroundByName(string bgName)
-            => LuaDoString($"for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
+                            => LuaDoString($"for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
 
         public void ReleaseSpirit()
             => LuaDoString("RepopMe();");
@@ -708,12 +729,17 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{CodeToExecuteAddress.ToInt32()}], 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
+                // check if we want to override our is ingame check
+                WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{OverrideWorldCheckAddress.ToInt32()}], 0");
+                WowInterface.XMemory.Fasm.AddLine("JE @ovr");
+
                 // check for world to be loaded
                 // we dont want to execute code in
                 // the loadingscreen, cause that
                 // mostly results in crashes
                 WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{WowInterface.OffsetList.IsWorldLoaded.ToInt32()}], 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
+                WowInterface.XMemory.Fasm.AddLine("@ovr:");
 
                 // execute our stuff and get return address
                 WowInterface.XMemory.Fasm.AddLine($"CALL {CodecaveForExecution.ToInt32()}");
@@ -872,7 +898,7 @@ namespace AmeisenBotX.Core.Hook
 
             CodeToExecuteAddress = codeToExecuteAddress;
             WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: {codeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: {CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr returnValueAddress))
@@ -882,7 +908,17 @@ namespace AmeisenBotX.Core.Hook
 
             ReturnValueAddress = returnValueAddress;
             WowInterface.XMemory.Write(ReturnValueAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {returnValueAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {ReturnValueAddress.ToInt32():X}", LogLevel.Verbose);
+
+            // codecave to override the is ingame check, used at the login
+            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress))
+            {
+                return false;
+            }
+
+            OverrideWorldCheckAddress = overrideWorldCheckAddress;
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OverrideWorldCheckAddress: {OverrideWorldCheckAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_CHECK_SIZE, out IntPtr codecaveForCheck))
@@ -891,7 +927,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             CodecaveForCheck = codecaveForCheck;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): {codecaveForCheck.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): {CodecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution))
@@ -900,7 +936,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             CodecaveForExecution = codecaveForExecution;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): {codecaveForExecution.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): {CodecaveForExecution.ToInt32():X}", LogLevel.Verbose);
 
             return true;
         }
@@ -959,7 +995,8 @@ namespace AmeisenBotX.Core.Hook
                 // zero our memory
                 if (WowInterface.XMemory.ZeroMemory(CodecaveForExecution, MEM_ALLOC_EXECUTION_SIZE))
                 {
-                    if (!WowInterface.ObjectManager.IsWorldLoaded || WowInterface.XMemory.Process.HasExited)
+                    WowInterface.ObjectManager.RefreshIsWorldLoaded();
+                    if ((!WowInterface.ObjectManager.IsWorldLoaded && !OverrideWorldCheck) || WowInterface.XMemory.Process.HasExited)
                     {
                         return returnBytes.ToArray();
                     }
@@ -1007,7 +1044,7 @@ namespace AmeisenBotX.Core.Hook
                                 WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
 
                                 // read all parameter-bytes until we the buffer is 0
-                                WowInterface.XMemory.ReadByte(dwAddress, out byte buffer);
+                                WowInterface.XMemory.Read(dwAddress, out byte buffer);
 
                                 if (buffer != 0)
                                 {
@@ -1015,7 +1052,7 @@ namespace AmeisenBotX.Core.Hook
                                     {
                                         returnBytes.Add(buffer);
                                         dwAddress += 1;
-                                    } while (WowInterface.XMemory.ReadByte(dwAddress, out buffer) && buffer != 0);
+                                    } while (WowInterface.XMemory.Read(dwAddress, out buffer) && buffer != 0);
                                 }
                                 else
                                 {
@@ -1034,7 +1071,9 @@ namespace AmeisenBotX.Core.Hook
 
                         // now there is no more code to be executed
                         WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-
+                    }
+                    finally
+                    {
                         if (frozenMainThread)
                         {
                             WowInterface.XMemory.ResumeMainThread();

@@ -111,6 +111,10 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaDoString(string command);
 
+        void OverrideWorldCheckOff();
+
+        void OverrideWorldCheckOn();
+
         void QueueBattlegroundByName(string bgName);
 
         void ReleaseSpirit();

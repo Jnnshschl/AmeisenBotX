@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Dungeon
         {
             WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
 
-            if (partyLeader != null && partyLeader.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 32)
+            if (partyLeader != null && partyLeader.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 64)
             {
                 WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
                 WowInterface.MovementEngine.Execute();

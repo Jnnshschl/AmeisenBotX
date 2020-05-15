@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.Movement
 
             LastAction = DateTime.Now;
 
-            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) && LastPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 16) || TryCount > 2)
+            if ((DateTime.Now - LastLastPositionUpdate > TimeSpan.FromMilliseconds(1000) || TryCount > 2))
             {
                 Reset();
                 return;

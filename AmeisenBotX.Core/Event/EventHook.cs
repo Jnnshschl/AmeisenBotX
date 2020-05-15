@@ -17,14 +17,13 @@ namespace AmeisenBotX.Core.Event
             EventDictionary = new Dictionary<string, List<OnEventFired>>();
             SubscribeQueue = new Queue<(string, OnEventFired)>();
             UnsubscribeQueue = new Queue<(string, OnEventFired)>();
-            IsSetUp = false;
         }
 
         public delegate void OnEventFired(long timestamp, List<string> args);
 
         public Dictionary<string, List<OnEventFired>> EventDictionary { get; }
 
-        public bool IsSetUp { get; private set; }
+        public bool IsActive { get; private set; }
 
         public Queue<(string, OnEventFired)> SubscribeQueue { get; }
 
@@ -76,22 +75,22 @@ namespace AmeisenBotX.Core.Event
 
         public void Start()
         {
-            if (!IsSetUp)
+            if (!IsActive)
             {
                 AmeisenLogger.Instance.Log("EventHook", $"Starting EventHookManager...", LogLevel.Verbose);
 
-                IsSetUp = true;
+                IsActive = true;
                 SetupEventHook();
             }
         }
 
         public void Stop()
         {
-            if (!IsSetUp)
+            if (!IsActive)
             {
                 AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager...", LogLevel.Verbose);
 
-                IsSetUp = false;
+                IsActive = false;
                 WowInterface.HookManager.LuaDoString($"abFrame:UnregisterAllEvents();");
                 WowInterface.HookManager.LuaDoString($"abFrame:SetScript(\"OnEvent\", nil);");
             }
@@ -113,7 +112,7 @@ namespace AmeisenBotX.Core.Event
         {
             try
             {
-                if (IsSetUp && SubscribeQueue.Count > 0)
+                if (IsActive && SubscribeQueue.Count > 0)
                 {
                     StringBuilder sb = new StringBuilder();
 
@@ -145,7 +144,7 @@ namespace AmeisenBotX.Core.Event
         {
             try
             {
-                if (IsSetUp && UnsubscribeQueue.Count > 0)
+                if (IsActive && UnsubscribeQueue.Count > 0)
                 {
                     (string, OnEventFired) queueElement = SubscribeQueue.Dequeue();
 

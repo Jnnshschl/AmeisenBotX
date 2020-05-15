@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
+using System.IO;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -14,11 +14,15 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            WowInterface.WowProcess = Process.Start(Config.PathToWowExe);
-            WowInterface.WowProcess.WaitForInputIdle();
-            Thread.Sleep(1000);
-            WowInterface.XMemory.Attach(WowInterface.WowProcess);
-            WowStart = DateTime.Now;
+            CheckTosAndEula();
+
+            if (File.Exists(Config.PathToWowExe))
+            {
+                WowInterface.WowProcess = Process.Start(Config.PathToWowExe);
+                WowInterface.WowProcess.WaitForInputIdle();
+                WowInterface.XMemory.Attach(WowInterface.WowProcess);
+                WowStart = DateTime.Now;
+            }
         }
 
         public override void Execute()
@@ -41,6 +45,35 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+        }
+
+        private void CheckTosAndEula()
+        {
+            string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+            if (File.Exists(configWtfPath))
+            {
+                string content = File.ReadAllText(configWtfPath).ToUpper();
+
+                if (content.Contains("SET READEULA"))
+                {
+                    content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
+                }
+                else
+                {
+                    content += "\nSET READEULA \"1\"";
+                }
+
+                if (content.Contains("SET READTOS"))
+                {
+                    content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
+                }
+                else
+                {
+                    content += "\nSET READTOS \"1\"";
+                }
+
+                File.WriteAllText(configWtfPath, content);
+            }
         }
     }
 }

@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Character
 
         void Jump();
 
-        void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f);
+        void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.25f);
 
         void UpdateAll();
 

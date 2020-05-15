@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Statemachine
                 SetState(BotState.None);
             }
 
-            if (WowInterface.ObjectManager != null && CurrentState.Key != BotState.LoadingScreen)
+            if (WowInterface.ObjectManager != null && CurrentState.Key != BotState.LoadingScreen && CurrentState.Key != BotState.StartWow && CurrentState.Key != BotState.Login && CurrentState.Key != BotState.None)
             {
                 if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
@@ -148,9 +148,9 @@ namespace AmeisenBotX.Core.Statemachine
 
         internal IEnumerable<WowUnit> GetNearLootableUnits()
             => WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-            .Where(e => e.IsLootable
-                && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
-                && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
+               .Where(e => e.IsLootable
+                   && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
+                   && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
 
         internal bool HasFoodInBag()
             => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Statemachine
 
         private void HandleEventPull()
         {
-            if (WowInterface.EventHookManager.IsSetUp
+            if (WowInterface.EventHookManager.IsActive
                 && LastEventPull + TimeSpan.FromMilliseconds(Config.EventPullMs) < DateTime.Now)
             {
                 LastEventPull = DateTime.Now;

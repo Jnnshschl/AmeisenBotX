@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Autologin
         {
             int count = 0;
 
-            if (WowInterface.XMemory.ReadInt(WowInterface.OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.IsWorldLoaded, out int isWorldLoaded))
             {
                 while (!WowInterface.XMemory.Process.HasExited && isWorldLoaded == 0)
                 {
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Autologin
                         count++;
                     }
 
-                    WowInterface.XMemory.ReadInt(WowInterface.OffsetList.IsWorldLoaded, out isWorldLoaded);
+                    WowInterface.XMemory.Read(WowInterface.OffsetList.IsWorldLoaded, out isWorldLoaded);
                 }
 
                 if (WowInterface.XMemory.Process != null && !WowInterface.XMemory.Process.HasExited)
@@ -67,14 +67,14 @@ namespace AmeisenBotX.Core.Autologin
 
         private void HandleCharSelect(int characterSlot)
         {
-            if (WowInterface.XMemory.ReadInt(WowInterface.OffsetList.CharacterSlotSelected, out int currentSlot))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.CharacterSlotSelected, out int currentSlot))
             {
                 bool failed = false;
                 while (!failed && currentSlot != characterSlot)
                 {
                     BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x28));
                     Thread.Sleep(1000);
-                    failed = WowInterface.XMemory.ReadInt(WowInterface.OffsetList.CharacterSlotSelected, out currentSlot);
+                    failed = WowInterface.XMemory.Read(WowInterface.OffsetList.CharacterSlotSelected, out currentSlot);
                 }
 
                 BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x0D));

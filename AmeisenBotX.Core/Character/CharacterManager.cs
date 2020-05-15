@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.25f)
         {
             if (pos == new Vector3(0, 0, 0))
             {

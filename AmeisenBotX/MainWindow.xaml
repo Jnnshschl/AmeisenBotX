@@ -189,12 +189,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,68.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" />
-        <Label x:Name="labelGamestate" Content="GameState" Margin="205,0,0,51.333" FontFamily="Bahnschrift Light" FontSize="10" Padding="0" HorizontalAlignment="Left" Width="49" Height="12" VerticalAlignment="Bottom">
-            <Label.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-            </Label.Foreground>
-        </Label>
+        <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,51.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" />
         <Label Content="Level:" HorizontalAlignment="Left" Margin="6,88,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
