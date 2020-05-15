@@ -592,17 +592,17 @@ namespace AmeisenBotX.Core.Hook
         public void OverrideWorldCheckOff()
         {
             OverrideWorldCheck = false;
-            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
         }
 
         public void OverrideWorldCheckOn()
         {
             OverrideWorldCheck = true;
-            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
         }
 
         public void QueueBattlegroundByName(string bgName)
-                            => LuaDoString($"for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
+            => LuaDoString($"for i=1,GetNumBattlegroundTypes()do local name,_,_,_,_=GetBattlegroundInfo(i)if name==\"{bgName}\"then JoinBattlefield(i)end end");
 
         public void ReleaseSpirit()
             => LuaDoString("RepopMe();");
@@ -730,7 +730,7 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Fasm.AddLine("JE @out");
 
                 // check if we want to override our is ingame check
-                WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{OverrideWorldCheckAddress.ToInt32()}], 0");
+                WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{OverrideWorldCheckAddress.ToInt32()}], 1");
                 WowInterface.XMemory.Fasm.AddLine("JE @ovr");
 
                 // check for world to be loaded
