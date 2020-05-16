@@ -119,6 +119,7 @@ namespace AmeisenBotX.Memory
             }
 
             Fasm = new ManagedFasm(ProcessHandle);
+            MemoryAllocations.Clear();
             return true;
         }
 

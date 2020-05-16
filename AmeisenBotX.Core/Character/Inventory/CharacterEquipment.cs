@@ -94,17 +94,11 @@ namespace AmeisenBotX.Core.Character.Inventory
                     continue;
                 }
 
-                count++;
-
-                if (Items.ContainsKey(slot))
-                {
-                    itemLevel += Items[slot].ItemLevel;
-                }
-
-                itemLevel /= count;
+                if (Items.ContainsKey(slot)) { itemLevel += Items[slot].ItemLevel; }
+                ++count;
             }
 
-            return itemLevel;
+            return itemLevel /= count;
         }
     }
 }

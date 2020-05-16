@@ -25,16 +25,7 @@ namespace AmeisenBotX.Core.Common
         /// <param name="max">The maximun value a value in the vector is allowed to have</param>
         /// <returns>The capped Vector</returns>
         public static Vector3 CapVector3(Vector3 vector, float max)
-            => new Vector3(
-                vector.X < 0 ?
-                    vector.X <= max * -1 ? max * -1 : vector.X
-                    : vector.X >= max ? max : vector.X,
-                vector.Y < 0 ?
-                    vector.Y <= max * -1 ? max * -1 : vector.Y
-                    : vector.Y >= max ? max : vector.Y,
-                vector.Z < 0 ?
-                    vector.Z <= max * -1 ? max * -1 : vector.Z
-                    : vector.Z >= max ? max : vector.Z);
+            => new Vector3(Math.Min(vector.X, max), Math.Min(vector.Y, max), Math.Min(vector.Z, max));
 
         public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
         {

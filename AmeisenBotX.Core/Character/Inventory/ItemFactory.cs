@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Character.Inventory
             => (basicItem.Type.ToUpper()) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
-                "CONSUMEABLE" => new WowConsumable(basicItem),
+                "CONSUMABLE" => new WowConsumable(basicItem),
                 "CONTAINER" => new WowContainer(basicItem),
                 "GEM" => new WowGem(basicItem),
                 "KEY" => new WowKey(basicItem),
@@ -28,21 +28,15 @@ namespace AmeisenBotX.Core.Character.Inventory
             };
 
         public static WowBasicItem ParseItem(string json)
-        {
-            return JsonConvert.DeserializeObject<WowBasicItem>(json);
-        }
+            => JsonConvert.DeserializeObject<WowBasicItem>(json);
 
         public static List<WowBasicItem> ParseItemList(string json)
-        {
-            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
+            => JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
             {
                 Error = HandleDeserializationError
             });
-        }
 
         private static void HandleDeserializationError(object sender, ErrorEventArgs e)
-        {
-            e.ErrorContext.Handled = true;
-        }
+            => e.ErrorContext.Handled = true;
     }
 }

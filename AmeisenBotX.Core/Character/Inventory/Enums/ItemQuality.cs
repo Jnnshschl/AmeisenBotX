@@ -5,7 +5,7 @@
         Unique = -1,
         Poor,
         Common,
-        Uncomman,
+        Uncommon,
         Rare,
         Epic,
         Legendary,

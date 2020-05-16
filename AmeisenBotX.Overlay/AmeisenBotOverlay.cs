@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Memory;
 using GameOverlay.Drawing;
 using GameOverlay.Windows;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Overlay
@@ -24,7 +25,7 @@ namespace AmeisenBotX.Overlay
             Gfx = new Graphics(OverlayWindow.Handle, OverlayWindow.Width, OverlayWindow.Height);
             Gfx.Setup();
 
-            BlackBrush = Gfx.CreateSolidBrush(0, 0, 0);
+            DefaultLineBrush = Gfx.CreateSolidBrush(0, 255, 255);
         }
 
         public Graphics Gfx { get; }
@@ -33,7 +34,7 @@ namespace AmeisenBotX.Overlay
 
         public XMemory XMemory { get; }
 
-        private IBrush BlackBrush { get; }
+        private IBrush DefaultLineBrush { get; }
 
         private List<(Point, Point)> LinesToRender { get; }
 
@@ -57,7 +58,7 @@ namespace AmeisenBotX.Overlay
 
                 foreach ((Point, Point) line in LinesToRender)
                 {
-                    Gfx.DrawLine(BlackBrush, new Line(line.Item1, line.Item2), 2f);
+                    Gfx.DrawLine(DefaultLineBrush, new Line(line.Item1, line.Item2), 2f);
                 }
 
                 LinesToRender.Clear();
@@ -70,6 +71,16 @@ namespace AmeisenBotX.Overlay
         {
             OverlayWindow.Dispose();
             Gfx.Dispose();
+        }
+
+        public void Clear()
+        {
+            if (LinesToRender.Count > 0)
+            {
+                LinesToRender.Clear();
+            }
+
+            Draw();
         }
     }
 }

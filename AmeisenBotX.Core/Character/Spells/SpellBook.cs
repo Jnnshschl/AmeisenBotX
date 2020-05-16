@@ -15,8 +15,6 @@ namespace AmeisenBotX.Core.Character.Spells
             WowInterface = wowInterface;
 
             Spells = new List<Spell>();
-
-            Update();
         }
 
         public delegate void SpellBookUpdate();
@@ -28,10 +26,10 @@ namespace AmeisenBotX.Core.Character.Spells
         private WowInterface WowInterface { get; }
 
         public Spell GetSpellByName(string spellname)
-            => Spells.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+            => Spells?.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
 
         public bool IsSpellKnown(string spellname)
-            => Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+            => Spells != null && Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
 
         public void Update()
         {
@@ -40,17 +38,12 @@ namespace AmeisenBotX.Core.Character.Spells
 
             try
             {
-                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells);
+                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells).OrderBy(e => e.Name).ThenByDescending(e => e.Rank).ToList();
+                OnSpellBookUpdate?.Invoke();
             }
             catch (Exception e)
             {
                 AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Spells JSON:\n{rawSpells}\n{e}", LogLevel.Error);
-            }
-
-            if (Spells != null)
-            {
-                Spells.OrderBy(e => e.Name).ThenByDescending(e => e.Rank);
-                OnSpellBookUpdate?.Invoke();
             }
         }
     }

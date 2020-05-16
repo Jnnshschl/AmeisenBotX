@@ -268,24 +268,31 @@ namespace AmeisenBotX
                     LastStateMachineTickUpdate = DateTime.Now;
                 }
 
-                if (DrawOverlay)
+
+                if (Overlay == null)
                 {
-                    if (AmeisenBot.WowInterface.ObjectManager.Target != null)
+                    Overlay = new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
+                }
+                else
+                {
+                    if (DrawOverlay)
                     {
-                        Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
-                        if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Player.Position, out Point debugPointMe)
-                        && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Target.Position, out Point debugPointTarget))
+                        if (AmeisenBot.WowInterface.ObjectManager.Target != null)
                         {
-                            Overlay.AddLine((int)debugPointMe.X, (int)debugPointMe.Y, (int)debugPointTarget.X, (int)debugPointTarget.Y);
+                            Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+                            if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Player.Position, out Point debugPointMe)
+                            && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Target.Position, out Point debugPointTarget))
+                            {
+                                Overlay.AddLine((int)debugPointMe.X, (int)debugPointMe.Y, (int)debugPointTarget.X, (int)debugPointTarget.Y);
+                            }
                         }
-                    }
 
-                    if (Overlay == null)
+                        Overlay?.Draw();
+                    }
+                    else
                     {
-                        Overlay = new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
+                        Overlay.Clear();
                     }
-
-                    Overlay?.Draw();
                 }
             });
         }
@@ -413,5 +420,7 @@ namespace AmeisenBotX
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+
+        private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e) => new InfoWindow(AmeisenBot).Show();
     }
 }

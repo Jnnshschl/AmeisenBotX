@@ -20,5 +20,15 @@ namespace AmeisenBotX.Test
             Assert.AreEqual("100M", BotUtils.BigValueToString(100000000));
             Assert.AreEqual("1000M", BotUtils.BigValueToString(1000000000));
         }
+
+        [TestMethod]
+        public void ObfuscateLuaTest()
+        {
+            string x = BotUtils.FastRandomString();
+            string sample = $"{{v:0}}={x}";
+            (string, string) result = BotUtils.ObfuscateLua(sample);
+
+            Assert.AreEqual(result.Item1, $"{result.Item2}={x}");
+        }
     }
 }
