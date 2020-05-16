@@ -149,6 +149,8 @@ namespace AmeisenBotX
             }
         }
 
+        private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e) => new InfoWindow(AmeisenBot).Show();
+
         private void ButtonToggleOverlay_Click(object sender, RoutedEventArgs e)
         {
             if (DrawOverlay)
@@ -268,7 +270,6 @@ namespace AmeisenBotX
                     LastStateMachineTickUpdate = DateTime.Now;
                 }
 
-
                 if (Overlay == null)
                 {
                     Overlay = new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
@@ -283,7 +284,7 @@ namespace AmeisenBotX
                             if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Player.Position, out Point debugPointMe)
                             && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Target.Position, out Point debugPointTarget))
                             {
-                                Overlay.AddLine((int)debugPointMe.X, (int)debugPointMe.Y, (int)debugPointTarget.X, (int)debugPointTarget.Y);
+                                Overlay.AddLine((int)debugPointMe.X, (int)debugPointMe.Y, (int)debugPointTarget.X, (int)debugPointTarget.Y, Colors.Cyan);
                             }
                         }
 
@@ -420,7 +421,5 @@ namespace AmeisenBotX
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-
-        private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e) => new InfoWindow(AmeisenBot).Show();
     }
 }

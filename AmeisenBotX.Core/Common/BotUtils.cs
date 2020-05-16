@@ -10,7 +10,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace AmeisenBotX.Core.Common
@@ -79,10 +78,10 @@ namespace AmeisenBotX.Core.Common
 
         /// <summary>
         /// Replace the variables in a LUA string to make them less obvious.
-        /// 
+        ///
         /// Mark the variable places using this format: "{v:0}=1" ({v:0} will be replaced with a random string)
         /// Name the next {v:1} the next {v:2} and so on.
-        /// 
+        ///
         /// The first variable will always be the return variable name!
         /// </summary>
         /// <param name="input">LUA string</param>

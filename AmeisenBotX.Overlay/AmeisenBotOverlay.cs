@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Memory;
 using GameOverlay.Drawing;
 using GameOverlay.Windows;
-using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Overlay
@@ -11,7 +10,7 @@ namespace AmeisenBotX.Overlay
         public AmeisenBotOverlay(XMemory xMemory)
         {
             XMemory = xMemory;
-            LinesToRender = new List<(Point, Point)>();
+            LinesToRender = new List<(SolidBrush, (Point, Point))>();
 
             OverlayWindow = new StickyWindow(xMemory.Process.MainWindowHandle)
             {
@@ -24,8 +23,6 @@ namespace AmeisenBotX.Overlay
 
             Gfx = new Graphics(OverlayWindow.Handle, OverlayWindow.Width, OverlayWindow.Height);
             Gfx.Setup();
-
-            DefaultLineBrush = Gfx.CreateSolidBrush(0, 255, 255);
         }
 
         public Graphics Gfx { get; }
@@ -34,18 +31,26 @@ namespace AmeisenBotX.Overlay
 
         public XMemory XMemory { get; }
 
-        private IBrush DefaultLineBrush { get; }
+        private List<(SolidBrush, (Point, Point))> LinesToRender { get; }
 
-        private List<(Point, Point)> LinesToRender { get; }
-
-        public void AddLine(int x1, int y1, int x2, int y2)
+        public void AddLine(int x1, int y1, int x2, int y2, System.Windows.Media.Color color)
         {
-            (Point, Point) line = (new Point(x1, y1), new Point(x2, y2));
+            (SolidBrush, (Point, Point)) line = (Gfx.CreateSolidBrush(color.R, color.G, color.B, color.A), (new Point(x1, y1), new Point(x2, y2)));
 
             if (!LinesToRender.Contains(line))
             {
                 LinesToRender.Add(line);
             }
+        }
+
+        public void Clear()
+        {
+            if (LinesToRender.Count > 0)
+            {
+                LinesToRender.Clear();
+            }
+
+            Draw();
         }
 
         public void Draw()
@@ -56,9 +61,9 @@ namespace AmeisenBotX.Overlay
                 Gfx.BeginScene();
                 Gfx.ClearScene();
 
-                foreach ((Point, Point) line in LinesToRender)
+                foreach ((SolidBrush, (Point, Point)) line in LinesToRender)
                 {
-                    Gfx.DrawLine(DefaultLineBrush, new Line(line.Item1, line.Item2), 2f);
+                    Gfx.DrawLine(line.Item1, new Line(line.Item2.Item1, line.Item2.Item2), 2f);
                 }
 
                 LinesToRender.Clear();
@@ -71,16 +76,6 @@ namespace AmeisenBotX.Overlay
         {
             OverlayWindow.Dispose();
             Gfx.Dispose();
-        }
-
-        public void Clear()
-        {
-            if (LinesToRender.Count > 0)
-            {
-                LinesToRender.Clear();
-            }
-
-            Draw();
         }
     }
 }

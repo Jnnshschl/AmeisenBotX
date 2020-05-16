@@ -1,9 +1,6 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Character.Spells.Objects;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace AmeisenBotX.Views
 {

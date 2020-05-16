@@ -3,32 +3,15 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Views;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace AmeisenBotX
 {
     public partial class InfoWindow : Window
     {
-        enum DisplayMode
-        {
-            Equipment,
-            Inventory,
-            Spells
-        }
-
-        private DisplayMode CurrentDisplayMode { get; set; }
-
         public InfoWindow(AmeisenBot ameisenBot)
         {
             AmeisenBot = ameisenBot;
@@ -36,14 +19,39 @@ namespace AmeisenBotX
             InitializeComponent();
         }
 
+        private enum DisplayMode
+        {
+            Equipment,
+            Inventory,
+            Spells
+        }
+
         private AmeisenBot AmeisenBot { get; set; }
+
+        private DisplayMode CurrentDisplayMode { get; set; }
+
+        private void ButtonEquipment_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentDisplayMode = DisplayMode.Equipment;
+            DisplayStuff();
+        }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void ButtonInventory_Click(object sender, RoutedEventArgs e)
         {
+            CurrentDisplayMode = DisplayMode.Inventory;
+            DisplayStuff();
+        }
+
+        private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayStuff();
+        }
+
+        private void ButtonSpells_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentDisplayMode = DisplayMode.Spells;
             DisplayStuff();
         }
 
@@ -86,31 +94,14 @@ namespace AmeisenBotX
                         equipmentWrapPanel.Children.Add(new SpellDisplay(spell));
                     }
                     break;
-
             }
         }
 
-        private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             DisplayStuff();
         }
 
-        private void ButtonEquipment_Click(object sender, RoutedEventArgs e)
-        {
-            CurrentDisplayMode = DisplayMode.Equipment;
-            DisplayStuff();
-        }
-
-        private void ButtonInventory_Click(object sender, RoutedEventArgs e)
-        {
-            CurrentDisplayMode = DisplayMode.Inventory;
-            DisplayStuff();
-        }
-
-        private void ButtonSpells_Click(object sender, RoutedEventArgs e)
-        {
-            CurrentDisplayMode = DisplayMode.Spells;
-            DisplayStuff();
-        }
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
     }
 }
