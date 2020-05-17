@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.Settings;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Movement
 {
@@ -24,6 +25,8 @@ namespace AmeisenBotX.Core.Movement
         }
 
         public bool BurstCheckDistance { get; private set; }
+
+        public List<Vector3> Path => CurrentPath?.ToList();
 
         public Queue<Vector3> CurrentPath { get; private set; }
 
@@ -83,7 +86,7 @@ namespace AmeisenBotX.Core.Movement
                 TryCount = 0;
                 List<Vector3> nodes = new List<Vector3>();
 
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > 30)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > 8)
                 {
                     List<Vector3> getPathResult = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 

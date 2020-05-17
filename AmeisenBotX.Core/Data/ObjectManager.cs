@@ -535,15 +535,19 @@ namespace AmeisenBotX.Core.Data
         private WowPlayer ReadWowPlayer(IntPtr activeObject, WowObjectType wowObjectType)
         {
             if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
-                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position))
+                && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position)
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation)
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
             {
                 WowPlayer player = new WowPlayer(activeObject, wowObjectType)
                 {
                     DescriptorAddress = descriptorAddress,
-                    Position = position
+                    Position = position,
+                    Rotation = rotation,
+                    IsAutoAttacking = isAutoAttacking == 1
                 };
 
-                // First read the descriptor, then lookup the Name by GUID
+                // first read the descriptor, then lookup the Name by GUID
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
                 player.Name = ReadPlayerName(player.Guid);
 

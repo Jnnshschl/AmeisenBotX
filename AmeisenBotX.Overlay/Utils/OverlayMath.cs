@@ -38,7 +38,7 @@ namespace AmeisenBotX.Overlay.Utils
                 Y = (int)(screenY + cam.Y * tmpY / cam.Z)
             };
 
-            return screenCoordinates.X > 0 && screenCoordinates.Y > 0 && screenCoordinates.X < windowWidth && screenCoordinates.Y < windowHeight;
+            return screenCoordinates.X > 0 && screenCoordinates.Y > 0; //  && screenCoordinates.X < windowWidth && screenCoordinates.Y < windowHeight
         }
     }
 }

@@ -36,7 +36,7 @@ namespace AmeisenBotX
             DisplayStuff();
         }
 
-        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
+        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Hide();
 
         private void ButtonInventory_Click(object sender, RoutedEventArgs e)
         {

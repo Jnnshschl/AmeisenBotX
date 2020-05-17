@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="InfoWindow" Height="480" Width="750" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
+        Title="InfoWindow" Height="480" Width="740" MinHeight="120" MinWidth="740" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -13,7 +13,7 @@
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
     <Grid>
-        <ScrollViewer Margin="10,59,10.333,10.333" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Margin="0,27,0.333,0.333" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <WrapPanel x:Name="equipmentWrapPanel">
                 <WrapPanel.Background>
                     <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}" />
@@ -51,7 +51,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonEquipment" Content="Equipment" HorizontalAlignment="Left" Margin="10,33,0,0" VerticalAlignment="Top" Width="100" Style="{DynamicResource ButtonStyleDark}" Click="ButtonEquipment_Click">
+        <Button x:Name="buttonEquipment" Content="Equipment" HorizontalAlignment="Right" Margin="0,0,256.333,0" VerticalAlignment="Top" Width="100" Style="{DynamicResource ButtonStyleDark}" Click="ButtonEquipment_Click" BorderThickness="1,0,0,0" Height="27">
             <Button.BorderBrush>
                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
             </Button.BorderBrush>
@@ -59,12 +59,12 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonInventory" Content="Inventory" HorizontalAlignment="Left" Margin="115,33,0,0" VerticalAlignment="Top" Width="100" Style="{DynamicResource ButtonStyleDark}" Click="ButtonInventory_Click">
+        <Button x:Name="buttonInventory" Content="Inventory" Margin="0,0,156.333,0" VerticalAlignment="Top" Style="{DynamicResource ButtonStyleDark}" Click="ButtonInventory_Click" BorderThickness="1,0,0,0" Height="27" HorizontalAlignment="Right" Width="100">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonSpells" Content="Spells" HorizontalAlignment="Left" Margin="220,33,0,0" VerticalAlignment="Top" Width="100" Style="{DynamicResource ButtonStyleDark}" Click="ButtonSpells_Click">
+        <Button x:Name="buttonSpells" Content="Spells" Margin="0,0,56.333,0" VerticalAlignment="Top" Style="{DynamicResource ButtonStyleDark}" Click="ButtonSpells_Click" BorderThickness="1,0,0,0" Height="27" HorizontalAlignment="Right" Width="100">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

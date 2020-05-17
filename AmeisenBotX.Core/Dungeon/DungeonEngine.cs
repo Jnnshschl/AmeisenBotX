@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         public bool AllPlayersArrived { get; private set; }
 
+        public List<DungeonNode> Nodes => CurrentNodes?.ToList();
+
         public Queue<DungeonNode> CurrentNodes { get; private set; }
 
         public IDungeonProfile DungeonProfile { get; private set; }

@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -87,6 +89,10 @@ namespace AmeisenBotX
 
         private DateTime LastStateMachineTickUpdate { get; set; }
 
+        private InfoWindow InfoWindow { get; set; }
+
+        private MapWindow MapWindow { get; set; }
+
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
             AmeisenBot.WowInterface.BotCache.Clear();
@@ -108,6 +114,8 @@ namespace AmeisenBotX
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             Overlay?.Exit();
+            InfoWindow?.Close();
+            MapWindow?.Close();
             Close();
         }
 
@@ -149,7 +157,15 @@ namespace AmeisenBotX
             }
         }
 
-        private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e) => new InfoWindow(AmeisenBot).Show();
+        private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if (InfoWindow == null)
+            {
+                InfoWindow = new InfoWindow(AmeisenBot);
+            }
+
+            InfoWindow.Show();
+        }
 
         private void ButtonToggleOverlay_Click(object sender, RoutedEventArgs e)
         {
@@ -278,13 +294,49 @@ namespace AmeisenBotX
                 {
                     if (DrawOverlay)
                     {
-                        if (AmeisenBot.WowInterface.ObjectManager.Target != null)
+                        if (AmeisenBot.WowInterface.MovementEngine.Path != null
+                        && AmeisenBot.WowInterface.MovementEngine.Path.Count > 0)
                         {
-                            Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
-                            if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Player.Position, out Point debugPointMe)
-                            && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, AmeisenBot.WowInterface.ObjectManager.Target.Position, out Point debugPointTarget))
+                            for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count && i < 10; ++i)
                             {
-                                Overlay.AddLine((int)debugPointMe.X, (int)debugPointMe.Y, (int)debugPointTarget.X, (int)debugPointTarget.Y, Colors.Cyan);
+                                Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
+                                Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
+
+                                Color lineColor = Colors.LightCyan;
+                                Color startDot = Colors.Cyan;
+                                Color endDot = i == 0 ? Colors.Navy : Colors.Cyan;
+
+                                Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+                                if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
+                                && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
+                                {
+                                    Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
+                                    Overlay.AddRectangle((int)startPoint.X - 3, (int)startPoint.Y - 3, 5, 5, startDot);
+                                    Overlay.AddRectangle((int)endPoint.X - 3, (int)endPoint.Y - 3, 5, 5, endDot);
+                                }
+                            }
+                        }
+
+                        if (AmeisenBot.WowInterface.DungeonEngine.Nodes != null
+                        && AmeisenBot.WowInterface.DungeonEngine.Nodes.Count > 0)
+                        {
+                            for (int i = 0; i < AmeisenBot.WowInterface.DungeonEngine.Nodes.Count && i < 32; ++i)
+                            {
+                                Vector3 start = AmeisenBot.WowInterface.DungeonEngine.Nodes[i].Position;
+                                Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.DungeonEngine.Nodes[i - 1].Position;
+
+                                Color lineColor = Colors.White;
+                                Color startDot = Colors.Gray;
+                                Color endDot = i == 0 ? Colors.Orange : Colors.Gray;
+
+                                Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+                                if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
+                                && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
+                                {
+                                    Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
+                                    Overlay.AddRectangle((int)startPoint.X - 3, (int)startPoint.Y - 3, 5, 5, startDot);
+                                    Overlay.AddRectangle((int)endPoint.X - 3, (int)endPoint.Y - 3, 5, 5, endDot);
+                                }
                             }
                         }
 
@@ -421,5 +473,15 @@ namespace AmeisenBotX
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+
+        private void ButtonToggleMapWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if (MapWindow == null)
+            {
+                MapWindow = new MapWindow(AmeisenBot);
+            }
+
+            MapWindow.Show();
+        }
     }
 }

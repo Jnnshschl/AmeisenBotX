@@ -523,13 +523,13 @@ namespace AmeisenBotX.Core.Hook
         public void OverrideWorldCheckOff()
         {
             OverrideWorldCheck = false;
-            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
         }
 
         public void OverrideWorldCheckOn()
         {
             OverrideWorldCheck = true;
-            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
         }
 
         public void QueueBattlegroundByName(string bgName)
@@ -664,7 +664,7 @@ namespace AmeisenBotX.Core.Hook
 
             // check if we want to override our is ingame check
             WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{OverrideWorldCheckAddress.ToInt32()}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @ovr");
+            WowInterface.XMemory.Fasm.AddLine("JNE @ovr");
 
             // check for world to be loaded
             // we dont want to execute code in

@@ -98,9 +98,15 @@ namespace AmeisenBotX.Core.Statemachine
                 SetState(BotState.None);
             }
 
-            if (WowInterface.ObjectManager != null && CurrentState.Key != BotState.LoadingScreen && CurrentState.Key != BotState.StartWow && CurrentState.Key != BotState.Login && CurrentState.Key != BotState.None)
+            if (WowInterface.ObjectManager != null)
             {
-                if (!WowInterface.ObjectManager.IsWorldLoaded)
+                WowInterface.ObjectManager.RefreshIsWorldLoaded();
+
+                if (CurrentState.Key != BotState.LoadingScreen 
+                    && CurrentState.Key != BotState.StartWow 
+                    && CurrentState.Key != BotState.Login 
+                    && CurrentState.Key != BotState.None 
+                    && !WowInterface.ObjectManager.IsWorldLoaded)
                 {
                     AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
                     SetState(BotState.LoadingScreen, true);

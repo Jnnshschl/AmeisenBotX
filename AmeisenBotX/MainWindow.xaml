@@ -184,11 +184,6 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonFaceTarget" Content="Face Target" Margin="290,0,0,30.333" Click="ButtonFaceTarget_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Left" Width="80" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom">
-            <Button.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-            </Button.Foreground>
-        </Button>
         <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,51.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" />
         <Label Content="Level:" HorizontalAlignment="Left" Margin="6,88,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
@@ -251,6 +246,11 @@
             </Button.Foreground>
         </Button>
         <Button x:Name="buttonToggleInfoWindow" Content="⚔️" Margin="0,0,84.333,0" BorderThickness="1,0,0,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleInfoWindow_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" Width="28">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Button x:Name="buttonToggleMapWindow" Content="🗺️" Margin="0,0,112.333,0" BorderThickness="1,0,0,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleMapWindow_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" Width="28">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
