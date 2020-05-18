@@ -94,8 +94,9 @@ namespace AmeisenBotX.Overlay
 
         public void Exit()
         {
-            OverlayWindow.Dispose();
             Gfx.Dispose();
+            OverlayWindow.Dispose();
+            OverlayWindow.Join();
         }
     }
 }

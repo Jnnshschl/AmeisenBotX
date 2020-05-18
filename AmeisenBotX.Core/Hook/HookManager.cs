@@ -21,8 +21,9 @@ namespace AmeisenBotX.Core.Hook
 {
     public class HookManager : IHookManager
     {
-        private const int MEM_ALLOC_CHECK_SIZE = 56;
+        private const int MEM_ALLOC_CHECK_SIZE = 64;
         private const int MEM_ALLOC_EXECUTION_SIZE = 512;
+        private const int MEM_ALLOC_GATEWAY_SIZE = 12;
         private readonly object hookLock = new object();
         private ulong endsceneCalls;
 
@@ -47,6 +48,8 @@ namespace AmeisenBotX.Core.Hook
         public IntPtr CodecaveForCheck { get; private set; }
 
         public IntPtr CodecaveForExecution { get; private set; }
+
+        public IntPtr CodecaveForGateway { get; private set; }
 
         public IntPtr CodeToExecuteAddress { get; private set; }
 
@@ -179,6 +182,7 @@ namespace AmeisenBotX.Core.Hook
 
                 WowInterface.XMemory.FreeMemory(CodecaveForCheck);
                 WowInterface.XMemory.FreeMemory(CodecaveForExecution);
+                WowInterface.XMemory.FreeMemory(CodecaveForGateway);
                 WowInterface.XMemory.FreeMemory(OverrideWorldCheckAddress);
                 WowInterface.XMemory.FreeMemory(CodeToExecuteAddress);
                 WowInterface.XMemory.FreeMemory(ReturnValueAddress);
@@ -345,7 +349,7 @@ namespace AmeisenBotX.Core.Hook
         {
             try
             {
-                return new List<string>(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{{v:0}}=\"\"{{v:1}}=GetNumSkillLines()for a=1,{{v:1}} do local b,c=GetSkillLineInfo(a)if not c then {{v:0}}={{v:0}}..b;if a<{{v:1}} then {{v:0}}={{v:0}}..\"; \"end end end")).Split(';')).Select(s => s.Trim()).ToList();
+                return new List<string>(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\"; \"end end end")).Split(';')).Select(s => s.Trim()).ToList();
             }
             catch
             {
@@ -355,16 +359,17 @@ namespace AmeisenBotX.Core.Hook
 
         public double GetSpellCooldown(string spellName)
         {
-            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}} = GetSpellCooldown(\"{spellName}\");{{v:0}} = ({{v:1}} + {{v:2}} - GetTime()) * 1000;if {{v:0}} < 0 then {{v:0}} = 0 end;"));
+            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}} = GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}} < 0 then {{v:0}} = 0 end;"));
             double cooldown = 0;
+
+            if (result.Contains('.'))
+            {
+                result = result.Split('.')[0];
+            }
 
             if (double.TryParse(result, out double value))
             {
                 cooldown = Math.Round(value);
-            }
-            else if (double.TryParse(result.Replace(".", ","), out double svalue)) // try again with comma instead of a dot
-            {
-                cooldown = Math.Round(svalue);
             }
 
             AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {cooldown}ms", LogLevel.Verbose);
@@ -631,20 +636,19 @@ namespace AmeisenBotX.Core.Hook
                 return false;
             }
 
-            // first thing thats 5 bytes big is here
-            // we are going to replace this 5 bytes with
-            // our JMP instruction (JMP (1 byte) + Address (4 byte))
-            // EndsceneAddress = IntPtr.Add(EndsceneAddress, 0x2);
-            EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, 0x7);
+            // we are going to replace the first 7 bytes of EndScene
+            int hookSize = 0x7;
+            EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, hookSize);
 
             AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: {EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
 
             // if WoW is already hooked, unhook it, wont do anything if wow is not hooked
             DisposeHook();
 
-            if (WowInterface.XMemory.ReadBytes(EndsceneAddress, 7, out byte[] bytes))
+            if (WowInterface.XMemory.ReadBytes(EndsceneAddress, hookSize, out byte[] bytes))
             {
                 OriginalEndsceneBytes = bytes;
+                AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OriginalEndsceneBytes: {BotUtils.ByteArrayToString(OriginalEndsceneBytes)}", LogLevel.Verbose);
             }
 
             if (!AllocateCodeCaves())
@@ -682,15 +686,12 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.Fasm.AddLine("@out:");
             WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{CodeToExecuteAddress.ToInt32()}], 0");
 
+            // call the gateway function
+            WowInterface.XMemory.Fasm.AddLine($"JMP {CodecaveForGateway.ToInt32()}");
+
             // restore registers
             // WowInterface.XMemory.Fasm.AddLine("POPFD");
             // WowInterface.XMemory.Fasm.AddLine("POPAD");
-
-            byte[] asmBytes = WowInterface.XMemory.Fasm.Assemble();
-
-            // needed to determine the position where the original
-            // asm is going to be placed
-            int asmLenght = asmBytes.Length;
 
             // inject the instructions into our codecave
             WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32());
@@ -700,17 +701,16 @@ namespace AmeisenBotX.Core.Hook
             // executed on our hook
             // ---------------------------------------------------
 
-            // Prepare to replace the instructions inside WoW
+            // original EndScene in the gateway
             WowInterface.XMemory.Fasm.Clear();
-
-            // do the original EndScene stuff after we restored the registers
-            // and insert it after our code
-            WowInterface.XMemory.WriteBytes(IntPtr.Add(CodecaveForCheck, asmLenght), OriginalEndsceneBytes);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OriginalEndsceneBytes: {BotUtils.ByteArrayToString(OriginalEndsceneBytes)}", LogLevel.Verbose);
+            WowInterface.XMemory.WriteBytes(CodecaveForGateway, OriginalEndsceneBytes);
 
             // return to original function after we're done with our stuff
-            WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}");
-            WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck.ToInt32() + (uint)asmLenght + 7);
+            WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}"); // 5 bytes
+            WowInterface.XMemory.Fasm.AddLine($"NOP");                                   // 2 bytes
+            // note if you increase the hookSize we need to add more NOP's
+
+            WowInterface.XMemory.Fasm.Inject((uint)CodecaveForGateway.ToInt32() + (uint)OriginalEndsceneBytes.Length);
             WowInterface.XMemory.Fasm.Clear();
 
             // ---------------------------------------------------
@@ -825,33 +825,39 @@ namespace AmeisenBotX.Core.Hook
 
             CodeToExecuteAddress = codeToExecuteAddress;
             WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: {CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: 0x{CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr returnValueAddress)) { return false; }
 
             ReturnValueAddress = returnValueAddress;
             WowInterface.XMemory.Write(ReturnValueAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: {ReturnValueAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook ReturnValueAddress: 0x{ReturnValueAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to override the is ingame check, used at the login
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress)) { return false; }
 
             OverrideWorldCheckAddress = overrideWorldCheckAddress;
             WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OverrideWorldCheckAddress: {OverrideWorldCheckAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook OverrideWorldCheckAddress: 0x{OverrideWorldCheckAddress.ToInt32():X}", LogLevel.Verbose);
+
+            // codecave for the original endscene code
+            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out IntPtr codecaveForGateway)) { return false; }
+
+            CodecaveForGateway = codecaveForGateway;
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForGateway ({MEM_ALLOC_GATEWAY_SIZE} bytes): 0x{CodecaveForGateway.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_CHECK_SIZE, out IntPtr codecaveForCheck)) { return false; }
 
             CodecaveForCheck = codecaveForCheck;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): {CodecaveForCheck.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): 0x{CodecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution)) { return false; }
 
             CodecaveForExecution = codecaveForExecution;
-            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): {CodecaveForExecution.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): 0x{CodecaveForExecution.ToInt32():X}", LogLevel.Verbose);
 
             return true;
         }

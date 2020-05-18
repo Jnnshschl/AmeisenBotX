@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -87,9 +86,9 @@ namespace AmeisenBotX
 
         private bool DrawOverlay { get; set; }
 
-        private DateTime LastStateMachineTickUpdate { get; set; }
-
         private InfoWindow InfoWindow { get; set; }
+
+        private DateTime LastStateMachineTickUpdate { get; set; }
 
         private MapWindow MapWindow { get; set; }
 
@@ -113,9 +112,6 @@ namespace AmeisenBotX
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
-            Overlay?.Exit();
-            InfoWindow?.Close();
-            MapWindow?.Close();
             Close();
         }
 
@@ -165,6 +161,16 @@ namespace AmeisenBotX
             }
 
             InfoWindow.Show();
+        }
+
+        private void ButtonToggleMapWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if (MapWindow == null)
+            {
+                MapWindow = new MapWindow(AmeisenBot);
+            }
+
+            MapWindow.Show();
         }
 
         private void ButtonToggleOverlay_Click(object sender, RoutedEventArgs e)
@@ -450,6 +456,9 @@ namespace AmeisenBotX
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             AmeisenBot?.Stop();
+            Overlay?.Exit();
+            InfoWindow?.Close();
+            MapWindow?.Close();
             SaveConfig();
         }
 
@@ -473,15 +482,5 @@ namespace AmeisenBotX
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-
-        private void ButtonToggleMapWindow_Click(object sender, RoutedEventArgs e)
-        {
-            if (MapWindow == null)
-            {
-                MapWindow = new MapWindow(AmeisenBot);
-            }
-
-            MapWindow.Show();
-        }
     }
 }

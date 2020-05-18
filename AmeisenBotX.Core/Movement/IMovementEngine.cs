@@ -6,13 +6,13 @@ namespace AmeisenBotX.Core.Movement
 {
     public interface IMovementEngine
     {
+        List<Vector3> Path { get; }
+
         MovementEngineState State { get; }
 
         void Execute();
 
         void Reset();
-
-        List<Vector3> Path { get; }
 
         void SetState(MovementEngineState state, Vector3 position, float targetRotation = 0f);
     }

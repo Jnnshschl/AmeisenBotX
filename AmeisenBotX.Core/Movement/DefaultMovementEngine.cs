@@ -26,11 +26,11 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 Acceleration { get; private set; }
 
-        public List<Vector3> Path => CurrentPath.ToList();
-
         public Queue<Vector3> CurrentPath { get; private set; }
 
         public Vector3 LastPosition { get; private set; }
+
+        public List<Vector3> Path => CurrentPath.ToList();
 
         public MovementSettings Settings { get; private set; }
 

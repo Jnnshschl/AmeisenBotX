@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,7 +21,7 @@ namespace AmeisenBotX.Core.Dungeon
             WowInterface = wowInterface;
             StateMachine = stateMachine;
 
-            CurrentNodes = new Queue<DungeonNode>();
+            CurrentNodes = new ConcurrentQueue<DungeonNode>();
             CompletedNodes = new List<DungeonNode>();
 
             Reset();
@@ -28,9 +29,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public bool AllPlayersArrived { get; private set; }
 
-        public List<DungeonNode> Nodes => CurrentNodes?.ToList();
-
-        public Queue<DungeonNode> CurrentNodes { get; private set; }
+        public ConcurrentQueue<DungeonNode> CurrentNodes { get; private set; }
 
         public IDungeonProfile DungeonProfile { get; private set; }
 
@@ -42,6 +41,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         public bool IgnoreEatDrink { get; private set; }
 
+        public List<DungeonNode> Nodes => CurrentNodes?.ToList();
+
         public double Progress { get; private set; }
 
         public int TotalNodes { get; private set; }
@@ -51,6 +52,8 @@ namespace AmeisenBotX.Core.Dungeon
         public DateTime WaitingSince { get; private set; }
 
         private List<DungeonNode> CompletedNodes { get; set; }
+
+        private bool NodesLoaded { get; set; }
 
         private AmeisenBotStateMachine StateMachine { get; }
 
@@ -64,7 +67,7 @@ namespace AmeisenBotX.Core.Dungeon
                 Entered = true;
             }
 
-            if (!HasFinishedDungeon && DungeonProfile != null && CurrentNodes.Count > 0)
+            if (!HasFinishedDungeon && DungeonProfile != null && CurrentNodes.Count() > 0)
             {
                 // we are fighting
                 if ((WowInterface.ObjectManager.Player.IsInCombat && StateMachine.IsAnyPartymemberInCombat())
@@ -93,15 +96,18 @@ namespace AmeisenBotX.Core.Dungeon
                     {
                         if (!ShouldWaitForGroup())
                         {
-                            if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > 5)
+                            if (CurrentNodes.TryPeek(out DungeonNode node))
                             {
-                                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CurrentNodes.Peek().Position);
-                                WowInterface.MovementEngine.Execute();
-                                return;
-                            }
-                            else
-                            {
-                                FollowNodePath(5);
+                                if (WowInterface.ObjectManager.Player.Position.GetDistance(node.Position) > 5)
+                                {
+                                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, node.Position);
+                                    WowInterface.MovementEngine.Execute();
+                                    return;
+                                }
+                                else
+                                {
+                                    FollowNodePath(5);
+                                }
                             }
                         }
                     }
@@ -111,7 +117,7 @@ namespace AmeisenBotX.Core.Dungeon
                     }
                 }
             }
-            else if (!HasFinishedDungeon && DungeonProfile == null && CurrentNodes.Count == 0)
+            else if (!HasFinishedDungeon && DungeonProfile == null && CurrentNodes.Count() == 0)
             {
                 LoadProfile(TryLoadProfile());
             }
@@ -141,10 +147,12 @@ namespace AmeisenBotX.Core.Dungeon
         public void Reset()
         {
             Entered = false;
+            NodesLoaded = false;
             HasFinishedDungeon = false;
             AllPlayersArrived = false;
+
             DungeonProfile = null;
-            CurrentNodes.Clear();
+            CurrentNodes = new ConcurrentQueue<DungeonNode>();
             Progress = 0.0;
             TotalNodes = 0;
         }
@@ -153,40 +161,8 @@ namespace AmeisenBotX.Core.Dungeon
             => WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 50)
             .Count() >= WowInterface.ObjectManager.Partymembers.Count;
 
-        private void FollowNodePath(int completionDistance)
+        private void FilterOutAlreadyCompletedNodes()
         {
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentNodes.Peek().Position) > completionDistance)
-            {
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CurrentNodes.Peek().Position);
-                WowInterface.MovementEngine.Execute();
-            }
-            else
-            {
-                DungeonNode dungeonNode = CurrentNodes.Peek();
-
-                if (dungeonNode.Type == Enums.DungeonNodeType.Door
-                    || dungeonNode.Type == Enums.DungeonNodeType.Collect
-                    || dungeonNode.Type == Enums.DungeonNodeType.Use)
-                {
-                    WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                        .OrderBy(e => e.Position.GetDistance(dungeonNode.Position))
-                        .FirstOrDefault();
-
-                    if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < completionDistance)
-                    {
-                        WowInterface.HookManager.GameobjectOnRightClick(obj);
-                    }
-                }
-
-                CompletedNodes.Add(CurrentNodes.Dequeue());
-            }
-        }
-
-        private void LoadNodes()
-        {
-            CurrentNodes.Clear();
-
-            // filter out already checked nodes
             DungeonNode closestDungeonNode = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
             bool shouldAddNodes = closestDungeonNode == null;
 
@@ -207,6 +183,47 @@ namespace AmeisenBotX.Core.Dungeon
             }
         }
 
+        private void FollowNodePath(int completionDistance)
+        {
+            if (CurrentNodes.TryPeek(out DungeonNode node))
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(node.Position) > completionDistance)
+                {
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, node.Position);
+                    WowInterface.MovementEngine.Execute();
+                }
+                else
+                {
+                    DungeonNode dungeonNode = node;
+
+                    if (dungeonNode.Type == Enums.DungeonNodeType.Door
+                        || dungeonNode.Type == Enums.DungeonNodeType.Collect
+                        || dungeonNode.Type == Enums.DungeonNodeType.Use)
+                    {
+                        WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                            .OrderBy(e => e.Position.GetDistance(dungeonNode.Position))
+                            .FirstOrDefault();
+
+                        if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < completionDistance)
+                        {
+                            WowInterface.HookManager.GameobjectOnRightClick(obj);
+                        }
+                    }
+
+                    if (CurrentNodes.TryDequeue(out DungeonNode completedNode))
+                    {
+                        CompletedNodes.Add(completedNode);
+                    }
+                }
+            }
+        }
+
+        private void LoadNodes()
+        {
+            CurrentNodes = new ConcurrentQueue<DungeonNode>();
+            FilterOutAlreadyCompletedNodes();
+        }
+
         private bool NeedToMoveToGroupLeader()
         {
             WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
@@ -219,16 +236,17 @@ namespace AmeisenBotX.Core.Dungeon
                 return true;
             }
 
-            DungeonNode closestDungeonNode = CurrentNodes.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
-
-            if (closestDungeonNode.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 20)
+            if (CurrentNodes.TryPeek(out DungeonNode closestDungeonNode))
             {
-                LoadNodes();
-            }
-            else
-            {
-                FollowNodePath(12);
-                return true;
+                if (!NodesLoaded)
+                {
+                    LoadNodes();
+                    NodesLoaded = true;
+                }
+                else
+                {
+                    FollowNodePath(8);
+                }
             }
 
             return false;
@@ -236,10 +254,11 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool ShouldWaitForGroup()
         {
-            if (!IgnoreEatDrink)
+            if (!IgnoreEatDrink
+                && CurrentNodes.TryPeek(out DungeonNode node))
             {
                 // we need to be prepared for the bossfight
-                double minPercentages = CurrentNodes.Peek().Type == Enums.DungeonNodeType.Boss ? 100.0 : 75.0;
+                double minPercentages = node.Type == Enums.DungeonNodeType.Boss ? 100.0 : 75.0;
 
                 // wait for guys to start eating
                 if (DateTime.Now - WaitingSince > TimeSpan.FromSeconds(3)

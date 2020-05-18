@@ -102,10 +102,10 @@ namespace AmeisenBotX.Core.Statemachine
             {
                 WowInterface.ObjectManager.RefreshIsWorldLoaded();
 
-                if (CurrentState.Key != BotState.LoadingScreen 
-                    && CurrentState.Key != BotState.StartWow 
-                    && CurrentState.Key != BotState.Login 
-                    && CurrentState.Key != BotState.None 
+                if (CurrentState.Key != BotState.LoadingScreen
+                    && CurrentState.Key != BotState.StartWow
+                    && CurrentState.Key != BotState.Login
+                    && CurrentState.Key != BotState.None
                     && !WowInterface.ObjectManager.IsWorldLoaded)
                 {
                     AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);

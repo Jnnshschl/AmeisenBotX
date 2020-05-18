@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, flashOfLightSpell },
                 { 2000, holyShockSpell },
-                { 10000, holyLightSpell }
+                { 4000, holyLightSpell }
             };
         }
 
@@ -77,61 +77,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 80
-                && CastSpellIfPossible(divinePleaSpell, WowInterface.ObjectManager.PlayerGuid, true))
-            {
-                return;
-            }
-
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
-            {
-                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-
-                if (WowInterface.ObjectManager.Target != null)
-                {
-                    WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
-
-                    if (WowInterface.ObjectManager.Target.HealthPercentage < 12
-                        && CastSpellIfPossible(layOnHandsSpell, 0))
-                    {
-                        return;
-                    }
-
-                    if (WowInterface.ObjectManager.Target.HealthPercentage < 50)
-                    {
-                        CastSpellIfPossible(divineFavorSpell, WowInterface.ObjectManager.TargetGuid, true);
-                    }
-
-                    if (WowInterface.ObjectManager.Player.ManaPercentage < 50
-                       && WowInterface.ObjectManager.Player.ManaPercentage > 20)
-                    {
-                        CastSpellIfPossible(divineIlluminationSpell, 0, true);
-                    }
-
-                    double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
-                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                    {
-                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                LastHealAction = DateTime.Now;
-            }
-            else if (DateTime.Now - LastHealAction > TimeSpan.FromSeconds(3)) // after 3 seconds of no healing we are going to attack stuff
+            if (!NeedToHealSomeone()
+                && DateTime.Now - LastHealAction > TimeSpan.FromSeconds(5)) // after 5 seconds of no healing we are going to attack stuff
             {
                 if (MyAuraManager.Tick())
                 {
                     return;
                 }
-
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
 
                 // basic auto attack defending
                 if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
@@ -172,9 +124,59 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
+        private bool NeedToHealSomeone()
+        {
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            {
+                WowUnit targetUnit = unitsToHeal.First();
+                WowInterface.HookManager.TargetGuid(targetUnit.Guid);
+
+                if (targetUnit.HealthPercentage < 12
+                    && CastSpellIfPossible(layOnHandsSpell, 0))
+                {
+                    return true;
+                }
+
+                if (targetUnit.HealthPercentage < 50
+                    && CastSpellIfPossible(divineFavorSpell, targetUnit.Guid, true))
+                {
+                    return true;
+                }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 50
+                   && WowInterface.ObjectManager.Player.ManaPercentage > 20
+                   && CastSpellIfPossible(divineIlluminationSpell, 0, true))
+                {
+                    return true;
+                }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 60
+                    && CastSpellIfPossible(divinePleaSpell, 0, true))
+                {
+                    return true;
+                }
+
+                double healthDifference = targetUnit.MaxHealth - targetUnit.Health;
+                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                {
+                    if (CastSpellIfPossible(keyValuePair.Value, targetUnit.Guid, true))
+                    {
+                        break;
+                    }
+                }
+
+                LastHealAction = DateTime.Now;
+                return true;
+            }
+
+            return false;
+        }
+
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
+            if (MyAuraManager.Tick() || NeedToHealSomeone())
             {
                 return;
             }

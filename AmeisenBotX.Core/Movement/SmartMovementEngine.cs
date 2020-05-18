@@ -17,6 +17,7 @@ namespace AmeisenBotX.Core.Movement
             MovementSettings = movementSettings;
 
             Rnd = new Random();
+            CurrentPath = new Queue<Vector3>();
 
             State = MovementEngineState.None;
             TryCount = 0;
@@ -25,8 +26,6 @@ namespace AmeisenBotX.Core.Movement
         }
 
         public bool BurstCheckDistance { get; private set; }
-
-        public List<Vector3> Path => CurrentPath?.ToList();
 
         public Queue<Vector3> CurrentPath { get; private set; }
 
@@ -45,6 +44,8 @@ namespace AmeisenBotX.Core.Movement
         public MovementSettings MovementSettings { get; private set; }
 
         public IObjectManager ObjectManager { get; }
+
+        public List<Vector3> Path => CurrentPath?.ToList();
 
         public BasicVehicle PlayerVehicle { get; private set; }
 
@@ -199,8 +200,7 @@ namespace AmeisenBotX.Core.Movement
 
                     if (Straving)
                     {
-                        WowInterface.HookManager.LuaDoString("StrafeLeftStop();MoveBackwardStop();");
-                        WowInterface.HookManager.LuaDoString("StrafeRightStop();MoveBackwardStop();");
+                        WowInterface.HookManager.LuaDoString("StrafeLeftStop();MoveBackwardStop();StrafeRightStop();MoveBackwardStop();");
                         Straving = false;
                     }
                 }
@@ -254,6 +254,7 @@ namespace AmeisenBotX.Core.Movement
 
         public void Reset()
         {
+            WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
             State = MovementEngineState.None;
             CurrentPath = new Queue<Vector3>();
             HasMoved = false;

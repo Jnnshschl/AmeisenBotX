@@ -13,9 +13,9 @@
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
     <Grid>
-        <Rectangle x:Name="mapCanvasBackground" Margin="0,28,0.333,0.333" >
+        <Rectangle x:Name="mapCanvasBackground" Margin="0,28,0.333,0.333">
             <Rectangle.Fill>
-                <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}"/>
+                <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}" />
             </Rectangle.Fill>
         </Rectangle>
         <Image x:Name="mapCanvas" Margin="0,28,0.333,0.333" />
