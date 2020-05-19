@@ -9,6 +9,7 @@
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
+            StateMachine.OnStateOverride += StateMachine_OnStateOverride;
         }
 
         public override void Execute()
@@ -25,7 +26,16 @@
 
         public override void Exit()
         {
-            WowInterface.DungeonEngine.Reset();
+            StateMachine.OnStateOverride -= StateMachine_OnStateOverride;
+            WowInterface.MovementEngine.Reset();
+        }
+
+        private void StateMachine_OnStateOverride(BotState botState)
+        {
+            if (botState == BotState.Dead)
+            {
+                WowInterface.DungeonEngine.OnDeath();
+            }
         }
     }
 }

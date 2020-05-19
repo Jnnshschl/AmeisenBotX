@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string vampiricTouchSpell = "Vampiric Touch";
 #pragma warning restore IDE0051
 
-        public PriestShadow(WowInterface wowInterface) : base(wowInterface)
+        public PriestShadow(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

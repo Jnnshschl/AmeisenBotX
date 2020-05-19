@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string tigersFurySpell = "Tiger's Fury";
 #pragma warning restore IDE0051
 
-        public DruidFeralCat(WowInterface wowInterface) : base(wowInterface)
+        public DruidFeralCat(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

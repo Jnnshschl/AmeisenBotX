@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string unstableAfflictionSpell = "Unstable Affliction";
 #pragma warning restore IDE0051
 
-        public WarlockAffliction(WowInterface wowInterface) : base(wowInterface)
+        public WarlockAffliction(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
                 WowInterface.ObjectManager.Pet,

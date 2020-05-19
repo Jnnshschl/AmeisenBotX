@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Movement
                 TryCount = 0;
                 List<Vector3> nodes = new List<Vector3>();
 
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > 8)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > 5)
                 {
                     List<Vector3> getPathResult = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Movement
             Vector3 targetPosition = CurrentPath.Peek();
             double distanceToTargetPosition = currentPosition.GetDistance(targetPosition);
 
-            if (distanceToTargetPosition > 512)
+            if (distanceToTargetPosition > 4096)
             {
                 Reset();
                 return;
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Movement
 
                 if (TryCount > 2)
                 {
-                    WowInterface.BotCache.CacheBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position);
+                    // WowInterface.BotCache.CacheBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position);
                 }
                 else if (TryCount > 1)
                 {

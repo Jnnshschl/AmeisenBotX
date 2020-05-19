@@ -43,21 +43,23 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (!IsAtNpc)
                 {
                     double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                    if (distance > 3.0)
-                    {
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                        WowInterface.MovementEngine.Execute();
-                    }
-                    else
+                    if (distance < 3.0)
                     {
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                         SellActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
                         IsAtNpc = true;
                     }
+                    else
+                    {
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
+                        WowInterface.MovementEngine.Execute();
+                    }
                 }
                 else if (DateTime.Now > SellActionGo)
                 {
                     WowInterface.HookManager.SellAllGrayItems();
+                    WowInterface.HookManager.RepairAllItems();
+
                     foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
                     {
                         IWowItem itemToSell = item;

@@ -104,6 +104,12 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        public List<WowDynobject> GetNearAoeSpells()
+        {
+            // TODO: recognize spells that harm me
+            return new List<WowDynobject>();
+        }
+
         public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)

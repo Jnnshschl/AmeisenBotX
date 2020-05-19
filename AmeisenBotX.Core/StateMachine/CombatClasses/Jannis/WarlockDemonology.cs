@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string summonImpSpell = "Summon Imp";
 #pragma warning restore IDE0051
 
-        public WarlockDemonology(WowInterface wowInterface) : base(wowInterface)
+        public WarlockDemonology(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
                 WowInterface.ObjectManager.Pet,

@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string steadyShotSpell = "Steady Shot";
 #pragma warning restore IDE0051
 
-        public HunterMarksmanship(WowInterface wowInterface) : base(wowInterface)
+        public HunterMarksmanship(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
                    WowInterface.ObjectManager.Pet,

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils
         public TargetManager(ITargetSelectionLogic targetSelectionLogic, TimeSpan minTargetSwitchTime)
         {
             TargetSelectionLogic = targetSelectionLogic;
-            MinTargetSwitchTime = minTargetSwitchTime;
+
+            TargetSwitchEvent = new TimegatedEvent(minTargetSwitchTime);
 
             PriorityTargets = new List<string>();
         }
@@ -20,20 +22,12 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public ITargetSelectionLogic TargetSelectionLogic { get; }
 
-        private DateTime LastTargetSwitch { get; set; }
-
-        private TimeSpan MinTargetSwitchTime { get; }
+        private TimegatedEvent TargetSwitchEvent { get; set; }
 
         public bool GetUnitToTarget(out List<WowUnit> possibleTargets)
         {
-            bool result = TargetSelectionLogic != null                      // we cant use the logic if its null
-                && DateTime.Now - LastTargetSwitch > MinTargetSwitchTime;   // limit the target switches by time
-
-            if (result && TargetSelectionLogic.SelectTarget(out List<WowUnit> possibleTargetsFromLogic))
+            if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out List<WowUnit> possibleTargetsFromLogic))
             {
-                // if everything went well, we reset the time gate
-                LastTargetSwitch = DateTime.Now;
-
                 // move the priority unit to the start of the list
                 if (PriorityTargets != null && PriorityTargets.Count > 0)
                 {

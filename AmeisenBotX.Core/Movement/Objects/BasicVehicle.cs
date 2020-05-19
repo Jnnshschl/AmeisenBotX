@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 acceleration = new Vector3(0, 0, 0);
 
             // acceleration += GetObjectForceAroundMe<WowObject>(12);
-            acceleration += GetNearestBlacklistForce(12);
+            // acceleration += GetNearestBlacklistForce(12);
 
             acceleration.Limit(MaxAcceleration);
             acceleration.Multiply(multiplier);
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Unstuck(int multiplier)
         {
-            Vector3 positionBehindMe = CalculatPositionnBehind(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, 8);
+            Vector3 positionBehindMe = CalculatPositionBehind(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, 8);
             return Seek(positionBehindMe, multiplier);
         }
 
@@ -172,7 +172,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             };
         }
 
-        private static Vector3 CalculatPositionnBehind(Vector3 position, float targetRotation, float targetVelocity)
+        private static Vector3 CalculatPositionBehind(Vector3 position, float targetRotation, float targetVelocity)
         {
             float rotation = targetRotation + Convert.ToSingle(Math.PI);
 

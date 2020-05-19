@@ -41,23 +41,17 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (!IsAtNpc)
                 {
                     double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                    if (distance > 5.0)
+
+                    if (distance < 3.0)
                     {
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                        WowInterface.MovementEngine.Execute();
+                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        RepairActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
+                        IsAtNpc = true;
                     }
                     else
                     {
-                        if (distance > 3)
-                        {
-                            WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                        }
-                        else
-                        {
-                            WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                            RepairActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
-                            IsAtNpc = true;
-                        }
+                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
+                        WowInterface.MovementEngine.Execute();
                     }
                 }
                 else if (DateTime.Now > RepairActionGo)

@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Data.CombatLog;
@@ -142,6 +143,8 @@ namespace AmeisenBotX.Core
 
         public WowInterface WowInterface { get; set; }
 
+        private TimegatedEvent BagUpdateEvent { get; set; }
+
         private int CurrentExecutionCount { get; set; }
 
         private Timer StateMachineTimer { get; }
@@ -276,33 +279,33 @@ namespace AmeisenBotX.Core
         {
             CombatClasses = new List<ICombatClass>
             {
-                new Statemachine.CombatClasses.Jannis.DeathknightFrost(WowInterface),
-                new Statemachine.CombatClasses.Jannis.DeathknightUnholy(WowInterface),
-                new Statemachine.CombatClasses.Jannis.DruidBalance(WowInterface),
-                new Statemachine.CombatClasses.Jannis.DruidFeralBear(WowInterface),
-                new Statemachine.CombatClasses.Jannis.DruidFeralCat(WowInterface),
-                new Statemachine.CombatClasses.Jannis.DruidRestoration(WowInterface),
-                new Statemachine.CombatClasses.Jannis.HunterBeastmastery(WowInterface),
-                new Statemachine.CombatClasses.Jannis.HunterMarksmanship(WowInterface),
-                new Statemachine.CombatClasses.Jannis.HunterSurvival(WowInterface),
-                new Statemachine.CombatClasses.Jannis.MageArcane(WowInterface),
-                new Statemachine.CombatClasses.Jannis.MageFire(WowInterface),
-                new Statemachine.CombatClasses.Jannis.PaladinHoly(WowInterface),
-                new Statemachine.CombatClasses.Jannis.PaladinProtection(WowInterface),
-                new Statemachine.CombatClasses.Jannis.PaladinRetribution(WowInterface),
-                new Statemachine.CombatClasses.Jannis.PriestDiscipline(WowInterface),
-                new Statemachine.CombatClasses.Jannis.PriestHoly(WowInterface),
-                new Statemachine.CombatClasses.Jannis.PriestShadow(WowInterface),
-                new Statemachine.CombatClasses.Jannis.RogueAssassination(WowInterface),
-                new Statemachine.CombatClasses.Jannis.ShamanElemental(WowInterface),
-                new Statemachine.CombatClasses.Jannis.ShamanEnhancement(WowInterface),
-                new Statemachine.CombatClasses.Jannis.ShamanRestoration(WowInterface),
-                new Statemachine.CombatClasses.Jannis.WarlockAffliction(WowInterface),
-                new Statemachine.CombatClasses.Jannis.WarlockDemonology(WowInterface),
-                new Statemachine.CombatClasses.Jannis.WarlockDestruction(WowInterface),
-                new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface),
-                new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface),
-                new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface),
+                new Statemachine.CombatClasses.Jannis.DeathknightFrost(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.DeathknightUnholy(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidBalance(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidFeralBear(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidFeralCat(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidRestoration(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.HunterBeastmastery(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.HunterMarksmanship(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.HunterSurvival(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.MageArcane(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.MageFire(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.PaladinHoly(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.PaladinProtection(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.PaladinRetribution(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.PriestDiscipline(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.PriestHoly(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.PriestShadow(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.RogueAssassination(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.ShamanElemental(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.ShamanEnhancement(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.ShamanRestoration(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarlockAffliction(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarlockDemonology(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarlockDestruction(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
                 new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
@@ -383,9 +386,12 @@ namespace AmeisenBotX.Core
 
         private void OnBagChanged(long timestamp, List<string> args)
         {
-            WowInterface.CharacterManager.Inventory.Update();
-            WowInterface.CharacterManager.UpdateCharacterGear();
-            WowInterface.CharacterManager.Inventory.Update();
+            if (BagUpdateEvent.Run())
+            {
+                WowInterface.CharacterManager.Inventory.Update();
+                WowInterface.CharacterManager.UpdateCharacterGear();
+                WowInterface.CharacterManager.Inventory.Update();
+            }
         }
 
         private void OnBattlegroundScoreUpdate(long timestamp, List<string> args)
@@ -588,6 +594,10 @@ namespace AmeisenBotX.Core
 
         private void SubscribeToWowEvents()
         {
+            // Prepare stuff
+            BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
+            // Subscribe
             WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
             WowInterface.EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             WowInterface.EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);

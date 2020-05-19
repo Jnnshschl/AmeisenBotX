@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string wyvernStingSpell = "Wyvern Sting";
 #pragma warning restore IDE0051
 
-        public HunterSurvival(WowInterface wowInterface) : base(wowInterface)
+        public HunterSurvival(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
                 WowInterface.ObjectManager.Pet,

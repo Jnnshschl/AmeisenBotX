@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string wildGrowthSpell = "Wild Growth";
 #pragma warning restore IDE0051
 
-        public DruidRestoration(WowInterface wowInterface) : base(wowInterface)
+        public DruidRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
 

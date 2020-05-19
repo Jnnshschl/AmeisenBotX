@@ -118,6 +118,7 @@
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\CustomTcpClient.cs" />
     <Compile Include="Common\Enums\VirtualKeys.cs" />
+    <Compile Include="Common\TimegatedEvent.cs" />
     <Compile Include="Data\CombatLog\CombatLogParser.cs" />
     <Compile Include="Data\CombatLog\Enums\CombatLogEntrySubtype.cs" />
     <Compile Include="Data\CombatLog\Enums\CombatLogEntryType.cs" />

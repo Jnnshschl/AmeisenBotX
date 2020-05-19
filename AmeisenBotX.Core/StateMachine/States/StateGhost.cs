@@ -48,7 +48,17 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (StateMachine.IsDungeonMap(StateMachine.MapIDiedOn))
             {
-                CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                if (WowInterface.DungeonEngine.DungeonProfile != null)
+                {
+                    CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                }
+                else
+                {
+                    WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
+                    corpsePosition.Z = WowInterface.ObjectManager.Player.Position.Z;
+                    CorpsePosition = corpsePosition;
+                }
+
                 NeedToEnterPortal = true;
             }
             else if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))

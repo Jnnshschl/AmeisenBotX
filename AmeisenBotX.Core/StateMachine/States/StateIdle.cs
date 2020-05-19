@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -10,7 +11,10 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
+            FirstStart = true;
         }
+
+        public bool FirstStart { get; set; }
 
         private DateTime LastBagSlotCheck { get; set; }
 
@@ -22,12 +26,24 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
-            StateMachine.PlayerName = playerName;
-
-            if (!WowInterface.EventHookManager.IsActive)
+            while (!WowInterface.ObjectManager.IsWorldLoaded)
             {
-                WowInterface.EventHookManager.Start();
+                WowInterface.ObjectManager.RefreshIsWorldLoaded();
+                Task.Delay(1).Wait();
+            }
+
+            if (FirstStart)
+            {
+                FirstStart = false;
+                WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
+
+                WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
+                StateMachine.PlayerName = playerName;
+
+                if (!WowInterface.EventHookManager.IsActive)
+                {
+                    WowInterface.EventHookManager.Start();
+                }
             }
 
             WowInterface.CharacterManager.UpdateAll();

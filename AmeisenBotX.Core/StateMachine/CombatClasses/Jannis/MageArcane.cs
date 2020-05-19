@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string spellStealSpell = "Spellsteal";
 #pragma warning restore IDE0051
 
-        public MageArcane(WowInterface wowInterface) : base(wowInterface)
+        public MageArcane(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

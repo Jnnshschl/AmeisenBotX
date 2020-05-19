@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string resurrectionSpell = "Resurrection";
 #pragma warning restore IDE0051
 
-        public PriestHoly(WowInterface wowInterface) : base(wowInterface)
+        public PriestHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
 

@@ -95,6 +95,8 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsGhost(WowLuaUnit luaUnit);
 
+        bool IsInLfgGroup();
+
         bool IsInLineOfSight(Vector3 start, Vector3 end);
 
         bool IsRuneReady(int runeId);

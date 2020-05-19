@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string weakenedSoulSpell = "Weakened Soul";
 #pragma warning restore IDE0051
 
-        public PriestDiscipline(WowInterface wowInterface) : base(wowInterface)
+        public PriestDiscipline(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
 

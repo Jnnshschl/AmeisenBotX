@@ -12,15 +12,22 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             // default distance values
             DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3 : 25.0;
+
+            FacingCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
+            LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
         }
 
         public double DistanceToTarget { get; private set; }
 
-        private DateTime LastFacingCheck { get; set; }
+        public bool IsFacing { get; private set; }
 
-        private DateTime LastLineOfSightCheck { get; set; }
+        public bool TargetInLos { get; private set; }
 
-        private WowUnit LastTarget { get; set; }
+        private TimegatedEvent<bool> FacingCheck { get; set; }
+
+        private ulong LastTarget { get; set; }
+
+        private TimegatedEvent<bool> LineOfSightCheck { get; set; }
 
         public override void Enter()
         {
@@ -31,13 +38,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
-                && (WowInterface.BattlegroundEngine == null || !WowInterface.BattlegroundEngine.ForceCombat))
+                && (WowInterface.BattlegroundEngine == null || !WowInterface.BattlegroundEngine.ForceCombat)
+                && StateMachine.SetState(BotState.Idle))
             {
-                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -48,28 +53,38 @@ namespace AmeisenBotX.Core.Statemachine.States
                 // use the default MovementEngine to move if the CombatClass doesnt
                 if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
-                    // we cant move to a target that not exists
-                    if (LastTarget == null || WowInterface.ObjectManager.Target.Guid != LastTarget.Guid)
+                    if (WowInterface.ObjectManager.Target != null)
                     {
-                        WowInterface.MovementEngine.Reset();
-                        LastTarget = WowInterface.ObjectManager.Target;
-                    }
+                        if (LastTarget != WowInterface.ObjectManager.Target.Guid)
+                        {
+                            LastTarget = WowInterface.ObjectManager.Target.Guid;
+                            WowInterface.MovementEngine.Reset();
+                        }
 
-                    HandleMovement(WowInterface.ObjectManager.Target);
+                        if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
+                            || WowInterface.ObjectManager.Target.IsDead
+                            || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
+                        {
+                            WowInterface.MovementEngine.Reset();
+                        }
+                        else
+                        {
+                            HandleMovement(WowInterface.ObjectManager.Target);
+                        }
+                    }
                 }
 
                 // if no CombatClass is loaded, just autoattack
-                if (WowInterface.CombatClass != null)
+                if (WowInterface.CombatClass == null)
                 {
-                    WowInterface.CombatClass.Execute();
-                }
-                else
-                {
-                    // default action to defend ourself
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                     {
                         WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                     }
+                }
+                else
+                {
+                    WowInterface.CombatClass.Execute();
                 }
             }
         }
@@ -82,34 +97,37 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFps);
         }
 
-        private void HandleMovement(WowUnit target)
+        private bool HandleMovement(WowUnit target)
         {
-            if (target == null || target.Guid == WowInterface.ObjectManager.PlayerGuid) { return; }
-
-            bool isInLos = true;
-
-            if (DateTime.Now - LastLineOfSightCheck > TimeSpan.FromMilliseconds(1000))
+            if (LineOfSightCheck.Run(out bool isInLos, () => WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
             {
-                isInLos = WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position);
-                LastLineOfSightCheck = DateTime.Now;
+                TargetInLos = isInLos;
+            }
+
+            if (FacingCheck.Run(out bool isFacing, () => WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
+            {
+                IsFacing = isFacing;
+
+                if (!IsFacing)
+                {
+                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                }
             }
 
             // if we are close enough, stop movement and start attacking
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
-            if (distance <= DistanceToTarget && isInLos)
+
+            if (distance <= DistanceToTarget && TargetInLos)
             {
-                if (DateTime.Now - LastFacingCheck > TimeSpan.FromMilliseconds(500) && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
-                {
-                    WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
-                    LastFacingCheck = DateTime.Now;
-                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
-                }
+                WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                return false;
             }
             else
             {
                 Vector3 positionToGoTo = target.Position; // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetState(distance > 4 ? MovementEngineState.Moving : MovementEngineState.DirectMoving, positionToGoTo);
                 WowInterface.MovementEngine.Execute();
+                return true;
             }
         }
     }

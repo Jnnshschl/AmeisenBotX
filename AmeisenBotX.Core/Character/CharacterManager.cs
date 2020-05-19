@@ -97,8 +97,8 @@ namespace AmeisenBotX.Core.Character
         {
             itemToReplace = null;
 
-            if (((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
-                || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item))))
+            if ((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
+                || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item)))
             {
                 if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out _))
                 {
@@ -180,8 +180,14 @@ namespace AmeisenBotX.Core.Character
                     }
                     else
                     {
-                        WowInterface.HookManager.ReplaceItem(null, itemsLikeEquipped.First());
-                        Equipment.Update();
+                        IWowItem itemToEquip = itemsLikeEquipped.First();
+
+                        if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)itemToEquip))
+                            || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
+                        {
+                            WowInterface.HookManager.ReplaceItem(null, itemToEquip);
+                            Equipment.Update();
+                        }
                     }
                 }
             }

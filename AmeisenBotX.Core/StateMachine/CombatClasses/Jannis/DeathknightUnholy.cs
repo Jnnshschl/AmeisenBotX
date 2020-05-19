@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string unholyPresenceSpell = "Unholy Presence";
 #pragma warning restore IDE0051
 
-        public DeathknightUnholy(WowInterface wowInterface) : base(wowInterface)
+        public DeathknightUnholy(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

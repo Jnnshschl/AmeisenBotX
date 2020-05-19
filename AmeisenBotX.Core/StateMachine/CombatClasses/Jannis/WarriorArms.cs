@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string rendSpell = "Rend";
 #pragma warning restore IDE0051
 
-        public WarriorArms(WowInterface wowInterface) : base(wowInterface)
+        public WarriorArms(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public SortedList<int, CastInterruptFunction> InterruptSpells { get; set; }
 
-        private List<WowUnit> UnitsToWatch { get; set; }
+        public List<WowUnit> UnitsToWatch { get; set; }
 
         public bool Tick()
         {
@@ -28,7 +29,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                 {
                     foreach (KeyValuePair<int, CastInterruptFunction> keyValuePair in InterruptSpells)
                     {
-                        return keyValuePair.Value(selectedUnit);
+                        if (keyValuePair.Value(selectedUnit))
+                        {
+                            AmeisenLogger.Instance.Log("Interrupt", $"Interrupted \"{selectedUnit}\" using CastInterruptFunction: \"{keyValuePair.Key}\"");
+                            return true;
+                        }
                     }
                 }
             }

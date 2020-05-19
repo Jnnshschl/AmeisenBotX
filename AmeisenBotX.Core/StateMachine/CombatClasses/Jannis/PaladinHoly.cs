@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string layOnHandsSpell = "Lay on Hands";
 #pragma warning restore IDE0051
 
-        public PaladinHoly(WowInterface wowInterface) : base(wowInterface)
+        public PaladinHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
 

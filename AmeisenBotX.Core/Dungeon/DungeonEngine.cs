@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Dungeon.Profiles.Classic;
@@ -24,6 +25,8 @@ namespace AmeisenBotX.Core.Dungeon
             CurrentNodes = new ConcurrentQueue<DungeonNode>();
             CompletedNodes = new List<DungeonNode>();
 
+            ExitDungeonEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+
             Reset();
         }
 
@@ -31,13 +34,15 @@ namespace AmeisenBotX.Core.Dungeon
 
         public ConcurrentQueue<DungeonNode> CurrentNodes { get; private set; }
 
+        public bool DidAllDie { get; private set; }
+
         public IDungeonProfile DungeonProfile { get; private set; }
 
         public bool Entered { get; private set; }
 
         public DateTime EntryTime { get; private set; }
 
-        public bool HasFinishedDungeon { get; private set; }
+        public bool HasFinishedDungeon => Progress == 100.0;
 
         public bool IgnoreEatDrink { get; private set; }
 
@@ -53,7 +58,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private List<DungeonNode> CompletedNodes { get; set; }
 
-        private bool NodesLoaded { get; set; }
+        private TimegatedEvent ExitDungeonEvent { get; set; }
 
         private AmeisenBotStateMachine StateMachine { get; }
 
@@ -67,64 +72,54 @@ namespace AmeisenBotX.Core.Dungeon
                 Entered = true;
             }
 
-            if (!HasFinishedDungeon && DungeonProfile != null && CurrentNodes.Count() > 0)
+            if (DungeonProfile != null)
             {
-                // we are fighting
-                if ((WowInterface.ObjectManager.Player.IsInCombat && StateMachine.IsAnyPartymemberInCombat())
-                    || WowInterface.ObjectManager.Player.IsCasting)
+                if (!HasFinishedDungeon)
                 {
-                    return;
-                }
-
-                if (Progress == 100.0)
-                {
-                    // exit dungeon
-                    HasFinishedDungeon = true;
-                    return;
-                }
-
-                // wait for all players to arrive
-                if (!AllPlayersArrived)
-                {
-                    AllPlayersArrived = AreAllPlayersPresent();
-                }
-                else
-                {
-                    bool isMePartyleader = WowInterface.ObjectManager.Player.Guid == WowInterface.ObjectManager.PartyleaderGuid || WowInterface.ObjectManager.PartyleaderGuid == 0;
-
-                    if (isMePartyleader)
+                    if (CurrentNodes.Count() == 0)
                     {
-                        if (!ShouldWaitForGroup())
-                        {
-                            if (CurrentNodes.TryPeek(out DungeonNode node))
-                            {
-                                if (WowInterface.ObjectManager.Player.Position.GetDistance(node.Position) > 5)
-                                {
-                                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, node.Position);
-                                    WowInterface.MovementEngine.Execute();
-                                    return;
-                                }
-                                else
-                                {
-                                    FollowNodePath(5);
-                                }
-                            }
-                        }
+                        LoadProfile(TryLoadProfile());
                     }
                     else
                     {
-                        NeedToMoveToGroupLeader();
+                        bool isMePartyleader = WowInterface.ObjectManager.Player.Guid == WowInterface.ObjectManager.PartyleaderGuid || WowInterface.ObjectManager.PartyleaderGuid == 0;
+
+                        if (isMePartyleader)
+                        {
+                            // wait for all players to arrive
+                            if (!DidAllDie && !AreAllPlayersPresent()) // ShouldWaitForGroup()
+                            {
+                                // wait for them
+                            }
+                            else
+                            {
+                                FollowNodePath(8);
+                            }
+                        }
+                        else
+                        {
+                            if (!MoveToGroupLeader())
+                            {
+                                // wait for the group leader
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (ExitDungeonEvent.Run())
+                    {
+                        // find a way to exit the dungeon, maybe hearthstone
+                        if (WowInterface.HookManager.IsInLfgGroup())
+                        {
+                            WowInterface.HookManager.LuaDoString("LFGTeleport(true);");
+                        }
                     }
                 }
             }
-            else if (!HasFinishedDungeon && DungeonProfile == null && CurrentNodes.Count() == 0)
-            {
-                LoadProfile(TryLoadProfile());
-            }
             else
             {
-                // find a way to exit the dungeon, maybe hearthstone
-                WowInterface.HookManager.LuaDoString("LFGTeleport(true);");
+                LoadProfile(TryLoadProfile());
             }
         }
 
@@ -144,21 +139,29 @@ namespace AmeisenBotX.Core.Dungeon
             TotalNodes = CurrentNodes.Count;
         }
 
+        public void OnDeath()
+        {
+            Reset();
+            DidAllDie = WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead);
+        }
+
         public void Reset()
         {
             Entered = false;
-            NodesLoaded = false;
-            HasFinishedDungeon = false;
             AllPlayersArrived = false;
+            DidAllDie = false;
 
             DungeonProfile = null;
+
             CurrentNodes = new ConcurrentQueue<DungeonNode>();
+            CompletedNodes.Clear();
+
             Progress = 0.0;
             TotalNodes = 0;
         }
 
         private bool AreAllPlayersPresent()
-            => WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 50)
+            => WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 64)
             .Count() >= WowInterface.ObjectManager.Partymembers.Count;
 
         private void FilterOutAlreadyCompletedNodes()
@@ -213,6 +216,7 @@ namespace AmeisenBotX.Core.Dungeon
                     if (CurrentNodes.TryDequeue(out DungeonNode completedNode))
                     {
                         CompletedNodes.Add(completedNode);
+                        Progress = Math.Round((double)CompletedNodes.Count / (double)TotalNodes * 100.0);
                     }
                 }
             }
@@ -224,32 +228,51 @@ namespace AmeisenBotX.Core.Dungeon
             FilterOutAlreadyCompletedNodes();
         }
 
-        private bool NeedToMoveToGroupLeader()
+        private bool MoveToGroupLeader()
         {
             WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
 
-            if (partyLeader != null && partyLeader.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 64)
-            {
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
-                WowInterface.MovementEngine.Execute();
+            double distance = partyLeader != null ? partyLeader.Position.GetDistance(WowInterface.ObjectManager.Player.Position) : 0;
 
-                return true;
+            if (distance > 0 && distance < 8)
+            {
+                return false;
             }
-
-            if (CurrentNodes.TryPeek(out DungeonNode closestDungeonNode))
+            else
             {
-                if (!NodesLoaded)
+                if (distance > 0 && distance < 48)
                 {
-                    LoadNodes();
-                    NodesLoaded = true;
+                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, partyLeader.Position);
+                    WowInterface.MovementEngine.Execute();
+                    return true;
                 }
                 else
                 {
-                    FollowNodePath(8);
+                    LoadNodes();
+
+                    if (partyLeader != null)
+                    {
+                        DungeonNode closestDungeonNodeLeader = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(partyLeader.Position)).FirstOrDefault();
+                        int nodeIndex = DungeonProfile.Path.IndexOf(closestDungeonNodeLeader);
+                        int completedNodes = CompletedNodes.Count();
+
+                        if (nodeIndex > completedNodes)
+                        {
+                            FollowNodePath(8);
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        FollowNodePath(8);
+                        return true;
+                    }
                 }
             }
-
-            return false;
         }
 
         private bool ShouldWaitForGroup()

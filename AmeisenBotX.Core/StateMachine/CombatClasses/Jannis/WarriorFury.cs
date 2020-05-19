@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string whirlwindSpell = "Whirlwind";
 #pragma warning restore IDE0051
 
-        public WarriorFury(WowInterface wowInterface) : base(wowInterface)
+        public WarriorFury(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 

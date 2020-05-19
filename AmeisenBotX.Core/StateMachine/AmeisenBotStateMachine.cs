@@ -20,9 +20,6 @@ namespace AmeisenBotX.Core.Statemachine
             Config = config;
             WowInterface = wowInterface;
 
-            LastGhostCheck = DateTime.Now;
-            LastEventPull = DateTime.Now;
-
             LastState = BotState.None;
 
             States = new Dictionary<BotState, BasicState>()
@@ -48,7 +45,14 @@ namespace AmeisenBotX.Core.Statemachine
 
             CurrentState = States.First();
             CurrentState.Value.Enter();
+
+            AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
+            EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
+            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromSeconds(5), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
+            ObjectUpdateEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.ObjectUpdateMs), WowInterface.ObjectManager.UpdateWowObjects);
         }
+
+        public delegate void StateMachineOverride(BotState botState);
 
         public delegate void StateMachineStateChange();
 
@@ -57,6 +61,8 @@ namespace AmeisenBotX.Core.Statemachine
         public event StateMachineStateChange OnStateMachineStateChanged;
 
         public event StateMachineTick OnStateMachineTick;
+
+        public event StateMachineOverride OnStateOverride;
 
         public string BotDataPath { get; }
 
@@ -74,64 +80,92 @@ namespace AmeisenBotX.Core.Statemachine
 
         internal WowInterface WowInterface { get; }
 
+        private TimegatedEvent AntiAfkEvent { get; set; }
+
         private AmeisenBotConfig Config { get; }
 
-        private DateTime LastAntiAfk { get; set; }
+        private TimegatedEvent EventPullEvent { get; set; }
 
-        private DateTime LastEventPull { get; set; }
+        private TimegatedEvent<bool> GhostCheckEvent { get; set; }
 
-        private DateTime LastGhostCheck { get; set; }
-
-        private DateTime LastObjectUpdate { get; set; }
+        private TimegatedEvent ObjectUpdateEvent { get; set; }
 
         public void Execute()
         {
-            if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
+            // we cant do anything if wow has crashed
+            if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
+                && SetState(BotState.None))
             {
                 AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
+
                 WowCrashed = true;
+                ((StateIdle)States[BotState.Idle]).FirstStart = true;
 
                 WowInterface.MovementEngine.Reset();
                 WowInterface.ObjectManager.WowObjects.Clear();
                 WowInterface.EventHookManager.Stop();
 
-                SetState(BotState.None);
+                return;
             }
 
-            if (WowInterface.ObjectManager != null)
+            // ingame override states
+            if (CurrentState.Key != BotState.None
+                && CurrentState.Key != BotState.StartWow
+                && CurrentState.Key != BotState.Login
+                && WowInterface.ObjectManager != null)
             {
                 WowInterface.ObjectManager.RefreshIsWorldLoaded();
 
-                if (CurrentState.Key != BotState.LoadingScreen
-                    && CurrentState.Key != BotState.StartWow
-                    && CurrentState.Key != BotState.Login
-                    && CurrentState.Key != BotState.None
-                    && !WowInterface.ObjectManager.IsWorldLoaded)
+                if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
-                    AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
-                    SetState(BotState.LoadingScreen, true);
-                    WowInterface.MovementEngine.Reset();
+                    if (SetState(BotState.LoadingScreen, true))
+                    {
+                        OnStateOverride(CurrentState.Key);
+                        AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
+                        return;
+                    }
                 }
                 else
                 {
-                    HandleObjectUpdates();
-                    HandleEventPull();
+                    ObjectUpdateEvent.Run();
+                    EventPullEvent.Run();
 
                     if (WowInterface.ObjectManager.Player != null)
                     {
-                        HandlePlayerDeadOrGhostState();
-
-                        if (CurrentState.Key != BotState.Dead && CurrentState.Key != BotState.Ghost)
+                        if (WowInterface.ObjectManager.Player.IsDead
+                            && SetState(BotState.Dead, true))
                         {
-                            if (Config.AutoDodgeAoeSpells
-                                && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
-                            {
-                                SetState(BotState.InsideAoeDamage, true);
-                            }
+                            // we are dead, state needs to release the spirit
+                            OnStateOverride(CurrentState.Key);
+                            return;
+                        }
+                        else if (GhostCheckEvent.Run(out bool isGhost)
+                            && isGhost
+                            && SetState(BotState.Ghost, true))
+                        {
+                            // we cant be a ghost if we are still dead
+                            OnStateOverride(CurrentState.Key);
+                            return;
+                        }
 
-                            if (WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
+                        // we cant fight nor do we receive damage when we are dead or a ghost
+                        // so ignore these overrides
+                        if (CurrentState.Key != BotState.Dead
+                            && CurrentState.Key != BotState.Ghost)
+                        {
+                            // if (Config.AutoDodgeAoeSpells
+                            //     && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
+                            //     && SetState(BotState.InsideAoeDamage, true))
+                            // {
+                            //     OnStateOverride(CurrentState.Key);
+                            //     return;
+                            // }
+
+                            // TODO: handle combat bug, sometimes when combat ends, the player stays in combot for no reason
+                            if ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()) && SetState(BotState.Attacking, true))
                             {
-                                SetState(BotState.Attacking, true);
+                                OnStateOverride(CurrentState.Key);
+                                return;
                             }
                         }
                     }
@@ -140,16 +174,8 @@ namespace AmeisenBotX.Core.Statemachine
 
             // execute the State
             CurrentState.Value.Execute();
-
-            // anti AFK
-            if (DateTime.Now - LastAntiAfk > TimeSpan.FromMilliseconds(Config.AntiAfkMs))
-            {
-                LastAntiAfk = DateTime.Now;
-                WowInterface.CharacterManager.AntiAfk();
-            }
-
-            // used for ui updates
             OnStateMachineTick?.Invoke();
+            AntiAfkEvent.Run();
         }
 
         internal IEnumerable<WowUnit> GetNearLootableUnits()
@@ -190,12 +216,12 @@ namespace AmeisenBotX.Core.Statemachine
             return false;
         }
 
-        internal void SetState(BotState state, bool ignoreExit = false)
+        internal bool SetState(BotState state, bool ignoreExit = false)
         {
             if (CurrentState.Key == state)
             {
                 // we are already in this state
-                return;
+                return false;
             }
 
             LastState = CurrentState.Key;
@@ -211,50 +237,7 @@ namespace AmeisenBotX.Core.Statemachine
             CurrentState.Value.Enter();
 
             OnStateMachineStateChanged?.Invoke();
-        }
-
-        private void HandleEventPull()
-        {
-            if (WowInterface.EventHookManager.IsActive
-                && LastEventPull + TimeSpan.FromMilliseconds(Config.EventPullMs) < DateTime.Now)
-            {
-                LastEventPull = DateTime.Now;
-                WowInterface.EventHookManager.ReadEvents();
-            }
-        }
-
-        private void HandleObjectUpdates()
-        {
-            if (DateTime.Now - LastObjectUpdate > TimeSpan.FromMilliseconds(Config.ObjectUpdateMs)
-                && CurrentState.Key != BotState.None
-                && CurrentState.Key != BotState.StartWow
-                && CurrentState.Key != BotState.Login
-                && CurrentState.Key != BotState.LoadingScreen)
-            {
-                LastObjectUpdate = DateTime.Now;
-                WowInterface.ObjectManager.UpdateWowObjects();
-            }
-        }
-
-        private void HandlePlayerDeadOrGhostState()
-        {
-            if (WowInterface.ObjectManager.Player.IsDead)
-            {
-                SetState(BotState.Dead);
-            }
-            else
-            {
-                if (LastGhostCheck + TimeSpan.FromSeconds(8) < DateTime.Now)
-                {
-                    bool isGhost = WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player);
-                    LastGhostCheck = DateTime.Now;
-
-                    if (isGhost)
-                    {
-                        SetState(BotState.Ghost);
-                    }
-                }
-            }
+            return true;
         }
     }
 }

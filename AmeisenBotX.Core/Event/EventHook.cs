@@ -31,8 +31,10 @@ namespace AmeisenBotX.Core.Event
 
         private WowInterface WowInterface { get; }
 
-        public void ReadEvents()
+        public void Pull()
         {
+            if (!IsActive) { return; }
+
             HandleSubEventQueue();
             HandleUnsubEventQueue();
 

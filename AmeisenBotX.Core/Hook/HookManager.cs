@@ -74,34 +74,26 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptPartyInvite()
         {
-            LuaDoString("AcceptGroup();");
             ClickUiElement("StaticPopup1Button1");
+            // LuaDoString("AcceptGroup();");
         }
 
         public void AcceptResurrect()
         {
-            LuaDoString("AcceptResurrect();");
             ClickUiElement("StaticPopup1Button1");
+            // LuaDoString("AcceptResurrect();");
         }
 
         public void AcceptSummon()
         {
-            LuaDoString("ConfirmSummon();");
             ClickUiElement("StaticPopup1Button1");
+            // LuaDoString("ConfirmSummon();");
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
         {
             AmeisenLogger.Instance.Log("HookManager", $"Casting spell with name: {name}", LogLevel.Verbose);
-
-            if (castOnSelf)
-            {
-                LuaDoString($"CastSpellByName(\"{name}\", true);");
-            }
-            else
-            {
-                LuaDoString($"CastSpellByName(\"{name}\");");
-            }
+            LuaDoString($"CastSpellByName(\"{name}\"{(castOnSelf ? ", \"player\"" : string.Empty)});");
         }
 
         public void CastSpellById(int spellId)
@@ -467,6 +459,12 @@ namespace AmeisenBotX.Core.Hook
         public bool IsGhost(WowLuaUnit luaUnit)
             => int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=UnitIsGhost(\"{luaUnit}\");")), out int isGhost) && isGhost == 1;
 
+        public bool IsInLfgGroup()
+        {
+            string lfgMode = ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:1},{v:0}=GetLFGInfoServer()"));
+            return bool.TryParse(lfgMode, out bool isInLfg) && isInLfg;
+        }
+
         public bool IsInLineOfSight(Vector3 start, Vector3 end)
         {
             start.Z += 1.5f;
@@ -478,13 +476,13 @@ namespace AmeisenBotX.Core.Hook
             => WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus) && ((1 << runeId) & runeStatus) != 0;
 
         public bool IsSpellKnown(int spellId, bool isPetSpell = false)
-            => bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=IsSpellKnown({spellId}, {isPetSpell});")), out bool result) ? result : false;
+            => bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLFGInfoServer({spellId}, {isPetSpell});")), out bool result) ? result : false;
 
         public void KickNpcsOutOfMammoth()
-            => LuaDoString("for i = 1,2 do EjectPassengerFromSeat(i) end");
+            => LuaDoString("for i=1,2 do EjectPassengerFromSeat(i) end");
 
         public void LearnAllAvaiableSpells()
-            => LuaDoString("LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e = 0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
+            => LuaDoString("LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e=0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
 
         public void LeaveBattleground()
             => ClickUiElement("WorldStateScoreFrameLeaveButton");
@@ -640,7 +638,7 @@ namespace AmeisenBotX.Core.Hook
             int hookSize = 0x7;
             EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, hookSize);
 
-            AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: {EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: 0x{EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
 
             // if WoW is already hooked, unhook it, wont do anything if wow is not hooked
             DisposeHook();

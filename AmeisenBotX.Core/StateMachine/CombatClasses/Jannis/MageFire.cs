@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string spellStealSpell = "Spellsteal";
 #pragma warning restore IDE0051
 
-        public MageFire(WowInterface wowInterface) : base(wowInterface)
+        public MageFire(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

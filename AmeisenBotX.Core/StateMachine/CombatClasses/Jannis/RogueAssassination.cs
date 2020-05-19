@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string stealthSpell = "Stealth";
 #pragma warning restore IDE0051
 
-        public RogueAssassination(WowInterface wowInterface) : base(wowInterface)
+        public RogueAssassination(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

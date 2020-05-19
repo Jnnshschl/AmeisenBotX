@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string shieldOfTheRighteousnessSpell = "Shield of the Righteousness";
 #pragma warning restore IDE0051
 
-        public PaladinProtection(WowInterface wowInterface) : base(wowInterface)
+        public PaladinProtection(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

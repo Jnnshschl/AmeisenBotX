@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string windShearSpell = "Wind Shear";
 #pragma warning restore IDE0051
 
-        public ShamanElemental(WowInterface wowInterface) : base(wowInterface)
+        public ShamanElemental(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 

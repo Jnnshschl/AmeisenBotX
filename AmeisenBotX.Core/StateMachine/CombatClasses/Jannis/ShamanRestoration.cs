@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string waterShieldSpell = "Water Shield";
 #pragma warning restore IDE0051
 
-        public ShamanRestoration(WowInterface wowInterface) : base(wowInterface)
+        public ShamanRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
 

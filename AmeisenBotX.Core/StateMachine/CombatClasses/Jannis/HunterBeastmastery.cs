@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string wingClipSpell = "Wing Clip";
 #pragma warning restore IDE0051
 
-        public HunterBeastmastery(WowInterface wowInterface) : base(wowInterface)
+        public HunterBeastmastery(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
                 WowInterface.ObjectManager.Pet,

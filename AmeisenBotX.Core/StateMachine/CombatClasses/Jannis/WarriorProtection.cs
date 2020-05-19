@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string thunderClapSpell = "Thunder Clap";
 #pragma warning restore IDE0051
 
-        public WarriorProtection(WowInterface wowInterface) : base(wowInterface)
+        public WarriorProtection(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

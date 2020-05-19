@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string wrathSpell = "Wrath";
 #pragma warning restore IDE0051
 
-        public DruidBalance(WowInterface wowInterface) : base(wowInterface)
+        public DruidBalance(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
