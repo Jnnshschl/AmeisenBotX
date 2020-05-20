@@ -18,10 +18,14 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         }
 
         public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
-            => BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.CastMovementRay).Count() > 0;
+        {
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.CastMovementRay).Count() > 0;
+        }
 
         public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
-            => BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.MoveToPosition);
+        {
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.MoveToPosition);
+        }
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
@@ -52,6 +56,8 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         }
 
         private string SendPathRequest(int mapId, Vector3 start, Vector3 end, PathRequestFlags pathRequestFlags, MovementType movementType)
-            => SendRequest(JsonConvert.SerializeObject(new PathRequest(start, end, mapId, pathRequestFlags, movementType)));
+        {
+            return SendRequest(JsonConvert.SerializeObject(new PathRequest(start, end, mapId, pathRequestFlags, movementType))).GetAwaiter().GetResult();
+        }
     }
 }

@@ -26,10 +26,14 @@ namespace AmeisenBotX.Core.Character.Spells
         private WowInterface WowInterface { get; }
 
         public Spell GetSpellByName(string spellname)
-            => Spells?.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        {
+            return Spells?.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        }
 
         public bool IsSpellKnown(string spellname)
-            => Spells != null && Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        {
+            return Spells != null && Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        }
 
         public void Update()
         {

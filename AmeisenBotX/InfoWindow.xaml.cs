@@ -36,7 +36,10 @@ namespace AmeisenBotX
             DisplayStuff();
         }
 
-        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Hide();
+        private void ButtonExit_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+        }
 
         private void ButtonInventory_Click(object sender, RoutedEventArgs e)
         {
@@ -102,6 +105,9 @@ namespace AmeisenBotX
             DisplayStuff();
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
     }
 }

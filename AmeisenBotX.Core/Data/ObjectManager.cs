@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Data
             WowInterface = wowInterface;
 
             IsWorldLoaded = true;
-            WowObjects = new List<WowObject>();
+            wowObjects = new List<WowObject>();
             PartymemberGuids = new List<ulong>();
         }
 
@@ -43,13 +43,13 @@ namespace AmeisenBotX.Core.Data
 
         public List<ulong> PartymemberGuids
         {
-            get { lock (queryLock) { return partymemberGuids; } }
+            get { lock (queryLock) { return partymemberGuids.ToList(); } }
             private set { lock (queryLock) { partymemberGuids = value; } }
         }
 
         public List<WowUnit> Partymembers
         {
-            get { lock (queryLock) { return WowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList(); } }
+            get { lock (queryLock) { return wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList(); } }
         }
 
         public WowUnit Pet { get; private set; }
@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Data
 
         public List<WowObject> WowObjects
         {
-            get { lock (queryLock) { return wowObjects; } }
+            get { lock (queryLock) { return wowObjects.ToList(); } }
             set { lock (queryLock) { wowObjects = value; } }
         }
 
@@ -90,17 +90,18 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
+        public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowUnit>()
+                return wowObjects.OfType<WowUnit>()
                   .Where(e => e != null
                     && e.Guid != PlayerGuid
                     && !e.IsDead
                     && !e.IsNotAttackable
                     && PartymemberGuids.Contains(e.TargetGuid)
-                    && e.Position.GetDistance(position) < distance);
+                    && e.Position.GetDistance(position) < distance)
+                  .ToList();
             }
         }
 
@@ -110,56 +111,59 @@ namespace AmeisenBotX.Core.Data
             return new List<WowDynobject>();
         }
 
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
+        public List<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>()
+                return wowObjects.OfType<T>()
                     .Where(e => e != null
                         && e.Guid != PlayerGuid
                         && !e.IsDead
                         && !e.IsNotAttackable
                         && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                        && e.Position.GetDistance(position) < distance);
+                        && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
+        public List<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>()
+                return wowObjects.OfType<T>()
                   .Where(e => e != null
                     && e.Guid != PlayerGuid
                     && !e.IsDead
                     && !e.IsNotAttackable
                     && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
-                    && e.Position.GetDistance(position) < distance);
+                    && e.Position.GetDistance(position) < distance)
+                  .ToList();
             }
         }
 
-        public IEnumerable<WowPlayer> GetNearPartymembers(Vector3 position, double distance)
+        public List<WowPlayer> GetNearPartymembers(Vector3 position, double distance)
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowPlayer>()
+                return wowObjects.OfType<WowPlayer>()
                   .Where(e => e != null
                     && e.Guid != PlayerGuid
                     && !e.IsDead
                     && !e.IsNotAttackable
                     && PartymemberGuids.Contains(e.Guid)
-                    && e.Position.GetDistance(position) < distance);
+                    && e.Position.GetDistance(position) < distance)
+                  .ToList();
             }
         }
 
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
         {
-            lock (queryLock) { return WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid); }
+            lock (queryLock) { return wowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid); }
         }
 
         public WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
         {
-            lock (queryLock) { return WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Name.Equals(playername.ToUpper(), stringComparison)); }
+            lock (queryLock) { return wowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Name.Equals(playername.ToUpper(), stringComparison)); }
         }
 
         public bool RefreshIsWorldLoaded()
@@ -183,43 +187,21 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                if (WowObjects.Count > 0)
+                if (wowObjects.Count > 0)
                 {
-                    WowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
-                    switch (wowObjectType)
+                    wowObjects.RemoveAll(e => e.BaseAddress == baseAddress);
+                    WowObject obj = wowObjectType switch
                     {
-                        case WowObjectType.Dynobject:
-                            WowObjects.Add(ReadWowDynobject(baseAddress, wowObjectType));
-                            break;
-
-                        case WowObjectType.Gameobject:
-                            WowObjects.Add(ReadWowGameobject(baseAddress, wowObjectType));
-                            break;
-
-                        case WowObjectType.Player:
-                            WowObjects.Add(ReadWowPlayer(baseAddress, wowObjectType));
-                            break;
-
-                        case WowObjectType.Unit:
-                            WowObjects.Add(ReadWowUnit(baseAddress, wowObjectType));
-                            break;
-
-                        case WowObjectType.Corpse:
-                            WowObjects.Add(ReadWowCorpse(baseAddress, wowObjectType));
-                            break;
-
-                        case WowObjectType.Container:
-                            WowObjects.Add(ReadWowContainer(baseAddress, wowObjectType));
-                            break;
-
-                        case WowObjectType.Item:
-                            WowObjects.Add(ReadWowItem(baseAddress, wowObjectType));
-                            break;
-
-                        default:
-                            WowObjects.Add(ReadWowObject(baseAddress, wowObjectType));
-                            break;
-                    }
+                        WowObjectType.Dynobject => ReadWowDynobject(baseAddress, wowObjectType),
+                        WowObjectType.Gameobject => ReadWowGameobject(baseAddress, wowObjectType),
+                        WowObjectType.Player => ReadWowPlayer(baseAddress, wowObjectType),
+                        WowObjectType.Unit => ReadWowUnit(baseAddress, wowObjectType),
+                        WowObjectType.Corpse => ReadWowCorpse(baseAddress, wowObjectType),
+                        WowObjectType.Container => ReadWowContainer(baseAddress, wowObjectType),
+                        WowObjectType.Item => ReadWowItem(baseAddress, wowObjectType),
+                        _ => ReadWowObject(baseAddress, wowObjectType),
+                    };
+                    wowObjects.Add(obj);
                 }
             }
         }
@@ -258,7 +240,7 @@ namespace AmeisenBotX.Core.Data
 
                 GameState = UpdateGlobalVarString(WowInterface.OffsetList.GameState);
 
-                WowObjects.Clear();
+                wowObjects.Clear();
 
                 // get the current objectmanager
                 // better not cache it until we switched map
@@ -270,7 +252,7 @@ namespace AmeisenBotX.Core.Data
                 WowInterface.XMemory.Read(IntPtr.Add(CurrentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
                 WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out int activeObjectType);
 
-                while (IsWorldLoaded && (activeObjectType <= 7 && activeObjectType > 0))
+                while (IsWorldLoaded && activeObjectType <= 7 && activeObjectType > 0)
                 {
                     WowObjectType wowObjectType = (WowObjectType)activeObjectType;
                     WowObject obj = wowObjectType switch
@@ -287,7 +269,7 @@ namespace AmeisenBotX.Core.Data
 
                     if (obj != null)
                     {
-                        WowObjects.Add(obj);
+                        wowObjects.Add(obj);
 
                         // set the global unit properties if a guid matches it
                         if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
@@ -610,9 +592,13 @@ namespace AmeisenBotX.Core.Data
         }
 
         private T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
-            => WowInterface.XMemory.Read(address, out T v) ? v : default;
+        {
+            return WowInterface.XMemory.Read(address, out T v) ? v : default;
+        }
 
         private string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
-            => WowInterface.XMemory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
+        {
+            return WowInterface.XMemory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
+        }
     }
 }

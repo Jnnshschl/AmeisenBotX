@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             // default distance values
             DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3 : 25.0;
 
-            FacingCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
+            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
         }
 
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public bool TargetInLos { get; private set; }
 
-        private TimegatedEvent<bool> FacingCheck { get; set; }
+        private TimegatedEvent FacingCheck { get; set; }
 
         private ulong LastTarget { get; set; }
 
@@ -104,14 +104,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                 TargetInLos = isInLos;
             }
 
-            if (FacingCheck.Run(out bool isFacing, () => WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
+            if (FacingCheck.Run())
             {
-                IsFacing = isFacing;
-
-                if (!IsFacing)
-                {
-                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
-                }
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
             }
 
             // if we are close enough, stop movement and start attacking

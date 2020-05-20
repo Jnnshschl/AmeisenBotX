@@ -72,6 +72,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
+            if (!NeedToHealSomeone())
+            {
+                if (MyAuraManager.Tick())
+                {
+                    return;
+                }
+
+                if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
+                {
+                    return;
+                }
+            }
+        }
+
+        private bool NeedToHealSomeone()
+        {
             if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
@@ -82,20 +98,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 25
                         && CastSpellIfPossible(earthShieldSpell, 0, true))
                     {
-                        return;
+                        return true;
                     }
 
                     if (unitsToHeal.Count > 4
                         && CastSpellIfPossible(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
-                        return;
+                        return true;
                     }
 
                     if (unitsToHeal.Count > 6
                         && (CastSpellIfPossible(naturesSwiftnessSpell, 0, true)
                         || CastSpellIfPossible(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
-                        return;
+                        return true;
                     }
 
                     double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
@@ -105,28 +121,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            return;
+                            return true;
                         }
                     }
                 }
-                else
-                {
-                    if (MyAuraManager.Tick())
-                    {
-                        return;
-                    }
-
-                    if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
-                    {
-                        return;
-                    }
-                }
             }
+
+            return false;
         }
 
         public override void OutOfCombatExecute()
         {
             if (MyAuraManager.Tick()
+                || NeedToHealSomeone()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                 && HandleDeadPartymembers(ancestralSpiritSpell)))
             {

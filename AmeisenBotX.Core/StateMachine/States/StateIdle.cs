@@ -178,12 +178,16 @@ namespace AmeisenBotX.Core.Statemachine.States
         }
 
         internal bool IsRepairNpcNear()
-            => WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-            .Any(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .Any(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+        }
 
         internal bool IsVendorNpcNear()
-            => WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-            .Any(e => e.GetType() != typeof(WowPlayer) && e.IsVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .Any(e => e.GetType() != typeof(WowPlayer) && e.IsVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+        }
 
         private void CheckForBattlegroundInvites()
         {
@@ -209,6 +213,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         }
 
         private bool UnitIsOutOfRange(double distance)
-           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        {
+            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        }
     }
 }

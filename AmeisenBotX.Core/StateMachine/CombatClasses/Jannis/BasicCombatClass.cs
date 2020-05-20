@@ -78,6 +78,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(50));
             NearInterruptUnitsEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
             UpdatePriorityUnits = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+
+            WalkBehindEnemy = false;
         }
 
         public TimegatedEvent ActionEvent { get; set; }
@@ -110,7 +112,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 
-        public List<string> PriorityTargets { get { return TargetManager.PriorityTargets; } set { TargetManager.PriorityTargets = value; } }
+        public List<string> PriorityTargets { get => TargetManager.PriorityTargets; set => TargetManager.PriorityTargets = value; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
@@ -129,6 +131,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public bool UseDefaultTargetSelection { get; protected set; } = true;
 
         public abstract string Version { get; }
+
+        public virtual bool WalkBehindEnemy { get; }
 
         public WowInterface WowInterface { get; internal set; }
 
@@ -175,7 +179,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (NearInterruptUnitsEvent.Run())
             {
-                TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 4.0 : 25.0).ToList();
+                TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 25.0).ToList();
             }
 
             ExecuteCC();
@@ -185,7 +189,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract void OutOfCombatExecute();
 
-        public override string ToString() => $"[{Class}] [{Role}] {Displayname}";
+        public override string ToString()
+        {
+            return $"[{Class}] [{Role}] {Displayname}";
+        }
 
         protected bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {

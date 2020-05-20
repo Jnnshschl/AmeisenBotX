@@ -41,6 +41,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public string Version => "1.0";
 
+        public bool WalkBehindEnemy => false;
+
         private IHookManager HookManager { get; }
 
         private IObjectManager ObjectManager { get; }
@@ -125,11 +127,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         }
 
         private bool IsOneOfAllRunesReady()
-            => HookManager.IsRuneReady(0)
-            || HookManager.IsRuneReady(1)
-            && HookManager.IsRuneReady(2)
-            || HookManager.IsRuneReady(3)
-            && HookManager.IsRuneReady(4)
-            || HookManager.IsRuneReady(5);
+        {
+            return HookManager.IsRuneReady(0)
+                       || HookManager.IsRuneReady(1)
+                       && HookManager.IsRuneReady(2)
+                       || HookManager.IsRuneReady(3)
+                       && HookManager.IsRuneReady(4)
+                       || HookManager.IsRuneReady(5);
+        }
     }
 }

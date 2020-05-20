@@ -45,10 +45,15 @@ namespace AmeisenBotX.Core.Character
 
         private WowInterface WowInterface { get; }
 
-        public void AntiAfk() => WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
+        public void AntiAfk()
+        {
+            WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
+        }
 
         public Dictionary<int, int> GetConsumeables()
-            => Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
+        {
+            return Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
+        }
 
         public bool IsAbleToUseArmor(WowArmor item)
         {
@@ -125,9 +130,12 @@ namespace AmeisenBotX.Core.Character
             return false;
         }
 
-        public void Jump() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
+        public void Jump()
+        {
+            BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
+        }
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.25f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.4f)
         {
             if (pos == new Vector3(0, 0, 0))
             {

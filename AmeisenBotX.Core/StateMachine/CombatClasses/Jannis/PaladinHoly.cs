@@ -45,6 +45,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 2000, holyShockSpell },
                 { 4000, holyLightSpell }
             };
+
+            FaceEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
         }
 
         public override string Author => "Jannis";
@@ -69,7 +72,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        private DateTime LastAutoAttackCheck { get; set; }
+        private TimegatedEvent FaceEvent { get; set; }
+
+        private TimegatedEvent AutoAttackEvent { get; set; }
 
         private DateTime LastHealAction { get; set; }
 
@@ -77,8 +82,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
+            // after 1 seconds of no healing and no freidns around us we are going to attack stuff
             if (!NeedToHealSomeone()
-                && DateTime.Now - LastHealAction > TimeSpan.FromSeconds(5)) // after 5 seconds of no healing we are going to attack stuff
+                && DateTime.Now - LastHealAction > TimeSpan.FromSeconds(1)
+                && WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 48).Count <= 1)
             {
                 if (MyAuraManager.Tick())
                 {
@@ -109,18 +116,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
                     else
                     {
-                        if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && !WowInterface.ObjectManager.Player.IsAutoAttacking)
+                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
                         {
-                            LastAutoAttackCheck = DateTime.Now;
                             WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                         }
 
-                        if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.ObjectManager.Target.Position))
+                        if (FaceEvent.Run())
                         {
                             WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
                         }
                     }
                 }
+            }
+        }
+
+        public override void OutOfCombatExecute()
+        {
+            if (MyAuraManager.Tick() || NeedToHealSomeone())
+            {
+                return;
             }
         }
 
@@ -134,12 +148,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (targetUnit.HealthPercentage < 12
                     && CastSpellIfPossible(layOnHandsSpell, 0))
                 {
+                    LastHealAction = DateTime.Now;
                     return true;
                 }
 
                 if (targetUnit.HealthPercentage < 50
                     && CastSpellIfPossible(divineFavorSpell, targetUnit.Guid, true))
                 {
+                    LastHealAction = DateTime.Now;
                     return true;
                 }
 
@@ -147,12 +163,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                    && WowInterface.ObjectManager.Player.ManaPercentage > 20
                    && CastSpellIfPossible(divineIlluminationSpell, 0, true))
                 {
+                    LastHealAction = DateTime.Now;
                     return true;
                 }
 
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 60
                     && CastSpellIfPossible(divinePleaSpell, 0, true))
                 {
+                    LastHealAction = DateTime.Now;
                     return true;
                 }
 
@@ -172,14 +190,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
-        }
-
-        public override void OutOfCombatExecute()
-        {
-            if (MyAuraManager.Tick() || NeedToHealSomeone())
-            {
-                return;
-            }
         }
     }
 }

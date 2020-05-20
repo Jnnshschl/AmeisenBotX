@@ -78,6 +78,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
+            if (!NeedToHealSomeone())
+            {
+                if (MyAuraManager.Tick())
+                {
+                    return;
+                }
+            }
+        }
+
+        private bool NeedToHealSomeone()
+        {
             if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
@@ -86,7 +97,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (unitsToHeal.Count > 3
                     && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
-                    return;
+                    return true;
                 }
 
                 WowUnit target = WowInterface.ObjectManager.Target;
@@ -99,32 +110,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         && WowInterface.ObjectManager.Player.HealthPercentage < 70
                         && CastSpellIfPossible(bindingHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
-                        return;
+                        return true;
                     }
 
                     if (WowInterface.ObjectManager.Player.ManaPercentage < 50
                         && CastSpellIfPossible(hymnOfHopeSpell, 0))
                     {
-                        return;
+                        return true;
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 20
                         && CastSpellIfPossible(desperatePrayerSpell, 0))
                     {
-                        return;
+                        return true;
                     }
 
                     List<string> targetBuffs = WowInterface.HookManager.GetAuras(WowLuaUnit.Target);
 
-                    if ((target.HealthPercentage < 85
+                    if ((target.HealthPercentage < 98 && target.HealthPercentage > 80
                             && !WowInterface.ObjectManager.Target.HasBuffByName(weakenedSoulSpell)
                             && !WowInterface.ObjectManager.Target.HasBuffByName(powerWordShieldSpell)
                             && CastSpellIfPossible(powerWordShieldSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (target.HealthPercentage < 80
+                        || (target.HealthPercentage < 90 && target.HealthPercentage > 80
                             && !WowInterface.ObjectManager.Target.HasBuffByName(renewSpell)
                             && CastSpellIfPossible(renewSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
-                        return;
+                        return true;
                     }
 
                     double healthDifference = target.MaxHealth - target.Health;
@@ -134,23 +145,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            return;
+                            return true;
                         }
                     }
                 }
-                else
-                {
-                    if (MyAuraManager.Tick())
-                    {
-                        return;
-                    }
-                }
             }
+
+            return false;
         }
 
         public override void OutOfCombatExecute()
         {
             if (MyAuraManager.Tick()
+                || NeedToHealSomeone()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                 && HandleDeadPartymembers(resurrectionSpell)))
             {

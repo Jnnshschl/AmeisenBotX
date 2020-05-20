@@ -19,7 +19,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         private RawWowCorpse RawWowCorpse { get; set; }
 
         public override string ToString()
-            => $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
+        {
+            return $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
+        }
 
         public WowCorpse UpdateRawWowCorpse(XMemory xMemory)
         {

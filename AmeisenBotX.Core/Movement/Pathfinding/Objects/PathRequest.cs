@@ -34,18 +34,20 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public override bool Equals(object obj)
-            => obj.GetType() == typeof(PathRequest)
-            && ((PathRequest)obj).A == A
-            && ((PathRequest)obj).B == B
-            && ((PathRequest)obj).MapId == MapId
-            && ((PathRequest)obj).Flags == Flags
-            && ((PathRequest)obj).MovementType == MovementType;
+        {
+            return obj.GetType() == typeof(PathRequest)
+                       && ((PathRequest)obj).A == A
+                       && ((PathRequest)obj).B == B
+                       && ((PathRequest)obj).MapId == MapId
+                       && ((PathRequest)obj).Flags == Flags
+                       && ((PathRequest)obj).MovementType == MovementType;
+        }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (int)(17 + (A.GetHashCode() * 23) + (B.GetHashCode() * 23) + (MapId * 23) + ((int)Flags * 23) + ((int)MovementType * 23));
+                return 17 + (A.GetHashCode() * 23) + (B.GetHashCode() * 23) + (MapId * 23) + ((int)Flags * 23) + ((int)MovementType * 23);
             }
         }
     }

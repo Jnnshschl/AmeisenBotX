@@ -15,7 +15,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         private RawWowContainer RawWowContainer { get; set; }
 
         public override string ToString()
-            => $"Container: [{Guid}] SlotCount: {SlotCount}";
+        {
+            return $"Container: [{Guid}] SlotCount: {SlotCount}";
+        }
 
         public WowContainer UpdateRawWowContainer(XMemory xMemory)
         {

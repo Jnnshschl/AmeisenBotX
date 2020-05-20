@@ -59,6 +59,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public string Version => "1.0";
 
+        public bool WalkBehindEnemy => false;
+
         private ICharacterManager CharacterManager { get; }
 
         private bool Dancing { get; set; }

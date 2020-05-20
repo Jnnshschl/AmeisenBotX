@@ -26,7 +26,9 @@ namespace AmeisenBotX.Core.Common
         /// </summary>
         /// <returns>True when the function is executed, false if not</returns>
         public bool Run()
-            => Run(Function);
+        {
+            return Run(Function);
+        }
 
         /// <summary>
         /// Executes the provided function if the last execution is longer than the specified TimeSpan
@@ -71,7 +73,9 @@ namespace AmeisenBotX.Core.Common
         /// <param name="value">The return value of your supplied function</param>
         /// <returns>True when the function is executed, false if not</returns>
         public bool Run(out T value, Func<T> function)
-            => CallFunction(out value, function);
+        {
+            return CallFunction(out value, function);
+        }
 
         /// <summary>
         /// Executes the provided function if the last execution is longer than the specified TimeSpan
@@ -79,7 +83,9 @@ namespace AmeisenBotX.Core.Common
         /// <param name="value">The return value of your supplied function</param>
         /// <returns>True when the function is executed, false if not</returns>
         public bool Run(out T value)
-            => CallFunction(out value, Function);
+        {
+            return CallFunction(out value, Function);
+        }
 
         private bool CallFunction(out T value, Func<T> function)
         {

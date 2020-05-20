@@ -7,15 +7,13 @@ namespace AmeisenBotX.Core.Common
     {
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, double distanceToMove = 2.0)
         {
-            double x = position.X + (distanceToMove * Math.Cos(rotation + Math.PI));
-            double y = position.Y + (distanceToMove * Math.Sin(rotation + Math.PI));
+            double s = Math.Round(Math.Sin(rotation + Math.PI), 4);
+            double c = Math.Round(Math.Cos(rotation + Math.PI), 4);
 
-            return new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = position.Z
-            };
+            float x = Convert.ToSingle((position.X + distanceToMove) * c);
+            float y = Convert.ToSingle((position.Y + distanceToMove) * s);
+
+            return new Vector3(x, y, position.Z);
         }
 
         /// <summary>
@@ -27,26 +25,27 @@ namespace AmeisenBotX.Core.Common
         public static Vector3 CapVector3(Vector3 vector, float max)
             => new Vector3(Math.Min(vector.X, max), Math.Min(vector.Y, max), Math.Min(vector.Z, max));
 
-        public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
-        {
-            float angle = (float)Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X);
-
-            if (angle < 0.0f)
-            {
-                angle += (float)Math.PI * 2.0f;
-            }
-            else if (angle > (float)Math.PI * 2)
-            {
-                angle -= (float)Math.PI * 2.0f;
-            }
-
-            return angle;
-        }
+        public static float GetFacingAngle2D(Vector3 position, Vector3 targetPosition)
+            => ClampAngles(Convert.ToSingle(Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X)));
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, double minRotation = 0.7, double maxRotation = 1.3)
         {
-            float f = GetFacingAngle(position, targetPosition);
+            float f = GetFacingAngle2D(position, targetPosition);
             return (f >= (rotation * minRotation)) && (f <= (rotation * maxRotation));
+        }
+
+        private static float ClampAngles(float rotation)
+        {
+            if (rotation < 0.0f)
+            {
+                rotation += (float)Math.PI * 2.0f;
+            }
+            else if (rotation > (float)Math.PI * 2)
+            {
+                rotation -= (float)Math.PI * 2.0f;
+            }
+
+            return rotation;
         }
     }
 }

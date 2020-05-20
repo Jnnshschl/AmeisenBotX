@@ -83,6 +83,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
+            if (!NeedToHealSomeone())
+            {
+                if (MyAuraManager.Tick())
+                {
+                    return;
+                }
+            }
+        }
+
+        private bool NeedToHealSomeone()
+        {
             if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
@@ -91,7 +102,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (unitsToHeal.Count > 3
                     && CastSpellIfPossible(tranquilitySpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
-                    return;
+                    return true;
                 }
 
                 WowUnit target = WowInterface.ObjectManager.Target;
@@ -111,7 +122,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                                 || WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
                             && CastSpellIfPossible(swiftmendSpell, WowInterface.ObjectManager.TargetGuid, true))))
                     {
-                        return;
+                        return true;
                     }
 
                     double healthDifference = target.MaxHealth - target.Health;
@@ -121,23 +132,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            break;
+                            return true;
                         }
                     }
                 }
             }
-            else
-            {
-                if (MyAuraManager.Tick())
-                {
-                    return;
-                }
-            }
+
+            return false;
         }
 
         public override void OutOfCombatExecute()
         {
             if (MyAuraManager.Tick()
+                || NeedToHealSomeone()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                     && HandleDeadPartymembers(reviveSpell)))
             {

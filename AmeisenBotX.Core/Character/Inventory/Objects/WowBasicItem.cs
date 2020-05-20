@@ -22,24 +22,24 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         {
             if (item != null)
             {
-                this.BagId = item.BagId;
-                this.BagSlot = item.BagSlot;
-                this.Count = Count;
-                this.Durability = item.Durability;
-                this.EquipLocation = item.EquipLocation;
-                this.EquipSlot = item.EquipSlot;
-                this.Id = item.Id;
-                this.ItemLevel = item.ItemLevel;
-                this.ItemLink = item.ItemLink;
-                this.ItemQuality = item.ItemQuality;
-                this.MaxDurability = item.MaxDurability;
-                this.MaxStack = item.MaxStack;
-                this.Name = item.Name;
-                this.Price = item.Price;
-                this.RequiredLevel = item.RequiredLevel;
-                this.Stats = item.Stats;
-                this.Subtype = item.Subtype;
-                this.Type = item.Type;
+                BagId = item.BagId;
+                BagSlot = item.BagSlot;
+                Count = Count;
+                Durability = item.Durability;
+                EquipLocation = item.EquipLocation;
+                EquipSlot = item.EquipSlot;
+                Id = item.Id;
+                ItemLevel = item.ItemLevel;
+                ItemLink = item.ItemLink;
+                ItemQuality = item.ItemQuality;
+                MaxDurability = item.MaxDurability;
+                MaxStack = item.MaxStack;
+                Name = item.Name;
+                Price = item.Price;
+                RequiredLevel = item.RequiredLevel;
+                Stats = item.Stats;
+                Subtype = item.Subtype;
+                Type = item.Type;
             }
         }
 

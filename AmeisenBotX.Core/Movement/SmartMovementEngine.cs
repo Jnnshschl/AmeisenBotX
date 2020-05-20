@@ -198,38 +198,36 @@ namespace AmeisenBotX.Core.Movement
                 {
                     TryCount = 0;
 
-                    if (Straving)
-                    {
-                        WowInterface.HookManager.LuaDoString("StrafeLeftStop();MoveBackwardStop();StrafeRightStop();MoveBackwardStop();");
-                        Straving = false;
-                    }
+                    // if (Straving)
+                    // {
+                    //     WowInterface.HookManager.LuaDoString("StrafeLeftStop();MoveBackwardStop();StrafeRightStop();MoveBackwardStop();");
+                    //     Straving = false;
+                    // }
                 }
 
-                if (TryCount > 2)
-                {
-                    // WowInterface.BotCache.CacheBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position);
-                }
-                else if (TryCount > 1)
+                // if the target position is higher than us, jump
+                if (TryCount > 1 || (distanceToTargetPosition < 3 && currentPosition.Z + 2 < targetPosition.Z))
                 {
                     WowInterface.CharacterManager.Jump();
+                    TryCount = 0;
 
-                    if (DateTime.Now > StrafeEnd)
-                    {
-                        int msToStrafe = Rnd.Next(1000, 5000);
-
-                        if (Rnd.Next(0, 2) == 0)
-                        {
-                            WowInterface.HookManager.LuaDoString("StrafeLeftStart();MoveBackwardStart();");
-                            Straving = true;
-                        }
-                        else
-                        {
-                            WowInterface.HookManager.LuaDoString("StrafeRightStart();MoveBackwardStart();");
-                            Straving = true;
-                        }
-
-                        StrafeEnd = DateTime.Now + TimeSpan.FromMilliseconds(msToStrafe + 200);
-                    }
+                    // if (DateTime.Now > StrafeEnd)
+                    // {
+                    //     int msToStrafe = Rnd.Next(1000, 5000);
+                    //
+                    //     if (Rnd.Next(0, 2) == 0)
+                    //     {
+                    //         WowInterface.HookManager.LuaDoString("StrafeLeftStart();MoveBackwardStart();");
+                    //         Straving = true;
+                    //     }
+                    //     else
+                    //     {
+                    //         WowInterface.HookManager.LuaDoString("StrafeRightStart();MoveBackwardStart();");
+                    //         Straving = true;
+                    //     }
+                    //
+                    //     StrafeEnd = DateTime.Now + TimeSpan.FromMilliseconds(msToStrafe + 200);
+                    // }
                 }
 
                 if (updateForces && !Straving)
@@ -240,12 +238,6 @@ namespace AmeisenBotX.Core.Movement
                 LastPosition = WowInterface.ObjectManager.Player.Position;
                 LastLastPositionUpdate = DateTime.Now;
                 LastJumpCheck = DateTime.Now;
-            }
-
-            // if the target position is higher than us, jump
-            if (distanceToTargetPosition < 3 && currentPosition.Z + 2 < targetPosition.Z)
-            {
-                WowInterface.CharacterManager.Jump();
             }
 
             LastTargetPosition = WowInterface.ObjectManager.Player.Position;

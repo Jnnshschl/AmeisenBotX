@@ -54,7 +54,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         }
 
         public override string ToString()
-                            => $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
+        {
+            return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
+        }
 
         public WowItem UpdateRawWowItem(XMemory xMemory)
         {

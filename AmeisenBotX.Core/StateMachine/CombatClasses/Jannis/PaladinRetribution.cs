@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
@@ -44,6 +45,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossible(hammerOfJusticeSpell, x.Guid, true) }
             };
+
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
         }
 
         public override string Author => "Jannis";
@@ -68,13 +71,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        private DateTime LastAutoAttackCheck { get; set; }
+        private TimegatedEvent AutoAttackEvent { get; set; }
 
         public override void ExecuteCC()
         {
-            if (DateTime.Now - LastAutoAttackCheck > TimeSpan.FromSeconds(4) && !WowInterface.ObjectManager.Player.IsAutoAttacking)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
             {
-                LastAutoAttackCheck = DateTime.Now;
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 

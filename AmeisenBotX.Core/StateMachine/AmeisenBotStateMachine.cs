@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.Statemachine
                 {
                     if (SetState(BotState.LoadingScreen, true))
                     {
-                        OnStateOverride(CurrentState.Key);
+                        OnStateOverride?.Invoke(CurrentState.Key);
                         AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
                         return;
                     }
@@ -136,7 +136,7 @@ namespace AmeisenBotX.Core.Statemachine
                             && SetState(BotState.Dead, true))
                         {
                             // we are dead, state needs to release the spirit
-                            OnStateOverride(CurrentState.Key);
+                            OnStateOverride?.Invoke(CurrentState.Key);
                             return;
                         }
                         else if (GhostCheckEvent.Run(out bool isGhost)
@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Statemachine
                             && SetState(BotState.Ghost, true))
                         {
                             // we cant be a ghost if we are still dead
-                            OnStateOverride(CurrentState.Key);
+                            OnStateOverride?.Invoke(CurrentState.Key);
                             return;
                         }
 
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Statemachine
                             // TODO: handle combat bug, sometimes when combat ends, the player stays in combot for no reason
                             if ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()) && SetState(BotState.Attacking, true))
                             {
-                                OnStateOverride(CurrentState.Key);
+                                OnStateOverride?.Invoke(CurrentState.Key);
                                 return;
                             }
                         }
@@ -179,37 +179,51 @@ namespace AmeisenBotX.Core.Statemachine
         }
 
         internal IEnumerable<WowUnit> GetNearLootableUnits()
-            => WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-               .Where(e => e.IsLootable
-                   && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
-                   && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                          .Where(e => e.IsLootable
+                              && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
+                              && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
+        }
 
         internal bool HasFoodInBag()
-            => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
+        {
+            return WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
+        }
 
         internal bool HasRefreshmentInBag()
-            => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowRefreshment), e));
+        {
+            return WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowRefreshment), e));
+        }
 
         internal bool HasWaterInBag()
-            => WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowWater), e));
+        {
+            return WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowWater), e));
+        }
 
         internal bool IsAnyPartymemberInCombat()
-            => WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
-            .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
-            .Any(r => r.IsInCombat);
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
+                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
+                       .Any(r => r.IsInCombat);
+        }
 
         internal bool IsBattlegroundMap(MapId map)
-            => map == MapId.AlteracValley
-            || map == MapId.WarsongGulch
-            || map == MapId.ArathiBasin
-            || map == MapId.EyeOfTheStorm
-            || map == MapId.StrandOfTheAncients;
+        {
+            return map == MapId.AlteracValley
+                       || map == MapId.WarsongGulch
+                       || map == MapId.ArathiBasin
+                       || map == MapId.EyeOfTheStorm
+                       || map == MapId.StrandOfTheAncients;
+        }
 
         internal bool IsDungeonMap(MapId map)
-            => map == MapId.Deadmines
-            || map == MapId.HellfireRamparts
-            || map == MapId.UtgardeKeep
-            || map == MapId.AzjolNerub;
+        {
+            return map == MapId.Deadmines
+                       || map == MapId.HellfireRamparts
+                       || map == MapId.UtgardeKeep
+                       || map == MapId.AzjolNerub;
+        }
 
         internal bool IsInCapitalCity()
         {
@@ -234,7 +248,11 @@ namespace AmeisenBotX.Core.Statemachine
             }
 
             CurrentState = States.First(s => s.Key == state);
-            CurrentState.Value.Enter();
+
+            if (!ignoreExit)
+            {
+                CurrentState.Value.Enter();
+            }
 
             OnStateMachineStateChanged?.Invoke();
             return true;

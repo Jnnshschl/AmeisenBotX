@@ -51,10 +51,14 @@ namespace AmeisenBotX.Core.Common
         }
 
         public static string ByteArrayToString(byte[] bytes)
-            => BitConverter.ToString(bytes).Replace("-", " ");
+        {
+            return BitConverter.ToString(bytes).Replace("-", " ");
+        }
 
         public static string Capitalize(string input)
-            => input.First().ToString().ToUpper() + input.Substring(1);
+        {
+            return input.First().ToString().ToUpper() + input.Substring(1);
+        }
 
         public static void HoldKey(IntPtr windowHandle, IntPtr key)
         {
@@ -114,7 +118,7 @@ namespace AmeisenBotX.Core.Common
 
         public static string GenerateUniqueString(int lenght)
         {
-            using var rng = new RNGCryptoServiceProvider();
+            using RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
 
             int bitCount = (lenght * 6);
             int byteCount = ((bitCount + 7) / 8);
@@ -126,16 +130,23 @@ namespace AmeisenBotX.Core.Common
         }
 
         public static string FastRandomStringOnlyLetters()
-            => new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
+        {
+            return new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
+        }
 
         public static string FastRandomString()
-            => Path.GetRandomFileName().Replace(".", string.Empty);
+        {
+            return Path.GetRandomFileName().Replace(".", string.Empty);
+        }
 
         public static string RandomStringOnlyLetters(int lenght = 8, string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-            => RandomString(lenght, chars);
+        {
+            return RandomString(lenght, chars);
+        }
 
         public static string GetColorByQuality(ItemQuality itemQuality)
-            => itemQuality switch
+        {
+            return itemQuality switch
             {
                 ItemQuality.Unique => "#00ccff",
                 ItemQuality.Poor => "#9d9d9d",
@@ -147,9 +158,12 @@ namespace AmeisenBotX.Core.Common
                 ItemQuality.Artifact => "#e6cc80",
                 _ => "#ffffff",
             };
+        }
 
         public static string FirstCharToUpper(string input)
-            => input.First().ToString().ToUpper() + input.Substring(1);
+        {
+            return input.First().ToString().ToUpper() + input.Substring(1);
+        }
 
         public static string RandomString(int lenght = 8, string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
         {
@@ -185,7 +199,9 @@ namespace AmeisenBotX.Core.Common
         }
 
         public static bool IsPositionInsideAoeSpell(Vector3 position, List<WowDynobject> wowDynobjects)
-            => wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 1);
+        {
+            return wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 1);
+        }
 
         public static bool IsValidUnit(WowUnit unit)
         {

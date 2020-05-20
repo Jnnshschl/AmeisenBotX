@@ -262,11 +262,15 @@ namespace AmeisenBotX.Memory
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WriteBytes(IntPtr address, byte[] bytes)
-            => WpmGateWay(address, bytes, bytes.Length);
+        {
+            return WpmGateWay(address, bytes, bytes.Length);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ZeroMemory(IntPtr address, int size)
-            => WriteBytes(address, new byte[size]);
+        {
+            return WriteBytes(address, new byte[size]);
+        }
 
         private bool OpenMainThread()
         {

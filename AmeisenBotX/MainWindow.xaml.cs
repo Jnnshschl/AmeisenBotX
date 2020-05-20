@@ -117,11 +117,14 @@ namespace AmeisenBotX
 
         private void ButtonFaceTarget_Click(object sender, RoutedEventArgs e)
         {
-            float angle = BotMath.GetFacingAngle(AmeisenBot.WowInterface.ObjectManager.Player.Position, AmeisenBot.WowInterface.ObjectManager.Target.Position);
+            float angle = BotMath.GetFacingAngle2D(AmeisenBot.WowInterface.ObjectManager.Player.Position, AmeisenBot.WowInterface.ObjectManager.Target.Position);
             AmeisenBot.WowInterface.HookManager.SetFacing(AmeisenBot.WowInterface.ObjectManager.Player, angle);
         }
 
-        private void ButtonSettings_Click(object sender, RoutedEventArgs e) => new SettingsWindow(Config).ShowDialog();
+        private void ButtonSettings_Click(object sender, RoutedEventArgs e)
+        {
+            new SettingsWindow(Config).ShowDialog();
+        }
 
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
         {
@@ -481,6 +484,9 @@ namespace AmeisenBotX
             }
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace AmeisenBotX.Core.Common
@@ -10,10 +11,14 @@ namespace AmeisenBotX.Core.Common
     public abstract class CustomTcpClient
     {
         public CustomTcpClient(string ip, int port, int watchdogPollMs = 1000)
-            => Init(IPAddress.Parse(ip), port, watchdogPollMs);
+        {
+            Init(IPAddress.Parse(ip), port, watchdogPollMs);
+        }
 
         public CustomTcpClient(IPAddress ip, int port, int watchdogPollMs = 1000)
-            => Init(ip, port, watchdogPollMs);
+        {
+            Init(ip, port, watchdogPollMs);
+        }
 
         public IPAddress Ip { get; private set; }
 
@@ -37,14 +42,14 @@ namespace AmeisenBotX.Core.Common
             TcpClient.Close();
         }
 
-        public string SendRequest(string payload)
+        public async Task<string> SendRequest(string payload)
         {
-            Writer.WriteLine($"{payload}&gt;");
-            Writer.Flush();
-            return Reader.ReadLine().Replace("&gt;", string.Empty);
+            await Writer.WriteLineAsync($"{payload}&gt;");
+            await Writer.FlushAsync();
+            return Reader.ReadLineAsync().GetAwaiter().GetResult().Replace("&gt;", string.Empty);
         }
 
-        private void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
+        private async void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
         {
             if (TcpClient == null)
             {
@@ -54,7 +59,7 @@ namespace AmeisenBotX.Core.Common
             {
                 try
                 {
-                    TcpClient.Connect(Ip, Port);
+                    await TcpClient.ConnectAsync(Ip, Port);
 
                     Reader = new StreamReader(TcpClient.GetStream(), Encoding.ASCII);
                     Writer = new StreamWriter(TcpClient.GetStream(), Encoding.ASCII);

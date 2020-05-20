@@ -19,7 +19,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         private RawWowDynobject RawWowDynobject { get; set; }
 
         public override string ToString()
-            => $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
+        {
+            return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
+        }
 
         public WowDynobject UpdateRawWowDynobject(XMemory xMemory)
         {

@@ -82,21 +82,27 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         }
 
         public bool IsAlliance()
-            => Race == WowRace.Draenei
-            || Race == WowRace.Human
-            || Race == WowRace.Dwarf
-            || Race == WowRace.Gnome
-            || Race == WowRace.Nightelf;
+        {
+            return Race == WowRace.Draenei
+                       || Race == WowRace.Human
+                       || Race == WowRace.Dwarf
+                       || Race == WowRace.Gnome
+                       || Race == WowRace.Nightelf;
+        }
 
         public bool IsHorde()
-            => Race == WowRace.Undead
-            || Race == WowRace.Orc
-            || Race == WowRace.Bloodelf
-            || Race == WowRace.Tauren
-            || Race == WowRace.Undead;
+        {
+            return Race == WowRace.Undead
+                       || Race == WowRace.Orc
+                       || Race == WowRace.Bloodelf
+                       || Race == WowRace.Tauren
+                       || Race == WowRace.Undead;
+        }
 
         public override string ToString()
-            => $"Player: [{Guid}] {Name} lvl. {Level}";
+        {
+            return $"Player: [{Guid}] {Name} lvl. {Level}";
+        }
 
         public WowPlayer UpdateRawWowPlayer(XMemory xMemory)
         {

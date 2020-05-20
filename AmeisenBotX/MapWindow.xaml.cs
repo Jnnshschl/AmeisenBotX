@@ -268,7 +268,10 @@ namespace AmeisenBotX
             MapTimer.Start();
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {

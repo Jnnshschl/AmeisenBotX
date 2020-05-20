@@ -75,9 +75,15 @@ namespace AmeisenBotX.Core.Battleground.Profiles
 
         private IWsgDataset WsgDataset { get; }
 
-        public void AllianceFlagWasDropped() => UnsetFlagCarrier(!IsAlliance);
+        public void AllianceFlagWasDropped()
+        {
+            UnsetFlagCarrier(!IsAlliance);
+        }
 
-        public void AllianceFlagWasPickedUp(string playername) => SetFlagCarrier(!IsAlliance, playername);
+        public void AllianceFlagWasPickedUp(string playername)
+        {
+            SetFlagCarrier(!IsAlliance, playername);
+        }
 
         public bool HanldeInterruptStates()
         {
@@ -101,9 +107,15 @@ namespace AmeisenBotX.Core.Battleground.Profiles
             return false;
         }
 
-        public void HordeFlagWasDropped() => UnsetFlagCarrier(IsAlliance);
+        public void HordeFlagWasDropped()
+        {
+            UnsetFlagCarrier(IsAlliance);
+        }
 
-        public void HordeFlagWasPickedUp(string playername) => SetFlagCarrier(IsAlliance, playername);
+        public void HordeFlagWasPickedUp(string playername)
+        {
+            SetFlagCarrier(IsAlliance, playername);
+        }
 
         private void SetFlagCarrier(bool own, string playername)
         {

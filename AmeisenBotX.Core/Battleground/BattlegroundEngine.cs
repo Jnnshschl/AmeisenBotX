@@ -144,11 +144,13 @@ namespace AmeisenBotX.Core.Battleground
         }
 
         internal IEnumerable<WowGameobject> GetBattlegroundFlags(bool onlyEnemy = true)
-            => WowInterface.ObjectManager.WowObjects
-                .OfType<WowGameobject>()
-                .Where(e => onlyEnemy ? (!WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag)
-                        || (WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
-                    : e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag);
+        {
+            return WowInterface.ObjectManager.WowObjects
+                           .OfType<WowGameobject>()
+                           .Where(e => onlyEnemy ? (!WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag)
+                                   || (WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
+                               : e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag);
+        }
 
         internal void SetState(BattlegroundState state)
         {

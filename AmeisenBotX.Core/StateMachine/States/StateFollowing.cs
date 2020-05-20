@@ -86,6 +86,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         }
 
         private bool UnitIsOutOfRange(double distance)
-           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        {
+            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        }
     }
 }

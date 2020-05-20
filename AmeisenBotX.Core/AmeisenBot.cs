@@ -127,10 +127,7 @@ namespace AmeisenBotX.Core
                 return avgTickTime;
             }
 
-            private set
-            {
-                currentExecutionMs = value;
-            }
+            private set => currentExecutionMs = value;
         }
 
         public bool IsRunning { get; private set; }

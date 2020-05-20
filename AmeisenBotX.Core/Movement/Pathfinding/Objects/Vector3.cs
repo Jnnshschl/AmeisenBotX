@@ -25,43 +25,63 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         public float Z { get; set; }
 
         public static Vector3 FromArray(float[] array)
-            => new Vector3()
+        {
+            return new Vector3()
             {
                 X = array[0],
                 Y = array[1],
                 Z = array[2]
             };
+        }
 
         public static Vector3 operator -(Vector3 a, Vector3 b)
-            => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        {
+            return new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
 
         public static bool operator !=(Vector3 left, Vector3 right)
-            => !(left == right);
+        {
+            return !(left == right);
+        }
 
         public static Vector3 operator *(Vector3 a, float b)
-            => new Vector3(a.X * b, a.Y * b, a.Z * b);
+        {
+            return new Vector3(a.X * b, a.Y * b, a.Z * b);
+        }
 
         public static Vector3 operator *(Vector3 a, Vector3 b)
-            => new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+        {
+            return new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+        }
 
         public static Vector3 operator /(Vector3 a, float b)
-            => new Vector3(a.X / b, a.Y / b, a.Z / b);
+        {
+            return new Vector3(a.X / b, a.Y / b, a.Z / b);
+        }
 
         public static Vector3 operator +(Vector3 a, Vector3 b)
-            => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        {
+            return new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        }
 
         public static bool operator <(Vector3 left, Vector3 right)
-            => left.X < right.X
-            && left.Y < right.Y
-            && left.Z < right.Z;
+        {
+            return left.X < right.X
+                       && left.Y < right.Y
+                       && left.Z < right.Z;
+        }
 
         public static bool operator ==(Vector3 left, Vector3 right)
-            => left.Equals(right);
+        {
+            return left.Equals(right);
+        }
 
         public static bool operator >(Vector3 left, Vector3 right)
-            => left.X > right.X
-            && left.Y > right.Y
-            && left.Z > right.Z;
+        {
+            return left.X > right.X
+                       && left.Y > right.Y
+                       && left.Z > right.Z;
+        }
 
         public void Add(Vector3 vector)
         {
@@ -85,15 +105,19 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public override bool Equals(object obj)
-            => obj.GetType() == typeof(Vector3)
-            && ((Vector3)obj).X == X
-            && ((Vector3)obj).Y == Y
-            && ((Vector3)obj).Z == Z;
+        {
+            return obj.GetType() == typeof(Vector3)
+                       && ((Vector3)obj).X == X
+                       && ((Vector3)obj).Y == Y
+                       && ((Vector3)obj).Z == Z;
+        }
 
         public double GetDistance(Vector3 b)
-            => Math.Sqrt(((X - b.X) * (X - b.X))
-                       + ((Y - b.Y) * (Y - b.Y))
-                       + ((Z - b.Z) * (Z - b.Z)));
+        {
+            return Math.Sqrt(((X - b.X) * (X - b.X))
+                                  + ((Y - b.Y) * (Y - b.Y))
+                                  + ((Z - b.Z) * (Z - b.Z)));
+        }
 
         public override int GetHashCode()
         {
@@ -104,7 +128,9 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public float GetMagnitude()
-            => Convert.ToSingle(Math.Sqrt(X * X + Y * Y));
+        {
+            return Convert.ToSingle(Math.Sqrt(X * X + Y * Y));
+        }
 
         public void Limit(float maxSpeed)
         {
@@ -128,7 +154,9 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public void Normalize()
-            => Normalize(GetMagnitude());
+        {
+            Normalize(GetMagnitude());
+        }
 
         public void Normalize(float magnitude)
         {
@@ -140,7 +168,9 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public void Rotate(double degrees)
-            => RotateRadians(degrees * (Math.PI / 180));
+        {
+            RotateRadians(degrees * (Math.PI / 180));
+        }
 
         public void RotateRadians(double radians)
         {
@@ -159,9 +189,13 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public float[] ToArray()
-            => new float[3] { X, Y, Z };
+        {
+            return new float[3] { X, Y, Z };
+        }
 
         public override string ToString()
-            => $"X: {X}, Y: {Y}, Z: {Z}";
+        {
+            return $"X: {X}, Y: {Y}, Z: {Z}";
+        }
     }
 }

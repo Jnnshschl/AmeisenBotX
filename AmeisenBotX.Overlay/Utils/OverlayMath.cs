@@ -26,8 +26,8 @@ namespace AmeisenBotX.Overlay.Utils
             float windowWidth = (clientRect.Right - clientRect.Left);
             float windowHeight = (clientRect.Bottom - clientRect.Top);
 
-            float screenX = (float)windowWidth / 2.0f;
-            float screenY = (float)windowHeight / 2.0f;
+            float screenX = windowWidth / 2.0f;
+            float screenY = windowHeight / 2.0f;
 
             float tmpX = screenX / (float)Math.Tan((cameraInfo.Fov * 180) * DEG_TO_RAD);
             float tmpY = screenY / (float)Math.Tan((cameraInfo.Fov * 180) * DEG_TO_RAD);

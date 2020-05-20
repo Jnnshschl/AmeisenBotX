@@ -55,15 +55,15 @@ namespace AmeisenBotX.Core.Data
 
         T ExecuteWithQueryLock<T>(Func<T> func);
 
-        IEnumerable<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
+        List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
 
         List<WowDynobject> GetNearAoeSpells();
 
-        IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
+        List<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
 
-        IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
+        List<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
 
-        IEnumerable<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
+        List<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
 
         T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 

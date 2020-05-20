@@ -179,10 +179,14 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         private RawWowUnit RawWowUnit { get; set; }
 
         public bool HasBuffByName(string name)
-            => Auras != null && Auras.Any(e => e.Name == name);
+        {
+            return Auras != null && Auras.Any(e => e.Name == name);
+        }
 
         public override string ToString()
-            => $"Unit: [{Guid}] {Name} lvl. {Level}";
+        {
+            return $"Unit: [{Guid}] {Name} lvl. {Level}";
+        }
 
         public WowUnit UpdateRawWowUnit(XMemory xMemory)
         {
@@ -204,7 +208,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             }
             else
             {
-                return (double)value / (double)max * 100.0;
+                return value / (double)max * 100.0;
             }
         }
     }

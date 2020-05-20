@@ -24,21 +24,25 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         public override bool Equals(object obj)
-            => obj.GetType() == typeof(Rect)
-            && ((Rect)obj).Left == Left
-            && ((Rect)obj).Top == Top
-            && ((Rect)obj).Right == Right
-            && ((Rect)obj).Bottom == Bottom;
+        {
+            return obj.GetType() == typeof(Rect)
+                       && ((Rect)obj).Left == Left
+                       && ((Rect)obj).Top == Top
+                       && ((Rect)obj).Right == Right
+                       && ((Rect)obj).Bottom == Bottom;
+        }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (int)(17 + (Left * 23) + (Top * 23) + (Right * 23) + (Bottom * 23));
+                return 17 + (Left * 23) + (Top * 23) + (Right * 23) + (Bottom * 23);
             }
         }
 
         public override string ToString()
-            => $"Left: {Left} Top: {Top} Right: {Right} Bottom: {Bottom}";
+        {
+            return $"Left: {Left} Top: {Top} Right: {Right} Bottom: {Bottom}";
+        }
     }
 }

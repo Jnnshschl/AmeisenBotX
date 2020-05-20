@@ -32,7 +32,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         private RawWowObject RawWowObject { get; set; }
 
         public override string ToString()
-            => $"Object: {Guid}";
+        {
+            return $"Object: {Guid}";
+        }
 
         public WowObject UpdateRawWowObject(XMemory xMemory)
         {

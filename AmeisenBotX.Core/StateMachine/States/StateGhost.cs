@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 .OfType<WowGameobject>()
                 .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal
                             || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
-                .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 40);
+                .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 64);
 
             if (nearestPortal != null)
             {
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (NeedToEnterPortal)
                 {
                     // move into portal
-                    CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 4);
+                    CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 4);
                     WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CorpsePosition);
                     WowInterface.MovementEngine.Execute();
                 }

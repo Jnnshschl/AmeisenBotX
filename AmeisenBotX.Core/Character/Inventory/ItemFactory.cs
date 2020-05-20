@@ -8,7 +8,8 @@ namespace AmeisenBotX.Core.Character.Inventory
     public static class ItemFactory
     {
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
-            => (basicItem.Type.ToUpper()) switch
+        {
+            return (basicItem.Type.ToUpper()) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
                 "CONSUMABLE" => new WowConsumable(basicItem),
@@ -26,17 +27,24 @@ namespace AmeisenBotX.Core.Character.Inventory
                 "WEAPON" => new WowWeapon(basicItem),
                 _ => basicItem,
             };
+        }
 
         public static WowBasicItem ParseItem(string json)
-            => JsonConvert.DeserializeObject<WowBasicItem>(json);
+        {
+            return JsonConvert.DeserializeObject<WowBasicItem>(json);
+        }
 
         public static List<WowBasicItem> ParseItemList(string json)
-            => JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
+        {
+            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
             {
                 Error = HandleDeserializationError
             });
+        }
 
         private static void HandleDeserializationError(object sender, ErrorEventArgs e)
-            => e.ErrorContext.Handled = true;
+        {
+            e.ErrorContext.Handled = true;
+        }
     }
 }

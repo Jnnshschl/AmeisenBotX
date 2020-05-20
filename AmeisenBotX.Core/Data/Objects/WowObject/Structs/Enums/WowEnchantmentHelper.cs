@@ -4,7 +4,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs.Enums
 {
     public static class WowEnchantmentHelper
     {
-        private static Dictionary<int, string> EnchantmentDict = new Dictionary<int, string>()
+        private static readonly Dictionary<int, string> EnchantmentDict = new Dictionary<int, string>()
         {
              {1, "Rockbiter 3"},
              {2, "Frostbrand 1"},

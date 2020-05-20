@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Dungeon.Profiles.WotLK;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine;
+using AmeisenBotX.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public DateTime EntryTime { get; private set; }
 
-        public bool HasFinishedDungeon => Progress == 100.0;
+        public bool HasFinishedDungeon => Progress == 100.0 || CurrentNodes.IsEmpty;
 
         public bool IgnoreEatDrink { get; private set; }
 
@@ -78,7 +79,7 @@ namespace AmeisenBotX.Core.Dungeon
                 {
                     if (CurrentNodes.Count() == 0)
                     {
-                        LoadProfile(TryLoadProfile());
+                        LoadNodes();
                     }
                     else
                     {
@@ -131,8 +132,8 @@ namespace AmeisenBotX.Core.Dungeon
             }
 
             Reset();
-            DungeonProfile = profile;
 
+            DungeonProfile = profile;
             LoadNodes();
 
             WowInterface.CombatClass.PriorityTargets = profile.PriorityUnits;
@@ -141,7 +142,6 @@ namespace AmeisenBotX.Core.Dungeon
 
         public void OnDeath()
         {
-            Reset();
             DidAllDie = WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead);
         }
 
@@ -161,11 +161,15 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private bool AreAllPlayersPresent()
-            => WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 64)
-            .Count() >= WowInterface.ObjectManager.Partymembers.Count;
+        {
+            return WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 64)
+                   .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count;
+        }
 
         private void FilterOutAlreadyCompletedNodes()
         {
+            AmeisenLogger.Instance.Log("Dungeon", "FilterOutAlreadyCompletedNodes called...");
+
             DungeonNode closestDungeonNode = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
             bool shouldAddNodes = closestDungeonNode == null;
 
@@ -216,7 +220,7 @@ namespace AmeisenBotX.Core.Dungeon
                     if (CurrentNodes.TryDequeue(out DungeonNode completedNode))
                     {
                         CompletedNodes.Add(completedNode);
-                        Progress = Math.Round((double)CompletedNodes.Count / (double)TotalNodes * 100.0);
+                        Progress = Math.Round(CompletedNodes.Count / (double)TotalNodes * 100.0);
                     }
                 }
             }
@@ -248,29 +252,25 @@ namespace AmeisenBotX.Core.Dungeon
                 }
                 else
                 {
-                    LoadNodes();
-
                     if (partyLeader != null)
                     {
                         DungeonNode closestDungeonNodeLeader = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(partyLeader.Position)).FirstOrDefault();
                         int nodeIndex = DungeonProfile.Path.IndexOf(closestDungeonNodeLeader);
                         int completedNodes = CompletedNodes.Count();
 
-                        if (nodeIndex > completedNodes)
-                        {
-                            FollowNodePath(8);
-                            return true;
-                        }
-                        else
+                        if (nodeIndex <= completedNodes)
                         {
                             return false;
                         }
                     }
-                    else
+
+                    if (CurrentNodes?.Count == 0)
                     {
-                        FollowNodePath(8);
-                        return true;
+                        LoadNodes();
                     }
+
+                    FollowNodePath(8);
+                    return true;
                 }
             }
         }
@@ -314,7 +314,8 @@ namespace AmeisenBotX.Core.Dungeon
         }
 
         private IDungeonProfile TryLoadProfile()
-            => WowInterface.ObjectManager.MapId switch
+        {
+            return WowInterface.ObjectManager.MapId switch
             {
                 MapId.Deadmines => new DeadminesProfile(),
                 MapId.HellfireRamparts => new HellfireRampartsProfile(),
@@ -322,5 +323,6 @@ namespace AmeisenBotX.Core.Dungeon
                 MapId.AzjolNerub => new AzjolNerubProfile(),
                 _ => null
             };
+        }
     }
 }
