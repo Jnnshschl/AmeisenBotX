@@ -1,5 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,18 +55,44 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Execute()
         {
             WowInterface.ObjectManager.UpdateObject(PlayerToFollow);
-            double distance = PlayerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+
+            Vector3 posToGoTo = default;
+
+            // handle nearby portals, if our groupleader enters a portal, we follow
+            WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.GhostPortalScanThreshold);
+
+            if (nearestPortal != null)
+            {
+                double distanceToPortal = PlayerToFollow.Position.GetDistance(nearestPortal.Position);
+
+                if (distanceToPortal < 4.0)
+                {
+                    // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
+                    posToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                }
+            }
+
+            // if no portal position was found, follow the player
+            if (posToGoTo == default)
+            {
+                posToGoTo = PlayerToFollow.Position;
+            }
+
+            double distance = PlayerToFollow.Position.GetDistance(posToGoTo);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
                 StateMachine.SetState(BotState.Idle);
             }
 
-            if (WowInterface.ObjectManager.Player.CurrentlyCastingSpellId > 0 || WowInterface.ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
-            WowInterface.MovementEngine.SetState(MovementEngineState.Following, PlayerToFollow.Position);
+            WowInterface.MovementEngine.SetState(MovementEngineState.Following, posToGoTo);
             WowInterface.MovementEngine.Execute();
         }
 

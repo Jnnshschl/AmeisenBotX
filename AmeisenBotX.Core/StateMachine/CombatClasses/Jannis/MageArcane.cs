@@ -46,6 +46,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossible(counterspellSpell, x.Guid, true) }
             };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((arcaneIntellectSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -74,8 +76,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
+            if (TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick())
             {
                 return;
@@ -88,7 +89,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     || (WowInterface.ObjectManager.Player.ManaPercentage < 40
                         && CastSpellIfPossible(evocationSpell, 0, true))
                     || CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || (MyAuraManager.Buffs.Contains(missileBarrageSpell.ToLower()) && CastSpellIfPossible(arcaneMissilesSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.ObjectManager.Player.HasBuffByName(missileBarrageSpell) && CastSpellIfPossible(arcaneMissilesSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || CastSpellIfPossible(arcaneBarrageSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || CastSpellIfPossible(arcaneBlastSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -100,7 +101,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick())
             {
                 return;
             }

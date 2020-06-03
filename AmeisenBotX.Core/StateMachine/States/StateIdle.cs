@@ -75,9 +75,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 LastEatCheck = DateTime.Now;
 
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && StateMachine.HasRefreshmentInBag())
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && StateMachine.HasFoodInBag())
-                    || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && StateMachine.HasWaterInBag()))
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasRefreshmentInBag())
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.CharacterManager.HasFoodInBag())
+                    || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasWaterInBag()))
                 {
                     StateMachine.SetState(BotState.Eating);
                     return;

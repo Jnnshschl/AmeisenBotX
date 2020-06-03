@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Event
 
         public void Stop()
         {
-            if (!IsActive)
+            if (IsActive)
             {
                 AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager...", LogLevel.Verbose);
 

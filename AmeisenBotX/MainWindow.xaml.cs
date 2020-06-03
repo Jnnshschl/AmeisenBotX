@@ -467,6 +467,8 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
+
             if (Config != null)
             {
                 string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));

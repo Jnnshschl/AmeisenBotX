@@ -254,11 +254,6 @@ namespace AmeisenBotX.Core.Hook
             SetFacing(player, BotMath.GetFacingAngle2D(player.Position, positionToFace));
         }
 
-        public void GameobjectOnRightClick(WowObject gameobject)
-        {
-            CallObjectFunction(gameobject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
-        }
-
         public List<string> GetAuras(WowLuaUnit luaunit)
         {
             return ReadAuras(luaunit, "UnitAura");
@@ -647,7 +642,7 @@ namespace AmeisenBotX.Core.Hook
                 CombatClassRole.Tank => "LFDRoleCheckPopupRoleButtonTank",
                 CombatClassRole.Heal => "LFDRoleCheckPopupRoleButtonHealer",
                 CombatClassRole.Dps => "LFDRoleCheckPopupRoleButtonDPS",
-                _ => "LFDRoleCheckPopupRoleButtonDPS",  // should never happen but in case, queue as DPS
+                _ => "LFDRoleCheckPopupRoleButtonDPS", // should never happen but in case, queue as DPS
             };
 
             // do this twice to ensure that we join the queue
@@ -691,10 +686,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void SetFacing(WowUnit unit, float angle)
         {
-            if (unit == null || angle < 0 || angle > Math.PI * 2)
-            {
-                return;
-            }
+            if (unit == null || angle < 0 || angle > Math.PI * 2) return;
 
             CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString().Replace(',', '.'), Environment.TickCount });
         }
@@ -821,10 +813,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetGuid(ulong guid)
         {
-            if (guid < 0)
-            {
-                return;
-            }
+            if (guid < 0) return;
 
             byte[] guidBytes = BitConverter.GetBytes(guid);
             string[] asm = new string[]
@@ -882,14 +871,12 @@ namespace AmeisenBotX.Core.Hook
             return 0;
         }
 
-        public void UnitOnRightClick(WowUnit unit)
+        public void UnitOnRightClick(WowUnit wowUnit)
         {
-            if (unit == null || unit.Guid == 0)
-            {
-                return;
-            }
+            if (wowUnit.GetType() != typeof(WowUnit)) throw new ArgumentException("This method should only be called with WowUnit's", "wowUnit");
+            if (wowUnit == null || wowUnit.Guid == 0) return;
 
-            CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
+            CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)
@@ -900,6 +887,14 @@ namespace AmeisenBotX.Core.Hook
         public void UseItemByName(string itemName)
         {
             SellItemsByName(itemName);
+        }
+
+        public void WowObjectOnRightClick(WowObject wowObject)
+        {
+            if (wowObject.GetType() == typeof(WowUnit)) throw new ArgumentException("This method should not be called with WowUnit's, use the specific method for them", "gameobject");
+            if (wowObject.GetType() == typeof(WowItem)) throw new ArgumentException("This method should not be called with WowItem's", "gameobject");
+
+            CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
         }
 
         private bool AllocateCodeCaves()
@@ -956,6 +951,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (args != null)
             {
+                // push all parameters
                 foreach (object arg in args)
                 {
                     asm.Add($"PUSH {arg}");

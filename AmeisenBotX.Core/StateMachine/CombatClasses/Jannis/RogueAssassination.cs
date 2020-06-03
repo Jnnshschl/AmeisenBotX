@@ -75,8 +75,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            if (MyAuraManager.Tick()
-                || TargetInterruptManager.Tick()
+            if (TargetInterruptManager.Tick()
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
             {
@@ -101,6 +100,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
+            if (MyAuraManager.Tick())
+            {
+                return;
+            }
         }
     }
 }

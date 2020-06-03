@@ -49,6 +49,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
 
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfKingsSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -82,8 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
+            if (TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick())
             {
                 return;
@@ -129,7 +130,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick())
             {
                 return;
             }

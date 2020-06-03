@@ -85,6 +85,9 @@ namespace AmeisenBotX.Core
                 AmeisenLogger.Instance.Log("AmeisenBot", $"Creating folder {botDataPath}", LogLevel.Verbose);
             }
 
+            StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
+            StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
+
             InitCombatClasses();
             if (config.UseBuiltInCombatClass)
             {
@@ -101,9 +104,6 @@ namespace AmeisenBotX.Core
             {
                 WowInterface.CharacterManager.ItemComparator = WowInterface.CombatClass.ItemComparator;
             }
-
-            StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
-            StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
         }
 
         public delegate void CombatClassCompilationStatus(bool succeeded, string heading, string message);

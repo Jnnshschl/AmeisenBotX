@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
 
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfMightSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -88,8 +90,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (MyAuraManager.Tick()
-                || TargetInterruptManager.Tick()
+            if (TargetInterruptManager.Tick()
                 || (MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLower())
                     && CastSpellIfPossible(judgementOfLightSpell, 0))
                 || CastSpellIfPossible(avengingWrathSpell, 0, true)
@@ -116,7 +117,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick())
             {
                 return;
             }

@@ -47,8 +47,6 @@ namespace AmeisenBotX.Core.Hook
 
         void FacePosition(WowPlayer player, Vector3 positionToFace);
 
-        void GameobjectOnRightClick(WowObject gObject);
-
         List<string> GetAuras(WowLuaUnit luaunit);
 
         List<string> GetBuffs(WowLuaUnit luaunit);
@@ -164,5 +162,7 @@ namespace AmeisenBotX.Core.Hook
         void UseItemByBagAndSlot(int bagId, int bagSlot);
 
         void UseItemByName(string itemName);
+
+        void WowObjectOnRightClick(WowObject gObject);
     }
 }

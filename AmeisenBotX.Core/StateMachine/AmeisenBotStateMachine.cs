@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -10,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine
 {
-    public class AmeisenBotStateMachine
+    public class AmeisenBotStateMachine : AbstractStateMachine
     {
         public AmeisenBotStateMachine(string botDataPath, AmeisenBotConfig config, WowInterface wowInterface)
         {
@@ -48,33 +49,21 @@ namespace AmeisenBotX.Core.Statemachine
 
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
-            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromSeconds(5), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
+            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
             ObjectUpdateEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.ObjectUpdateMs), WowInterface.ObjectManager.UpdateWowObjects);
         }
 
-        public delegate void StateMachineOverride(BotState botState);
+        public override event StateMachineTick OnStateMachineTick;
 
-        public delegate void StateMachineStateChange();
-
-        public delegate void StateMachineTick();
-
-        public event StateMachineStateChange OnStateMachineStateChanged;
-
-        public event StateMachineTick OnStateMachineTick;
-
-        public event StateMachineOverride OnStateOverride;
+        public override event StateMachineOverride OnStateOverride;
 
         public string BotDataPath { get; }
 
-        public KeyValuePair<BotState, BasicState> CurrentState { get; private set; }
+        public MapId LastDiedMap { get; internal set; }
 
-        public BotState LastState { get; private set; }
-
-        public MapId MapIDiedOn { get; internal set; }
+        public Vector3 LastDiedPosition { get; internal set; }
 
         public string PlayerName { get; internal set; }
-
-        public Dictionary<BotState, BasicState> States { get; private set; }
 
         public bool WowCrashed { get; internal set; }
 
@@ -90,7 +79,7 @@ namespace AmeisenBotX.Core.Statemachine
 
         private TimegatedEvent ObjectUpdateEvent { get; set; }
 
-        public void Execute()
+        public override void Execute()
         {
             // we cant do anything if wow has crashed
             if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
@@ -181,24 +170,9 @@ namespace AmeisenBotX.Core.Statemachine
         internal IEnumerable<WowUnit> GetNearLootableUnits()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                          .Where(e => e.IsLootable
-                              && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
-                              && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
-        }
-
-        internal bool HasFoodInBag()
-        {
-            return WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
-        }
-
-        internal bool HasRefreshmentInBag()
-        {
-            return WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowRefreshment), e));
-        }
-
-        internal bool HasWaterInBag()
-        {
-            return WowInterface.CharacterManager.Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowWater), e));
+                       .Where(e => e.IsLootable
+                                && !((StateLooting)States[BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
+                                && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
         }
 
         internal bool IsAnyPartymemberInCombat()
@@ -217,45 +191,35 @@ namespace AmeisenBotX.Core.Statemachine
                        || map == MapId.StrandOfTheAncients;
         }
 
+        internal bool IsCapitalCityZone(ZoneId zone)
+        {
+            if (WowInterface.ObjectManager.Player.IsAlliance())
+            {
+                return zone == ZoneId.StormwindCity
+                           || zone == ZoneId.Ironforge
+                           || zone == ZoneId.Teldrassil
+                           || zone == ZoneId.TheExodar;
+            }
+            else if (WowInterface.ObjectManager.Player.IsHorde())
+            {
+                return zone == ZoneId.Orgrimmar
+                           || zone == ZoneId.Undercity
+                           || zone == ZoneId.ThunderBluff
+                           || zone == ZoneId.SilvermoonCity;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         internal bool IsDungeonMap(MapId map)
         {
             return map == MapId.Deadmines
                        || map == MapId.HellfireRamparts
+                       || map == MapId.TheBloodFurnace
                        || map == MapId.UtgardeKeep
                        || map == MapId.AzjolNerub;
-        }
-
-        internal bool IsInCapitalCity()
-        {
-            return false;
-        }
-
-        internal bool SetState(BotState state, bool ignoreExit = false)
-        {
-            if (CurrentState.Key == state)
-            {
-                // we are already in this state
-                return false;
-            }
-
-            LastState = CurrentState.Key;
-
-            // this is used by the combat state because
-            // it will override any existing state
-            if (!ignoreExit)
-            {
-                CurrentState.Value.Exit();
-            }
-
-            CurrentState = States.First(s => s.Key == state);
-
-            if (!ignoreExit)
-            {
-                CurrentState.Value.Enter();
-            }
-
-            OnStateMachineStateChanged?.Invoke();
-            return true;
         }
     }
 }

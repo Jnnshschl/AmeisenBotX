@@ -23,6 +23,12 @@ namespace AmeisenBotX.Core.Character
 
         void AntiAfk();
 
+        bool HasFoodInBag();
+
+        bool HasRefreshmentInBag();
+
+        bool HasWaterInBag();
+
         bool IsAbleToUseArmor(WowArmor item);
 
         bool IsAbleToUseWeapon(WowWeapon item);

@@ -50,6 +50,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossible(faerieFireSpell, x.Guid, true) },
             };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -82,8 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
+            if (TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
                     && CheckForEclipseProcs())
@@ -109,7 +110,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            MyAuraManager.Tick();
+            if (GroupAuraManager.Tick()
+                || MyAuraManager.Tick())
+            {
+                return;
+            }
         }
 
         private bool CheckForEclipseProcs()

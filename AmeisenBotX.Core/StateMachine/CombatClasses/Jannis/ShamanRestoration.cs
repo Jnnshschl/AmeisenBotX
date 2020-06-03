@@ -72,17 +72,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!NeedToHealSomeone())
+            if (NeedToHealSomeone())
             {
-                if (MyAuraManager.Tick())
-                {
-                    return;
-                }
-
-                if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
-                {
-                    return;
-                }
+                return;
             }
         }
 

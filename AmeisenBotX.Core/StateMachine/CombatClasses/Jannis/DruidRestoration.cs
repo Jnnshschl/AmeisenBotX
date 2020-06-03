@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 3000, regrowthSpell },
                 { 5000, healingTouchSpell },
             };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -85,10 +87,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (!NeedToHealSomeone())
             {
-                if (MyAuraManager.Tick())
-                {
-                    return;
-                }
+                return;
             }
         }
 
@@ -143,7 +142,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
+            if (GroupAuraManager.Tick()
+                || MyAuraManager.Tick()
                 || NeedToHealSomeone()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                     && HandleDeadPartymembers(reviveSpell)))

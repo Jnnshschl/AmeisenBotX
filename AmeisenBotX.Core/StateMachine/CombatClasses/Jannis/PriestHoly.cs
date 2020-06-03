@@ -44,6 +44,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, flashHealSpell },
                 { 5000, greaterHealSpell },
             };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -76,10 +78,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (!NeedToHealSomeone())
             {
-                if (MyAuraManager.Tick())
-                {
-                    return;
-                }
+                return;
             }
         }
 
@@ -138,6 +137,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override void OutOfCombatExecute()
         {
             if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick()
                 || NeedToHealSomeone()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
                 && HandleDeadPartymembers(resurrectionSpell)))

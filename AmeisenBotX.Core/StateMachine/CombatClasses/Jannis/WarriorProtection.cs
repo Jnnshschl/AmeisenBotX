@@ -95,9 +95,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick())
+            if (TargetInterruptManager.Tick())
             {
                 return;
             }

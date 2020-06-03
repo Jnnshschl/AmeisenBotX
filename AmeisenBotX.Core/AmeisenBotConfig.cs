@@ -38,6 +38,14 @@ namespace AmeisenBotX.Core
 
         public bool FollowSpecificCharacter { get; set; } = false;
 
+        public double GhostCheckMs { get; set; } = 5000;
+
+        public double GhostPortalScanThreshold { get; set; } = 24;
+
+        public double GhostPortalSearchMs { get; set; } = 1000;
+
+        public double GhostResurrectThreshold { get; set; } = 24;
+
         public bool LootUnits { get; set; } = true;
 
         public double LootUnitsRadius { get; set; } = 20.0;

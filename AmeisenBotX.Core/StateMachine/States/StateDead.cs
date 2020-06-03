@@ -8,15 +8,32 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
+        public bool SetMapAndPosition { get; set; }
+
         public override void Enter()
         {
+            SetMapAndPosition = false;
         }
 
         public override void Execute()
         {
             if (WowInterface.ObjectManager.Player.IsDead)
             {
-                StateMachine.MapIDiedOn = WowInterface.ObjectManager.MapId;
+                if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
+                {
+                    StateMachine.LastDiedMap = WowInterface.ObjectManager.MapId;
+
+                    if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap))
+                    {
+                        // when we died in a dungeon, we need to return to its portal
+                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                    }
+                    else
+                    {
+                        StateMachine.LastDiedPosition = WowInterface.ObjectManager.Player.Position;
+                    }
+                }
+
                 WowInterface.HookManager.ReleaseSpirit();
             }
             else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
@@ -31,6 +48,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+            SetMapAndPosition = false;
         }
     }
 }

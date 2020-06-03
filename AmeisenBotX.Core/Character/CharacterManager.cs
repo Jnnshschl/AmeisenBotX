@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -53,6 +54,21 @@ namespace AmeisenBotX.Core.Character
         public Dictionary<int, int> GetConsumeables()
         {
             return Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
+        }
+
+        public bool HasFoodInBag()
+        {
+            return Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
+        }
+
+        public bool HasRefreshmentInBag()
+        {
+            return Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowRefreshment), e));
+        }
+
+        public bool HasWaterInBag()
+        {
+            return Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowWater), e));
         }
 
         public bool IsAbleToUseArmor(WowArmor item)

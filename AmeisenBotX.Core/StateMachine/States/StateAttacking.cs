@@ -10,14 +10,11 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            // default distance values
-            DistanceToTarget = WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3 : 25.0;
-
             FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
         }
 
-        public double DistanceToTarget { get; private set; }
+        public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 25.0;
 
         public bool IsFacing { get; private set; }
 

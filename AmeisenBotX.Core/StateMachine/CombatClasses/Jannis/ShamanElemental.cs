@@ -79,9 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick())
+            if (TargetInterruptManager.Tick())
             {
                 return;
             }

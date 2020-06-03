@@ -44,6 +44,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { shadowWordPainSpell, () => CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true) },
                 { mindBlastSpell, () => CastSpellIfPossible(mindBlastSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -72,8 +74,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick())
+            if (TargetAuraManager.Tick())
             {
                 return;
             }
@@ -105,7 +106,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick()
+                || GroupAuraManager.Tick())
             {
                 return;
             }

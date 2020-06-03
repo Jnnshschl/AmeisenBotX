@@ -124,6 +124,7 @@
     <Compile Include="Data\CombatLog\Enums\CombatLogEntryType.cs" />
     <Compile Include="Data\CombatLog\Objects\BasicCombatLogEntry.cs" />
     <Compile Include="Data\Enums\CreatureType.cs" />
+    <Compile Include="Data\Enums\DispelType.cs" />
     <Compile Include="Data\Enums\DungeonDifficulty.cs" />
     <Compile Include="Data\Enums\GameobjectDisplayId.cs" />
     <Compile Include="Data\Enums\GameState.cs" />
@@ -191,6 +192,7 @@
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />
     <Compile Include="Dungeon\Profiles\TBC\HellfireRampartsProfile.cs" />
+    <Compile Include="Dungeon\Profiles\TBC\TheBloodFurnaceProfile.cs" />
     <Compile Include="Dungeon\Profiles\WotLK\AzjolNerubProfile.cs" />
     <Compile Include="Dungeon\Profiles\WotLK\UtgardeKeepProfile.cs" />
     <Compile Include="Event\EventHook.cs" />
@@ -228,6 +230,7 @@
     <Compile Include="Raid\RaidEngine.cs" />
     <Compile Include="Raid\Profiles\IRaidProfile.cs" />
     <Compile Include="Relaxing\RelaxEngine.cs" />
+    <Compile Include="Statemachine\AbstractStateMachine.cs" />
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
     <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
@@ -287,6 +290,7 @@
     <Compile Include="Statemachine\States\StateRepairing.cs" />
     <Compile Include="Statemachine\States\StateStartWow.cs" />
     <Compile Include="Statemachine\CombatClasses\WarriorFury.cs" />
+    <Compile Include="Statemachine\Utils\GroupAuraManager.cs" />
     <Compile Include="Statemachine\Utils\InterruptManager.cs" />
     <Compile Include="Statemachine\Utils\PetManager.cs" />
     <Compile Include="Statemachine\Utils\TargetManager.cs" />
@@ -310,6 +314,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Dungeon\States\" />
     <Folder Include="Jobs\Profiles\Gathering\Herbs\" />
     <Folder Include="Jobs\Profiles\Gathering\Mining\" />
     <Folder Include="Raid\Profiles\Classic\" />

@@ -55,6 +55,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
 
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -96,8 +98,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
+            if (TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick()
                 || (WowInterface.ObjectManager.Player.EnergyPercentage > 70
                     && CastSpellIfPossible(berserkSpell, 0))
@@ -117,7 +118,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            MyAuraManager.Tick();
+            if (GroupAuraManager.Tick()
+                || MyAuraManager.Tick())
+            {
+                return;
+            }
         }
     }
 }

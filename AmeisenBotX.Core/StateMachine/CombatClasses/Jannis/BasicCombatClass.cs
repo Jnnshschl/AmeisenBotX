@@ -73,6 +73,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null
             );
 
+            GroupAuraManager = new GroupAuraManager(WowInterface);
+
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
             ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(50));
@@ -109,6 +111,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public abstract IWowItemComparator ItemComparator { get; set; }
 
         public AuraManager MyAuraManager { get; internal set; }
+
+        public GroupAuraManager GroupAuraManager { get; internal set; }
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 

@@ -57,6 +57,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         public DateTime WaitingSince { get; private set; }
 
+        private int AllPlayerPresentDistance { get; set; }
+
         private List<DungeonNode> CompletedNodes { get; set; }
 
         private TimegatedEvent ExitDungeonEvent { get; set; }
@@ -88,13 +90,19 @@ namespace AmeisenBotX.Core.Dungeon
                         if (isMePartyleader)
                         {
                             // wait for all players to arrive
-                            if (!DidAllDie && !AreAllPlayersPresent()) // ShouldWaitForGroup()
+                            if (AreAllPlayersPresent())
                             {
-                                // wait for them
+                                AllPlayerPresentDistance = 48;
+
+                                if (!ShouldWaitForGroup()) // ShouldWaitForGroup()
+                                {
+                                    FollowNodePath(WowInterface.MovementSettings.WaypointCheckThreshold);
+                                }
                             }
                             else
                             {
-                                FollowNodePath(8);
+                                // wait until the players are near us
+                                AllPlayerPresentDistance = 16;
                             }
                         }
                         else
@@ -158,11 +166,13 @@ namespace AmeisenBotX.Core.Dungeon
 
             Progress = 0.0;
             TotalNodes = 0;
+
+            AllPlayerPresentDistance = 48;
         }
 
         private bool AreAllPlayersPresent()
         {
-            return WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 64)
+            return WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, AllPlayerPresentDistance)
                    .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count;
         }
 
@@ -190,7 +200,7 @@ namespace AmeisenBotX.Core.Dungeon
             }
         }
 
-        private void FollowNodePath(int completionDistance)
+        private void FollowNodePath(double completionDistance)
         {
             if (CurrentNodes.TryPeek(out DungeonNode node))
             {
@@ -213,7 +223,7 @@ namespace AmeisenBotX.Core.Dungeon
 
                         if (obj != null && obj.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < completionDistance)
                         {
-                            WowInterface.HookManager.GameobjectOnRightClick(obj);
+                            WowInterface.HookManager.WowObjectOnRightClick(obj);
                         }
                     }
 
@@ -269,7 +279,7 @@ namespace AmeisenBotX.Core.Dungeon
                         LoadNodes();
                     }
 
-                    FollowNodePath(8);
+                    FollowNodePath(WowInterface.MovementSettings.WaypointCheckThreshold);
                     return true;
                 }
             }
@@ -319,6 +329,7 @@ namespace AmeisenBotX.Core.Dungeon
             {
                 MapId.Deadmines => new DeadminesProfile(),
                 MapId.HellfireRamparts => new HellfireRampartsProfile(),
+                MapId.TheBloodFurnace => new TheBloodFurnaceProfile(),
                 MapId.UtgardeKeep => new UtgardeKeepProfile(),
                 MapId.AzjolNerub => new AzjolNerubProfile(),
                 _ => null

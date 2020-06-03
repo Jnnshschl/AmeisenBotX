@@ -550,7 +550,8 @@ namespace AmeisenBotX.Core.Data
                 }
 
                 if (player.Guid == TargetGuid
-                    || player.Guid == PlayerGuid)
+                    || player.Guid == PlayerGuid
+                    || PartymemberGuids.Contains(player.Guid))
                 {
                     player.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
                 }

@@ -48,6 +48,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             FaceEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
         public override string Author => "Jannis";
@@ -87,11 +89,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && DateTime.Now - LastHealAction > TimeSpan.FromSeconds(1)
                 && WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 48).Count <= 1)
             {
-                if (MyAuraManager.Tick())
-                {
-                    return;
-                }
-
                 // basic auto attack defending
                 if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
                 {
@@ -132,7 +129,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick() || NeedToHealSomeone())
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick() 
+                || NeedToHealSomeone())
             {
                 return;
             }
@@ -152,12 +151,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return true;
                 }
 
-                if (targetUnit.HealthPercentage < 50
-                    && CastSpellIfPossible(divineFavorSpell, targetUnit.Guid, true))
-                {
-                    LastHealAction = DateTime.Now;
-                    return true;
-                }
+                // TODO: bugged need to figure out why cooldown is always wrong
+                // if (targetUnit.HealthPercentage < 50
+                //     && CastSpellIfPossible(divineFavorSpell, targetUnit.Guid, true))
+                // {
+                //     LastHealAction = DateTime.Now;
+                //     return true;
+                // }
 
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 50
                    && WowInterface.ObjectManager.Player.ManaPercentage > 20

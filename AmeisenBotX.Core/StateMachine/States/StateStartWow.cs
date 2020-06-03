@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Logging;
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -49,30 +50,37 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private void CheckTosAndEula()
         {
-            string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
-            if (File.Exists(configWtfPath))
+            try
             {
-                string content = File.ReadAllText(configWtfPath).ToUpper();
+                string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+                if (File.Exists(configWtfPath))
+                {
+                    string content = File.ReadAllText(configWtfPath).ToUpper();
 
-                if (content.Contains("SET READEULA"))
-                {
-                    content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
-                }
-                else
-                {
-                    content += "\nSET READEULA \"1\"";
-                }
+                    if (content.Contains("SET READEULA"))
+                    {
+                        content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
+                    }
+                    else
+                    {
+                        content += "\nSET READEULA \"1\"";
+                    }
 
-                if (content.Contains("SET READTOS"))
-                {
-                    content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
-                }
-                else
-                {
-                    content += "\nSET READTOS \"1\"";
-                }
+                    if (content.Contains("SET READTOS"))
+                    {
+                        content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
+                    }
+                    else
+                    {
+                        content += "\nSET READTOS \"1\"";
+                    }
 
-                File.WriteAllText(configWtfPath, content);
+                    File.WriteAllText(configWtfPath, content);
+                }
+            }
+            catch
+            {
+                AmeisenLogger.Instance.Log("StartWow", "Cannot write to config.wtf, maybe its write protected");
             }
         }
     }

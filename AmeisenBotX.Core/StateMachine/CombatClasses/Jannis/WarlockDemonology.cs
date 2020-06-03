@@ -92,9 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
-                || WowInterface.ObjectManager.Player.ManaPercentage < 20
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 20
                     && WowInterface.ObjectManager.Player.HealthPercentage > 60
                     && CastSpellIfPossible(lifeTapSpell, 0)
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 80
