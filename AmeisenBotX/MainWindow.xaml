@@ -184,7 +184,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,51.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" />
+        <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,51.333" Foreground="White" FontFamily="Bahnschrift Light" Padding="0" FontSize="10" />
         <Label Content="Level:" HorizontalAlignment="Left" Margin="6,88,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -257,7 +257,7 @@
         </Button>
         <Label x:Name="labelPID" Content="PID: " HorizontalAlignment="Left" Margin="365,0,0,29.333" FontFamily="Bahnschrift Light" Padding="0" FontSize="8" Height="8" VerticalAlignment="Bottom" Background="{x:Null}" Width="48" HorizontalContentAlignment="Right">
             <Label.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkBorder}"/>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Label.Foreground>
         </Label>
     </Grid>

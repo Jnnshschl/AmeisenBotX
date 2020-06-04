@@ -218,6 +218,8 @@ namespace AmeisenBotX.Core.Statemachine
             return map == MapId.Deadmines
                        || map == MapId.HellfireRamparts
                        || map == MapId.TheBloodFurnace
+                       || map == MapId.TheSlavePens
+                       || map == MapId.TheUnderbog
                        || map == MapId.UtgardeKeep
                        || map == MapId.AzjolNerub;
         }

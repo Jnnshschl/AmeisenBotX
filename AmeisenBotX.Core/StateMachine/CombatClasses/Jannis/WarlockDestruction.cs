@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public WarlockDestruction(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
-                WowInterface.ObjectManager.Pet,
+                WowInterface,
                 TimeSpan.FromSeconds(1),
                 null,
                 () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0),

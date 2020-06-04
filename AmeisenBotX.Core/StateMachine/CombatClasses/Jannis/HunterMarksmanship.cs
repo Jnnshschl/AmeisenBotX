@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public HunterMarksmanship(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
-                   WowInterface.ObjectManager.Pet,
+                   WowInterface,
                    TimeSpan.FromSeconds(15),
                    () => CastSpellIfPossible(mendPetSpell, 0, true),
                    () => CastSpellIfPossible(callPetSpell, 0),

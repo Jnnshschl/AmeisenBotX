@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public BitVector32 Flags => new BitVector32(RawWowGameobject.Flags);
 
-        public WowGameobjectType GameobjectType { get; set; }
+        public WowGameobjectType GameobjectType => (WowGameobjectType)RawWowGameobject.GameobjectBytes1;
 
         public int Level => RawWowGameobject.Level;
 

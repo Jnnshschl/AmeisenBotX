@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public WarlockDemonology(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
-                WowInterface.ObjectManager.Pet,
+                WowInterface,
                 TimeSpan.FromSeconds(1),
                 null,
                 () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell, 0))

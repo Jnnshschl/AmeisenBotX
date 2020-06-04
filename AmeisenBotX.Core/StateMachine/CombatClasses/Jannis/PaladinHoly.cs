@@ -130,7 +130,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override void OutOfCombatExecute()
         {
             if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick() 
+                || GroupAuraManager.Tick()
                 || NeedToHealSomeone())
             {
                 return;

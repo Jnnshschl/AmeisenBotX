@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
@@ -14,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -223,24 +225,31 @@ namespace AmeisenBotX
             Dispatcher.InvokeAsync(() =>
             {
                 // debug label stuff
-                if (AmeisenBot.WowInterface.BattlegroundEngine != null)
-                {
-                    string ownCarrier = string.Empty;
-                    string enemyCarrier = string.Empty;
-                    bool isMeCarrier = false;
+                // if (AmeisenBot.WowInterface.BattlegroundEngine != null)
+                // {
+                //     string ownCarrier = string.Empty;
+                //     string enemyCarrier = string.Empty;
+                //     bool isMeCarrier = false;
+                // 
+                //     if (AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
+                //     {
+                //         ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile;
+                //         ownCarrier = ctfBattlegroundProfile.OwnFlagCarrierPlayer?.Name;
+                //         enemyCarrier = ctfBattlegroundProfile.EnemyFlagCarrierPlayer?.Name;
+                //         isMeCarrier = ctfBattlegroundProfile.IsMeFlagCarrier;
+                //     }
+                // }
 
-                    if (AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
-                    {
-                        ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile;
-                        ownCarrier = ctfBattlegroundProfile.OwnFlagCarrierPlayer?.Name;
-                        enemyCarrier = ctfBattlegroundProfile.EnemyFlagCarrierPlayer?.Name;
-                        isMeCarrier = ctfBattlegroundProfile.IsMeFlagCarrier;
-                    }
-                }
-
-                if (AmeisenBot.WowInterface.ObjectManager?.Player != null)
+                if (AmeisenBot.WowInterface.ObjectManager?.Player?.Auras != null)
                 {
-                    labelDebug.Content = AmeisenBot.WowInterface.ObjectManager.Player.Position;
+                    //StringBuilder sb = new StringBuilder();
+                    //
+                    //foreach(WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
+                    //{
+                    //    sb.AppendLine(aura.ToString());
+                    //}
+
+                    labelDebug.Content = $"Aura Count: {AmeisenBot.WowInterface.ObjectManager?.Player?.Auras.Count}";
                 }
 
                 // update health and secodary power bar and

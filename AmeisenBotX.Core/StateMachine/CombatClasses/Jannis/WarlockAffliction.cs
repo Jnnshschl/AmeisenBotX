@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public WarlockAffliction(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(
-                WowInterface.ObjectManager.Pet,
+                WowInterface,
                 TimeSpan.FromSeconds(1),
                 null,
                 () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelhunterSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelhunterSpell, 0))

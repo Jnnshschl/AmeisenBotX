@@ -1,17 +1,20 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 
 namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class PetManager
     {
-        public PetManager(WowUnit pet, TimeSpan healPetCooldown, CastMendPetFunction castMendPetFunction, CastCallPetFunction castCallPetFunction, CastRevivePetFunction castRevivePetFunction)
+        public PetManager(WowInterface wowInterface, TimeSpan healPetCooldown, CastMendPetFunction castMendPetFunction, CastCallPetFunction castCallPetFunction, CastRevivePetFunction castRevivePetFunction)
         {
-            Pet = pet;
+            WowInterface = wowInterface;
             HealPetCooldown = healPetCooldown;
             CastMendPet = castMendPetFunction;
             CastCallPet = castCallPetFunction;
             CastRevivePet = castRevivePetFunction;
+
+            CallPetEvent = new TimegatedEvent(TimeSpan.FromSeconds(8));
         }
 
         public delegate bool CastCallPetFunction();
@@ -30,35 +33,41 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public DateTime LastMendPetUsed { get; private set; }
 
-        public WowUnit Pet { get; set; }
+        public WowInterface WowInterface { get; set; }
+
+        private TimegatedEvent CallPetEvent { get; }
 
         public bool Tick()
         {
-            if (Pet != null)
+            if (WowInterface.ObjectManager.Pet != null)
             {
                 if (CastCallPet != null
-                    && ((Pet.Guid == 0
+                    && ((WowInterface.ObjectManager.Pet.Guid == 0
                         && CastCallPet.Invoke())
                     || CastRevivePet != null
-                        && Pet != null && (Pet.Health == 0 || Pet.IsDead)
+                        && WowInterface.ObjectManager.Pet != null && (WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead)
                             && CastRevivePet()))
                 {
                     return true;
                 }
 
-                if (Pet == null || Pet.Health == 0 || Pet.IsDead)
+                if (WowInterface.ObjectManager.Pet == null || WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead)
                 {
                     return true;
                 }
 
                 if (CastMendPet != null
                     && DateTime.Now - LastMendPetUsed > HealPetCooldown
-                        && Pet?.HealthPercentage < 80
+                        && WowInterface.ObjectManager.Pet.HealthPercentage < 80
                         && CastMendPet.Invoke())
                 {
                     LastMendPetUsed = DateTime.Now;
                     return true;
                 }
+            }
+            else if(CastCallPet != null && CallPetEvent.Run())
+            {
+                CastCallPet.Invoke();
             }
 
             return false;

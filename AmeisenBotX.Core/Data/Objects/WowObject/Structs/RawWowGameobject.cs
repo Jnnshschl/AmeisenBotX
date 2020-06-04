@@ -12,7 +12,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public fixed short Dynamics[2];
         public int Faction;
         public int Level;
-        public fixed byte GameobjectBytes[4];
+        public byte GameobjectBytes0;
+        public byte GameobjectBytes1;
+        public byte GameobjectBytes2;
+        public byte GameobjectBytes3;
 
         public const int EndOffset = 48;
     }

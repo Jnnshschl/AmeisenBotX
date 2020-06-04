@@ -114,9 +114,14 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         public double GetDistance(Vector3 b)
         {
-            return Math.Sqrt(((X - b.X) * (X - b.X))
-                                  + ((Y - b.Y) * (Y - b.Y))
-                                  + ((Z - b.Z) * (Z - b.Z)));
+            return Math.Sqrt(Math.Pow((X - b.X), 2)
+                                  + Math.Pow((Y - b.Y), 2)
+                                  + Math.Pow((Z - b.Z), 2);
+        }
+
+        public double GetDistanceIgnoreZ(Vector3 b)
+        {
+            return Math.Sqrt(((X - b.X) * (X - b.X)) + ((Y - b.Y) * (Y - b.Y)));
         }
 
         public override int GetHashCode()

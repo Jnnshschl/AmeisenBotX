@@ -102,6 +102,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract string Displayname { get; }
 
+        public GroupAuraManager GroupAuraManager { get; internal set; }
+
         public abstract bool HandlesMovement { get; }
 
         public abstract bool HandlesTargetSelection { get; }
@@ -111,8 +113,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public abstract IWowItemComparator ItemComparator { get; set; }
 
         public AuraManager MyAuraManager { get; internal set; }
-
-        public GroupAuraManager GroupAuraManager { get; internal set; }
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 

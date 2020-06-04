@@ -34,5 +34,8 @@ namespace AmeisenBotX.Core.Data.Objects
         public int StackCount => RawWowAura.StackCount;
 
         private RawWowAura RawWowAura { get; set; }
+
+        public override string ToString()
+            => $"{Name} ({SpellId}) (lvl. {Level}) x{StackCount} [CG: {CreatorGuid}], Harmful: {IsHarmful}, Passive: {IsPassive}";
     }
 }

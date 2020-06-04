@@ -409,20 +409,21 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}='['{v:1}=GetNumSpellTabs()for a=1,{v:1} do {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)for b={v:4}+1,{v:4}+{v:5} do {v:6},{v:7}=GetSpellName(b,\"BOOKTYPE_SPELL\")if {v:6} then {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6},{v:7}){v:0}={v:0}..'{'..'\"spellbookName\": \"'..tostring({v:2} or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring({v:6} or 0)..'\",'..'\"rank\": \"'..tostring({v:9} or 0)..'\",'..'\"castTime\": \"'..tostring({v:11} or 0)..'\",'..'\"minRange\": \"'..tostring({v:12} or 0)..'\",'..'\"maxRange\": \"'..tostring({v:13} or 0)..'\",'..'\"costs\": \"'..tostring({v:10} or 0)..'\"'..'}'if a<{v:1} or b<{v:4}+{v:5} then {v:0}={v:0}..','end end end end;{v:0}={v:0}..']'"));
         }
 
-        public List<WowAura> GetUnitAuras(IntPtr baseAddress)
+        public List<WowAura> GetUnitAuras(WowUnit wowUnit)
         {
             List<WowAura> buffs = new List<WowAura>();
 
-            if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, 0xDD0), out int auraCount1)
-                && auraCount1 > 0)
+            if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xDD0), out int auraCount1))
             {
-                buffs.AddRange(ReadAuraTable(IntPtr.Add(baseAddress, 0xC50), auraCount1));
-            }
+                if (auraCount1 != -1)
+                {
+                    buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC50), auraCount1));
 
-            if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, 0xC54), out int auraCount2)
-                && auraCount2 > 0)
-            {
-                buffs.AddRange(ReadAuraTable(IntPtr.Add(baseAddress, 0xC58), auraCount2));
+                }
+                else if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2) && auraCount2 > 0)
+                {
+                    buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC58), auraCount2));
+                }
             }
 
             return buffs;
@@ -1099,7 +1100,7 @@ namespace AmeisenBotX.Core.Hook
         {
             List<WowAura> buffs = new List<WowAura>();
 
-            if (auraCount > 16)
+            if (auraCount > 40)
             {
                 return buffs;
             }
@@ -1121,10 +1122,6 @@ namespace AmeisenBotX.Core.Hook
                             buffs.Add(new WowAura(aura, name));
                         }
                     }
-                }
-                else
-                {
-                    break;
                 }
             }
 

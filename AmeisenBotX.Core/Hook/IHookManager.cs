@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Hook
 
         string GetSpells();
 
-        List<WowAura> GetUnitAuras(IntPtr baseAddress);
+        List<WowAura> GetUnitAuras(WowUnit wowUnit);
 
         (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
 

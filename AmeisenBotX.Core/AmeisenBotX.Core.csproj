@@ -192,6 +192,8 @@
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />
     <Compile Include="Dungeon\Profiles\TBC\HellfireRampartsProfile.cs" />
+    <Compile Include="Dungeon\Profiles\TBC\TheUnderbogProfile.cs" />
+    <Compile Include="Dungeon\Profiles\TBC\TheSlavePensProfile.cs" />
     <Compile Include="Dungeon\Profiles\TBC\TheBloodFurnaceProfile.cs" />
     <Compile Include="Dungeon\Profiles\WotLK\AzjolNerubProfile.cs" />
     <Compile Include="Dungeon\Profiles\WotLK\UtgardeKeepProfile.cs" />

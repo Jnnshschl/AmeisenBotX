@@ -553,7 +553,7 @@ namespace AmeisenBotX.Core.Data
                     || player.Guid == PlayerGuid
                     || PartymemberGuids.Contains(player.Guid))
                 {
-                    player.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
+                    player.Auras = WowInterface.HookManager.GetUnitAuras(player);
                 }
 
                 return player;
@@ -583,7 +583,7 @@ namespace AmeisenBotX.Core.Data
 
                 if (unit.Guid == TargetGuid)
                 {
-                    unit.Auras = WowInterface.HookManager.GetUnitAuras(activeObject);
+                    unit.Auras = WowInterface.HookManager.GetUnitAuras(unit);
                 }
 
                 return unit;
