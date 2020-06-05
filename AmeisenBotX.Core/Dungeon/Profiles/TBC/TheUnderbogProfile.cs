@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public MapId MapId { get; } = MapId.TheUnderbog;
 
-        public int MaxLevel { get; } = 64;
+        public int MaxLevel { get; } = 65;
 
         public string Name { get; } = "[61-65] The Underbog";
 
@@ -336,7 +336,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public int RequiredItemLevel { get; } = 65;
 
-        public int RequiredLevel { get; } = 60;
+        public int RequiredLevel { get; } = 61;
 
         public Vector3 WorldEntry { get; } = new Vector3(782, 6746, -73);
 

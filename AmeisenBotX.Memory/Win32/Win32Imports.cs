@@ -5,6 +5,12 @@ namespace AmeisenBotX.Memory.Win32
 {
     internal class Win32Imports
     {
+        public const int STARTF_USESHOWWINDOW = 1;
+
+        public const int SW_SHOWMINNOACTIVE = 7;
+
+        public const int SW_SHOWNOACTIVATE = 4;
+
         [Flags]
         public enum AllocationType : uint
         {
@@ -90,6 +96,20 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
+        [DllImport("kernel32.dll")]
+        public static extern bool CreateProcess(
+            string lpApplicationName,
+            string lpCommandLine,
+            IntPtr lpProcessAttributes,
+            IntPtr lpThreadAttributes,
+            bool bInheritHandles,
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            [In] ref StartupInfo lpStartupInfo,
+            out ProcessInformation lpProcessInformation
+        );
+
         [DllImport("dwmapi", SetLastError = true)]
         public static extern void DwmExtendFrameIntoClientArea(IntPtr windowHandle, ref Margins margins);
 
@@ -140,5 +160,37 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ProcessInformation
+        {
+            public IntPtr hProcess;
+            public IntPtr hThread;
+            public int dwProcessId;
+            public int dwThreadId;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct StartupInfo
+        {
+            public int cb;
+            public string lpReserved;
+            public string lpDesktop;
+            public string lpTitle;
+            public int dwX;
+            public int dwY;
+            public int dwXSize;
+            public int dwYSize;
+            public int dwXCountChars;
+            public int dwYCountChars;
+            public int dwFillAttribute;
+            public int dwFlags;
+            public short wShowWindow;
+            public short cbReserved2;
+            public IntPtr lpReserved2;
+            public IntPtr hStdInput;
+            public IntPtr hStdOutput;
+            public IntPtr hStdError;
+        }
     }
 }

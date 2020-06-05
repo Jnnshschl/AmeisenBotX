@@ -332,6 +332,7 @@ namespace AmeisenBotX.Core.Dungeon
                 MapId.TheBloodFurnace => new TheBloodFurnaceProfile(),
                 MapId.TheSlavePens => new TheSlavePensProfile(),
                 MapId.TheUnderbog => new TheUnderbogProfile(),
+                MapId.TheSteamvault => new TheSteamvaultProfile(),
                 MapId.UtgardeKeep => new UtgardeKeepProfile(),
                 MapId.AzjolNerub => new AzjolNerubProfile(),
                 _ => null

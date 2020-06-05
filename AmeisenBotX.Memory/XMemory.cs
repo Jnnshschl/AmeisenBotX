@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
@@ -154,7 +155,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
         {
-            int size = sizeof(T);
+            int size = SizeOf<T>();
             byte[] buffer = new byte[size];
 
             if (RpmGateWay(address, buffer, size))
@@ -168,6 +169,28 @@ namespace AmeisenBotX.Memory
 
             value = default;
             return false;
+        }
+
+        public Process StartProcessNoActivate(string processCmd)
+        {
+            StartupInfo startupInfo = new StartupInfo
+            {
+                cb = SizeOf<StartupInfo>(),
+                dwFlags = STARTF_USESHOWWINDOW,
+                wShowWindow = SW_SHOWMINNOACTIVE
+            };
+
+            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            {
+                CloseHandle(processInformation.hProcess);
+                CloseHandle(processInformation.hThread);
+
+                return Process.GetProcessById(processInformation.dwProcessId);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

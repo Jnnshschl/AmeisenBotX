@@ -220,6 +220,7 @@ namespace AmeisenBotX.Core.Statemachine
                        || map == MapId.TheBloodFurnace
                        || map == MapId.TheSlavePens
                        || map == MapId.TheUnderbog
+                       || map == MapId.TheSteamvault
                        || map == MapId.UtgardeKeep
                        || map == MapId.AzjolNerub;
         }

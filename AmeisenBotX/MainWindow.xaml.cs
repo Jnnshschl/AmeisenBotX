@@ -242,14 +242,14 @@ namespace AmeisenBotX
 
                 if (AmeisenBot.WowInterface.ObjectManager?.Player?.Auras != null)
                 {
-                    //StringBuilder sb = new StringBuilder();
-                    //
-                    //foreach(WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
-                    //{
-                    //    sb.AppendLine(aura.ToString());
-                    //}
+                    StringBuilder sb = new StringBuilder();
+                    
+                    foreach(WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
+                    {
+                        sb.AppendLine($"({aura.SpellId, -5}) {aura.Name}");
+                    }
 
-                    labelDebug.Content = $"Aura Count: {AmeisenBot.WowInterface.ObjectManager?.Player?.Auras.Count}";
+                    labelDebug.Content = $"Aura Count: {AmeisenBot.WowInterface.ObjectManager?.Player?.Auras.Count}\n{sb}";
                 }
 
                 // update health and secodary power bar and
@@ -393,7 +393,7 @@ namespace AmeisenBotX
             labelZoneName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneName;
             labelZoneSubName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneSubName;
 
-            labelCurrentLevel.Content = AmeisenBot.WowInterface.ObjectManager.Player.Level;
+            labelCurrentLevel.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Level} (iLvl. {Math.Round(AmeisenBot.WowInterface.CharacterManager.Equipment.AverageItemLevel)})";
             labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Race} {AmeisenBot.WowInterface.ObjectManager.Player.Gender}";
             labelCurrentClass.Content = AmeisenBot.WowInterface.ObjectManager.Player.Class;
 

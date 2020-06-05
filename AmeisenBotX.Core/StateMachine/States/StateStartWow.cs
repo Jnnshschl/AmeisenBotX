@@ -19,10 +19,14 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (File.Exists(Config.PathToWowExe))
             {
-                WowInterface.WowProcess = Process.Start(Config.PathToWowExe);
-                WowInterface.WowProcess.WaitForInputIdle();
-                WowInterface.XMemory.Attach(WowInterface.WowProcess);
-                WowStart = DateTime.Now;
+                WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
+
+                if (WowInterface.WowProcess != null)
+                {
+                    WowInterface.WowProcess.WaitForInputIdle();
+                    WowInterface.XMemory.Attach(WowInterface.WowProcess);
+                    WowStart = DateTime.Now;
+                }
             }
         }
 

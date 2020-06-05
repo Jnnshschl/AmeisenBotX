@@ -16,13 +16,15 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace AmeisenBotX.Core.Hook
 {
     public class HookManager : IHookManager
     {
         private const int MEM_ALLOC_CHECK_SIZE = 64;
-        private const int MEM_ALLOC_EXECUTION_SIZE = 512;
+        private const int MEM_ALLOC_EXECUTION_SIZE = 4096;
         private const int MEM_ALLOC_GATEWAY_SIZE = 12;
         private readonly object hookLock = new object();
         private ulong endsceneCalls;
@@ -254,16 +256,19 @@ namespace AmeisenBotX.Core.Hook
             SetFacing(player, BotMath.GetFacingAngle2D(player.Position, positionToFace));
         }
 
+        [Obsolete]
         public List<string> GetAuras(WowLuaUnit luaunit)
         {
             return ReadAuras(luaunit, "UnitAura");
         }
 
+        [Obsolete]
         public List<string> GetBuffs(WowLuaUnit luaunit)
         {
             return ReadAuras(luaunit, "UnitBuff");
         }
 
+        [Obsolete]
         public List<string> GetDebuffs(WowLuaUnit luaunit)
         {
             return ReadAuras(luaunit, "UnitDebuff");
@@ -415,14 +420,16 @@ namespace AmeisenBotX.Core.Hook
 
             if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xDD0), out int auraCount1))
             {
-                if (auraCount1 != -1)
+                if (auraCount1 == -1)
+                {
+                    if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2) && auraCount2 > 0)
+                    {
+                        buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC58), auraCount2));
+                    }
+                }
+                else
                 {
                     buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC50), auraCount1));
-
-                }
-                else if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2) && auraCount2 > 0)
-                {
-                    buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC58), auraCount2));
                 }
             }
 
@@ -1100,16 +1107,11 @@ namespace AmeisenBotX.Core.Hook
         {
             List<WowAura> buffs = new List<WowAura>();
 
-            if (auraCount > 40)
-            {
-                return buffs;
-            }
-
             for (int i = 0; i < auraCount; ++i)
             {
-                if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * i), out RawWowAura aura))
+                if (WowInterface.XMemory.Read(new IntPtr(buffBase.ToInt32() + (0x18 * i)), out RawWowAura aura))
                 {
-                    if (aura.SpellId > 0 && aura.Creator > 0)
+                    if (aura.SpellId > 0)
                     {
                         if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
                         {
@@ -1117,10 +1119,7 @@ namespace AmeisenBotX.Core.Hook
                             WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
                         }
 
-                        if (name.Length > 0 && !buffs.Any(e => e.Name == name))
-                        {
-                            buffs.Add(new WowAura(aura, name));
-                        }
+                        buffs.Add(new WowAura(aura, name.Length > 0 ? name : "unk"));
                     }
                 }
             }
