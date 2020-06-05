@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
@@ -112,16 +113,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
                        && ((Vector3)obj).Z == Z;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double GetDistance(Vector3 b)
         {
-            return Math.Sqrt(Math.Pow((X - b.X), 2)
-                                  + Math.Pow((Y - b.Y), 2)
-                                  + Math.Pow((Z - b.Z), 2);
+            return Math.Sqrt(Math.Pow((X - b.X), 2) + Math.Pow((Y - b.Y), 2) + Math.Pow((Z - b.Z), 2));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double GetDistanceIgnoreZ(Vector3 b)
         {
-            return Math.Sqrt(((X - b.X) * (X - b.X)) + ((Y - b.Y) * (Y - b.Y)));
+            return Math.Sqrt(Math.Pow((X - b.X), 2) + Math.Pow((Y - b.Y), 2));
         }
 
         public override int GetHashCode()
