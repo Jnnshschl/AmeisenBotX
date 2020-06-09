@@ -16,8 +16,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Timers;
-using Timer = System.Timers.Timer;
 
 namespace AmeisenBotX.Core.Hook
 {
@@ -32,6 +30,7 @@ namespace AmeisenBotX.Core.Hook
         public HookManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
+            RenderFunctionOldMemory = new Dictionary<IntPtr, byte>();
         }
 
         public ulong CallCount
@@ -418,19 +417,19 @@ namespace AmeisenBotX.Core.Hook
         {
             List<WowAura> buffs = new List<WowAura>();
 
-            if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xDD0), out int auraCount1))
+            int auraCount = 0;
+            int tableOffset = 0;
+
+            if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xDD0), out int auraCount1)
+                && WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2))
             {
-                if (auraCount1 == -1)
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2) && auraCount2 > 0)
-                    {
-                        buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC58), auraCount2));
-                    }
-                }
-                else
-                {
-                    buffs.AddRange(ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, 0xC50), auraCount1));
-                }
+                auraCount = auraCount1 == -1 ? auraCount2 : auraCount1;
+                tableOffset = auraCount1 == -1 ? 0xC58 : 0xC50;
+            }
+
+            if (tableOffset != 0 && auraCount > 0)
+            {
+                buffs.AddRange(ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + tableOffset), auraCount));
             }
 
             return buffs;
@@ -451,6 +450,63 @@ namespace AmeisenBotX.Core.Hook
             }
 
             return (string.Empty, 0);
+        }
+
+        private Dictionary<IntPtr, byte> RenderFunctionOldMemory { get; }
+
+        public void SetRenderState(bool renderingEnabled)
+        {
+            WowInterface.XMemory.SuspendMainThread();
+
+            if (renderingEnabled)
+            {
+                EnableFunction(WowInterface.OffsetList.FunctionWorldRender);
+                EnableFunction(WowInterface.OffsetList.FunctionWorldFrame);
+            }
+            else
+            {
+                DisableFunction(WowInterface.OffsetList.FunctionWorldRender);
+                DisableFunction(WowInterface.OffsetList.FunctionWorldFrame);
+            }
+
+            WowInterface.XMemory.ResumeMainThread();
+        }
+
+        private void EnableFunction(IntPtr address)
+        {
+            // check for RET opcode to be present before restoring original function
+            if (RenderFunctionOldMemory.ContainsKey(address)
+                && WowInterface.XMemory.Read(address, out byte opcode)
+                && opcode == 0xC3)
+            {
+                WowInterface.XMemory.PatchMemory(address, RenderFunctionOldMemory[address]);
+            }
+        }
+
+        private void DisableFunction(IntPtr address)
+        {
+            // check wether we already replaced the function or not
+            if (WowInterface.XMemory.Read(address, out byte opcode)
+                && opcode != 0xC3)
+            {
+                SaveOriginalFunctionBytes(address);
+                WowInterface.XMemory.PatchMemory<byte>(address, 0xC3);
+            }
+        }
+
+        private void SaveOriginalFunctionBytes(IntPtr address)
+        {
+            if (WowInterface.XMemory.Read(address, out byte opcode))
+            {
+                if (!RenderFunctionOldMemory.ContainsKey(address))
+                {
+                    RenderFunctionOldMemory.Add(address, opcode);
+                }
+                else
+                {
+                    RenderFunctionOldMemory[address] = opcode;
+                }
+            }
         }
 
         public WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
@@ -1109,18 +1165,15 @@ namespace AmeisenBotX.Core.Hook
 
             for (int i = 0; i < auraCount; ++i)
             {
-                if (WowInterface.XMemory.Read(new IntPtr(buffBase.ToInt32() + (0x18 * i)), out RawWowAura aura))
+                if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * i), out RawWowAura aura))
                 {
-                    if (aura.SpellId > 0)
+                    if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
                     {
-                        if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
-                        {
-                            name = GetSpellNameById(aura.SpellId);
-                            WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
-                        }
-
-                        buffs.Add(new WowAura(aura, name.Length > 0 ? name : "unk"));
+                        name = GetSpellNameById(aura.SpellId);
+                        WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
                     }
+
+                    buffs.Add(new WowAura(aura, name.Length > 0 ? name : "unk"));
                 }
             }
 

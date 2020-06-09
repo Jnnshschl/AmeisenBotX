@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (UnitLootQueue.Count == 0)
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
             else
             {
@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.0)
                     {
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
                         WowInterface.MovementEngine.Execute();
                     }
                     else if (DateTime.Now - LastOpenLootTry > TimeSpan.FromSeconds(1))

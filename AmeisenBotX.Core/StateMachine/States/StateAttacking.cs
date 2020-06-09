@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
                 && (WowInterface.BattlegroundEngine == null || !WowInterface.BattlegroundEngine.ForceCombat)
-                && StateMachine.SetState(BotState.Idle))
+                && StateMachine.SetState((int)BotState.Idle))
             {
                 return;
             }
@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             else
             {
                 Vector3 positionToGoTo = target.Position; // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
-                WowInterface.MovementEngine.SetState(distance > 4 ? MovementEngineState.Moving : MovementEngineState.DirectMoving, positionToGoTo);
+                WowInterface.MovementEngine.SetMovementAction(distance > 4 ? MovementAction.Moving : MovementAction.DirectMoving, positionToGoTo);
                 WowInterface.MovementEngine.Execute();
                 return true;
             }

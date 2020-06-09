@@ -115,14 +115,16 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return wowObjects.OfType<T>()
-                    .Where(e => e != null
-                        && e.Guid != PlayerGuid
-                        && !e.IsDead
-                        && !e.IsNotAttackable
-                        && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                        && e.Position.GetDistance(position) < distance)
-                    .ToList();
+                return wowObjects
+                       .ToList()
+                       .OfType<T>()
+                       .Where(e => e != null
+                           && e.Guid != PlayerGuid
+                           && !e.IsDead
+                           && !e.IsNotAttackable
+                           && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                           && e.Position.GetDistance(position) < distance)
+                       .ToList();
             }
         }
 
@@ -130,14 +132,16 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return wowObjects.OfType<T>()
-                  .Where(e => e != null
-                    && e.Guid != PlayerGuid
-                    && !e.IsDead
-                    && !e.IsNotAttackable
-                    && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
-                    && e.Position.GetDistance(position) < distance)
-                  .ToList();
+                return wowObjects
+                       .ToList()
+                       .OfType<T>()
+                       .Where(e => e != null
+                         && e.Guid != PlayerGuid
+                         && !e.IsDead
+                         && !e.IsNotAttackable
+                         && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
+                         && e.Position.GetDistance(position) < distance)
+                       .ToList();
             }
         }
 

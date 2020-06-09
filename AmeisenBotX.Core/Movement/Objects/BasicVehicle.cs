@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             return acceleration;
         }
 
-        public Vector3 Unstuck(int multiplier)
+        public Vector3 Unstuck(float multiplier)
         {
             Vector3 positionBehindMe = CalculatPositionBehind(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, 8);
             return Seek(positionBehindMe, multiplier);
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             WowInterface.CharacterManager.MoveToPosition(currentPosition);
         }
 
-        public Vector3 Wander(int multiplier)
+        public Vector3 Wander(float multiplier)
         {
             // TODO: implement some sort of radius where the target wanders around.
             //       maybe add a very weak force keeping it inside a given circle...

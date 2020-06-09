@@ -1,10 +1,12 @@
 ﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Battleground.Profiles;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.SMovementEngine;
+using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
+using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -230,7 +232,7 @@ namespace AmeisenBotX
                 //     string ownCarrier = string.Empty;
                 //     string enemyCarrier = string.Empty;
                 //     bool isMeCarrier = false;
-                // 
+                //
                 //     if (AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
                 //     {
                 //         ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile;
@@ -243,13 +245,18 @@ namespace AmeisenBotX
                 if (AmeisenBot.WowInterface.ObjectManager?.Player?.Auras != null)
                 {
                     StringBuilder sb = new StringBuilder();
-                    
-                    foreach(WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
+
+                    sb.AppendLine($"MovementAction: {AmeisenBot.WowInterface.MovementEngine.MovementAction}");
+                    sb.AppendLine($"MovementState: {(MovementState)((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).CurrentState.Key}\n");
+
+                    sb.AppendLine($"Aura Count: {AmeisenBot.WowInterface.ObjectManager?.Player?.Auras.Count}");
+
+                    foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
                     {
-                        sb.AppendLine($"({aura.SpellId, -5}) {aura.Name}");
+                        sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
                     }
 
-                    labelDebug.Content = $"Aura Count: {AmeisenBot.WowInterface.ObjectManager?.Player?.Auras.Count}\n{sb}";
+                    labelDebug.Content = sb.ToString();
                 }
 
                 // update health and secodary power bar and
@@ -372,7 +379,7 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}";
+                labelCurrentState.Content = $"{(BotState)AmeisenBot.StateMachine.CurrentState.Key}";
             });
         }
 
@@ -498,6 +505,14 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        public bool RenderState { get; set; }
+
+        private void ButtonDebug_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
+            RenderState = !RenderState;
         }
     }
 }

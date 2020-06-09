@@ -210,7 +210,7 @@ namespace AmeisenBotX
 
         private void MapTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (NeedToUpdateMap && AmeisenBot.StateMachine.CurrentState.Key != BotState.LoadingScreen)
+            if (NeedToUpdateMap && AmeisenBot.StateMachine.CurrentState.Key != (int)BotState.LoadingScreen)
             {
                 Dispatcher.InvokeAsync(() =>
                 {

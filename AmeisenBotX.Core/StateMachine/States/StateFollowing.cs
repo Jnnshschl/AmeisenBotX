@@ -48,14 +48,12 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (PlayerToFollow == null)
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
         public override void Execute()
         {
-            WowInterface.ObjectManager.UpdateObject(PlayerToFollow);
-
             Vector3 posToGoTo = default;
 
             // handle nearby portals, if our groupleader enters a portal, we follow
@@ -81,10 +79,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                 posToGoTo = PlayerToFollow.Position;
             }
 
-            double distance = PlayerToFollow.Position.GetDistance(posToGoTo);
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(posToGoTo);
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
 
             if (WowInterface.ObjectManager.Player.IsCasting)
@@ -92,7 +90,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            WowInterface.MovementEngine.SetState(MovementEngineState.Following, posToGoTo);
+            WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, posToGoTo);
             WowInterface.MovementEngine.Execute();
         }
 

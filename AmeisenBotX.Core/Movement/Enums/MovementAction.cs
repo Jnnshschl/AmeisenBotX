@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Movement.Enums
 {
-    public enum MovementEngineState
+    public enum MovementAction
     {
         None,
         Moving,

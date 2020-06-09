@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 4)
                     {
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, WowInterface.ObjectManager.Target.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
                         WowInterface.MovementEngine.Execute();
                     }
                     else

@@ -212,7 +212,7 @@
     <Compile Include="Autologin\DefaultLoginHandler.cs" />
     <Compile Include="Autologin\ILoginHandler.cs" />
     <Compile Include="Movement\DefaultMovementEngine.cs" />
-    <Compile Include="Movement\Enums\MovementEngineState.cs" />
+    <Compile Include="Movement\Enums\MovementAction.cs" />
     <Compile Include="Movement\IMovementEngine.cs" />
     <Compile Include="Movement\Pathfinding\IPathfindingHandler.cs" />
     <Compile Include="Movement\Pathfinding\NavmeshServerPathfindingHandler.cs" />
@@ -223,6 +223,12 @@
     <Compile Include="Movement\Pathfinding\Objects\Vector3.cs" />
     <Compile Include="Movement\Settings\MovementSettings.cs" />
     <Compile Include="Movement\SmartMovementEngine.cs" />
+    <Compile Include="Movement\SMovementEngine\Enums\MovementState.cs" />
+    <Compile Include="Movement\SMovementEngine\StateBasedMovementEngine.cs" />
+    <Compile Include="Movement\SMovementEngine\States\BasicMovementState.cs" />
+    <Compile Include="Movement\SMovementEngine\States\StateMovementMoveToNode.cs" />
+    <Compile Include="Movement\SMovementEngine\States\StateMovementPathfinding.cs" />
+    <Compile Include="Movement\SMovementEngine\States\StateMovementNone.cs" />
     <Compile Include="Offsets\OffsetList335a.cs" />
     <Compile Include="Offsets\IOffsetList.cs" />
     <Compile Include="Personality\BotPersonality.cs" />
@@ -233,7 +239,7 @@
     <Compile Include="Raid\RaidEngine.cs" />
     <Compile Include="Raid\Profiles\IRaidProfile.cs" />
     <Compile Include="Relaxing\RelaxEngine.cs" />
-    <Compile Include="Statemachine\AbstractStateMachine.cs" />
+    <Compile Include="Common\AbstractStateMachine.cs" />
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
     <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
@@ -264,6 +270,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\PriestShadow.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\RogueAssassination.cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
+    <Compile Include="Common\IState.cs" />
     <Compile Include="Statemachine\States\StateRelaxing.cs" />
     <Compile Include="Statemachine\States\StateDungeon.cs" />
     <Compile Include="Statemachine\States\StateJob.cs" />

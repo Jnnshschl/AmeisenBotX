@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Battleground.States
                         }
                         else
                         {
-                            WowInterface.MovementEngine.SetState(MovementEngineState.Moving, flagObject.Position);
+                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, flagObject.Position);
                             WowInterface.MovementEngine.Execute();
                         }
                     }

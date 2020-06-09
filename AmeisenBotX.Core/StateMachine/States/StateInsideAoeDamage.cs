@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
 
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, targetPosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, targetPosition);
                 WowInterface.MovementEngine.Execute();
             }
         }

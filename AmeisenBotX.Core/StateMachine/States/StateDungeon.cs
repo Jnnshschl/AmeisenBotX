@@ -21,7 +21,7 @@
             }
             else
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
@@ -32,9 +32,9 @@
             WowInterface.DungeonEngine.Reset();
         }
 
-        private void StateMachine_OnStateOverride(BotState botState)
+        private void StateMachine_OnStateOverride(int botState)
         {
-            if (botState == BotState.Dead)
+            if (botState == (int)BotState.Dead)
             {
                 WowInterface.DungeonEngine.OnDeath();
             }

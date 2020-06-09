@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
-    internal class Win32Imports
+    public class Win32Imports
     {
         public const int STARTF_USESHOWWINDOW = 1;
 
@@ -160,6 +160,9 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation

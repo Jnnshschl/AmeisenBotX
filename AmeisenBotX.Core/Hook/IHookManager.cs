@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Hook
@@ -22,6 +21,8 @@ namespace AmeisenBotX.Core.Hook
         void AcceptResurrect();
 
         void AcceptSummon();
+
+        void SetRenderState(bool renderingEnabled);
 
         void CastSpell(string name, bool castOnSelf = false);
 

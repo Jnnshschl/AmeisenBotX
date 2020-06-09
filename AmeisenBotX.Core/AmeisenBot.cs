@@ -15,6 +15,7 @@ using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
+using AmeisenBotX.Core.Movement.SMovementEngine;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Relaxing;
@@ -258,7 +259,7 @@ namespace AmeisenBotX.Core
 
         private void HandleLoadWowPosition()
         {
-            if (StateMachine.CurrentState.Key == BotState.Login)
+            if (StateMachine.CurrentState.Key == (int)BotState.Login)
             {
                 if (Config.SaveWowWindowPosition)
                 {
@@ -564,7 +565,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();
-            WowInterface.MovementEngine = new SmartMovementEngine(WowInterface, WowInterface.MovementSettings);
+            WowInterface.MovementEngine = new StateBasedMovementEngine(WowInterface, Config, WowInterface.MovementSettings, WowInterface.PathfindingHandler);
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)

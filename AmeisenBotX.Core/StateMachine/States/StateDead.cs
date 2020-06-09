@@ -38,11 +38,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
             {
-                StateMachine.SetState(BotState.Ghost);
+                StateMachine.SetState((int)BotState.Ghost);
             }
             else
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 

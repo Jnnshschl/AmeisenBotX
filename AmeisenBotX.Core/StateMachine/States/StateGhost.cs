@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.ObjectManager.Player.Health > 1)
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
 
             // first step, determine our corpse/portal position
@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             // step two, move to the corpse/portal
             if (WowInterface.ObjectManager.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
             {
-                WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CorpsePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
                 WowInterface.MovementEngine.Execute();
             }
             else
@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
                     CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 6);
-                    WowInterface.MovementEngine.SetState(MovementEngineState.Moving, CorpsePosition);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
                     WowInterface.MovementEngine.Execute();
                 }
                 else

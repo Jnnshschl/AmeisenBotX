@@ -18,6 +18,14 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr CameraPointer { get; }
 
+        IntPtr FunctionWorldFrameOnFrameRender { get; }
+
+        IntPtr FunctionWorldRender { get; }
+
+        IntPtr FunctionWorldRenderWorld { get; }
+
+        IntPtr FunctionWorldFrame { get; }
+
         IntPtr CharacterSlotSelected { get; }
 
         IntPtr ChatBuffer { get; }
@@ -91,8 +99,6 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr FunctionPlayerClickToMoveStop { get; }
 
         IntPtr FunctionPlayerIsClickMoving { get; }
-
-        IntPtr FunctionRenderWorld { get; }
 
         IntPtr FunctionSetTarget { get; }
 

@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Jobs
                     if (gatheringProfile.MailboxPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 6)
                     {
                         // move towards mailbox
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.MailboxPosition);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, gatheringProfile.MailboxPosition);
                         WowInterface.MovementEngine.Execute();
                     }
                     else
@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Jobs
                     if (selectedNode.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 6)
                     {
                         // move to it until we are close enough
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.Path[CurrentNodeAt]);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, gatheringProfile.Path[CurrentNodeAt]);
                         WowInterface.MovementEngine.Execute();
                     }
                     else
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Jobs
                     if (gatheringProfile.Path[CurrentNodeAt].GetDistance(WowInterface.ObjectManager.Player.Position) > 6)
                     {
                         // move towards next node
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, gatheringProfile.Path[CurrentNodeAt]);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, gatheringProfile.Path[CurrentNodeAt]);
                         WowInterface.MovementEngine.Execute();
                     }
                     else

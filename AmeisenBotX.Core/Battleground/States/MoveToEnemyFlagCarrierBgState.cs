@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Battleground.States
 
                     if (WowInterface.ObjectManager.Player.Position.GetDistance(enemyFlagCarrier.Position) > 10)
                     {
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, enemyFlagCarrier.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, enemyFlagCarrier.Position);
                         WowInterface.MovementEngine.Execute();
                     }
                     else

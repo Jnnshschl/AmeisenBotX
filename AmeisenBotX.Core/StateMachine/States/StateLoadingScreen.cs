@@ -18,14 +18,14 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.XMemory.Process == null || WowInterface.WowProcess.HasExited)
             {
-                StateMachine.SetState(BotState.None);
+                StateMachine.SetState((int)BotState.None);
                 return;
             }
 
             if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string gameState)
                 && gameState.Contains("login"))
             {
-                StateMachine.SetState(BotState.Login);
+                StateMachine.SetState((int)BotState.Login);
                 BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x1B));
                 return;
             }
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
             if (WowInterface.ObjectManager.IsWorldLoaded)
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
                 return;
             }
         }

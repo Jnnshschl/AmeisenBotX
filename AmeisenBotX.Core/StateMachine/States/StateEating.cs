@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 else
                 {
                     // exit if we have no more food left or are near full hp/power
-                    StateMachine.SetState(BotState.Idle);
+                    StateMachine.SetState((int)BotState.Idle);
                     return;
                 }
 

@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
             {
                 WowInterface.CharacterManager.Equipment.Update();
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
                         WowInterface.MovementEngine.Execute();
                     }
                 }
@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             else
             {
                 WowInterface.CharacterManager.Equipment.Update();
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 

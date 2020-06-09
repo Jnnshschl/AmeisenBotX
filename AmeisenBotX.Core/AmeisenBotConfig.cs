@@ -18,6 +18,8 @@ namespace AmeisenBotX.Core
 
         public bool Autopilot { get; set; } = false;
 
+        public bool AutoDisableRender { get; set; } = false;
+
         public bool AutostartWow { get; set; } = false;
 
         public Rect BotWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };

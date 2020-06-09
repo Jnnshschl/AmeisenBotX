@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Movement
             Rnd = new Random();
             CurrentPath = new Queue<Vector3>();
 
-            State = MovementEngineState.None;
+            MovementAction = MovementAction.None;
             TryCount = 0;
 
             PlayerVehicle = new BasicVehicle(wowInterface, movementSettings.MaxSteering, movementSettings.MaxVelocity, movementSettings.MaxAcceleration);
@@ -41,6 +41,8 @@ namespace AmeisenBotX.Core.Movement
 
         public Vector3 LastTargetPosition { get; private set; }
 
+        public MovementAction MovementAction { get; private set; }
+
         public MovementSettings MovementSettings { get; private set; }
 
         public IObjectManager ObjectManager { get; }
@@ -48,8 +50,6 @@ namespace AmeisenBotX.Core.Movement
         public List<Vector3> Path => CurrentPath?.ToList();
 
         public BasicVehicle PlayerVehicle { get; private set; }
-
-        public MovementEngineState State { get; private set; }
 
         public bool Straving { get; private set; }
 
@@ -145,41 +145,41 @@ namespace AmeisenBotX.Core.Movement
             Vector3 positionToGoTo = targetPosition;
             bool updateForces = true;
 
-            switch (State)
+            switch (MovementAction)
             {
-                case MovementEngineState.Moving:
+                case MovementAction.Moving:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     forces.Add(PlayerVehicle.AvoidObstacles(2));
                     break;
 
-                case MovementEngineState.DirectMoving:
+                case MovementAction.DirectMoving:
                     WowInterface.CharacterManager.MoveToPosition(targetPosition);
                     updateForces = false;
                     break;
 
-                case MovementEngineState.Following:
+                case MovementAction.Following:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     forces.Add(PlayerVehicle.Seperate(0.5f));
                     forces.Add(PlayerVehicle.AvoidObstacles(2));
                     break;
 
-                case MovementEngineState.Chasing:
+                case MovementAction.Chasing:
                     forces.Add(PlayerVehicle.Seek(positionToGoTo, 1));
                     break;
 
-                case MovementEngineState.Fleeing:
+                case MovementAction.Fleeing:
                     forces.Add(PlayerVehicle.Flee(positionToGoTo, 1));
                     break;
 
-                case MovementEngineState.Evading:
+                case MovementAction.Evading:
                     forces.Add(PlayerVehicle.Evade(positionToGoTo, 1, TargetRotation));
                     break;
 
-                case MovementEngineState.Wandering:
+                case MovementAction.Wandering:
                     forces.Add(PlayerVehicle.Wander(1));
                     break;
 
-                case MovementEngineState.Stuck:
+                case MovementAction.Stuck:
                     forces.Add(PlayerVehicle.Unstuck(1));
                     break;
 
@@ -247,19 +247,19 @@ namespace AmeisenBotX.Core.Movement
         public void Reset()
         {
             WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
-            State = MovementEngineState.None;
+            MovementAction = MovementAction.None;
             CurrentPath = new Queue<Vector3>();
             HasMoved = false;
             TryCount = 0;
             LastLastPositionUpdate = DateTime.Now;
         }
 
-        public void SetState(MovementEngineState state, Vector3 position, float targetRotation = 0f)
+        public void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f)
         {
-            if (State != state)
+            if (MovementAction != state)
             {
                 Reset();
-                State = state;
+                MovementAction = state;
             }
 
             TargetPosition = position;

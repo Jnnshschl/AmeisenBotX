@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
@@ -77,6 +76,12 @@ namespace AmeisenBotX.Memory
             Rect rect = new Rect();
             GetWindowRect(windowHandle, ref rect);
             return rect;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntPtr GetForegroundWindow()
+        {
+            return Win32Imports.GetForegroundWindow();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -171,28 +176,6 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        public Process StartProcessNoActivate(string processCmd)
-        {
-            StartupInfo startupInfo = new StartupInfo
-            {
-                cb = SizeOf<StartupInfo>(),
-                dwFlags = STARTF_USESHOWWINDOW,
-                wShowWindow = SW_SHOWMINNOACTIVE
-            };
-
-            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
-            {
-                CloseHandle(processInformation.hProcess);
-                CloseHandle(processInformation.hThread);
-
-                return Process.GetProcessById(processInformation.dwProcessId);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
         {
@@ -257,6 +240,46 @@ namespace AmeisenBotX.Memory
             if (OpenMainThread())
             {
                 NtResumeThread(MainThreadHandle, out _);
+            }
+        }
+
+        public Process StartProcessNoActivate(string processCmd)
+        {
+            StartupInfo startupInfo = new StartupInfo
+            {
+                cb = SizeOf<StartupInfo>(),
+                dwFlags = STARTF_USESHOWWINDOW,
+                wShowWindow = SW_SHOWMINNOACTIVE
+            };
+
+            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            {
+                CloseHandle(processInformation.hProcess);
+                CloseHandle(processInformation.hThread);
+
+                return Process.GetProcessById(processInformation.dwProcessId);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool MemoryProtect(IntPtr address, uint size, MemoryProtection memoryProtection, out MemoryProtection oldMemoryProtection)
+        {
+            return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
+        {
+            uint size = (uint)SizeOf<T>();
+
+            if (MemoryProtect(address, size, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldMemoryProtection))
+            {
+                Write(address, data);
+                MemoryProtect(address, size, oldMemoryProtection, out _);
             }
         }
 

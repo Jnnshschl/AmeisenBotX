@@ -1,12 +1,11 @@
-﻿using AmeisenBotX.Core.Statemachine.States;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine
+namespace AmeisenBotX.Core.Common
 {
-    public abstract class AbstractStateMachine
+    public abstract class AbstractStateMachine<T> where T : IState
     {
-        public delegate void StateMachineOverride(BotState botState);
+        public delegate void StateMachineOverride(int botState);
 
         public delegate void StateMachineStateChange();
 
@@ -18,15 +17,15 @@ namespace AmeisenBotX.Core.Statemachine
 
         public abstract event StateMachineOverride OnStateOverride;
 
-        public KeyValuePair<BotState, BasicState> CurrentState { get; protected set; }
+        public KeyValuePair<int, T> CurrentState { get; protected set; }
 
-        public BotState LastState { get; protected set; }
+        public int LastState { get; protected set; }
 
-        public Dictionary<BotState, BasicState> States { get; protected set; }
+        public Dictionary<int, T> States { get; protected set; }
 
         public abstract void Execute();
 
-        public bool SetState(BotState state, bool ignoreExit = false)
+        public bool SetState(int state, bool ignoreExit = false)
         {
             if (CurrentState.Key == state)
             {

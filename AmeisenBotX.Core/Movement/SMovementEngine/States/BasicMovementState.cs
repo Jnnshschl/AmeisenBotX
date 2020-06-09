@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Core.Common;
 
-namespace AmeisenBotX.Core.Statemachine.States
+namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 {
-    public abstract class BasicState : IState
+    public abstract class BasicMovementState : IState
     {
-        public BasicState(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface)
+        public BasicMovementState(StateBasedMovementEngine stateMachine, AmeisenBotConfig config, WowInterface wowInterface)
         {
             StateMachine = stateMachine;
             Config = config;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         internal AmeisenBotConfig Config { get; }
 
-        internal AmeisenBotStateMachine StateMachine { get; }
+        internal StateBasedMovementEngine StateMachine { get; }
 
         internal WowInterface WowInterface { get; }
 

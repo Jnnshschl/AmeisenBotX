@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 
 namespace AmeisenBotX.Core.Statemachine.Utils
@@ -65,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     return true;
                 }
             }
-            else if(CastCallPet != null && CallPetEvent.Run())
+            else if (CastCallPet != null && CallPetEvent.Run())
             {
                 CastCallPet.Invoke();
             }

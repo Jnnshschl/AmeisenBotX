@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (StateMachine.GetNearLootableUnits().Count() > 0)
                 {
-                    StateMachine.SetState(BotState.Looting);
+                    StateMachine.SetState((int)BotState.Looting);
                     return;
                 }
             }
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.CharacterManager.HasFoodInBag())
                     || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasWaterInBag()))
                 {
-                    StateMachine.SetState(BotState.Eating);
+                    StateMachine.SetState((int)BotState.Eating);
                     return;
                 }
             }
@@ -88,21 +88,21 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3)
             {
-                StateMachine.SetState(BotState.Battleground);
+                StateMachine.SetState((int)BotState.Battleground);
                 return;
             }
 
             // we are in a dungeon
             if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
             {
-                StateMachine.SetState(BotState.Dungeon);
+                StateMachine.SetState((int)BotState.Dungeon);
                 return;
             }
 
             // do i need to follow someone
             if (IsUnitToFollowThere())
             {
-                StateMachine.SetState(BotState.Following);
+                StateMachine.SetState((int)BotState.Following);
                 return;
             }
 
@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.CharacterManager.Equipment.Update();
                     if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
                     {
-                        StateMachine.SetState(BotState.Repairing);
+                        StateMachine.SetState((int)BotState.Repairing);
                         return;
                     }
                 }
@@ -131,7 +131,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (IsVendorNpcNear()
                     && WowInterface.HookManager.GetFreeBagSlotCount() < 4)
                 {
-                    StateMachine.SetState(BotState.Selling);
+                    StateMachine.SetState((int)BotState.Selling);
                     return;
                 }
             }

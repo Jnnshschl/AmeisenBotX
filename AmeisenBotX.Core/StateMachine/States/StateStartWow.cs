@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Logging;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -34,17 +33,17 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
             {
-                StateMachine.SetState(BotState.None);
+                StateMachine.SetState((int)BotState.None);
                 return;
             }
 
             if (Config.AutoLogin)
             {
-                StateMachine.SetState(BotState.Login);
+                StateMachine.SetState((int)BotState.Login);
             }
             else
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 

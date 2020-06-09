@@ -10,15 +10,15 @@
         {
             if (Config.AutostartWow)
             {
-                StateMachine.SetState(BotState.StartWow);
+                StateMachine.SetState((int)BotState.StartWow);
             }
             else if (Config.AutoLogin)
             {
-                StateMachine.SetState(BotState.Login);
+                StateMachine.SetState((int)BotState.Login);
             }
             else
             {
-                StateMachine.SetState(BotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
