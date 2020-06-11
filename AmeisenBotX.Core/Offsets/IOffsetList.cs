@@ -18,14 +18,6 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr CameraPointer { get; }
 
-        IntPtr FunctionWorldFrameOnFrameRender { get; }
-
-        IntPtr FunctionWorldRender { get; }
-
-        IntPtr FunctionWorldRenderWorld { get; }
-
-        IntPtr FunctionWorldFrame { get; }
-
         IntPtr CharacterSlotSelected { get; }
 
         IntPtr ChatBuffer { get; }
@@ -114,7 +106,15 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionUnitSetFacing { get; }
 
+        IntPtr FunctionWorldFrame { get; }
+
         IntPtr FunctionWorldFrameGetActiveCamera { get; }
+
+        IntPtr FunctionWorldFrameOnFrameRender { get; }
+
+        IntPtr FunctionWorldRender { get; }
+
+        IntPtr FunctionWorldRenderWorld { get; }
 
         IntPtr GameState { get; }
 

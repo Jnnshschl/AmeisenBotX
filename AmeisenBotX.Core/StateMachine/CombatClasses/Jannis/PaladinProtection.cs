@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (WowInterface.ObjectManager.Target != null)
             {
                 if (CastSpellIfPossible(avengersShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
-                    || CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true)
+                    || (WowInterface.ObjectManager.Target.HealthPercentage < 20.0 && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true))
                     || CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.Target.Guid, true)
                     || CastSpellIfPossible(hammerOfTheRighteousSpell, WowInterface.ObjectManager.Target.Guid, true)
                     || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)

@@ -112,7 +112,15 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr FunctionUnitSetFacing { get; } = new IntPtr(0x72EA50);
 
+        public IntPtr FunctionWorldFrame { get; } = new IntPtr(0x4FA390);
+
         public IntPtr FunctionWorldFrameGetActiveCamera { get; } = new IntPtr(0x4F5960);
+
+        public IntPtr FunctionWorldFrameOnFrameRender { get; } = new IntPtr(0x4FB080);
+
+        public IntPtr FunctionWorldRender { get; } = new IntPtr(0x4F8EA0);
+
+        public IntPtr FunctionWorldRenderWorld { get; } = new IntPtr(0x4FAF90);
 
         public IntPtr GameState { get; } = new IntPtr(0xB6A9E0);
 
@@ -219,13 +227,5 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr ZoneSubText { get; } = new IntPtr(0xBD0784);
 
         public IntPtr ZoneText { get; } = new IntPtr(0xBD0788);
-
-        public IntPtr FunctionWorldFrameOnFrameRender { get; } = new IntPtr(0x4FB080);
-
-        public IntPtr FunctionWorldRender { get; } = new IntPtr(0x4F8EA0);
-
-        public IntPtr FunctionWorldRenderWorld { get; } = new IntPtr(0x4FAF90);
-
-        public IntPtr FunctionWorldFrame { get; } = new IntPtr(0x4FA390);
     }
 }

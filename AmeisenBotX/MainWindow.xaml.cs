@@ -86,6 +86,8 @@ namespace AmeisenBotX
 
         public AmeisenBotOverlay Overlay { get; private set; }
 
+        public bool RenderState { get; set; }
+
         private AmeisenBot AmeisenBot { get; set; }
 
         private bool DrawOverlay { get; set; }
@@ -112,6 +114,12 @@ namespace AmeisenBotX
                 AmeisenBot.ReloadConfig();
                 File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(configWindow.Config, Formatting.Indented));
             }
+        }
+
+        private void ButtonDebug_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
+            RenderState = !RenderState;
         }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
@@ -507,12 +515,9 @@ namespace AmeisenBotX
             DragMove();
         }
 
-        public bool RenderState { get; set; }
-
-        private void ButtonDebug_Click(object sender, RoutedEventArgs e)
+        private void ButtonDbg_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
-            RenderState = !RenderState;
+            AmeisenBot.WowInterface.XMemory.SetWindowParent(AmeisenBot.WowInterface.WowProcess.MainWindowHandle, Process.GetCurrentProcess().MainWindowHandle);
         }
     }
 }

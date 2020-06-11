@@ -68,6 +68,8 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr ReturnValueAddress { get; private set; }
 
+        private Dictionary<IntPtr, byte> RenderFunctionOldMemory { get; }
+
         private WowInterface WowInterface { get; }
 
         public void AcceptBattlegroundInvite()
@@ -452,63 +454,6 @@ namespace AmeisenBotX.Core.Hook
             return (string.Empty, 0);
         }
 
-        private Dictionary<IntPtr, byte> RenderFunctionOldMemory { get; }
-
-        public void SetRenderState(bool renderingEnabled)
-        {
-            WowInterface.XMemory.SuspendMainThread();
-
-            if (renderingEnabled)
-            {
-                EnableFunction(WowInterface.OffsetList.FunctionWorldRender);
-                EnableFunction(WowInterface.OffsetList.FunctionWorldFrame);
-            }
-            else
-            {
-                DisableFunction(WowInterface.OffsetList.FunctionWorldRender);
-                DisableFunction(WowInterface.OffsetList.FunctionWorldFrame);
-            }
-
-            WowInterface.XMemory.ResumeMainThread();
-        }
-
-        private void EnableFunction(IntPtr address)
-        {
-            // check for RET opcode to be present before restoring original function
-            if (RenderFunctionOldMemory.ContainsKey(address)
-                && WowInterface.XMemory.Read(address, out byte opcode)
-                && opcode == 0xC3)
-            {
-                WowInterface.XMemory.PatchMemory(address, RenderFunctionOldMemory[address]);
-            }
-        }
-
-        private void DisableFunction(IntPtr address)
-        {
-            // check wether we already replaced the function or not
-            if (WowInterface.XMemory.Read(address, out byte opcode)
-                && opcode != 0xC3)
-            {
-                SaveOriginalFunctionBytes(address);
-                WowInterface.XMemory.PatchMemory<byte>(address, 0xC3);
-            }
-        }
-
-        private void SaveOriginalFunctionBytes(IntPtr address)
-        {
-            if (WowInterface.XMemory.Read(address, out byte opcode))
-            {
-                if (!RenderFunctionOldMemory.ContainsKey(address))
-                {
-                    RenderFunctionOldMemory.Add(address, opcode);
-                }
-                else
-                {
-                    RenderFunctionOldMemory[address] = opcode;
-                }
-            }
-        }
-
         public WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
         {
             WowUnitReaction reaction = WowUnitReaction.Unknown;
@@ -758,6 +703,26 @@ namespace AmeisenBotX.Core.Hook
         public void SetMaxFps(byte maxFps)
         {
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
+        }
+
+        public void SetRenderState(bool renderingEnabled)
+        {
+            WowInterface.XMemory.SuspendMainThread();
+
+            if (renderingEnabled)
+            {
+                EnableFunction(WowInterface.OffsetList.FunctionWorldRender);
+                EnableFunction(WowInterface.OffsetList.FunctionWorldRenderWorld);
+                EnableFunction(WowInterface.OffsetList.FunctionWorldFrame);
+            }
+            else
+            {
+                DisableFunction(WowInterface.OffsetList.FunctionWorldRender);
+                DisableFunction(WowInterface.OffsetList.FunctionWorldRenderWorld);
+                DisableFunction(WowInterface.OffsetList.FunctionWorldFrame);
+            }
+
+            WowInterface.XMemory.ResumeMainThread();
         }
 
         public bool SetupEndsceneHook()
@@ -1011,6 +976,8 @@ namespace AmeisenBotX.Core.Hook
         {
             if (objectBaseAddress == IntPtr.Zero || functionAddress == IntPtr.Zero) { return null; }
 
+            AmeisenLogger.Instance.Log("HookManager", $"CallObjectFunction objectBaseAddress: 0x{objectBaseAddress.ToInt32():X} functionAddress: 0x{functionAddress.ToInt32():X} readReturnBytes: {readReturnBytes} args: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+
             List<string> asm = new List<string> { $"MOV ECX, {objectBaseAddress}" };
 
             if (args != null)
@@ -1026,6 +993,28 @@ namespace AmeisenBotX.Core.Hook
             asm.Add("RETN");
 
             return InjectAndExecute(asm.ToArray(), readReturnBytes);
+        }
+
+        private void DisableFunction(IntPtr address)
+        {
+            // check wether we already replaced the function or not
+            if (WowInterface.XMemory.Read(address, out byte opcode)
+                && opcode != 0xC3)
+            {
+                SaveOriginalFunctionBytes(address);
+                WowInterface.XMemory.PatchMemory<byte>(address, 0xC3);
+            }
+        }
+
+        private void EnableFunction(IntPtr address)
+        {
+            // check for RET opcode to be present before restoring original function
+            if (RenderFunctionOldMemory.ContainsKey(address)
+                && WowInterface.XMemory.Read(address, out byte opcode)
+                && opcode == 0xC3)
+            {
+                WowInterface.XMemory.PatchMemory(address, RenderFunctionOldMemory[address]);
+            }
         }
 
         private IntPtr GetEndScene()
@@ -1178,6 +1167,21 @@ namespace AmeisenBotX.Core.Hook
             }
 
             return buffs;
+        }
+
+        private void SaveOriginalFunctionBytes(IntPtr address)
+        {
+            if (WowInterface.XMemory.Read(address, out byte opcode))
+            {
+                if (!RenderFunctionOldMemory.ContainsKey(address))
+                {
+                    RenderFunctionOldMemory.Add(address, opcode);
+                }
+                else
+                {
+                    RenderFunctionOldMemory[address] = opcode;
+                }
+            }
         }
     }
 }

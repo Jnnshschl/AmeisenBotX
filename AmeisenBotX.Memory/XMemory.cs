@@ -3,6 +3,7 @@ using Fasm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
@@ -23,7 +24,7 @@ namespace AmeisenBotX.Memory
         ~XMemory()
         {
             CloseHandle(MainThreadHandle);
-            foreach (IntPtr memAlloc in MemoryAllocations.Keys)
+            foreach (IntPtr memAlloc in MemoryAllocations.Keys.ToList())
             {
                 FreeMemory(memAlloc);
             }
@@ -76,12 +77,6 @@ namespace AmeisenBotX.Memory
             Rect rect = new Rect();
             GetWindowRect(windowHandle, ref rect);
             return rect;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IntPtr GetForegroundWindow()
-        {
-            return Win32Imports.GetForegroundWindow();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,6 +136,12 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntPtr GetForegroundWindow()
+        {
+            return Win32Imports.GetForegroundWindow();
+        }
+
         public ProcessThread GetMainThread()
         {
             if (Process.MainWindowHandle == null) { return null; }
@@ -155,6 +156,24 @@ namespace AmeisenBotX.Memory
             }
 
             return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool MemoryProtect(IntPtr address, uint size, MemoryProtection memoryProtection, out MemoryProtection oldMemoryProtection)
+        {
+            return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
+        {
+            uint size = (uint)SizeOf<T>();
+
+            if (MemoryProtect(address, size, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldMemoryProtection))
+            {
+                Write(address, data);
+                MemoryProtect(address, size, oldMemoryProtection, out _);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -266,24 +285,6 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MemoryProtect(IntPtr address, uint size, MemoryProtection memoryProtection, out MemoryProtection oldMemoryProtection)
-        {
-            return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
-        {
-            uint size = (uint)SizeOf<T>();
-
-            if (MemoryProtect(address, size, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldMemoryProtection))
-            {
-                Write(address, data);
-                MemoryProtect(address, size, oldMemoryProtection, out _);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
             if (OpenMainThread())
@@ -329,6 +330,12 @@ namespace AmeisenBotX.Memory
         {
             ++rpmCalls;
             return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+        }
+
+        public void SetWindowParent(IntPtr parentHandle, IntPtr childHandle)
+        {
+            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+            SetParent(childHandle, parentHandle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

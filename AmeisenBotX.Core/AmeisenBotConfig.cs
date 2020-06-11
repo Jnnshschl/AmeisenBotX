@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core
 
         public bool AutocloseWow { get; set; } = false;
 
+        public bool AutoDisableRender { get; set; } = false;
+
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
         public bool AutojoinBg { get; set; } = false;
@@ -17,8 +19,6 @@ namespace AmeisenBotX.Core
         public bool AutoLogin { get; set; } = false;
 
         public bool Autopilot { get; set; } = false;
-
-        public bool AutoDisableRender { get; set; } = false;
 
         public bool AutostartWow { get; set; } = false;
 

@@ -22,8 +22,6 @@ namespace AmeisenBotX.Core.Hook
 
         void AcceptSummon();
 
-        void SetRenderState(bool renderingEnabled);
-
         void CastSpell(string name, bool castOnSelf = false);
 
         void CastSpellById(int spellId);
@@ -145,6 +143,8 @@ namespace AmeisenBotX.Core.Hook
         void SetFacing(WowUnit unit, float angle);
 
         void SetMaxFps(byte maxFps);
+
+        void SetRenderState(bool renderingEnabled);
 
         bool SetupEndsceneHook();
 

@@ -421,6 +421,8 @@ namespace AmeisenBotX
                 textboxConfigName.IsEnabled = false;
                 textboxConfigName.Text = ConfigName;
                 labelHeader.Content = $"AmeisenBotX - {ConfigName}";
+
+                AddDefaultCombatClasses();
             }
             else
             {
@@ -432,7 +434,6 @@ namespace AmeisenBotX
                 checkboxBuiltinCombatClass.Visibility = Visibility.Hidden;
             }
 
-            AddDefaultCombatClasses();
             LoadConfigToUi();
         }
 

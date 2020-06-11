@@ -11,6 +11,10 @@ namespace AmeisenBotX.Memory.Win32
 
         public const int SW_SHOWNOACTIVATE = 4;
 
+        public static int GWL_STYLE = -16;
+
+        public static int WS_CHILD = 0x40000000;
+
         [Flags]
         public enum AllocationType : uint
         {
@@ -96,7 +100,7 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern bool CreateProcess(
             string lpApplicationName,
             string lpCommandLine,
@@ -117,7 +121,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32", SetLastError = true)]
-        public static extern uint GetWindowLong(IntPtr windowHandle, int index);
+        public static extern int GetWindowLong(IntPtr windowHandle, int index);
 
         [DllImport("user32", SetLastError = true)]
         public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
@@ -150,7 +154,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern bool SetLayeredWindowAttributes(IntPtr windowHandle, uint colorKey, uint alpha, uint flags);
 
         [DllImport("user32", SetLastError = true)]
-        public static extern int SetWindowLong(IntPtr windowHandle, int index, IntPtr newLong);
+        public static extern int SetWindowLong(IntPtr windowHandle, int index, int newLong);
 
         [DllImport("user32", SetLastError = true)]
         public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
@@ -161,8 +165,11 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
+
+        [DllImport("user32", SetLastError = true)]
+        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation
