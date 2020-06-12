@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
 
-                    if (distance < 3.0)
+                    if (distance < 6.0)
                     {
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                         RepairActionGo = DateTime.Now + TimeSpan.FromSeconds(1);

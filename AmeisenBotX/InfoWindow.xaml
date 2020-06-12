@@ -31,7 +31,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </Button.Background>
         </Button>
-        <Label Content="AmeisenBotX - Charcter Info" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="0,-2,0,0" FontFamily="Bahnschrift Light">
+        <Label Content="AmeisenBotX - Character Info" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="0,-2,0,0" FontFamily="Bahnschrift Light">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>

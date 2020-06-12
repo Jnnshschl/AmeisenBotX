@@ -43,7 +43,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (!IsAtNpc)
                 {
                     double distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                    if (distance < 3.0)
+
+                    if (distance < 6.0)
                     {
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                         SellActionGo = DateTime.Now + TimeSpan.FromSeconds(1);

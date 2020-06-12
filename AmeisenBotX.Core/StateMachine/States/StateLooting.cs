@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (selectedUnit != null && selectedUnit.IsDead && selectedUnit.IsLootable)
                 {
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.0)
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 6.0)
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
                         WowInterface.MovementEngine.Execute();

@@ -974,9 +974,10 @@ namespace AmeisenBotX.Core.Hook
 
         private byte[] CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null, bool readReturnBytes = false)
         {
-            if (objectBaseAddress == IntPtr.Zero || functionAddress == IntPtr.Zero) { return null; }
+            if (objectBaseAddress == IntPtr.Zero || functionAddress == IntPtr.Zero || !WowInterface.ObjectManager.WowObjects.Any(e => e.BaseAddress == objectBaseAddress)) { return null; }
 
             AmeisenLogger.Instance.Log("HookManager", $"CallObjectFunction objectBaseAddress: 0x{objectBaseAddress.ToInt32():X} functionAddress: 0x{functionAddress.ToInt32():X} readReturnBytes: {readReturnBytes} args: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"CallObjectFunction object: {WowInterface.ObjectManager.WowObjects.FirstOrDefault(e => e.BaseAddress == objectBaseAddress)}", LogLevel.Verbose);
 
             List<string> asm = new List<string> { $"MOV ECX, {objectBaseAddress}" };
 
