@@ -118,7 +118,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 Vector3 positionToGoTo = target.Position; // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetMovementAction(distance > 4 ? MovementAction.Moving : MovementAction.DirectMoving, positionToGoTo);
-                WowInterface.MovementEngine.Execute();
                 return true;
             }
         }

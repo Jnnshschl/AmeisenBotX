@@ -30,14 +30,13 @@ namespace AmeisenBotX.Core.Battleground.States
                     if (!((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
                     {
                         WowGameobject flagObject = flags.First();
-                        if (flagObject != null && flagObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 8)
+                        if (flagObject != null && WowInterface.MovementEngine.IsAtTargetPosition)
                         {
                             WowInterface.HookManager.WowObjectOnRightClick(flagObject);
                         }
                         else
                         {
                             WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, flagObject.Position);
-                            WowInterface.MovementEngine.Execute();
                         }
                     }
                     else

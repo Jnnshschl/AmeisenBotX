@@ -174,8 +174,10 @@ namespace AmeisenBotX.Core.Statemachine
                 WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
             }
 
-            // execute the State
+            // execute the State and Movement
             CurrentState.Value.Execute();
+            WowInterface.MovementEngine.Execute();
+
             OnStateMachineTick?.Invoke();
             AntiAfkEvent.Run();
         }

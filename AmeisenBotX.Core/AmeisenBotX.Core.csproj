@@ -222,7 +222,6 @@
     <Compile Include="Movement\Pathfinding\Objects\PathRequest.cs" />
     <Compile Include="Movement\Pathfinding\Objects\Vector3.cs" />
     <Compile Include="Movement\Settings\MovementSettings.cs" />
-    <Compile Include="Movement\SmartMovementEngine.cs" />
     <Compile Include="Movement\SMovementEngine\Enums\MovementState.cs" />
     <Compile Include="Movement\SMovementEngine\StateBasedMovementEngine.cs" />
     <Compile Include="Movement\SMovementEngine\States\BasicMovementState.cs" />

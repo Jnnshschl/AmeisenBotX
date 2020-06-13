@@ -35,12 +35,9 @@ namespace AmeisenBotX.Core.Battleground.States
                     WowPlayer ownFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(ownFlagCarrierGuid);
                     IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(ownFlagCarrier.Position, 25);
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(ownFlagCarrier.Position) > 10)
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, ownFlagCarrier.Position);
-                        WowInterface.MovementEngine.Execute();
-                    }
-                    else
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, ownFlagCarrier.Position);
+
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
                     {
                         WowPlayer target = nearEnemies.FirstOrDefault();
                         if (target != null)

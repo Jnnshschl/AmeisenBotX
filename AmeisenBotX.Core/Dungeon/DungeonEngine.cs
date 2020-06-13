@@ -204,12 +204,9 @@ namespace AmeisenBotX.Core.Dungeon
         {
             if (CurrentNodes.TryPeek(out DungeonNode node))
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(node.Position) > completionDistance)
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, node.Position);
-                    WowInterface.MovementEngine.Execute();
-                }
-                else
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, node.Position);
+
+                if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
                     DungeonNode dungeonNode = node;
 
@@ -257,7 +254,6 @@ namespace AmeisenBotX.Core.Dungeon
                 if (distance > 0 && distance < 48)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, partyLeader.Position);
-                    WowInterface.MovementEngine.Execute();
                     return true;
                 }
                 else

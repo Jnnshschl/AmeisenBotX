@@ -78,7 +78,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (WowInterface.ObjectManager.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
-                WowInterface.MovementEngine.Execute();
             }
             else
             {
@@ -87,7 +86,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                     // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
                     CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 6);
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
-                    WowInterface.MovementEngine.Execute();
                 }
                 else
                 {

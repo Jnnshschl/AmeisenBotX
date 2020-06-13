@@ -54,13 +54,9 @@ namespace AmeisenBotX.Core.Battleground
 
                 if (target != null)
                 {
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) > 10)
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
-                        WowInterface.MovementEngine.Execute();
-                        return true;
-                    }
-                    else
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
                     {
                         WowInterface.HookManager.TargetGuid(target.Guid);
                         WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);

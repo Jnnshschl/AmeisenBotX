@@ -35,13 +35,9 @@ namespace AmeisenBotX.Core.Battleground.States
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(OwnBasePosition) > 5)
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, OwnBasePosition);
-                    WowInterface.MovementEngine.Execute();
-                    return;
-                }
-                else
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, OwnBasePosition);
+
+                if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
                     BattlegroundEngine.SetState(BattlegroundState.DefendMyself);
                     return;

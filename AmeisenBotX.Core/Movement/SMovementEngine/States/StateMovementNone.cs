@@ -14,22 +14,25 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Execute()
         {
-            double zDiff = StateMachine.TargetPosition.Z - WowInterface.ObjectManager.Player.Position.Z;
+            if (StateMachine.TargetPosition != default && !StateMachine.IsAtTargetPosition)
+            {
+                double zDiff = StateMachine.TargetPosition.Z - WowInterface.ObjectManager.Player.Position.Z;
 
-            if (zDiff > 2)
-            {
-                // target position is above us
-            }
-            else if (zDiff < -2)
-            {
-                // target position is below us
-            }
-            else
-            {
-                // target is on our level
-            }
+                if (zDiff > 2)
+                {
+                    // target position is above us
+                }
+                else if (zDiff < -2)
+                {
+                    // target position is below us
+                }
+                else
+                {
+                    // target is on our level
+                }
 
-            StateMachine.SetState((int)MovementState.Pathfinding);
+                StateMachine.SetState((int)MovementState.Pathfinding);
+            }
         }
 
         public override void Exit()

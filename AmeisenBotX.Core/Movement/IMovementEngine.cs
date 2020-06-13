@@ -6,6 +6,8 @@ namespace AmeisenBotX.Core.Movement
 {
     public interface IMovementEngine
     {
+        bool IsAtTargetPosition { get; }
+
         MovementAction MovementAction { get; }
 
         List<Vector3> Path { get; }

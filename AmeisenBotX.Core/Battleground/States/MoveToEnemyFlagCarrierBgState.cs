@@ -32,12 +32,9 @@ namespace AmeisenBotX.Core.Battleground.States
                     ulong enemyFlagCarrierGuid = ((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).EnemyFlagCarrierPlayer.Guid;
                     WowPlayer enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(enemyFlagCarrierGuid);
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(enemyFlagCarrier.Position) > 10)
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, enemyFlagCarrier.Position);
-                        WowInterface.MovementEngine.Execute();
-                    }
-                    else
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, enemyFlagCarrier.Position);
+
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
                     {
                         if (enemyFlagCarrier != null)
                         {

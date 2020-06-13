@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public override event StateMachineOverride OnStateOverride;
 
+        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < MovementSettings.WaypointCheckThreshold;
+
         public MovementAction MovementAction { get; private set; }
 
         public Queue<Vector3> Nodes { get; private set; }

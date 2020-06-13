@@ -91,7 +91,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, posToGoTo);
-            WowInterface.MovementEngine.Execute();
         }
 
         public override void Exit()
