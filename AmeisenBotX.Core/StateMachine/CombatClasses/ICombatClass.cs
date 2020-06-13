@@ -1,24 +1,21 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public interface ICombatClass
     {
-        string Displayname { get; }
-
-        string Version { get; }
-
         string Author { get; }
+
+        WowClass Class { get; }
+
+        Dictionary<string, dynamic> Configureables { get; set; }
 
         string Description { get; }
 
-        CombatClassRole Role { get; }
-
-        WowClass Class { get; }
+        string Displayname { get; }
 
         bool HandlesMovement { get; }
 
@@ -28,7 +25,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         IWowItemComparator ItemComparator { get; }
 
-        Dictionary<string, dynamic> Configureables { get; set; }
+        List<string> PriorityTargets { get; set; }
+
+        CombatClassRole Role { get; }
+
+        string Version { get; }
+
+        bool WalkBehindEnemy { get; }
 
         void Execute();
 

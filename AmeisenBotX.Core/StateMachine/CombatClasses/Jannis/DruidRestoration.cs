@@ -1,47 +1,45 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class DruidRestoration : ICombatClass
+    public class DruidRestoration : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string rejuvenationSpell = "Rejuvenation";
-        private readonly string lifebloomSpell = "Lifebloom";
-        private readonly string wildGrowthSpell = "Wild Growth";
-        private readonly string regrowthSpell = "Regrowth";
-        private readonly string healingTouchSpell = "Healing Touch";
-        private readonly string nourishSpell = "Nourish";
-        private readonly string treeOfLifeSpell = "Tree of Life";
-        private readonly string markofTheWildSpell = "Mark of the Wild";
-        private readonly string reviveSpell = "Revive";
-        private readonly string tranquilitySpell = "Tranquility";
-        private readonly string innervateSpell = "Innervate";
-        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
-        private readonly string swiftmendSpell = "Swiftmend";
+#pragma warning disable IDE0051
+        private const int deadPartymembersCheckTime = 4;
+        private const string healingTouchSpell = "Healing Touch";
+        private const string innervateSpell = "Innervate";
+        private const string lifebloomSpell = "Lifebloom";
+        private const string markOfTheWildSpell = "Mark of the Wild";
+        private const string naturesSwiftnessSpell = "Nature's Swiftness";
+        private const string nourishSpell = "Nourish";
+        private const string regrowthSpell = "Regrowth";
+        private const string rejuvenationSpell = "Rejuvenation";
+        private const string reviveSpell = "Revive";
+        private const string swiftmendSpell = "Swiftmend";
+        private const string tranquilitySpell = "Tranquility";
+        private const string treeOfLifeSpell = "Tree of Life";
+        private const string wildGrowthSpell = "Wild Growth";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int deadPartymembersCheckTime = 4;
-
-        public DruidRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DruidRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            UseDefaultTargetSelection = false;
+
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { treeOfLifeSpell, () => CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
+            };
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
@@ -50,103 +48,80 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
                 { 5000, healingTouchSpell },
             };
 
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
-            {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
-            };
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => true;
+        public override WowClass Class => WowClass.Druid;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicSpiritComparator();
+        public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Druid Restoration";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => true;
+
+        public override bool IsMelee => false;
+
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
+
+        public override CombatClassRole Role => CombatClassRole.Heal;
+
+        public override string Version => "1.0";
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
-
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public string Displayname => "Druid Restoration";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
-
-        public WowClass Class => WowClass.Druid;
-
-        public CombatClassRole Role => CombatClassRole.Heal;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+                && CastSpellIfPossible(innervateSpell, WowInterface.ObjectManager.PlayerGuid, true))
             {
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercentage < 30
-                && CastSpellIfPossible(innervateSpell, true))
+            if (!NeedToHealSomeone())
             {
                 return;
             }
+        }
 
-            if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
+        private bool NeedToHealSomeone()
+        {
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                HandleTargetSelection(playersThatNeedHealing);
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
-                if (playersThatNeedHealing.Count > 4
-                    && CastSpellIfPossible(tranquilitySpell, true))
+                if (unitsToHeal.Count > 3
+                    && CastSpellIfPossible(tranquilitySpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
-                    return;
+                    return true;
                 }
 
-                WowUnit target = ObjectManager.Target;
+                WowUnit target = WowInterface.ObjectManager.Target;
                 if (target != null)
                 {
-                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-                    List<string> targetBuffs = HookManager.GetBuffs(WowLuaUnit.Target);
-
+                    WowInterface.ObjectManager.UpdateObject(target);
                     if ((target.HealthPercentage < 15
-                            && CastSpellIfPossible(naturesSwiftnessSpell, true))
+                            && CastSpellIfPossible(naturesSwiftnessSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 90
-                            && !targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(rejuvenationSpell, true))
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
+                            && CastSpellIfPossible(rejuvenationSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 85
-                            && !targetBuffs.Any(e => e.Equals(wildGrowthSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(wildGrowthSpell, true))
-                        || (target.HealthPercentage < 85
-                            && !targetBuffs.Any(e => e.Equals(lifebloomSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(reviveSpell, true))
+                            && !WowInterface.ObjectManager.Target.HasBuffByName(wildGrowthSpell)
+                            && CastSpellIfPossible(wildGrowthSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (target.HealthPercentage < 70
-                            && (targetBuffs.Any(e => e.Equals(regrowthSpell, StringComparison.OrdinalIgnoreCase))
-                                || targetBuffs.Any(e => e.Equals(rejuvenationSpell, StringComparison.OrdinalIgnoreCase))
-                            && CastSpellIfPossible(swiftmendSpell, true))))
+                            && (WowInterface.ObjectManager.Target.HasBuffByName(regrowthSpell)
+                                || WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
+                            && CastSpellIfPossible(swiftmendSpell, WowInterface.ObjectManager.TargetGuid, true))))
                     {
-                        return;
+                        return true;
                     }
 
                     double healthDifference = target.MaxHealth - target.Health;
@@ -154,117 +129,27 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            break;
+                            return true;
                         }
                     }
                 }
             }
-            else
-            {
-                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                {
-                    return;
-                }
-            }
+
+            return false;
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
+            if (GroupAuraManager.Tick()
+                || MyAuraManager.Tick()
+                || NeedToHealSomeone()
                 || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                    && HandleDeadPartymembers()))
+                    && HandleDeadPartymembers(reviveSpell)))
             {
                 return;
             }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
-
-            if ((!myBuffs.Any(e => e.Equals(markofTheWildSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(markofTheWildSpell, true))
-                || (!myBuffs.Any(e => e.Equals(treeOfLifeSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(treeOfLifeSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(reviveSpell))
-            {
-                Spells.Add(reviveSpell, CharacterManager.SpellBook.GetSpellByName(reviveSpell));
-            }
-
-            if (Spells[reviveSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(reviveSpell)
-                && Spells[reviveSpell].Costs < ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(reviveSpell);
-                    CooldownManager.SetSpellCooldown(reviveSpell, (int)HookManager.GetSpellCooldown(reviveSpell));
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
-
-            if (target != null)
-            {
-                HookManager.TargetGuid(target.Guid);
-            }
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
-        {
-            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-            groupPlayers.Add(ObjectManager.Player);
-
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
         }
     }
 }

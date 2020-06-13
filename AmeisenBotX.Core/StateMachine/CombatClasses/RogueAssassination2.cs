@@ -6,14 +6,14 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class RogueAssassination2 : ICombatClass
     {
@@ -35,13 +35,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private bool isSneaky = false;
 
-        private bool multipleTargets = false;
-
         private bool standing = false;
 
         private bool wasInStealth = false;
 
-        public RogueAssassination2(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public RogueAssassination2(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -51,6 +49,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             spells = new RogueAssassinSpells(hookManager, objectManager);
         }
 
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Rogue;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Assasination Rogue";
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -59,11 +67,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public IWowItemComparator ItemComparator => new AssassinationItemComparator();
 
-        private CharacterManager CharacterManager { get; }
+        public List<string> PriorityTargets { get; set; }
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public string Version => "1.0";
+
+        public bool WalkBehindEnemy => false;
+
+        private ICharacterManager CharacterManager { get; }
 
         private bool Dancing { get; set; }
 
-        private HookManager HookManager { get; }
+        private IHookManager HookManager { get; }
 
         private Vector3 LastBehindTargetPosition { get; set; }
 
@@ -75,23 +91,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DefaultMovementEngine MovementEngine { get; set; }
 
-        private ObjectManager ObjectManager { get; }
+        private IObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
-
-        public string Displayname => "Assasination Rogue";
-
-        public string Version => "1.0";
-
-        public string Author => "einTyp";
-
-        public string Description => "...";
-
-        public WowClass Class => WowClass.Rogue;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -117,7 +119,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 bool targetDistanceChanged = false;
                 if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
-                    distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
                     LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
@@ -143,8 +145,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (targetDistanceChanged)
                 {
-                    distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
-                    distanceToBehindTarget = LastPlayerPosition.GetDistance2D(LastBehindTargetPosition);
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                    distanceToBehindTarget = LastPlayerPosition.GetDistance(LastBehindTargetPosition);
                 }
 
                 HandleMovement(target);
@@ -177,13 +179,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
             {
-                distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
                 LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
             }
 
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
@@ -191,7 +193,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         hasTargetMoved = true;
                         LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                        distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                     }
                     else
                     {
@@ -283,13 +285,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastBehindTargetPosition);
+                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastBehindTargetPosition);
                     MovementEngine.LoadPath(path);
                     MovementEngine.PostProcessPath();
                 }
                 else
                 {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
                     {
                         CharacterManager.MoveToPosition(positionToGoTo);
 
@@ -314,12 +316,11 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             int targetHealth = (target == null || target.IsDead) ? 0 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
             int targetCount = 0;
-            multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < 100.0)
                     {
                         if (tmpDistance < 6.0)
@@ -343,10 +344,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 HookManager.ClearTarget();
                 newTargetFound = false;
                 target = null;
-            }
-            else if (targetCount > 1)
-            {
-                multipleTargets = true;
             }
 
             if (newTargetFound)
@@ -404,22 +401,22 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             private int comboCnt = 0;
 
-            public RogueAssassinSpells(HookManager hookManager, ObjectManager objectManager)
+            public RogueAssassinSpells(IHookManager hookManager, IObjectManager objectManager)
             {
                 HookManager = hookManager;
                 ObjectManager = objectManager;
-                Player = ObjectManager.Player;
+                Player = ObjectManager?.Player;
                 NextGCDSpell = DateTime.Now;
                 NextCast = DateTime.Now;
             }
 
-            private HookManager HookManager { get; set; }
+            private IHookManager HookManager { get; set; }
 
             private DateTime NextCast { get; set; }
 
             private DateTime NextGCDSpell { get; set; }
 
-            private ObjectManager ObjectManager { get; set; }
+            private IObjectManager ObjectManager { get; set; }
 
             private WowPlayer Player { get; set; }
 
@@ -432,7 +429,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (!ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 Player = ObjectManager.Player;
@@ -631,13 +628,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private bool IsTargetPoisoned()
             {
                 return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("Poison") || e.Contains("poison"));
-            }
-
-            private int UpdateEnergy()
-            {
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
-                Player = ObjectManager.Player;
-                return Player.Energy;
             }
         }
     }

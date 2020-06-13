@@ -3,10 +3,20 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
-    internal class Win32Imports
+    public class Win32Imports
     {
+        public const int STARTF_USESHOWWINDOW = 1;
+
+        public const int SW_SHOWMINNOACTIVE = 7;
+
+        public const int SW_SHOWNOACTIVATE = 4;
+
+        public static int GWL_STYLE = -16;
+
+        public static int WS_CHILD = 0x40000000;
+
         [Flags]
-        public enum AllocationType
+        public enum AllocationType : uint
         {
             Commit = 0x1000,
             Reserve = 0x2000,
@@ -20,16 +30,16 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum MemoryProtection
+        public enum MemoryProtection : uint
         {
+            NoAccess = 0x1,
+            ReadOnly = 0x2,
+            ReadWrite = 0x4,
+            WriteCopy = 0x8,
             Execute = 0x10,
             ExecuteRead = 0x20,
             ExecuteReadWrite = 0x40,
             ExecuteWriteCopy = 0x80,
-            NoAccess = 0x01,
-            ReadOnly = 0x02,
-            ReadWrite = 0x04,
-            WriteCopy = 0x08,
             GuardModifierflag = 0x100,
             NoCacheModifierflag = 0x200,
             WriteCombineModifierflag = 0x400
@@ -38,75 +48,159 @@ namespace AmeisenBotX.Memory.Win32
         [Flags]
         public enum ProcessAccessFlags : uint
         {
-            All = 0x001F0FFF,
-            Terminate = 0x00000001,
-            CreateThread = 0x00000002,
-            VirtualMemoryOperation = 0x00000008,
-            VirtualMemoryRead = 0x00000010,
-            VirtualMemoryWrite = 0x00000020,
-            DuplicateHandle = 0x00000040,
-            CreateProcess = 0x000000080,
-            SetQuota = 0x00000100,
-            SetInformation = 0x00000200,
-            QueryInformation = 0x00000400,
-            QueryLimitedInformation = 0x00001000,
-            Synchronize = 0x00100000
+            All = 0x1F0FFF,
+            Terminate = 0x1,
+            CreateThread = 0x2,
+            VirtualMemoryOperation = 0x8,
+            VirtualMemoryRead = 0x10,
+            VirtualMemoryWrite = 0x20,
+            DuplicateHandle = 0x40,
+            CreateProcess = 0x80,
+            SetQuota = 0x100,
+            SetInformation = 0x200,
+            QueryInformation = 0x400,
+            QueryLimitedInformation = 0x1000,
+            Synchronize = 0x100000
         }
 
         [Flags]
-        public enum ThreadAccess : int
+        public enum ThreadAccess : uint
         {
-            TERMINATE = (0x0001),
-            SUSPEND_RESUME = (0x0002),
-            GET_CONTEXT = (0x0008),
-            SET_CONTEXT = (0x0010),
-            SET_INFORMATION = (0x0020),
-            QUERY_INFORMATION = (0x0040),
-            SET_THREAD_TOKEN = (0x0080),
-            IMPERSONATE = (0x0100),
-            DIRECT_IMPERSONATION = (0x0200)
+            Terminate = 0x1,
+            SuspendResume = 0x2,
+            GetContext = 0x8,
+            SetContext = 0x10,
+            SetInformation = 0x20,
+            QueryInformation = 0x40,
+            SetThreadToken = 0x80,
+            Impersonate = 0x100,
+            DirectImpersonation = 0x200
         }
 
-        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
+        [Flags]
+        public enum WindowFlags : uint
+        {
+            NoSize = 0x1,
+            NoMove = 0x2,
+            NoZOrder = 0x4,
+            NoRedraw = 0x8,
+            NoActivate = 0x10,
+            DrawFrame = 0x20,
+            FrameChanged = 0x20,
+            ShowWindow = 0x40,
+            HideWindow = 0x80,
+            NoCopyBits = 0x100,
+            NoOwnerZOrder = 0x200,
+            NoReposition = 0x200,
+            NoSendChanging = 0x400,
+            Defererase = 0x2000,
+            AsyncWindowPos = 0x4000
+        }
+
+        [DllImport("kernel32", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
-        [DllImport("user32.dll")]
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern bool CreateProcess(
+            string lpApplicationName,
+            string lpCommandLine,
+            IntPtr lpProcessAttributes,
+            IntPtr lpThreadAttributes,
+            bool bInheritHandles,
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            [In] ref StartupInfo lpStartupInfo,
+            out ProcessInformation lpProcessInformation
+        );
+
+        [DllImport("dwmapi", SetLastError = true)]
+        public static extern void DwmExtendFrameIntoClientArea(IntPtr windowHandle, ref Margins margins);
+
+        [DllImport("user32", SetLastError = true)]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32", SetLastError = true)]
+        public static extern int GetWindowLong(IntPtr windowHandle, int index);
+
+        [DllImport("user32", SetLastError = true)]
         public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32", SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool MoveWindow(IntPtr windowHandle, int x, int y, int width, int height, bool repaint);
+        [DllImport("msvcrt", EntryPoint = "memset", SetLastError = false)]
+        public static extern IntPtr MemSet(IntPtr dest, int c, int count);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesRead);
+
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtResumeThread(IntPtr threadHandle, out IntPtr suspendCount);
+
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtSuspendThread(IntPtr threadHandle, out IntPtr previousSuspendCount);
+
+        [DllImport("ntdll", SetLastError = true)]
+        public static extern bool NtWriteVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
+
+        [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool inheritHandle, int processId);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr OpenThread(ThreadAccess threadAccess, bool inheritHandle, uint threadId);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(IntPtr processHandle, IntPtr baseAddress, IntPtr buffer, int size, out IntPtr numberOfBytesRead);
+        [DllImport("user32", SetLastError = true)]
+        public static extern bool SetLayeredWindowAttributes(IntPtr windowHandle, uint colorKey, uint alpha, uint flags);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(IntPtr processHandle, IntPtr baseAddress, [Out] byte[] buffer, int size, out IntPtr numberOfBytesRead);
+        [DllImport("user32", SetLastError = true)]
+        public static extern int SetWindowLong(IntPtr windowHandle, int index, int newLong);
 
-        [DllImport("kernel32.dll")]
-        public static extern int ResumeThread(IntPtr threadHandle);
+        [DllImport("user32", SetLastError = true)]
+        public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
-        [DllImport("kernel32.dll")]
-        public static extern uint SuspendThread(IntPtr threadHandle);
-
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtection memoryProtection);
 
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr processHandle, IntPtr baseAddress, IntPtr buffer, int size, out IntPtr numberOfBytesWritten);
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
+        [DllImport("user32", SetLastError = true)]
+        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ProcessInformation
+        {
+            public IntPtr hProcess;
+            public IntPtr hThread;
+            public int dwProcessId;
+            public int dwThreadId;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct StartupInfo
+        {
+            public int cb;
+            public string lpReserved;
+            public string lpDesktop;
+            public string lpTitle;
+            public int dwX;
+            public int dwY;
+            public int dwXSize;
+            public int dwYSize;
+            public int dwXCountChars;
+            public int dwYCountChars;
+            public int dwFillAttribute;
+            public int dwFlags;
+            public short wShowWindow;
+            public short cbReserved2;
+            public IntPtr lpReserved2;
+            public IntPtr hStdInput;
+            public IntPtr hStdOutput;
+            public IntPtr hStdError;
+        }
     }
 }

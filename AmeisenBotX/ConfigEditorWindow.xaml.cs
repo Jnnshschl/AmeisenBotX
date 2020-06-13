@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Views;
 using Microsoft.Win32;
 using System;
-using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -11,46 +11,52 @@ using System.Windows.Media;
 
 namespace AmeisenBotX
 {
-    /// <summary>
-    /// Interaktionslogik für ConfigEditorWindow.xaml
-    /// </summary>
     public partial class ConfigEditorWindow : Window
     {
-        public SolidColorBrush normalBorderBrush;
         public SolidColorBrush errorBorderBrush;
+        public SolidColorBrush normalBorderBrush;
 
-        public ConfigEditorWindow(string dataDir, AmeisenBotConfig initialConfig = null)
+        public ConfigEditorWindow(string dataDir, AmeisenBot ameisenBot, AmeisenBotConfig initialConfig = null, string initialConfigName = "")
         {
             InitializeComponent();
 
             DataDir = dataDir;
             NewConfig = initialConfig == null;
             Config = initialConfig ?? new AmeisenBotConfig();
+            AmeisenBot = ameisenBot;
+            ConfigName = initialConfigName;
+
+            SaveConfig = NewConfig;
 
             normalBorderBrush = new SolidColorBrush((Color)FindResource("DarkBorder"));
             errorBorderBrush = new SolidColorBrush((Color)FindResource("DarkError"));
         }
 
-        public AmeisenBotConfig Config { get; private set; }
+        public AmeisenBot AmeisenBot { get; private set; }
 
-        public string DataDir { get; }
+        public AmeisenBotConfig Config { get; private set; }
 
         public string ConfigName { get; private set; }
 
+        public string DataDir { get; }
+
         public bool NewConfig { get; }
 
-        private void ButtonAbort_Click(object sender, RoutedEventArgs e)
-        {
-            ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
-            confirmWindow.ShowDialog();
+        public bool SaveConfig { get; private set; }
 
-            if (confirmWindow.OkayPressed)
+        private void AddDefaultCombatClasses()
+        {
+            comboboxBuiltInCombatClass.Items.Add("None");
+
+            foreach (ICombatClass combatClass in AmeisenBot.CombatClasses)
             {
-                Close();
+                comboboxBuiltInCombatClass.Items.Add(combatClass.ToString());
             }
+
+            comboboxBuiltInCombatClass.SelectedIndex = 0;
         }
 
-        private void ButtonOkay_Click(object sender, RoutedEventArgs e)
+        private void ButtonDone_Click(object sender, RoutedEventArgs e)
         {
             if (ValidateFields())
             {
@@ -60,7 +66,7 @@ namespace AmeisenBotX
                     Username = textboxUsername.Text,
                     Password = textboxPassword.Password,
                     CharacterSlot = int.Parse(textboxCharacterSlot.Text),
-                    BuiltInCombatClassName = comboboxBuiltInCombatClass.Text,
+                    BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty,
                     UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true),
                     CustomCombatClassFile = textboxCombatClassFile.Text,
                     AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false),
@@ -87,135 +93,158 @@ namespace AmeisenBotX
                     NameshServerPort = int.Parse(textboxNavmeshServerPort.Text)
                 };
 
+                SaveConfig = true;
                 Close();
             }
         }
 
-        private bool ValidateFields()
+        private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
-            bool failed = false;
-            failed = ValidateConfigName(failed);
-            failed = ValidateAutoLogin(failed);
-            failed = ValidateAutostartWow(failed);
-            failed = ValidateSpecificFollow(failed);
-            failed = ValidateCombatClass(failed);
-            failed = ValidateNavmeshServer(failed);
-            return !failed;
+            ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
+            confirmWindow.ShowDialog();
+
+            if (confirmWindow.OkayPressed)
+            {
+                Close();
+            }
         }
 
-        private bool ValidateNavmeshServer(bool failed)
+        private void ButtonOpenCombatClassFile_Click(object sender, RoutedEventArgs e)
         {
-            if (textboxNavmeshServerIp.Text.Length == 0
-                || !IPAddress.TryParse(textboxNavmeshServerIp.Text, out IPAddress _))
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                textboxNavmeshServerIp.BorderBrush = errorBorderBrush;
-                failed = true;
-            }
-            else
-            {
-                textboxNavmeshServerIp.BorderBrush = normalBorderBrush;
-            }
+                Filter = "C# Files|*.cs"
+            };
 
-            if (textboxNavmeshServerPort.Text.Length == 0
-                || !int.TryParse(textboxNavmeshServerPort.Text, out int port)
-                || port < 0
-                || port > ushort.MaxValue)
+            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
-                textboxNavmeshServerPort.BorderBrush = errorBorderBrush;
-                failed = true;
+                textboxCombatClassFile.Text = openFileDialog.FileName;
             }
-            else
-            {
-                textboxNavmeshServerPort.BorderBrush = normalBorderBrush;
-            }
-
-            return failed;
         }
 
-        private bool ValidateConfigName(bool failed)
+        private void ButtonOpenWowExe_Click(object sender, RoutedEventArgs e)
         {
-            Regex regex = new Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$");
-
-            if (textboxConfigName.Text.Length == 0
-                || regex.IsMatch(textboxConfigName.Text)
-                || Directory.Exists(Path.Combine(DataDir, textboxConfigName.Text)))
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                textboxConfigName.BorderBrush = errorBorderBrush;
-                failed = true;
-            }
-            else
-            {
-                textboxConfigName.BorderBrush = normalBorderBrush;
-            }
+                Filter = "WoW Executeable|*.exe"
+            };
 
-            return failed;
+            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
+            {
+                textboxWowPath.Text = openFileDialog.FileName;
+            }
         }
 
-        private bool ValidateAutostartWow(bool failed)
+        private void CheckboxAutoStartWow_Checked(object sender, RoutedEventArgs e)
         {
-            if (checkboxAutoStartWow.IsChecked.GetValueOrDefault(false))
-            {
-                if (textboxWowPath.Text.Length == 0)
-                {
-                    textboxConfigName.BorderBrush = errorBorderBrush;
-                    failed = true;
-                }
-                else
-                {
-                    textboxConfigName.BorderBrush = normalBorderBrush;
-                }
-            }
-
-            return failed;
+            textboxWowPath.IsEnabled = true;
+            buttonOpenWowExe.IsEnabled = true;
         }
 
-        private bool ValidateSpecificFollow(bool failed)
+        private void CheckboxAutoStartWow_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false))
-            {
-                if (textboxFollowSpecificCharacterName.Text.Length == 0)
-                {
-                    textboxFollowSpecificCharacterName.BorderBrush = errorBorderBrush;
-                    failed = true;
-                }
-                else
-                {
-                    textboxFollowSpecificCharacterName.BorderBrush = normalBorderBrush;
-                }
-            }
-
-            return failed;
+            textboxWowPath.IsEnabled = false;
+            textboxWowPath.Text = string.Empty;
+            buttonOpenWowExe.IsEnabled = false;
         }
 
-        private bool ValidateCombatClass(bool failed)
+        private void CheckboxBuiltinCombatClass_Checked(object sender, RoutedEventArgs e)
         {
-            if (checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(false))
-            {
-                if (comboboxBuiltInCombatClass.Text.Length == 0)
-                {
-                    comboboxBuiltInCombatClass.BorderBrush = errorBorderBrush;
-                    failed = true;
-                }
-                else
-                {
-                    comboboxBuiltInCombatClass.BorderBrush = normalBorderBrush;
-                }
-            }
+            labelCombatClassHeader.Content = "Select CombatClass:";
+            buttonOpenCombatClassFile.Visibility = Visibility.Hidden;
+            textboxCombatClassFile.Visibility = Visibility.Hidden;
+            comboboxBuiltInCombatClass.Visibility = Visibility.Visible;
+        }
 
-            if (checkboxCustomCombatClass.IsChecked.GetValueOrDefault(false))
-            {
-                if (textboxCombatClassFile.Text.Length == 0)
-                {
-                    textboxCombatClassFile.BorderBrush = errorBorderBrush;
-                    failed = true;
-                }
-                else
-                {
-                    textboxCombatClassFile.BorderBrush = normalBorderBrush;
-                }
-            }
+        private void CheckboxCustomCombatClass_Checked(object sender, RoutedEventArgs e)
+        {
+            labelCombatClassHeader.Content = "CombatClass File:";
+            buttonOpenCombatClassFile.Visibility = Visibility.Visible;
+            textboxCombatClassFile.Visibility = Visibility.Visible;
+            comboboxBuiltInCombatClass.Visibility = Visibility.Hidden;
+        }
 
-            return failed;
+        private void CheckboxFollowSpecificCharacter_Checked(object sender, RoutedEventArgs e)
+        {
+            textboxFollowSpecificCharacterName.IsEnabled = true;
+        }
+
+        private void CheckboxFollowSpecificCharacter_Unchecked(object sender, RoutedEventArgs e)
+        {
+            textboxFollowSpecificCharacterName.IsEnabled = false;
+            textboxFollowSpecificCharacterName.Text = string.Empty;
+        }
+
+        private void LoadConfigToUi()
+        {
+            textboxUsername.Text = Config.Username;
+            textboxPassword.Password = Config.Password;
+            textboxCharacterSlot.Text = Config.CharacterSlot.ToString();
+            comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
+            checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
+            textboxCombatClassFile.Text = Config.CustomCombatClassFile;
+            checkboxAvoidAoe.IsChecked = Config.AutoDodgeAoeSpells;
+            checkboxAutoStartWow.IsChecked = Config.AutostartWow;
+            checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
+            checkboxAutoLogin.IsChecked = Config.AutoLogin;
+            checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
+            checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
+            checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
+            checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
+            checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
+            checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
+            checkboxSaveWowWindowPosition.IsChecked = Config.SaveWowWindowPosition;
+            checkboxSaveBotWindowPosition.IsChecked = Config.SaveBotWindowPosition;
+            textboxWowPath.Text = Config.PathToWowExe;
+            textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
+            checkboxLooting.IsChecked = Config.LootUnits;
+            sliderMinFollowDistance.Value = Config.MinFollowDistance;
+            sliderMaxFollowDistance.Value = Config.MaxFollowDistance;
+            sliderMaxFps.Value = Config.MaxFps;
+            sliderMaxFpsCombat.Value = Config.MaxFpsCombat;
+            sliderLootRadius.Value = Math.Round(Config.LootUnitsRadius);
+            textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
+            textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
+        }
+
+        private void SliderLootRadius_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (labelLootRadius != null)
+            {
+                labelLootRadius.Content = $"Loot Radius: {Math.Round(e.NewValue)}m";
+            }
+        }
+
+        private void SliderMaxFollowDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (labelMaxFollowDistance != null)
+            {
+                labelMaxFollowDistance.Content = $"Max Follow Distance: {Math.Round(e.NewValue)}m";
+            }
+        }
+
+        private void SliderMaxFps_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (labelMaxFps != null)
+            {
+                labelMaxFps.Content = $"Max FPS: {Math.Round(e.NewValue)}";
+            }
+        }
+
+        private void SliderMaxFpsCombat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (labelMaxFpsCombat != null)
+            {
+                labelMaxFpsCombat.Content = $"Max FPS Combat: {Math.Round(e.NewValue)}";
+            }
+        }
+
+        private void SliderMinFollowDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (labelMinFollowDistance != null)
+            {
+                labelMinFollowDistance.Content = $"Min Follow Distance: {Math.Round(e.NewValue)}m";
+            }
         }
 
         private bool ValidateAutoLogin(bool failed)
@@ -254,79 +283,135 @@ namespace AmeisenBotX
                 {
                     textboxCharacterSlot.BorderBrush = normalBorderBrush;
                 }
-
             }
 
             return failed;
         }
 
-        private void ButtonOpenWowExe_Click(object sender, RoutedEventArgs e)
+        private bool ValidateAutostartWow(bool failed)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            if (checkboxAutoStartWow.IsChecked.GetValueOrDefault(false))
             {
-                Filter = "WoW Executeable|*.exe"
-            };
-
-            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
-            {
-                textboxWowPath.Text = openFileDialog.FileName;
+                if (textboxWowPath.Text.Length == 0)
+                {
+                    textboxConfigName.BorderBrush = errorBorderBrush;
+                    failed = true;
+                }
+                else
+                {
+                    textboxConfigName.BorderBrush = normalBorderBrush;
+                }
             }
+
+            return failed;
         }
 
-        private void CheckboxAutoStartWow_Checked(object sender, RoutedEventArgs e)
+        private bool ValidateCombatClass(bool failed)
         {
-            textboxWowPath.IsEnabled = true;
-            buttonOpenWowExe.IsEnabled = true;
-        }
-
-        private void CheckboxAutoStartWow_Unchecked(object sender, RoutedEventArgs e)
-        {
-            textboxWowPath.IsEnabled = false;
-            textboxWowPath.Text = string.Empty;
-            buttonOpenWowExe.IsEnabled = false;
-        }
-
-        private void CheckboxFollowSpecificCharacter_Checked(object sender, RoutedEventArgs e)
-        {
-            textboxFollowSpecificCharacterName.IsEnabled = true;
-        }
-
-        private void CheckboxFollowSpecificCharacter_Unchecked(object sender, RoutedEventArgs e)
-        {
-            textboxFollowSpecificCharacterName.IsEnabled = false;
-            textboxFollowSpecificCharacterName.Text = string.Empty;
-        }
-
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
-
-        private void CheckboxBuiltinCombatClass_Checked(object sender, RoutedEventArgs e)
-        {
-            labelCombatClassHeader.Content = "Select CombatClass:";
-            buttonOpenCombatClassFile.Visibility = Visibility.Hidden;
-            textboxCombatClassFile.Visibility = Visibility.Hidden;
-            comboboxBuiltInCombatClass.Visibility = Visibility.Visible;
-        }
-
-        private void CheckboxCustomCombatClass_Checked(object sender, RoutedEventArgs e)
-        {
-            labelCombatClassHeader.Content = "CombatClass File:";
-            buttonOpenCombatClassFile.Visibility = Visibility.Visible;
-            textboxCombatClassFile.Visibility = Visibility.Visible;
-            comboboxBuiltInCombatClass.Visibility = Visibility.Hidden;
-        }
-
-        private void ButtonOpenCombatClassFile_Click(object sender, RoutedEventArgs e)
-        {
-
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            if (checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(false))
             {
-                Filter = "C# Files|*.cs"
-            };
-
-            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
-            {
-                textboxCombatClassFile.Text = openFileDialog.FileName;
+                if (comboboxBuiltInCombatClass.Text.Length == 0)
+                {
+                    comboboxBuiltInCombatClass.BorderBrush = errorBorderBrush;
+                    failed = true;
+                }
+                else
+                {
+                    comboboxBuiltInCombatClass.BorderBrush = normalBorderBrush;
+                }
             }
+
+            if (checkboxCustomCombatClass.IsChecked.GetValueOrDefault(false))
+            {
+                if (textboxCombatClassFile.Text.Length == 0)
+                {
+                    textboxCombatClassFile.BorderBrush = errorBorderBrush;
+                    failed = true;
+                }
+                else
+                {
+                    textboxCombatClassFile.BorderBrush = normalBorderBrush;
+                }
+            }
+
+            return failed;
+        }
+
+        private bool ValidateConfigName(bool failed)
+        {
+            Regex regex = new Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$");
+
+            if (textboxConfigName.Text.Length == 0
+                || regex.IsMatch(textboxConfigName.Text))
+            {
+                textboxConfigName.BorderBrush = errorBorderBrush;
+                failed = true;
+            }
+            else
+            {
+                textboxConfigName.BorderBrush = normalBorderBrush;
+            }
+
+            return failed;
+        }
+
+        private bool ValidateFields()
+        {
+            bool failed = false;
+            failed = ValidateConfigName(failed);
+            failed = ValidateAutoLogin(failed);
+            failed = ValidateAutostartWow(failed);
+            failed = ValidateSpecificFollow(failed);
+            // failed = ValidateCombatClass(failed);
+            failed = ValidateNavmeshServer(failed);
+            return !failed;
+        }
+
+        private bool ValidateNavmeshServer(bool failed)
+        {
+            if (textboxNavmeshServerIp.Text.Length == 0
+                || !IPAddress.TryParse(textboxNavmeshServerIp.Text, out IPAddress _))
+            {
+                textboxNavmeshServerIp.BorderBrush = errorBorderBrush;
+                failed = true;
+            }
+            else
+            {
+                textboxNavmeshServerIp.BorderBrush = normalBorderBrush;
+            }
+
+            if (textboxNavmeshServerPort.Text.Length == 0
+                || !int.TryParse(textboxNavmeshServerPort.Text, out int port)
+                || port < 0
+                || port > ushort.MaxValue)
+            {
+                textboxNavmeshServerPort.BorderBrush = errorBorderBrush;
+                failed = true;
+            }
+            else
+            {
+                textboxNavmeshServerPort.BorderBrush = normalBorderBrush;
+            }
+
+            return failed;
+        }
+
+        private bool ValidateSpecificFollow(bool failed)
+        {
+            if (checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false))
+            {
+                if (textboxFollowSpecificCharacterName.Text.Length == 0)
+                {
+                    textboxFollowSpecificCharacterName.BorderBrush = errorBorderBrush;
+                    failed = true;
+                }
+                else
+                {
+                    textboxFollowSpecificCharacterName.BorderBrush = normalBorderBrush;
+                }
+            }
+
+            return failed;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -334,112 +419,27 @@ namespace AmeisenBotX
             if (!NewConfig)
             {
                 textboxConfigName.IsEnabled = false;
+                textboxConfigName.Text = ConfigName;
+                labelHeader.Content = $"AmeisenBotX - {ConfigName}";
+
+                AddDefaultCombatClasses();
+            }
+            else
+            {
+                buttonOpenCombatClassFile.Visibility = Visibility.Hidden;
+                comboboxBuiltInCombatClass.Visibility = Visibility.Hidden;
+                checkboxCustomCombatClass.Visibility = Visibility.Hidden;
+                labelCombatClassHeader.Visibility = Visibility.Hidden;
+                textboxCombatClassFile.Visibility = Visibility.Hidden;
+                checkboxBuiltinCombatClass.Visibility = Visibility.Hidden;
             }
 
-            AddDefaultCombatClasses();
             LoadConfigToUi();
         }
 
-        private void LoadConfigToUi()
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            textboxUsername.Text = Config.Username;
-            textboxPassword.Password = Config.Password;
-            textboxCharacterSlot.Text = Config.CharacterSlot.ToString();
-            comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
-            checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
-            textboxCombatClassFile.Text = Config.CustomCombatClassFile;
-            checkboxAvoidAoe.IsChecked = Config.AutoDodgeAoeSpells;
-            checkboxAutoStartWow.IsChecked = Config.AutostartWow;
-            checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
-            checkboxAutoLogin.IsChecked = Config.AutoLogin;
-            checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
-            checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
-            checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
-            checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
-            checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
-            checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
-            checkboxSaveWowWindowPosition.IsChecked = Config.SaveWowWindowPosition;
-            checkboxSaveBotWindowPosition.IsChecked = Config.SaveBotWindowPosition;
-            textboxWowPath.Text = Config.PathToWowExe;
-            textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
-            checkboxLooting.IsChecked = Config.LootUnits;
-            sliderMinFollowDistance.Value = Config.MinFollowDistance;
-            sliderMaxFollowDistance.Value = Config.MaxFollowDistance;
-            sliderMaxFps.Value = Config.MaxFps;
-            sliderMaxFpsCombat.Value = Config.MaxFpsCombat;
-            sliderLootRadius.Value = Math.Round(Config.LootUnitsRadius);
-            textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
-            textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
-        }
-
-        private void AddDefaultCombatClasses()
-        {
-            comboboxBuiltInCombatClass.Items.Add("None");
-            comboboxBuiltInCombatClass.Items.Add("WarriorArms");
-            comboboxBuiltInCombatClass.Items.Add("DeathknightBlood");
-            comboboxBuiltInCombatClass.Items.Add("DeathknightUnholy");
-            comboboxBuiltInCombatClass.Items.Add("DeathknightFrost");
-            comboboxBuiltInCombatClass.Items.Add("WarriorFury");
-            comboboxBuiltInCombatClass.Items.Add("PaladinHoly");
-            comboboxBuiltInCombatClass.Items.Add("PaladinRetribution");
-            comboboxBuiltInCombatClass.Items.Add("PaladinProtection");
-            comboboxBuiltInCombatClass.Items.Add("MageArcane");
-            comboboxBuiltInCombatClass.Items.Add("MageFire");
-            comboboxBuiltInCombatClass.Items.Add("HunterBeastmastery");
-            comboboxBuiltInCombatClass.Items.Add("HunterMarksmanship");
-            comboboxBuiltInCombatClass.Items.Add("HunterSurvival");
-            comboboxBuiltInCombatClass.Items.Add("PriestHoly");
-            comboboxBuiltInCombatClass.Items.Add("PriestDiscipline");
-            comboboxBuiltInCombatClass.Items.Add("PriestShadow"); 
-            comboboxBuiltInCombatClass.Items.Add("WarlockAffliction");
-            comboboxBuiltInCombatClass.Items.Add("WarlockDemonology");
-            comboboxBuiltInCombatClass.Items.Add("WarlockDestruction");
-            comboboxBuiltInCombatClass.Items.Add("DruidRestoration");
-            comboboxBuiltInCombatClass.Items.Add("DruidBalance");
-            comboboxBuiltInCombatClass.Items.Add("RogueAssasination");
-            comboboxBuiltInCombatClass.Items.Add("ShamanElemental");
-            comboboxBuiltInCombatClass.Items.Add("ShamanRestoration");
-            comboboxBuiltInCombatClass.SelectedIndex = 0;
-        }
-
-        private void SliderMinFollowDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (labelMinFollowDistance != null)
-            {
-                labelMinFollowDistance.Content = $"Min Follow Distance: {Math.Round(e.NewValue)}m";
-            }
-        }
-
-        private void SliderMaxFollowDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (labelMaxFollowDistance != null)
-            {
-                labelMaxFollowDistance.Content = $"Max Follow Distance: {Math.Round(e.NewValue)}m";
-            }
-        }
-
-        private void SliderLootRadius_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (labelLootRadius != null)
-            {
-                labelLootRadius.Content = $"Loot Radius: {Math.Round(e.NewValue)}m";
-            }
-        }
-
-        private void SliderMaxFps_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (labelMaxFps != null)
-            {
-                labelMaxFps.Content = $"Max FPS: {Math.Round(e.NewValue)}";
-            }
-        }
-
-        private void SliderMaxFpsCombat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (labelMaxFpsCombat != null)
-            {
-                labelMaxFpsCombat.Content = $"Max FPS Combat: {Math.Round(e.NewValue)}";
-            }
+            DragMove();
         }
     }
 }

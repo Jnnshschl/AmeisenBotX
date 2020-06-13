@@ -1,85 +1,104 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateGhost : State
+    public class StateGhost : BasicState
     {
-        public StateGhost(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateGhost(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            OffsetList = offsetList;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
+            PortalSearchEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.GhostPortalSearchMs));
         }
 
-        private CharacterManager CharacterManager { get; }
+        public Vector3 CorpsePosition { get; private set; }
 
-        private AmeisenBotConfig Config { get; }
+        public bool NeedToEnterPortal { get; private set; }
 
-        private HookManager HookManager { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IOffsetList OffsetList { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
+        public TimegatedEvent PortalSearchEvent { get; private set; }
 
         public override void Enter()
         {
-            WowUnit spiritHealer = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Name.ToUpper().Contains("SPIRIT HEALER"));
-
-            if (spiritHealer != null)
-            {
-                HookManager.RightClickUnit(spiritHealer);
-            }
+            // WowUnit spiritHealer = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Name.ToUpper().Contains("SPIRIT HEALER"));
+            //
+            // if (spiritHealer != null)
+            // {
+            //     WowInterface.HookManager.UnitOnRightClick(spiritHealer);
+            // }
         }
 
         public override void Execute()
         {
-            if (ObjectManager.Player.Health > 1)
+            if (WowInterface.ObjectManager.Player.Health > 1)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
 
-            if (AmeisenBotStateMachine.IsOnBattleground())
+            // first step, determine our corpse/portal position
+            if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))
             {
-                // just wait for the mass ress
+                // we are on a battleground just wait for the mass ress
                 return;
             }
-
-            if (AmeisenBotStateMachine.XMemory.ReadStruct(OffsetList.CorpsePosition, out Vector3 corpsePosition)
-                && ObjectManager.Player.Position.GetDistance(corpsePosition) > 16)
+            else if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap) && !StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
             {
-                MovementEngine.SetState(MovementEngineState.Moving, corpsePosition);
-                MovementEngine.Execute();
+                // we died inside a dungeon but are no longer on a dungeon map, we need to go to its portal
+
+                if (PortalSearchEvent.Run())
+                {
+                    // search for nearby portals
+                    WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
+                        .OfType<WowGameobject>()
+                        .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                        .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.GhostPortalScanThreshold);
+
+                    if (nearestPortal != null)
+                    {
+                        CorpsePosition = nearestPortal.Position;
+                        NeedToEnterPortal = true;
+                    }
+                    else
+                    {
+                        CorpsePosition = StateMachine.LastDiedPosition;
+                        NeedToEnterPortal = false;
+                    }
+                }
             }
             else
             {
-                HookManager.RetrieveCorpse();
+                WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
+                CorpsePosition = corpsePosition;
+            }
+
+            // step two, move to the corpse/portal
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
+            }
+            else
+            {
+                if (NeedToEnterPortal)
+                {
+                    // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
+                    CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 6);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
+                }
+                else
+                {
+                    // if we died normally, just resurrect
+                    WowInterface.HookManager.RetrieveCorpse();
+                }
             }
         }
 
         public override void Exit()
         {
-
+            CorpsePosition = default;
+            NeedToEnterPortal = false;
         }
     }
 }

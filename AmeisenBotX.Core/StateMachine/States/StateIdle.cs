@@ -1,140 +1,143 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Event;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateIdle : State
+    public class StateIdle : BasicState
     {
-        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, EventHookManager eventHookManager, ICombatClass combatClass, Queue<ulong> unitLootList) : base(stateMachine)
+        public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            OffsetList = offsetList;
-            ObjectManager = objectManager;
-            HookManager = hookManager;
-            EventHookManager = eventHookManager;
-            CharacterManager = characterManager;
-            CombatClass = combatClass;
-            UnitLootList = unitLootList;
+            FirstStart = true;
         }
 
-        private CharacterManager CharacterManager { get; }
-
-        private ICombatClass CombatClass { get; }
-
-        private AmeisenBotConfig Config { get; }
-
-        private EventHookManager EventHookManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IOffsetList OffsetList { get; }
-
-        private DateTime LastRepairCheck { get; set; }
+        public bool FirstStart { get; set; }
 
         private DateTime LastBagSlotCheck { get; set; }
 
-        private Queue<ulong> UnitLootList { get; }
+        private DateTime LastEatCheck { get; set; }
+
+        private DateTime LastLoot { get; set; }
+
+        private DateTime LastRepairCheck { get; set; }
 
         public override void Enter()
         {
-            // first start
-            if (!HookManager.IsWoWHooked)
+            while (!WowInterface.ObjectManager.IsWorldLoaded)
             {
-                AmeisenBotStateMachine.XMemory.ReadString(OffsetList.PlayerName, Encoding.ASCII, out string playerName);
-                AmeisenBotStateMachine.PlayerName = playerName;
-
-                HookManager.SetupEndsceneHook();
-                HookManager.SetMaxFps((byte)Config.MaxFps);
-
-                EventHookManager.Start();
-
-                CharacterManager.UpdateAll();
+                WowInterface.ObjectManager.RefreshIsWorldLoaded();
+                Task.Delay(1).Wait();
             }
+
+            if (FirstStart)
+            {
+                FirstStart = false;
+                WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
+
+                WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
+                StateMachine.PlayerName = playerName;
+
+                if (!WowInterface.EventHookManager.IsActive)
+                {
+                    WowInterface.EventHookManager.Start();
+                }
+            }
+
+            WowInterface.CharacterManager.UpdateAll();
+            WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
+            WowInterface.HookManager.EnableClickToMove();
         }
 
         public override void Execute()
         {
-            CheckForBattlegroundInvites();
+            if (Config.AutojoinBg)
+            {
+                CheckForBattlegroundInvites();
+            }
+
+            // do we need to loot stuff
+            if (DateTime.Now - LastLoot > TimeSpan.FromSeconds(1))
+            {
+                LastLoot = DateTime.Now;
+
+                if (StateMachine.GetNearLootableUnits().Count() > 0)
+                {
+                    StateMachine.SetState((int)BotState.Looting);
+                    return;
+                }
+            }
+
+            // do we need to eat something
+            if (DateTime.Now - LastEatCheck > TimeSpan.FromSeconds(2))
+            {
+                LastEatCheck = DateTime.Now;
+
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasRefreshmentInBag())
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.CharacterManager.HasFoodInBag())
+                    || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasWaterInBag()))
+                {
+                    StateMachine.SetState((int)BotState.Eating);
+                    return;
+                }
+            }
 
             // we are on a battleground
-            if (AmeisenBotStateMachine.XMemory.Read(OffsetList.BattlegroundStatus, out int bgStatus)
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Battleground);
+                StateMachine.SetState((int)BotState.Battleground);
                 return;
-            } 
+            }
 
-            // do i need to loot units
-            if (UnitLootList.Count > 0)
+            // we are in a dungeon
+            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Looting);
+                StateMachine.SetState((int)BotState.Dungeon);
                 return;
             }
 
             // do i need to follow someone
             if (IsUnitToFollowThere())
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Following);
+                StateMachine.SetState((int)BotState.Following);
+                return;
             }
 
             // do we need to repair our equipment
-            if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(12))
+            if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(6))
             {
-                if (IsRepairNpcNear()
-                    && CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) < 0.2))
-                {
-                    AmeisenBotStateMachine.SetState(AmeisenBotState.Repairing);
-                }
-
                 LastRepairCheck = DateTime.Now;
+
+                if (IsRepairNpcNear())
+                {
+                    WowInterface.CharacterManager.Equipment.Update();
+                    if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
+                    {
+                        StateMachine.SetState((int)BotState.Repairing);
+                        return;
+                    }
+                }
             }
 
             // do we need to sell stuff
-            if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(5)
-                && CharacterManager.Inventory.Items.Any(e => e.Price > 0))
+            if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(6)
+                && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
-                if (IsVendorNpcNear()
-                    && HookManager.GetFreeBagSlotCount() < 4)
-                {
-                    AmeisenBotStateMachine.SetState(AmeisenBotState.Selling);
-                }
-
                 LastBagSlotCheck = DateTime.Now;
+
+                if (IsVendorNpcNear()
+                    && WowInterface.HookManager.GetFreeBagSlotCount() < 4)
+                {
+                    StateMachine.SetState((int)BotState.Selling);
+                    return;
+                }
             }
 
             // do buffing etc...
-            CombatClass?.OutOfCombatExecute();
-        }
-
-        private void CheckForBattlegroundInvites()
-        {
-            if (AmeisenBotStateMachine.XMemory.Read(OffsetList.BattlegroundStatus, out int bgStatus)
-                && bgStatus == 2)
-            {
-                HookManager.AcceptBattlegroundInvite();
-            }
-        }
-
-        internal bool IsVendorNpcNear()
-        {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.GetType() != typeof(WowPlayer) && e.IsVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
-        }
-
-        internal bool IsRepairNpcNear()
-        {
-            return ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+            WowInterface.CombatClass?.OutOfCombatExecute();
         }
 
         public override void Exit()
@@ -147,7 +150,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            List<WowPlayer> wowPlayers = ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
+            List<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
             if (wowPlayers.Count > 0)
             {
                 if (Config.FollowSpecificCharacter)
@@ -159,14 +162,14 @@ namespace AmeisenBotX.Core.StateMachine.States
                 // check the group/raid leader
                 if (playerToFollow == null && Config.FollowGroupLeader)
                 {
-                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
+                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid);
                     playerToFollow = SkipIfOutOfRange(playerToFollow);
                 }
 
                 // check the group members
                 if (playerToFollow == null && Config.FollowGroupMembers)
                 {
-                    playerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
+                    playerToFollow = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
                     playerToFollow = SkipIfOutOfRange(playerToFollow);
                 }
             }
@@ -174,11 +177,32 @@ namespace AmeisenBotX.Core.StateMachine.States
             return playerToFollow != null;
         }
 
+        internal bool IsRepairNpcNear()
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .Any(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+        }
+
+        internal bool IsVendorNpcNear()
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .Any(e => e.GetType() != typeof(WowPlayer) && e.IsVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+        }
+
+        private void CheckForBattlegroundInvites()
+        {
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
+                && bgStatus == 2)
+            {
+                WowInterface.HookManager.AcceptBattlegroundInvite();
+            }
+        }
+
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
         {
             if (playerToFollow != null)
             {
-                double distance = playerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
                 if (UnitIsOutOfRange(distance))
                 {
                     playerToFollow = null;
@@ -189,6 +213,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private bool UnitIsOutOfRange(double distance)
-           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        {
+            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        }
     }
 }

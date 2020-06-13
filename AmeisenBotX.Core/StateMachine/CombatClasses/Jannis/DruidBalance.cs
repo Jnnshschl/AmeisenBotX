@@ -1,190 +1,125 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
+using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class DruidBalance : ICombatClass
+    public class DruidBalance : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string moonkinFormSpell = "Moonkin Form";
-        private readonly string markOfTheWildSpell = "Mark of the Wild";
-        private readonly string innervateSpell = "Innervate";
-        private readonly string moonfireSpell = "Moonfire";
-        private readonly string insectSwarmSpell = "Insect Swarm";
-        private readonly string starfallSpell = "Starfall";
-        private readonly string forceOfNatureSpell = "Force of Nature";
-        private readonly string wrathSpell = "Wrath";
-        private readonly string starfireSpell = "Starfire";
-        private readonly string faerieFireSpell = "Faerie Fire";
-        private readonly string eclipseSolarSpell = "Eclipse (Solar)";
-        private readonly string eclipseLunarSpell = "Eclipse (Lunar)";
-        private readonly string barkskinSpell = "Barkskin";
+#pragma warning disable IDE0051
+        private const string barkskinSpell = "Barkskin";
+        private const int eclipseCheckTime = 1;
+        private const string eclipseLunarSpell = "Eclipse (Lunar)";
+        private const string eclipseSolarSpell = "Eclipse (Solar)";
+        private const string faerieFireSpell = "Faerie Fire";
+        private const string forceOfNatureSpell = "Force of Nature";
+        private const string innervateSpell = "Innervate";
+        private const string insectSwarmSpell = "Insect Swarm";
+        private const string markOfTheWildSpell = "Mark of the Wild";
+        private const string moonfireSpell = "Moonfire";
+        private const string moonkinFormSpell = "Moonkin Form";
+        private const string starfallSpell = "Starfall";
+        private const string starfireSpell = "Starfire";
+        private const string wrathSpell = "Wrath";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
-        private readonly int eclipseCheckTime = 1;
-
-        public DruidBalance(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DruidBalance(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            LunarEclipse = true;
-            SolarEclipse = false;
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell,0, true) },
+                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true) }
             };
+
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { moonfireSpell, () => LunarEclipse && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { insectSwarmSpell, () => SolarEclipse && CastSpellIfPossible(insectSwarmSpell, WowInterface.ObjectManager.TargetGuid, true) }
+            };
+
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, (x) => CastSpellIfPossible(faerieFireSpell, x.Guid, true) },
+            };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => false;
+        public override WowClass Class => WowClass.Druid;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
+        public override string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
 
-        public bool SolarEclipse { get; set; }
+        public override string Displayname => "Druid Balance";
+
+        public override bool HandlesMovement => false;
+
+        public override bool HandlesTargetSelection => false;
+
+        public override bool IsMelee => false;
+
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
+
+        public DateTime LastEclipseCheck { get; private set; }
 
         public bool LunarEclipse { get; set; }
 
-        private CharacterManager CharacterManager { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        private HookManager HookManager { get; }
+        public bool SolarEclipse { get; set; }
 
-        private DateTime LastBuffCheck { get; set; }
+        public override string Version => "1.0";
 
-        private DateTime LastDebuffCheck { get; set; }
-
-        private DateTime LastEclipseCheck { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
-
-        public string Displayname => "Druid Balance";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
-
-        public WowClass Class => WowClass.Druid;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
-            {
-                return;
-            }
-
-            if (CastSpellIfPossible(forceOfNatureSpell, true))
-            {
-                HookManager.ClickOnTerrain(ObjectManager.Player.Position);
-            }
-
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing())
+            if (TargetAuraManager.Tick()
+                || TargetInterruptManager.Tick()
                 || (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
                     && CheckForEclipseProcs())
-                || (ObjectManager.Player.ManaPercentage < 30
-                    && CastSpellIfPossible(innervateSpell))
-                || (ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(barkskinSpell, true))
+                || (WowInterface.ObjectManager.Player.ManaPercentage < 30
+                    && CastSpellIfPossible(innervateSpell, 0))
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    && CastSpellIfPossible(barkskinSpell, 0, true))
                 || (LunarEclipse
-                    && CastSpellIfPossible(starfireSpell, true))
+                    && CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || (SolarEclipse
-                    && CastSpellIfPossible(wrathSpell, true))
-                || (ObjectManager.WowObjects.OfType<WowUnit>().Where(e=>!e.IsInCombat && ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                    && CastSpellIfPossible(starfallSpell, true)))
+                    && CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
+                    && CastSpellIfPossible(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
             {
                 return;
             }
+
+            if (CastSpellIfPossible(forceOfNatureSpell, 0, true))
+            {
+                WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
+            }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (GroupAuraManager.Tick()
+                || MyAuraManager.Tick())
             {
                 return;
             }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if ((!myBuffs.Any(e => e.Equals(moonkinFormSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(moonkinFormSpell))
-                || (!myBuffs.Any(e => e.Equals(markOfTheWildSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(markOfTheWildSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if ((!targetDebuffs.Any(e => e.Equals(faerieFireSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(faerieFireSpell, true))
-                || (LunarEclipse
-                    && !targetDebuffs.Any(e => e.Equals(moonfireSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(moonfireSpell, true))
-                || (SolarEclipse
-                    && !targetDebuffs.Any(e => e.Equals(insectSwarmSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(insectSwarmSpell, true)))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
         }
 
         private bool CheckForEclipseProcs()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
+            List<string> myBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
 
             if (myBuffs.Any(e => e.Equals(eclipseLunarSpell, StringComparison.OrdinalIgnoreCase)))
             {
@@ -198,25 +133,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             }
 
             LastEclipseCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
             return false;
         }
     }

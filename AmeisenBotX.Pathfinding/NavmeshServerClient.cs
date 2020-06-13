@@ -1,10 +1,13 @@
-﻿using AmeisenBotX.Pathfinding.Enums;
+﻿using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Pathfinding.Enums;
 using AmeisenBotX.Pathfinding.Objects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
@@ -38,6 +41,28 @@ namespace AmeisenBotX.Pathfinding
 
         private StreamWriter Writer { get; set; }
 
+        public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
+        {
+            if (TcpClient.Connected)
+            {
+                try
+                {
+                    string pathJson = SendPathRequest(mapId, start, end, PathRequestFlags.None, MovementType.CastMovementRay);
+
+                    if (IsValidJson(pathJson))
+                    {
+                        return JsonConvert.DeserializeObject<List<Vector3>>(pathJson.Trim()).Count > 0;
+                    }
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.Instance.Log("Pathfinding", $"CastMovementRay failed:\n{e}", LogLevel.Error);
+                }
+            }
+
+            return false;
+        }
+
         public void Disconnect()
         {
             ConnectionWatchdog.Stop();
@@ -52,30 +77,42 @@ namespace AmeisenBotX.Pathfinding
             {
                 try
                 {
-                    string pathRequest = JsonConvert.SerializeObject(new PathRequest(start, end, mapId, PathRequestFlags.None));
-
-                    Writer.WriteLine(pathRequest + " &gt;");
-                    Writer.Flush();
-
-                    string pathJson = Reader.ReadLine().Replace("&gt;", string.Empty);
+                    string pathJson = SendPathRequest(mapId, start, end, PathRequestFlags.None, MovementType.MoveToPosition);
 
                     if (IsValidJson(pathJson))
                     {
                         return JsonConvert.DeserializeObject<List<Vector3>>(pathJson.Trim());
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-                    // ignored
+                    AmeisenLogger.Instance.Log("Pathfinding", $"GetPath failed:\n{e}", LogLevel.Error);
                 }
             }
 
             return new List<Vector3>();
         }
 
-        public bool IsInLineOfSight(Vector3 start, Vector3 end, int mapId)
+        public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
-            return GetPath(mapId, start, end).Count == 1;
+            if (TcpClient.Connected)
+            {
+                try
+                {
+                    string pathJson = SendPathRequest(mapId, start, end, PathRequestFlags.None, MovementType.MoveAlongSurface);
+
+                    if (IsValidJson(pathJson))
+                    {
+                        return JsonConvert.DeserializeObject<List<Vector3>>(pathJson.Trim()).FirstOrDefault();
+                    }
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.Instance.Log("Pathfinding", $"MoveAlongSurface failed:\n{e}", LogLevel.Error);
+                }
+            }
+
+            return new Vector3();
         }
 
         private static bool IsValidJson(string strInput)
@@ -113,7 +150,7 @@ namespace AmeisenBotX.Pathfinding
                 {
                     TcpClient = new TcpClient();
                 }
-                catch (Exception)
+                catch
                 {
                     // server is maybe not running or whatever
                 }
@@ -123,6 +160,17 @@ namespace AmeisenBotX.Pathfinding
             {
                 IsConnected = TcpClient.Connected;
             }
+        }
+
+        private string SendPathRequest(int mapId, Vector3 start, Vector3 end, PathRequestFlags pathRequestFlags, MovementType movementType)
+        {
+            string pathRequest = JsonConvert.SerializeObject(new PathRequest(start, end, mapId, pathRequestFlags, movementType));
+
+            Writer.WriteLine(pathRequest + " &gt;");
+            Writer.Flush();
+
+            string pathJson = Reader.ReadLine().Replace("&gt;", string.Empty);
+            return pathJson;
         }
     }
 }

@@ -1,17 +1,21 @@
 ﻿using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement
 {
     public interface IMovementEngine
     {
-        MovementEngineState State { get; }
+        bool IsAtTargetPosition { get; }
+
+        MovementAction MovementAction { get; }
+
+        List<Vector3> Path { get; }
 
         void Execute();
 
         void Reset();
 
-        void SetState(MovementEngineState state, Vector3 position, float targetRotation = 0f);
+        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f);
     }
 }

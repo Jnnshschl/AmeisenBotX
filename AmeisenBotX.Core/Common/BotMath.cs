@@ -1,10 +1,21 @@
-﻿using AmeisenBotX.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Common
 {
     public class BotMath
     {
+        public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, double distanceToMove = 2.0)
+        {
+            double s = Math.Round(Math.Sin(rotation + Math.PI), 4);
+            double c = Math.Round(Math.Cos(rotation + Math.PI), 4);
+
+            float x = Convert.ToSingle((position.X + distanceToMove) * c);
+            float y = Convert.ToSingle((position.Y + distanceToMove) * s);
+
+            return new Vector3(x, y, position.Z);
+        }
+
         /// <summary>
         /// Caps a Vector3's values to the given max value
         /// </summary>
@@ -12,37 +23,29 @@ namespace AmeisenBotX.Core.Common
         /// <param name="max">The maximun value a value in the vector is allowed to have</param>
         /// <returns>The capped Vector</returns>
         public static Vector3 CapVector3(Vector3 vector, float max)
-            => new Vector3(
-                vector.X < 0 ?
-                    vector.X <= max * -1 ? max * -1 : vector.X
-                    : vector.X >= max ? max : vector.X,
-                vector.Y < 0 ?
-                    vector.Y <= max * -1 ? max * -1 : vector.Y
-                    : vector.Y >= max ? max : vector.Y,
-                vector.Z < 0 ?
-                    vector.Z <= max * -1 ? max * -1 : vector.Z
-                    : vector.Z >= max ? max : vector.Z);
+            => new Vector3(Math.Min(vector.X, max), Math.Min(vector.Y, max), Math.Min(vector.Z, max));
 
-        public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
-        {
-            float angle = (float)Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X);
-
-            if (angle < 0.0f)
-            {
-                angle += (float)Math.PI * 2.0f;
-            }
-            else if (angle > (float)Math.PI * 2)
-            {
-                angle -= (float)Math.PI * 2.0f;
-            }
-
-            return angle;
-        }
+        public static float GetFacingAngle2D(Vector3 position, Vector3 targetPosition)
+            => ClampAngles(Convert.ToSingle(Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X)));
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, double minRotation = 0.7, double maxRotation = 1.3)
         {
-            float f = GetFacingAngle(position, targetPosition);
+            float f = GetFacingAngle2D(position, targetPosition);
             return (f >= (rotation * minRotation)) && (f <= (rotation * maxRotation));
+        }
+
+        private static float ClampAngles(float rotation)
+        {
+            if (rotation < 0.0f)
+            {
+                rotation += (float)Math.PI * 2.0f;
+            }
+            else if (rotation > (float)Math.PI * 2)
+            {
+                rotation -= (float)Math.PI * 2.0f;
+            }
+
+            return rotation;
         }
     }
 }

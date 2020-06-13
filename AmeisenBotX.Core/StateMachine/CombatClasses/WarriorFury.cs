@@ -6,36 +6,31 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class WarriorFury : ICombatClass
     {
-        private readonly WarriorFurySpells spells;
-
         private readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
-
+        private readonly WarriorFurySpells spells;
         private readonly string[] standingEmotes = { "/chug", "/pick", "/whistle", "/shimmy", "/dance", "/twiddle", "/bored", "/violin", "/highfive", "/bow" };
 
+        private bool computeNewRoute = false;
         private double distanceToTarget = 0;
 
         private double distanceTraveled = 0;
 
-        private bool multipleTargets = false;
-
-        private bool computeNewRoute = false;
-
         private bool hasTargetMoved = false;
-
+        private bool multipleTargets = false;
         private bool standing = false;
 
-        public WarriorFury(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public WarriorFury(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -45,6 +40,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             spells = new WarriorFurySpells(hookManager, objectManager);
         }
 
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Warrior;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Fury Warrior";
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -53,11 +58,19 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public IWowItemComparator ItemComparator => new FurySwordItemComparator();
 
-        private CharacterManager CharacterManager { get; }
+        public List<string> PriorityTargets { get; set; }
+
+        public CombatClassRole Role => CombatClassRole.Dps;
+
+        public string Version => "1.0";
+
+        public bool WalkBehindEnemy => false;
+
+        private ICharacterManager CharacterManager { get; }
 
         private bool Dancing { get; set; }
 
-        private HookManager HookManager { get; }
+        private IHookManager HookManager { get; }
 
         private Vector3 LastPlayerPosition { get; set; }
 
@@ -65,23 +78,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         private DefaultMovementEngine MovementEngine { get; set; }
 
-        private ObjectManager ObjectManager { get; }
+        private IObjectManager ObjectManager { get; }
 
         private IPathfindingHandler PathfindingHandler { get; set; }
-
-        public string Displayname => "Fury Warrior";
-
-        public string Version => "1.0";
-
-        public string Author => "einTyp";
-
-        public string Description => "...";
-
-        public WowClass Class => WowClass.Warrior;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public void Execute()
         {
@@ -107,7 +106,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 bool targetDistanceChanged = false;
                 if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
                 {
-                    distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
                     LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
@@ -126,7 +125,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (targetDistanceChanged)
                 {
-                    distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                 }
 
                 HandleMovement(target);
@@ -153,13 +152,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         {
             if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
             {
-                distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
                 LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
             }
 
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
@@ -167,7 +166,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                     {
                         hasTargetMoved = true;
                         LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                        distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                     }
                     else
                     {
@@ -223,13 +222,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
+                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
                     MovementEngine.LoadPath(path);
                     MovementEngine.PostProcessPath();
                 }
                 else
                 {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
                     {
                         CharacterManager.MoveToPosition(positionToGoTo);
 
@@ -259,7 +258,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < 100.0)
                     {
                         if (tmpDistance < 6.0)
@@ -318,6 +317,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private static readonly string ShatteringThrow = "Shattering Throw";
             private static readonly string Slam = "Slam";
             private static readonly string Whirlwind = "Whirlwind";
+
             private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
             {
                 { BattleShout, DateTime.Now },
@@ -343,7 +343,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             private bool askedForHeal = false;
             private bool askedForHelp = false;
 
-            public WarriorFurySpells(HookManager hookManager, ObjectManager objectManager)
+            public WarriorFurySpells(IHookManager hookManager, IObjectManager objectManager)
             {
                 HookManager = hookManager;
                 ObjectManager = objectManager;
@@ -354,7 +354,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 NextCast = DateTime.Now;
             }
 
-            private HookManager HookManager { get; set; }
+            private IHookManager HookManager { get; set; }
 
             private bool IsInBerserkerStance { get; set; }
 
@@ -364,7 +364,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             private DateTime NextStance { get; set; }
 
-            private ObjectManager ObjectManager { get; set; }
+            private IObjectManager ObjectManager { get; set; }
 
             private WowPlayer Player { get; set; }
 
@@ -377,7 +377,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (!ObjectManager.Player.IsAutoAttacking)
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 Player = ObjectManager.Player;
@@ -520,7 +520,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                                 }
                                 else if (!ObjectManager.Player.IsAutoAttacking)
                                 {
-                                    HookManager.StartAutoAttack();
+                                    HookManager.StartAutoAttack(ObjectManager.Target);
                                 }
                             }
                         }

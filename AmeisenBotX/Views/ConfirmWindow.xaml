@@ -13,25 +13,30 @@
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
     <Grid>
-        <TextBlock x:Name="messageLabel" HorizontalAlignment="Left" Margin="15,39,0,0" VerticalAlignment="Top" Width="397" Height="63" Text="Message..." TextAlignment="Center" FontSize="16">
+        <TextBlock x:Name="messageLabel" HorizontalAlignment="Left" Margin="15,38,0,0" VerticalAlignment="Top" Width="397" Height="64" Text="Message..." TextAlignment="Center" FontSize="16" FontFamily="Bahnschrift Light">
             <TextBlock.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </TextBlock.Foreground>
         </TextBlock>
-        <TextBlock x:Name="messageTitle" HorizontalAlignment="Left" Margin="15,6,0,0" VerticalAlignment="Top" Width="397" Height="24" Text="Title" TextAlignment="Center" FontWeight="Bold" FontSize="20">
-            <TextBlock.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-            </TextBlock.Foreground>
-        </TextBlock>
-        <Button x:Name="buttonOkay" Content="Okay" HorizontalAlignment="Left" Margin="60,0,0,10" VerticalAlignment="Bottom" Width="128" Click="ButtonOkay_Click" Style="{DynamicResource ButtonStyleDark}">
+        <Button x:Name="buttonOkay" Content="✔️ Okay" HorizontalAlignment="Left" Margin="60,0,0,10" VerticalAlignment="Bottom" Width="128" Click="ButtonOkay_Click" Style="{DynamicResource ButtonStyleDark}" FontFamily="Bahnschrift Light">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonCancel" Content="Cancel" Margin="0,0,60,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Click="ButtonCancel_Click" Style="{DynamicResource ButtonStyleDark}">
+        <Button x:Name="buttonCancel" Content="❌Cancel" Margin="0,0,60,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" Click="ButtonCancel_Click" Style="{DynamicResource ButtonStyleDark}" FontFamily="Bahnschrift Light">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
+        <Label x:Name="messageTitle" Content="Title" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="0,-2,0,0" FontFamily="Bahnschrift Light">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
+        <Rectangle Margin="0,27,0,0" Height="1" VerticalAlignment="Top">
+            <Rectangle.Fill>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Rectangle.Fill>
+        </Rectangle>
     </Grid>
 </Window>

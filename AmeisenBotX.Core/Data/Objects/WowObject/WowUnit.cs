@@ -1,30 +1,52 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+using AmeisenBotX.Memory;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowUnit : WowObject
     {
-        public WowClass Class { get; set; }
+        public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        {
+        }
 
-        public int CurrentlyCastingSpellId { get; set; }
+        public List<WowAura> Auras { get; set; }
 
-        public int CurrentlyChannelingSpellId { get; set; }
+        public WowClass Class => Enum.IsDefined(typeof(WowClass), (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF)) ? (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF) : WowClass.Unknown;
 
-        public int Energy { get; set; }
+        public float CombatReach => RawWowUnit.CombatReach;
+
+        public int CurrentlyCastingSpellId => RawWowUnit.ChannelSpell;
+
+        public int CurrentlyChannelingSpellId => RawWowUnit.ChannelSpell;
+
+        public int Energy => RawWowUnit.Power3;
 
         public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
 
-        public int FactionTemplate { get; set; }
+        public int FactionTemplate => RawWowUnit.FactionTemplate;
 
-        public WowGender Gender { get; set; }
+        public WowGender Gender => Enum.IsDefined(typeof(WowGender), (WowGender)((RawWowUnit.Bytes0 >> 16) & 0xFF)) ? (WowGender)((RawWowUnit.Bytes0 >> 16) & 0xFF) : WowGender.Unknown;
 
-        public int Health { get; set; }
+        public int Health => RawWowUnit.Health;
 
         public double HealthPercentage => ReturnPercentage(Health, MaxHealth);
 
+        public bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlags.Auctioneer];
+
         public bool IsAutoAttacking { get; set; }
+
+        public bool IsBanker => NpcFlags[(int)WowUnitNpcFlags.Banker];
+
+        public bool IsBattlemaster => NpcFlags[(int)WowUnitNpcFlags.Battlemaster];
+
+        public bool IsCasting => CurrentlyCastingSpellId > 0 || CurrentlyChannelingSpellId > 0;
+
+        public bool IsClasstrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
 
         public bool IsConfused => UnitFlags[(int)WowUnitFlags.Confused];
 
@@ -35,50 +57,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public bool IsDisarmed => UnitFlags[(int)WowUnitFlags.Disarmed];
 
         public bool IsFleeing => UnitFlags[(int)WowUnitFlags.Fleeing];
-
-        public bool IsInCombat => UnitFlags[(int)WowUnitFlags.Combat];
-
-        public bool IsInFlightmasterFlight => UnitFlags[(int)WowUnitFlags.FlightmasterFlight];
-
-        public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags.Lootable];
-
-        public bool IsLooting => UnitFlags[(int)WowUnitFlags.Looting];
-
-        public bool IsMounted => UnitFlags[(int)WowUnitFlags.Mounted];
-
-        public bool IsNotAttackable => UnitFlags[(int)WowUnitFlags.NotAttackable];
-
-        public bool IsPetInCombat => UnitFlags[(int)WowUnitFlags.PetInCombat];
-
-        public bool IsPvpFlagged => UnitFlags[(int)WowUnitFlags.PvpFlagged];
-
-        public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags.ReferAFriendLinked];
-
-        public bool IsSilenced => UnitFlags[(int)WowUnitFlags.Silenced];
-
-        public bool IsSitting => UnitFlags[(int)WowUnitFlags.Sitting];
-
-        public bool IsSkinnable => UnitFlags[(int)WowUnitFlags.Skinnable];
-
-        public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags.SpecialInfo];
-
-        public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByMe];
-
-        public bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByOther];
-
-        public bool IsTappedByThreat => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TappedByThreat];
-
-        public bool IsTotem => UnitFlags[(int)WowUnitFlags.Totem];
-
-        public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TrackUnit];
-
-        public bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlags.Auctioneer];
-
-        public bool IsBanker => NpcFlags[(int)WowUnitNpcFlags.Banker];
-
-        public bool IsBattlemaster => NpcFlags[(int)WowUnitNpcFlags.Battlemaster];
-
-        public bool IsClasstrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
 
         public bool IsFlightmaster => NpcFlags[(int)WowUnitNpcFlags.Flightmaster];
 
@@ -92,9 +70,23 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsGuildbanker => NpcFlags[(int)WowUnitNpcFlags.Guildbanker];
 
+        public bool IsInCombat => UnitFlags[(int)WowUnitFlags.Combat];
+
+        public bool IsInFlightmasterFlight => UnitFlags[(int)WowUnitFlags.FlightmasterFlight];
+
         public bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlags.Innkeeper];
 
+        public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags.Lootable];
+
+        public bool IsLooting => UnitFlags[(int)WowUnitFlags.Looting];
+
+        public bool IsMounted => UnitFlags[(int)WowUnitFlags.Mounted];
+
         public bool IsNoneNpc => NpcFlags[(int)WowUnitNpcFlags.None];
+
+        public bool IsNotAttackable => UnitFlags[(int)WowUnitFlags.NotAttackable];
+
+        public bool IsPetInCombat => UnitFlags[(int)WowUnitFlags.PetInCombat];
 
         public bool IsPetition => NpcFlags[(int)WowUnitNpcFlags.Petitioner];
 
@@ -102,11 +94,23 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsProfessionTrainer => NpcFlags[(int)WowUnitNpcFlags.ProfessionTrainer];
 
+        public bool IsPvpFlagged => UnitFlags[(int)WowUnitFlags.PvpFlagged];
+
         public bool IsQuestgiver => NpcFlags[(int)WowUnitNpcFlags.Questgiver];
 
         public bool IsReagentVendor => NpcFlags[(int)WowUnitNpcFlags.ReagentVendor];
 
+        public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags.ReferAFriendLinked];
+
         public bool IsRepairVendor => NpcFlags[(int)WowUnitNpcFlags.RepairVendor];
+
+        public bool IsSilenced => UnitFlags[(int)WowUnitFlags.Silenced];
+
+        public bool IsSitting => UnitFlags[(int)WowUnitFlags.Sitting];
+
+        public bool IsSkinnable => UnitFlags[(int)WowUnitFlags.Skinnable];
+
+        public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags.SpecialInfo];
 
         public bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlags.Spellclick];
 
@@ -118,55 +122,85 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsTabarddesigner => NpcFlags[(int)WowUnitNpcFlags.Tabarddesigner];
 
+        public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByMe];
+
+        public bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByOther];
+
+        public bool IsTappedByThreat => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TappedByThreat];
+
+        public bool IsTotem => UnitFlags[(int)WowUnitFlags.Totem];
+
+        public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TrackUnit];
+
         public bool IsTrainer => NpcFlags[(int)WowUnitNpcFlags.Trainer];
 
         public bool IsVendor => NpcFlags[(int)WowUnitNpcFlags.Vendor];
 
-        public bool IsCasting => CurrentlyCastingSpellId > 0 || CurrentlyChannelingSpellId > 0;
+        public int Level => RawWowUnit.Level;
 
-        public int Level { get; set; }
-
-        public int Mana { get; set; }
+        public int Mana => RawWowUnit.Power1;
 
         public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
 
-        public int MaxEnergy { get; set; }
+        public int MaxEnergy => RawWowUnit.MaxPower3;
 
-        public int MaxHealth { get; set; }
+        public int MaxHealth => RawWowUnit.MaxHealth;
 
-        public int MaxMana { get; set; }
+        public int MaxMana => RawWowUnit.MaxPower1;
 
-        public int MaxRage { get; set; }
+        public int MaxRage => RawWowUnit.MaxPower2 / 10;
 
-        public int MaxRuneenergy { get; set; }
+        public int MaxRuneenergy => RawWowUnit.MaxPower7 / 10;
 
         public string Name { get; set; }
 
-        public WowPowertype PowerType { get; set; }
+        public BitVector32 NpcFlags => RawWowUnit.NpcFlags;
 
-        public WowRace Race { get; set; }
+        public WowPowertype PowerType => Enum.IsDefined(typeof(WowPowertype), (WowPowertype)((RawWowUnit.Bytes0 >> 24) & 0xFF)) ? (WowPowertype)((RawWowUnit.Bytes0 >> 24) & 0xFF) : WowPowertype.Unknown;
 
-        public int Rage { get; set; }
+        public WowRace Race => Enum.IsDefined(typeof(WowRace), (WowRace)((RawWowUnit.Bytes0 >> 0) & 0xFF)) ? (WowRace)((RawWowUnit.Bytes0 >> 0) & 0xFF) : WowRace.Unknown;
+
+        public int Rage => RawWowUnit.Power2 / 10;
 
         public double RagePercentage => ReturnPercentage(Rage, MaxRage);
 
         public float Rotation { get; set; }
 
-        public float CombatReach { get; set; }
-
-        public int Runeenergy { get; set; }
+        public int Runeenergy => RawWowUnit.Power7 / 10;
 
         public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
 
-        public ulong TargetGuid { get; set; }
+        public ulong TargetGuid => RawWowUnit.Target;
 
-        public BitVector32 UnitFlags { get; set; }
+        public BitVector32 UnitFlags => RawWowUnit.Flags1;
 
-        public BitVector32 UnitFlagsDynamic { get; set; }
+        public BitVector32 UnitFlagsDynamic => RawWowUnit.DynamicFlags;
 
-        public BitVector32 NpcFlags { get; set; }
+        private RawWowUnit RawWowUnit { get; set; }
 
-        private double ReturnPercentage(int value, int max)
+        public bool HasBuffByName(string name)
+        {
+            return Auras != null && Auras.Any(e => e.Name == name);
+        }
+
+        public override string ToString()
+        {
+            return $"Unit: [{Guid}] {Name} lvl. {Level}";
+        }
+
+        public WowUnit UpdateRawWowUnit(XMemory xMemory)
+        {
+            UpdateRawWowObject(xMemory);
+
+            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit rawWowUnit))
+            {
+                RawWowUnit = rawWowUnit;
+            }
+
+            return this;
+        }
+
+        internal double ReturnPercentage(int value, int max)
         {
             if (value == 0 || max == 0)
             {
@@ -174,7 +208,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             }
             else
             {
-                return (double)value / (double)max * 100.0;
+                return value / (double)max * 100.0;
             }
         }
     }

@@ -1,97 +1,38 @@
-﻿using AmeisenBotX.Core.Battleground.Objectives;
-using AmeisenBotX.Core.Battleground.Profiles;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
-using System;
+﻿using AmeisenBotX.Core.Battleground.Profiles;
+using AmeisenBotX.Core.Battleground.States;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Battleground
 {
     public class BattlegroundEngine
     {
-        public BattlegroundEngine(HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine)
+        public BattlegroundEngine(WowInterface wowInterface)
         {
-            HookManager = hookManager;
-            ObjectManager = objectManager;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
 
             ForceCombat = false;
-            CurrentObjectiveName = "None";
         }
 
-        public string CurrentObjectiveName { get; private set; }
+        public IBattlegroundProfile BattlegroundProfile { get; private set; }
 
-        public bool ForceCombat { get; set; }
+        public KeyValuePair<BattlegroundState, BasicBattlegroundState> CurrentState { get; private set; }
 
-        private IBattlegroundProfile BattlegroundProfile { get; set; }
+        public bool ForceCombat { get; internal set; }
 
-        private ObjectManager ObjectManager { get; set; }
+        public BattlegroundState LastState { get; private set; }
 
-        private HookManager HookManager { get; set; }
+        private WowInterface WowInterface { get; }
 
-        private IMovementEngine MovementEngine { get; set; }
-
-        private IBattlegroundObjective LastObjective { get; set; }
-
-        public void Execute()
+        public void AllianceFlagWasDropped()
         {
-            if (BattlegroundProfile == null)
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
             {
-                TryLoadProfile(ObjectManager.MapId);
-            }
-
-            if (BattlegroundProfile != null)
-            {
-                foreach (IBattlegroundObjective objective in BattlegroundProfile.Objectives.OrderByDescending(e => e.Priority))
-                {
-                    if (!objective.IsAvailable)
-                    {
-                        continue;
-                    }
-
-                    if(CurrentObjectiveName != objective.GetType().Name)
-                    {
-                        LastObjective?.Exit();
-                        objective.Enter();
-                    }
-
-                    objective.Execute();
-                    CurrentObjectiveName = objective.GetType().Name;
-                    return;
-                }
-            }
-        }
-
-        public bool TryLoadProfile(int mapId)
-        {
-            switch (mapId)
-            {
-                case 30:
-                    // Alterac Valley
-                    return false;
-
-                case 489:
-                    BattlegroundProfile = new WarsongGulchProfile(ObjectManager.Player.IsAlliance(), HookManager, ObjectManager, MovementEngine, ForceCombat);
-                    return true;
-
-                case 529:
-                    // Arathi Basin
-                    return false;
-
-                case 566:
-                    // Eye of the Storm
-                    return false;
-
-                case 607:
-                    // Strand of the Ancients
-                    return false;
-
-                default:
-                    return false;
+                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped();
             }
         }
 
@@ -103,6 +44,59 @@ namespace AmeisenBotX.Core.Battleground
             }
         }
 
+        public bool AttackNearEnemies(double range = 25)
+        {
+            IEnumerable<WowPlayer> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, range);
+
+            if (nearEnemies.Count() > 0)
+            {
+                WowPlayer target = nearEnemies.FirstOrDefault(e => BotUtils.IsValidUnit(e));
+
+                if (target != null)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    {
+                        WowInterface.HookManager.TargetGuid(target.Guid);
+                        WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public void Execute()
+        {
+            List<WowGameobject> flagObjects = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();
+
+            if (BattlegroundProfile == null)
+            {
+                TryLoadProfile(WowInterface.ObjectManager.MapId);
+
+                if (BattlegroundProfile != null)
+                {
+                    CurrentState = BattlegroundProfile.States.First();
+                }
+            }
+            else
+            {
+                CurrentState.Value.Execute();
+            }
+        }
+
+        public void HordeFlagWasDropped()
+        {
+            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            {
+                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped();
+            }
+        }
+
         public void HordeFlagWasPickedUp(string playername)
         {
             if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
@@ -111,20 +105,61 @@ namespace AmeisenBotX.Core.Battleground
             }
         }
 
-        public void AllianceFlagWasDropped(string playername)
+        public void Reset()
         {
-            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            BattlegroundProfile = null;
+        }
+
+        public bool TryLoadProfile(MapId mapId)
+        {
+            switch (mapId)
             {
-                ((WarsongGulchProfile)BattlegroundProfile).AllianceFlagWasDropped(playername);
+                case MapId.AlteracValley:
+                    // Alterac Valley
+                    return false;
+
+                case MapId.WarsongGulch:
+                    BattlegroundProfile = new WarsongGulchProfile(WowInterface, this);
+                    return true;
+
+                case MapId.ArathiBasin:
+                    // Arathi Basin
+                    return false;
+
+                case MapId.EyeOfTheStorm:
+                    // Eye of the Storm
+                    return false;
+
+                case MapId.StrandOfTheAncients:
+                    // Strand of the Ancients
+                    return false;
+
+                default:
+                    return false;
             }
         }
 
-        public void HordeFlagWasDropped(string playername)
+        internal IEnumerable<WowGameobject> GetBattlegroundFlags(bool onlyEnemy = true)
         {
-            if (BattlegroundProfile.GetType() == typeof(WarsongGulchProfile))
+            return WowInterface.ObjectManager.WowObjects
+                           .OfType<WowGameobject>()
+                           .Where(e => onlyEnemy ? (!WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag)
+                                   || (WowInterface.ObjectManager.Player.IsAlliance() && e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
+                               : e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag);
+        }
+
+        internal void SetState(BattlegroundState state)
+        {
+            if (BattlegroundProfile == null || CurrentState.Key == state)
             {
-                ((WarsongGulchProfile)BattlegroundProfile).HordeFlagWasDropped(playername);
+                // we are already in this state
+                return;
             }
+
+            LastState = CurrentState.Key;
+            CurrentState.Value.Exit();
+            CurrentState = BattlegroundProfile.States.First(s => s.Key == state);
+            CurrentState.Value.Enter();
         }
     }
 }

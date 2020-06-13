@@ -1,52 +1,90 @@
-﻿using AmeisenBotX.Memory;
-using System.Diagnostics;
-using System.Threading;
+﻿using AmeisenBotX.Logging;
+using System;
+using System.IO;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateStartWow : State
+    public class StateStartWow : BasicState
     {
-        public StateStartWow(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, Process wowProcess, XMemory xMemory) : base(stateMachine)
+        public StateStartWow(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            WowProcess = wowProcess;
-            XMemory = xMemory;
         }
 
-        private AmeisenBotConfig Config { get; }
-
-        private Process WowProcess { get; set; }
-
-        private XMemory XMemory { get; }
+        private DateTime WowStart { get; set; }
 
         public override void Enter()
         {
-            WowProcess = Process.Start(Config.PathToWowExe);
-            WowProcess.WaitForInputIdle();
-            Thread.Sleep(1000);
-            XMemory.Attach(WowProcess);
+            CheckTosAndEula();
+
+            if (File.Exists(Config.PathToWowExe))
+            {
+                WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
+
+                if (WowInterface.WowProcess != null)
+                {
+                    WowInterface.WowProcess.WaitForInputIdle();
+                    WowInterface.XMemory.Attach(WowInterface.WowProcess);
+                    WowStart = DateTime.Now;
+                }
+            }
         }
 
         public override void Execute()
         {
-            if (WowProcess.HasExited)
+            if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
+                StateMachine.SetState((int)BotState.None);
                 return;
             }
 
             if (Config.AutoLogin)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Login);
+                StateMachine.SetState((int)BotState.Login);
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
         public override void Exit()
         {
+        }
+
+        private void CheckTosAndEula()
+        {
+            try
+            {
+                string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+                if (File.Exists(configWtfPath))
+                {
+                    string content = File.ReadAllText(configWtfPath).ToUpper();
+
+                    if (content.Contains("SET READEULA"))
+                    {
+                        content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
+                    }
+                    else
+                    {
+                        content += "\nSET READEULA \"1\"";
+                    }
+
+                    if (content.Contains("SET READTOS"))
+                    {
+                        content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
+                    }
+                    else
+                    {
+                        content += "\nSET READTOS \"1\"";
+                    }
+
+                    File.WriteAllText(configWtfPath, content);
+                }
+            }
+            catch
+            {
+                AmeisenLogger.Instance.Log("StartWow", "Cannot write to config.wtf, maybe its write protected");
+            }
         }
     }
 }

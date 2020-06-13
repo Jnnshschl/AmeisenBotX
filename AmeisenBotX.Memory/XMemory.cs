@@ -3,8 +3,8 @@ using Fasm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
@@ -12,26 +12,66 @@ namespace AmeisenBotX.Memory
 {
     public class XMemory
     {
+        private ulong rpmCalls;
+        private ulong wpmCalls;
+
         public XMemory()
         {
             SizeCache = new Dictionary<Type, int>();
+            MemoryAllocations = new Dictionary<IntPtr, uint>();
         }
 
         ~XMemory()
         {
             CloseHandle(MainThreadHandle);
+            foreach (IntPtr memAlloc in MemoryAllocations.Keys.ToList())
+            {
+                FreeMemory(memAlloc);
+            }
         }
+
+        public int AllocationCount
+            => MemoryAllocations.Count;
 
         public ManagedFasm Fasm { get; private set; }
 
         public IntPtr MainThreadHandle { get; private set; }
 
+        public Dictionary<IntPtr, uint> MemoryAllocations { get; }
+
         public Process Process { get; private set; }
 
         public IntPtr ProcessHandle { get; private set; }
 
+        public ulong RpmCallCount
+        {
+            get
+            {
+                unchecked
+                {
+                    ulong val = rpmCalls;
+                    rpmCalls = 0;
+                    return val;
+                }
+            }
+        }
+
+        public ulong WpmCallCount
+        {
+            get
+            {
+                unchecked
+                {
+                    ulong val = wpmCalls;
+                    wpmCalls = 0;
+                    return val;
+                }
+            }
+        }
+
         private Dictionary<Type, int> SizeCache { get; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
             Rect rect = new Rect();
@@ -39,56 +79,72 @@ namespace AmeisenBotX.Memory
             return rect;
         }
 
-        public static void SetWindowPosition(IntPtr windowHandle, Rect rect)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
-            if (rect.Left > 0
-                && rect.Right > 0
-                && rect.Top > 0
-                && rect.Bottom > 0)
+            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
+            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
+
+            if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                MoveWindow(windowHandle, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, true);
+                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllocateMemory(uint size, out IntPtr address)
         {
-            try
+            address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
+            if (address != IntPtr.Zero)
             {
-                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
-            }
-            catch
-            {
-                address = IntPtr.Zero;
+                MemoryAllocations.Add(address, size);
+                return true;
             }
 
-            return address != IntPtr.Zero;
+            address = IntPtr.Zero;
+            return false;
         }
 
-        public void Attach(Process wowProcess)
+        public bool Attach(Process wowProcess)
         {
             Process = wowProcess;
-            ProcessHandle = OpenProcess(ProcessAccessFlags.All, false, wowProcess.Id);
-            Fasm = new ManagedFasm(ProcessHandle);
-        }
-
-        public bool FreeMemory(IntPtr address)
-        {
-            try
-            {
-                return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release);
-            }
-            catch
+            if (Process == null || Process.HasExited)
             {
                 return false;
             }
+
+            ProcessHandle = OpenProcess(ProcessAccessFlags.All, false, wowProcess.Id);
+            if (ProcessHandle == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            Fasm = new ManagedFasm(ProcessHandle);
+            MemoryAllocations.Clear();
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool FreeMemory(IntPtr address)
+        {
+            if (MemoryAllocations.ContainsKey(address))
+            {
+                MemoryAllocations.Remove(address);
+                return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release);
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntPtr GetForegroundWindow()
+        {
+            return Win32Imports.GetForegroundWindow();
         }
 
         public ProcessThread GetMainThread()
         {
-            if (Process.MainWindowHandle == null)
-            {
-                return null;
-            }
+            if (Process.MainWindowHandle == null) { return null; }
 
             int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
             foreach (ProcessThread processThread in Process.Threads)
@@ -102,55 +158,51 @@ namespace AmeisenBotX.Memory
             return null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool MemoryProtect(IntPtr address, uint size, MemoryProtection memoryProtection, out MemoryProtection oldMemoryProtection)
+        {
+            return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
+        {
+            uint size = (uint)SizeOf<T>();
+
+            if (MemoryProtect(address, size, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldMemoryProtection))
+            {
+                Write(address, data);
+                MemoryProtect(address, size, oldMemoryProtection, out _);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
         {
-            int size = sizeof(T);
-            byte[] readBuffer = new byte[size];
+            int size = SizeOf<T>();
+            byte[] buffer = new byte[size];
 
-            try
+            if (RpmGateWay(address, buffer, size))
             {
-                if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
+                fixed (byte* ptr = buffer)
                 {
-                    fixed (byte* ptr = readBuffer)
-                    {
-                        value = *(T*)ptr;
-                        return true;
-                    }
+                    value = *(T*)ptr;
+                    return true;
                 }
-            }
-            catch
-            {
-                // ignored lel
             }
 
             value = default;
             return false;
         }
 
-        public unsafe bool ReadByte(IntPtr address, out byte buffer)
-        {
-            byte[] readBuffer = new byte[1];
-
-            if (ReadProcessMemory(ProcessHandle, address, readBuffer, 1, out _))
-            {
-                fixed (byte* ptr = readBuffer)
-                {
-                    buffer = *ptr;
-                    return true;
-                }
-            }
-
-            buffer = 0x0;
-            return false;
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
         {
-            byte[] readBuffer = new byte[size];
+            byte[] buffer = new byte[size];
 
-            if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
+            if (RpmGateWay(address, buffer, size))
             {
-                bytes = readBuffer;
+                bytes = buffer;
                 return true;
             }
 
@@ -158,149 +210,150 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        public unsafe bool ReadInt(IntPtr address, out int value)
-        {
-            byte[] readBuffer = new byte[4];
-
-            try
-            {
-                if (ReadProcessMemory(ProcessHandle, address, readBuffer, 4, out _))
-                {
-                    fixed (byte* ptr = readBuffer)
-                    {
-                        value = *(int*)ptr;
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-                // ignored lel
-            }
-
-            value = 0;
-            return false;
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
         {
-            byte[] readBuffer = new byte[lenght];
+            byte[] buffer = new byte[lenght];
 
-            try
+            if (RpmGateWay(address, buffer, lenght))
             {
-                if (ReadProcessMemory(ProcessHandle, address, readBuffer, lenght, out _))
+                List<byte> strBuffer = new List<byte>();
+
+                for (int i = 0; i < lenght; ++i)
                 {
-                    List<byte> stringBytes = new List<byte>();
-
-                    foreach (byte b in readBuffer)
-                    {
-                        if (b == 0b0)
-                        {
-                            break;
-                        }
-
-                        stringBytes.Add(b);
-                    }
-
-                    value = encoding.GetString(stringBytes.ToArray()).Trim();
-                    return true;
+                    if (buffer[i] == 0) { break; }
+                    strBuffer.Add(buffer[i]);
                 }
-            }
-            catch
-            {
-                // ignored lel
+
+                value = encoding.GetString(strBuffer.ToArray());
+                return true;
             }
 
             value = string.Empty;
             return false;
         }
 
-        public bool ReadStruct<T>(IntPtr address, out T value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe bool ReadStruct<T>(IntPtr address, out T value) where T : struct
         {
-            int size = SizeOf(typeof(T));
-            IntPtr readBuffer = Marshal.AllocHGlobal(size);
+            int size = SizeOf<T>();
+            byte[] buffer = new byte[size];
 
-            try
+            if (RpmGateWay(address, buffer, size))
             {
-                if (ReadProcessMemory(ProcessHandle, address, readBuffer, size, out _))
+                fixed (byte* pBuffer = buffer)
                 {
-                    value = (T)Marshal.PtrToStructure(readBuffer, typeof(T));
-                    return true;
+                    value = Unsafe.Read<T>(pBuffer);
                 }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(readBuffer);
+
+                return true;
             }
 
             value = default;
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
             if (OpenMainThread())
             {
-                ResumeThread(MainThreadHandle);
+                NtResumeThread(MainThreadHandle, out _);
             }
         }
 
+        public Process StartProcessNoActivate(string processCmd)
+        {
+            StartupInfo startupInfo = new StartupInfo
+            {
+                cb = SizeOf<StartupInfo>(),
+                dwFlags = STARTF_USESHOWWINDOW,
+                wShowWindow = SW_SHOWMINNOACTIVE
+            };
+
+            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            {
+                CloseHandle(processInformation.hProcess);
+                CloseHandle(processInformation.hThread);
+
+                return Process.GetProcessById(processInformation.dwProcessId);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
             if (OpenMainThread())
             {
-                SuspendThread(MainThreadHandle);
+                NtSuspendThread(MainThreadHandle, out _);
             }
         }
 
-        public bool Write<T>(IntPtr address, T value, int size = 0)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe bool Write<T>(IntPtr address, T value) where T : struct
         {
-            if (size == 0)
+            int size = SizeOf<T>();
+            byte[] buffer = new byte[size];
+
+            fixed (byte* pBuffer = buffer)
             {
-                size = SizeOf(typeof(T));
+                Unsafe.Write(pBuffer, value);
             }
 
-            IntPtr writeBuffer = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(value, writeBuffer, false);
-
-            bool result = WriteProcessMemory(ProcessHandle, address, writeBuffer, size, out _);
-
-            Marshal.DestroyStructure(writeBuffer, typeof(T));
-            Marshal.FreeHGlobal(writeBuffer);
-
-            return result;
+            return WpmGateWay(address, buffer, size);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WriteBytes(IntPtr address, byte[] bytes)
-            => WriteProcessMemory(ProcessHandle, address, bytes, bytes.Length, out _);
+        {
+            return WpmGateWay(address, bytes, bytes.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ZeroMemory(IntPtr address, int size)
+        {
+            return WriteBytes(address, new byte[size]);
+        }
 
         private bool OpenMainThread()
         {
-            if (MainThreadHandle == IntPtr.Zero)
-            {
-                ProcessThread mainThread = GetMainThread();
-                MainThreadHandle = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)mainThread.Id);
-                return MainThreadHandle != null && MainThreadHandle != IntPtr.Zero;
-            }
-
-            return true;
+            MainThreadHandle = OpenThread(ThreadAccess.SuspendResume, false, (uint)GetMainThread().Id);
+            return MainThreadHandle != IntPtr.Zero;
         }
 
-        private int SizeOf(Type type)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool RpmGateWay(IntPtr baseAddress, byte[] buffer, int size)
         {
-            if (!SizeCache.ContainsKey(type))
+            ++rpmCalls;
+            return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+        }
+
+        public void SetWindowParent(IntPtr parentHandle, IntPtr childHandle)
+        {
+            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+            SetParent(childHandle, parentHandle);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int SizeOf<T>()
+        {
+            if (!SizeCache.ContainsKey(typeof(T)))
             {
-                DynamicMethod dm = new DynamicMethod("SizeOf", typeof(int), new Type[] { });
-                ILGenerator il = dm.GetILGenerator();
-
-                il.Emit(OpCodes.Sizeof, type);
-                il.Emit(OpCodes.Ret);
-
-                int size = (int)dm.Invoke(null, null);
-                SizeCache.Add(type, size);
+                SizeCache.Add(typeof(T), Unsafe.SizeOf<T>());
             }
 
-            return SizeCache[type];
+            return SizeCache[typeof(T)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool WpmGateWay(IntPtr baseAddress, byte[] buffer, int size)
+        {
+            ++wpmCalls;
+            return !NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
         }
     }
 }

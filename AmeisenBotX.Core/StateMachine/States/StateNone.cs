@@ -1,27 +1,24 @@
-﻿namespace AmeisenBotX.Core.StateMachine.States
+﻿namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateNone : State
+    public class StateNone : BasicState
     {
-        public StateNone(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config) : base(stateMachine)
+        public StateNone(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
         }
-
-        private AmeisenBotConfig Config { get; }
 
         public override void Enter()
         {
             if (Config.AutostartWow)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.StartWow);
+                StateMachine.SetState((int)BotState.StartWow);
             }
             else if (Config.AutoLogin)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Login);
+                StateMachine.SetState((int)BotState.Login);
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 

@@ -1,263 +1,156 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class WarlockDestruction : ICombatClass
+    public class WarlockDestruction : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string corruptionSpell = "Corruption";
-        private readonly string curseOftheElementsSpell = "Curse of the Elements";
-        private readonly string chaosBoltSpell = "Chaos Bolt";
-        private readonly string conflagrateSpell = "Conflagrate";
-        private readonly string incinerateSpell = "Incinerate";
-        private readonly string immolateSpell = "Immolate";
-        private readonly string lifeTapSpell = "Life Tap";
-        private readonly string drainSoulSpell = "Drain Soul";
-        private readonly string drainLifeSpell = "Drain Life";
-        private readonly string fearSpell = "Fear";
-        private readonly string howlOfTerrorSpell = "Howl of Terror";
-        private readonly string demonSkinSpell = "Demon Skin";
-        private readonly string demonArmorSpell = "Demon Armor";
-        private readonly string felArmorSpell = "Fel Armor";
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string summonImpSpell = "Summon Imp";
+#pragma warning disable IDE0051
+        private const string chaosBoltSpell = "Chaos Bolt";
+        private const string conflagrateSpell = "Conflagrate";
+        private const string corruptionSpell = "Corruption";
+        private const string curseOftheElementsSpell = "Curse of the Elements";
+        private const string deathCoilSpell = "Death Coil";
+        private const string demonArmorSpell = "Demon Armor";
+        private const string demonSkinSpell = "Demon Skin";
+        private const string drainLifeSpell = "Drain Life";
+        private const string drainSoulSpell = "Drain Soul";
+        private const int fearAttemptDelay = 5;
+        private const string fearSpell = "Fear";
+        private const string felArmorSpell = "Fel Armor";
+        private const string howlOfTerrorSpell = "Howl of Terror";
+        private const string immolateSpell = "Immolate";
+        private const string incinerateSpell = "Incinerate";
+        private const string lifeTapSpell = "Life Tap";
+        private const string summonImpSpell = "Summon Imp";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
-        private readonly int fearAttemptDelay = 5;
-
-        public WarlockDestruction(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public WarlockDestruction(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            PetManager = new PetManager(
+                WowInterface,
+                TimeSpan.FromSeconds(1),
+                null,
+                () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0),
+                null);
 
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
+
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { corruptionSpell, () => CastSpellIfPossible(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { curseOftheElementsSpell, () => CastSpellIfPossible(curseOftheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { immolateSpell, () => CastSpellIfPossible(immolateSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
+
+            WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => false;
+        public override WowClass Class => WowClass.Warlock;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
+        public override string Description => "FCFS based CombatClass for the Destruction Warlock spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Warlock Destruction";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => false;
 
-        private DateTime LastDebuffCheck { get; set; }
+        public override bool IsMelee => false;
 
-        private ObjectManager ObjectManager { get; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
-        private CooldownManager CooldownManager { get; }
+        public PetManager PetManager { get; private set; }
 
-        private Dictionary<string, Spell> Spells { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
+
+        public override string Version => "1.0";
 
         private DateTime LastFearAttempt { get; set; }
 
-        public string Displayname => "Warlock Destruction";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Destruction Warlock spec.";
-
-        public WowClass Class => WowClass.Warlock;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (PetManager.Tick()
+                || WowInterface.ObjectManager.Player.ManaPercentage < 20
+                    && WowInterface.ObjectManager.Player.HealthPercentage > 60
+                    && CastSpellIfPossible(lifeTapSpell, 0)
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 80
+                    && CastSpellIfPossible(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 50
+                    && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true)))
             {
                 return;
             }
 
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing())
-                || ObjectManager.Player.ManaPercentage < 20
-                    && ObjectManager.Player.HealthPercentage > 60
-                    && CastSpellIfPossible(lifeTapSpell)
-                || (ObjectManager.Player.HealthPercentage < 80
-                    && CastSpellIfPossible(deathCoilSpell, true))
-                || (ObjectManager.Player.HealthPercentage < 50
-                    && CastSpellIfPossible(drainLifeSpell, true)))
+            if (WowInterface.ObjectManager.Target != null)
             {
-                return;
-            }
-
-            if (ObjectManager.Target != null)
-            {
-                if (ObjectManager.Target.GetType() == typeof(WowPlayer))
+                if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
                 {
                     if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
-                        && ((ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) < 6
-                            && CastSpellIfPossible(howlOfTerrorSpell, true))
-                        || (ObjectManager.Player.Position.GetDistance(ObjectManager.Target.Position) < 12
-                            && CastSpellIfPossible(fearSpell, true))))
+                        && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
+                            && CastSpellIfPossible(howlOfTerrorSpell, 0, true))
+                        || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
+                            && CastSpellIfPossible(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
                     {
                         LastFearAttempt = DateTime.Now;
                         return;
                     }
                 }
 
-                if ((ObjectManager.Player.CurrentlyCastingSpellId == 0
-                    && ObjectManager.Player.CurrentlyCastingSpellId == 0
-                    && CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                    && ObjectManager.Target.HealthPercentage < 8
-                    && CastSpellIfPossible(drainSoulSpell, true)))
+                if (!WowInterface.ObjectManager.Player.IsCasting
+                    && WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
+                    && WowInterface.ObjectManager.Target.HealthPercentage < 8
+                    && CastSpellIfPossible(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
             }
 
-            if (CastSpellIfPossible(chaosBoltSpell, true)
-                || CastSpellIfPossible(conflagrateSpell, true)
-                || CastSpellIfPossible(incinerateSpell, true))
+            if (CastSpellIfPossible(chaosBoltSpell, WowInterface.ObjectManager.TargetGuid, true)
+                || CastSpellIfPossible(conflagrateSpell, WowInterface.ObjectManager.TargetGuid, true)
+                || CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
-            {
-                return;
-            }
-
-            if (ObjectManager.PetGuid == 0
-                && SummonPet())
+            if (MyAuraManager.Tick()
+                || PetManager.Tick())
             {
                 return;
             }
         }
 
-        private bool SummonPet()
+        private void SpellBook_OnSpellBookUpdate()
         {
-            if (CastSpellIfPossible(summonImpSpell, true))
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell))
             {
-                return true;
+                MyAuraManager.BuffsToKeepActive.Add(felArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(felArmorSpell) && CastSpellIfPossible(felArmorSpell, 0, true));
             }
-            return false;
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
+            else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell))
             {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
+                MyAuraManager.BuffsToKeepActive.Add(demonArmorSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonArmorSpell) && CastSpellIfPossible(demonArmorSpell, 0, true));
             }
-
-            if (Spells.ContainsKey(felArmorSpell)
-                    && Spells[felArmorSpell] != null)
+            else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell))
             {
-                if ((!myBuffs.Any(e => e.Equals(felArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(felArmorSpell, true)))
-                {
-                    return true;
-                }
+                MyAuraManager.BuffsToKeepActive.Add(demonSkinSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(demonSkinSpell) && CastSpellIfPossible(demonSkinSpell, 0, true));
             }
-            else if (Spells.ContainsKey(demonArmorSpell)
-                    && Spells[demonArmorSpell] != null)
-            {
-                if ((!myBuffs.Any(e => e.Equals(demonArmorSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(demonArmorSpell, true)))
-                {
-                    return true;
-                }
-            }
-            else if (Spells.ContainsKey(demonSkinSpell)
-                    && Spells[demonSkinSpell] != null)
-            {
-                if ((!myBuffs.Any(e => e.Equals(demonSkinSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(demonSkinSpell, true)))
-                {
-                    return true;
-                }
-            }
-
-            if (ObjectManager.PetGuid == 0
-                && SummonPet())
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if ((!targetDebuffs.Any(e => e.Equals(curseOftheElementsSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(curseOftheElementsSpell, true))
-                || (!targetDebuffs.Any(e => e.Equals(immolateSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(immolateSpell, true))
-                || (!targetDebuffs.Any(e => e.Equals(corruptionSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(corruptionSpell, true)))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
         }
     }
 }

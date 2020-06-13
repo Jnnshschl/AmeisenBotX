@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
@@ -11,42 +10,44 @@ namespace AmeisenBotX.Core.Character.Spells
 {
     public class SpellBook
     {
-        public SpellBook(HookManager hookManager)
+        public SpellBook(WowInterface wowInterface)
         {
-            Spells = new List<Spell>();
+            WowInterface = wowInterface;
 
-            HookManager = hookManager;
-            Update();
+            Spells = new List<Spell>();
         }
 
         public delegate void SpellBookUpdate();
+
         public event SpellBookUpdate OnSpellBookUpdate;
 
         public List<Spell> Spells { get; private set; }
 
-        private HookManager HookManager { get; }
+        private WowInterface WowInterface { get; }
 
         public Spell GetSpellByName(string spellname)
-            => Spells.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        {
+            return Spells?.FirstOrDefault(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        }
 
         public bool IsSpellKnown(string spellname)
-            => Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        {
+            return Spells != null && Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
+        }
 
         public void Update()
         {
-            string rawSpells = HookManager.GetSpells()
+            string rawSpells = WowInterface.HookManager.GetSpells()
                 .Replace(".799999237061", ""); // weird druid bug kekw
 
             try
             {
-                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells);
-
-                Spells.OrderBy(e => e.Name).ThenByDescending(e => e.Rank);
+                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells).OrderBy(e => e.Name).ThenByDescending(e => e.Rank).ToList();
                 OnSpellBookUpdate?.Invoke();
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed to parse Spells JSON:\n{rawSpells}\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Spells JSON:\n{rawSpells}\n{e}", LogLevel.Error);
             }
         }
     }

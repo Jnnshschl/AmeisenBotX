@@ -13,7 +13,7 @@ namespace AmeisenBotX.Logging
         private static readonly object Padlock = new object();
         private static AmeisenLogger instance;
 
-        private AmeisenLogger()
+        private AmeisenLogger(bool deleteOldLogs = true)
         {
             LogQueue = new ConcurrentQueue<LogEntry>();
 
@@ -21,7 +21,12 @@ namespace AmeisenBotX.Logging
             ActiveLogLevel = LogLevel.Debug;
 
             // default log path
-            ChangeLogFolder(AppDomain.CurrentDomain.BaseDirectory + "log/");
+            ChangeLogFolder(AppDomain.CurrentDomain.BaseDirectory + "log/", false);
+
+            if (deleteOldLogs)
+            {
+                DeleteOldLogs();
+            }
         }
 
         public static AmeisenLogger Instance
@@ -52,22 +57,43 @@ namespace AmeisenBotX.Logging
 
         private Thread LogWorker { get; set; }
 
-        public void ChangeLogFolder(string logFolderPath)
+        public void ChangeLogFolder(string logFolderPath, bool createFolder = true, bool deleteOldLogs = true)
         {
             LogFileFolder = logFolderPath;
-            if (!Directory.Exists(logFolderPath))
+            if (createFolder && !Directory.Exists(logFolderPath))
             {
                 Directory.CreateDirectory(logFolderPath);
             }
 
-            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now.ToString("dd.MM.yyyy")}.{DateTime.Now.ToString("HH.mm")}.txt";
+            LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now:dd.MM.yyyy}-{DateTime.Now:HH.mm}.txt";
+
+            if (deleteOldLogs)
+            {
+                DeleteOldLogs();
+            }
         }
 
-        public void Log(string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
+        public void DeleteOldLogs(int daysToKeep = 1)
+        {
+            if (Directory.Exists(LogFileFolder))
+            {
+                foreach (string file in Directory.GetFiles(LogFileFolder))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+
+                    if (fileInfo.LastAccessTime < DateTime.Now.AddDays(daysToKeep * -1))
+                    {
+                        fileInfo.Delete();
+                    }
+                }
+            }
+        }
+
+        public void Log(string tag, string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
             if (logLevel <= ActiveLogLevel)
             {
-                LogQueue.Enqueue(new LogEntry(logLevel, message, Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+                LogQueue.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",-24} {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
             }
         }
 

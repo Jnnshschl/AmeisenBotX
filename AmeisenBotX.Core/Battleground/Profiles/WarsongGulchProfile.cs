@@ -1,29 +1,22 @@
 ﻿using AmeisenBotX.Core.Battleground.Enums;
-using AmeisenBotX.Core.Battleground.Objectives;
-using AmeisenBotX.Core.Data;
+using AmeisenBotX.Core.Battleground.States;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Battleground.Profiles
 {
-    public class WarsongGulchProfile : IBattlegroundProfile
+    public class WarsongGulchProfile : ICtfBattlegroundProfile
     {
-        public WarsongGulchProfile(bool isAlliance, HookManager hookManager, ObjectManager objectManager, IMovementEngine movementEngine, bool forceCombat)
+        public WarsongGulchProfile(WowInterface wowInterface, BattlegroundEngine battlegroundEngine)
         {
-            ObjectManager = objectManager;
-            MovementEngine = movementEngine;
-            HookManager = hookManager;
-            IsAlliance = isAlliance;
+            WowInterface = wowInterface;
+            IsAlliance = wowInterface.ObjectManager.Player.IsAlliance();
+            BattlegroundEngine = battlegroundEngine;
+            IsMeFlagCarrier = false;
 
-            if (isAlliance)
+            if (IsAlliance)
             {
                 WsgDataset = new AllianceWsgDataset();
             }
@@ -32,93 +25,138 @@ namespace AmeisenBotX.Core.Battleground.Profiles
                 WsgDataset = new HordeWsgDataset();
             }
 
-            // used to make the players do different things
-            Random rnd = new Random();
-
-            Objectives = new List<IBattlegroundObjective>
+            States = new Dictionary<BattlegroundState, BasicBattlegroundState>()
             {
-                new CarryFlagToBaseObjective(100, WsgDataset.OwnFlagPosition, hookManager, objectManager, movementEngine),
-                new AttackEnemyPlayers(rnd.Next(50), hookManager, objectManager, movementEngine, ref forceCombat),
-                new CaptureFlagObjective(rnd.Next(10), WsgDataset.TargetFlagPosition, hookManager, objectManager, movementEngine),
-                new RetrieveOwnFlagObjective(rnd.Next(10), hookManager, objectManager, movementEngine),
+                { BattlegroundState.WaitingForStart, new WaitingForStartBgState(battlegroundEngine) },
+                { BattlegroundState.MoveToEnemyBase, new MoveToEnemyBaseBgState(battlegroundEngine,WowInterface, WsgDataset.EnemyFlagPosition) },
+                { BattlegroundState.MoveToOwnBase, new MoveToOwnBaseBgState(battlegroundEngine, WowInterface, WsgDataset.OwnFlagPosition) },
+                { BattlegroundState.MoveToEnemyFlagCarrier, new MoveToEnemyFlagCarrierBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.AssistOwnFlagCarrier, new AssistOwnFlagCarrierBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.DefendMyself, new DefendMyselfBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.PickupEnemyFlag, new PickupEnemyFlagBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.PickupOwnFlag, new PickupOwnFlagBgState(battlegroundEngine, WowInterface) },
+                { BattlegroundState.PickupBuff, new PickupBuffBgState(battlegroundEngine) },
+                { BattlegroundState.ExitBattleground, new ExitBattlegroundBgState(battlegroundEngine) }
             };
-        }
-
-        public BattlegroundType BattlegroundType { get; } = BattlegroundType.CaptureTheFlag;
-
-        public List<IBattlegroundObjective> Objectives { get; private set; }
-
-        private bool IsAlliance { get; set; }
-
-        private IWsgDataset WsgDataset { get; set; }
-
-        private ObjectManager ObjectManager { get; set; }
-
-        private HookManager HookManager { get; set; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private WowPlayer AllianceFlagCarrier { get; set; }
-
-        private WowPlayer HordeFlagCarrier { get; set; }
-
-        public void AllianceFlagWasPickedUp(string playername)
-        {
-            AllianceFlagCarrier = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Name.ToUpper() == playername.ToUpper());
-            Objectives.OfType<CaptureFlagObjective>().First().IsAvailable = !IsAlliance;
-
-            if (IsAlliance)
-            {
-                Objectives.OfType<RetrieveOwnFlagObjective>().First().IsAvailable = true;
-                Objectives.OfType<RetrieveOwnFlagObjective>().First().FlagCarrier = AllianceFlagCarrier;
-            }
-        }
-
-        public void HordeFlagWasPickedUp(string playername)
-        {
-            HordeFlagCarrier = ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Name.ToUpper() == playername.ToUpper());
-            Objectives.OfType<CaptureFlagObjective>().First().IsAvailable = IsAlliance;
-
-            if (!IsAlliance)
-            {
-                Objectives.OfType<RetrieveOwnFlagObjective>().First().IsAvailable = true;
-                Objectives.OfType<RetrieveOwnFlagObjective>().First().FlagCarrier = HordeFlagCarrier;
-            }
-        }
-
-        public void AllianceFlagWasDropped(string playername)
-        {
-            AllianceFlagCarrier = null;
-            Objectives.OfType<CaptureFlagObjective>().First().IsAvailable = !IsAlliance;
-            Objectives.OfType<RetrieveOwnFlagObjective>().First().IsAvailable = !IsAlliance;
-        }
-
-        public void HordeFlagWasDropped(string playername)
-        {
-            HordeFlagCarrier = null;
-            Objectives.OfType<CaptureFlagObjective>().First().IsAvailable = IsAlliance;
-            Objectives.OfType<RetrieveOwnFlagObjective>().First().IsAvailable = IsAlliance;
         }
 
         private interface IWsgDataset
         {
-            Vector3 TargetFlagPosition { get; }
+            Vector3 EnemyFlagPosition { get; }
 
             Vector3 OwnFlagPosition { get; }
         }
 
+        public BattlegroundType BattlegroundType { get; } = BattlegroundType.CaptureTheFlag;
+
+        public Vector3 EnemyBasePosition => WsgDataset.EnemyFlagPosition;
+
+        public WowPlayer EnemyFlagCarrierPlayer { get; private set; }
+
+        public bool IsBattlegroundRunning => IsAlliance;
+
+        public bool IsMeFlagCarrier { get; private set; }
+
+        public WowPlayer LastEnemyFlagCarrier { get; set; }
+
+        public WowPlayer LastOwnFlagCarrier { get; set; }
+
+        public Vector3 OwnBasePosition => WsgDataset.OwnFlagPosition;
+
+        public WowPlayer OwnFlagCarrierPlayer { get; private set; }
+
+        public Dictionary<BattlegroundState, BasicBattlegroundState> States { get; private set; }
+
+        private BattlegroundEngine BattlegroundEngine { get; set; }
+
+        private bool IsAlliance { get; set; }
+
+        private WowInterface WowInterface { get; }
+
+        private IWsgDataset WsgDataset { get; }
+
+        public void AllianceFlagWasDropped()
+        {
+            UnsetFlagCarrier(!IsAlliance);
+        }
+
+        public void AllianceFlagWasPickedUp(string playername)
+        {
+            SetFlagCarrier(!IsAlliance, playername);
+        }
+
+        public bool HanldeInterruptStates()
+        {
+            IEnumerable<WowGameobject> enemyflags = BattlegroundEngine.GetBattlegroundFlags();
+            if (enemyflags.Count() > 0
+                && !((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier)
+            {
+                BattlegroundEngine.SetState(BattlegroundState.PickupEnemyFlag);
+                return true;
+            }
+
+            IEnumerable<WowGameobject> ownFlags = BattlegroundEngine.GetBattlegroundFlags(false);
+            if (ownFlags.Count() > 0
+                && !((ICtfBattlegroundProfile)BattlegroundEngine.BattlegroundProfile).IsMeFlagCarrier
+                && ownFlags.FirstOrDefault()?.Position.GetDistance(WsgDataset.OwnFlagPosition) > 4)
+            {
+                BattlegroundEngine.SetState(BattlegroundState.PickupOwnFlag);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void HordeFlagWasDropped()
+        {
+            UnsetFlagCarrier(IsAlliance);
+        }
+
+        public void HordeFlagWasPickedUp(string playername)
+        {
+            SetFlagCarrier(IsAlliance, playername);
+        }
+
+        private void SetFlagCarrier(bool own, string playername)
+        {
+            if (own)
+            {
+                OwnFlagCarrierPlayer = WowInterface.ObjectManager.GetWowPlayerByName(playername);
+                IsMeFlagCarrier = playername.ToUpper() == WowInterface.ObjectManager.Player.Name.ToUpper();
+            }
+            else
+            {
+                EnemyFlagCarrierPlayer = WowInterface.ObjectManager.GetWowPlayerByName(playername);
+            }
+        }
+
+        private void UnsetFlagCarrier(bool own)
+        {
+            if (own)
+            {
+                LastOwnFlagCarrier = OwnFlagCarrierPlayer;
+                OwnFlagCarrierPlayer = null;
+                IsMeFlagCarrier = false;
+            }
+            else
+            {
+                LastEnemyFlagCarrier = EnemyFlagCarrierPlayer;
+                EnemyFlagCarrierPlayer = null;
+            }
+        }
+
         private class AllianceWsgDataset : IWsgDataset
         {
-            public Vector3 OwnFlagPosition { get; } = new Vector3(1539, 1481, 352);
+            public Vector3 EnemyFlagPosition { get; } = new Vector3(916, 1434, 346);
 
-            public Vector3 TargetFlagPosition { get; } = new Vector3(916, 1434, 346);
+            public Vector3 OwnFlagPosition { get; } = new Vector3(1539, 1481, 352);
         }
 
         private class HordeWsgDataset : IWsgDataset
         {
-            public Vector3 OwnFlagPosition { get; } = new Vector3(916, 1434, 346);
+            public Vector3 EnemyFlagPosition { get; } = new Vector3(1539, 1481, 352);
 
-            public Vector3 TargetFlagPosition { get; } = new Vector3(1539, 1481, 352);
+            public Vector3 OwnFlagPosition { get; } = new Vector3(916, 1434, 346);
         }
     }
 }

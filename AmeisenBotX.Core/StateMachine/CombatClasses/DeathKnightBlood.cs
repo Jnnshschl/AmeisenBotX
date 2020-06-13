@@ -1,25 +1,31 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class DeathknightBlood : ICombatClass
     {
-        public DeathknightBlood(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DeathknightBlood(IObjectManager objectManager, IHookManager hookManager)
         {
             ObjectManager = objectManager;
-            CharacterManager = characterManager;
             HookManager = hookManager;
         }
+
+        public string Author => "Jamsbaer";
+
+        public WowClass Class => WowClass.Deathknight;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
+
+        public string Displayname => "[WIP] Blood Deathknight";
 
         public bool HandlesMovement => false;
 
@@ -29,29 +35,17 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public IWowItemComparator ItemComparator => null;
 
-        private CharacterManager CharacterManager { get; }
-
-        private DateTime HeroicStrikeLastUsed { get; set; }
-
-        private HookManager HookManager { get; }
-
-        private Vector3 LastPosition { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        public string Displayname => "[WIP] Blood Deathknight";
-
-        public string Version => "1.0";
-
-        public string Author => "Jamsbaer";
-
-        public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
-
-        public WowClass Class => WowClass.Deathknight;
+        public List<string> PriorityTargets { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Tank;
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public string Version => "1.0";
+
+        public bool WalkBehindEnemy => false;
+
+        private IHookManager HookManager { get; }
+
+        private IObjectManager ObjectManager { get; }
 
         public void Execute()
         {
@@ -62,7 +56,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
                 // make sure we're auto attacking
                 if (!ObjectManager.Player.IsAutoAttacking)
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 HandleAttacking(target);
@@ -71,7 +65,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-
         }
 
         private void HandleAttacking(WowUnit target)
@@ -101,7 +94,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             List<WowUnit> unitsNearPlayer = ObjectManager.WowObjects
                 .OfType<WowUnit>()
-                .Where(e => e.Position.GetDistance2D(ObjectManager.Player.Position) <= 10)
+                .Where(e => e.Position.GetDistance(ObjectManager.Player.Position) <= 10)
                 .ToList();
 
             if (unitsNearPlayer.Count > 2 &&
@@ -114,7 +107,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             List<WowUnit> unitsNearTarget = ObjectManager.WowObjects
                 .OfType<WowUnit>()
-                .Where(e => e.Position.GetDistance2D(target.Position) <= 30)
+                .Where(e => e.Position.GetDistance(target.Position) <= 30)
                 .ToList();
 
             if (unitsNearTarget.Count > 2 &&
@@ -131,17 +124,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 HookManager.CastSpell("Icy Touch");
             }
-
-
-
         }
 
         private bool IsOneOfAllRunesReady()
-            => HookManager.IsRuneReady(0) 
-            || HookManager.IsRuneReady(1) 
-            && HookManager.IsRuneReady(2) 
-            || HookManager.IsRuneReady(3) 
-            && HookManager.IsRuneReady(4) 
-            || HookManager.IsRuneReady(5);
+        {
+            return HookManager.IsRuneReady(0)
+                       || HookManager.IsRuneReady(1)
+                       && HookManager.IsRuneReady(2)
+                       || HookManager.IsRuneReady(3)
+                       && HookManager.IsRuneReady(4)
+                       || HookManager.IsRuneReady(5);
+        }
     }
 }

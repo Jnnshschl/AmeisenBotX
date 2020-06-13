@@ -1,257 +1,243 @@
-﻿using AmeisenBotX.Core.Battleground;
-using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Data.Persistence;
-using AmeisenBotX.Core.Event;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
-using AmeisenBotX.Core.StateMachine.States;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
-using AmeisenBotX.Pathfinding;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine
+namespace AmeisenBotX.Core.Statemachine
 {
-    public class AmeisenBotStateMachine
+    public class AmeisenBotStateMachine : AbstractStateMachine<BasicState>
     {
-        public AmeisenBotStateMachine(
-            string botDataPath,
-            Process wowProcess,
-            AmeisenBotConfig config,
-            XMemory xMemory,
-            IOffsetList offsetList,
-            ObjectManager objectManager,
-            CharacterManager characterManager,
-            HookManager hookManager,
-            EventHookManager eventHookManager,
-            IAmeisenBotCache botCache,
-            IPathfindingHandler pathfindingHandler,
-            IMovementEngine movementEngine,
-            MovementSettings movementSettings,
-            ICombatClass combatClass,
-            BattlegroundEngine battlegroundEngine)
+        public AmeisenBotStateMachine(string botDataPath, AmeisenBotConfig config, WowInterface wowInterface)
         {
-            AmeisenLogger.Instance.Log("Starting AmeisenBotStateMachine...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("StateMachine", "Starting AmeisenBotStateMachine...", LogLevel.Verbose);
 
             BotDataPath = botDataPath;
             Config = config;
-            XMemory = xMemory;
-            OffsetList = offsetList;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            EventHookManager = eventHookManager;
-            BotCache = botCache;
-            MovementEngine = movementEngine;
+            WowInterface = wowInterface;
 
-            LastObjectUpdate = DateTime.Now;
-            LastGhostCheck = DateTime.Now;
-            LastEventPull = DateTime.Now;
+            LastState = (int)BotState.None;
 
-            LastState = AmeisenBotState.None;
-            UnitLootList = new Queue<ulong>();
-
-            States = new Dictionary<AmeisenBotState, State>()
+            States = new Dictionary<int, BasicState>()
             {
-                { AmeisenBotState.None, new StateNone(this, config) },
-                { AmeisenBotState.StartWow, new StateStartWow(this, config, wowProcess, xMemory) },
-                { AmeisenBotState.Login, new StateLogin(this, config, offsetList, characterManager) },
-                { AmeisenBotState.LoadingScreen, new StateLoadingScreen(this, xMemory, config, objectManager) },
-                { AmeisenBotState.Idle, new StateIdle(this, config, offsetList, objectManager, characterManager, hookManager, eventHookManager, combatClass, UnitLootList) },
-                { AmeisenBotState.Dead, new StateDead(this, config, objectManager, hookManager) },
-                { AmeisenBotState.Ghost, new StateGhost(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Following, new StateFollowing(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Attacking, new StateAttacking(this, config, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, movementSettings, combatClass) },
-                { AmeisenBotState.Repairing, new StateRepairing(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Selling, new StateSelling(this, config, objectManager, hookManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Healing, new StateEating(this, config, objectManager, characterManager) },
-                { AmeisenBotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, objectManager, characterManager, pathfindingHandler, movementEngine) },
-                { AmeisenBotState.Looting, new StateLooting(this, config, offsetList, objectManager, characterManager, hookManager, pathfindingHandler, movementEngine, UnitLootList) },
-                { AmeisenBotState.Battleground, new StateBattleground(this, config, offsetList, objectManager, characterManager, hookManager, movementEngine, battlegroundEngine) }
+                { (int)BotState.None, new StateNone(this, config, WowInterface) },
+                { (int)BotState.Attacking, new StateAttacking(this, config, WowInterface) },
+                { (int)BotState.Battleground, new StateBattleground(this, config, WowInterface) },
+                { (int)BotState.Dead, new StateDead(this, config, WowInterface) },
+                { (int)BotState.Dungeon, new StateDungeon(this, config, WowInterface) },
+                { (int)BotState.Eating, new StateEating(this, config, WowInterface) },
+                { (int)BotState.Following, new StateFollowing(this, config, WowInterface) },
+                { (int)BotState.Ghost, new StateGhost(this, config, WowInterface) },
+                { (int)BotState.Idle, new StateIdle(this, config, WowInterface) },
+                { (int)BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
+                { (int)BotState.Job, new StateJob(this, config, WowInterface) },
+                { (int)BotState.LoadingScreen, new StateLoadingScreen(this, config, WowInterface) },
+                { (int)BotState.Login, new StateLogin(this, config, WowInterface) },
+                { (int)BotState.Looting, new StateLooting(this, config, WowInterface) },
+                { (int)BotState.Repairing, new StateRepairing(this, config, WowInterface) },
+                { (int)BotState.Selling, new StateSelling(this, config, WowInterface) },
+                { (int)BotState.StartWow, new StateStartWow(this, config, WowInterface) }
             };
+
+            AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
+            EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
+            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
+            ObjectUpdateEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.ObjectUpdateMs), WowInterface.ObjectManager.UpdateWowObjects);
+
+            RenderSwitchEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             CurrentState = States.First();
             CurrentState.Value.Enter();
+
+            OnStateMachineStateChanged += () => WowInterface.MovementEngine.Reset();
         }
 
-        public delegate void StateMachineStateChange();
+        public override event StateMachineTick OnStateMachineTick;
 
-        public delegate void StateMachineTick();
-
-        public event StateMachineStateChange OnStateMachineStateChanged;
-
-        public event StateMachineTick OnStateMachineTick;
+        public override event StateMachineOverride OnStateOverride;
 
         public string BotDataPath { get; }
 
-        public KeyValuePair<AmeisenBotState, State> CurrentState { get; private set; }
+        public MapId LastDiedMap { get; internal set; }
 
-        public AmeisenBotState LastState { get; private set; }
+        public Vector3 LastDiedPosition { get; internal set; }
 
         public string PlayerName { get; internal set; }
 
-        internal IOffsetList OffsetList { get; }
+        public bool WowCrashed { get; internal set; }
 
-        internal XMemory XMemory { get; }
+        internal WowInterface WowInterface { get; }
 
-        internal Queue<ulong> UnitLootList { get; set; }
-
-        internal BattlegroundEngine BattlegroundEngine { get; }
-
-        private IAmeisenBotCache BotCache { get; }
-
-        private CharacterManager CharacterManager { get; }
+        private TimegatedEvent AntiAfkEvent { get; set; }
 
         private AmeisenBotConfig Config { get; }
 
-        private EventHookManager EventHookManager { get; }
+        private TimegatedEvent EventPullEvent { get; set; }
 
-        private HookManager HookManager { get; }
+        private TimegatedEvent<bool> GhostCheckEvent { get; set; }
 
-        private DateTime LastEventPull { get; set; }
+        private TimegatedEvent ObjectUpdateEvent { get; set; }
 
-        private DateTime LastGhostCheck { get; set; }
+        private TimegatedEvent RenderSwitchEvent { get; set; }
 
-        private DateTime LastObjectUpdate { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private Dictionary<AmeisenBotState, State> States { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        public void Execute()
+        public override void Execute()
         {
-            if (XMemory.Process == null || XMemory.Process.HasExited)
+            // we cant do anything if wow has crashed
+            if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
+                && SetState((int)BotState.None))
             {
-                AmeisenLogger.Instance.Log("WoW crashed...", LogLevel.Verbose);
-                SetState(AmeisenBotState.None);
-            }
+                AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
 
-            if (ObjectManager != null)
-            {
-                if (!ObjectManager.IsWorldLoaded)
-                {
-                    SetState(AmeisenBotState.LoadingScreen);
-                    MovementEngine.Reset();
-                }
+                WowCrashed = true;
+                ((StateIdle)States[(int)BotState.Idle]).FirstStart = true;
 
-                HandleEventPull();
+                WowInterface.MovementEngine.Reset();
+                WowInterface.ObjectManager.WowObjects.Clear();
+                WowInterface.EventHookManager.Stop();
 
-                if (ObjectManager.Player != null)
-                {
-                    HandlePlayerDeadOrGhostState();
-
-                    if (CurrentState.Key != AmeisenBotState.Dead && CurrentState.Key != AmeisenBotState.Ghost)
-                    {
-                        if (Config.AutoDodgeAoeSpells
-                            && BotUtils.IsPositionInsideAoeSpell(ObjectManager.Player.Position, ObjectManager.WowObjects.OfType<WowDynobject>().ToList()))
-                        {
-                            SetState(AmeisenBotState.InsideAoeDamage);
-                        }
-
-                        if (ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat() || (BattlegroundEngine != null && (BattlegroundEngine != null && !BattlegroundEngine.ForceCombat)))
-                        {
-                            if(BattlegroundEngine != null && BattlegroundEngine.ForceCombat && ObjectManager.GetNearEnemies(50.0).Count() == 0)
-                            {
-                                BattlegroundEngine.ForceCombat = false;
-                                return;
-                            }
-
-                            SetState(AmeisenBotState.Attacking);
-                        }
-                    }
-                }
-            }
-
-            HandleObjectUpdates();
-            CharacterManager.AntiAfk();
-
-            // used for ui updates
-            OnStateMachineTick?.Invoke();
-            CurrentState.Value.Execute();
-        }
-
-        internal bool IsOnBattleground()
-            => ObjectManager.MapId == 30
-            || ObjectManager.MapId == 489
-            || ObjectManager.MapId == 529
-            || ObjectManager.MapId == 566
-            || ObjectManager.MapId == 607;
-
-        internal bool IsAnyPartymemberInCombat()
-            => ObjectManager.WowObjects.OfType<WowPlayer>()
-            .Where(e => ObjectManager.PartymemberGuids.Contains(e.Guid))
-            .Any(r => r.Position.GetDistance(ObjectManager.Player.Position) < 60 && r.IsInCombat);
-
-        internal void SetState(AmeisenBotState state)
-        {
-            if (CurrentState.Key == state)
-            {
-                // we are already in this state
                 return;
             }
 
-            LastState = CurrentState.Key;
-            CurrentState.Value.Exit();
-            CurrentState = States.First(s => s.Key == state);
-            CurrentState.Value.Enter();
-
-            OnStateMachineStateChanged?.Invoke();
-        }
-
-        private void HandleEventPull()
-        {
-            if (EventHookManager.IsSetUp
-                && LastEventPull + TimeSpan.FromSeconds(1) < DateTime.Now)
+            // ingame override states
+            if (CurrentState.Key != (int)BotState.None
+                && CurrentState.Key != (int)BotState.StartWow
+                && CurrentState.Key != (int)BotState.Login
+                && WowInterface.ObjectManager != null)
             {
-                EventHookManager.ReadEvents();
-                LastEventPull = DateTime.Now;
-            }
-        }
+                WowInterface.ObjectManager.RefreshIsWorldLoaded();
 
-        private void HandleObjectUpdates()
-        {
-            if (LastObjectUpdate - TimeSpan.FromMilliseconds(Config.ObjectUpdateMs) < DateTime.Now
-                && CurrentState.Key != AmeisenBotState.None
-                && CurrentState.Key != AmeisenBotState.StartWow
-                && CurrentState.Key != AmeisenBotState.Login
-                && CurrentState.Key != AmeisenBotState.LoadingScreen)
-            {
-                ObjectManager.UpdateWowObjects();
-                LastObjectUpdate = DateTime.Now;
-            }
-        }
-
-        private void HandlePlayerDeadOrGhostState()
-        {
-            if (ObjectManager.Player.IsDead)
-            {
-                SetState(AmeisenBotState.Dead);
-            }
-            else
-            {
-                if (LastGhostCheck + TimeSpan.FromSeconds(8) < DateTime.Now)
+                if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
-                    bool isGhost = HookManager.IsGhost("player");
-                    LastGhostCheck = DateTime.Now;
-
-                    if (isGhost)
+                    if (SetState((int)BotState.LoadingScreen, true))
                     {
-                        SetState(AmeisenBotState.Ghost);
+                        OnStateOverride?.Invoke(CurrentState.Key);
+                        AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
+                        return;
+                    }
+                }
+                else
+                {
+                    ObjectUpdateEvent.Run();
+                    EventPullEvent.Run();
+
+                    if (WowInterface.ObjectManager.Player != null)
+                    {
+                        if (WowInterface.ObjectManager.Player.IsDead
+                            && SetState((int)BotState.Dead, true))
+                        {
+                            // we are dead, state needs to release the spirit
+                            OnStateOverride?.Invoke(CurrentState.Key);
+                            return;
+                        }
+                        else if (GhostCheckEvent.Run(out bool isGhost)
+                            && isGhost
+                            && SetState((int)BotState.Ghost, true))
+                        {
+                            // we cant be a ghost if we are still dead
+                            OnStateOverride?.Invoke(CurrentState.Key);
+                            return;
+                        }
+
+                        // we cant fight nor do we receive damage when we are dead or a ghost
+                        // so ignore these overrides
+                        if (CurrentState.Key != (int)BotState.Dead
+                            && CurrentState.Key != (int)BotState.Ghost)
+                        {
+                            // if (Config.AutoDodgeAoeSpells
+                            //     && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
+                            //     && SetState(BotState.InsideAoeDamage, true))
+                            // {
+                            //     OnStateOverride(CurrentState.Key);
+                            //     return;
+                            // }
+
+                            // TODO: handle combat bug, sometimes when combat ends, the player stays in combot for no reason
+                            if ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()) && SetState((int)BotState.Attacking, true))
+                            {
+                                OnStateOverride?.Invoke(CurrentState.Key);
+                                return;
+                            }
+                        }
                     }
                 }
             }
+
+            // auto disable rendering when not in focus
+            if (Config.AutoDisableRender && RenderSwitchEvent.Run())
+            {
+                IntPtr foregroundWindow = WowInterface.XMemory.GetForegroundWindow();
+                WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+            }
+
+            // execute the State and Movement
+            CurrentState.Value.Execute();
+            WowInterface.MovementEngine.Execute();
+
+            OnStateMachineTick?.Invoke();
+            AntiAfkEvent.Run();
+        }
+
+        internal IEnumerable<WowUnit> GetNearLootableUnits()
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .Where(e => e.IsLootable
+                                && !((StateLooting)States[12]).UnitsAlreadyLootedList.Contains(e.Guid)
+                                && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
+        }
+
+        internal bool IsAnyPartymemberInCombat()
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
+                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))
+                       .Any(r => r.IsInCombat);
+        }
+
+        internal bool IsBattlegroundMap(MapId map)
+        {
+            return map == MapId.AlteracValley
+                       || map == MapId.WarsongGulch
+                       || map == MapId.ArathiBasin
+                       || map == MapId.EyeOfTheStorm
+                       || map == MapId.StrandOfTheAncients;
+        }
+
+        internal bool IsCapitalCityZone(ZoneId zone)
+        {
+            if (WowInterface.ObjectManager.Player.IsAlliance())
+            {
+                return zone == ZoneId.StormwindCity
+                            || zone == ZoneId.Ironforge
+                            || zone == ZoneId.Teldrassil
+                            || zone == ZoneId.TheExodar;
+            }
+            else if (WowInterface.ObjectManager.Player.IsHorde())
+            {
+                return zone == ZoneId.Orgrimmar
+                            || zone == ZoneId.Undercity
+                            || zone == ZoneId.ThunderBluff
+                            || zone == ZoneId.SilvermoonCity;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        internal bool IsDungeonMap(MapId map)
+        {
+            return map == MapId.Deadmines
+                       || map == MapId.HellfireRamparts
+                       || map == MapId.TheBloodFurnace
+                       || map == MapId.TheSlavePens
+                       || map == MapId.TheUnderbog
+                       || map == MapId.TheSteamvault
+                       || map == MapId.UtgardeKeep
+                       || map == MapId.AzjolNerub;
         }
     }
 }

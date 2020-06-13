@@ -1,181 +1,140 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
+using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class ShamanElemental : ICombatClass
+    public class ShamanElemental : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string flameShockSpell = "Flame Shock";
-        private readonly string lavaBurstSpell = "Lava Burst";
-        private readonly string lightningBoltSpell = "Lightning Bolt";
-        private readonly string chainLightningSpell = "Chain Lightning";
-        private readonly string windShearSpell = "Wind Shear";
-        private readonly string thunderstormSpell = "Thunderstorm";
-        private readonly string lightningShieldSpell = "Lightning Shield";
-        private readonly string waterShieldSpell = "Water Shield";
-        private readonly string flametoungueWeaponSpell = "Flametoungue Weapon";
-        private readonly string elementalMasterySpell = "Elemental Mastery";
-        private readonly string heroismSpell = "Heroism";
-        private readonly string ancestralSpiritSpell = "Ancestral Spirit";
-        private readonly string hexSpell = "Hex";
-        private readonly string lesserHealingWaveSpell = "Lesser Healing Wave";
+#pragma warning disable IDE0051
+        private const string ancestralSpiritSpell = "Ancestral Spirit";
+        private const string chainLightningSpell = "Chain Lightning";
+        private const int deadPartymembersCheckTime = 4;
+        private const string elementalMasterySpell = "Elemental Mastery";
+        private const string flameShockSpell = "Flame Shock";
+        private const string flametongueBuff = "Flametongue ";
+        private const string flametongueWeaponSpell = "Flametongue Weapon";
+        private const string healingWaveSpell = "Healing Wave";
+        private const string heroismSpell = "Heroism";
+        private const string hexSpell = "Hex";
+        private const string lavaBurstSpell = "Lava Burst";
+        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
+        private const string lightningBoltSpell = "Lightning Bolt";
+        private const string lightningShieldSpell = "Lightning Shield";
+        private const string thunderstormSpell = "Thunderstorm";
+        private const string waterShieldSpell = "Water Shield";
+        private const string windShearSpell = "Wind Shear";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
-        private readonly int deadPartymembersCheckTime = 4;
-
-        public ShamanElemental(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public ShamanElemental(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { flameShockSpell, () => CastSpellIfPossible(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true) }
+            };
+
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, (x) => CastSpellIfPossible(windShearSpell, x.Guid, true) },
+                { 1, (x) => CastSpellIfPossible(hexSpell, x.Guid, true) }
             };
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => false;
+        public override WowClass Class => WowClass.Shaman;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
+        public override string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Shaman Elemental";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => false;
 
-        private DateTime LastDebuffCheck { get; set; }
+        public override bool IsMelee => false;
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
-        private ObjectManager ObjectManager { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
+        public override string Version => "1.0";
 
         private bool HexedTarget { get; set; }
 
-        public string Displayname => "Shaman Elemental";
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
-
-        public WowClass Class => WowClass.Shaman;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (TargetInterruptManager.Tick())
             {
                 return;
             }
 
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                    && HandleDebuffing())
+            if ((!WowInterface.ObjectManager.Player.HasBuffByName(lightningShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0))
+                || !WowInterface.ObjectManager.Player.HasBuffByName(waterShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0))
             {
                 return;
             }
 
-            if (ObjectManager.Player.HealthPercentage < 30
-                && CastSpellIfPossible(hexSpell, true))
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 30
+                && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
+                && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 HexedTarget = true;
                 return;
             }
 
-            if (ObjectManager.Player.HealthPercentage < 30
-                && (!CharacterManager.SpellBook.IsSpellKnown(hexSpell)
-                || HexedTarget)
-                && CastSpellIfPossible(lesserHealingWaveSpell, true))
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
             {
                 return;
             }
 
-            if (ObjectManager.Target != null)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                if (ObjectManager.Target.IsCasting
-                    && CastSpellIfPossible(windShearSpell))
+                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
+                        && CastSpellIfPossible(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
+                        && WowInterface.ObjectManager.Target.HealthPercentage < 25
+                        && CastSpellIfPossible(heroismSpell, 0))
+                    || CastSpellIfPossible(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossible(elementalMasterySpell, 0))
                 {
                     return;
                 }
 
-                if ((ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) < 6
-                        && CastSpellIfPossible(thunderstormSpell, true))
-                    || (ObjectManager.Target.MaxHealth > 1000000
-                        && ObjectManager.Target.HealthPercentage < 25
-                        && CastSpellIfPossible(heroismSpell))
-                    || CastSpellIfPossible(lavaBurstSpell, true)
-                    || CastSpellIfPossible(elementalMasterySpell))
-                {
-                    return;
-                }
-
-                if ((ObjectManager.WowObjects.OfType<WowUnit>().Where(e => ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, true))
-                    || CastSpellIfPossible(lightningBoltSpell, true))
+                if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
             }
         }
 
-        private bool HandleDebuffing()
+        public override void OutOfCombatExecute()
         {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if (!targetDebuffs.Any(e => e.Equals(flameShockSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(flameShockSpell, true))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
-        public void OutOfCombatExecute()
-        {
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
+            if (MyAuraManager.Tick()
                 || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                    && HandleDeadPartymembers())
+                && HandleDeadPartymembers(ancestralSpiritSpell))
+            {
+                return;
+            }
+
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametongueBuff, flametongueWeaponSpell))
             {
                 return;
             }
@@ -184,76 +143,6 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
             {
                 HexedTarget = false;
             }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if ((ObjectManager.Player.ManaPercentage > 80
-                    && !myBuffs.Any(e => e.Equals(lightningShieldSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(lightningShieldSpell, true))
-                || (ObjectManager.Player.ManaPercentage < 25
-                    && !myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(waterShieldSpell, true)))
-            // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
-            //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
-            //     && CastSpellIfPossible(flametoungueWeaponSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(ancestralSpiritSpell))
-            {
-                Spells.Add(ancestralSpiritSpell, CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
-            }
-
-            if (Spells[ancestralSpiritSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
-                && Spells[ancestralSpiritSpell].Costs < ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(ancestralSpiritSpell);
-                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)HookManager.GetSpellCooldown(ancestralSpiritSpell));
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
         }
     }
 }

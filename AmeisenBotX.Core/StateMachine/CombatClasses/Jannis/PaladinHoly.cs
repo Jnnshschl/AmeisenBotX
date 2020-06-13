@@ -1,224 +1,192 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class PaladinHoly : ICombatClass
+    public class PaladinHoly : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string blessingOfWisdomSpell = "Blessing of Wisdom";
-        private readonly string devotionAuraSpell = "Devotion Aura";
-        private readonly string divineFavorSpell = "Divine Favor";
-        private readonly string divineIlluminationSpell = "Divine Illumination";
-        private readonly string divinePleaSpell = "Divine Plea";
-        private readonly string flashOfLightSpell = "Flash of Light";
-        private readonly string holyLightSpell = "Holy Light";
-        private readonly string holyShockSpell = "Holy Shock";
-        private readonly string layOnHandsSpell = "Lay on Hands";
+#pragma warning disable IDE0051
+        private const string blessingOfWisdomSpell = "Blessing of Wisdom";
+        private const string devotionAuraSpell = "Devotion Aura";
+        private const string divineFavorSpell = "Divine Favor";
+        private const string divineIlluminationSpell = "Divine Illumination";
+        private const string divinePleaSpell = "Divine Plea";
+        private const string flashOfLightSpell = "Flash of Light";
+        private const string holyLightSpell = "Holy Light";
+        private const string holyShockSpell = "Holy Shock";
+        private const string layOnHandsSpell = "Lay on Hands";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-
-        public PaladinHoly(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public PaladinHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            UseDefaultTargetSelection = false;
+
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { blessingOfWisdomSpell, () => CastSpellIfPossible(blessingOfWisdomSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, WowInterface.ObjectManager.PlayerGuid, true) }
+            };
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, flashOfLightSpell },
                 { 2000, holyShockSpell },
-                { 10000, holyLightSpell }
+                { 4000, holyLightSpell }
             };
 
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
-            {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
-            };
+            FaceEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => true;
+        public override WowClass Class => WowClass.Paladin;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicSpiritComparator();
+        public override string Description => "FCFS based CombatClass for the Holy Paladin spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Paladin Holy";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => true;
 
-        private ObjectManager ObjectManager { get; }
+        public override bool IsMelee => false;
 
-        private CooldownManager CooldownManager { get; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
-        private Dictionary<string, Spell> Spells { get; }
+        public override CombatClassRole Role => CombatClassRole.Heal;
+
+        public override string Version => "1.0";
+
+        private TimegatedEvent FaceEvent { get; set; }
+
+        private TimegatedEvent AutoAttackEvent { get; set; }
+
+        private DateTime LastHealAction { get; set; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public string Displayname => "Paladin Holy";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Holy Paladin spec.";
-
-        public WowClass Class => WowClass.Paladin;
-
-        public CombatClassRole Role => CombatClassRole.Heal;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            // after 1 seconds of no healing and no freidns around us we are going to attack stuff
+            if (!NeedToHealSomeone()
+                && DateTime.Now - LastHealAction > TimeSpan.FromSeconds(1)
+                && WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 48).Count <= 1)
             {
-                return;
-            }
-
-            if (ObjectManager.Player.ManaPercentage < 80
-                && CastSpellIfPossible(divinePleaSpell, true))
-            {
-                return;
-            }
-
-            if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
-            {
-                HandleTargetSelection(playersThatNeedHealing);
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
-
-                WowUnit target = ObjectManager.Target;
-                if (target != null)
+                // basic auto attack defending
+                if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
                 {
-                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
+                    List<WowUnit> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Where(e => e.IsInCombat).ToList();
 
-                    if (target.HealthPercentage < 12
-                        && CastSpellIfPossible(layOnHandsSpell))
+                    if (nearEnemies.Count > 0)
                     {
-                        return;
-                    }
-
-                    if (target.HealthPercentage < 50)
-                    {
-                        CastSpellIfPossible(divineFavorSpell, true);
-                    }
-
-                    if (ObjectManager.Player.ManaPercentage < 50
-                       && ObjectManager.Player.ManaPercentage > 20)
-                    {
-                        CastSpellIfPossible(divineIlluminationSpell, true);
-                    }
-
-                    double healthDifference = target.MaxHealth - target.Health;
-                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                    {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        WowUnit target = nearEnemies.FirstOrDefault();
+                        if (target != null)
                         {
-                            break;
+                            WowInterface.HookManager.TargetGuid(target.Guid);
+                            WowInterface.MovementEngine.Reset();
+                        }
+                    }
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
+
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    {
+                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                        {
+                            WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                        }
+
+                        if (FaceEvent.Run())
+                        {
+                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
                         }
                     }
                 }
             }
-            else
-            {
-                if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                {
-                    return;
-                }
-            }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick()
+                || NeedToHealSomeone())
             {
                 return;
             }
         }
 
-        private bool HandleBuffing()
+        private bool NeedToHealSomeone()
         {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            HookManager.TargetGuid(ObjectManager.PlayerGuid);
-
-            if ((!myBuffs.Any(e => e.Equals(devotionAuraSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(devotionAuraSpell, true))
-                || (!myBuffs.Any(e => e.Equals(blessingOfWisdomSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(blessingOfWisdomSpell, true)))
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
+                WowUnit targetUnit = unitsToHeal.First();
+                WowInterface.HookManager.TargetGuid(targetUnit.Guid);
+
+                if (targetUnit.HealthPercentage < 12
+                    && CastSpellIfPossible(layOnHandsSpell, 0))
+                {
+                    LastHealAction = DateTime.Now;
+                    return true;
+                }
+
+                // TODO: bugged need to figure out why cooldown is always wrong
+                // if (targetUnit.HealthPercentage < 50
+                //     && CastSpellIfPossible(divineFavorSpell, targetUnit.Guid, true))
+                // {
+                //     LastHealAction = DateTime.Now;
+                //     return true;
+                // }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 50
+                   && WowInterface.ObjectManager.Player.ManaPercentage > 20
+                   && CastSpellIfPossible(divineIlluminationSpell, 0, true))
+                {
+                    LastHealAction = DateTime.Now;
+                    return true;
+                }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 60
+                    && CastSpellIfPossible(divinePleaSpell, 0, true))
+                {
+                    LastHealAction = DateTime.Now;
+                    return true;
+                }
+
+                double healthDifference = targetUnit.MaxHealth - targetUnit.Health;
+                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                {
+                    if (CastSpellIfPossible(keyValuePair.Value, targetUnit.Guid, true))
+                    {
+                        break;
+                    }
+                }
+
+                LastHealAction = DateTime.Now;
                 return true;
             }
 
-            LastBuffCheck = DateTime.Now;
             return false;
-        }
-
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
-
-            if (target != null)
-            {
-                HookManager.TargetGuid(target.Guid);
-            }
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
-        {
-            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-            groupPlayers.Add(ObjectManager.Player);
-
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
         }
     }
 }

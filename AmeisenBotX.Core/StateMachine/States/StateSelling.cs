@@ -1,104 +1,87 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateSelling : State
+    public class StateSelling : BasicState
     {
-        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookmanager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            HookManager = hookmanager;
-            CharacterManager = characterManager;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
         }
 
-        private CharacterManager CharacterManager { get; }
+        private bool IsAtNpc { get; set; }
 
-        private AmeisenBotConfig Config { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
+        private DateTime SellActionGo { get; set; }
 
         public override void Enter()
         {
-
+            IsAtNpc = false;
         }
 
         public override void Execute()
         {
-            if (HookManager.GetFreeBagSlotCount() > 4
-               || !CharacterManager.Inventory.Items.Any(e => e.Price > 0))
+            if (WowInterface.HookManager.GetFreeBagSlotCount() > 4
+               || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                WowInterface.CharacterManager.Inventory.Update();
+                StateMachine.SetState((int)BotState.Idle);
                 return;
             }
 
-            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
-                .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position))
+            WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
-                    && HookManager.GetUnitReaction(ObjectManager.Player, e) == WowUnitReaction.Friendly
+                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
                     && e.IsRepairVendor
-                    && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
-                double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                if (distance > 3.0)
+                if (!IsAtNpc)
                 {
-                    MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                    MovementEngine.Execute();
-                }
-                else
-                {
-                    HookManager.RightClickUnit(selectedUnit);
-                    Task.Delay(1000).GetAwaiter().GetResult();
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                    HookManager.SellAllGrayItems();
-                    foreach (IWowItem item in CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    {
+                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        SellActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
+                        IsAtNpc = true;
+                    }
+                }
+                else if (DateTime.Now > SellActionGo)
+                {
+                    WowInterface.HookManager.SellAllGrayItems();
+                    WowInterface.HookManager.RepairAllItems();
+
+                    foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
                     {
                         IWowItem itemToSell = item;
-                        if (CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                        if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                         {
                             itemToSell = itemToReplace;
-                            HookManager.ReplaceItem(null, item);
+                            WowInterface.HookManager.ReplaceItem(null, item);
                         }
 
-                        HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                        if (itemToSell != null)
+                        {
+                            WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                            WowInterface.HookManager.CofirmBop();
+                        }
                     }
                 }
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                WowInterface.CharacterManager.Inventory.Update();
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
         public override void Exit()
         {
-
         }
     }
 }

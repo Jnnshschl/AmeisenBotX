@@ -1,17 +1,24 @@
 ﻿using AmeisenBotX.Memory.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
+        public double AntiAfkMs { get; set; } = 1000;
+
         public bool AutocloseWow { get; set; } = false;
+
+        public bool AutoDisableRender { get; set; } = false;
 
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
+        public bool AutojoinBg { get; set; } = false;
+
         public bool AutoLogin { get; set; } = false;
+
+        public bool Autopilot { get; set; } = false;
 
         public bool AutostartWow { get; set; } = false;
 
@@ -25,11 +32,21 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = "";
 
+        public double EventPullMs { get; set; } = 1000;
+
         public bool FollowGroupLeader { get; set; } = false;
 
         public bool FollowGroupMembers { get; set; } = false;
 
         public bool FollowSpecificCharacter { get; set; } = false;
+
+        public double GhostCheckMs { get; set; } = 5000;
+
+        public double GhostPortalScanThreshold { get; set; } = 24;
+
+        public double GhostPortalSearchMs { get; set; } = 1000;
+
+        public double GhostResurrectThreshold { get; set; } = 24;
 
         public bool LootUnits { get; set; } = true;
 
@@ -47,7 +64,7 @@ namespace AmeisenBotX.Core
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
 
-        public double ObjectUpdateMs { get; set; } = 0;
+        public double ObjectUpdateMs { get; set; } = 250;
 
         public string Password { get; set; } = string.Empty;
 
@@ -56,6 +73,8 @@ namespace AmeisenBotX.Core
         public bool PermanentNameCache { get; set; } = true;
 
         public bool PermanentReactionCache { get; set; } = true;
+
+        public string Realm { get; set; } = "AmeisenRealm";
 
         public bool ReleaseSpirit { get; set; } = false;
 

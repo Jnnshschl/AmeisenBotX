@@ -1,255 +1,141 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class ShamanRestoration : ICombatClass
+    public class ShamanRestoration : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string chainHealSpell = "Chain Heal";
-        private readonly string healingWaveSpell = "Healing Wave";
-        private readonly string riptideSpell = "Riptide";
-        private readonly string earthShieldSpell = "Earth Shield";
-        private readonly string waterShieldSpell = "Water Shield";
-        private readonly string earthlivingWeaponSpell = "Earthliving Weapon";
-        private readonly string naturesSwiftnessSpell = "Nature's Swiftness";
-        private readonly string tidalForceSpell = "Tidal Force";
-        private readonly string ancestralSpiritSpell = "Ancestral Spirit";
+#pragma warning disable IDE0051
+        private const string ancestralSpiritSpell = "Ancestral Spirit";
+        private const string chainHealSpell = "Chain Heal";
+        private const int deadPartymembersCheckTime = 4;
+        private const string earthlivingBuff = "Earthliving ";
+        private const string earthlivingWeaponSpell = "Earthliving Weapon";
+        private const string earthShieldSpell = "Earth Shield";
+        private const string healingWaveSpell = "Healing Wave";
+        private const string naturesSwiftnessSpell = "Nature's Swiftness";
+        private const string riptideSpell = "Riptide";
+        private const string tidalForceSpell = "Tidal Force";
+        private const string waterShieldSpell = "Water Shield";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int deadPartymembersCheckTime = 4;
-
-        public ShamanRestoration(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public ShamanRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
+            UseDefaultTargetSelection = false;
+
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, 0, true) }
+            };
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, riptideSpell },
                 { 5000, healingWaveSpell },
             };
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
-            {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
-            };
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => true;
+        public override WowClass Class => WowClass.Shaman;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicSpiritComparator();
+        public override string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Shaman Restoration";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => true;
+
+        public override bool IsMelee => false;
+
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
+
+        public override CombatClassRole Role => CombatClassRole.Heal;
+
+        public override string Version => "1.0";
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
-
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public string Displayname => "Shaman Restoration";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
-
-        public WowClass Class => WowClass.Shaman;
-
-        public CombatClassRole Role => CombatClassRole.Heal;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (NeedToHealSomeone())
             {
                 return;
             }
+        }
 
-            if (NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing))
+        private bool NeedToHealSomeone()
+        {
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                HandleTargetSelection(playersThatNeedHealing);
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
+                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
+                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
-                WowUnit target = ObjectManager.Target;
-                if (target != null)
+                if (WowInterface.ObjectManager.Target != null)
                 {
-                    ObjectManager.UpdateObject(target.Type, target.BaseAddress);
-
-                    if (target.HealthPercentage < 25
-                        && CastSpellIfPossible(earthShieldSpell, true))
+                    if (WowInterface.ObjectManager.Target.HealthPercentage < 25
+                        && CastSpellIfPossible(earthShieldSpell, 0, true))
                     {
-                        return;
+                        return true;
                     }
 
-                    if (playersThatNeedHealing.Count > 4
-                        && CastSpellIfPossible(chainHealSpell, true))
+                    if (unitsToHeal.Count > 4
+                        && CastSpellIfPossible(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
-                        return;
+                        return true;
                     }
 
-                    if (playersThatNeedHealing.Count > 6
-                        && (CastSpellIfPossible(naturesSwiftnessSpell, true)
-                        || CastSpellIfPossible(tidalForceSpell, true)))
+                    if (unitsToHeal.Count > 6
+                        && (CastSpellIfPossible(naturesSwiftnessSpell, 0, true)
+                        || CastSpellIfPossible(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
-                        return;
+                        return true;
                     }
 
-                    double healthDifference = target.MaxHealth - target.Health;
+                    double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
                     List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, true))
+                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            return;
+                            return true;
                         }
                     }
                 }
-                else
-                {
-                    if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                        && HandleBuffing())
-                    {
-                        return;
-                    }
-                }
             }
+
+            return false;
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                && HandleBuffing())
+            if (MyAuraManager.Tick()
+                || NeedToHealSomeone()
+                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers(ancestralSpiritSpell)))
             {
                 return;
             }
 
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers())
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
                 return;
             }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if ((!myBuffs.Any(e => e.Equals(waterShieldSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(waterShieldSpell, true)))
-                // || (CharacterManager.Equipment.Equipment.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainhandItem)
-                //     && !myBuffs.Any(e => e.Equals(mainhandItem.Name, StringComparison.OrdinalIgnoreCase))
-                //     && CastSpellIfPossible(earthlivingWeaponSpell, true)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(ancestralSpiritSpell))
-            {
-                Spells.Add(ancestralSpiritSpell, CharacterManager.SpellBook.GetSpellByName(ancestralSpiritSpell));
-            }
-
-            if (Spells[ancestralSpiritSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(ancestralSpiritSpell)
-                && Spells[ancestralSpiritSpell].Costs < ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(ancestralSpiritSpell);
-                    CooldownManager.SetSpellCooldown(ancestralSpiritSpell, (int)HookManager.GetSpellCooldown(ancestralSpiritSpell));
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            WowUnit target = possibleTargets.Where(e => !e.IsDead && e.Health > 1).OrderBy(e => e.HealthPercentage).First();
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool NeedToHealSomeone(out List<WowPlayer> playersThatNeedHealing)
-        {
-            IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-            List<WowPlayer> groupPlayers = players.Where(e => !e.IsDead && e.Health > 1 && ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance2D(ObjectManager.Player.Position) < 35).ToList();
-
-            groupPlayers.Add(ObjectManager.Player);
-
-            playersThatNeedHealing = groupPlayers.Where(e => e.HealthPercentage < 90).ToList();
-
-            return playersThatNeedHealing.Count > 0;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -10,19 +9,42 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public class CharacterEquipment
     {
-        public CharacterEquipment(HookManager hookManager)
+        private readonly object queryLock = new object();
+        private Dictionary<EquipmentSlot, IWowItem> items;
+
+        public CharacterEquipment(WowInterface wowInterface)
         {
-            HookManager = hookManager;
-            Equipment = new Dictionary<EquipmentSlot, IWowItem>();
+            WowInterface = wowInterface;
+
+            Items = new Dictionary<EquipmentSlot, IWowItem>();
         }
 
-        public Dictionary<EquipmentSlot, IWowItem> Equipment { get; private set; }
+        public double AverageItemLevel { get; private set; }
 
-        private HookManager HookManager { get; }
+        public Dictionary<EquipmentSlot, IWowItem> Items
+        {
+            get
+            {
+                lock (queryLock)
+                {
+                    return items;
+                }
+            }
+
+            set
+            {
+                lock (queryLock)
+                {
+                    items = value;
+                }
+            }
+        }
+
+        private WowInterface WowInterface { get; }
 
         public void Update()
         {
-            string resultJson = HookManager.GetEquipmentItems();
+            string resultJson = WowInterface.HookManager.GetEquipmentItems();
             if (resultJson.Length > 1 && resultJson.Substring(resultJson.Length - 2, 2).Equals(",]"))
             {
                 resultJson.Remove(resultJson.Length - 2);
@@ -32,17 +54,51 @@ namespace AmeisenBotX.Core.Character.Inventory
             {
                 List<WowBasicItem> rawEquipment = ItemFactory.ParseItemList(resultJson);
 
-                Equipment.Clear();
-                foreach (WowBasicItem rawItem in rawEquipment)
+                if (rawEquipment != null && rawEquipment.Count > 0)
                 {
-                    IWowItem item = ItemFactory.BuildSpecificItem(rawItem);
-                    Equipment.Add(item.EquipSlot, item);
+                    lock (queryLock)
+                    {
+                        Items.Clear();
+                        foreach (WowBasicItem rawItem in rawEquipment)
+                        {
+                            IWowItem item = ItemFactory.BuildSpecificItem(rawItem);
+                            Items.Add(item.EquipSlot, item);
+                        }
+                    }
                 }
+
+                AverageItemLevel = GetAverageItemLevel();
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed to parse Equipment JSON:\n{resultJson}\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Equipment JSON:\n{resultJson}\n{e}", LogLevel.Error);
             }
+        }
+
+        private double GetAverageItemLevel()
+        {
+            double itemLevel = 0.0;
+            int count = 0;
+
+            foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
+            {
+                if (slot == EquipmentSlot.CONTAINER_BAG_1
+                    || slot == EquipmentSlot.CONTAINER_BAG_2
+                    || slot == EquipmentSlot.CONTAINER_BAG_3
+                    || slot == EquipmentSlot.CONTAINER_BAG_4
+                    || slot == EquipmentSlot.INVSLOT_OFFHAND
+                    || slot == EquipmentSlot.INVSLOT_TABARD
+                    || slot == EquipmentSlot.INVSLOT_AMMO
+                    || slot == EquipmentSlot.NOT_EQUIPABLE)
+                {
+                    continue;
+                }
+
+                if (Items.ContainsKey(slot)) { itemLevel += Items[slot].ItemLevel; }
+                ++count;
+            }
+
+            return itemLevel /= count;
         }
     }
 }

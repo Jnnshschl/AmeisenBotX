@@ -1,114 +1,101 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.OffsetLists;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateLooting : State
+    public class StateLooting : BasicState
     {
-        public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, IOffsetList offsetList, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, Queue<ulong> unitLootList) : base(stateMachine)
+        public StateLooting(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            OffsetList = offsetList;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
-            UnitLootList = unitLootList;
+            UnitLootQueue = new Queue<ulong>();
             UnitsAlreadyLootedList = new List<ulong>();
+            LastOpenLootTry = DateTime.Now;
         }
 
-        private CharacterManager CharacterManager { get; }
+        public List<ulong> UnitsAlreadyLootedList { get; private set; }
 
-        private AmeisenBotConfig Config { get; }
+        private DateTime LastOpenLootTry { get; set; }
 
-        private HookManager HookManager { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IOffsetList OffsetList { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private List<ulong> UnitsAlreadyLootedList { get; }
-
-        private Queue<ulong> UnitLootList { get; }
-
-        private int LootTryCount { get; set; }
+        private Queue<ulong> UnitLootQueue { get; set; }
 
         public override void Enter()
         {
-            LootTryCount = 0;
+            WowInterface.MovementEngine.Reset();
         }
 
         public override void Execute()
         {
-            if (UnitLootList.Count == 0)
+            // add nearby Units to the loot List
+            if (Config.LootUnits)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                foreach (WowUnit lootableUnit in StateMachine.GetNearLootableUnits())
+                {
+                    if (!UnitLootQueue.Contains(lootableUnit.Guid))
+                    {
+                        UnitLootQueue.Enqueue(lootableUnit.Guid);
+                    }
+                }
+            }
+
+            if (UnitLootQueue.Count == 0)
+            {
+                StateMachine.SetState((int)BotState.Idle);
             }
             else
             {
-                if (UnitsAlreadyLootedList.Contains(UnitLootList.Peek()))
+                if (UnitsAlreadyLootedList.Contains(UnitLootQueue.Peek()))
                 {
-                    UnitLootList.Dequeue();
+                    if (UnitLootQueue.Count > 0)
+                    {
+                        UnitLootQueue.Dequeue();
+                    }
+
                     return;
                 }
 
-                WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.Guid == UnitLootList.Peek());
+                WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
+
                 if (selectedUnit != null && selectedUnit.IsDead && selectedUnit.IsLootable)
                 {
-                    if (ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.0)
-                    {
-                        MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                        MovementEngine.Execute();
-                        LootTryCount++;
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                        if(LootTryCount == 16)
+                    if (WowInterface.MovementEngine.IsAtTargetPosition && DateTime.Now - LastOpenLootTry > TimeSpan.FromSeconds(1))
+                    {
+                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+
+                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
+                             && lootOpen > 0)
                         {
-                            UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
+                            WowInterface.HookManager.LootEveryThing();
+                            UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
+
+                            if (UnitLootQueue.Count > 0)
+                            {
+                                UnitLootQueue.Dequeue();
+                            }
                         }
-                    }
-                    else
-                    {
-                        do
-                        {
-                            HookManager.RightClickUnit(selectedUnit);
-                            LootTryCount++;
-                            Task.Delay(500).GetAwaiter().GetResult();
-                        } while (AmeisenBotStateMachine.XMemory.ReadByte(OffsetList.LootWindowOpen, out byte lootOpen)
-                                 && lootOpen == 0
-                                 && LootTryCount < 2);
 
-                        UnitsAlreadyLootedList.Add(UnitLootList.Dequeue());
+                        LastOpenLootTry = DateTime.Now;
                     }
                 }
                 else
                 {
-                    UnitLootList.Dequeue();
+                    if (UnitLootQueue.Count > 0)
+                    {
+                        UnitLootQueue.Dequeue();
+                    }
                 }
             }
         }
 
         public override void Exit()
         {
-
         }
     }
 }

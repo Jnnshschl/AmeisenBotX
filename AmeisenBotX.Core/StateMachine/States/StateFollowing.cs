@@ -1,38 +1,18 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
-using System;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    internal class StateFollowing : State
+    internal class StateFollowing : BasicState
     {
-        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
         }
-
-        private CharacterManager CharacterManager { get; }
-
-        private AmeisenBotConfig Config { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
 
         private WowPlayer PlayerToFollow { get; set; }
 
@@ -42,7 +22,7 @@ namespace AmeisenBotX.Core.StateMachine.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            List<WowPlayer> wowPlayers = ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
+            List<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
             if (wowPlayers.Count > 0)
             {
                 if (Config.FollowSpecificCharacter)
@@ -54,52 +34,74 @@ namespace AmeisenBotX.Core.StateMachine.States
                 // check the group/raid leader
                 if (PlayerToFollow == null && Config.FollowGroupLeader)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == ObjectManager.PartyleaderGuid);
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid);
                     PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
                 }
 
                 // check the group members
                 if (PlayerToFollow == null && Config.FollowGroupMembers)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => ObjectManager.PartymemberGuids.Contains(p.Guid));
+                    PlayerToFollow = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
                     PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
                 }
             }
 
             if (PlayerToFollow == null)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
         public override void Execute()
         {
-            ObjectManager.UpdateObject(PlayerToFollow.Type, PlayerToFollow.BaseAddress);
-            double distance = PlayerToFollow.Position.GetDistance(ObjectManager.Player.Position);
-            if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
+            Vector3 posToGoTo = default;
+
+            // handle nearby portals, if our groupleader enters a portal, we follow
+            WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.GhostPortalScanThreshold);
+
+            if (nearestPortal != null)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                double distanceToPortal = PlayerToFollow.Position.GetDistance(nearestPortal.Position);
+
+                if (distanceToPortal < 4.0)
+                {
+                    // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
+                    posToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                }
             }
 
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
+            // if no portal position was found, follow the player
+            if (posToGoTo == default)
+            {
+                posToGoTo = PlayerToFollow.Position;
+            }
+
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(posToGoTo);
+            if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
+            {
+                StateMachine.SetState((int)BotState.Idle);
+            }
+
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
             }
 
-            MovementEngine.SetState(MovementEngineState.Following, PlayerToFollow.Position);
-            MovementEngine.Execute();
+            WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, posToGoTo);
         }
 
         public override void Exit()
         {
-
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
         {
             if (playerToFollow != null)
             {
-                double distance = playerToFollow.Position.GetDistance(ObjectManager.Player.Position);
+                double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
                 if (UnitIsOutOfRange(distance))
                 {
                     playerToFollow = null;
@@ -110,6 +112,8 @@ namespace AmeisenBotX.Core.StateMachine.States
         }
 
         private bool UnitIsOutOfRange(double distance)
-           => (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        {
+            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+        }
     }
 }

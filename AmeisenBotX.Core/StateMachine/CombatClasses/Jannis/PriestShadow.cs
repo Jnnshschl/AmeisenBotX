@@ -1,261 +1,123 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class PriestShadow : ICombatClass
+    public class PriestShadow : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string flashHealSpell = "Flash Heal";
-        private readonly string hymnOfHopeSpell = "Hymn of Hope";
-        private readonly string shadowformSpell = "Shadowform";
-        private readonly string shadowfiendSpell = "Shadowfiend";
-        private readonly string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private readonly string resurrectionSpell = "Resurrection";
-        private readonly string vampiricTouchSpell = "Vampiric Touch";
-        private readonly string devouringPlagueSpell = "Devouring Plague";
-        private readonly string shadowWordPainSpell = "Shadow Word: Pain";
-        private readonly string mindBlastSpell = "Mind Blast";
-        private readonly string mindFlaySpell = "Mind Flay";
-        private readonly string vampiricEmbraceSpell = "Vampiric Embrace";
+#pragma warning disable IDE0051
+        private const int deadPartymembersCheckTime = 4;
+        private const string devouringPlagueSpell = "Devouring Plague";
+        private const string flashHealSpell = "Flash Heal";
+        private const string hymnOfHopeSpell = "Hymn of Hope";
+        private const string mindBlastSpell = "Mind Blast";
+        private const string mindFlaySpell = "Mind Flay";
+        private const string powerWordFortitudeSpell = "Power Word: Fortitude";
+        private const string resurrectionSpell = "Resurrection";
+        private const string shadowfiendSpell = "Shadowfiend";
+        private const string shadowformSpell = "Shadowform";
+        private const string shadowWordPainSpell = "Shadow Word: Pain";
+        private const string vampiricEmbraceSpell = "Vampiric Embrace";
+        private const string vampiricTouchSpell = "Vampiric Touch";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int debuffCheckTime = 1;
-        private readonly int deadPartymembersCheckTime = 4;
-
-        public PriestShadow(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public PriestShadow(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { shadowformSpell, () => CastSpellIfPossible(shadowformSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { vampiricEmbraceSpell, () => CastSpellIfPossible(vampiricEmbraceSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
+
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { vampiricTouchSpell, () => CastSpellIfPossible(vampiricTouchSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { devouringPlagueSpell, () => CastSpellIfPossible(devouringPlagueSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { shadowWordPainSpell, () => CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { mindBlastSpell, () => CastSpellIfPossible(mindBlastSpell, WowInterface.ObjectManager.TargetGuid, true) }
+            };
+
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => false;
+        public override WowClass Class => WowClass.Priest;
 
-        public bool IsMelee => false;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicIntellectComparator();
+        public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Priest Shadow";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => false;
 
-        private DateTime LastDebuffCheck { get; set; }
+        public override bool IsMelee => false;
+
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
+
+        public override CombatClassRole Role => CombatClassRole.Dps;
+
+        public override string Version => "1.0";
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        private ObjectManager ObjectManager { get; }
-
-        private CooldownManager CooldownManager { get; }
-
-        private Dictionary<string, Spell> Spells { get; }
-
-        public string Displayname => "Priest Shadow";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Shadow Priest spec.";
-
-        public WowClass Class => WowClass.Priest;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (TargetAuraManager.Tick())
             {
                 return;
             }
 
-            if (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(debuffCheckTime)
-                && HandleDebuffing())
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+                && CastSpellIfPossible(hymnOfHopeSpell, 0))
             {
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercentage < 30
-                && CastSpellIfPossible(hymnOfHopeSpell))
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
+                && CastSpellIfPossible(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
             {
                 return;
             }
 
-            if (ObjectManager.Player.ManaPercentage < 90
-                && CastSpellIfPossible(shadowfiendSpell))
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                && CastSpellIfPossible(flashHealSpell, WowInterface.ObjectManager.TargetGuid))
             {
                 return;
             }
 
-            //// if (ObjectManager.Player.HealthPercentage < 70
-            ////     && IsSpellKnown(flashHealSpell)
-            ////     && !IsOnCooldown(flashHealSpell))
-            //// {
-            ////     HookManager.CastSpell(flashHealSpell);
-            ////     return;
-            //// }
-
-            if (ObjectManager.Player.IsCasting
-                && CastSpellIfPossible(mindFlaySpell, true))
+            if (!WowInterface.ObjectManager.Player.IsCasting
+                && CastSpellIfPossible(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }
         }
 
-        private bool HandleDebuffing()
+        public override void OutOfCombatExecute()
         {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if (!targetDebuffs.Any(e => e.Equals(vampiricTouchSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(vampiricTouchSpell,true))
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick()
+                || GroupAuraManager.Tick())
             {
-                return true;
+                return;
             }
 
-            if (!targetDebuffs.Any(e => e.Equals(devouringPlagueSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(devouringPlagueSpell))
+            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers(resurrectionSpell))
             {
-                return true;
+                return;
             }
-
-            if (!targetDebuffs.Any(e => e.Equals(mindBlastSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(mindBlastSpell))
-            {
-                return true;
-            }
-
-            if (!targetDebuffs.Any(e => e.Equals(shadowWordPainSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(shadowWordPainSpell, true))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
-        public void OutOfCombatExecute()
-        {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
-            {
-                HandleBuffing();
-            }
-
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime))
-            {
-                HandleDeadPartymembers();
-            }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if (!ObjectManager.Player.IsInCombat)
-            {
-                HookManager.TargetGuid(ObjectManager.PlayerGuid);
-            }
-
-            if (!myBuffs.Any(e => e.Equals(shadowformSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(shadowformSpell, true))
-            {
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(powerWordFortitudeSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(powerWordFortitudeSpell, true))
-            {
-                HookManager.CastSpell(powerWordFortitudeSpell);
-                return true;
-            }
-
-            if (!myBuffs.Any(e => e.Equals(vampiricEmbraceSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(vampiricEmbraceSpell, true))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private void HandleDeadPartymembers()
-        {
-            if (!Spells.ContainsKey(resurrectionSpell))
-            {
-                Spells.Add(resurrectionSpell, CharacterManager.SpellBook.GetSpellByName(resurrectionSpell));
-            }
-
-            if (Spells[resurrectionSpell] != null
-                && !CooldownManager.IsSpellOnCooldown(resurrectionSpell)
-                && Spells[resurrectionSpell].Costs < ObjectManager.Player.Mana)
-            {
-                IEnumerable<WowPlayer> players = ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
-
-                if (groupPlayers.Count > 0)
-                {
-                    HookManager.TargetGuid(groupPlayers.First().Guid);
-                    HookManager.CastSpell(resurrectionSpell);
-                    CooldownManager.SetSpellCooldown(resurrectionSpell, (int)HookManager.GetSpellCooldown(resurrectionSpell));
-                }
-            }
-        }
-
-        private void HandleTargetSelection(List<WowPlayer> possibleTargets)
-        {
-            // select the one with lowest hp
-            HookManager.TargetGuid(possibleTargets.OrderBy(e => e.HealthPercentage).First().Guid);
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsMana = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsMana || Spells[spellName].Costs < ObjectManager.Player.Mana))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
         }
     }
 }

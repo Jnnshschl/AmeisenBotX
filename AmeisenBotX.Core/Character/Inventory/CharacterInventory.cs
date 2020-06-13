@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -9,33 +8,59 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public class CharacterInventory
     {
-        public CharacterInventory(HookManager hookManager)
+        private readonly object queryLock = new object();
+        private List<IWowItem> items;
+
+        public CharacterInventory(WowInterface wowInterface)
         {
-            HookManager = hookManager;
+            WowInterface = wowInterface;
             Items = new List<IWowItem>();
         }
 
-        public List<IWowItem> Items { get; private set; }
+        public List<IWowItem> Items
+        {
+            get
+            {
+                lock (queryLock)
+                {
+                    return items;
+                }
+            }
 
-        private HookManager HookManager { get; }
+            set
+            {
+                lock (queryLock)
+                {
+                    items = value;
+                }
+            }
+        }
+
+        private WowInterface WowInterface { get; }
 
         public void Update()
         {
-            string resultJson = HookManager.GetInventoryItems();
+            string resultJson = WowInterface.HookManager.GetInventoryItems();
 
             try
             {
                 List<WowBasicItem> basicItems = ItemFactory.ParseItemList(resultJson);
 
-                Items.Clear();
-                foreach (WowBasicItem basicItem in basicItems)
+                if (basicItems != null && basicItems.Count > 0)
                 {
-                    Items.Add(ItemFactory.BuildSpecificItem(basicItem));
+                    lock (queryLock)
+                    {
+                        Items.Clear();
+                        foreach (WowBasicItem basicItem in basicItems)
+                        {
+                            Items.Add(ItemFactory.BuildSpecificItem(basicItem));
+                        }
+                    }
                 }
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log($"Failed to parse Inventory JSON:\n{resultJson}\n{e.ToString()}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Inventory JSON:\n{resultJson}\n{e}", LogLevel.Error);
             }
         }
     }

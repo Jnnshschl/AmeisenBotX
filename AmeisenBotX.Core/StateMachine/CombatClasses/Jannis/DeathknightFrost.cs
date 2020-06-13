@@ -1,215 +1,110 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
+using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class DeathknightFrost : ICombatClass
+    public class DeathknightFrost : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string frostPresenceSpell = "Frost Presence";
-        private readonly string icyTouchSpell = "Icy Touch";
-        private readonly string bloodStrikeSpell = "Blood Strike";
-        private readonly string plagueStrikeSpell = "Plague Strike";
-        private readonly string runeStrikeSpell = "Rune Strike";
-        private readonly string strangulateSpell = "Strangulate";
-        private readonly string mindFreezeSpell = "Mind Freeze";
-        private readonly string obliterateSpell = "Obliterate";
-        private readonly string frostFeverSpell = "Frost Fever";
-        private readonly string bloodPlagueSpell = "Blood Plague";
-        private readonly string deathCoilSpell = "Death Coil";
-        private readonly string hornOfWinterSpell = "Horn of Winter";
-        private readonly string iceboundFortitudeSpell = "Icebound Fortitude";
-        private readonly string unbreakableArmorSpell = "Unbreakable Armor";
-        private readonly string armyOfTheDeadSpell = "Army of the Dead";
+#pragma warning disable IDE0051
+        private const string armyOfTheDeadSpell = "Army of the Dead";
+        private const string bloodPlagueSpell = "Blood Plague";
+        private const string bloodStrikeSpell = "Blood Strike";
+        private const string deathCoilSpell = "Death Coil";
+        private const string frostFeverSpell = "Frost Fever";
+        private const string frostPresenceSpell = "Frost Presence";
+        private const string hornOfWinterSpell = "Horn of Winter";
+        private const string iceboundFortitudeSpell = "Icebound Fortitude";
+        private const string icyTouchSpell = "Icy Touch";
+        private const string mindFreezeSpell = "Mind Freeze";
+        private const string obliterateSpell = "Obliterate";
+        private const string plagueStrikeSpell = "Plague Strike";
+        private const string runeStrikeSpell = "Rune Strike";
+        private const string strangulateSpell = "Strangulate";
+        private const string unbreakableArmorSpell = "Unbreakable Armor";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 4;
-        private readonly int deBuffCheckTime = 4;
-        private readonly int enemyCastingCheckTime = 1;
-
-        public DeathknightFrost(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public DeathknightFrost(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { frostPresenceSpell, () => CastSpellIfPossibleDk(frostPresenceSpell, 0) },
+                { hornOfWinterSpell, () => CastSpellIfPossibleDk(hornOfWinterSpell, 0, true) }
             };
+
+            TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { frostFeverSpell, () => CastSpellIfPossibleDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) },
+                { bloodPlagueSpell, () => CastSpellIfPossibleDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) }
+            };
+
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, (x) => CastSpellIfPossibleDk(mindFreezeSpell, x.Guid, true) },
+                { 1, (x) => CastSpellIfPossibleDk(strangulateSpell, x.Guid, false, true) }
+            };
+
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => false;
+        public override WowClass Class => WowClass.Deathknight;
 
-        public bool IsMelee => true;
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public IWowItemComparator ItemComparator { get; } = new BasicStrengthComparator();
+        public override string Description => "FCFS based CombatClass for the Frost Deathknight spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "Deathknight Frost";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => false;
 
-        private DateTime LastDebuffCheck { get; set; }
+        public override bool IsMelee => true;
 
-        private DateTime LastEnemyCastingCheck { get; set; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
-        private ObjectManager ObjectManager { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        private CooldownManager CooldownManager { get; }
+        public override string Version => "1.0";
 
-        private Dictionary<string, Spell> Spells { get; }
+        private TimegatedEvent AutoAttackEvent { get; set; }
 
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public string Displayname => "Deathknight Frost";
-
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Frost Deathknight spec.";
-
-        public WowClass Class => WowClass.Deathknight;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
             {
-                return;
+                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            if (!ObjectManager.Player.IsAutoAttacking)
-            {
-                HookManager.StartAutoAttack();
-            }
-
-            if ((DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffing())
-                || (DateTime.Now - LastDebuffCheck > TimeSpan.FromSeconds(deBuffCheckTime)
-                    && HandleDebuffing())
-                || (DateTime.Now - LastEnemyCastingCheck > TimeSpan.FromSeconds(enemyCastingCheckTime)
-                    && HandleEnemyCasting())
-                || (ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossible(iceboundFortitudeSpell, true))
-                || CastSpellIfPossible(unbreakableArmorSpell, false, false, true)
-                || CastSpellIfPossible(obliterateSpell, false, false, true, true)
-                || CastSpellIfPossible(bloodStrikeSpell, false, true)
-                || CastSpellIfPossible(deathCoilSpell, true)
-                || (ObjectManager.Player.Runeenergy > 60
-                    && CastSpellIfPossible(runeStrikeSpell)))
+            if (MyAuraManager.Tick()
+                || TargetAuraManager.Tick()
+                || TargetInterruptManager.Tick()
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                    && CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true))
+                || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
+                || CastSpellIfPossibleDk(obliterateSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
+                || CastSpellIfPossibleDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
+                || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
+                || (WowInterface.ObjectManager.Player.Runeenergy > 60
+                    && CastSpellIfPossibleDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
             {
                 return;
             }
         }
 
-        private bool HandleEnemyCasting()
+        public override void OutOfCombatExecute()
         {
-            (string, int) castinInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
-
-            bool isCasting = castinInfo.Item1.Length > 0 && castinInfo.Item2 > 0;
-
-            if (isCasting
-                && (CastSpellIfPossible(mindFreezeSpell, true)
-                || CastSpellIfPossible(strangulateSpell, false, true)))
-            {
-                return true;
-            }
-
-            LastEnemyCastingCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool HandleDebuffing()
-        {
-            List<string> targetDebuffs = HookManager.GetDebuffs(WowLuaUnit.Target);
-
-            if (!targetDebuffs.Any(e => e.Equals(frostFeverSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(icyTouchSpell, false, false, true))
-            {
-                return true;
-            }
-
-            if (!targetDebuffs.Any(e => e.Equals(bloodPlagueSpell, StringComparison.OrdinalIgnoreCase))
-                && CastSpellIfPossible(plagueStrikeSpell, false, false, false, true))
-            {
-                return true;
-            }
-
-            LastDebuffCheck = DateTime.Now;
-            return false;
-        }
-
-        public void OutOfCombatExecute()
-        {
-            if (DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime))
-            {
-                HandleBuffing();
-            }
-        }
-
-        private bool HandleBuffing()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if ((ObjectManager.Player.IsInCombat
-                    && !myBuffs.Any(e => e.Equals(hornOfWinterSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(hornOfWinterSpell))
-                || (!myBuffs.Any(e => e.Equals(frostPresenceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(frostPresenceSpell)))
-            {
-                return true;
-            }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsRuneenergy || Spells[spellName].Costs < ObjectManager.Player.Runeenergy)
-                && (!needsBloodrune || (HookManager.IsRuneReady(0) || HookManager.IsRuneReady(1)))
-                && (!needsFrostrune || (HookManager.IsRuneReady(2) || HookManager.IsRuneReady(3)))
-                && (!needsUnholyrune || (HookManager.IsRuneReady(4) || HookManager.IsRuneReady(5))))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
+            MyAuraManager.Tick();
         }
     }
 }

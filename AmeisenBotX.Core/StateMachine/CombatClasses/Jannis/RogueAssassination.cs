@@ -1,171 +1,109 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Spells.Objects;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Core.StateMachine.Utils;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
+using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
-    public class RogueAssassination : ICombatClass
+    public class RogueAssassination : BasicCombatClass
     {
         // author: Jannis Höschele
 
-        private readonly string stealthSpell = "Stealth";
-        private readonly string hungerForBloodSpell = "Hunger for Blood";
-        private readonly string sliceAndDiceSpell = "Slice and Dice";
-        private readonly string mutilateSpell = "Mutilate";
-        private readonly string coldBloodSpell = "Cold Blood";
-        private readonly string eviscerateSpell = "Eviscerate";
-        private readonly string cloakOfShadowsSpell = "Cloak of Shadows";
-        private readonly string kickSpell = "Kick";
-        private readonly string sprintSpell = "Sprint";
+#pragma warning disable IDE0051
+        private const string cloakOfShadowsSpell = "Cloak of Shadows";
+        private const string coldBloodSpell = "Cold Blood";
+        private const string eviscerateSpell = "Eviscerate";
+        private const string hungerForBloodSpell = "Hunger for Blood";
+        private const string kickSpell = "Kick";
+        private const string mutilateSpell = "Mutilate";
+        private const string sliceAndDiceSpell = "Slice and Dice";
+        private const string sprintSpell = "Sprint";
+        private const string stealthSpell = "Stealth";
+#pragma warning restore IDE0051
 
-        private readonly int buffCheckTime = 8;
-        private readonly int enemyCastingCheckTime = 1;
-
-        public RogueAssassination(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager)
+        public RogueAssassination(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            CooldownManager = new CooldownManager(characterManager.SpellBook.Spells);
-
-            Spells = new Dictionary<string, Spell>();
-            CharacterManager.SpellBook.OnSpellBookUpdate += () =>
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                Spells.Clear();
-                foreach (Spell spell in CharacterManager.SpellBook.Spells)
-                {
-                    Spells.Add(spell.Name, spell);
-                }
+                { sliceAndDiceSpell, () => CastSpellIfPossibleRogue(sliceAndDiceSpell, 0, true, true, 1) },
+                { coldBloodSpell, () => CastSpellIfPossibleRogue(coldBloodSpell, 0, true) }
             };
+
+            TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            {
+                { 0, (x) => CastSpellIfPossibleRogue(kickSpell, x.Guid, true) }
+            };
+
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
         }
 
-        public bool HandlesMovement => false;
+        public override string Author => "Jannis";
 
-        public bool HandlesTargetSelection => false;
+        public override bool WalkBehindEnemy => true;
 
-        public bool IsMelee => true;
+        public override WowClass Class => WowClass.Rogue;
 
-        public IWowItemComparator ItemComparator { get; } = new BasicAgilityComparator();
+        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public bool InOpener { get; set; }
+        public override string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
 
-        private CharacterManager CharacterManager { get; }
+        public override string Displayname => "[WIP] Rogue Assasination";
 
-        private HookManager HookManager { get; }
+        public override bool HandlesMovement => false;
 
-        private DateTime LastBuffCheck { get; set; }
+        public override bool HandlesTargetSelection => false;
 
-        private DateTime LastEnemyCastingCheck { get; set; }
+        public override bool IsMelee => true;
 
-        private ObjectManager ObjectManager { get; }
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicAgilityComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
 
-        private CooldownManager CooldownManager { get; }
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
-        private Dictionary<string, Spell> Spells { get; }
+        public override string Version => "1.0";
 
-        public string Displayname => "[WIP] Rogue Assasination";
+        private TimegatedEvent AutoAttackEvent { get; set; }
 
-        public string Version => "1.0";
-
-        public string Author => "Jannis";
-
-        public string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
-
-        public WowClass Class => WowClass.Rogue;
-
-        public CombatClassRole Role => CombatClassRole.Dps;
-
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
-
-        public void Execute()
+        public override void ExecuteCC()
         {
-            // we dont want to do anything if we are casting something...
-            if (ObjectManager.Player.IsCasting)
+            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
+            {
+                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+            }
+
+            if (TargetInterruptManager.Tick()
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 20
+                    && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
             {
                 return;
             }
 
-            if (!ObjectManager.Player.IsAutoAttacking)
+            if (WowInterface.ObjectManager.Target != null)
             {
-                HookManager.StartAutoAttack();
-            }
-
-            if ((!ObjectManager.Player.IsInCombat && DateTime.Now - LastBuffCheck > TimeSpan.FromSeconds(buffCheckTime)
-                    && HandleBuffs())
-                // || CastSpellIfPossible(hungerForBloodSpell, true)
-                || (ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossible(cloakOfShadowsSpell, true)))
-            {
-                return;
-            }
-
-            if (ObjectManager.Target != null)
-            {
-                if ((CharacterManager.SpellBook.IsSpellKnown(kickSpell) 
-                        && ObjectManager.Target.IsCasting
-                        && CastSpellIfPossible(kickSpell))
-                    || (ObjectManager.Target.Position.GetDistance2D(ObjectManager.Player.Position) > 16
-                        && CastSpellIfPossible(sprintSpell, true)))
+                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
+                        && CastSpellIfPossibleRogue(sprintSpell, 0, true)))
                 {
                     return;
                 }
             }
 
-            if (CastSpellIfPossible(eviscerateSpell, true, true, 3)
-                || CastSpellIfPossible(mutilateSpell, true))
+            if (CastSpellIfPossibleRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
+                || CastSpellIfPossibleRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }
         }
 
-        public void OutOfCombatExecute()
+        public override void OutOfCombatExecute()
         {
-
-        }
-
-        private bool HandleBuffs()
-        {
-            List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player);
-
-            if ((!myBuffs.Any(e => e.Equals(sliceAndDiceSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(sliceAndDiceSpell, false, true, 1))
-                || (!myBuffs.Any(e => e.Equals(coldBloodSpell, StringComparison.OrdinalIgnoreCase))
-                    && CastSpellIfPossible(coldBloodSpell)))
+            if (MyAuraManager.Tick())
             {
-                return true;
+                return;
             }
-
-            LastBuffCheck = DateTime.Now;
-            return false;
-        }
-
-        private bool CastSpellIfPossible(string spellName, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1)
-        {
-            if (!Spells.ContainsKey(spellName))
-            {
-                Spells.Add(spellName, CharacterManager.SpellBook.GetSpellByName(spellName));
-            }
-
-            if (Spells[spellName] != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && (!needsEnergy || Spells[spellName].Costs < ObjectManager.Player.Energy)
-                && (!needsCombopoints || ObjectManager.Player.ComboPoints >= requiredCombopoints))
-            {
-                HookManager.CastSpell(spellName);
-                CooldownManager.SetSpellCooldown(spellName, (int)HookManager.GetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
         }
     }
 }

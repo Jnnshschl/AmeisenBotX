@@ -1,45 +1,54 @@
-﻿using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Hook;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateDead : State
+    public class StateDead : BasicState
     {
-        public StateDead(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookManager) : base(stateMachine)
+        public StateDead(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            HookManager = hookManager;
         }
 
-        private AmeisenBotConfig Config { get; }
-
-        private HookManager HookManager { get; }
-
-        private ObjectManager ObjectManager { get; }
+        public bool SetMapAndPosition { get; set; }
 
         public override void Enter()
         {
+            SetMapAndPosition = false;
         }
 
         public override void Execute()
         {
-            if (ObjectManager.Player.IsDead)
+            if (WowInterface.ObjectManager.Player.IsDead)
             {
-                HookManager.ReleaseSpirit();
+                if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
+                {
+                    StateMachine.LastDiedMap = WowInterface.ObjectManager.MapId;
+
+                    if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap))
+                    {
+                        // when we died in a dungeon, we need to return to its portal
+                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                    }
+                    else
+                    {
+                        StateMachine.LastDiedPosition = WowInterface.ObjectManager.Player.Position;
+                    }
+                }
+
+                WowInterface.HookManager.ReleaseSpirit();
             }
-            else if (HookManager.IsGhost("player"))
+            else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Ghost);
+                StateMachine.SetState((int)BotState.Ghost);
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
         public override void Exit()
         {
+            SetMapAndPosition = false;
         }
     }
 }

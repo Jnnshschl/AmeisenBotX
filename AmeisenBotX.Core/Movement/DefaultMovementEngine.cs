@@ -1,8 +1,7 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +10,7 @@ namespace AmeisenBotX.Core.Movement
 {
     public class DefaultMovementEngine
     {
-        public DefaultMovementEngine(ObjectManager objectManager, MovementSettings settings = null)
+        public DefaultMovementEngine(IObjectManager objectManager, MovementSettings settings = null)
         {
             ObjectManager = objectManager;
 
@@ -25,24 +24,26 @@ namespace AmeisenBotX.Core.Movement
             Reset();
         }
 
+        public Vector3 Acceleration { get; private set; }
+
         public Queue<Vector3> CurrentPath { get; private set; }
 
         public Vector3 LastPosition { get; private set; }
 
-        public Vector3 Acceleration { get; private set; }
-
-        public Vector3 Velocity { get; private set; }
+        public List<Vector3> Path => CurrentPath.ToList();
 
         public MovementSettings Settings { get; private set; }
 
-        private ObjectManager ObjectManager { get; }
+        public Vector3 Velocity { get; private set; }
 
-        public bool GetNextStep(Vector3 currentPosition, float currentRotation, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
+        private IObjectManager ObjectManager { get; }
+
+        public bool GetNextStep(Vector3 currentPosition, out Vector3 positionToGoTo, out bool needToJump, bool enableSeperation = false)
         {
             positionToGoTo = new Vector3(0, 0, 0);
             needToJump = false;
 
-            double distance = currentPosition.GetDistance2D(CurrentPath.Peek());
+            double distance = currentPosition.GetDistance(CurrentPath.Peek());
             if ((CurrentPath == null || CurrentPath.Count == 0)
                 || (CurrentPath.Peek() != new Vector3(0, 0, 0) && distance > 1024))
             {
@@ -78,10 +79,35 @@ namespace AmeisenBotX.Core.Movement
                 heightDiff *= -1;
             }
 
-            double distanceTraveled = currentPosition.GetDistance2D(LastPosition);
-            needToJump =  LastPosition != new Vector3(0, 0, 0) && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
+            double distanceTraveled = currentPosition.GetDistance(LastPosition);
+            needToJump = LastPosition != new Vector3(0, 0, 0) && (heightDiff > 1 || distanceTraveled > 0 && distanceTraveled < 0.1);
             LastPosition = currentPosition;
             return true;
+        }
+
+        public void LoadPath(List<Vector3> path)
+        {
+            CurrentPath = new Queue<Vector3>();
+            foreach (Vector3 v in path)
+            {
+                CurrentPath.Enqueue(v);
+            }
+        }
+
+        public void PostProcessPath()
+        {
+            // wont do anything here
+        }
+
+        public void Reset()
+        {
+            if (CurrentPath == null)
+            {
+                CurrentPath = new Queue<Vector3>();
+            }
+
+            Acceleration = new Vector3(0, 0, 0);
+            CurrentPath.Clear();
         }
 
         private Vector3 Seek(Vector3 currentPosition, double distance)
@@ -154,51 +180,6 @@ namespace AmeisenBotX.Core.Movement
             }
 
             return force;
-        }
-
-        public void LoadPath(List<Vector3> path)
-        {
-            CurrentPath = new Queue<Vector3>();
-            foreach (Vector3 v in path)
-            {
-                CurrentPath.Enqueue(v);
-            }
-        }
-
-        public void PostProcessPath()
-        {
-            // wont do anything here
-        }
-
-        public void Reset()
-        {
-            if (CurrentPath == null)
-            {
-                CurrentPath = new Queue<Vector3>();
-            }
-
-            Acceleration = new Vector3(0, 0, 0);
-            CurrentPath.Clear();
-        }
-
-        private Vector3 CalculatePositionBehindMe(Vector3 currentPosition, float currentRotation)
-        {
-            double x = currentPosition.X + Math.Cos(currentRotation + Math.PI);
-            double y = currentPosition.Y + Math.Sin(currentRotation + Math.PI);
-
-            Vector3 destination = new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = currentPosition.Z
-            };
-
-            return destination;
-        }
-
-        private bool NeedToJumpOrUnstuck(Vector3 currentPosition, float currentRotation, double distanceTraveled)
-        {
-            return false;
         }
     }
 }

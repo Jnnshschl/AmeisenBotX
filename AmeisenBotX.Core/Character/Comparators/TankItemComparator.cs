@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND))
             {
                 // shields
-                if (item.GetType() == typeof(WowArmor) && ((WowArmor) item).ArmorType.Equals(ArmorType.SHIEDLS))
+                if (item.GetType() == typeof(WowArmor) && ((WowArmor)item).ArmorType.Equals(ArmorType.SHIEDLS))
                 {
                     if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString) && double.TryParse(armorString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double armor))
                     {

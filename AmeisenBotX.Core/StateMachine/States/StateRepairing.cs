@@ -1,101 +1,70 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateRepairing : State
+    public class StateRepairing : BasicState
     {
-        public StateRepairing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, HookManager hookmanager, CharacterManager characterManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine) : base(stateMachine)
+        public StateRepairing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            HookManager = hookmanager;
-            CharacterManager = characterManager;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
         }
 
-        private CharacterManager CharacterManager { get; }
+        private bool IsAtNpc { get; set; }
 
-        private AmeisenBotConfig Config { get; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private HookManager HookManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private int TryCount { get; set; }
+        private DateTime RepairActionGo { get; set; }
 
         public override void Enter()
         {
-
+            IsAtNpc = false;
         }
 
         public override void Execute()
         {
-            if (CharacterManager.Equipment.Equipment.Any(e => ((double)e.Value.MaxDurability / (double)e.Value.Durability) > 0.2))
+            if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                WowInterface.CharacterManager.Equipment.Update();
+                StateMachine.SetState((int)BotState.Idle);
                 return;
             }
 
-            WowUnit selectedUnit = ObjectManager.WowObjects.OfType<WowUnit>()
-                .OrderBy(e => e.Position.GetDistance(ObjectManager.Player.Position))
+            WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
-                    && HookManager.GetUnitReaction(ObjectManager.Player, e) == WowUnitReaction.Friendly
+                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
                     && e.IsRepairVendor
-                    && e.Position.GetDistance(ObjectManager.Player.Position) < 50);
+                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
-                double distance = ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
-                if (distance > 5.0)
+                if (!IsAtNpc)
                 {
-                    MovementEngine.SetState(MovementEngineState.Moving, selectedUnit.Position);
-                    MovementEngine.Execute();
-                }
-                else
-                {
-                    if (distance > 3)
-                    {
-                        CharacterManager.InteractWithUnit(selectedUnit, 20.9f, 0.2f);
-                    }
-                    else
-                    {
-                        HookManager.RightClickUnit(selectedUnit);
-                        Task.Delay(1000).GetAwaiter().GetResult();
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                        HookManager.RepairAllItems();
-                        HookManager.SellAllGrayItems();
-                        Task.Delay(1000).GetAwaiter().GetResult();
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    {
+                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        RepairActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
+                        IsAtNpc = true;
                     }
+                }
+                else if (DateTime.Now > RepairActionGo)
+                {
+                    WowInterface.HookManager.RepairAllItems();
+                    WowInterface.HookManager.SellAllGrayItems();
+                    WowInterface.CharacterManager.Equipment.Update();
                 }
             }
             else
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                WowInterface.CharacterManager.Equipment.Update();
+                StateMachine.SetState((int)BotState.Idle);
             }
         }
 
         public override void Exit()
         {
-
         }
     }
 }

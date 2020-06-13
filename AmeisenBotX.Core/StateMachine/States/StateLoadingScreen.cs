@@ -1,22 +1,14 @@
-﻿using AmeisenBotX.Core.Data;
-using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Core.Common;
+using System;
+using System.Text;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    public class StateLoadingScreen : State
+    public class StateLoadingScreen : BasicState
     {
-        public StateLoadingScreen(AmeisenBotStateMachine stateMachine, XMemory xMemory, AmeisenBotConfig config, ObjectManager objectManager) : base(stateMachine)
+        public StateLoadingScreen(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            XMemory = xMemory;
         }
-
-        private AmeisenBotConfig Config { get; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private XMemory XMemory { get; }
 
         public override void Enter()
         {
@@ -24,15 +16,25 @@ namespace AmeisenBotX.Core.StateMachine.States
 
         public override void Execute()
         {
-            if (XMemory.Process != null && XMemory.Process.HasExited)
+            if (WowInterface.XMemory.Process == null || WowInterface.WowProcess.HasExited)
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.None);
+                StateMachine.SetState((int)BotState.None);
+                return;
             }
 
-            ObjectManager.RefreshIsWorldLoaded();
-            if (ObjectManager.IsWorldLoaded)
+            if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string gameState)
+                && gameState.Contains("login"))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
+                StateMachine.SetState((int)BotState.Login);
+                BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x1B));
+                return;
+            }
+
+            WowInterface.ObjectManager.RefreshIsWorldLoaded();
+            if (WowInterface.ObjectManager.IsWorldLoaded)
+            {
+                StateMachine.SetState((int)BotState.Idle);
+                return;
             }
         }
 

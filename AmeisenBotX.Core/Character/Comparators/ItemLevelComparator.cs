@@ -5,6 +5,8 @@ namespace AmeisenBotX.Core.Character.Comparators
     public class ItemLevelComparator : IWowItemComparator
     {
         public bool IsBetter(IWowItem current, IWowItem item)
-            => current == null || current.ItemLevel < item.ItemLevel;
+        {
+            return current == null || current.ItemLevel < item.ItemLevel;
+        }
     }
 }

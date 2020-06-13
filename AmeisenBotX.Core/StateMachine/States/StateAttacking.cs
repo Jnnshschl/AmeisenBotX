@@ -1,287 +1,125 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Settings;
-using AmeisenBotX.Core.StateMachine.CombatClasses;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.States
+namespace AmeisenBotX.Core.Statemachine.States
 {
-    internal class StateAttacking : State
+    internal class StateAttacking : BasicState
     {
-        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathfindingHandler, IMovementEngine movementEngine, MovementSettings movementSettings, ICombatClass combatClass) : base(stateMachine)
+        public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Config = config;
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            PathfindingHandler = pathfindingHandler;
-            MovementEngine = movementEngine;
-            MovementSettings = movementSettings;
-            CombatClass = combatClass;
-
-            // default distance values
-            DistanceToTarget = combatClass == null || combatClass.IsMelee ? 3.0 : 25.0;
+            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
         }
 
-        public double DistanceToTarget { get; private set; }
+        public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 25.0;
 
-        private CharacterManager CharacterManager { get; }
+        public bool IsFacing { get; private set; }
 
-        private ICombatClass CombatClass { get; }
+        public bool TargetInLos { get; private set; }
 
-        private AmeisenBotConfig Config { get; }
+        private TimegatedEvent FacingCheck { get; set; }
 
-        private HookManager HookManager { get; }
+        private ulong LastTarget { get; set; }
 
-        private MovementSettings MovementSettings { get; }
-
-        private DateTime LastRotationCheck { get; set; }
-
-        private DateTime LastValidTargetCheck { get; set; }
-
-        private IMovementEngine MovementEngine { get; set; }
-
-        private ObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; }
-
-        private int TryCount { get; set; }
+        private TimegatedEvent<bool> LineOfSightCheck { get; set; }
 
         public override void Enter()
         {
-            AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
+            WowInterface.MovementEngine.Reset();
+
+            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
         }
 
         public override void Execute()
         {
-            if (!ObjectManager.Player.IsInCombat && !AmeisenBotStateMachine.IsAnyPartymemberInCombat() && !(AmeisenBotStateMachine.BattlegroundEngine != null && AmeisenBotStateMachine.BattlegroundEngine.ForceCombat))
+            if (!WowInterface.ObjectManager.Player.IsInCombat
+                && !StateMachine.IsAnyPartymemberInCombat()
+                && (WowInterface.BattlegroundEngine == null || !WowInterface.BattlegroundEngine.ForceCombat)
+                && StateMachine.SetState((int)BotState.Idle))
             {
-                AmeisenBotStateMachine.SetState(AmeisenBotState.Idle);
                 return;
             }
 
             // we can do nothing until the ObjectManager is initialzed
-            if (ObjectManager != null
-                && ObjectManager.Player != null)
+            if (WowInterface.ObjectManager != null
+                && WowInterface.ObjectManager.Player != null)
             {
-                // use the default Target selection algorithm if the CombatClass doenst
-
-                // Note: this only works for dps classes, tanks and healers need
-                //        to implement their own target selection algorithm
-                if (CombatClass == null || !CombatClass.HandlesTargetSelection)
-                {
-                    // make sure we got both objects refreshed before we check them
-                    ObjectManager.UpdateObject(ObjectManager.Player);
-                    ObjectManager.UpdateObject(ObjectManager.Target);
-
-                    // do we need to clear our target
-                    if (DateTime.Now - LastValidTargetCheck > TimeSpan.FromMilliseconds(1000)
-                        && ObjectManager.TargetGuid > 0
-                        && (ObjectManager.Target.IsDead
-                        || HookManager.GetUnitReaction(ObjectManager.Player, ObjectManager.Target) == WowUnitReaction.Friendly))
-                    {
-                        HookManager.ClearTarget();
-                        ObjectManager.UpdateObject(ObjectManager.Player);
-                    }
-                    LastValidTargetCheck = DateTime.Now;
-
-                    // select a new target if our current target is invalid
-                    if ((ObjectManager.TargetGuid == 0
-                        || (ObjectManager.Target == null || ObjectManager.Target.Guid == ObjectManager.PlayerGuid))
-                        && SelectTargetToAttack(out WowUnit target))
-                    {
-                        HookManager.TargetGuid(target.Guid);
-
-                        ObjectManager.UpdateObject(ObjectManager.Player);
-                        ObjectManager.UpdateObject(ObjectManager.Target);
-                    }
-                }
-
                 // use the default MovementEngine to move if the CombatClass doesnt
-                if ((CombatClass == null || !CombatClass.HandlesMovement) && ObjectManager.Target != null)
+                if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
-                    HandleMovement(ObjectManager.Target);
+                    if (WowInterface.ObjectManager.Target != null)
+                    {
+                        if (LastTarget != WowInterface.ObjectManager.Target.Guid)
+                        {
+                            LastTarget = WowInterface.ObjectManager.Target.Guid;
+                            WowInterface.MovementEngine.Reset();
+                        }
+
+                        if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
+                            || WowInterface.ObjectManager.Target.IsDead
+                            || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
+                        {
+                            WowInterface.MovementEngine.Reset();
+                        }
+                        else
+                        {
+                            HandleMovement(WowInterface.ObjectManager.Target);
+                        }
+                    }
                 }
 
                 // if no CombatClass is loaded, just autoattack
-                if (CombatClass != null)
+                if (WowInterface.CombatClass == null)
                 {
-                    CombatClass.Execute();
+                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
+                    {
+                        WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                    }
                 }
                 else
                 {
-                    if (!ObjectManager.Player.IsAutoAttacking)
-                    {
-                        HookManager.StartAutoAttack();
-                    }
+                    WowInterface.CombatClass.Execute();
                 }
             }
-
-            TryCount = 0;
         }
 
         public override void Exit()
         {
-            MovementEngine.Reset();
+            WowInterface.MovementEngine.Reset();
 
             // set our normal maxfps
-            AmeisenBotStateMachine.XMemory.Write(AmeisenBotStateMachine.OffsetList.CvarMaxFps, Config.MaxFps);
-
-            // clear our target after we exited the combat state
-            if (CombatClass == null || !CombatClass.HandlesTargetSelection)
-            {
-                HookManager.ClearTarget();
-            }
-
-            // add nearby Units to the loot List
-            if (Config.LootUnits)
-            {
-                foreach (WowUnit lootableUnit in ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.IsLootable && e.Position.GetDistance2D(ObjectManager.Player.Position) < Config.LootUnitsRadius))
-                {
-                    if (!AmeisenBotStateMachine.UnitLootList.Contains(lootableUnit.Guid))
-                    {
-                        AmeisenBotStateMachine.UnitLootList.Enqueue(lootableUnit.Guid);
-                    }
-                }
-            }
+            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFps);
         }
 
-        private void HandleMovement(WowUnit target)
+        private bool HandleMovement(WowUnit target)
         {
-            // we cant move to a null target
-            if (target == null)
+            if (LineOfSightCheck.Run(out bool isInLos, () => WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
             {
-                return;
+                TargetInLos = isInLos;
             }
 
-            // perform a facing check every 250ms, should be enough
-            if (target.Guid != ObjectManager.PlayerGuid
-                && !BotMath.IsFacing(ObjectManager.Player.Position, ObjectManager.Player.Rotation, target.Position)
-                && DateTime.Now - LastRotationCheck > TimeSpan.FromMilliseconds(250))
+            if (FacingCheck.Run())
             {
-                HookManager.FacePosition(ObjectManager.Player, target.Position);
-                CharacterManager.Face(target.Position, target.Guid);
-                LastRotationCheck = DateTime.Now;
-            }
-
-            // we don't want to move when we are casting or channeling something
-            if (ObjectManager.Player.CurrentlyCastingSpellId > 0 || ObjectManager.Player.CurrentlyChannelingSpellId > 0)
-            {
-                return;
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
             }
 
             // if we are close enough, stop movement and start attacking
-            double distance = ObjectManager.Player.Position.GetDistance2D(target.Position);
-            if (distance <= DistanceToTarget)
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
+
+            if (distance <= DistanceToTarget && TargetInLos)
             {
-                // do we need to stop movement
-                HookManager.StopClickToMove(ObjectManager.Player);
+                WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                return false;
             }
             else
             {
-                float oldMaxSteering = MovementSettings.MaxSteering;
-                MovementSettings.MaxSteering = 2f;
-
-                MovementEngine.SetState(MovementEngineState.Moving, target.Position);
-                MovementEngine.Execute();
-
-                MovementSettings.MaxSteering = oldMaxSteering;
+                Vector3 positionToGoTo = target.Position; // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                WowInterface.MovementEngine.SetMovementAction(distance > 4 ? MovementAction.Moving : MovementAction.DirectMoving, positionToGoTo);
+                return true;
             }
-        }
-
-        private bool SelectTargetToAttack(out WowUnit target)
-        {
-            // TODO: need to handle duels, our target will
-            // be friendly there but is attackable
-
-            // get all targets that are not friendly to us
-            List<WowUnit> nonFriendlyUnits = ObjectManager.WowObjects.OfType<WowUnit>()
-                .Where(e => e.IsInCombat && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly)
-                .ToList();
-
-            // remove all invalid, dead units
-            nonFriendlyUnits = nonFriendlyUnits.Where(e => BotUtils.IsValidUnit(e)).ToList();
-
-            // if there are no non Friendly units, we can't attack anything
-            if (nonFriendlyUnits.Count > 0)
-            {
-                List<WowUnit> unitsInCombat = nonFriendlyUnits.Where(e => e.IsInCombat).ToList();
-                target = unitsInCombat.FirstOrDefault();
-
-                if (target != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    // maybe we are able to assist our partymembers
-                    /*if (ObjectManager.PartymemberGuids.Count > 0)
-                    {
-                        Dictionary<ulong, int> partymemberTargets = new Dictionary<ulong, int>();
-                        ObjectManager.Partymembers.ForEach(e =>
-                        {
-                            ulong targetGuid = ((WowUnit)e).TargetGuid;
-                            if (targetGuid > 0)
-                            {
-                                if (partymemberTargets.ContainsKey(targetGuid))
-                                {
-                                    partymemberTargets[targetGuid]++;
-                                }
-                                else
-                                {
-                                    partymemberTargets.Add(targetGuid, 1);
-                                }
-                            }
-                        });
-
-                        List<KeyValuePair<ulong, int>> selectedTargets = partymemberTargets.OrderByDescending(e => e.Value).ToList();
-
-                        // filter out invalid, not in combat and friendly units
-                        WowUnit validTarget = null;
-
-                        selectedTargets.ForEach(e =>
-                        {
-                            WowUnit target = (WowUnit)ObjectManager.GetWowObjectByGuid(e.Key);
-                            if (BotUtils.IsValidUnit(target)
-                                && target.IsInCombat
-                                && HookManager.GetUnitReaction(ObjectManager.Player, target) != WowUnitReaction.Friendly)
-                            {
-                                validTarget = target;
-                            }
-                        });
-
-                        if (validTarget != null)
-                        {
-                            target = validTarget;
-                            return true;
-                        }
-                    }*/
-
-                    // last fallback, target our nearest enemy
-                    HookManager.TargetNearestEnemy();
-                    ObjectManager.UpdateObject(ObjectManager.Player);
-
-                    target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(e => e.IsInCombat && e.Guid == ObjectManager.Player.Guid);
-                    if (BotUtils.IsValidUnit(target)
-                        && target.IsInCombat)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            target = null;
-            return false;
         }
     }
 }

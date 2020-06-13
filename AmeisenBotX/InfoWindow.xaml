@@ -1,0 +1,84 @@
+﻿<Window x:Class="AmeisenBotX.InfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AmeisenBotX"
+        mc:Ignorable="d"
+        Title="InfoWindow" Height="480" Width="740" MinHeight="120" MinWidth="740" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
+    <Window.BorderBrush>
+        <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+    </Window.BorderBrush>
+    <Window.Background>
+        <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+    </Window.Background>
+    <Grid>
+        <ScrollViewer Margin="0,27,0.333,0.333" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <WrapPanel x:Name="equipmentWrapPanel">
+                <WrapPanel.Background>
+                    <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}" />
+                </WrapPanel.Background>
+            </WrapPanel>
+        </ScrollViewer>
+        <Button x:Name="buttonExit" Margin="0,0,0.333,0" Click="ButtonExit_Click" BorderThickness="1,0,0,0" Padding="1,1,1,3" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" Content="❌" Style="{DynamicResource ButtonStyleDark}" FontSize="16">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+            </Button.Background>
+        </Button>
+        <Label Content="AmeisenBotX - Character Info" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="0,-2,0,0" FontFamily="Bahnschrift Light">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
+        <Rectangle Margin="0,27,0.333,0" Height="1" VerticalAlignment="Top">
+            <Rectangle.Fill>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Rectangle.Fill>
+        </Rectangle>
+        <Label Content="Average iLvl :" Margin="232,7,0,0" FontFamily="Bahnschrift Light" Background="{x:Null}" HorizontalAlignment="Left" Width="74" Height="15" VerticalAlignment="Top" FontWeight="Bold" Padding="0">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
+        <Label x:Name="labelAvgItemLvl" Content="0" Margin="311,7,0,0" FontFamily="Bahnschrift Light" Background="{x:Null}" HorizontalAlignment="Left" Width="42" Height="14" VerticalAlignment="Top" FontWeight="Bold" Padding="0">
+            <Label.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Label.Foreground>
+        </Label>
+        <Button x:Name="buttonEquipment" Content="Equipment" HorizontalAlignment="Right" Margin="0,0,256.333,0" VerticalAlignment="Top" Width="100" Style="{DynamicResource ButtonStyleDark}" Click="ButtonEquipment_Click" BorderThickness="1,0,0,0" Height="27">
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+            </Button.BorderBrush>
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Button x:Name="buttonInventory" Content="Inventory" Margin="0,0,156.333,0" VerticalAlignment="Top" Style="{DynamicResource ButtonStyleDark}" Click="ButtonInventory_Click" BorderThickness="1,0,0,0" Height="27" HorizontalAlignment="Right" Width="100">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Button x:Name="buttonSpells" Content="Spells" Margin="0,0,56.333,0" VerticalAlignment="Top" Style="{DynamicResource ButtonStyleDark}" Click="ButtonSpells_Click" BorderThickness="1,0,0,0" Height="27" HorizontalAlignment="Right" Width="100">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Button x:Name="buttonRefresh" Margin="0,0,28.333,0" Click="ButtonRefresh_Click" BorderThickness="1,0,0,0" Padding="1,1,1,3" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" Content="⟳" Style="{DynamicResource ButtonStyleDark}" FontSize="18" FontWeight="Bold">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+            <Button.BorderBrush>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Button.BorderBrush>
+            <Button.Background>
+                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+            </Button.Background>
+        </Button>
+    </Grid>
+</Window>

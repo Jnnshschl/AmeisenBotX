@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Character.Inventory
             return (basicItem.Type.ToUpper()) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
-                "CONSUMEABLE" => new WowConsumable(basicItem),
+                "CONSUMABLE" => new WowConsumable(basicItem),
                 "CONTAINER" => new WowContainer(basicItem),
                 "GEM" => new WowGem(basicItem),
                 "KEY" => new WowKey(basicItem),

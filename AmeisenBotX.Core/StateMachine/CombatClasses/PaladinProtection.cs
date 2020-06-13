@@ -6,14 +6,14 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.StateMachine.Enums;
-using AmeisenBotX.Pathfinding;
-using AmeisenBotX.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class PaladinProtection : ICombatClass
     {
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
         private bool hasTargetMoved = false;
         private bool multipleTargets = false;
 
-        public PaladinProtection(ObjectManager objectManager, CharacterManager characterManager, HookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public PaladinProtection(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
@@ -32,6 +32,16 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             Jumped = false;
             LastTargetCheck = DateTime.Now;
         }
+
+        public string Author => "einTyp";
+
+        public WowClass Class => WowClass.Paladin;
+
+        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+
+        public string Description => "...";
+
+        public string Displayname => "Protection Paladin";
 
         public bool HandlesMovement => true;
 
@@ -43,57 +53,51 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public bool Jumped { get; set; }
 
-        private CharacterManager CharacterManager { get; }
-
-        private bool Dancing { get; set; }
-        
-        private HookManager HookManager { get; }
-        
-        private DateTime LastAvenger { get; set; }
-        
-        private DateTime LastConsecration { get; set; }
-        
-        private DateTime LastDivineShield { get; set; }
-       
-        private DateTime LastGCD { get; set; }
-        
-        private DateTime LastHammer { get; set; }
-        
-        private DateTime LastHolyShield { get; set; }
-        
-        private Vector3 LastPlayerPosition { get; set; }
-
-        private DateTime LastProtection { get; set; }
-        
-        private DateTime LastSacrifice { get; set; }
-        
-        private DateTime LastTargetCheck { get; set; }
-        
-        private Vector3 LastTargetPosition { get; set; }
-        
-        private DateTime LastWisdom { get; set; }
-        
-        private DefaultMovementEngine MovementEngine { get; set; }
-        
-        private ObjectManager ObjectManager { get; }
-        
-        private IPathfindingHandler PathfindingHandler { get; set; }
-        
-        private double GCDTime { get; set; }
-
-        public string Displayname => "Protection Paladin";
-
-        public string Version => "1.0";
-
-        public string Author => "einTyp";
-
-        public string Description => "...";
-
-        public WowClass Class => WowClass.Paladin;
+        public List<string> PriorityTargets { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Tank;
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public string Version => "1.0";
+
+        public bool WalkBehindEnemy => false;
+
+        private ICharacterManager CharacterManager { get; }
+
+        private bool Dancing { get; set; }
+
+        private double GCDTime { get; set; }
+
+        private IHookManager HookManager { get; }
+
+        private DateTime LastAvenger { get; set; }
+
+        private DateTime LastConsecration { get; set; }
+
+        private DateTime LastDivineShield { get; set; }
+
+        private DateTime LastGCD { get; set; }
+
+        private DateTime LastHammer { get; set; }
+
+        private DateTime LastHolyShield { get; set; }
+
+        private Vector3 LastPlayerPosition { get; set; }
+
+        private DateTime LastProtection { get; set; }
+
+        private DateTime LastSacrifice { get; set; }
+
+        private DateTime LastTargetCheck { get; set; }
+
+        private Vector3 LastTargetPosition { get; set; }
+
+        private DateTime LastWisdom { get; set; }
+
+        private DefaultMovementEngine MovementEngine { get; set; }
+
+        private IObjectManager ObjectManager { get; }
+
+        private IPathfindingHandler PathfindingHandler { get; set; }
 
         public void Execute()
         {
@@ -123,7 +127,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
                 if (targetDistanceChanged)
                 {
-                    distanceToTarget = LastPlayerPosition.GetDistance2D(LastTargetPosition);
+                    distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                    Console.WriteLine("distanceToTarget: " + distanceToTarget);
                 }
 
                 HandleMovement(target);
@@ -133,10 +138,10 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
-            double distanceTraveled = ObjectManager.Player.Position.GetDistance2D(LastPlayerPosition);
+            double distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 WowUnit target = null;
                 if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
@@ -322,7 +327,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
 
             if (!ObjectManager.Player.IsAutoAttacking)
             {
-                HookManager.StartAutoAttack();
+                HookManager.StartAutoAttack(ObjectManager.Target);
             }
         }
 
@@ -341,13 +346,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath(ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
+                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
                     MovementEngine.LoadPath(path);
                     MovementEngine.PostProcessPath();
                 }
                 else
                 {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, ObjectManager.Player.Rotation, out Vector3 positionToGoTo, out bool needToJump))
+                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
                     {
                         CharacterManager.MoveToPosition(positionToGoTo);
 
@@ -387,7 +392,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance2D(unit.Position);
+                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < areaToLookAt)
                     {
                         int compHealth = 2147483647;
@@ -420,7 +425,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses
             if (target == null || target.IsDead)
             {
                 HookManager.ClearTarget();
-                ulong leaderGuid = ObjectManager.ReadPartyLeaderGuid();
+                ulong leaderGuid = ObjectManager.PartyleaderGuid;
                 if (leaderGuid != ObjectManager.PlayerGuid)
                 {
                     WowUnit leader = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == leaderGuid);
