@@ -907,7 +907,6 @@ namespace AmeisenBotX.Core.Hook
         public void UnitOnRightClick(WowUnit wowUnit)
         {
             if (wowUnit == null || wowUnit.Guid == 0) return;
-            if (wowUnit.GetType() != typeof(WowUnit)) throw new ArgumentException("This method should only be called with WowUnit's", "wowUnit");
 
             CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
@@ -924,7 +923,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void WowObjectOnRightClick(WowObject wowObject)
         {
-            if (wowObject.GetType() == typeof(WowObject))
+            if (wowObject.GetType() == typeof(WowObject)
+                || wowObject.GetType() == typeof(WowGameobject))
             {
                 CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
             }
