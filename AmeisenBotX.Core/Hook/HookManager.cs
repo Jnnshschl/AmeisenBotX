@@ -431,7 +431,11 @@ namespace AmeisenBotX.Core.Hook
 
             if (tableOffset != 0 && auraCount > 0)
             {
-                buffs.AddRange(ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + tableOffset), auraCount));
+                List<WowAura> aura1 = ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + 0xC50), auraCount);
+                List<WowAura> aura2 = ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + 0xC58), auraCount);
+
+                buffs.AddRange(aura1);
+                buffs.AddRange(aura2);
             }
 
             return buffs;
@@ -920,10 +924,10 @@ namespace AmeisenBotX.Core.Hook
 
         public void WowObjectOnRightClick(WowObject wowObject)
         {
-            if (wowObject.GetType() == typeof(WowUnit)) throw new ArgumentException("This method should not be called with WowUnit's, use the specific method for them", "gameobject");
-            if (wowObject.GetType() == typeof(WowItem)) throw new ArgumentException("This method should not be called with WowItem's", "gameobject");
-
-            CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
+            if (wowObject.GetType() == typeof(WowObject))
+            {
+                CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
+            }
         }
 
         private bool AllocateCodeCaves()
