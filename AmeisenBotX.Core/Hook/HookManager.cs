@@ -351,7 +351,7 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"));
         }
 
-        public Dictionary<RuneType, int> GetRunesReady(int runeId)
+        public Dictionary<RuneType, int> GetRunesReady()
         {
             Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
             {
@@ -364,8 +364,7 @@ namespace AmeisenBotX.Core.Hook
             for (int i = 0; i < 6; ++i)
             {
                 if (WowInterface.XMemory.Read(WowInterface.OffsetList.RuneType + (4 * i), out RuneType type)
-                    && WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus)
-                    && ((1 << runeId) & runeStatus) != 0)
+                    && WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus))
                 {
                     ++runes[type];
                 }
