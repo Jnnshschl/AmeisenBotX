@@ -106,8 +106,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract bool HandlesMovement { get; }
 
-        public abstract bool HandlesTargetSelection { get; }
-
         public abstract bool IsMelee { get; }
 
         public abstract IWowItemComparator ItemComparator { get; set; }

@@ -19,8 +19,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         bool HandlesMovement { get; }
 
-        bool HandlesTargetSelection { get; }
-
         bool IsMelee { get; }
 
         IWowItemComparator ItemComparator { get; }

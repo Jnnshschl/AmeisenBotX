@@ -364,7 +364,8 @@ namespace AmeisenBotX.Core.Hook
             for (int i = 0; i < 6; ++i)
             {
                 if (WowInterface.XMemory.Read(WowInterface.OffsetList.RuneType + (4 * i), out RuneType type)
-                    && WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus))
+                    && WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus)
+                    && ((1 << i) & runeStatus) != 0)
                 {
                     ++runes[type];
                 }
@@ -906,7 +907,6 @@ namespace AmeisenBotX.Core.Hook
         public void UnitOnRightClick(WowUnit wowUnit)
         {
             if (wowUnit == null || wowUnit.Guid == 0) return;
-            if (wowUnit.GetType() != typeof(WowUnit)) throw new ArgumentException("This method should only be called with WowUnit's", "wowUnit");
 
             CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
