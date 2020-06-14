@@ -65,8 +65,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool HandlesMovement => false;
 
-        public override bool HandlesTargetSelection => true;
-
         public override bool IsMelee => true;
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES });

@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Hook
 
         string GetMoney();
 
-        Dictionary<RuneType, int> GetRunesReady(int runeId);
+        Dictionary<RuneType, int> GetRunesReady();
 
         List<string> GetSkills();
 

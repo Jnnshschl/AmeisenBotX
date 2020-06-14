@@ -2,6 +2,9 @@
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Statemachine.Utils;
+using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using System;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -29,7 +32,6 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
-
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
         }
 
