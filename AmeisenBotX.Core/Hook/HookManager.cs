@@ -923,7 +923,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void WowObjectOnRightClick(WowObject wowObject)
         {
-            if (wowObject.GetType() == typeof(WowObject))
+            if (wowObject.GetType() == typeof(WowObject)
+                || wowObject.GetType() == typeof(WowGameobject))
             {
                 CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
             }

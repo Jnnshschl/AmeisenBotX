@@ -53,6 +53,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            //StateMachine.SetState((int)BotState.Job);
+
             if (Config.AutojoinBg)
             {
                 CheckForBattlegroundInvites();

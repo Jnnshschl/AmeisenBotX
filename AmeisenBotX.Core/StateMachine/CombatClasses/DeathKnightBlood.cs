@@ -1,9 +1,13 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Statemachine.Utils;
+using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,11 +15,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
     public class DeathknightBlood : ICombatClass
     {
-        public DeathknightBlood(IObjectManager objectManager, IHookManager hookManager)
+        public DeathknightBlood(WowInterface wowInterface)
         {
-            ObjectManager = objectManager;
-            HookManager = hookManager;
+            ObjectManager = wowInterface.ObjectManager;
+            HookManager = wowInterface.HookManager;
+            TargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
+
+        public TargetManager TargetManager { get; internal set; }
 
         public string Author => "Jamsbaer";
 
@@ -37,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public List<string> PriorityTargets { get; set; }
 
-        public CombatClassRole Role => CombatClassRole.Tank;
+        public CombatClassRole Role => CombatClassRole.Dps;
 
         public string Version => "1.0";
 
@@ -69,6 +76,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private void HandleAttacking(WowUnit target)
         {
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+            {
+                ulong guid = targetToTarget.First().Guid;
+
+                if (ObjectManager.Player.TargetGuid != guid)
+                {
+                    HookManager.TargetGuid(guid);
+                    ObjectManager.UpdateObject(ObjectManager.Player);
+                }
+            }
+
+            if (ObjectManager.Target == null
+                || ObjectManager.Target.IsDead
+                || !BotUtils.IsValidUnit(ObjectManager.Target))
+            {
+                return;
+            }
+
             double playerRunePower = ObjectManager.Player.Runeenergy;
             double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100;
@@ -80,16 +105,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             if (HookManager.GetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
             {
                 HookManager.CastSpell("Death Grip");
+                return;
             }
             if (target.IsFleeing && distanceToTarget <= 30)
             {
                 HookManager.CastSpell("Chains of Ice");
+                return;
             }
 
             if (HookManager.GetSpellCooldown("Army of the Dead") <= 0 &&
                 IsOneOfAllRunesReady())
             {
                 HookManager.CastSpell("Army of the Dead");
+                return;
             }
 
             List<WowUnit> unitsNearPlayer = ObjectManager.WowObjects
@@ -103,6 +131,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 HookManager.IsRuneReady(1))
             {
                 HookManager.CastSpell("Blood Boil");
+                return;
             }
 
             List<WowUnit> unitsNearTarget = ObjectManager.WowObjects
@@ -116,6 +145,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             {
                 HookManager.CastSpell("Death and Decay");
                 HookManager.ClickOnTerrain(target.Position);
+                return;
             }
 
             if (HookManager.GetSpellCooldown("Icy Touch") <= 0 &&
@@ -123,6 +153,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 HookManager.IsRuneReady(3))
             {
                 HookManager.CastSpell("Icy Touch");
+                return;
             }
         }
 
