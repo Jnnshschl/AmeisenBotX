@@ -38,15 +38,19 @@ namespace AmeisenBotX.Core.Statemachine.States
                 StateMachine.SetState((int)BotState.Idle);
             }
 
-            // first step, determine our corpse/portal position
-            if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))
+            if (!NeedToEnterPortal)
             {
-                // we are on a battleground just wait for the mass ress
-                return;
-            }
-            else if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap) && !StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
-            {
-                // we died inside a dungeon but are no longer on a dungeon map, we need to go to its portal
+                // first step, determine our corpse/portal position
+                if (StateMachine.IsBattlegroundMap(WowInterface.ObjectManager.MapId))
+                {
+                    // we are on a battleground just wait for the mass ress
+                    return;
+                }
+                else
+                {
+                    WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
+                    CorpsePosition = corpsePosition;
+                }
 
                 if (PortalSearchEvent.Run())
                 {
@@ -58,7 +62,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (nearestPortal != null)
                     {
-                        CorpsePosition = nearestPortal.Position;
+                        CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
                         NeedToEnterPortal = true;
                     }
                     else
@@ -67,11 +71,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         NeedToEnterPortal = false;
                     }
                 }
-            }
-            else
-            {
-                WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);
-                CorpsePosition = corpsePosition;
             }
 
             // step two, move to the corpse/portal
@@ -84,7 +83,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (NeedToEnterPortal)
                 {
                     // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
-                    CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, CorpsePosition), CorpsePosition, 6);
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
                 }
                 else

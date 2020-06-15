@@ -184,6 +184,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 25.0).ToList();
             }
 
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick())
+            {
+                return;
+            }
+
             ExecuteCC();
         }
 

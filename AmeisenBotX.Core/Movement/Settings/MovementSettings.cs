@@ -4,12 +4,12 @@
     {
         public float MaxAcceleration { get; set; } = 3f;
 
-        public float MaxSteering { get; set; } = 2f;
+        public float MaxSteering { get; set; } = 1f;
 
         public float MaxVelocity { get; set; } = 6f;
 
-        public double SeperationDistance { get; set; } = 2;
+        public double SeperationDistance { get; set; } = 2.0;
 
-        public double WaypointCheckThreshold { get; set; } = 5;
+        public double WaypointCheckThreshold { get; set; } = 4.0;
     }
 }

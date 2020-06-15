@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -30,15 +29,25 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Execute()
         {
-            if (StateMachine.MovementAction == MovementAction.DirectMoving)
+            if (StateMachine.MovementAction == MovementAction.DirectMove && StateMachine.TargetPosition != default)
             {
+                double distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.TargetPosition);
+
+                if (distanceToNode < StateMachine.MovementSettings.WaypointCheckThreshold)
+                {
+                    StateMachine.Reset();
+                    // WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                    return;
+                }
+
                 WowInterface.CharacterManager.MoveToPosition(StateMachine.TargetPosition);
                 return;
             }
 
             if (StateMachine.Path?.Count == 0 && TargetPosition == default)
             {
-                StateMachine.SetState((int)MovementState.None);
+                StateMachine.Reset();
+                // WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
             }
             else
             {
@@ -58,14 +67,39 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                         {
                             StateMachine.Nodes.Dequeue();
                         }
+                        else
+                        {
+                            StateMachine.Reset();
+                        }
 
                         TargetPosition = default;
                         return;
                     }
 
-                    List<Vector3> forces = GetForces(TargetPosition, StateMachine.TargetRotation);
+                    // calculate forces and move the character
+                    List<Vector3> forces = GetForces(BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, TargetPosition), TargetPosition, 2.0), StateMachine.TargetRotation);
                     StateMachine.PlayerVehicle.Update(forces);
 
+                    // check wether we need to jump up or down
+                    double distanceToNodeIgnoreZ = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(TargetPosition);
+
+                    if (distanceToNodeIgnoreZ < 1.5)
+                    {
+                        double zDiff = StateMachine.TargetPosition.Z - WowInterface.ObjectManager.Player.Position.Z;
+
+                        if (zDiff > 2)
+                        {
+                            // target position is above us, jump up
+                            WowInterface.CharacterManager.Jump();
+                        }
+                        else if (zDiff < -2)
+                        {
+                            // target position is below us, jump down
+                            WowInterface.CharacterManager.Jump();
+                        }
+                    }
+
+                    // check for beeing stuck
                     if (LastPositionEvent.Run())
                     {
                         double distanceMovedSinceLastTick = WowInterface.ObjectManager.Player.Position.GetDistance(LastPosition);
@@ -118,7 +152,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     forces.Add(StateMachine.PlayerVehicle.Wander(1f));
                     break;
 
-                case MovementAction.Stuck:
+                case MovementAction.Unstuck:
                     forces.Add(StateMachine.PlayerVehicle.Unstuck(1f));
                     break;
 

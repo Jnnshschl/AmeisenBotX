@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,40 +18,50 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Execute()
         {
-            if (StateMachine.Path?.Count == 0)
+            if (StateMachine.MovementAction != MovementAction.DirectMove)
             {
-                List<Vector3> nodeList;
-
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.TargetPosition) > 4)
+                if (StateMachine.Path?.Count == 0)
                 {
-                    nodeList = StateMachine.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.TargetPosition);
+                    List<Vector3> nodeList;
+
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.TargetPosition) > 5.0)
+                    {
+                        // regular pathfinding
+                        nodeList = StateMachine.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.TargetPosition);
+                    }
+                    else
+                    {
+                        // move along surface
+                        nodeList = new List<Vector3>() { StateMachine.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.TargetPosition) };
+                    }
+
+                    if (nodeList != null && nodeList.Count > 0)
+                    {
+                        foreach (Vector3 node in nodeList)
+                        {
+                            StateMachine.Nodes.Enqueue(node);
+                        }
+                    }
                 }
                 else
                 {
-                    nodeList = new List<Vector3>() { StateMachine.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.TargetPosition) };
-                }
+                    double lastNodeDistanceToTarget = StateMachine.Path.Last().GetDistance(StateMachine.TargetPosition);
 
-                if (nodeList != null && nodeList.Count > 0)
-                {
-                    foreach (Vector3 node in nodeList)
+                    if (lastNodeDistanceToTarget > 24)
                     {
-                        StateMachine.Nodes.Enqueue(node);
+                        // target position is to far away from the end of the path, path may be incomplete
+                        StateMachine.SetState((int)MovementState.MoveToNode);
+                    }
+                    else
+                    {
+                        // pathfinding successful
+                        StateMachine.SetState((int)MovementState.MoveToNode);
                     }
                 }
             }
             else
             {
-                double lastNodeDistanceToTarget = StateMachine.Path.Last().GetDistance(StateMachine.TargetPosition);
-
-                if (lastNodeDistanceToTarget > 24)
-                {
-                    // target position is to far away from the end of the path, path may be incomplete
-                }
-                else
-                {
-                    // pathfinding successful
-                    StateMachine.SetState((int)MovementState.MoveToNode);
-                }
+                StateMachine.SetState((int)MovementState.MoveToNode);
             }
         }
 

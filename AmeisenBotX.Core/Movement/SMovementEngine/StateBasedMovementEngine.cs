@@ -41,6 +41,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < MovementSettings.WaypointCheckThreshold;
 
+        public Vector3 LastPlayerPosition { get; private set; }
+
         public MovementAction MovementAction { get; private set; }
 
         public Queue<Vector3> Nodes { get; private set; }
@@ -73,15 +75,15 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             Nodes.Clear();
         }
 
-        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0)
+        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f)
         {
-            MovementAction = movementAction;
             TargetRotation = targetRotation;
 
-            if (TargetPosition.GetDistance(positionToGoTo) > 2.0)
+            if (TargetPosition.GetDistance(positionToGoTo) > 2.0 || MovementAction != movementAction)
             {
+                MovementAction = movementAction;
+                LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
                 TargetPosition = positionToGoTo;
-                Nodes.Clear();
             }
         }
     }

@@ -47,7 +47,6 @@ namespace AmeisenBotX.Core.Statemachine
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
             GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
-            ObjectUpdateEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.ObjectUpdateMs), WowInterface.ObjectManager.UpdateWowObjects);
 
             RenderSwitchEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
@@ -80,8 +79,6 @@ namespace AmeisenBotX.Core.Statemachine
         private TimegatedEvent EventPullEvent { get; set; }
 
         private TimegatedEvent<bool> GhostCheckEvent { get; set; }
-
-        private TimegatedEvent ObjectUpdateEvent { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
@@ -122,7 +119,7 @@ namespace AmeisenBotX.Core.Statemachine
                 }
                 else
                 {
-                    ObjectUpdateEvent.Run();
+                    WowInterface.ObjectManager.UpdateWowObjects();
                     EventPullEvent.Run();
 
                     if (WowInterface.ObjectManager.Player != null)

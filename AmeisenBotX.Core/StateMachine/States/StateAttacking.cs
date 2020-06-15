@@ -2,9 +2,6 @@
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.Utils;
-using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using System;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -17,7 +14,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(500));
         }
 
-        public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 25.0;
+        public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
 
         public bool IsFacing { get; private set; }
 
@@ -111,17 +108,14 @@ namespace AmeisenBotX.Core.Statemachine.States
             // if we are close enough, stop movement and start attacking
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
 
-            if (distance <= DistanceToTarget && TargetInLos)
-            {
-                WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
-                return false;
-            }
-            else
+            if (distance > DistanceToTarget || !TargetInLos)
             {
                 Vector3 positionToGoTo = target.Position; // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
-                WowInterface.MovementEngine.SetMovementAction(distance > 4 ? MovementAction.Moving : MovementAction.DirectMoving, positionToGoTo);
+                WowInterface.MovementEngine.SetMovementAction(distance > 4.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }
+
+            return false;
         }
     }
 }

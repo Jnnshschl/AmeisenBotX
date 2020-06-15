@@ -184,7 +184,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,72.333" Foreground="White" FontFamily="Consolas" Padding="0" FontSize="10" />
+        <Label x:Name="labelDebug" Content="..." Margin="205,33,3.333,51.333" Foreground="White" FontFamily="Consolas" Padding="0" FontSize="10" />
         <Label Content="Level:" HorizontalAlignment="Left" Margin="6,88,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -261,11 +261,6 @@
             </Label.Foreground>
         </Label>
         <Button x:Name="buttonDebug" Content="Toggle Render" Margin="290,0,0,30.333" Click="ButtonDebug_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Left" Width="71" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom">
-            <Button.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-            </Button.Foreground>
-        </Button>
-        <Button x:Name="buttonDbg" Content="Debug" Margin="205,0,0,51.333" Click="ButtonDbg_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Left" Width="80" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

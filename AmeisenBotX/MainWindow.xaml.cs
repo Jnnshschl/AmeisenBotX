@@ -116,6 +116,11 @@ namespace AmeisenBotX
             }
         }
 
+        private void ButtonDbg_Click(object sender, RoutedEventArgs e)
+        {
+            // AmeisenBot.WowInterface.XMemory.SetWindowParent(AmeisenBot.WowInterface.WowProcess.MainWindowHandle, Process.GetCurrentProcess().MainWindowHandle);
+        }
+
         private void ButtonDebug_Click(object sender, RoutedEventArgs e)
         {
             AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
@@ -255,14 +260,27 @@ namespace AmeisenBotX
                     StringBuilder sb = new StringBuilder();
 
                     sb.AppendLine($"MovementAction: {AmeisenBot.WowInterface.MovementEngine.MovementAction}");
-                    sb.AppendLine($"MovementState: {(MovementState)((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).CurrentState.Key}\n");
+                    sb.AppendLine($"MovementState: {(MovementState)((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).CurrentState.Key}");
+                    sb.AppendLine($"MovementTarget: {((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).TargetPosition}\n");
 
-                    sb.AppendLine($"Aura Count: {AmeisenBot.WowInterface.ObjectManager?.Player?.Auras.Count}");
-
-                    foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
-                    {
-                        sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
-                    }
+                    //     sb.AppendLine($"Me - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Player.Auras.Count}");
+                    // 
+                    //     foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
+                    //     {
+                    //         sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
+                    //     }
+                    // 
+                    //     labelDebug.Content = sb.ToString();
+                    // 
+                    //     if (AmeisenBot.WowInterface.ObjectManager.Target != null)
+                    //     {
+                    //         sb.AppendLine($"\nTarget - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Target.Auras.Count}");
+                    // 
+                    //         foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Target.Auras)
+                    //         {
+                    //             sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
+                    //         }
+                    //     }
 
                     labelDebug.Content = sb.ToString();
                 }
@@ -330,22 +348,22 @@ namespace AmeisenBotX
                         if (AmeisenBot.WowInterface.MovementEngine.Path != null
                         && AmeisenBot.WowInterface.MovementEngine.Path.Count > 0)
                         {
-                            for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count && i < 10; ++i)
+                            for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count; ++i)
                             {
                                 Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
                                 Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
 
                                 Color lineColor = Colors.LightCyan;
-                                Color startDot = Colors.Cyan;
-                                Color endDot = i == 0 ? Colors.Navy : Colors.Cyan;
+                                Color startDot = Colors.Red;
+                                Color endDot = i == 0 ? Colors.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? Colors.Orange : Colors.Cyan;
 
                                 Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
                                 if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
                                 && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
                                 {
                                     Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
-                                    Overlay.AddRectangle((int)startPoint.X - 3, (int)startPoint.Y - 3, 5, 5, startDot);
-                                    Overlay.AddRectangle((int)endPoint.X - 3, (int)endPoint.Y - 3, 5, 5, endDot);
+                                    Overlay.AddRectangle((int)startPoint.X - 4, (int)startPoint.Y - 4, 7, 7, startDot);
+                                    Overlay.AddRectangle((int)endPoint.X - 4, (int)endPoint.Y - 4, 7, 7, endDot);
                                 }
                             }
                         }
@@ -353,7 +371,7 @@ namespace AmeisenBotX
                         if (AmeisenBot.WowInterface.DungeonEngine.Nodes != null
                         && AmeisenBot.WowInterface.DungeonEngine.Nodes.Count > 0)
                         {
-                            for (int i = 0; i < AmeisenBot.WowInterface.DungeonEngine.Nodes.Count && i < 32; ++i)
+                            for (int i = 0; i < AmeisenBot.WowInterface.DungeonEngine.Nodes.Count; ++i)
                             {
                                 Vector3 start = AmeisenBot.WowInterface.DungeonEngine.Nodes[i].Position;
                                 Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.DungeonEngine.Nodes[i - 1].Position;
@@ -513,11 +531,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void ButtonDbg_Click(object sender, RoutedEventArgs e)
-        {
-            AmeisenBot.WowInterface.XMemory.SetWindowParent(AmeisenBot.WowInterface.WowProcess.MainWindowHandle, Process.GetCurrentProcess().MainWindowHandle);
         }
     }
 }

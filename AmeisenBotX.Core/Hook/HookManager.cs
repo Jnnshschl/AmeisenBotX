@@ -419,24 +419,24 @@ namespace AmeisenBotX.Core.Hook
         {
             List<WowAura> buffs = new List<WowAura>();
 
-            int auraCount = 0;
-            int tableOffset = 0;
-
-            if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xDD0), out int auraCount1)
-                && WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2))
+            if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xDD0), out int auraCount1))
             {
-                auraCount = auraCount1 == -1 ? auraCount2 : auraCount1;
-                tableOffset = auraCount1 == -1 ? 0xC58 : 0xC50;
+                if (auraCount1 == -1)
+                {
+                    if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, 0xC54), out int auraCount2))
+                    {
+                        if (auraCount2 > 0 && WowInterface.XMemory.Read(new IntPtr(wowUnit.BaseAddress.ToInt32() + 0xC58), out IntPtr auraTable))
+                        {
+                            buffs.AddRange(ReadAuraTable(auraTable, auraCount2));
+                        }
+                    }
+                }
+                else
+                {
+                    buffs.AddRange(ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + 0xC50), auraCount1));
+                }
             }
 
-            if (tableOffset != 0 && auraCount > 0)
-            {
-                List<WowAura> aura1 = ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + 0xC50), auraCount);
-                List<WowAura> aura2 = ReadAuraTable(new IntPtr(wowUnit.BaseAddress.ToInt32() + 0xC58), auraCount);
-
-                buffs.AddRange(aura1);
-                buffs.AddRange(aura2);
-            }
 
             return buffs;
         }
@@ -1160,13 +1160,16 @@ namespace AmeisenBotX.Core.Hook
             {
                 if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * i), out RawWowAura aura))
                 {
-                    if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
+                    if (aura.SpellId > 0 && aura.SpellId < 55000)
                     {
-                        name = GetSpellNameById(aura.SpellId);
-                        WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
-                    }
+                        if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
+                        {
+                            name = GetSpellNameById(aura.SpellId);
+                            WowInterface.BotCache.CacheSpellName(aura.SpellId, name);
+                        }
 
-                    buffs.Add(new WowAura(aura, name.Length > 0 ? name : "unk"));
+                        buffs.Add(new WowAura(aura, name.Length > 0 ? name : "unk"));
+                    }
                 }
             }
 

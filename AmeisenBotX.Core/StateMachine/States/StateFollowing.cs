@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -62,6 +63,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                 .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
                 .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.GhostPortalScanThreshold);
 
+            bool moveIntoPortal = false;
+
             if (nearestPortal != null)
             {
                 double distanceToPortal = PlayerToFollow.Position.GetDistance(nearestPortal.Position);
@@ -70,16 +73,18 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
                     posToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                    moveIntoPortal = true;
                 }
             }
 
             // if no portal position was found, follow the player
-            if (posToGoTo == default)
+            if (!moveIntoPortal)
             {
                 posToGoTo = PlayerToFollow.Position;
             }
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(posToGoTo);
+
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
                 StateMachine.SetState((int)BotState.Idle);
@@ -90,7 +95,23 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, posToGoTo);
+            double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
+
+            Vector3 playerPosZMod = WowInterface.ObjectManager.Player.Position;
+            playerPosZMod.Z += 1f;
+
+            Vector3 posToGoToZMod = posToGoTo;
+            posToGoToZMod.Z += 1f;
+
+            if ((distance < 8.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
+                || (distance < 32.0 && zDiff < 0.0 && WowInterface.HookManager.IsInLineOfSight(playerPosZMod, posToGoToZMod))) // target is below us and in line of sight, just run down
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, posToGoTo);
+            }
         }
 
         public override void Exit()

@@ -4,11 +4,11 @@
     {
         None,
         Moving,
-        DirectMoving,
+        DirectMove,
         Following,
         Fleeing,
         Chasing,
-        Stuck,
+        Unstuck,
         Evading,
         Wandering
     }

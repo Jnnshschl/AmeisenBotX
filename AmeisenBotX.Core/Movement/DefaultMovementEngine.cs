@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Movement
 {
+    [Obsolete]
     public class DefaultMovementEngine
     {
         public DefaultMovementEngine(IObjectManager objectManager, MovementSettings settings = null)
