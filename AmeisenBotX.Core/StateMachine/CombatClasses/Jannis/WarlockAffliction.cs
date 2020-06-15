@@ -42,7 +42,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelhunterSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelhunterSpell, 0))
                    || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0)),
-                null);
+                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelhunterSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelhunterSpell, 0))
+                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0)));
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 

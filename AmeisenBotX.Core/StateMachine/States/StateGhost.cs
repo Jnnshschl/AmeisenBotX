@@ -46,6 +46,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                     // we are on a battleground just wait for the mass ress
                     return;
                 }
+                else if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap)
+                         && WowInterface.DungeonEngine?.DungeonProfile != null)
+                {
+                    CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                }
                 else
                 {
                     WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition);

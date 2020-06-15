@@ -50,7 +50,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 null,
                 () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell, 0))
                    || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0)),
-                null);
+                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell) && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) && CastSpellIfPossible(summonFelguardSpell, 0))
+                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0)));
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 
@@ -98,7 +99,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 50
                     && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
                 || CastSpellIfPossible(metamorphosisSpell, 0)
-                || (WowInterface.ObjectManager.Pet != null && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
+                || (WowInterface.ObjectManager.Pet?.Health > 0 && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
             {
                 return;
             }

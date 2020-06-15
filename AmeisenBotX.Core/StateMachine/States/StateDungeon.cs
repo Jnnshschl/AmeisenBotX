@@ -15,14 +15,14 @@
 
         public override void Execute()
         {
-            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
-            {
-                WowInterface.DungeonEngine.Execute();
-            }
-            else
+            if (!StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
             {
                 StateMachine.SetState((int)BotState.Idle);
+                return;
             }
+
+            WowInterface.DungeonEngine.Execute();
+            WowInterface.CombatClass?.OutOfCombatExecute();
         }
 
         public override void Exit()

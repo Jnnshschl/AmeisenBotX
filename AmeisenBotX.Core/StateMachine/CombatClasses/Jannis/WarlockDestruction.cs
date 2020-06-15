@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 TimeSpan.FromSeconds(1),
                 null,
                 () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0),
-                null);
+                () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0));
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
 
