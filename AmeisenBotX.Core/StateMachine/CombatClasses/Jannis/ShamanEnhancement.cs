@@ -35,14 +35,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string shamanisticRageSpell = "Shamanistic Rage";
         private const string stormstrikeSpell = "Stormstrike";
         private const string waterShieldSpell = "Water Shield";
-        private const string windfuryBuff = "Windfury ";
+        private const string windfuryBuff = "Windfury";
         private const string windfuryWeaponSpell = "Windfury Weapon";
         private const string windShearSpell = "Wind Shear";
 #pragma warning restore IDE0051
 
         public ShamanEnhancement(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { lightningShieldSpell, () => CastSpellIfPossible(lightningShieldSpell, 0, true) }
+            };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

@@ -37,7 +37,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public ShamanElemental(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { lightningShieldSpell, () => CastSpellIfPossible(lightningShieldSpell, 0, true) }
+            };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

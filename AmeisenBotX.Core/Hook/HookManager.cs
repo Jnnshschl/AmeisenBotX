@@ -1161,7 +1161,7 @@ namespace AmeisenBotX.Core.Hook
             {
                 if (WowInterface.XMemory.Read(IntPtr.Add(buffBase, 0x18 * i), out RawWowAura aura))
                 {
-                    if (aura.SpellId > 0 && aura.SpellId < 55000)
+                    if (aura.SpellId > 0)
                     {
                         if (!WowInterface.BotCache.TryGetSpellName(aura.SpellId, out string name))
                         {

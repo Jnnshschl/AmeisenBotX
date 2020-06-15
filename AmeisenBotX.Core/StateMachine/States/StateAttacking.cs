@@ -51,12 +51,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     if (WowInterface.ObjectManager.Target != null)
                     {
-                        if (LastTarget != WowInterface.ObjectManager.Target.Guid)
-                        {
-                            LastTarget = WowInterface.ObjectManager.Target.Guid;
-                            WowInterface.MovementEngine.Reset();
-                        }
-
                         if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
                             || WowInterface.ObjectManager.Target.IsDead
                             || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
@@ -110,8 +104,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance > DistanceToTarget || !TargetInLos)
             {
-                Vector3 positionToGoTo = target.Position; // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
-                WowInterface.MovementEngine.SetMovementAction(distance > 4.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
+                Vector3 positionToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), target.Position, 3.0); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }
 
