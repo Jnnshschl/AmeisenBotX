@@ -346,8 +346,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private bool CastSpell(string spellName, bool castOnSelf)
         {
             // stop pending movement if we cast something
-            WowInterface.MovementEngine.Reset();
-            WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+            // WowInterface.MovementEngine.Reset();
+            // WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
 
             if (!castOnSelf)
             {

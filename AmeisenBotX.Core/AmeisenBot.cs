@@ -446,6 +446,7 @@ namespace AmeisenBotX.Core
             {
                 string itemName = WowInterface.HookManager.GetLootRollItemLink(rollId);
                 string json = WowInterface.HookManager.GetItemByNameOrLink(itemName);
+
                 WowBasicItem item = ItemFactory.ParseItem(json);
                 item = ItemFactory.BuildSpecificItem(item);
 

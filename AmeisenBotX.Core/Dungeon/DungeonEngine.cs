@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public DateTime EntryTime { get; private set; }
 
-        public bool HasFinishedDungeon => Progress == 100.0 || CurrentNodes.IsEmpty;
+        public bool HasFinishedDungeon => Progress == 100.0;
 
         public bool IgnoreEatDrink { get; private set; }
 
@@ -168,6 +168,8 @@ namespace AmeisenBotX.Core.Dungeon
 
             Progress = 0.0;
             TotalNodes = 0;
+
+            LastNode = null;
 
             AllPlayerPresentDistance = 48;
         }

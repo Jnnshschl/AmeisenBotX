@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -65,7 +66,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                             WowInterface.HookManager.ReplaceItem(null, item);
                         }
 
-                        if (itemToSell != null)
+                        if (itemToSell != null 
+                            && itemToSell.EquipSlot != EquipmentSlot.INVSLOT_AMMO 
+                            && itemToSell.ItemQuality != ItemQuality.Epic)
                         {
                             WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
                             WowInterface.HookManager.CofirmBop();
