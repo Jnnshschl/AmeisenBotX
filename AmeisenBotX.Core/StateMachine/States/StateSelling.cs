@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
 
                         if (itemToSell != null 
-                            && itemToSell.EquipSlot != EquipmentSlot.INVSLOT_AMMO 
+                            && itemToSell.GetType() != typeof(WowProjectile)
                             && itemToSell.ItemQuality != ItemQuality.Epic)
                         {
                             WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);

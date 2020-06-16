@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Hook
 
         string GetInventoryItems();
 
-        string GetItemByNameOrLink(string itemName);
+        string GetItemJsonByNameOrLink(string itemName);
 
         string GetItemBySlot(int itemslot);
 

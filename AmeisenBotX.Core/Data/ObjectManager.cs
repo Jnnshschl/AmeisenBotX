@@ -529,14 +529,18 @@ namespace AmeisenBotX.Core.Data
             if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
                 && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position)
                 && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation)
-                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking)
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int castingId)
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int channelingId))
             {
                 WowPlayer player = new WowPlayer(activeObject, wowObjectType)
                 {
                     DescriptorAddress = descriptorAddress,
                     Position = position,
                     Rotation = rotation,
-                    IsAutoAttacking = isAutoAttacking == 1
+                    IsAutoAttacking = isAutoAttacking == 1,
+                    CurrentlyCastingSpellId = castingId,
+                    CurrentlyChannelingSpellId = channelingId
                 };
 
                 // first read the descriptor, then lookup the Name by GUID
@@ -571,14 +575,18 @@ namespace AmeisenBotX.Core.Data
             if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress)
                 && WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position)
                 && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation)
-                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking)
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int castingId)
+                && WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int channelingId))
             {
                 WowUnit unit = new WowUnit(activeObject, wowObjectType)
                 {
                     DescriptorAddress = descriptorAddress,
                     Position = position,
                     Rotation = rotation,
-                    IsAutoAttacking = isAutoAttacking == 1
+                    IsAutoAttacking = isAutoAttacking == 1,
+                    CurrentlyCastingSpellId = castingId,
+                    CurrentlyChannelingSpellId = channelingId
                 };
 
                 // First read the descriptor, then lookup the Name by GUID

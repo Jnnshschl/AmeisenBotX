@@ -444,11 +444,20 @@ namespace AmeisenBotX.Core
         {
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemName = WowInterface.HookManager.GetLootRollItemLink(rollId);
-                string json = WowInterface.HookManager.GetItemByNameOrLink(itemName);
+                string itemLink = WowInterface.HookManager.GetLootRollItemLink(rollId);
+                string itemJson = WowInterface.HookManager.GetItemJsonByNameOrLink(itemLink);
 
-                WowBasicItem item = ItemFactory.ParseItem(json);
-                item = ItemFactory.BuildSpecificItem(item);
+                WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
+
+                if(item.Name == "0" || item.ItemLink == "0")
+                {
+                    // get the item id ad try again
+                    itemJson = WowInterface.HookManager.GetItemJsonByNameOrLink(
+                        itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
+                        .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
+
+                    item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
+                }
 
                 if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                 {

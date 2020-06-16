@@ -20,9 +20,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public float CombatReach => RawWowUnit.CombatReach;
 
-        public int CurrentlyCastingSpellId => RawWowUnit.ChannelSpell;
+        public int CurrentlyCastingSpellId { get; set; }
 
-        public int CurrentlyChannelingSpellId => RawWowUnit.ChannelSpell;
+        public int CurrentlyChannelingSpellId { get; set; }
 
         public int Energy => RawWowUnit.Power3;
 

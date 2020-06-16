@@ -269,6 +269,10 @@ namespace AmeisenBotX
                     sb.AppendLine($"DungeonWaiting: {AmeisenBot.WowInterface.DungeonEngine.Waiting}");
                     sb.AppendLine($"CurrentNodes: {AmeisenBot.WowInterface.DungeonEngine.CurrentNodes.Count}\n");
 
+                    sb.AppendLine($"CurrentlyCastingSpellId: {AmeisenBot.WowInterface.ObjectManager.Player.CurrentlyCastingSpellId}");
+                    sb.AppendLine($"CurrentlyChannelingSpellId: {AmeisenBot.WowInterface.ObjectManager.Player.CurrentlyChannelingSpellId}");
+                    sb.AppendLine($"IsCasting: {AmeisenBot.WowInterface.ObjectManager.Player.IsCasting}\n");
+
                     //     sb.AppendLine($"Me - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Player.Auras.Count}");
                     //
                     //     foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
