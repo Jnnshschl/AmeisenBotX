@@ -30,6 +30,11 @@ namespace AmeisenBotX.Core.Character.Comparators
             return currentRating < newItemRating;
         }
 
+        public bool IsBlacklistedItem(IWowItem item)
+        {
+            return false;
+        }
+
         private double GetRating(IWowItem item, EquipmentSlot slot)
         {
             double rating = 0;

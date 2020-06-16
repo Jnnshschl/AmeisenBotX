@@ -147,6 +147,8 @@ namespace AmeisenBotX.Core
 
         private Timer StateMachineTimer { get; }
 
+        private bool TalentUpdateRunning { get; set; }
+
         public void Pause()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Pausing", LogLevel.Warning);
@@ -449,7 +451,7 @@ namespace AmeisenBotX.Core
 
                 WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
-                if(item.Name == "0" || item.ItemLink == "0")
+                if (item.Name == "0" || item.ItemLink == "0")
                 {
                     // get the item id ad try again
                     itemJson = WowInterface.HookManager.GetItemJsonByNameOrLink(
@@ -497,6 +499,17 @@ namespace AmeisenBotX.Core
         private void OnSummonRequest(long timestamp, List<string> args)
         {
             WowInterface.HookManager.AcceptSummon();
+        }
+
+        private void OnTalentPointsChange(long timestamp, List<string> args)
+        {
+            if (WowInterface.CombatClass.Talents != null && !TalentUpdateRunning)
+            {
+                TalentUpdateRunning = true;
+                WowInterface.CharacterManager.TalentManager.Update();
+                WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.HookManager.GetUnspentTalentPoints());
+                TalentUpdateRunning = false;
+            }
         }
 
         private void OnWorldStateUpdate(long timestamp, List<string> args)
@@ -629,6 +642,8 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
             WowInterface.EventHookManager.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
+
+            WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
 
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }

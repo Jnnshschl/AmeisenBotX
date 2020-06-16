@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -121,6 +122,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public Dictionary<string, Spell> Spells { get; internal set; }
 
+        public virtual TalentTree Talents { get; } = null;
+
         public AuraManager TargetAuraManager { get; internal set; }
 
         public InterruptManager TargetInterruptManager { get; internal set; }
@@ -141,7 +144,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public void Execute()
         {
-            if (!ActionEvent.Run()) { return; }
+            if (!ActionEvent.Run() || WowInterface.ObjectManager.Player.IsCasting) { return; }
 
             if (UpdatePriorityUnits.Run())
             {
@@ -153,9 +156,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     TargetManager.PriorityTargets = WowInterface.DungeonEngine.DungeonProfile.PriorityUnits.ToList();
                 }
             }
-
-            // we dont want to do anything if we are casting something...
-            if (WowInterface.ObjectManager.Player.IsCasting) { return; }
 
             if (UseDefaultTargetSelection)
             {
@@ -226,6 +226,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
+
+                    if (Spells[spellName].CastTime > 0)
+                    {
+                        // stop pending movement if we cast something
+                        WowInterface.MovementEngine.Reset();
+                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                    }
+
                     CastSpell(spellName, isTargetMyself);
                     return true;
                 }
@@ -251,6 +259,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
+
+                    if (Spells[spellName].CastTime > 0)
+                    {
+                        // stop pending movement if we cast something
+                        WowInterface.MovementEngine.Reset();
+                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                    }
+
                     CastSpell(spellName, isTargetMyself);
                     return true;
                 }
@@ -274,6 +290,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
+
+                    if (Spells[spellName].CastTime > 0)
+                    {
+                        // stop pending movement if we cast something
+                        WowInterface.MovementEngine.Reset();
+                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                    }
+
                     CastSpell(spellName, isTargetMyself);
                     return true;
                 }
@@ -345,10 +369,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CastSpell(string spellName, bool castOnSelf)
         {
-            // stop pending movement if we cast something
-            // WowInterface.MovementEngine.Reset();
-            // WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
-
             if (!castOnSelf)
             {
                 WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);

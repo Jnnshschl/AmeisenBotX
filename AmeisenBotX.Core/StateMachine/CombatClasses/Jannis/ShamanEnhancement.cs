@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 1, (x) => CastSpellIfPossible(hexSpell, x.Guid, true) }
             };
 
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public override string Author => "Jannis";
@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => true;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         List<string> PriorityTargets { get; set; }
 
         CombatClassRole Role { get; }
+
+        TalentTree Talents { get; }
 
         string Version { get; }
 

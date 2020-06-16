@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
+using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
@@ -20,6 +21,8 @@ namespace AmeisenBotX.Core.Character
         List<string> Skills { get; }
 
         SpellBook SpellBook { get; }
+
+        TalentManager TalentManager { get; }
 
         void AntiAfk();
 

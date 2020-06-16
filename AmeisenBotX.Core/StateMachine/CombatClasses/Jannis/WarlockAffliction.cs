@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -72,7 +73,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIEDLS });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public PetManager PetManager { get; private set; }
 
@@ -81,6 +82,42 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override string Version => "1.0";
 
         private DateTime LastFearAttempt { get; set; }
+
+        public override TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(1, 1, 2) },
+                { 2, new Talent(1, 2, 3) },
+                { 3, new Talent(1, 3, 5) },
+                { 7, new Talent(1, 7, 2) },
+                { 9, new Talent(1, 9, 3) },
+                { 12, new Talent(1, 12, 2) },
+                { 13, new Talent(1, 13, 3) },
+                { 14, new Talent(1, 14, 5) },
+                { 15, new Talent(1, 15, 1) },
+                { 17, new Talent(1, 17, 2) },
+                { 18, new Talent(1, 18, 5) },
+                { 19, new Talent(1, 19, 3) },
+                { 20, new Talent(1, 20, 5) },
+                { 23, new Talent(1, 23, 3) },
+                { 24, new Talent(1, 24, 3) },
+                { 25, new Talent(1, 25, 1) },
+                { 26, new Talent(1, 26, 1) },
+                { 27, new Talent(1, 27, 5) },
+                { 28, new Talent(1, 28, 1) },
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(3, 1, 5) },
+                { 2, new Talent(3, 2, 5) },
+                { 8, new Talent(3, 8, 5) },
+                { 9, new Talent(3, 9, 1) },
+            },
+        };
 
         public override void ExecuteCC()
         {

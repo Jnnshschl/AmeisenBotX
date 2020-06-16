@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -66,8 +67,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                             WowInterface.HookManager.ReplaceItem(null, item);
                         }
 
-                        if (itemToSell != null 
-                            && itemToSell.GetType() != typeof(WowProjectile)
+                        if (itemToSell != null
+                            && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile))
                             && itemToSell.ItemQuality != ItemQuality.Epic)
                         {
                             WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);

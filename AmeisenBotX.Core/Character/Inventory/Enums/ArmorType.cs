@@ -7,7 +7,7 @@
         LEATHER,
         MAIL,
         PLATE,
-        SHIEDLS,
+        SHIELDS,
         LIBRAMS,
         IDOLS,
         TOTEMS,

@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 1, (x) => CastSpellIfPossible(concussionBlowSpell, x.Guid, true) }
             };
 
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public override string Author => "Jannis";

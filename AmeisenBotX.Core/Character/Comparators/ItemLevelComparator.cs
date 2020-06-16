@@ -8,5 +8,10 @@ namespace AmeisenBotX.Core.Character.Comparators
         {
             return current == null || current.ItemLevel < item.ItemLevel;
         }
+
+        public bool IsBlacklistedItem(IWowItem item)
+        {
+            return false;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -46,7 +47,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossible(hammerOfJusticeSpell, x.Guid, true) }
             };
 
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfMightSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
@@ -65,7 +66,46 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => true;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIEDLS }, new List<WeaponType>() { WeaponType.ONEHANDED_AXES, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_SWORDS });
+        public override TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(1, 2, 5) },
+                { 4, new Talent(1, 4, 5) },
+                { 6, new Talent(1, 6, 1) },
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(2, 2, 5) },
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(3, 2, 5) },
+                { 3, new Talent(3, 3, 2) },
+                { 4, new Talent(3, 4, 3) },
+                { 5, new Talent(3, 5, 2) },
+                { 7, new Talent(3, 7, 5) },
+                { 8, new Talent(3, 8, 1) },
+                { 9, new Talent(3, 9, 2) },
+                { 11, new Talent(3, 11, 3) },
+                { 12, new Talent(3, 12, 3) },
+                { 13, new Talent(3, 13, 3) },
+                { 14, new Talent(3, 14, 1) },
+                { 15, new Talent(3, 15, 3) },
+                { 17, new Talent(3, 17, 2) },
+                { 18, new Talent(3, 18, 1) },
+                { 19, new Talent(3, 19, 3) },
+                { 20, new Talent(3, 20, 3) },
+                { 21, new Talent(3, 21, 2) },
+                { 22, new Talent(3, 22, 3) },
+                { 23, new Talent(3, 23, 1) },
+                { 24, new Talent(3, 24, 3) },
+                { 25, new Talent(3, 25, 3) },
+                { 26, new Talent(3, 26, 1) },
+            },
+        };
+
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_AXES, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_SWORDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 

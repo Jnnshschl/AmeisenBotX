@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators.Objects;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Comparators
@@ -30,6 +31,20 @@ namespace AmeisenBotX.Core.Character.Comparators
             double scoreCurrent = GearscoreFactory.Calculate(current);
             double scoreNew = GearscoreFactory.Calculate(item);
             return scoreCurrent < scoreNew;
+        }
+
+        public bool IsBlacklistedItem(IWowItem item)
+        {
+            if (string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && ArmorTypeBlacklist.Contains(((WowArmor)item).ArmorType))
+            {
+                return true;
+            }
+            else if (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && WeaponTypeBlacklist.Contains(((WowWeapon)item).WeaponType))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

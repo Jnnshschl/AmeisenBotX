@@ -114,6 +114,9 @@
     <Compile Include="Character\Spells\Enums\Spellschools.cs" />
     <Compile Include="Character\Spells\Objects\Spell.cs" />
     <Compile Include="Character\Spells\SpellBook.cs" />
+    <Compile Include="Character\Talents\Objects\TalentTree.cs" />
+    <Compile Include="Character\Talents\Objects\Talent.cs" />
+    <Compile Include="Character\Talents\TalentManager.cs" />
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\CustomTcpClient.cs" />

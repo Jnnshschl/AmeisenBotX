@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -47,7 +48,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
 
             FaceEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
@@ -79,6 +80,42 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private DateTime LastHealAction { get; set; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
+
+        public override TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(1, 1, 5) },
+                { 3, new Talent(1, 3, 3) },
+                { 4, new Talent(1, 4, 5) },
+                { 6, new Talent(1, 6, 1) },
+                { 7, new Talent(1, 7, 5) },
+                { 8, new Talent(1, 8, 1) },
+                { 10, new Talent(1, 10, 2) },
+                { 13, new Talent(1, 13, 1) },
+                { 14, new Talent(1, 14, 3) },
+                { 16, new Talent(1, 16, 5) },
+                { 17, new Talent(1, 17, 3) },
+                { 18, new Talent(1, 18, 1) },
+                { 21, new Talent(1, 21, 5) },
+                { 22, new Talent(1, 22, 1) },
+                { 23, new Talent(1, 23, 5) },
+                { 24, new Talent(1, 24, 2) },
+                { 25, new Talent(1, 25, 2) },
+                { 26, new Talent(1, 26, 1) },
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(2, 1, 5) },
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(3, 2, 5) },
+                { 4, new Talent(3, 4, 3) },
+                { 5, new Talent(3, 5, 2) },
+                { 7, new Talent(3, 7, 5) },
+            },
+        };
 
         public override void ExecuteCC()
         {

@@ -58,9 +58,9 @@ namespace AmeisenBotX.Core.Hook
 
         string GetInventoryItems();
 
-        string GetItemJsonByNameOrLink(string itemName);
-
         string GetItemBySlot(int itemslot);
+
+        string GetItemJsonByNameOrLink(string itemName);
 
         string GetItemStats(string itemLink);
 
@@ -78,11 +78,15 @@ namespace AmeisenBotX.Core.Hook
 
         string GetSpells();
 
+        string GetTalents();
+
         List<WowAura> GetUnitAuras(WowUnit wowUnit);
 
         (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
 
         WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
+
+        int GetUnspentTalentPoints();
 
         bool HasUnitStealableBuffs(WowLuaUnit luaUnit);
 

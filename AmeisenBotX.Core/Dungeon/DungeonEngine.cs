@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         public bool IgnoreEatDrink { get; private set; }
 
+        public DungeonNode LastNode { get; private set; }
+
         public List<DungeonNode> Nodes => CurrentNodes?.ToList();
 
         public double Progress { get; private set; }
@@ -54,8 +56,6 @@ namespace AmeisenBotX.Core.Dungeon
         public int TotalNodes { get; private set; }
 
         public bool Waiting { get; private set; }
-
-        public DungeonNode LastNode { get; private set; }
 
         public DateTime WaitingSince { get; private set; }
 
@@ -250,6 +250,15 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool MoveToGroupLeader()
         {
+            if (CurrentNodes.TryPeek(out DungeonNode pNode)
+                && pNode.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20.0
+                && CurrentNodes.TryDequeue(out DungeonNode completedNode))
+            {
+                CompletedNodes.Add(completedNode);
+                LastNode = completedNode;
+                Progress = Math.Round(CompletedNodes.Count / (double)TotalNodes * 100.0);
+            }
+
             WowUnit partyLeader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.PartyleaderGuid);
 
             double distance = partyLeader != null ? partyLeader.Position.GetDistance(WowInterface.ObjectManager.Player.Position) : 0;

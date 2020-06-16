@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
+using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
 using AmeisenBotX.Core.Data.Enums;
@@ -26,6 +27,7 @@ namespace AmeisenBotX.Core.Character
             Inventory = new CharacterInventory(WowInterface);
             Equipment = new CharacterEquipment(WowInterface);
             SpellBook = new SpellBook(WowInterface);
+            TalentManager = new TalentManager(WowInterface);
             ItemComparator = new ItemLevelComparator();
             Skills = new List<string>();
         }
@@ -41,6 +43,8 @@ namespace AmeisenBotX.Core.Character
         public List<string> Skills { get; private set; }
 
         public SpellBook SpellBook { get; }
+
+        public TalentManager TalentManager { get; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -83,7 +87,7 @@ namespace AmeisenBotX.Core.Character
                 ArmorType.LIBRAMS => Skills.Any(e => e.Contains("Libram") || e.Contains("Buchband")),
                 ArmorType.IDOLS => Skills.Any(e => e.Contains("Idol") || e.Contains("Götzen")),
                 ArmorType.SIGILS => Skills.Any(e => e.Contains("Sigil") || e.Contains("Siegel")),
-                ArmorType.SHIEDLS => Skills.Any(e => e.Contains("Shield") || e.Contains("Schild")),
+                ArmorType.SHIELDS => Skills.Any(e => e.Contains("Shield") || e.Contains("Schild")),
                 ArmorType.MISCELLANEOUS => true,
                 _ => false,
             };
@@ -117,6 +121,11 @@ namespace AmeisenBotX.Core.Character
         public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)
         {
             itemToReplace = null;
+
+            if (ItemComparator.IsBlacklistedItem(item))
+            {
+                return false;
+            }
 
             if ((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
                 || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item)))
@@ -169,6 +178,7 @@ namespace AmeisenBotX.Core.Character
             Inventory.Update();
             Equipment.Update();
             SpellBook.Update();
+            TalentManager.Update();
 
             UpdateSkills();
             UpdateMoney();
