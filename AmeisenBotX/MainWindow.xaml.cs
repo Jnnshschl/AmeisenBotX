@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.SMovementEngine;
@@ -255,27 +254,34 @@ namespace AmeisenBotX
                 //     }
                 // }
 
-                if (AmeisenBot.WowInterface.ObjectManager?.Player?.Auras != null)
+                if (AmeisenBot.WowInterface.ObjectManager?.Player != null)
                 {
                     StringBuilder sb = new StringBuilder();
 
                     sb.AppendLine($"MovementAction: {AmeisenBot.WowInterface.MovementEngine.MovementAction}");
                     sb.AppendLine($"MovementState: {(MovementState)((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).CurrentState.Key}");
-                    sb.AppendLine($"MovementTarget: {((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).TargetPosition}\n");
+                    sb.AppendLine($"FinalTargetPosition: {((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).FinalTargetPosition}");
+                    sb.AppendLine($"VehicleTargetPosition: {((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).VehicleTargetPosition}\n");
+
+                    sb.AppendLine($"LastDiedMap: {AmeisenBot.StateMachine.LastDiedMap} ({(int)AmeisenBot.StateMachine.LastDiedMap})\n");
+
+                    sb.AppendLine($"DungeonProgress: {Math.Round(AmeisenBot.WowInterface.DungeonEngine.Progress)}");
+                    sb.AppendLine($"DungeonWaiting: {AmeisenBot.WowInterface.DungeonEngine.Waiting}");
+                    sb.AppendLine($"CurrentNodes: {AmeisenBot.WowInterface.DungeonEngine.CurrentNodes.Count}\n");
 
                     //     sb.AppendLine($"Me - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Player.Auras.Count}");
-                    // 
+                    //
                     //     foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
                     //     {
                     //         sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
                     //     }
-                    // 
+                    //
                     //     labelDebug.Content = sb.ToString();
-                    // 
+                    //
                     //     if (AmeisenBot.WowInterface.ObjectManager.Target != null)
                     //     {
                     //         sb.AppendLine($"\nTarget - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Target.Auras.Count}");
-                    // 
+                    //
                     //         foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Target.Auras)
                     //         {
                     //             sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");

@@ -12,7 +12,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            SetMapAndPosition = false;
         }
 
         public override void Execute()
@@ -21,6 +20,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
                 {
+                    SetMapAndPosition = true;
                     StateMachine.LastDiedMap = WowInterface.ObjectManager.MapId;
 
                     if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap))

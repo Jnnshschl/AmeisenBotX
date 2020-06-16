@@ -33,13 +33,17 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             CurrentState = States.First();
             CurrentState.Value.Enter();
+
+            PlayerVehicle.OnMoveCharacter += (x) => VehicleTargetPosition = x;
         }
 
         public override event StateMachineTick OnStateMachineTick;
 
         public override event StateMachineOverride OnStateOverride;
 
-        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < MovementSettings.WaypointCheckThreshold;
+        public Vector3 FinalTargetPosition { get; private set; }
+
+        public bool IsAtTargetPosition => FinalTargetPosition != default && FinalTargetPosition.GetDistanceIgnoreZ(WowInterface.ObjectManager.Player.Position) < MovementSettings.WaypointCheckThreshold;
 
         public Vector3 LastPlayerPosition { get; private set; }
 
@@ -49,9 +53,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public List<Vector3> Path => Nodes.ToList();
 
-        public Vector3 TargetPosition { get; private set; }
-
-        public float TargetRotation { get; private set; }
+        public Vector3 VehicleTargetPosition { get; private set; }
 
         internal MovementSettings MovementSettings { get; }
 
@@ -71,20 +73,79 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         {
             MovementAction = MovementAction.None;
             CurrentState = States.First(e => e.Key == (int)MovementState.None);
-            TargetPosition = Vector3.Zero;
+            FinalTargetPosition = Vector3.Zero;
+            VehicleTargetPosition = Vector3.Zero;
             Nodes.Clear();
         }
 
         public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f)
         {
-            TargetRotation = targetRotation;
+            MovementAction = movementAction;
+            LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
 
-            if (TargetPosition.GetDistance(positionToGoTo) > 2.0 || MovementAction != movementAction)
+            PlayerVehicle.Update(GetForces(positionToGoTo, targetRotation));
+
+            if (movementAction == MovementAction.Fleeing
+                || movementAction == MovementAction.Wandering
+                || movementAction == MovementAction.Chasing
+                || movementAction == MovementAction.Evading
+                || movementAction == MovementAction.Unstuck)
             {
-                MovementAction = movementAction;
-                LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
-                TargetPosition = positionToGoTo;
+                // we dont care about reaching the target
+                FinalTargetPosition = VehicleTargetPosition;
             }
+            else
+            {
+                FinalTargetPosition = positionToGoTo;
+            }
+        }
+
+        private List<Vector3> GetForces(Vector3 targetPosition, float rotation = 0f)
+        {
+            List<Vector3> forces = new List<Vector3>();
+
+            switch (MovementAction)
+            {
+                case MovementAction.Moving:
+                    forces.Add(PlayerVehicle.Seek(targetPosition, 1f));
+                    forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    break;
+
+                case MovementAction.Following:
+                    forces.Add(PlayerVehicle.Seek(targetPosition, 1f));
+                    forces.Add(PlayerVehicle.Seperate(1f));
+                    forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    break;
+
+                case MovementAction.Chasing:
+                    forces.Add(PlayerVehicle.Seek(targetPosition, 1f));
+                    break;
+
+                case MovementAction.Fleeing:
+                    Vector3 fleeForce = PlayerVehicle.Flee(targetPosition, 1f);
+                    fleeForce.Z = 0; // set z to zero to avoid going under the terrain
+                    forces.Add(fleeForce);
+                    break;
+
+                case MovementAction.Evading:
+                    forces.Add(PlayerVehicle.Evade(targetPosition, 1f, rotation));
+                    break;
+
+                case MovementAction.Wandering:
+                    Vector3 wanderForce = PlayerVehicle.Wander(1f);
+                    wanderForce.Z = 0; // set z to zero to avoid going under the terrain
+                    forces.Add(wanderForce);
+                    break;
+
+                case MovementAction.Unstuck:
+                    forces.Add(PlayerVehicle.Unstuck(1f));
+                    break;
+
+                default:
+                    break;
+            }
+
+            return forces;
         }
     }
 }

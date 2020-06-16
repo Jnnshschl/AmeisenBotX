@@ -262,6 +262,12 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        public void SetWindowParent(IntPtr parentHandle, IntPtr childHandle)
+        {
+            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+            SetParent(childHandle, parentHandle);
+        }
+
         public Process StartProcessNoActivate(string processCmd)
         {
             StartupInfo startupInfo = new StartupInfo
@@ -321,7 +327,12 @@ namespace AmeisenBotX.Memory
 
         private bool OpenMainThread()
         {
-            MainThreadHandle = OpenThread(ThreadAccess.SuspendResume, false, (uint)GetMainThread().Id);
+            try
+            {
+                MainThreadHandle = OpenThread(ThreadAccess.SuspendResume, false, (uint)GetMainThread().Id);
+            }
+            catch { }
+
             return MainThreadHandle != IntPtr.Zero;
         }
 
@@ -330,12 +341,6 @@ namespace AmeisenBotX.Memory
         {
             ++rpmCalls;
             return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
-        }
-
-        public void SetWindowParent(IntPtr parentHandle, IntPtr childHandle)
-        {
-            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
-            SetParent(childHandle, parentHandle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

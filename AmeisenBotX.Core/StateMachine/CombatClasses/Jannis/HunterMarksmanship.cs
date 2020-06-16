@@ -90,9 +90,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        private bool DisengagePrepared { get; set; } = false;
+        private bool ReadyToDisengage { get; set; } = false;
 
-        private bool InFrostTrapCombo { get; set; } = false;
+        private bool SlowTargetWhenPossible { get; set; } = false;
 
         private PetManager PetManager { get; set; }
 
@@ -119,18 +119,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 double distanceToTarget = target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
+                // make some distance
+                if (WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
+                }
+
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 15
                     && CastSpellIfPossible(feignDeathSpell, 0))
                 {
                     return;
                 }
 
-                if (distanceToTarget < 3)
+                if (distanceToTarget < 5.0)
                 {
+                    if (ReadyToDisengage
+                        && CastSpellIfPossible(disengageSpell, 0, true))
+                    {
+                        ReadyToDisengage = false;
+                        return;
+                    }
+
                     if (CastSpellIfPossible(frostTrapSpell, 0, true))
                     {
-                        InFrostTrapCombo = true;
-                        DisengagePrepared = true;
+                        ReadyToDisengage = true;
+                        SlowTargetWhenPossible = true;
                         return;
                     }
 
@@ -148,17 +161,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
                 else
                 {
-                    if (DisengagePrepared
-                        && CastSpellIfPossible(concussiveShotSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    {
-                        DisengagePrepared = false;
-                        return;
-                    }
-
-                    if (InFrostTrapCombo
+                    if (SlowTargetWhenPossible
                         && CastSpellIfPossible(disengageSpell, 0, true))
                     {
-                        InFrostTrapCombo = false;
+                        SlowTargetWhenPossible = false;
                         return;
                     }
 
@@ -191,7 +197,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            DisengagePrepared = false;
+            ReadyToDisengage = false;
+            SlowTargetWhenPossible = false;
         }
     }
 }

@@ -18,21 +18,28 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Execute()
         {
+            if (StateMachine.FinalTargetPosition == default)
+            {
+                StateMachine.Reset();
+                return;
+            }
+
             if (StateMachine.MovementAction != MovementAction.DirectMove)
             {
                 if (StateMachine.Path?.Count == 0)
                 {
                     List<Vector3> nodeList;
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.TargetPosition) > 5.0)
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.FinalTargetPosition) > 10.0
+                        || !WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition))
                     {
                         // regular pathfinding
-                        nodeList = StateMachine.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.TargetPosition);
+                        nodeList = StateMachine.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition);
                     }
                     else
                     {
                         // move along surface
-                        nodeList = new List<Vector3>() { StateMachine.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.TargetPosition) };
+                        nodeList = new List<Vector3>() { StateMachine.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition) };
                     }
 
                     if (nodeList != null && nodeList.Count > 0)
@@ -45,7 +52,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                 }
                 else
                 {
-                    double lastNodeDistanceToTarget = StateMachine.Path.Last().GetDistance(StateMachine.TargetPosition);
+                    double lastNodeDistanceToTarget = StateMachine.Path.Last().GetDistance(StateMachine.FinalTargetPosition);
 
                     if (lastNodeDistanceToTarget > 24)
                     {

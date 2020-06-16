@@ -11,7 +11,6 @@ using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Jobs
 {
@@ -26,13 +25,13 @@ namespace AmeisenBotX.Core.Jobs
             JobProfile = new CopperElwynnForestProfile();
         }
 
-        private WowInterface WowInterface { get; }
-
-        private TimegatedEvent MiningEvent { get; }
+        public IJobProfile JobProfile { get; set; }
 
         private int CurrentNodeCounter { get; set; }
 
-        public IJobProfile JobProfile { get; set; }
+        private TimegatedEvent MiningEvent { get; }
+
+        private WowInterface WowInterface { get; }
 
         public void Execute()
         {
@@ -42,6 +41,11 @@ namespace AmeisenBotX.Core.Jobs
                     ExecuteMining((IMiningProfile)JobProfile);
                     break;
             }
+        }
+
+        public void Reset()
+        {
+            AmeisenLogger.Instance.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
         }
 
         private void ExecuteMining(IMiningProfile miningProfile)
@@ -91,11 +95,5 @@ namespace AmeisenBotX.Core.Jobs
                 }
             }
         }
-
-        public void Reset()
-        {
-            AmeisenLogger.Instance.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
-        }
-
     }
 }

@@ -55,6 +55,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         public bool Waiting { get; private set; }
 
+        public DungeonNode LastNode { get; private set; }
+
         public DateTime WaitingSince { get; private set; }
 
         private int AllPlayerPresentDistance { get; set; }
@@ -227,6 +229,7 @@ namespace AmeisenBotX.Core.Dungeon
                     if (CurrentNodes.TryDequeue(out DungeonNode completedNode))
                     {
                         CompletedNodes.Add(completedNode);
+                        LastNode = completedNode;
                         Progress = Math.Round(CompletedNodes.Count / (double)TotalNodes * 100.0);
                     }
                 }
@@ -236,7 +239,11 @@ namespace AmeisenBotX.Core.Dungeon
         private void LoadNodes()
         {
             CurrentNodes = new ConcurrentQueue<DungeonNode>();
-            FilterOutAlreadyCompletedNodes();
+
+            if (LastNode == null)
+            {
+                FilterOutAlreadyCompletedNodes();
+            }
         }
 
         private bool MoveToGroupLeader()

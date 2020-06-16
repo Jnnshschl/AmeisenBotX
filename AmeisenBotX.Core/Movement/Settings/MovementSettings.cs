@@ -8,8 +8,8 @@
 
         public float MaxVelocity { get; set; } = 6f;
 
-        public double SeperationDistance { get; set; } = 2.0;
+        public double SeperationDistance { get; set; } = 5.0;
 
-        public double WaypointCheckThreshold { get; set; } = 4.0;
+        public double WaypointCheckThreshold { get; set; } = 1.5;
     }
 }

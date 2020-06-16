@@ -22,8 +22,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             TargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
 
-        public TargetManager TargetManager { get; internal set; }
-
         public string Author => "Jamsbaer";
 
         public WowClass Class => WowClass.Deathknight;
@@ -45,6 +43,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         public List<string> PriorityTargets { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Dps;
+
+        public TargetManager TargetManager { get; internal set; }
 
         public string Version => "1.0";
 

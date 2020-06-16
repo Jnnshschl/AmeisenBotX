@@ -15,11 +15,13 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        private WowPlayer PlayerToFollow { get; set; }
+        private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(PlayerToFollowGuid);
+
+        private ulong PlayerToFollowGuid { get; set; }
 
         public override void Enter()
         {
-            PlayerToFollow = null;
+            PlayerToFollowGuid = 0;
 
             // TODO: make this crap less redundant
             // check the specific character
@@ -28,28 +30,26 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
-                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !UnitIsOutOfRange(p)).Guid;
                 }
 
                 // check the group/raid leader
                 if (PlayerToFollow == null && Config.FollowGroupLeader)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid);
-                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid && !UnitIsOutOfRange(p)).Guid;
                 }
 
                 // check the group members
                 if (PlayerToFollow == null && Config.FollowGroupMembers)
                 {
-                    PlayerToFollow = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
-                    PlayerToFollow = SkipIfOutOfRange(PlayerToFollow);
+                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid) && !UnitIsOutOfRange(p)).Guid;
                 }
             }
 
             if (PlayerToFollow == null)
             {
                 StateMachine.SetState((int)BotState.Idle);
+                return;
             }
         }
 
@@ -88,6 +88,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
                 StateMachine.SetState((int)BotState.Idle);
+                return;
             }
 
             if (WowInterface.ObjectManager.Player.IsCasting)
@@ -116,24 +117,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+            WowInterface.MovementEngine.Reset();
+            WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
         }
 
-        private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
+        private bool UnitIsOutOfRange(WowPlayer playerToFollow)
         {
-            if (playerToFollow != null)
-            {
-                double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
-                if (UnitIsOutOfRange(distance))
-                {
-                    playerToFollow = null;
-                }
-            }
-
-            return playerToFollow;
-        }
-
-        private bool UnitIsOutOfRange(double distance)
-        {
+            double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
             return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
         }
     }

@@ -53,7 +53,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            //StateMachine.SetState((int)BotState.Job);
+            // StateMachine.SetState((int)BotState.Job);
+
+            // if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 25.0)
+            // {
+            //     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Wandering, WowInterface.ObjectManager.Player.Position);
+            //     return;
+            // }
 
             if (Config.AutojoinBg)
             {

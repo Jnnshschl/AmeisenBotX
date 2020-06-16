@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Core.Statemachine.Utils;
@@ -181,7 +180,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (NearInterruptUnitsEvent.Run())
             {
-                TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 25.0).ToList();
+                TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 30.0).ToList();
             }
 
             if (MyAuraManager.Tick()
@@ -224,7 +223,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
-                    && (target == null || IsInRange(Spells[spellName], target.Position)))
+                    && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
                     CastSpell(spellName, isTargetMyself);
@@ -249,7 +248,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && (!needsBloodrune || (WowInterface.HookManager.IsRuneReady(0) || WowInterface.HookManager.IsRuneReady(1)))
                     && (!needsFrostrune || (WowInterface.HookManager.IsRuneReady(2) || WowInterface.HookManager.IsRuneReady(3)))
                     && (!needsUnholyrune || (WowInterface.HookManager.IsRuneReady(4) || WowInterface.HookManager.IsRuneReady(5)))
-                    && (target == null || IsInRange(Spells[spellName], target.Position)))
+                    && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
                     CastSpell(spellName, isTargetMyself);
@@ -272,7 +271,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsEnergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Energy)
                     && (!needsCombopoints || WowInterface.ObjectManager.Player.ComboPoints >= requiredCombopoints)
-                    && (target == null || IsInRange(Spells[spellName], target.Position)))
+                    && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
                     CastSpell(spellName, isTargetMyself);
@@ -346,6 +345,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CastSpell(string spellName, bool castOnSelf)
         {
+            // stop pending movement if we cast something
+            WowInterface.MovementEngine.Reset();
+            WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+
+            if (!castOnSelf)
+            {
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
+            }
+
             bool result = false;
             double cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
 
@@ -407,14 +415,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        private bool IsInRange(Spell spell, Vector3 position)
+        private bool IsInRange(Spell spell, WowUnit wowUnit)
         {
             if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
             {
-                return true;
+                return WowInterface.ObjectManager.Player.IsInMeleeRange(wowUnit);
             }
 
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
             return distance >= spell.MinRange && distance <= spell.MaxRange;
         }
     }

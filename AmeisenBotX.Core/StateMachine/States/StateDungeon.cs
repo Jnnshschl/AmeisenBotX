@@ -9,7 +9,6 @@
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
-            WowInterface.DungeonEngine.Reset();
             StateMachine.OnStateOverride += StateMachine_OnStateOverride;
         }
 

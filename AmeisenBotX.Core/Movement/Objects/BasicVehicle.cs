@@ -17,6 +17,10 @@ namespace AmeisenBotX.Core.Movement.Objects
             MaxAcceleration = maxAcceleration;
         }
 
+        public delegate void MoveCharacter(Vector3 positionToGoTo);
+
+        public event MoveCharacter OnMoveCharacter;
+
         public float MaxAcceleration { get; private set; }
 
         public float MaxSteering { get; private set; }
@@ -31,7 +35,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
 
-            // acceleration += GetObjectForceAroundMe<WowObject>(12);
+            acceleration += GetObjectForceAroundMe<WowObject>(12);
             // acceleration += GetNearestBlacklistForce(12);
 
             acceleration.Limit(MaxAcceleration);
@@ -138,7 +142,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             currentPosition.Add(Velocity);
 
-            WowInterface.CharacterManager.MoveToPosition(currentPosition);
+            OnMoveCharacter?.Invoke(currentPosition);
         }
 
         public Vector3 Wander(float multiplier)

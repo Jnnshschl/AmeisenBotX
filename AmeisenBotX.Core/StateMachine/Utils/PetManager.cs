@@ -36,6 +36,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         private TimegatedEvent CallPetEvent { get; }
 
+        private bool CallReviveToggle { get; set; }
+
         public bool Tick()
         {
             if (WowInterface.ObjectManager.Pet != null)
@@ -64,9 +66,18 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     return true;
                 }
             }
-            else if (CastCallPet != null && CallPetEvent.Run())
+            else if (CastCallPet != null && CallPetEvent.Run() && !WowInterface.ObjectManager.Player.IsCasting)
             {
-                CastCallPet.Invoke();
+                if (CallReviveToggle)
+                {
+                    CastRevivePet();
+                }
+                else
+                {
+                    CastCallPet.Invoke();
+                }
+
+                CallReviveToggle = !CallReviveToggle;
             }
 
             return false;

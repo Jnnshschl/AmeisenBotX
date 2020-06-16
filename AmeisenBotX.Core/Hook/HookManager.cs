@@ -437,7 +437,6 @@ namespace AmeisenBotX.Core.Hook
                 }
             }
 
-
             return buffs;
         }
 

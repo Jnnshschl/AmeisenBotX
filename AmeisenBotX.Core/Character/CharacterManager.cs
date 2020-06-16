@@ -151,12 +151,9 @@ namespace AmeisenBotX.Core.Character
             BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
         }
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.4f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
         {
-            if (pos == new Vector3(0, 0, 0))
-            {
-                return;
-            }
+            if (pos == default) { return; }
 
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
@@ -172,6 +169,7 @@ namespace AmeisenBotX.Core.Character
             Inventory.Update();
             Equipment.Update();
             SpellBook.Update();
+
             UpdateSkills();
             UpdateMoney();
         }

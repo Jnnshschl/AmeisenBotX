@@ -29,8 +29,14 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
-            Vector3 result = BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.MoveAlongSurface).FirstOrDefault();
-            return result == default ? Vector3.Zero : result;
+            List<Vector3> path = BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.MoveAlongSurface);
+
+            if (path == null || path.Count == 0)
+            {
+                return Vector3.Zero;
+            }
+
+            return path.FirstOrDefault();
         }
 
         private T BuildAndSendPathRequest<T>(int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)

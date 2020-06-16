@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 {
@@ -12,6 +11,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
         {
             LastPositionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
+
+        private Vector3 LastCompletedPosition { get; set; }
+
+        private double LastDistance { get; set; }
 
         private Vector3 LastPosition { get; set; }
 
@@ -25,33 +28,38 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
         {
             TargetPosition = default;
             StartPosition = default;
+            LastPosition = default;
+            LastCompletedPosition = default;
+            LastDistance = 0.0;
         }
 
         public override void Execute()
         {
-            if (StateMachine.MovementAction == MovementAction.DirectMove && StateMachine.TargetPosition != default)
+            if (StateMachine.MovementAction == MovementAction.DirectMove && StateMachine.FinalTargetPosition != default)
             {
-                double distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.TargetPosition);
+                double distanceToFinalNode = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(StateMachine.FinalTargetPosition);
 
-                if (distanceToNode < StateMachine.MovementSettings.WaypointCheckThreshold)
+                if (distanceToFinalNode < StateMachine.MovementSettings.WaypointCheckThreshold)
                 {
                     StateMachine.Reset();
                     // WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
                     return;
                 }
 
-                WowInterface.CharacterManager.MoveToPosition(StateMachine.TargetPosition);
+                WowInterface.CharacterManager.MoveToPosition(StateMachine.FinalTargetPosition);
                 return;
             }
 
-            if (StateMachine.Path?.Count == 0 && TargetPosition == default)
+            double distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition);
+
+            if (StateMachine.Path?.Count == 0 && TargetPosition == default
+                || (LastDistance > 0.0 && (LastDistance + 3.0) < distanceToNode)) // maybe we fell down somewhere
             {
                 StateMachine.Reset();
-                // WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
             }
             else
             {
-                double distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition);
+                distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(TargetPosition);
 
                 if (TargetPosition == default)
                 {
@@ -65,7 +73,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     {
                         if (StateMachine.Nodes.Count > 0)
                         {
-                            StateMachine.Nodes.Dequeue();
+                            LastCompletedPosition = StateMachine.Nodes.Dequeue();
+                            LastDistance = 0.0;
                         }
                         else
                         {
@@ -76,16 +85,15 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                         return;
                     }
 
-                    // calculate forces and move the character
-                    List<Vector3> forces = GetForces(BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, TargetPosition), TargetPosition, 2.0), StateMachine.TargetRotation);
-                    StateMachine.PlayerVehicle.Update(forces);
+                    // move the character
+                    WowInterface.CharacterManager.MoveToPosition(TargetPosition);
 
                     // check wether we need to jump up or down
                     double distanceToNodeIgnoreZ = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(TargetPosition);
 
                     if (distanceToNodeIgnoreZ < 1.5)
                     {
-                        double zDiff = StateMachine.TargetPosition.Z - WowInterface.ObjectManager.Player.Position.Z;
+                        double zDiff = StateMachine.VehicleTargetPosition.Z - WowInterface.ObjectManager.Player.Position.Z;
 
                         if (zDiff > 2)
                         {
@@ -102,14 +110,19 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     // check for beeing stuck
                     if (LastPositionEvent.Run())
                     {
-                        double distanceMovedSinceLastTick = WowInterface.ObjectManager.Player.Position.GetDistance(LastPosition);
+                        double distanceMovedSinceLastTick = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(LastPosition);
 
                         if (distanceMovedSinceLastTick < 0.1)
                         {
                             WowInterface.CharacterManager.Jump();
+
+                            // get a random position behind us
+                            double angle = Math.PI + ((new Random().NextDouble() * Math.PI) - Math.PI / 2.0);
+                            WowInterface.CharacterManager.MoveToPosition(BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 4.0));
                         }
 
                         LastPosition = WowInterface.ObjectManager.Player.Position;
+                        LastDistance = WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition);
                     }
                 }
             }
@@ -117,50 +130,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Exit()
         {
-        }
-
-        private List<Vector3> GetForces(Vector3 targetPosition, float rotation = 0f)
-        {
-            List<Vector3> forces = new List<Vector3>();
-
-            switch (StateMachine.MovementAction)
-            {
-                case MovementAction.Moving:
-                    forces.Add(StateMachine.PlayerVehicle.Seek(targetPosition, 1f));
-                    forces.Add(StateMachine.PlayerVehicle.AvoidObstacles(2f));
-                    break;
-
-                case MovementAction.Following:
-                    forces.Add(StateMachine.PlayerVehicle.Seek(targetPosition, 1f));
-                    forces.Add(StateMachine.PlayerVehicle.Seperate(1f));
-                    forces.Add(StateMachine.PlayerVehicle.AvoidObstacles(2f));
-                    break;
-
-                case MovementAction.Chasing:
-                    forces.Add(StateMachine.PlayerVehicle.Seek(targetPosition, 1f));
-                    break;
-
-                case MovementAction.Fleeing:
-                    forces.Add(StateMachine.PlayerVehicle.Flee(targetPosition, 1f));
-                    break;
-
-                case MovementAction.Evading:
-                    forces.Add(StateMachine.PlayerVehicle.Evade(targetPosition, 1f, rotation));
-                    break;
-
-                case MovementAction.Wandering:
-                    forces.Add(StateMachine.PlayerVehicle.Wander(1f));
-                    break;
-
-                case MovementAction.Unstuck:
-                    forces.Add(StateMachine.PlayerVehicle.Unstuck(1f));
-                    break;
-
-                default:
-                    break;
-            }
-
-            return forces;
         }
     }
 }

@@ -240,7 +240,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonToggleOverlay" Content="📍" Margin="0,0,188.333,0" BorderThickness="0,0,1,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleOverlay_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" Width="28">
+        <Button x:Name="buttonToggleOverlay" Content="📍" Margin="201,0,0,0" BorderThickness="0,0,1,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleOverlay_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Left" Width="28">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
