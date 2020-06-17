@@ -79,6 +79,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 }
             }
 
+            WowUnit lastFallbackUnit = enemies.Where(e => e.IsTaggedByMe).FirstOrDefault();
+            if (lastFallbackUnit != null)
+            {
+                possibleTargets = new List<WowUnit>() { lastFallbackUnit };
+                return true;
+            }
+
             possibleTargets = null;
             return false;
         }

@@ -30,7 +30,14 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                 {
                     List<Vector3> nodeList;
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.FinalTargetPosition) > 10.0
+                    double distanceToTargetPosition = WowInterface.ObjectManager.Player.Position.GetDistance(StateMachine.FinalTargetPosition);
+
+                    if (distanceToTargetPosition > 1024)
+                    {
+                        return;
+                    }
+
+                    if (distanceToTargetPosition > 10.0
                         || !WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition))
                     {
                         // regular pathfinding

@@ -555,7 +555,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void wowRect_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void WowRect_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow)
             {

@@ -53,6 +53,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+
+            SolarEclipse = false;
+            LunarEclipse = true;
         }
 
         public override string Author => "Jannis";
@@ -159,14 +162,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CheckForEclipseProcs()
         {
-            List<string> myBuffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
-
-            if (myBuffs.Any(e => e.Equals(eclipseLunarSpell, StringComparison.OrdinalIgnoreCase)))
+            if (WowInterface.ObjectManager.Player.HasBuffByName(eclipseLunarSpell))
             {
                 SolarEclipse = false;
                 LunarEclipse = true;
             }
-            else if (myBuffs.Any(e => e.Equals(eclipseSolarSpell, StringComparison.OrdinalIgnoreCase)))
+            else if (WowInterface.ObjectManager.Player.HasBuffByName(eclipseSolarSpell))
             {
                 SolarEclipse = true;
                 LunarEclipse = false;

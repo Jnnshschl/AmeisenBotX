@@ -264,7 +264,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Rectangle x:Name="wowRect" Margin="201,28,0.333,51.333" SizeChanged="wowRect_SizeChanged">
+        <Rectangle x:Name="wowRect" Margin="201,28,0.333,51.333" SizeChanged="WowRect_SizeChanged">
             <Rectangle.Fill>
                 <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}"/>
             </Rectangle.Fill>

@@ -20,7 +20,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out List<WowUnit> targetToSelect)
         {
-            if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0 && (WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
+            if (WowInterface.ObjectManager.Target != null
+                && (WowInterface.ObjectManager.Target.IsDead
+                    || WowInterface.ObjectManager.Target.IsNotAttackable
+                    || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
+                    || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly))
             {
                 WowInterface.HookManager.ClearTarget();
             }
@@ -42,7 +46,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // remove all invalid, dead units
-            List<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) || !e.IsDead).ToList();
+            List<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && !e.IsNotAttackable).ToList();
 
             // if there are no non Friendly units, we can't attack anything
             if (nonFriendlyUnits.Count > 0)
@@ -93,6 +97,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                         }
                     }
                 }
+            }
+
+            WowUnit lastFallbackUnit = Enemies.Where(e => e.IsTaggedByMe).FirstOrDefault();
+            if (lastFallbackUnit != null)
+            {
+                targetToSelect = new List<WowUnit>() { lastFallbackUnit };
+                return true;
             }
 
             targetToSelect = null;

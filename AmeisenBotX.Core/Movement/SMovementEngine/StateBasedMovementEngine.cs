@@ -108,13 +108,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             {
                 case MovementAction.Moving:
                     forces.Add(PlayerVehicle.Seek(targetPosition, 1f));
-                    forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    // forces.Add(PlayerVehicle.AvoidObstacles(2f));
                     break;
 
                 case MovementAction.Following:
                     forces.Add(PlayerVehicle.Seek(targetPosition, 1f));
-                    forces.Add(PlayerVehicle.Seperate(1f));
-                    forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    forces.Add(PlayerVehicle.Seperate(0.7f));
+                    // forces.Add(PlayerVehicle.AvoidObstacles(2f));
                     break;
 
                 case MovementAction.Chasing:
