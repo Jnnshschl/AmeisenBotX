@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
@@ -69,6 +70,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override string Version => "1.0";
 
         private DateTime LastDeadPartymembersCheck { get; set; }
+
+        public override TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(1, 2, 5) },
+                { 4, new Talent(1, 4, 3) },
+                { 5, new Talent(1, 5, 2) },
+                { 7, new Talent(1, 7, 3) },
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(3, 1, 3) },
+                { 2, new Talent(3, 2, 2) },
+                { 3, new Talent(3, 3, 5) },
+                { 5, new Talent(3, 5, 2) },
+                { 6, new Talent(3, 6, 3) },
+                { 8, new Talent(3, 8, 5) },
+                { 9, new Talent(3, 9, 1) },
+                { 10, new Talent(3, 10, 2) },
+                { 11, new Talent(3, 11, 2) },
+                { 12, new Talent(3, 12, 3) },
+                { 14, new Talent(3, 14, 1) },
+                { 16, new Talent(3, 16, 3) },
+                { 17, new Talent(3, 17, 2) },
+                { 18, new Talent(3, 18, 3) },
+                { 19, new Talent(3, 19, 1) },
+                { 20, new Talent(3, 20, 5) },
+                { 21, new Talent(3, 21, 2) },
+                { 22, new Talent(3, 22, 3) },
+                { 24, new Talent(3, 24, 1) },
+                { 25, new Talent(3, 25,3 ) },
+                { 26, new Talent(3, 26, 5) },
+                { 27, new Talent(3, 27, 1) },
+            },
+        };
 
         public override void ExecuteCC()
         {

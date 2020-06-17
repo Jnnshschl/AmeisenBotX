@@ -45,5 +45,15 @@ namespace AmeisenBotX.Core.Character.Talents.Objects
         public Dictionary<int, Talent> Tree2 { get; set; }
 
         public Dictionary<int, Talent> Tree3 { get; set; }
+
+        public Dictionary<int, Dictionary<int, Talent>> AsDict()
+        {
+            return  new Dictionary<int, Dictionary<int, Talent>>()
+            {
+                { 1, Tree1 },
+                { 2, Tree2 },
+                { 3, Tree3 },
+            };
+        }
     }
 }

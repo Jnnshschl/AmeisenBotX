@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Talents.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace AmeisenBotX.Core.Character.Talents
 {
@@ -17,13 +19,24 @@ namespace AmeisenBotX.Core.Character.Talents
 
         public void SelectTalents(TalentTree wantedTalents, int talentPoints)
         {
-            talentPoints = CheckTalentTree(1, talentPoints, TalentTree.Tree1, wantedTalents.Tree1);
+            Dictionary<int, Dictionary<int, Talent>> talentTrees = TalentTree.AsDict();
+            Dictionary<int, Dictionary<int, Talent>> wantedTalentTrees = wantedTalents.AsDict();
 
-            if (talentPoints == 0) { return; }
-            talentPoints = CheckTalentTree(2, talentPoints, TalentTree.Tree2, wantedTalents.Tree2);
+            List<(int, int, int)> talentsToSpend = new List<(int, int, int)>();
 
-            if (talentPoints == 0) { return; }
-            CheckTalentTree(3, talentPoints, TalentTree.Tree3, wantedTalents.Tree3);
+            // order the trees to skill the main tree first
+            foreach (KeyValuePair<int, Dictionary<int, Talent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count()))
+            {
+                if (CheckTalentTree(ref talentPoints, kv.Key, talentTrees[kv.Key], kv.Value, out List<(int, int, int)> newTalents))
+                {
+                    talentsToSpend.AddRange(newTalents);
+                }
+            }
+
+            if (talentsToSpend.Count > 0)
+            {
+                SpendTalents(talentsToSpend);
+            }
         }
 
         public void Update()
@@ -31,43 +44,52 @@ namespace AmeisenBotX.Core.Character.Talents
             TalentTree = new TalentTree(WowInterface.HookManager.GetTalents());
         }
 
-        private int CheckTalentTree(int id, int talentPoints, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree)
+        private bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree, out List<(int, int, int)> talentsToSpend)
         {
-            bool selectedTab = false;
+            talentsToSpend = new List<(int, int, int)>();
+
+            if (talentPoints == 0)
+            {
+                return false;
+            }
+
+            bool result = false;
+
             foreach (Talent wantedTalent in wantedTree.Values)
             {
+                if (talentPoints == 0) { break; }
+
                 if (tree.ContainsKey(wantedTalent.Num))
                 {
                     int wantedRank = Math.Min(wantedTalent.Rank, tree[wantedTalent.Num].MaxRank);
 
                     if (tree[wantedTalent.Num].Rank < wantedRank)
                     {
-                        if (!selectedTab)
-                        {
-                            SelectTalentTab(id);
-                            selectedTab = true;
-                        }
+                        int amount = Math.Min(talentPoints, wantedRank - tree[wantedTalent.Num].Rank);
 
-                        for (int i = 0; i < wantedRank - tree[wantedTalent.Num].Rank; ++i)
-                        {
-                            SpendTalent(wantedTalent.Num);
-                            --talentPoints;
-                        }
+                        talentsToSpend.Add((treeId, wantedTalent.Num, amount));
+
+                        talentPoints -= amount;
+                        result = true;
                     }
                 }
             }
 
-            return talentPoints;
+            return result;
         }
 
-        private void SelectTalentTab(int id)
+        private void SpendTalents(List<(int, int, int)> talentsToSpend)
         {
-            WowInterface.HookManager.ClickUiElement($"PlayerTalentFrameTab{id}");
-        }
+            StringBuilder sb = new StringBuilder();
 
-        private void SpendTalent(int id)
-        {
-            WowInterface.HookManager.ClickUiElement($"PlayerTalentFrameTalent{id}");
+            foreach ((int, int, int) talent in talentsToSpend)
+            {
+                sb.Append($"AddPreviewTalentPoints({talent.Item1},{talent.Item2},{talent.Item3});");
+            }
+
+            sb.Append("LearnPreviewTalents();");
+
+            WowInterface.HookManager.LuaDoString(sb.ToString());
         }
     }
 }

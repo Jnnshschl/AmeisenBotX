@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -97,6 +98,43 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private PetManager PetManager { get; set; }
 
         private TimegatedEvent AutoAttackEvent { get; set; }
+
+        public override TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(1, 1, 5) },
+                { 3, new Talent(1, 3, 2) },
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(2, 2, 3) },
+                { 3, new Talent(2, 3, 5) },
+                { 4, new Talent(2, 4, 3) },
+                { 6, new Talent(2, 6, 5) },
+                { 7, new Talent(2, 7, 1) },
+                { 8, new Talent(2, 8, 3) },
+                { 9, new Talent(2, 9, 1) },
+                { 11, new Talent(2, 11, 3) },
+                { 14, new Talent(2, 14, 1) },
+                { 15, new Talent(2, 15, 3) },
+                { 16, new Talent(2, 16, 2) },
+                { 17, new Talent(2, 17, 3) },
+                { 18, new Talent(2, 18, 3) },
+                { 19, new Talent(2, 19, 1) },
+                { 20, new Talent(2, 20, 3) },
+                { 21, new Talent(2, 21, 5) },
+                { 23, new Talent(2, 23, 3) },
+                { 25, new Talent(2, 25, 3) },
+                { 26, new Talent(2, 26, 5) },
+                { 27, new Talent(2, 27, 1) },
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(3, 1, 5) },
+                { 7, new Talent(3, 7, 2) },
+            },
+        };
 
         public override void ExecuteCC()
         {

@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -71,6 +72,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
+
+        public override TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(1, 1, 2) },
+                { 2, new Talent(1, 2, 3) },
+                { 3, new Talent(1, 3, 5) },
+                { 6, new Talent(1, 6, 5) },
+                { 8, new Talent(1, 8, 2) },
+                { 9, new Talent(1, 9, 1) },
+                { 10, new Talent(1, 10, 1) },
+                { 13, new Talent(1, 13, 2) },
+                { 14, new Talent(1, 14, 3) },
+                { 16, new Talent(1, 16, 1) },
+                { 17, new Talent(1, 17, 5) },
+                { 19, new Talent(1, 19, 3) },
+                { 20, new Talent(1, 20, 2) },
+                { 23, new Talent(1, 23, 3) },
+                { 24, new Talent(1, 24, 1) },
+                { 25, new Talent(1, 25, 5) },
+                { 27, new Talent(1, 27, 5) },
+                { 28, new Talent(1, 28, 3) },
+                { 29, new Talent(1, 29, 2) },
+                { 30, new Talent(1, 30, 1) },
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(2, 2, 3) },
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(3, 1, 2) },
+                { 3, new Talent(3, 3, 3) },
+                { 5, new Talent(3, 5, 2) },
+                { 6, new Talent(3, 6, 3) },
+                { 9, new Talent(3, 9, 1) },
+            },
+        };
 
         public override void ExecuteCC()
         {
