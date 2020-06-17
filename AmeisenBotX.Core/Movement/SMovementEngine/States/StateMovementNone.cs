@@ -14,8 +14,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Execute()
         {
-            if ((StateMachine.VehicleTargetPosition != default
-                    && !StateMachine.IsAtTargetPosition))
+            if (StateMachine.VehicleTargetPosition != default
+                 && StateMachine.FinalTargetPosition != default
+                 && !StateMachine.IsAtTargetPosition)
             {
                 StateMachine.SetState((int)MovementState.Pathfinding);
             }

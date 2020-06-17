@@ -24,6 +24,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowInterface.WowProcess.WaitForInputIdle();
                     WowInterface.XMemory.Attach(WowInterface.WowProcess);
+
+                    if (Config.AutoPositionWow)
+                    {
+                        WowInterface.XMemory.HideBordersWindowWow();
+                    }
+
                     WowStart = DateTime.Now;
                 }
             }

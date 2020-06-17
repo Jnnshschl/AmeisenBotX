@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
@@ -92,6 +93,43 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void BringWindowToFront(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
+        {
+            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoActivate;
+            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
+
+            if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
+            {
+                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Rect GetWindowPositionWow()
+        {
+            Rect rect = new Rect();
+            GetWindowRect(Process.MainWindowHandle, ref rect);
+            return rect;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetWindowPositionWow(Rect rect, bool resizeWindow = true)
+        {
+            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
+            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
+
+            if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
+            {
+                SetWindowPos(Process.MainWindowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+            }
+        }
+
+        public void SetWowWindowOwner(IntPtr owner)
+        {
+            Win32Imports.SetWindowLong(Process.MainWindowHandle, -8, owner);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllocateMemory(uint size, out IntPtr address)
         {
             address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
@@ -140,6 +178,18 @@ namespace AmeisenBotX.Memory
         public IntPtr GetForegroundWindow()
         {
             return Win32Imports.GetForegroundWindow();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetForegroundWindow(IntPtr windowHandle)
+        {
+            Win32Imports.SetForegroundWindow(windowHandle);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ShowWindow(IntPtr windowHandle)
+        {
+            Win32Imports.ShowWindow(windowHandle, 0x5);
         }
 
         public ProcessThread GetMainThread()
@@ -262,10 +312,22 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        public void SetWindowParent(IntPtr parentHandle, IntPtr childHandle)
+        public void SetWindowParent(IntPtr childHandle, IntPtr parentHandle)
         {
-            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+            HideBordersWindowWow();
+            Win32Imports.SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+
             SetParent(childHandle, parentHandle);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void HideBordersWindowWow()
+        {
+            uint currentLong = (uint)GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
+            uint flagsToRemove = (int)(WindowStyles.WS_BORDER | WindowStyles.WS_CAPTION | WindowStyles.WS_THICKFRAME | WindowStyles.WS_MINIMIZE | WindowStyles.WS_MAXIMIZE | WindowStyles.WS_SYSMENU);
+            uint newLong = currentLong & ~flagsToRemove;
+
+            Win32Imports.SetWindowLong(Process.MainWindowHandle, GWL_STYLE, newLong);
         }
 
         public Process StartProcessNoActivate(string processCmd)
@@ -359,6 +421,11 @@ namespace AmeisenBotX.Memory
         {
             ++wpmCalls;
             return !NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+        }
+
+        public void MoveWindowWow(int x, int y, int windowHandle, int height, bool repaint)
+        {
+            Win32Imports.MoveWindow(Process.MainWindowHandle, x, y, windowHandle, height, repaint);
         }
     }
 }

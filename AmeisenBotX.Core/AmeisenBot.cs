@@ -322,7 +322,7 @@ namespace AmeisenBotX.Core
                 {
                     if (Config.BotWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
-                        XMemory.SetWindowPosition(MainWindowHandle, Config.BotWindowRect, false);
+                        XMemory.SetWindowPosition(MainWindowHandle, Config.BotWindowRect);
                         AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded bot window position: {Config.BotWindowRect}", LogLevel.Verbose);
                     }
                 }
@@ -367,7 +367,7 @@ namespace AmeisenBotX.Core
 
         private void LoadWowWindowPosition()
         {
-            if (AccountName.Length > 0)
+            if (AccountName.Length > 0 && !Config.AutoPositionWow)
             {
                 try
                 {
@@ -554,13 +554,16 @@ namespace AmeisenBotX.Core
 
         private void SaveWowWindowPosition()
         {
-            try
+            if (!Config.AutoPositionWow)
             {
-                Config.WowWindowRect = XMemory.GetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle);
-            }
-            catch (Exception e)
-            {
-                AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save wow window position:\n{e}", LogLevel.Error);
+                try
+                {
+                    Config.WowWindowRect = XMemory.GetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle);
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to save wow window position:\n{e}", LogLevel.Error);
+                }
             }
         }
 

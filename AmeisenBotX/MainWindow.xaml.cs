@@ -17,8 +17,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace AmeisenBotX
@@ -234,65 +236,16 @@ namespace AmeisenBotX
             return null;
         }
 
+        private Memory.Win32.Rect LastBotWindowPosition { get; set; }
+
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
-                // debug label stuff
-                // if (AmeisenBot.WowInterface.BattlegroundEngine != null)
-                // {
-                //     string ownCarrier = string.Empty;
-                //     string enemyCarrier = string.Empty;
-                //     bool isMeCarrier = false;
-                //
-                //     if (AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile?.BattlegroundType == Core.Battleground.Enums.BattlegroundType.CaptureTheFlag)
-                //     {
-                //         ICtfBattlegroundProfile ctfBattlegroundProfile = (ICtfBattlegroundProfile)AmeisenBot.WowInterface.BattlegroundEngine.BattlegroundProfile;
-                //         ownCarrier = ctfBattlegroundProfile.OwnFlagCarrierPlayer?.Name;
-                //         enemyCarrier = ctfBattlegroundProfile.EnemyFlagCarrierPlayer?.Name;
-                //         isMeCarrier = ctfBattlegroundProfile.IsMeFlagCarrier;
-                //     }
-                // }
-
-                if (AmeisenBot.WowInterface.ObjectManager?.Player != null)
+                if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow && !SetupWindowOwner)
                 {
-                    StringBuilder sb = new StringBuilder();
-
-                    sb.AppendLine($"MovementAction: {AmeisenBot.WowInterface.MovementEngine.MovementAction}");
-                    sb.AppendLine($"MovementState: {(MovementState)((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).CurrentState.Key}");
-                    sb.AppendLine($"FinalTargetPosition: {((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).FinalTargetPosition}");
-                    sb.AppendLine($"VehicleTargetPosition: {((StateBasedMovementEngine)AmeisenBot.WowInterface.MovementEngine).VehicleTargetPosition}\n");
-
-                    sb.AppendLine($"LastDiedMap: {AmeisenBot.StateMachine.LastDiedMap} ({(int)AmeisenBot.StateMachine.LastDiedMap})\n");
-
-                    sb.AppendLine($"DungeonProgress: {Math.Round(AmeisenBot.WowInterface.DungeonEngine.Progress)}");
-                    sb.AppendLine($"DungeonWaiting: {AmeisenBot.WowInterface.DungeonEngine.Waiting}");
-                    sb.AppendLine($"CurrentNodes: {AmeisenBot.WowInterface.DungeonEngine.CurrentNodes.Count}\n");
-
-                    sb.AppendLine($"CurrentlyCastingSpellId: {AmeisenBot.WowInterface.ObjectManager.Player.CurrentlyCastingSpellId}");
-                    sb.AppendLine($"CurrentlyChannelingSpellId: {AmeisenBot.WowInterface.ObjectManager.Player.CurrentlyChannelingSpellId}");
-                    sb.AppendLine($"IsCasting: {AmeisenBot.WowInterface.ObjectManager.Player.IsCasting}\n");
-
-                    //     sb.AppendLine($"Me - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Player.Auras.Count}");
-                    //
-                    //     foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Player.Auras)
-                    //     {
-                    //         sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
-                    //     }
-                    //
-                    //     labelDebug.Content = sb.ToString();
-                    //
-                    //     if (AmeisenBot.WowInterface.ObjectManager.Target != null)
-                    //     {
-                    //         sb.AppendLine($"\nTarget - Aura Count: {AmeisenBot.WowInterface.ObjectManager.Target.Auras.Count}");
-                    //
-                    //         foreach (WowAura aura in AmeisenBot.WowInterface.ObjectManager.Target.Auras)
-                    //         {
-                    //             sb.AppendLine($"({aura.SpellId,-5}) {aura.Name}");
-                    //         }
-                    //     }
-
-                    labelDebug.Content = sb.ToString();
+                    AmeisenBot.WowInterface.XMemory.SetWowWindowOwner(Process.GetCurrentProcess().MainWindowHandle);
+                    SetupWindowOwner = true;
                 }
 
                 // update health and secodary power bar and
@@ -517,6 +470,8 @@ namespace AmeisenBotX
             SaveConfig();
         }
 
+        private bool SetupWindowOwner { get; set; }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
@@ -530,6 +485,10 @@ namespace AmeisenBotX
                 AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
 
                 LastStateMachineTickUpdate = DateTime.Now;
+                PresentationSource = PresentationSource.FromVisual(this);
+
+                M11 = PresentationSource.CompositionTarget.TransformToDevice.M11;
+                M22 = PresentationSource.CompositionTarget.TransformToDevice.M22;
             }
 
             if (AmeisenBot != null)
@@ -538,9 +497,70 @@ namespace AmeisenBotX
             }
         }
 
+        private PresentationSource PresentationSource { get; set; }
+
+        private double M11 { get; set; }
+
+        private double M22 { get; set; }
+
+        private void AdjustWowWindow()
+        {
+            Point screenCoordinates = PointToScreen(new Point(0, 0));
+            Point screenCoordinatesWowRect = wowRect.PointToScreen(new Point(0, 0));
+
+            double pixelHeight = Height * M22;
+            double pixelWidth = Width * M11;
+
+            double pixelHeightWowRect = wowRect.ActualHeight * M22;
+            double pixelWidthWowRect = wowRect.ActualWidth * M11;
+
+            Memory.Win32.Rect botPos = new Memory.Win32.Rect()
+            {
+                Left = (int)screenCoordinates.X,
+                Bottom = (int)screenCoordinates.Y + (int)pixelHeight,
+                Top = (int)screenCoordinates.Y,
+                Right = (int)screenCoordinates.X + (int)pixelWidth
+            };
+
+            // Memory.Win32.Rect wowPos = AmeisenBot.WowInterface.XMemory.GetWindowPositionWow();
+
+            if (botPos != LastBotWindowPosition)
+            {
+                // int height = (int)Math.Ceiling(pixelHeight * (4.0 / 3.0));
+                // int width = (int)Math.Ceiling(pixelHeight * 1.25);
+
+                Memory.Win32.Rect newPos = new Memory.Win32.Rect()
+                {
+                    Left = (int)screenCoordinatesWowRect.X,
+                    Bottom = (int)screenCoordinatesWowRect.Y + (int)pixelHeightWowRect,
+                    Top = (int)screenCoordinatesWowRect.Y,
+                    Right = (int)screenCoordinatesWowRect.X + (int)pixelWidthWowRect
+                };
+
+                Task.Run(() => AmeisenBot.WowInterface.XMemory.SetWindowPositionWow(newPos));
+                LastBotWindowPosition = botPos;
+            }
+        }
+
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow)
+            {
+                AdjustWowWindow();
+            }
+        }
+
+        private void wowRect_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow)
+            {
+                AdjustWowWindow();
+            }
         }
     }
 }
