@@ -39,6 +39,7 @@ namespace AmeisenBotX.Core.Statemachine
                 { (int)BotState.LoadingScreen, new StateLoadingScreen(this, config, WowInterface) },
                 { (int)BotState.Login, new StateLogin(this, config, WowInterface) },
                 { (int)BotState.Looting, new StateLooting(this, config, WowInterface) },
+                { (int)BotState.Questing, new StateQuesting(this, config, WowInterface) },
                 { (int)BotState.Repairing, new StateRepairing(this, config, WowInterface) },
                 { (int)BotState.Selling, new StateSelling(this, config, WowInterface) },
                 { (int)BotState.StartWow, new StateStartWow(this, config, WowInterface) }

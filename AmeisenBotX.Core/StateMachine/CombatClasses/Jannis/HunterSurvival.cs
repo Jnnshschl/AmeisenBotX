@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -70,9 +69,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossible(wyvernStingSpell, x.Guid, true) }
             };
-
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
+
+        public override bool WalkBehindEnemy => false;
 
         public override string Author => "Jannis";
 
@@ -100,13 +99,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private PetManager PetManager { get; set; }
 
-        private TimegatedEvent AutoAttackEvent { get; set; }
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
-            Tree1 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree1 = new Dictionary<int, Talent>(),
             Tree2 = new Dictionary<int, Talent>()
             {
                 { 3, new Talent(2, 3, 5) },
@@ -139,6 +134,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
@@ -146,13 +143,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick()
-                || PetManager.Tick())
-            {
-                return;
-            }
+            if (PetManager.Tick()) { return; }
 
             if (WowInterface.ObjectManager.Target != null)
             {

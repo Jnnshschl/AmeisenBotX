@@ -71,7 +71,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool HandlesMovement => false;
 
+        public override bool WalkBehindEnemy => false;
+
         public override bool IsMelee => false;
+
+        public override bool UseAutoAttacks => false;
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
@@ -107,9 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 27, new Talent(1, 27, 5) },
                 { 28, new Talent(1, 28, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree2 = new Dictionary<int, Talent>(),
             Tree3 = new Dictionary<int, Talent>()
             {
                 { 1, new Talent(3, 1, 5) },
@@ -121,10 +123,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (MyAuraManager.Tick()
-                || TargetAuraManager.Tick()
-                || PetManager.Tick()
-                || WowInterface.ObjectManager.Player.ManaPercentage < 90
+            if (PetManager.Tick()) { return; }
+
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
                     && WowInterface.ObjectManager.Player.HealthPercentage > 60
                     && CastSpellIfPossible(lifeTapSpell, 0)
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 80

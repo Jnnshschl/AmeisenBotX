@@ -24,6 +24,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int CurrentlyChannelingSpellId { get; set; }
 
+        public int DisplayId => RawWowUnit.DisplayId;
+
         public int Energy => RawWowUnit.Power3;
 
         public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);

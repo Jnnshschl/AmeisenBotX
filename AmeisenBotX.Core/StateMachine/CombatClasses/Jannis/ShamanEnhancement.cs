@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -58,9 +57,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossible(windShearSpell, x.Guid, true) },
                 { 1, (x) => CastSpellIfPossible(hexSpell, x.Guid, true) }
             };
-
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
+
+        public override bool WalkBehindEnemy => false;
 
         public override string Author => "Jannis";
 
@@ -85,8 +84,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private bool HexedTarget { get; set; }
 
         private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private TimegatedEvent AutoAttackEvent { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -121,21 +118,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 28, new Talent(2, 28, 5) },
                 { 29, new Talent(2, 29, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree3 = new Dictionary<int, Talent>(),
         };
+
+        public override bool UseAutoAttacks => true;
 
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
-
-            if (TargetInterruptManager.Tick())
-            {
-                return;
             }
 
             if ((!WowInterface.ObjectManager.Player.HasBuffByName(lightningShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0))

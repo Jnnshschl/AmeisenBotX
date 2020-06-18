@@ -11,56 +11,11 @@ namespace AmeisenBotX.Memory.Win32
 
         public const int SW_SHOWNOACTIVATE = 4;
 
-        public static int GWL_STYLE = -16;
-
         public static int GWL_EXSTYLE = -0x14;
-
-        public static int WS_EX_NOACTIVATE = 0x08000000;
-
-        public static int WS_EX_APPWINDOW = 0x40000;
-
+        public static int GWL_STYLE = -16;
         public static int WS_CHILD = 0x40000000;
-
-        [Flags]
-        public enum WindowStyles : uint
-        {
-            WS_OVERLAPPED = 0x00000000,
-            WS_POPUP = 0x80000000,
-            WS_CHILD = 0x40000000,
-            WS_MINIMIZE = 0x20000000,
-            WS_VISIBLE = 0x10000000,
-            WS_DISABLED = 0x08000000,
-            WS_CLIPSIBLINGS = 0x04000000,
-            WS_CLIPCHILDREN = 0x02000000,
-            WS_MAXIMIZE = 0x01000000,
-            WS_BORDER = 0x00800000,
-            WS_DLGFRAME = 0x00400000,
-            WS_VSCROLL = 0x00200000,
-            WS_HSCROLL = 0x00100000,
-            WS_SYSMENU = 0x00080000,
-            WS_THICKFRAME = 0x00040000,
-            WS_GROUP = 0x00020000,
-            WS_TABSTOP = 0x00010000,
-
-            WS_MINIMIZEBOX = 0x00020000,
-            WS_MAXIMIZEBOX = 0x00010000,
-
-            WS_CAPTION = WS_BORDER | WS_DLGFRAME,
-            WS_TILED = WS_OVERLAPPED,
-            WS_ICONIC = WS_MINIMIZE,
-            WS_SIZEBOX = WS_THICKFRAME,
-            WS_TILEDWINDOW = WS_OVERLAPPEDWINDOW,
-
-            WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
-            WS_POPUPWINDOW = WS_POPUP | WS_BORDER | WS_SYSMENU,
-            WS_CHILDWINDOW = WS_CHILD,
-
-            WS_EX_DLGMODALFRAME = 0x00000001,
-            WS_EX_NOPARENTNOTIFY = 0x00000004,
-            WS_EX_TOPMOST = 0x00000008,
-            WS_EX_ACCEPTFILES = 0x00000010,
-            WS_EX_TRANSPARENT = 0x00000020,
-        }
+        public static int WS_EX_APPWINDOW = 0x40000;
+        public static int WS_EX_NOACTIVATE = 0x08000000;
 
         [Flags]
         public enum AllocationType : uint
@@ -144,6 +99,47 @@ namespace AmeisenBotX.Memory.Win32
             AsyncWindowPos = 0x4000
         }
 
+        [Flags]
+        public enum WindowStyles : uint
+        {
+            WS_OVERLAPPED = 0x00000000,
+            WS_POPUP = 0x80000000,
+            WS_CHILD = 0x40000000,
+            WS_MINIMIZE = 0x20000000,
+            WS_VISIBLE = 0x10000000,
+            WS_DISABLED = 0x08000000,
+            WS_CLIPSIBLINGS = 0x04000000,
+            WS_CLIPCHILDREN = 0x02000000,
+            WS_MAXIMIZE = 0x01000000,
+            WS_BORDER = 0x00800000,
+            WS_DLGFRAME = 0x00400000,
+            WS_VSCROLL = 0x00200000,
+            WS_HSCROLL = 0x00100000,
+            WS_SYSMENU = 0x00080000,
+            WS_THICKFRAME = 0x00040000,
+            WS_GROUP = 0x00020000,
+            WS_TABSTOP = 0x00010000,
+
+            WS_MINIMIZEBOX = 0x00020000,
+            WS_MAXIMIZEBOX = 0x00010000,
+
+            WS_CAPTION = WS_BORDER | WS_DLGFRAME,
+            WS_TILED = WS_OVERLAPPED,
+            WS_ICONIC = WS_MINIMIZE,
+            WS_SIZEBOX = WS_THICKFRAME,
+            WS_TILEDWINDOW = WS_OVERLAPPEDWINDOW,
+
+            WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+            WS_POPUPWINDOW = WS_POPUP | WS_BORDER | WS_SYSMENU,
+            WS_CHILDWINDOW = WS_CHILD,
+
+            WS_EX_DLGMODALFRAME = 0x00000001,
+            WS_EX_NOPARENTNOTIFY = 0x00000004,
+            WS_EX_TOPMOST = 0x00000008,
+            WS_EX_ACCEPTFILES = 0x00000010,
+            WS_EX_TRANSPARENT = 0x00000020,
+        }
+
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr threadHandle);
 
@@ -179,6 +175,9 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("msvcrt", EntryPoint = "memset", SetLastError = false)]
         public static extern IntPtr MemSet(IntPtr dest, int c, int count);
 
+        [DllImport("user32", SetLastError = true)]
+        public static extern bool MoveWindow(IntPtr windowHandle, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
         [DllImport("ntdll", SetLastError = true)]
         public static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesRead);
 
@@ -210,7 +209,16 @@ namespace AmeisenBotX.Memory.Win32
         public static extern int SetWindowLong(IntPtr windowHandle, int index, int newLong);
 
         [DllImport("user32", SetLastError = true)]
+        public static extern int SetWindowLong(IntPtr windowHandle, int nIndex, uint dwNewLong);
+
+        [DllImport("user32")]
+        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        [DllImport("user32", SetLastError = true)]
         public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
+
+        [DllImport("user32", SetLastError = true)]
+        public static extern bool ShowWindow(IntPtr windowHandle, int nCmdShow);
 
         [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtection memoryProtection);
@@ -220,18 +228,6 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("kernel32", SetLastError = true)]
         public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
-
-        [DllImport("user32", SetLastError = true)]
-        public static extern bool ShowWindow(IntPtr windowHandle, int nCmdShow);
-
-        [DllImport("user32", SetLastError = true)]
-        public static extern int SetWindowLong(IntPtr windowHandle, int nIndex, uint dwNewLong);
-
-        [DllImport("user32", SetLastError = true)]
-        public static extern bool MoveWindow(IntPtr windowHandle, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-
-        [DllImport("user32")]
-        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation

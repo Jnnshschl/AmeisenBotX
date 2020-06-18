@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Common
 
         public DateTime LastExecution { get; set; }
 
+        public bool Ready => DateTime.Now - LastExecution > Timegate;
+
         public TimeSpan Timegate { get; set; }
 
         private Action Function { get; set; }

@@ -35,8 +35,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (FirstStart)
             {
                 FirstStart = false;
-                WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
-
                 WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
                 StateMachine.PlayerName = playerName;
 
@@ -53,13 +51,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            // StateMachine.SetState((int)BotState.Job);
-
-            // if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 25.0)
-            // {
-            //     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Wandering, WowInterface.ObjectManager.Player.Position);
-            //     return;
-            // }
+            StateMachine.SetState((int)BotState.Questing);
 
             if (Config.AutojoinBg)
             {

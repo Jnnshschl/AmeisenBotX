@@ -1,10 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
@@ -49,10 +47,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossible(hammerOfJusticeSpell, x.Guid, true) }
             };
 
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfKingsSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
+
+        public override bool WalkBehindEnemy => false;
 
         public override string Author => "Jannis";
 
@@ -74,13 +72,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        private TimegatedEvent AutoAttackEvent { get; set; }
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
-            Tree1 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree1 = new Dictionary<int, Talent>(),
             Tree2 = new Dictionary<int, Talent>()
             {
                 { 2, new Talent(2, 2, 5) },
@@ -115,17 +109,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
-
-            if (TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick())
-            {
-                return;
             }
 
             if (WowInterface.ObjectManager.Player.HealthPercentage < 10

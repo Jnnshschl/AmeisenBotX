@@ -105,10 +105,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 26, new Talent(2, 26, 5) },
                 { 27, new Talent(2, 27, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree3 = new Dictionary<int, Talent>(),
         };
+
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {

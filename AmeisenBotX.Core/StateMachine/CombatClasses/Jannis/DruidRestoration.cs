@@ -32,6 +32,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string wildGrowthSpell = "Wild Growth";
 #pragma warning restore IDE0051
 
+        public override bool WalkBehindEnemy => false;
+
         public DruidRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
@@ -85,9 +87,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 4, new Talent(1, 4, 2) },
                 { 8, new Talent(1, 8, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree2 = new Dictionary<int, Talent>(),
             Tree3 = new Dictionary<int, Talent>()
             {
                 { 1, new Talent(3, 1, 2) },
@@ -114,6 +114,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 27, new Talent(3, 27, 1) },
             },
         };
+
+        public override bool UseAutoAttacks => false;
 
         public override void ExecuteCC()
         {

@@ -90,6 +90,16 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        public WowGameobject GetClosestWowGameobjectByDisplayId(int displayId)
+        {
+            return WowObjects.OfType<WowGameobject>().Where(e => e.DisplayId == displayId).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+        }
+
+        public WowUnit GetClosestWowUnitByDisplayId(int displayId)
+        {
+            return WowObjects.OfType<WowUnit>().Where(e => e.DisplayId == displayId).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+        }
+
         public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
         {
             lock (queryLock)

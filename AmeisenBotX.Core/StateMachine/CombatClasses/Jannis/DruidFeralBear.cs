@@ -1,11 +1,9 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -38,6 +36,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string swipeSpell = "Swipe (Bear)";
 #pragma warning restore IDE0051
 
+        public override bool WalkBehindEnemy => false;
+
         public DruidFeralBear(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -56,8 +56,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossible(bashSpell, x.Guid, true) },
             };
-
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
@@ -84,13 +82,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool InHealCombo { get; set; }
 
-        private TimegatedEvent AutoAttackEvent { get; set; }
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
-            Tree1 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree1 = new Dictionary<int, Talent>(),
             Tree2 = new Dictionary<int, Talent>()
             {
                 { 1, new Talent(2, 1, 5) },
@@ -143,9 +137,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count();
 
-            if (TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick()
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+            if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
                     && CastSpellIfPossible(barkskinSpell, 0, true))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 50
                     && WowInterface.ObjectManager.Player.RagePercentage > 50
@@ -176,6 +168,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
         }
+
+        public override bool UseAutoAttacks => true;
 
         public override void OutOfCombatExecute()
         {

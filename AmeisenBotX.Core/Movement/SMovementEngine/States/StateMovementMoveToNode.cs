@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
         public StateMovementMoveToNode(StateBasedMovementEngine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             LastPositionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            UnstuckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1700));
+            JumpCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         private Vector3 LastCompletedPosition { get; set; }
@@ -24,6 +26,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         private Vector3 TargetPosition { get; set; }
 
+        private TimegatedEvent JumpCheckEvent { get; }
+
+        private TimegatedEvent UnstuckEvent { get; }
+
         public override void Enter()
         {
             TargetPosition = default;
@@ -35,6 +41,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         public override void Execute()
         {
+            // if (!UnstuckEvent.Ready)
+            // {
+            //     return;
+            // }
+
             if (StateMachine.MovementAction == MovementAction.DirectMove && StateMachine.FinalTargetPosition != default)
             {
                 double distanceToFinalNode = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(StateMachine.FinalTargetPosition);
@@ -86,7 +97,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     }
 
                     // move the character
-                    WowInterface.CharacterManager.MoveToPosition(TargetPosition);
+                    WowInterface.CharacterManager.MoveToPosition(BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, TargetPosition, 1.0));
 
                     // check wether we need to jump up or down
                     double distanceToNodeIgnoreZ = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(TargetPosition);
@@ -107,18 +118,25 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                         }
                     }
 
+                    if (JumpCheckEvent.Run()
+                        && !WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, TargetPosition, 0.05f))
+                    {
+                        WowInterface.CharacterManager.Jump();
+                    }
+
                     // check for beeing stuck
                     if (LastPositionEvent.Run())
                     {
                         double distanceMovedSinceLastTick = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(LastPosition);
 
-                        if (distanceMovedSinceLastTick < 0.1)
+                        if (distanceMovedSinceLastTick < 0.3)
                         {
                             WowInterface.CharacterManager.Jump();
 
                             // get a random position behind us
                             double angle = Math.PI + ((new Random().NextDouble() * Math.PI) - Math.PI / 2.0);
                             WowInterface.CharacterManager.MoveToPosition(BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 4.0));
+                            // UnstuckEvent.Run();
                         }
 
                         LastPosition = WowInterface.ObjectManager.Player.Position;

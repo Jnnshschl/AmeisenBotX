@@ -22,8 +22,6 @@ namespace AmeisenBotX.Core
 
         public bool AutoPositionWow { get; set; } = false;
 
-        public bool StartWowAsChild { get; set; } = false;
-
         public bool AutostartWow { get; set; } = false;
 
         public Rect BotWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
@@ -85,6 +83,8 @@ namespace AmeisenBotX.Core
         public bool SaveWowWindowPosition { get; set; } = false;
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
+
+        public bool StartWowAsChild { get; set; } = false;
 
         public double StateMachineTickMs { get; set; } = 50;
 

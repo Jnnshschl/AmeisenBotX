@@ -107,19 +107,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 27, new Talent(2, 27, 5) },
                 { 28, new Talent(2, 28, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree3 = new Dictionary<int, Talent>(),
         };
+
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {
-            if (TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick())
-            {
-                return;
-            }
-
             if (WowInterface.ObjectManager.Target != null)
             {
                 if (CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)

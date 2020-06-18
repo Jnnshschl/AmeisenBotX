@@ -59,6 +59,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
+
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
@@ -71,9 +75,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
-            Tree1 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree1 = new Dictionary<int, Talent>(),
             Tree2 = new Dictionary<int, Talent>()
             {
                 { 3, new Talent(2, 3, 5) },

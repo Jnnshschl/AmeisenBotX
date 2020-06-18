@@ -19,6 +19,7 @@
         Selling,
         Battleground,
         Job,
-        Dungeon
+        Dungeon,
+        Questing
     }
 }

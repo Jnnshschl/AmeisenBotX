@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Enums;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
@@ -83,6 +84,11 @@ namespace AmeisenBotX.Core.Hook
             // LuaDoString("AcceptGroup();");
         }
 
+        public void AcceptQuest(int gossipId)
+        {
+            LuaDoString($"SelectGossipAvailableQuest({gossipId});AcceptQuest();");
+        }
+
         public void AcceptResurrect()
         {
             ClickUiElement("StaticPopup1Button1");
@@ -107,17 +113,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (spellId > 0)
             {
-                string[] asm = new string[]
-                {
-                    "PUSH 0",
-                    "PUSH 0",
-                    "PUSH 0",
-                    $"PUSH {spellId}",
-                    $"CALL {WowInterface.OffsetList.FunctionCastSpellById.ToInt32()}",
-                    "ADD ESP, 0x10",
-                };
-
-                InjectAndExecute(asm, false);
+                LuaDoString($"CastSpellByID({spellId});");
             }
         }
 
@@ -171,6 +167,11 @@ namespace AmeisenBotX.Core.Hook
         public void CofirmReadyCheck(bool isReady)
         {
             LuaDoString($"ConfirmReadyCheck({isReady});");
+        }
+
+        public void CompleteQuestAndGetReward(int questlogId, int rewardId)
+        {
+            LuaDoString($"CompleteQuest({questlogId});GetQuestReward({rewardId});");
         }
 
         public void DisposeHook()
@@ -267,6 +268,22 @@ namespace AmeisenBotX.Core.Hook
         public List<string> GetBuffs(WowLuaUnit luaunit)
         {
             return ReadAuras(luaunit, "UnitBuff");
+        }
+
+        public List<int> GetCompletedQuests()
+        {
+            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=''for a,b in pairs(GetQuestsCompleted())do if b then {{v:0}}={{v:0}}..a..';'end end;"));
+
+            if (result != null && result.Length > 0)
+            {
+                return result.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(e => int.TryParse(e, out int n) ? n : (int?)null)
+                    .Where(e => e.HasValue)
+                    .Select(e => e.Value)
+                    .ToList();
+            }
+
+            return new List<int>();
         }
 
         [Obsolete]
@@ -530,10 +547,10 @@ namespace AmeisenBotX.Core.Hook
             return bool.TryParse(lfgMode, out bool isInLfg) && isInLfg;
         }
 
-        public bool IsInLineOfSight(Vector3 start, Vector3 end)
+        public bool IsInLineOfSight(Vector3 start, Vector3 end, float heightAdjust = 1.5f)
         {
-            start.Z += 1.5f;
-            end.Z += 1.5f;
+            start.Z += heightAdjust;
+            end.Z += heightAdjust;
             return TraceLine(start, end, out _) == 0;
         }
 
@@ -610,6 +627,11 @@ namespace AmeisenBotX.Core.Hook
         {
             OverrideWorldCheck = true;
             WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
+        }
+
+        public void QueryQuestsCompleted()
+        {
+            LuaDoString("QueryQuestsCompleted();");
         }
 
         public void QueueBattlegroundByName(string bgName)
@@ -845,11 +867,11 @@ namespace AmeisenBotX.Core.Hook
             UnitOnRightClick(wowUnit);
         }
 
-        public void StopClickToMoveIfActive(WowPlayer player)
+        public void StopClickToMoveIfActive()
         {
-            if (IsClickToMoveActive(player))
+            if (IsClickToMoveActive(WowInterface.ObjectManager.Player))
             {
-                CallObjectFunction(player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
+                CallObjectFunction(WowInterface.ObjectManager.Player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
             }
         }
 
@@ -918,6 +940,11 @@ namespace AmeisenBotX.Core.Hook
             if (wowUnit == null || wowUnit.Guid == 0) return;
 
             CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
+        }
+
+        public void UseInventoryItem(EquipmentSlot equipmentSlot)
+        {
+            LuaDoString($"UseInventoryItem({(int)equipmentSlot})");
         }
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)

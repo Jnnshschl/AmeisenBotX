@@ -1,11 +1,9 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -50,11 +48,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossible(intimidatingShoutSpell, x.Guid, true) }
             };
-
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public override string Author => "Jannis";
+
+        public override bool WalkBehindEnemy => false;
 
         public override WowClass Class => WowClass.Warrior;
 
@@ -68,13 +66,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => true;
 
+        public override bool UseAutoAttacks => true;
+
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
-
-        private TimegatedEvent AutoAttackEvent { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -113,9 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 5, new Talent(2, 5, 5) },
                 { 7, new Talent(2, 7, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree3 = new Dictionary<int, Talent>(),
         };
 
         public override void ExecuteCC()
@@ -123,11 +119,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
-
-            if (TargetInterruptManager.Tick())
-            {
-                return;
             }
 
             if (WowInterface.ObjectManager.Target != null)

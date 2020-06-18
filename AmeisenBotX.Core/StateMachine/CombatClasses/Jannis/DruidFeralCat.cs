@@ -1,10 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
@@ -55,10 +53,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossible(faerieFireSpell, x.Guid, true) },
             };
 
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
+
+        public override bool WalkBehindEnemy => false;
 
         public override string Author => "Jannis";
 
@@ -80,13 +78,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        private TimegatedEvent AutoAttackEvent { get; set; }
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
-            Tree1 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree1 = new Dictionary<int, Talent>(),
             Tree2 = new Dictionary<int, Talent>()
             {
                 { 1, new Talent(2, 1, 5) },
@@ -122,6 +116,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
@@ -137,9 +133,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick()
-                || (WowInterface.ObjectManager.Player.EnergyPercentage > 70
+            if ((WowInterface.ObjectManager.Player.EnergyPercentage > 70
                     && CastSpellIfPossible(berserkSpell, 0))
                 || (WowInterface.ObjectManager.Player.Energy < 30
                     && CastSpellIfPossible(tigersFurySpell, 0))

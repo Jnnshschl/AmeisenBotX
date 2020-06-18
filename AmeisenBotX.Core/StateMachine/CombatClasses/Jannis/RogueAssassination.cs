@@ -1,10 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
@@ -39,8 +37,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { 0, (x) => CastSpellIfPossibleRogue(kickSpell, x.Guid, true) }
             };
-
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public override string Author => "Jannis";
@@ -64,8 +60,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "1.0";
-
-        private TimegatedEvent AutoAttackEvent { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -102,6 +96,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
@@ -109,8 +105,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            if (TargetInterruptManager.Tick()
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 20
+            if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
                     && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
             {
                 return;

@@ -236,6 +236,18 @@
     <Compile Include="Personality\Enums\UnitRelationship.cs" />
     <Compile Include="Personality\Enums\Scale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Quest\Objects\AreaNode.cs" />
+    <Compile Include="Quest\Objects\Objectives\UseObjectQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\RuneforgingQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\CollectQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\IQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\MoveToObjectQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\QuestObjectiveChain.cs" />
+    <Compile Include="Quest\Objects\Objectives\CastSpellQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\UseItemQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\MoveToPositionQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Quests\BotQuest.cs" />
+    <Compile Include="Quest\QuestEngine.cs" />
     <Compile Include="Raid\RaidEngine.cs" />
     <Compile Include="Raid\Profiles\IRaidProfile.cs" />
     <Compile Include="Relaxing\RelaxEngine.cs" />
@@ -243,6 +255,7 @@
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
     <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
+    <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightFrost.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DruidFeralBear.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DruidFeralCat.cs" />
@@ -271,6 +284,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\RogueAssassination.cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
     <Compile Include="Common\IState.cs" />
+    <Compile Include="Statemachine\States\StateQuesting.cs" />
     <Compile Include="Statemachine\States\StateRelaxing.cs" />
     <Compile Include="Statemachine\States\StateDungeon.cs" />
     <Compile Include="Statemachine\States\StateJob.cs" />

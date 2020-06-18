@@ -18,6 +18,7 @@ using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Movement.SMovementEngine;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
+using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
@@ -588,6 +589,7 @@ namespace AmeisenBotX.Core
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
+            WowInterface.QuestEngine = new QuestEngine(WowInterface);
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();

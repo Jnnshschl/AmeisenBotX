@@ -45,6 +45,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool IsAtTargetPosition => FinalTargetPosition != default && FinalTargetPosition.GetDistanceIgnoreZ(WowInterface.ObjectManager.Player.Position) < MovementSettings.WaypointCheckThreshold;
 
+        public Vector3 LastFinalTargetPosition { get; private set; }
+
         public Vector3 LastPlayerPosition { get; private set; }
 
         public MovementAction MovementAction { get; private set; }
@@ -80,23 +82,36 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f)
         {
-            MovementAction = movementAction;
-            LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
-
-            PlayerVehicle.Update(GetForces(positionToGoTo, targetRotation));
-
             if (movementAction == MovementAction.Fleeing
                 || movementAction == MovementAction.Wandering
                 || movementAction == MovementAction.Chasing
                 || movementAction == MovementAction.Evading
                 || movementAction == MovementAction.Unstuck)
             {
+                MovementAction = movementAction;
+                LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
+
+                PlayerVehicle.Update(GetForces(positionToGoTo, targetRotation));
+
                 // we dont care about reaching the target
                 FinalTargetPosition = VehicleTargetPosition;
             }
             else
             {
-                FinalTargetPosition = positionToGoTo;
+                if (positionToGoTo.GetDistance(FinalTargetPosition) > 3.0)
+                {
+                    if (positionToGoTo.GetDistance(WowInterface.ObjectManager.Player.Position) < 8.0)
+                    {
+                        Reset(); 
+                    }
+
+                    FinalTargetPosition = positionToGoTo;
+                }
+
+                MovementAction = movementAction;
+                LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
+
+                PlayerVehicle.Update(GetForces(positionToGoTo, targetRotation));
             }
         }
 

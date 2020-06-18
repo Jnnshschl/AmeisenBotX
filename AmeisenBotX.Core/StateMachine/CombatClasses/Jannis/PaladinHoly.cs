@@ -159,6 +159,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
+
         public override void OutOfCombatExecute()
         {
             if (MyAuraManager.Tick()

@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Exit()
         {
             WowInterface.MovementEngine.Reset();
-            WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+            WowInterface.HookManager.StopClickToMoveIfActive();
         }
 
         private bool UnitIsOutOfRange(WowPlayer playerToFollow)

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -17,6 +18,8 @@ namespace AmeisenBotX.Core.Hook
         void AcceptBattlegroundInvite();
 
         void AcceptPartyInvite();
+
+        void AcceptQuest(int gossipId);
 
         void AcceptResurrect();
 
@@ -38,6 +41,8 @@ namespace AmeisenBotX.Core.Hook
 
         void CofirmReadyCheck(bool isReady);
 
+        void CompleteQuestAndGetReward(int questlogId, int rewardId);
+
         void DisposeHook();
 
         void EnableClickToMove();
@@ -49,6 +54,8 @@ namespace AmeisenBotX.Core.Hook
         List<string> GetAuras(WowLuaUnit luaunit);
 
         List<string> GetBuffs(WowLuaUnit luaunit);
+
+        List<int> GetCompletedQuests();
 
         List<string> GetDebuffs(WowLuaUnit luaunit);
 
@@ -98,7 +105,7 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsInLfgGroup();
 
-        bool IsInLineOfSight(Vector3 start, Vector3 end);
+        bool IsInLineOfSight(Vector3 start, Vector3 end, float heightAdjust = 1.5f);
 
         bool IsRuneReady(int runeId);
 
@@ -117,6 +124,8 @@ namespace AmeisenBotX.Core.Hook
         void OverrideWorldCheckOff();
 
         void OverrideWorldCheckOn();
+
+        void QueryQuestsCompleted();
 
         void QueueBattlegroundByName(string bgName);
 
@@ -154,7 +163,7 @@ namespace AmeisenBotX.Core.Hook
 
         void StartAutoAttack(WowUnit wowUnit);
 
-        void StopClickToMoveIfActive(WowPlayer player);
+        void StopClickToMoveIfActive();
 
         void TargetGuid(ulong guid);
 
@@ -163,6 +172,8 @@ namespace AmeisenBotX.Core.Hook
         byte TraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171);
 
         void UnitOnRightClick(WowUnit wowUnit);
+
+        void UseInventoryItem(EquipmentSlot equipmentSlot);
 
         void UseItemByBagAndSlot(int bagId, int bagSlot);
 

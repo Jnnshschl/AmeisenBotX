@@ -1,10 +1,8 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
@@ -47,8 +45,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossible(hammerOfJusticeSpell, x.Guid, true) }
             };
 
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfMightSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
@@ -65,6 +61,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => true;
+
+        public override bool WalkBehindEnemy => false;
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -111,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
-        private TimegatedEvent AutoAttackEvent { get; set; }
+        public override bool UseAutoAttacks => true;
 
         public override void ExecuteCC()
         {
@@ -128,8 +126,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (TargetInterruptManager.Tick()
-                || (MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLower())
+            if ((MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLower())
                     && CastSpellIfPossible(judgementOfLightSpell, 0))
                 || CastSpellIfPossible(avengingWrathSpell, 0, true)
                 || (WowInterface.ObjectManager.Player.ManaPercentage < 80

@@ -80,9 +80,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 5, new Talent(1, 5, 2) },
                 { 7, new Talent(1, 7, 3) },
             },
-            Tree2 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree2 = new Dictionary<int, Talent>(),
             Tree3 = new Dictionary<int, Talent>()
             {
                 { 1, new Talent(3, 1, 3) },
@@ -110,13 +108,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
+
         public override void ExecuteCC()
         {
-            if (TargetAuraManager.Tick())
-            {
-                return;
-            }
-
             if (WowInterface.ObjectManager.Player.ManaPercentage < 30
                 && CastSpellIfPossible(hymnOfHopeSpell, 0))
             {

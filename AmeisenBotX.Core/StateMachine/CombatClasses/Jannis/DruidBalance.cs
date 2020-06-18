@@ -111,9 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 27, new Talent(1, 27, 3) },
                 { 28, new Talent(1, 28, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree2 = new Dictionary<int, Talent>(),
             Tree3 = new Dictionary<int, Talent>()
             {
                 { 1, new Talent(3, 1, 2) },
@@ -125,11 +123,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
+
         public override void ExecuteCC()
         {
-            if (TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick()
-                || (DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
+            if ((DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
                     && CheckForEclipseProcs())
                 || (WowInterface.ObjectManager.Player.ManaPercentage < 30
                     && CastSpellIfPossible(innervateSpell, 0))

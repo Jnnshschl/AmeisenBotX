@@ -111,9 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 6, new Talent(2, 6, 1) },
                 { 8, new Talent(2, 8, 3) },
             },
-            Tree3 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree3 = new Dictionary<int, Talent>(),
         };
 
         public override void ExecuteCC()
@@ -123,6 +121,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
         }
+
+        public override bool WalkBehindEnemy => false;
+
+        public override bool UseAutoAttacks => false;
 
         private bool NeedToHealSomeone()
         {

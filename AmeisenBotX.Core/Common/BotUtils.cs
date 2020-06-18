@@ -209,6 +209,11 @@ namespace AmeisenBotX.Core.Common
                 && !unit.IsNotAttackable;
         }
 
+        public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, double offset)
+        {
+            return MoveAhead(BotMath.GetFacingAngle2D(origin, targetPosition), targetPosition, offset);
+        }
+
         public static Vector3 MoveAhead(float rotation, Vector3 targetPosition, double offset)
         {
             double x = targetPosition.X + (Math.Cos(rotation) * offset);

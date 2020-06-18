@@ -1,9 +1,12 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Character.Inventory
 {
@@ -41,6 +44,28 @@ namespace AmeisenBotX.Core.Character.Inventory
         }
 
         private WowInterface WowInterface { get; }
+
+        public bool HasEnchantment(EquipmentSlot slot, int enchantmentId)
+        {
+            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            {
+                int itemId = Items[slot].Id;
+
+                if (itemId > 0)
+                {
+                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+
+                    List<ItemEnchantment> enchantments = item.GetItemEnchantments();
+
+                    if (item != null && enchantments.Any(e => e.Id == enchantmentId))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         public void Update()
         {

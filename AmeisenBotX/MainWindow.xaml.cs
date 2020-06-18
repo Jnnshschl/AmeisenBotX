@@ -3,8 +3,6 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Movement.SMovementEngine;
-using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -16,11 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace AmeisenBotX
@@ -38,7 +34,7 @@ namespace AmeisenBotX
         private readonly Brush currentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
 
         private readonly Brush dkPrimaryBrush = new SolidColorBrush(Color.FromRgb(196, 30, 59));
-        private readonly Brush dkSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
+        private readonly Brush dkSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 209, 255));
 
         private readonly Brush druidPrimaryBrush = new SolidColorBrush(Color.FromRgb(255, 125, 10));
         private readonly Brush druidSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
@@ -95,9 +91,58 @@ namespace AmeisenBotX
 
         private InfoWindow InfoWindow { get; set; }
 
+        private Memory.Win32.Rect LastBotWindowPosition { get; set; }
+
         private DateTime LastStateMachineTickUpdate { get; set; }
 
+        private double M11 { get; set; }
+
+        private double M22 { get; set; }
+
         private MapWindow MapWindow { get; set; }
+
+        private PresentationSource PresentationSource { get; set; }
+
+        private bool SetupWindowOwner { get; set; }
+
+        private void AdjustWowWindow()
+        {
+            Point screenCoordinates = PointToScreen(new Point(0, 0));
+            Point screenCoordinatesWowRect = wowRect.PointToScreen(new Point(0, 0));
+
+            double pixelHeight = Height * M22;
+            double pixelWidth = Width * M11;
+
+            double pixelHeightWowRect = wowRect.ActualHeight * M22;
+            double pixelWidthWowRect = wowRect.ActualWidth * M11;
+
+            Memory.Win32.Rect botPos = new Memory.Win32.Rect()
+            {
+                Left = (int)screenCoordinates.X,
+                Bottom = (int)screenCoordinates.Y + (int)pixelHeight,
+                Top = (int)screenCoordinates.Y,
+                Right = (int)screenCoordinates.X + (int)pixelWidth
+            };
+
+            // Memory.Win32.Rect wowPos = AmeisenBot.WowInterface.XMemory.GetWindowPositionWow();
+
+            if (botPos != LastBotWindowPosition)
+            {
+                // int height = (int)Math.Ceiling(pixelHeight * (4.0 / 3.0));
+                // int width = (int)Math.Ceiling(pixelHeight * 1.25);
+
+                Memory.Win32.Rect newPos = new Memory.Win32.Rect()
+                {
+                    Left = (int)screenCoordinatesWowRect.X,
+                    Bottom = (int)screenCoordinatesWowRect.Y + (int)pixelHeightWowRect,
+                    Top = (int)screenCoordinatesWowRect.Y,
+                    Right = (int)screenCoordinatesWowRect.X + (int)pixelWidthWowRect
+                };
+
+                Task.Run(() => AmeisenBot.WowInterface.XMemory.SetWindowPositionWow(newPos));
+                LastBotWindowPosition = botPos;
+            }
+        }
 
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
@@ -235,8 +280,6 @@ namespace AmeisenBotX
 
             return null;
         }
-
-        private Memory.Win32.Rect LastBotWindowPosition { get; set; }
 
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
@@ -470,8 +513,6 @@ namespace AmeisenBotX
             SaveConfig();
         }
 
-        private bool SetupWindowOwner { get; set; }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
@@ -497,62 +538,17 @@ namespace AmeisenBotX
             }
         }
 
-        private PresentationSource PresentationSource { get; set; }
-
-        private double M11 { get; set; }
-
-        private double M22 { get; set; }
-
-        private void AdjustWowWindow()
-        {
-            Point screenCoordinates = PointToScreen(new Point(0, 0));
-            Point screenCoordinatesWowRect = wowRect.PointToScreen(new Point(0, 0));
-
-            double pixelHeight = Height * M22;
-            double pixelWidth = Width * M11;
-
-            double pixelHeightWowRect = wowRect.ActualHeight * M22;
-            double pixelWidthWowRect = wowRect.ActualWidth * M11;
-
-            Memory.Win32.Rect botPos = new Memory.Win32.Rect()
-            {
-                Left = (int)screenCoordinates.X,
-                Bottom = (int)screenCoordinates.Y + (int)pixelHeight,
-                Top = (int)screenCoordinates.Y,
-                Right = (int)screenCoordinates.X + (int)pixelWidth
-            };
-
-            // Memory.Win32.Rect wowPos = AmeisenBot.WowInterface.XMemory.GetWindowPositionWow();
-
-            if (botPos != LastBotWindowPosition)
-            {
-                // int height = (int)Math.Ceiling(pixelHeight * (4.0 / 3.0));
-                // int width = (int)Math.Ceiling(pixelHeight * 1.25);
-
-                Memory.Win32.Rect newPos = new Memory.Win32.Rect()
-                {
-                    Left = (int)screenCoordinatesWowRect.X,
-                    Bottom = (int)screenCoordinatesWowRect.Y + (int)pixelHeightWowRect,
-                    Top = (int)screenCoordinatesWowRect.Y,
-                    Right = (int)screenCoordinatesWowRect.X + (int)pixelWidthWowRect
-                };
-
-                Task.Run(() => AmeisenBot.WowInterface.XMemory.SetWindowPositionWow(newPos));
-                LastBotWindowPosition = botPos;
-            }
-        }
-
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            DragMove();
-        }
-
         private void Window_LocationChanged(object sender, EventArgs e)
         {
             if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow)
             {
                 AdjustWowWindow();
             }
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
         }
 
         private void WowRect_SizeChanged(object sender, SizeChangedEventArgs e)

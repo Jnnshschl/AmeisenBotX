@@ -77,32 +77,33 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
-            ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(50));
+            ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(0));
             NearInterruptUnitsEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
             UpdatePriorityUnits = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-
-            WalkBehindEnemy = false;
+            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public TimegatedEvent ActionEvent { get; set; }
 
         public abstract string Author { get; }
 
+        public TimegatedEvent AutoAttackEvent { get; private set; }
+
         public abstract WowClass Class { get; }
 
         public abstract Dictionary<string, dynamic> Configureables { get; set; }
 
-        public CooldownManager CooldownManager { get; internal set; }
+        public CooldownManager CooldownManager { get; private set; }
 
         public abstract string Description { get; }
 
-        public DispellBuffsFunction DispellBuffsFunction { get; internal set; }
+        public DispellBuffsFunction DispellBuffsFunction { get; private set; }
 
-        public DispellDebuffsFunction DispellDebuffsFunction { get; internal set; }
+        public DispellDebuffsFunction DispellDebuffsFunction { get; private set; }
 
         public abstract string Displayname { get; }
 
-        public GroupAuraManager GroupAuraManager { get; internal set; }
+        public GroupAuraManager GroupAuraManager { get; private set; }
 
         public abstract bool HandlesMovement { get; }
 
@@ -110,7 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract IWowItemComparator ItemComparator { get; set; }
 
-        public AuraManager MyAuraManager { get; internal set; }
+        public AuraManager MyAuraManager { get; private set; }
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 
@@ -120,23 +121,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract CombatClassRole Role { get; }
 
-        public Dictionary<string, Spell> Spells { get; internal set; }
+        public Dictionary<string, Spell> Spells { get; protected set; }
 
-        public virtual TalentTree Talents { get; } = null;
+        public abstract TalentTree Talents { get; }
 
-        public AuraManager TargetAuraManager { get; internal set; }
+        public AuraManager TargetAuraManager { get; private set; }
 
-        public InterruptManager TargetInterruptManager { get; internal set; }
+        public InterruptManager TargetInterruptManager { get; private set; }
 
-        public TargetManager TargetManager { get; internal set; }
+        public TargetManager TargetManager { get; private set; }
 
         public TimegatedEvent UpdatePriorityUnits { get; set; }
+
+        public abstract bool UseAutoAttacks { get; }
 
         public bool UseDefaultTargetSelection { get; protected set; } = true;
 
         public abstract string Version { get; }
 
-        public virtual bool WalkBehindEnemy { get; }
+        public abstract bool WalkBehindEnemy { get; }
 
         public WowInterface WowInterface { get; internal set; }
 
@@ -178,13 +181,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
 
+            if (UseAutoAttacks && (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target)))
+            {
+                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+            }
+
             if (NearInterruptUnitsEvent.Run())
             {
                 TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 30.0).ToList();
             }
 
             if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick())
+                || GroupAuraManager.Tick()
+                || TargetAuraManager.Tick()
+                || TargetInterruptManager.Tick())
             {
                 return;
             }
@@ -231,7 +241,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         // stop pending movement if we cast something
                         WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                        WowInterface.HookManager.StopClickToMoveIfActive();
                     }
 
                     CastSpell(spellName, isTargetMyself);
@@ -264,7 +274,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         // stop pending movement if we cast something
                         WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                        WowInterface.HookManager.StopClickToMoveIfActive();
                     }
 
                     CastSpell(spellName, isTargetMyself);
@@ -295,7 +305,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         // stop pending movement if we cast something
                         WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive(WowInterface.ObjectManager.Player);
+                        WowInterface.HookManager.StopClickToMoveIfActive();
                     }
 
                     CastSpell(spellName, isTargetMyself);

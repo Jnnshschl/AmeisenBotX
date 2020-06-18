@@ -73,6 +73,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.0";
 
+        public override bool WalkBehindEnemy => false;
+
         public override TalentTree Talents { get; } = new TalentTree()
         {
             Tree1 = new Dictionary<int, Talent>()
@@ -114,12 +116,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (TargetAuraManager.Tick()
-                || TargetInterruptManager.Tick())
-            {
-                return;
-            }
-
             if (WowInterface.ObjectManager.Target != null)
             {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 16
@@ -136,6 +132,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
         }
+
+        public override bool UseAutoAttacks => false;
 
         public override void OutOfCombatExecute()
         {

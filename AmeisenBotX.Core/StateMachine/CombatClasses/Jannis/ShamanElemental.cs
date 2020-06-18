@@ -112,18 +112,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 8, new Talent(2, 8, 3) },
                 { 9, new Talent(2, 9, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>()
-            {
-            },
+            Tree3 = new Dictionary<int, Talent>(),
         };
+
+        public override bool UseAutoAttacks => false;
+
+        public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {
-            if (TargetInterruptManager.Tick())
-            {
-                return;
-            }
-
             if ((!WowInterface.ObjectManager.Player.HasBuffByName(lightningShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0))
                 || !WowInterface.ObjectManager.Player.HasBuffByName(waterShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0))
             {

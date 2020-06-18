@@ -13,6 +13,7 @@ using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
+using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Memory;
@@ -53,6 +54,8 @@ namespace AmeisenBotX.Core
         public IOffsetList OffsetList { get; set; }
 
         public IPathfindingHandler PathfindingHandler { get; set; }
+
+        public QuestEngine QuestEngine { get; set; }
 
         public RelaxEngine RelaxEngine { get; set; }
 
