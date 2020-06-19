@@ -237,6 +237,14 @@
     <Compile Include="Personality\Enums\Scale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Quest\Objects\AreaNode.cs" />
+    <Compile Include="Quest\Objects\Objectives\CastPetSpellQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\MovePetToPositionQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\MoveToUnitQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\TalkToUnitQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\KillUnitQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\UseUnitQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\BotActionQuestObjective.cs" />
+    <Compile Include="Quest\Objects\Objectives\WaitUntilQuestObjective.cs" />
     <Compile Include="Quest\Objects\Objectives\UseObjectQuestObjective.cs" />
     <Compile Include="Quest\Objects\Objectives\RuneforgingQuestObjective.cs" />
     <Compile Include="Quest\Objects\Objectives\CollectQuestObjective.cs" />
@@ -247,6 +255,8 @@
     <Compile Include="Quest\Objects\Objectives\UseItemQuestObjective.cs" />
     <Compile Include="Quest\Objects\Objectives\MoveToPositionQuestObjective.cs" />
     <Compile Include="Quest\Objects\Quests\BotQuest.cs" />
+    <Compile Include="Quest\Profiles\IQuestProfile.cs" />
+    <Compile Include="Quest\Profiles\StartAreas\DeathknightStartAreaQuestProfile.cs" />
     <Compile Include="Quest\QuestEngine.cs" />
     <Compile Include="Raid\RaidEngine.cs" />
     <Compile Include="Raid\Profiles\IRaidProfile.cs" />

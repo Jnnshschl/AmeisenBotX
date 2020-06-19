@@ -169,9 +169,14 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString($"ConfirmReadyCheck({isReady});");
         }
 
-        public void CompleteQuestAndGetReward(int questlogId, int rewardId)
+        public void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId)
         {
-            LuaDoString($"CompleteQuest({questlogId});GetQuestReward({rewardId});");
+            LuaDoString($"SelectGossipActiveQuest(max({gossipId}, GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId});");
+        }
+
+        public void UnitSelectGossipOption(int gossipId)
+        {
+            LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
         }
 
         public void DisposeHook()

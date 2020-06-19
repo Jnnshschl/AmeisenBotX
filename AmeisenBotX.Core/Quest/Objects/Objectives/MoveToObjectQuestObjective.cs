@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
@@ -8,7 +9,14 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         public MoveToObjectQuestObjective(WowInterface wowInterface, int objectDisplayId, double distance)
         {
             WowInterface = wowInterface;
-            ObjectDisplayId = objectDisplayId;
+            ObjectDisplayIds = new List<int>() { objectDisplayId };
+            Distance = distance;
+        }
+
+        public MoveToObjectQuestObjective(WowInterface wowInterface, List<int> objectDisplayIds, double distance)
+        {
+            WowInterface = wowInterface;
+            ObjectDisplayIds = objectDisplayIds;
             Distance = distance;
         }
 
@@ -18,7 +26,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private double Distance { get; }
 
-        private int ObjectDisplayId { get; }
+        private List<int> ObjectDisplayIds { get; }
 
         private WowGameobject WowGameobject { get; set; }
 
@@ -33,7 +41,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 return;
             }
 
-            WowGameobject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(ObjectDisplayId);
+            WowGameobject = WowInterface.ObjectManager.GetClosestWowGameobjectQuestgiverByDisplayId(ObjectDisplayIds);
 
             if (WowGameobject != null)
             {

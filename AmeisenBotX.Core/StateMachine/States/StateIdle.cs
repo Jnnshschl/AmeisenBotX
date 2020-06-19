@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,21 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             FirstStart = true;
+            LastBagSlotCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            LastEatCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            LastLoot = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            LastRepairCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
         }
 
         public bool FirstStart { get; set; }
 
-        private DateTime LastBagSlotCheck { get; set; }
+        private TimegatedEvent LastBagSlotCheck { get; set; }
 
-        private DateTime LastEatCheck { get; set; }
+        private TimegatedEvent LastEatCheck { get; set; }
 
-        private DateTime LastLoot { get; set; }
+        private TimegatedEvent LastLoot { get; set; }
 
-        private DateTime LastRepairCheck { get; set; }
+        private TimegatedEvent LastRepairCheck { get; set; }
 
         public override void Enter()
         {
@@ -51,7 +56,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            StateMachine.SetState((int)BotState.Questing);
+            // StateMachine.SetState((int)BotState.Questing);
 
             if (Config.AutojoinBg)
             {
@@ -59,29 +64,21 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do we need to loot stuff
-            if (DateTime.Now - LastLoot > TimeSpan.FromSeconds(1))
+            if (LastLoot.Run()
+                && StateMachine.GetNearLootableUnits().Count() > 0)
             {
-                LastLoot = DateTime.Now;
-
-                if (StateMachine.GetNearLootableUnits().Count() > 0)
-                {
-                    StateMachine.SetState((int)BotState.Looting);
-                    return;
-                }
+                StateMachine.SetState((int)BotState.Looting);
+                return;
             }
 
             // do we need to eat something
-            if (DateTime.Now - LastEatCheck > TimeSpan.FromSeconds(2))
+            if (LastEatCheck.Run()
+                && ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasRefreshmentInBag())
+                     || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.CharacterManager.HasFoodInBag())
+                     || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasWaterInBag())))
             {
-                LastEatCheck = DateTime.Now;
-
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasRefreshmentInBag())
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.CharacterManager.HasFoodInBag())
-                    || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasWaterInBag()))
-                {
-                    StateMachine.SetState((int)BotState.Eating);
-                    return;
-                }
+                StateMachine.SetState((int)BotState.Eating);
+                return;
             }
 
             // we are on a battleground
@@ -107,33 +104,24 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do we need to repair our equipment
-            if (DateTime.Now - LastRepairCheck > TimeSpan.FromSeconds(6))
+            if (LastRepairCheck.Run()
+                && IsRepairNpcNear())
             {
-                LastRepairCheck = DateTime.Now;
-
-                if (IsRepairNpcNear())
+                WowInterface.CharacterManager.Equipment.Update();
+                if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
                 {
-                    WowInterface.CharacterManager.Equipment.Update();
-                    if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
-                    {
-                        StateMachine.SetState((int)BotState.Repairing);
-                        return;
-                    }
+                    StateMachine.SetState((int)BotState.Repairing);
+                    return;
                 }
             }
 
             // do we need to sell stuff
-            if (DateTime.Now - LastBagSlotCheck > TimeSpan.FromSeconds(6)
-                && WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
+            if (LastBagSlotCheck.Run()
+                && IsVendorNpcNear()
+                && WowInterface.HookManager.GetFreeBagSlotCount() < 4)
             {
-                LastBagSlotCheck = DateTime.Now;
-
-                if (IsVendorNpcNear()
-                    && WowInterface.HookManager.GetFreeBagSlotCount() < 4)
-                {
-                    StateMachine.SetState((int)BotState.Selling);
-                    return;
-                }
+                StateMachine.SetState((int)BotState.Selling);
+                return;
             }
 
             // do buffing etc...

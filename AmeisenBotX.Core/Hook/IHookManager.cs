@@ -41,9 +41,11 @@ namespace AmeisenBotX.Core.Hook
 
         void CofirmReadyCheck(bool isReady);
 
-        void CompleteQuestAndGetReward(int questlogId, int rewardId);
+        void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId);
 
         void DisposeHook();
+
+        void UnitSelectGossipOption(int gossipId);
 
         void EnableClickToMove();
 

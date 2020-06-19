@@ -1,10 +1,10 @@
 ﻿namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
-    public delegate bool CastSpellQuestObjectiveCondition();
+    public delegate bool CastPetSpellQuestObjectiveCondition();
 
-    public class CastSpellQuestObjective : IQuestObjective
+    public class CastPetSpellQuestObjective : IQuestObjective
     {
-        public CastSpellQuestObjective(WowInterface wowInterface, int spellId, CastSpellQuestObjectiveCondition condition)
+        public CastPetSpellQuestObjective(WowInterface wowInterface, int spellId, CastPetSpellQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
             SpellId = spellId;
@@ -15,7 +15,7 @@
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
-        private CastSpellQuestObjectiveCondition Condition { get; }
+        private CastPetSpellQuestObjectiveCondition Condition { get; }
 
         private int SpellId { get; }
 
@@ -23,7 +23,7 @@
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.ObjectManager.Pet.IsCasting) { return; }
 
             WowInterface.HookManager.CastSpellById(SpellId);
         }

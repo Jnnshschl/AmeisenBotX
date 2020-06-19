@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,12 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             UnitLootQueue = new Queue<ulong>();
             UnitsAlreadyLootedList = new List<ulong>();
-            LastOpenLootTry = DateTime.Now;
+            LastOpenLootTry = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public List<ulong> UnitsAlreadyLootedList { get; private set; }
 
-        private DateTime LastOpenLootTry { get; set; }
+        private TimegatedEvent LastOpenLootTry { get; set; }
 
         private Queue<ulong> UnitLootQueue { get; set; }
 
@@ -64,9 +65,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                    if (WowInterface.MovementEngine.IsAtTargetPosition && DateTime.Now - LastOpenLootTry > TimeSpan.FromSeconds(1))
+                    if (LastOpenLootTry.Run())
                     {
-                        WowInterface.HookManager.StopClickToMoveIfActive();
+                        if (WowInterface.MovementEngine.IsAtTargetPosition)
+                        {
+                            WowInterface.HookManager.StopClickToMoveIfActive();
+                        }
 
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                         if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
@@ -80,8 +84,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                                 UnitLootQueue.Dequeue();
                             }
                         }
-
-                        LastOpenLootTry = DateTime.Now;
                     }
                 }
                 else

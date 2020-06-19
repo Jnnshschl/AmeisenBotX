@@ -4,6 +4,8 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
+using AmeisenBotX.Core.Quest.Profiles;
+using AmeisenBotX.Core.Quest.Profiles.StartAreas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,75 +17,21 @@ namespace AmeisenBotX.Core.Quest
         public QuestEngine(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Quests = new Queue<List<BotQuest>>();
 
             WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
 
             CompletedQuests = new List<int>();
             QueryCompletedQuestsEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+        }
 
-            Quests.Enqueue(new List<BotQuest>()
-            {
-                new BotQuest
-                (
-                    WowInterface, 12593, "In Service of the Lich King", 55, 1,
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(24191),
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    null
-                ),
-                new BotQuest
-                (
-                    WowInterface, 12619, "The Emblazoned Runeblade", 55, 1,
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    new List<IQuestObjective>()
-                    {
-                        new QuestObjectiveChain(new List<IQuestObjective>()
-                        {
-                            new CollectQuestObjective(WowInterface, 38607, 1, 7961, new List<AreaNode>()
-                            {
-                                new AreaNode(new Vector3(2504, -5563, 421), 32.0)
-                            }),
-                            new MoveToObjectQuestObjective(WowInterface, 8175, 8.0),
-                            new UseItemQuestObjective(WowInterface, 38607, () => WowInterface.CharacterManager.Inventory.Items.Any(e => e.Id == 38631))
-                        })
-                    }
-                ),
-                new BotQuest
-                (
-                    WowInterface, 12842, "Preperation For Battle", 55, 1,
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    new List<IQuestObjective>()
-                    {
-                        new QuestObjectiveChain(new List<IQuestObjective>()
-                        {
-                            new MoveToObjectQuestObjective(WowInterface, 8175, 8.0),
-                            new RuneforgingQuestObjective(WowInterface, () => WowInterface.CharacterManager.Equipment.HasEnchantment(EquipmentSlot.INVSLOT_MAINHAND, 3369)
-                                                                           || WowInterface.CharacterManager.Equipment.HasEnchantment(EquipmentSlot.INVSLOT_MAINHAND, 3370))
-                        })
-                    }
-                ),
-                new BotQuest
-                (
-                    WowInterface, 12848, "The Endless Hunger", 55, 1,
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    () => WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(16582),
-                    new List<IQuestObjective>()
-                    {
-                        new QuestObjectiveChain(new List<IQuestObjective>()
-                        {
-                            new MoveToObjectQuestObjective(WowInterface, 8115, 4.0),
-                            new UseObjectQuestObjective(WowInterface, 8115, () => WowInterface.ObjectManager.Player.GetQuestlogEntries().FirstOrDefault(e=>e.Id == 12848).X == 1)
-                        })
-                    }
-                )
-            });
+        public void LoadProfile(IQuestProfile questProfile)
+        {
+            QuestProfile = questProfile;
         }
 
         public List<int> CompletedQuests { get; private set; }
 
-        public Queue<List<BotQuest>> Quests { get; private set; }
+        public IQuestProfile QuestProfile { get; private set; }
 
         public bool UpdatedCompletedQuests { get; set; }
 
@@ -93,6 +41,12 @@ namespace AmeisenBotX.Core.Quest
 
         public void Execute()
         {
+            if (QuestProfile == null)
+            {
+                LoadProfile(new DeathknightStartAreaQuestProfile(WowInterface));
+                return;
+            }
+
             if (!UpdatedCompletedQuests)
             {
                 if (QueryCompletedQuestsEvent.Run())
@@ -103,34 +57,59 @@ namespace AmeisenBotX.Core.Quest
                 return;
             }
 
-            if (Quests.Count > 0)
+            if (QuestProfile.Quests.Count > 0)
             {
-                List<BotQuest> quests = Quests.Peek();
-                BotQuest selectedQuest = quests.FirstOrDefault(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(x => x.Id == e.Id));
+                List<BotQuest> quests = QuestProfile.Quests.Peek();
+                List<BotQuest> selectedQuests = quests.Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(x => x.Id == e.Id)).ToList();
 
-                if (selectedQuest != null)
+                if (selectedQuests != null && selectedQuests.Count > 0)
                 {
-                    if (!selectedQuest.Accepted)
-                    {
-                        selectedQuest.AcceptQuest();
-                        return;
-                    }
+                    BotQuest notAcceptedQuest = selectedQuests.FirstOrDefault(e => !e.Accepted);
 
-                    if (selectedQuest.Finished)
+                    // make sure we got all quests
+                    if (notAcceptedQuest != null)
                     {
-                        selectedQuest.CompleteQuest();
-                        CompletedQuests.Add(selectedQuest.Id);
-                        return;
+                        if (!notAcceptedQuest.Accepted)
+                        {
+                            notAcceptedQuest.AcceptQuest();
+                            return;
+                        }
                     }
+                    else
+                    {
+                        // do the quests if not all of them are finished
+                        if (selectedQuests.Any(e => !e.Finished))
+                        {
+                            BotQuest activeQuest = selectedQuests.FirstOrDefault(e => !e.Finished);
 
-                    selectedQuest.Execute();
+                            if (activeQuest != null)
+                            {
+                                activeQuest.Execute();
+                            }
+                        }
+                        else
+                        {
+                            // make sure we return all quests
+                            BotQuest notReturnedQuest = selectedQuests.FirstOrDefault(e => !e.Accepted);
+
+                            if (notReturnedQuest != null)
+                            {
+                                notReturnedQuest.CompleteQuest();
+                                CompletedQuests.Add(notReturnedQuest.Id);
+                                return;
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    CompletedQuests.AddRange(Quests.Dequeue().Select(e => e.Id));
+                    CompletedQuests.AddRange(QuestProfile.Quests.Dequeue().Select(e => e.Id));
                     return;
                 }
             }
+
+            // filter duplicates
+            CompletedQuests = CompletedQuests.Distinct().ToList();
         }
 
         private void OnGetQuestsCompleted(long timestamp, List<string> args)

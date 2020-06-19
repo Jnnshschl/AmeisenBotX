@@ -90,14 +90,14 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public WowGameobject GetClosestWowGameobjectByDisplayId(int displayId)
+        public WowGameobject GetClosestWowGameobjectQuestgiverByDisplayId(List<int> displayIds)
         {
-            return WowObjects.OfType<WowGameobject>().Where(e => e.DisplayId == displayId).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            return WowObjects.OfType<WowGameobject>().Where(e => displayIds.Contains(e.DisplayId)).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
         }
 
-        public WowUnit GetClosestWowUnitByDisplayId(int displayId)
+        public WowUnit GetClosestWowUnitQuestgiverByDisplayId(List<int> displayIds, bool onlyQuestgiver = true)
         {
-            return WowObjects.OfType<WowUnit>().Where(e => e.DisplayId == displayId).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            return WowObjects.OfType<WowUnit>().Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId)).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
         }
 
         public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)

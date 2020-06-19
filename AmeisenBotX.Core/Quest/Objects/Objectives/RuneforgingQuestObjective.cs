@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class RuneforgingQuestObjective : IQuestObjective
     {
-        public RuneforgingQuestObjective(WowInterface wowInterface, UseItemQuestObjectiveCondition condition)
+        public RuneforgingQuestObjective(WowInterface wowInterface, EnchantItemQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
             Condition = condition;
@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
-        private UseItemQuestObjectiveCondition Condition { get; }
+        private EnchantItemQuestObjectiveCondition Condition { get; }
 
         private WowInterface WowInterface { get; }
 

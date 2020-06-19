@@ -1,17 +1,33 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
+    public delegate bool UseObjectQuestObjectiveCondition();
+
     public class UseObjectQuestObjective : IQuestObjective
     {
         public UseObjectQuestObjective(WowInterface wowInterface, int objectDisplayId, UseObjectQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
-            ObjectDisplayId = objectDisplayId;
+            ObjectDisplayIds = new List<int>() { objectDisplayId };
             Condition = condition;
+
+            UseEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
-        public delegate bool UseObjectQuestObjectiveCondition();
+        public UseObjectQuestObjective(WowInterface wowInterface, List<int> objectDisplayIds, UseObjectQuestObjectiveCondition condition)
+        {
+            WowInterface = wowInterface;
+            ObjectDisplayIds = objectDisplayIds;
+            Condition = condition;
+
+            UseEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+        }
 
         public bool Finished => Progress == 100.0;
 
@@ -19,24 +35,40 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private UseObjectQuestObjectiveCondition Condition { get; }
 
-        private int ObjectDisplayId { get; }
+        private List<int> ObjectDisplayIds { get; }
 
         private WowGameobject WowGameobject { get; set; }
 
         private WowInterface WowInterface { get; }
 
+        private TimegatedEvent UseEvent { get; }
+
         public void Execute()
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
 
-            WowGameobject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(ObjectDisplayId);
+            WowGameobject = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => ObjectDisplayIds.Contains(e.DisplayId))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .FirstOrDefault();
 
             if (WowGameobject != null)
             {
-                WowInterface.HookManager.StopClickToMoveIfActive();
-                WowInterface.MovementEngine.Reset();
+                if (WowGameobject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                {
+                    if (UseEvent.Run())
+                    {
+                        WowInterface.HookManager.StopClickToMoveIfActive();
+                        WowInterface.MovementEngine.Reset();
 
-                WowInterface.HookManager.WowObjectOnRightClick(WowGameobject);
+                        WowInterface.HookManager.WowObjectOnRightClick(WowGameobject);
+                    }
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowGameobject.Position);
+                }
             }
         }
     }

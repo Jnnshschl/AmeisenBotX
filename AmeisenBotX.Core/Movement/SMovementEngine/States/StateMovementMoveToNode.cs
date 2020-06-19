@@ -118,10 +118,16 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                         }
                     }
 
-                    if (JumpCheckEvent.Run()
-                        && !WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, TargetPosition, 0.05f))
+
+                    if (JumpCheckEvent.Run())
                     {
-                        WowInterface.CharacterManager.Jump();
+                        Vector3 extends = new Vector3(WowInterface.ObjectManager.Player.Position);
+                        extends = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, extends, 2.0);
+
+                        if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, extends, 0.1f))
+                        {
+                            WowInterface.CharacterManager.Jump();
+                        }
                     }
 
                     // check for beeing stuck

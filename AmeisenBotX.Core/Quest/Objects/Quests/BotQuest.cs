@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else if (ActionEvent.Run())
                     {
                         // TODO: get best reward
-                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.GetQuestlogEntries().FindIndex(e => e.Id == Id) + 1, 1);
+                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.GetQuestlogEntries().FindIndex(e => e.Id == Id) + 1, 1, GossipId);
                     }
 
                     ActionToggle = !ActionToggle;

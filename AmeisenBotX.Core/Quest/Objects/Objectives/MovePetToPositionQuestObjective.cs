@@ -3,9 +3,9 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
-    public class MoveToPositionQuestObjective : IQuestObjective
+    public class MovePetToPositionQuestObjective : IQuestObjective
     {
-        public MoveToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Moving)
+        public MovePetToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Moving)
         {
             WowInterface = wowInterface;
             WantedPosition = position;
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => WantedPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => WowInterface.ObjectManager.Pet != null && WantedPosition.GetDistance(WowInterface.ObjectManager.Pet.Position) < Distance ? 100.0 : 0.0;
 
         private double Distance { get; }
 
@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 return;
             }
 
-            if (WantedPosition.GetDistanceIgnoreZ(WowInterface.ObjectManager.Player.Position) > Distance)
+            if (WantedPosition.GetDistanceIgnoreZ(WowInterface.ObjectManager.Pet.Position) > Distance)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction, WantedPosition);
             }

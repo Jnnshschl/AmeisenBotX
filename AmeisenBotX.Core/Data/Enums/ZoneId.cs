@@ -1566,6 +1566,6 @@
         WyrmskullTunnel = 3954,
         HellfireBasin = 3955,
         TheShadowStair = 3956,
-        ShatariOutpost = 3957
+        ShatariOutpost = 3957,
     }
 }
