@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            StateMachine.SetState((int)BotState.Questing);
+            // StateMachine.SetState((int)BotState.Questing);
 
             if (Config.AutojoinBg)
             {
