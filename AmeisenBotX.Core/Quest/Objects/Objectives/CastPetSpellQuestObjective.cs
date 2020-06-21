@@ -23,7 +23,7 @@
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Pet.IsCasting) { return; }
+            if (Finished || WowInterface.ObjectManager.PetGuid == 0 || WowInterface.ObjectManager.Pet.IsCasting) { return; }
 
             WowInterface.HookManager.CastSpellById(SpellId);
         }

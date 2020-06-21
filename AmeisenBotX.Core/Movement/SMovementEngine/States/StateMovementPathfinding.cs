@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                         return;
                     }
 
-                    if (distanceToTargetPosition > 10.0
+                    if (distanceToTargetPosition > 8.0
                         || !WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition))
                     {
                         // regular pathfinding
@@ -46,7 +46,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     else
                     {
                         // move along surface
-                        nodeList = new List<Vector3>() { StateMachine.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition) };
+                        // nodeList = new List<Vector3>() { StateMachine.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, StateMachine.FinalTargetPosition) };
+                        nodeList = new List<Vector3>() { StateMachine.FinalTargetPosition };
                     }
 
                     if (nodeList != null && nodeList.Count > 0)

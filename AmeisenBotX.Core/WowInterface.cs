@@ -62,5 +62,7 @@ namespace AmeisenBotX.Core
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
+
+        public Globals Globals { get; set; }
     }
 }

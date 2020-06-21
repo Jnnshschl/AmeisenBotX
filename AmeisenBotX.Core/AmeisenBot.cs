@@ -570,6 +570,8 @@ namespace AmeisenBotX.Core
 
         private void SetupWowInterface()
         {
+            WowInterface.Globals = new Globals();
+
             WowInterface.OffsetList = new OffsetList335a();
             WowInterface.XMemory = new XMemory();
 

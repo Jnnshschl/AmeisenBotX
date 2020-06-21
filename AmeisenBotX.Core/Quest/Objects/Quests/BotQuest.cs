@@ -1,17 +1,19 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
+using System.Deployment.Internal;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Quests
 {
-    public delegate WowObject BotQuestGetWowObject();
+    public delegate (WowObject, Vector3) BotQuestGetPosition();
 
     public class BotQuest
     {
-        public BotQuest(WowInterface wowInterface, int id, string name, int level, int gossipId, BotQuestGetWowObject start, BotQuestGetWowObject end, List<IQuestObjective> objectives)
+        public BotQuest(WowInterface wowInterface, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, List<IQuestObjective> objectives)
         {
             WowInterface = wowInterface;
 
@@ -30,9 +32,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool Finished => (Objectives != null && Objectives.Count(e => !e.Finished) == 0) || Progress == 100.0;
 
-        public BotQuestGetWowObject GetEndObject { get; set; }
+        public BotQuestGetPosition GetEndObject { get; set; }
 
-        public BotQuestGetWowObject GetStartObject { get; set; }
+        public BotQuestGetPosition GetStartObject { get; set; }
 
         public bool HasQuest => WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(e => e.Id == Id);
 
@@ -75,19 +77,19 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
         {
             if (HasQuest) { Accepted = true; return; }
 
-            WowObject start = GetStartObject();
+            (WowObject, Vector3) objectPositionCombo = GetStartObject();
 
-            if (start != null)
+            if (objectPositionCombo.Item1 != null)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(start.Position) > 3.0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 3.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, start.Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item1.Position);
                 }
-                else if(ActionEvent.Run())
+                else if (ActionEvent.Run())
                 {
                     if (!ActionToggle)
                     {
-                        RightClickQuestgiver(start);
+                        RightClickQuestgiver(objectPositionCombo.Item1);
                     }
                     else
                     {
@@ -97,25 +99,35 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     ActionToggle = !ActionToggle;
                 }
             }
+            else if (objectPositionCombo.Item2 != default)
+            {
+                // move to position
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 3.0)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item2);
+                }
+            }
         }
 
         public void CompleteQuest()
         {
             if (!HasQuest || !Finished) { Returned = true; return; }
 
-            WowObject end = GetEndObject();
+            (WowObject, Vector3) objectPositionCombo = GetEndObject();
 
-            if (end != null)
+            if (objectPositionCombo.Item1 != null)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(end.Position) > 3.0)
+                // move to unit / object
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 3.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, end.Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item1.Position);
                 }
                 else
                 {
+                    // interact with it
                     if (!ActionToggle)
                     {
-                        RightClickQuestgiver(end);
+                        RightClickQuestgiver(objectPositionCombo.Item1);
                     }
                     else if (ActionEvent.Run())
                     {
@@ -124,6 +136,14 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
 
                     ActionToggle = !ActionToggle;
+                }
+            }
+            else if (objectPositionCombo.Item2 != default)
+            {
+                // move to position
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 3.0)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item2);
                 }
             }
         }

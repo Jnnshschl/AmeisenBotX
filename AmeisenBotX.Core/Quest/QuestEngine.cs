@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Quest
                         else
                         {
                             // make sure we return all quests
-                            BotQuest notReturnedQuest = selectedQuests.FirstOrDefault(e => !e.Accepted);
+                            BotQuest notReturnedQuest = selectedQuests.FirstOrDefault(e => !e.Returned);
 
                             if (notReturnedQuest != null)
                             {

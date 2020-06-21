@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs
     public struct QuestlogEntry
     {
         public int Id;
-        public int X;
+        public int Finished;
         public short ProgressPartymember1;
         public short ProgressPartymember2;
         public short ProgressPartymember3;

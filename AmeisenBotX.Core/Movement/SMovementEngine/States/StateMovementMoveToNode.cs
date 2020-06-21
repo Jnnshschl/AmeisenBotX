@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         private TimegatedEvent JumpCheckEvent { get; }
 
+        private int StuckCounter { get; set; }
+
         private TimegatedEvent UnstuckEvent { get; }
 
         public override void Enter()
@@ -37,6 +39,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
             LastPosition = default;
             LastCompletedPosition = default;
             LastDistance = 0.0;
+            StuckCounter = 0;
         }
 
         public override void Execute()
@@ -80,7 +83,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                 }
                 else
                 {
-                    if (distanceToNode < StateMachine.MovementSettings.WaypointCheckThreshold)
+                    double checkThreshold = WowInterface.ObjectManager.Player.IsMounted ? StateMachine.MovementSettings.WaypointCheckThreshold + 5.0 : StateMachine.MovementSettings.WaypointCheckThreshold;
+
+                    if (distanceToNode < checkThreshold)
                     {
                         if (StateMachine.Nodes.Count > 0)
                         {
@@ -97,7 +102,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     }
 
                     // move the character
-                    WowInterface.CharacterManager.MoveToPosition(BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, TargetPosition, 1.0));
+                    WowInterface.CharacterManager.MoveToPosition(TargetPosition);
 
                     // check wether we need to jump up or down
                     double distanceToNodeIgnoreZ = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(TargetPosition);
@@ -122,9 +127,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     if (JumpCheckEvent.Run())
                     {
                         Vector3 extends = new Vector3(WowInterface.ObjectManager.Player.Position);
-                        extends = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, extends, 2.0);
+                        extends = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, extends, 1.0);
 
-                        if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, extends, 0.1f))
+                        if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, extends, 0.2f))
                         {
                             WowInterface.CharacterManager.Jump();
                         }
@@ -133,10 +138,18 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                     // check for beeing stuck
                     if (LastPositionEvent.Run())
                     {
+                        if (StuckCounter == 2)
+                        {
+                            StuckCounter = 0;
+                            StateMachine.Reset();
+                            return;
+                        }
+
                         double distanceMovedSinceLastTick = WowInterface.ObjectManager.Player.Position.GetDistanceIgnoreZ(LastPosition);
 
                         if (distanceMovedSinceLastTick < 0.3)
                         {
+                            ++StuckCounter;
                             WowInterface.CharacterManager.Jump();
 
                             // get a random position behind us

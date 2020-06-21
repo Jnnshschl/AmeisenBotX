@@ -203,6 +203,7 @@
     <Compile Include="Dungeon\Profiles\WotLK\UtgardeKeepProfile.cs" />
     <Compile Include="Event\EventHook.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
+    <Compile Include="Globals.cs" />
     <Compile Include="Hook\HookManager.cs" />
     <Compile Include="Hook\IHookManager.cs" />
     <Compile Include="Jobs\Enums\JobType.cs" />

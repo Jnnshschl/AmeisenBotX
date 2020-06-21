@@ -155,10 +155,13 @@ namespace AmeisenBotX.Core.Statemachine
                             // }
 
                             // TODO: handle combat bug, sometimes when combat ends, the player stays in combot for no reason
-                            if ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()) && SetState((int)BotState.Attacking, true))
+                            if (!WowInterface.Globals.IgnoreCombat)
                             {
-                                OnStateOverride?.Invoke(CurrentState.Key);
-                                return;
+                                if ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()) && SetState((int)BotState.Attacking, true))
+                                {
+                                    OnStateOverride?.Invoke(CurrentState.Key);
+                                    return;
+                                }
                             }
                         }
                     }
