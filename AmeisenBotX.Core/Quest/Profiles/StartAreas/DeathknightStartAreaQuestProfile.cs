@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects;
@@ -8,7 +7,6 @@ using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Units.Unitives;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
 
 namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 {
@@ -286,9 +284,9 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
         public Queue<List<BotQuest>> Quests { get; }
 
-        private bool StolenPalomino { get; set; }
-
         private bool[] CastedSpell { get; } = new bool[4];
+
+        private bool StolenPalomino { get; set; }
 
         private bool CheckEyeCastingState(WowInterface wowInterface, int id, Vector3 positionToCast, double distance)
         {

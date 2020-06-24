@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Logging
 {
@@ -126,7 +127,7 @@ namespace AmeisenBotX.Logging
                     File.AppendAllText(LogFilePath, activeEntry.ToString() + "\n");
                 }
 
-                Thread.Sleep(1);
+                Task.Delay(1).Wait();
             }
         }
     }

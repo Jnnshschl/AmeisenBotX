@@ -14,6 +14,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
+        private TimegatedEvent JumpCheckEvent { get; }
+
         private Vector3 LastCompletedPosition { get; set; }
 
         private double LastDistance { get; set; }
@@ -24,11 +26,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
         private Vector3 StartPosition { get; set; }
 
-        private Vector3 TargetPosition { get; set; }
-
-        private TimegatedEvent JumpCheckEvent { get; }
-
         private int StuckCounter { get; set; }
+
+        private Vector3 TargetPosition { get; set; }
 
         private TimegatedEvent UnstuckEvent { get; }
 
@@ -122,7 +122,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
                             WowInterface.CharacterManager.Jump();
                         }
                     }
-
 
                     if (JumpCheckEvent.Run())
                     {

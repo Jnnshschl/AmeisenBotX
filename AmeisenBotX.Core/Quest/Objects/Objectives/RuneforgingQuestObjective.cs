@@ -22,9 +22,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private EnchantItemQuestObjectiveCondition Condition { get; }
 
-        private WowInterface WowInterface { get; }
-
         private TimegatedEvent EnchantEvent { get; }
+
+        private WowInterface WowInterface { get; }
 
         public void Execute()
         {

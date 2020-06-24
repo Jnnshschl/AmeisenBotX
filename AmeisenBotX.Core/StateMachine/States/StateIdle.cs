@@ -13,10 +13,10 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             FirstStart = true;
-            LastBagSlotCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            LastBagSlotCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
             LastEatCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
             LastLoot = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
-            LastRepairCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            LastRepairCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
         }
 
         public bool FirstStart { get; set; }

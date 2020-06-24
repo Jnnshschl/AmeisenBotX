@@ -154,6 +154,8 @@
     <Compile Include="Data\Objects\Matrix3x3.cs" />
     <Compile Include="Data\Objects\Structs\CameraInfo.cs" />
     <Compile Include="Data\Objects\Structs\RawPlayerSkillInfo.cs" />
+    <Compile Include="Data\Objects\Structs\RawRaidStruct.cs" />
+    <Compile Include="Data\Objects\Structs\RawRaidPlayer.cs" />
     <Compile Include="Data\Objects\Structs\RawWowAura.cs" />
     <Compile Include="Data\Objects\WowAura.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\Enums\WowEnchantmentHelper.cs" />
@@ -210,8 +212,6 @@
     <Compile Include="Jobs\Profiles\Gathering\CopperElwynnForestProfile.cs" />
     <Compile Include="Jobs\Profiles\IMiningProfile.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
-    <Compile Include="Autologin\DefaultLoginHandler.cs" />
-    <Compile Include="Autologin\ILoginHandler.cs" />
     <Compile Include="Jobs\Profiles\IJobsProfiles.cs" />
     <Compile Include="Movement\DefaultMovementEngine.cs" />
     <Compile Include="Movement\Enums\MovementAction.cs" />

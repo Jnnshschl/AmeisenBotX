@@ -37,11 +37,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private List<int> ObjectDisplayIds { get; }
 
+        private TimegatedEvent UseEvent { get; }
+
         private WowGameobject WowGameobject { get; set; }
 
         private WowInterface WowInterface { get; }
-
-        private TimegatedEvent UseEvent { get; }
 
         public void Execute()
         {

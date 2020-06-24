@@ -10,12 +10,6 @@ namespace AmeisenBotX.Core.Offsets
          *
          */
 
-        public IntPtr AccountName { get; } = new IntPtr(0xB6AA40);
-
-        public IntPtr AutolootEnabled { get; } = new IntPtr(0x30);
-
-        public IntPtr AutolootPointer { get; } = new IntPtr(0xBD0914);
-
         public IntPtr BattlegroundFinished { get; } = new IntPtr(0xBEA588);
 
         public IntPtr BattlegroundStatus { get; } = new IntPtr(0xBEA4D0);
@@ -26,12 +20,6 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr CharacterSlotSelected { get; } = new IntPtr(0xAC436C);
 
-        public IntPtr ChatBuffer { get; } = new IntPtr(0xB75A60);
-
-        public IntPtr ChatNextMessage { get; } = new IntPtr(0x17C0);
-
-        public IntPtr ChatOpened { get; } = new IntPtr(0xD41660);
-
         public IntPtr ClickToMoveAction { get; } = new IntPtr(0xCA11D8 + 0x1C);
 
         public IntPtr ClickToMoveDistance { get; } = new IntPtr(0xCA11D8 + 0xC);
@@ -40,23 +28,15 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr ClickToMoveGuid { get; } = new IntPtr(0xCA11D8 + 0x20);
 
-        public IntPtr ClickToMovePendingMovement { get; } = new IntPtr(0xCA1200);
-
         public IntPtr ClickToMovePointer { get; } = new IntPtr(0xBD08F4);
 
         public IntPtr ClickToMoveTurnSpeed { get; } = new IntPtr(0xCA11D8 + 0x4);
 
         public IntPtr ClickToMoveX { get; } = new IntPtr(0xCA11D8 + 0x8C);
 
-        public IntPtr ClickToMoveY { get; } = new IntPtr(0xCA11D8 + 0x90);
-
-        public IntPtr ClickToMoveZ { get; } = new IntPtr(0xCA11D8 + 0x94);
-
         public IntPtr ClientConnection { get; } = new IntPtr(0xC79CE0);
 
         public IntPtr ComboPoints { get; } = new IntPtr(0xBD084D);
-
-        public IntPtr ContinentName { get; } = new IntPtr(0xCE06D0);
 
         public IntPtr CorpsePosition { get; } = new IntPtr(0xBD0A58);
 
@@ -74,11 +54,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr EndSceneStaticDevice { get; } = new IntPtr(0xC5DF88);
 
-        public IntPtr ErrorMessage { get; } = new IntPtr(0xBCFB90);
-
         public IntPtr FirstObject { get; } = new IntPtr(0xAC);
-
-        public IntPtr FunctionCastSpellById { get; } = new IntPtr(0x80DA40);
 
         public IntPtr FunctionGameobjectOnRightClick { get; } = new IntPtr(0x711140);
 
@@ -90,17 +66,11 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr FunctionLuaDoString { get; } = new IntPtr(0x819210);
 
-        public IntPtr FunctionObjectGetPosition { get; } = new IntPtr(0x4D5EA0);
-
         public IntPtr FunctionPlayerClickToMove { get; } = new IntPtr(0x727400);
 
         public IntPtr FunctionPlayerClickToMoveStop { get; } = new IntPtr(0x72B3A0);
 
-        public IntPtr FunctionPlayerIsClickMoving { get; } = new IntPtr(0x721F90);
-
         public IntPtr FunctionSetTarget { get; } = new IntPtr(0x524BF0);
-
-        public IntPtr FunctionSpellGetSpellCooldown { get; } = new IntPtr(0x807980);
 
         public IntPtr FunctionTraceline { get; } = new IntPtr(0x7A3B70);
 
@@ -113,10 +83,6 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr FunctionUnitSetFacing { get; } = new IntPtr(0x72EA50);
 
         public IntPtr FunctionWorldFrame { get; } = new IntPtr(0x4FA390);
-
-        public IntPtr FunctionWorldFrameGetActiveCamera { get; } = new IntPtr(0x4F5960);
-
-        public IntPtr FunctionWorldFrameOnFrameRender { get; } = new IntPtr(0x4FB080);
 
         public IntPtr FunctionWorldRender { get; } = new IntPtr(0x4F8EA0);
 
@@ -152,8 +118,6 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr PartyPlayer4 { get; } = new IntPtr(0xBD1960);
 
-        public IntPtr PerformanceCounter { get; } = new IntPtr(0x86AE20);
-
         public IntPtr PetGuid { get; } = new IntPtr(0xC234D0);
 
         public IntPtr PlayerBase { get; } = new IntPtr(0xD38AE4);
@@ -168,61 +132,33 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr RaidLeader { get; } = new IntPtr(0xBD1990);
 
-        public IntPtr RealmName { get; } = new IntPtr(0xC79B9E);
-
-        public IntPtr RuneCooldown { get; } = new IntPtr(0xC24364);
-
         public IntPtr Runes { get; } = new IntPtr(0xC24388);
 
         public IntPtr RuneType { get; } = new IntPtr(0xC24304);
-
-        public IntPtr SpellbookCount { get; } = new IntPtr(0xBE8D9C);
-
-        public IntPtr SpellbookSpells { get; } = new IntPtr(0xBE5D88);
 
         public IntPtr TargetGuid { get; } = new IntPtr(0xBD07B0);
 
         public IntPtr TickCount { get; } = new IntPtr(0xB499A4);
 
-        public IntPtr WowBuild { get; } = new IntPtr(0xA30BE6);
-
-        public IntPtr WowDynobjectCasterGuid { get; } = new IntPtr(0x18);
-
-        public IntPtr WowDynobjectFacing { get; } = new IntPtr(0x38);
-
-        public IntPtr WowDynobjectPosition { get; } = new IntPtr(0x110);
-
-        public IntPtr WowDynobjectRadius { get; } = new IntPtr(0x28);
-
-        public IntPtr WowDynobjectSpellId { get; } = new IntPtr(0x24);
-
-        public IntPtr WowGameobjectDisplayId { get; } = new IntPtr(0x20);
-
-        public IntPtr WowGameobjectLevel { get; } = new IntPtr(0x58);
-
         public IntPtr WowGameobjectPosition { get; } = new IntPtr(0x1D8);
-
-        public IntPtr WowGameobjectType { get; } = new IntPtr(0x54);
 
         public IntPtr WowObjectDescriptor { get; } = new IntPtr(0x8);
 
-        public IntPtr WowObjectEntryId { get; } = new IntPtr(0x18);
-
-        public IntPtr WowObjectGuid { get; } = new IntPtr(0x30);
-
         public IntPtr WowObjectPosition { get; } = new IntPtr(0xE8);
-
-        public IntPtr WowObjectScale { get; } = new IntPtr(0x1C);
 
         public IntPtr WowObjectType { get; } = new IntPtr(0x14);
 
         public IntPtr WowUnitIsAutoAttacking { get; } = new IntPtr(0xA20);
 
+        public IntPtr WowUnitName1 { get; } = new IntPtr(0x964);
+
+        public IntPtr WowUnitName2 { get; } = new IntPtr(0x05C);
+
         public IntPtr WowUnitPosition { get; } = new IntPtr(0x798);
 
         public IntPtr WowUnitRotation { get; } = new IntPtr(0x7A8);
 
-        public IntPtr ZoneId { get; } = new IntPtr(0xBD080C); // 0xAF4E48
+        public IntPtr ZoneId { get; } = new IntPtr(0xBD080C);
 
         public IntPtr ZoneSubText { get; } = new IntPtr(0xBD0784);
 

@@ -14,6 +14,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             Condition = condition;
             QuestgiversOnly = questgiversOnly;
         }
+
         public UseUnitQuestObjective(WowInterface wowInterface, List<int> objectDisplayIds, bool questgiversOnly, UseUnitQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
@@ -30,11 +31,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private List<int> ObjectDisplayIds { get; }
 
-        private WowUnit WowUnit { get; set; }
-
         private bool QuestgiversOnly { get; }
 
         private WowInterface WowInterface { get; }
+
+        private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {

@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
-using System.Deployment.Internal;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Quests
@@ -30,23 +29,25 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool Accepted { get; set; }
 
+        public TimegatedEvent ActionEvent { get; }
+
+        public bool ActionToggle { get; set; }
+
         public bool Finished => (Objectives != null && Objectives.Count(e => !e.Finished) == 0) || Progress == 100.0;
 
         public BotQuestGetPosition GetEndObject { get; set; }
 
         public BotQuestGetPosition GetStartObject { get; set; }
 
+        public int GossipId { get; set; }
+
         public bool HasQuest => WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(e => e.Id == Id);
 
         public int Id { get; set; }
 
-        public int GossipId { get; set; }
-
         public int Level { get; set; }
 
         public string Name { get; set; }
-
-        public TimegatedEvent ActionEvent { get; }
 
         public List<IQuestObjective> Objectives { get; set; }
 
@@ -68,8 +69,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
         }
 
         public bool Returned { get; set; }
-
-        public bool ActionToggle { get; set; }
 
         private WowInterface WowInterface { get; }
 

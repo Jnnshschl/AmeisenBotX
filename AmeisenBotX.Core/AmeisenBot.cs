@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Autologin;
-using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -390,7 +389,10 @@ namespace AmeisenBotX.Core
             if (BagUpdateEvent.Run())
             {
                 WowInterface.CharacterManager.Inventory.Update();
+                WowInterface.CharacterManager.Equipment.Update();
+
                 WowInterface.CharacterManager.UpdateCharacterGear();
+
                 WowInterface.CharacterManager.Inventory.Update();
             }
         }
@@ -574,8 +576,6 @@ namespace AmeisenBotX.Core
 
             WowInterface.OffsetList = new OffsetList335a();
             WowInterface.XMemory = new XMemory();
-
-            WowInterface.LoginHandler = new DefaultLoginHandler(WowInterface);
 
             WowInterface.BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, AccountName, "cache.bin"));
             WowInterface.BotPersonality = new BotPersonality(Path.Combine(BotDataPath, AccountName, "personality.bin"));

@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +15,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             ObjectDisplayIds = new Dictionary<int, int>() { { 0, objectDisplayId } };
             Condition = condition;
         }
+
         public KillUnitQuestObjective(WowInterface wowInterface, Dictionary<int, int> objectDisplayIds, KillUnitQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
@@ -31,9 +31,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private Dictionary<int, int> ObjectDisplayIds { get; }
 
-        private WowUnit WowUnit { get; set; }
-
         private WowInterface WowInterface { get; }
+
+        private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {

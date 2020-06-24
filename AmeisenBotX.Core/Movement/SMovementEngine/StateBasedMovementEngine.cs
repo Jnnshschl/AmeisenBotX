@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 {
                     if (positionToGoTo.GetDistance(WowInterface.ObjectManager.Player.Position) < 8.0)
                     {
-                        Reset(); 
+                        Reset();
                     }
 
                     FinalTargetPosition = positionToGoTo;

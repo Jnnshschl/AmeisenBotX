@@ -323,38 +323,24 @@ namespace AmeisenBotX.Core.Data
         {
             List<ulong> partymemberGuids = new List<ulong>();
 
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayer1, out ulong partyMember1)
-                && WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayer2, out ulong partyMember2)
-                && WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayer3, out ulong partyMember3)
-                && WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayer4, out ulong partyMember4))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.PartyLeader, out ulong partyLeader)
+                && partyLeader != 0
+                && WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayer1, out (ulong, ulong, ulong, ulong) partyMembers))
             {
-                partymemberGuids.Add(partyMember1);
-                partymemberGuids.Add(partyMember2);
-                partymemberGuids.Add(partyMember3);
-                partymemberGuids.Add(partyMember4);
-
-                // try to add raidmembers
-                for (uint p = 0; p < 40; ++p)
-                {
-                    try
-                    {
-                        IntPtr address = IntPtr.Add(WowInterface.OffsetList.RaidGroupStart, (int)(p * WowInterface.OffsetList.RaidGroupPlayer.ToInt32()));
-                        if (WowInterface.XMemory.Read(address, out ulong guid))
-                        {
-                            if (!partymemberGuids.Contains(guid))
-                            {
-                                partymemberGuids.Add(guid);
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // TODO: i ned to find a partymember count
-                    }
-                }
+                partymemberGuids.Add(partyMembers.Item1);
+                partymemberGuids.Add(partyMembers.Item2);
+                partymemberGuids.Add(partyMembers.Item3);
+                partymemberGuids.Add(partyMembers.Item4);
             }
 
-            return partymemberGuids;
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.RaidLeader, out ulong raidLeader)
+                && raidLeader != 0
+                && WowInterface.XMemory.Read(IntPtr.Add(WowInterface.OffsetList.RaidGroupStart, WowInterface.OffsetList.RaidGroupPlayer.ToInt32()), out RawRaidStruct raidStruct))
+            {
+                partymemberGuids.AddRange(raidStruct.GetGuids());
+            }
+
+            return partymemberGuids.Where(e => e != 0).Distinct().ToList();
         }
 
         private string ReadPlayerName(ulong guid)
@@ -412,13 +398,10 @@ namespace AmeisenBotX.Core.Data
                 return cachedName;
             }
 
-            try
+            if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitName1.ToInt32()), out IntPtr objName)
+                && WowInterface.XMemory.Read(IntPtr.Add(objName, WowInterface.OffsetList.WowUnitName2.ToInt32()), out objName)
+                && WowInterface.XMemory.ReadString(objName, Encoding.UTF8, out string name))
             {
-                WowInterface.XMemory.Read(IntPtr.Add(activeObject, 0x964), out uint objName);
-                WowInterface.XMemory.Read(IntPtr.Add(new IntPtr(objName), 0x05C), out objName);
-
-                WowInterface.XMemory.ReadString(new IntPtr(objName), Encoding.UTF8, out string name, 32);
-
                 if (name.Length > 0)
                 {
                     WowInterface.BotCache.CacheName(guid, name);
@@ -426,10 +409,8 @@ namespace AmeisenBotX.Core.Data
 
                 return name;
             }
-            catch
-            {
-                return "unknown";
-            }
+
+            return "unknown";
         }
 
         private WowContainer ReadWowContainer(IntPtr activeObject, WowObjectType wowObjectType)

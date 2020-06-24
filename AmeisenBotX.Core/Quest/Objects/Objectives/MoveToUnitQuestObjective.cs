@@ -29,9 +29,9 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
 
         private List<int> UnitDisplayIds { get; }
 
-        private WowUnit WowUnit { get; set; }
-
         private WowInterface WowInterface { get; }
+
+        private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {

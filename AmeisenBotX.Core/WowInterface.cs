@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Autologin;
-using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Cache;
@@ -39,11 +38,11 @@ namespace AmeisenBotX.Core
 
         public EventHook EventHookManager { get; set; }
 
+        public Globals Globals { get; set; }
+
         public IHookManager HookManager { get; set; }
 
         public JobEngine JobEngine { get; set; }
-
-        public DefaultLoginHandler LoginHandler { get; internal set; }
 
         public IMovementEngine MovementEngine { get; set; }
 
@@ -62,7 +61,5 @@ namespace AmeisenBotX.Core
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
-
-        public Globals Globals { get; set; }
     }
 }

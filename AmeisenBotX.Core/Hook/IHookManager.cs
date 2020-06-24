@@ -45,8 +45,6 @@ namespace AmeisenBotX.Core.Hook
 
         void DisposeHook();
 
-        void UnitSelectGossipOption(int gossipId);
-
         void EnableClickToMove();
 
         string ExecuteLuaAndRead(string command, string variable);
@@ -174,6 +172,8 @@ namespace AmeisenBotX.Core.Hook
         byte TraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171);
 
         void UnitOnRightClick(WowUnit wowUnit);
+
+        void UnitSelectGossipOption(int gossipId);
 
         void UseInventoryItem(EquipmentSlot equipmentSlot);
 

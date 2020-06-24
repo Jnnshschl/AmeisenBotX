@@ -13,10 +13,11 @@ using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook
 {
@@ -172,11 +173,6 @@ namespace AmeisenBotX.Core.Hook
         public void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId)
         {
             LuaDoString($"SelectGossipActiveQuest(max({gossipId}, GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId});");
-        }
-
-        public void UnitSelectGossipOption(int gossipId)
-        {
-            LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
         }
 
         public void DisposeHook()
@@ -846,8 +842,9 @@ namespace AmeisenBotX.Core.Hook
 
             // return to original function after we're done with our stuff
             WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress.ToInt32()}"); // 5 bytes
-            WowInterface.XMemory.Fasm.AddLine($"NOP");                                   // 2 bytes
+
             // note if you increase the hookSize we need to add more NOP's
+            WowInterface.XMemory.Fasm.AddLine($"NOP");                                   // 2 bytes
 
             WowInterface.XMemory.Fasm.Inject((uint)CodecaveForGateway.ToInt32() + (uint)OriginalEndsceneBytes.Length);
             WowInterface.XMemory.Fasm.Clear();
@@ -945,6 +942,11 @@ namespace AmeisenBotX.Core.Hook
             if (wowUnit == null || wowUnit.Guid == 0) return;
 
             CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
+        }
+
+        public void UnitSelectGossipOption(int gossipId)
+        {
+            LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
         }
 
         public void UseInventoryItem(EquipmentSlot equipmentSlot)
@@ -1083,6 +1085,9 @@ namespace AmeisenBotX.Core.Hook
             lock (hookLock)
             {
                 ++endsceneCalls;
+
+                Stopwatch fullStopwatch = Stopwatch.StartNew();
+
                 AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ...", LogLevel.Verbose);
                 AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}...", LogLevel.Verbose);
 
@@ -1101,6 +1106,8 @@ namespace AmeisenBotX.Core.Hook
 
                     try
                     {
+                        Stopwatch injectionStopwatch = Stopwatch.StartNew();
+
                         // preparing to inject the given ASM
                         WowInterface.XMemory.Fasm.Clear();
 
@@ -1120,45 +1127,52 @@ namespace AmeisenBotX.Core.Hook
                         WowInterface.XMemory.ResumeMainThread();
                         frozenMainThread = false;
 
+                        AmeisenLogger.Instance.Log("HookManager", $"Injection took {injectionStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
+
+                        int delayCount = 0;
+                        Stopwatch executionStopwatch = Stopwatch.StartNew();
+
                         AmeisenLogger.Instance.Log("HookManager", $"Injection completed...", LogLevel.Verbose);
 
                         // wait for the code to be executed
-                        while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted) && codeToBeExecuted > 0)
+                        while (WowInterface.XMemory.Read(CodeToExecuteAddress, out int codeToBeExecuted)
+                               && codeToBeExecuted > 0)
                         {
-                            Thread.Sleep(1);
+                            ++delayCount;
+                            Task.Delay(1).Wait();
                         }
 
-                        AmeisenLogger.Instance.Log("HookManager", $"Execution completed...", LogLevel.Verbose);
+                        executionStopwatch.Stop();
+
+                        AmeisenLogger.Instance.Log("HookManager", $"Execution completed in {executionStopwatch.ElapsedMilliseconds}ms (delayCount: {delayCount})", LogLevel.Verbose);
 
                         // if we want to read the return value do it otherwise we're done
                         if (readReturnBytes)
                         {
-                            AmeisenLogger.Instance.Log("HookManager", $"Reading return bytes...", LogLevel.Verbose);
+                            AmeisenLogger.Instance.Log("HookManager", $"Reading return bytes", LogLevel.Verbose);
 
-                            try
+                            Stopwatch returnbytesStopwatch = Stopwatch.StartNew();
+
+                            WowInterface.XMemory.Read(ReturnValueAddress, out uint dwAddress);
+                            IntPtr addrPointer = new IntPtr(dwAddress);
+
+                            // read all parameter-bytes until we the buffer is 0
+                            WowInterface.XMemory.Read(addrPointer, out byte buffer);
+
+                            if (buffer != 0)
                             {
-                                WowInterface.XMemory.Read(ReturnValueAddress, out IntPtr dwAddress);
-
-                                // read all parameter-bytes until we the buffer is 0
-                                WowInterface.XMemory.Read(dwAddress, out byte buffer);
-
-                                if (buffer != 0)
+                                do
                                 {
-                                    do
-                                    {
-                                        returnBytes.Add(buffer);
-                                        dwAddress += 1;
-                                    } while (WowInterface.XMemory.Read(dwAddress, out buffer) && buffer != 0);
-                                }
-                                else
-                                {
-                                    returnBytes.AddRange(BitConverter.GetBytes(dwAddress.ToInt32()));
-                                }
+                                    returnBytes.Add(buffer);
+                                    addrPointer += 1;
+                                } while (WowInterface.XMemory.Read(addrPointer, out buffer) && buffer != 0);
                             }
-                            catch (Exception e)
+                            else
                             {
-                                AmeisenLogger.Instance.Log("HookManager", $"Failed to read return bytes:\n{e}", LogLevel.Error);
+                                returnBytes.AddRange(BitConverter.GetBytes(dwAddress));
                             }
+
+                            AmeisenLogger.Instance.Log("HookManager", $"Reading ReturnBytes (size: {returnBytes.Count}) took {returnbytesStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
                         }
                     }
                     catch (Exception e)
@@ -1177,6 +1191,7 @@ namespace AmeisenBotX.Core.Hook
                     }
                 }
 
+                AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
                 return returnBytes.ToArray();
             }
         }

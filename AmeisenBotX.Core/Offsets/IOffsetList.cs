@@ -4,12 +4,6 @@ namespace AmeisenBotX.Core.Offsets
 {
     public interface IOffsetList
     {
-        IntPtr AccountName { get; }
-
-        IntPtr AutolootEnabled { get; }
-
-        IntPtr AutolootPointer { get; }
-
         IntPtr BattlegroundFinished { get; }
 
         IntPtr BattlegroundStatus { get; }
@@ -20,12 +14,6 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr CharacterSlotSelected { get; }
 
-        IntPtr ChatBuffer { get; }
-
-        IntPtr ChatNextMessage { get; }
-
-        IntPtr ChatOpened { get; }
-
         IntPtr ClickToMoveAction { get; }
 
         IntPtr ClickToMoveDistance { get; }
@@ -34,23 +22,15 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr ClickToMoveGuid { get; }
 
-        IntPtr ClickToMovePendingMovement { get; }
-
         IntPtr ClickToMovePointer { get; }
 
         IntPtr ClickToMoveTurnSpeed { get; }
 
         IntPtr ClickToMoveX { get; }
 
-        IntPtr ClickToMoveY { get; }
-
-        IntPtr ClickToMoveZ { get; }
-
         IntPtr ClientConnection { get; }
 
         IntPtr ComboPoints { get; }
-
-        IntPtr ContinentName { get; }
 
         IntPtr CorpsePosition { get; }
 
@@ -68,11 +48,7 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr EndSceneStaticDevice { get; }
 
-        IntPtr ErrorMessage { get; }
-
         IntPtr FirstObject { get; }
-
-        IntPtr FunctionCastSpellById { get; }
 
         IntPtr FunctionGameobjectOnRightClick { get; }
 
@@ -84,17 +60,11 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionLuaDoString { get; }
 
-        IntPtr FunctionObjectGetPosition { get; }
-
         IntPtr FunctionPlayerClickToMove { get; }
 
         IntPtr FunctionPlayerClickToMoveStop { get; }
 
-        IntPtr FunctionPlayerIsClickMoving { get; }
-
         IntPtr FunctionSetTarget { get; }
-
-        IntPtr FunctionSpellGetSpellCooldown { get; }
 
         IntPtr FunctionTraceline { get; }
 
@@ -107,10 +77,6 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr FunctionUnitSetFacing { get; }
 
         IntPtr FunctionWorldFrame { get; }
-
-        IntPtr FunctionWorldFrameGetActiveCamera { get; }
-
-        IntPtr FunctionWorldFrameOnFrameRender { get; }
 
         IntPtr FunctionWorldRender { get; }
 
@@ -146,8 +112,6 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr PartyPlayer4 { get; }
 
-        IntPtr PerformanceCounter { get; }
-
         IntPtr PetGuid { get; }
 
         IntPtr PlayerBase { get; }
@@ -162,55 +126,27 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr RaidLeader { get; }
 
-        IntPtr RealmName { get; }
-
-        IntPtr RuneCooldown { get; }
-
         IntPtr Runes { get; }
 
         IntPtr RuneType { get; }
-
-        IntPtr SpellbookCount { get; }
-
-        IntPtr SpellbookSpells { get; }
 
         IntPtr TargetGuid { get; }
 
         IntPtr TickCount { get; }
 
-        IntPtr WowBuild { get; }
-
-        IntPtr WowDynobjectCasterGuid { get; }
-
-        IntPtr WowDynobjectFacing { get; }
-
-        IntPtr WowDynobjectPosition { get; }
-
-        IntPtr WowDynobjectRadius { get; }
-
-        IntPtr WowDynobjectSpellId { get; }
-
-        IntPtr WowGameobjectDisplayId { get; }
-
-        IntPtr WowGameobjectLevel { get; }
-
         IntPtr WowGameobjectPosition { get; }
-
-        IntPtr WowGameobjectType { get; }
 
         IntPtr WowObjectDescriptor { get; }
 
-        IntPtr WowObjectEntryId { get; }
-
-        IntPtr WowObjectGuid { get; }
-
         IntPtr WowObjectPosition { get; }
-
-        IntPtr WowObjectScale { get; }
 
         IntPtr WowObjectType { get; }
 
         IntPtr WowUnitIsAutoAttacking { get; }
+
+        IntPtr WowUnitName1 { get; }
+
+        IntPtr WowUnitName2 { get; }
 
         IntPtr WowUnitPosition { get; }
 

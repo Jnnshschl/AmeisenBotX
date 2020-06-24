@@ -1,7 +1,4 @@
-﻿using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-
-namespace AmeisenBotX.Core.Quest.Objects.Objectives
+﻿namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public delegate bool BotActionQuestObjectiveCondition();
 

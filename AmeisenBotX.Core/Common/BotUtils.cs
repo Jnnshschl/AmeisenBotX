@@ -10,7 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Common
 {
@@ -235,7 +235,7 @@ namespace AmeisenBotX.Core.Common
         public static void SendKey(IntPtr windowHandle, IntPtr key, int minDelay = 20, int maxDelay = 40)
         {
             SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
-            Thread.Sleep(new Random().Next(minDelay, maxDelay));
+            Task.Delay(new Random().Next(minDelay, maxDelay)).Wait();
             SendMessage(windowHandle, WM_KEYUP, key, new IntPtr(0));
         }
 

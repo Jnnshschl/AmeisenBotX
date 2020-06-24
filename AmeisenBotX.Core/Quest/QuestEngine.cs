@@ -1,8 +1,4 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Quest.Objects;
-using AmeisenBotX.Core.Quest.Objects.Objectives;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Profiles;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
@@ -22,11 +18,6 @@ namespace AmeisenBotX.Core.Quest
 
             CompletedQuests = new List<int>();
             QueryCompletedQuestsEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-        }
-
-        public void LoadProfile(IQuestProfile questProfile)
-        {
-            QuestProfile = questProfile;
         }
 
         public List<int> CompletedQuests { get; private set; }
@@ -110,6 +101,11 @@ namespace AmeisenBotX.Core.Quest
 
             // filter duplicates
             CompletedQuests = CompletedQuests.Distinct().ToList();
+        }
+
+        public void LoadProfile(IQuestProfile questProfile)
+        {
+            QuestProfile = questProfile;
         }
 
         private void OnGetQuestsCompleted(long timestamp, List<string> args)

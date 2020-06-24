@@ -39,19 +39,19 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private TalkToUnitQuestObjectiveCondition Condition { get; }
 
-        private List<int> DisplayIds { get; }
-
         private int Counter { get; set; }
 
-        private bool QuestgiversOnly { get; }
+        private List<int> DisplayIds { get; }
 
         private List<int> GossipIds { get; }
 
-        private WowUnit WowUnit { get; set; }
+        private bool QuestgiversOnly { get; }
+
+        private TimegatedEvent TalkEvent { get; }
 
         private WowInterface WowInterface { get; }
 
-        private TimegatedEvent TalkEvent { get; }
+        private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 .Where(e => e.IsGossip && !e.IsDead && DisplayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault();
-        
+
             if (WowUnit != null)
             {
                 if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
