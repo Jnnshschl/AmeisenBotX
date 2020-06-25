@@ -51,9 +51,10 @@ namespace AmeisenBotX.Core.Character.Inventory
                     lock (queryLock)
                     {
                         Items.Clear();
-                        foreach (WowBasicItem basicItem in basicItems)
+
+                        for (int i = 0; i < basicItems.Count; ++i)
                         {
-                            Items.Add(ItemFactory.BuildSpecificItem(basicItem));
+                            Items.Add(ItemFactory.BuildSpecificItem(basicItems[i]));
                         }
                     }
                 }

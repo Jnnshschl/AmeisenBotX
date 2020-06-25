@@ -187,19 +187,19 @@ namespace AmeisenBotX.Core.Dungeon
             DungeonNode closestDungeonNode = DungeonProfile.Path.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
             bool shouldAddNodes = closestDungeonNode == null;
 
-            foreach (DungeonNode d in DungeonProfile.Path)
+            for (int i = 0; i < DungeonProfile.Path.Count; ++i)
             {
                 // skip all already completed nodes
                 if (!shouldAddNodes)
                 {
-                    if (d == closestDungeonNode)
+                    if (DungeonProfile.Path[i] == closestDungeonNode)
                     {
                         shouldAddNodes = true;
                     }
                 }
                 else
                 {
-                    CurrentNodes.Enqueue(d);
+                    CurrentNodes.Enqueue(DungeonProfile.Path[i]);
                 }
             }
         }

@@ -84,9 +84,10 @@ namespace AmeisenBotX.Core.Character.Inventory
                     lock (queryLock)
                     {
                         Items.Clear();
-                        foreach (WowBasicItem rawItem in rawEquipment)
+
+                        for (int i = 0; i < rawEquipment.Count; ++i)
                         {
-                            IWowItem item = ItemFactory.BuildSpecificItem(rawItem);
+                            IWowItem item = ItemFactory.BuildSpecificItem(rawEquipment[i]);
                             Items.Add(item.EquipSlot, item);
                         }
                     }
@@ -105,8 +106,11 @@ namespace AmeisenBotX.Core.Character.Inventory
             double itemLevel = 0.0;
             int count = 0;
 
-            foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
+            System.Collections.IList enumValues = Enum.GetValues(typeof(EquipmentSlot));
+
+            for (int i = 0; i < enumValues.Count; ++i)
             {
+                EquipmentSlot slot = (EquipmentSlot)enumValues[i];
                 if (slot == EquipmentSlot.CONTAINER_BAG_1
                     || slot == EquipmentSlot.CONTAINER_BAG_2
                     || slot == EquipmentSlot.CONTAINER_BAG_3

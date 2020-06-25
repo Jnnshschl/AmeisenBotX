@@ -18,8 +18,10 @@ namespace AmeisenBotX.Core.Character.Comparators.Objects
         {
             double score = 0;
 
-            foreach (KeyValuePair<string, double> keyValuePair in StatMultiplicators)
+            for (int i = 0; i < StatMultiplicators.Count; ++i)
             {
+                KeyValuePair<string, double> keyValuePair = StatMultiplicators.ElementAt(i);
+
                 if (item.Stats.TryGetValue(keyValuePair.Key, out string stat))
                 {
                     if ((stat.Contains('.') || stat.Contains(',')) && double.TryParse(stat, NumberStyles.Any, CultureInfo.InvariantCulture, out double statDoubleValue))

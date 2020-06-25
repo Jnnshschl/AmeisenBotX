@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
 
-            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitQuestgiverByDisplayId(ObjectDisplayIds, QuestgiversOnly);
+            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(ObjectDisplayIds, QuestgiversOnly);
 
             if (WowUnit != null)
             {

@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core
             CurrentExecutionCount = 0;
             stateMachineTimerBusy = 0;
 
-            AmeisenLogger.Instance.Log("AmeisenBot", $"AmeisenBot ({version}) starting...", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"AmeisenBot ({version}) starting", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core
                 }
             }
 
-            AmeisenLogger.Instance.Log("AmeisenBot", $"Stopping AmeisenBot...", LogLevel.Master);
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Stopping AmeisenBot", LogLevel.Master);
             AmeisenLogger.Instance.Stop();
         }
 
@@ -236,9 +236,9 @@ namespace AmeisenBotX.Core
                 GenerateExecutable = false
             };
 
-            foreach (string dependecy in Config.CustomCombatClassDependencies)
+            for (int i = 0; i < Config.CustomCombatClassDependencies.Length; ++i)
             {
-                parameters.ReferencedAssemblies.Add(dependecy);
+                parameters.ReferencedAssemblies.Add(Config.CustomCombatClassDependencies[i]);
             }
 
             using CSharpCodeProvider codeProvider = new CSharpCodeProvider();
@@ -248,8 +248,11 @@ namespace AmeisenBotX.Core
             {
                 StringBuilder sb = new StringBuilder();
 
-                foreach (CompilerError error in results.Errors)
+                CompilerErrorCollection list = results.Errors;
+
+                for (int i = 0; i < list.Count; ++i)
                 {
+                    CompilerError error = list[i];
                     sb.AppendLine($"Error {error.ErrorNumber} Line: {error.Line}: {error.ErrorText}");
                 }
 
@@ -572,7 +575,7 @@ namespace AmeisenBotX.Core
 
         private void SetupWowInterface()
         {
-            WowInterface.Globals = new Globals();
+            WowInterface.Globals = new AmeisenBotGlobals();
 
             WowInterface.OffsetList = new OffsetList335a();
             WowInterface.XMemory = new XMemory();

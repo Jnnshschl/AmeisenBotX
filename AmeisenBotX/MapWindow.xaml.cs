@@ -151,8 +151,10 @@ namespace AmeisenBotX
 
                 // render Units
 
-                foreach (WowUnit unit in wowUnits)
+                for (int i = 0; i < wowUnits.Count; ++i)
                 {
+                    WowUnit unit = wowUnits[i];
+
                     Brush selectedBrush = (AmeisenBot.WowInterface.HookManager.GetUnitReaction(AmeisenBot.WowInterface.ObjectManager.Player, unit)) switch
                     {
                         WowUnitReaction.HostileGuard => EnemyBrush,

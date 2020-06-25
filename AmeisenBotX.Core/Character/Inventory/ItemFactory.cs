@@ -1,12 +1,16 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Inventory
 {
     public static class ItemFactory
     {
+        public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
+        {
+            Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
+        };
+
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
         {
             return (basicItem.Type.ToUpper()) switch
@@ -31,20 +35,12 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public static WowBasicItem ParseItem(string json)
         {
-            return JsonConvert.DeserializeObject<WowBasicItem>(json);
+            return JsonConvert.DeserializeObject<WowBasicItem>(json, JsonSerializerSettings);
         }
 
         public static List<WowBasicItem> ParseItemList(string json)
         {
-            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, new JsonSerializerSettings
-            {
-                Error = HandleDeserializationError
-            });
-        }
-
-        private static void HandleDeserializationError(object sender, ErrorEventArgs e)
-        {
-            e.ErrorContext.Handled = true;
+            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, JsonSerializerSettings);
         }
     }
 }

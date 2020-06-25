@@ -69,8 +69,9 @@ namespace AmeisenBotX.Core.Common
         {
             StringBuilder sb = new StringBuilder(input.Length);
 
-            foreach (char c in input)
+            for (int i = 0; i < input.Length; ++i)
             {
+                char c = input[i];
                 if (c != '\n' && c != '\r' && c != '\t')
                 {
                     sb.Append(c);

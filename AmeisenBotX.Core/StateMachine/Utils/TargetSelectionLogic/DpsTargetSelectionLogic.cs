@@ -65,14 +65,17 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     if (WowInterface.ObjectManager.PartymemberGuids.Count > 0)
                     {
                         Dictionary<WowUnit, int> partymemberTargets = new Dictionary<WowUnit, int>();
-                        WowInterface.ObjectManager.Partymembers.ForEach(e =>
+
+                        for (int i = 0; i < WowInterface.ObjectManager.Partymembers.Count; ++i)
                         {
-                            if (e.TargetGuid > 0)
+                            WowUnit partymember = WowInterface.ObjectManager.Partymembers[i];
+
+                            if (partymember.TargetGuid > 0)
                             {
-                                WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.TargetGuid);
+                                WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partymember.TargetGuid);
 
                                 if (target != null
-                                    && BotUtils.IsValidUnit(e)
+                                    && BotUtils.IsValidUnit(target)
                                     && target.IsInCombat
                                     && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, target) != WowUnitReaction.Friendly)
                                 {
@@ -86,7 +89,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                                     }
                                 }
                             }
-                        });
+                        }
 
                         List<KeyValuePair<WowUnit, int>> selectedTargets = partymemberTargets.OrderByDescending(e => e.Value).ToList();
 

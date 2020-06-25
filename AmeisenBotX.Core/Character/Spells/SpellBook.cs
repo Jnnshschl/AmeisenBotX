@@ -15,11 +15,18 @@ namespace AmeisenBotX.Core.Character.Spells
             WowInterface = wowInterface;
 
             Spells = new List<Spell>();
+
+            JsonSerializerSettings = new JsonSerializerSettings()
+            {
+                Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
+            };
         }
 
         public delegate void SpellBookUpdate();
 
         public event SpellBookUpdate OnSpellBookUpdate;
+
+        public JsonSerializerSettings JsonSerializerSettings { get; }
 
         public List<Spell> Spells { get; private set; }
 
@@ -37,12 +44,15 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
-            string rawSpells = WowInterface.HookManager.GetSpells()
-                .Replace(".799999237061", ""); // weird druid bug kekw
+            string rawSpells = WowInterface.HookManager.GetSpells();
 
             try
             {
-                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells).OrderBy(e => e.Name).ThenByDescending(e => e.Rank).ToList();
+                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells, JsonSerializerSettings)
+                    .OrderBy(e => e.Name)
+                    .ThenByDescending(e => e.Rank)
+                    .ToList();
+
                 OnSpellBookUpdate?.Invoke();
             }
             catch (Exception e)

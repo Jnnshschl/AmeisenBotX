@@ -132,9 +132,9 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public void Update(List<Vector3> forces)
         {
-            foreach (Vector3 force in forces)
+            for (int i = 0; i < forces.Count; ++i)
             {
-                Velocity += (force);
+                Velocity += forces[i];
             }
 
             Velocity.Limit(MaxVelocity);
@@ -222,22 +222,24 @@ namespace AmeisenBotX.Core.Movement.Objects
             // we need to know every objects position and distance
             // to later apply a force pushing us back from it that
             // is relational to the objects distance.
-            foreach (WowObject obj in WowInterface.ObjectManager.WowObjects.OfType<T>())
+            T[] objects = WowInterface.ObjectManager.WowObjects.OfType<T>().ToArray();
+
+            for (int i = 0; i < objects.Length; ++i)
             {
-                double distance = obj.Position.GetDistance(vehiclePosition);
+                double distance = objects[i].Position.GetDistance(vehiclePosition);
 
                 if (distance < maxDistance)
                 {
-                    objectDistances.Add((obj.Position, distance));
+                    objectDistances.Add((objects[i].Position, distance));
                 }
             }
 
             // get the biggest distance to normalize the fleeing forces
             float normalizingMultiplier = Convert.ToSingle(objectDistances.Max(e => e.Item2));
 
-            foreach ((Vector3, double) obj in objectDistances)
+            for (int i = 0; i < objectDistances.Count; ++i)
             {
-                force += Flee(obj.Item1, Convert.ToSingle(obj.Item2) * normalizingMultiplier);
+                force += Flee(objectDistances[i].Item1, Convert.ToSingle(objectDistances[i].Item2) * normalizingMultiplier);
                 count++;
             }
 

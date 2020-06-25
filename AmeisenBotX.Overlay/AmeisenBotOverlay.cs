@@ -75,14 +75,14 @@ namespace AmeisenBotX.Overlay
                 Gfx.BeginScene();
                 Gfx.ClearScene();
 
-                foreach ((SolidBrush, (Point, Point)) line in LinesToRender)
+                for (int i = 0; i < LinesToRender.Count; ++i)
                 {
-                    Gfx.DrawLine(line.Item1, new Line(line.Item2.Item1, line.Item2.Item2), 2f);
+                    Gfx.DrawLine(LinesToRender[i].Item1, new Line(LinesToRender[i].Item2.Item1, LinesToRender[i].Item2.Item2), 2f);
                 }
 
-                foreach ((SolidBrush, (Point, Point)) line in RectanglesToRender)
+                for (int i = 0; i < RectanglesToRender.Count; ++i)
                 {
-                    Gfx.FillRectangle(line.Item1, line.Item2.Item1.X, line.Item2.Item1.Y, line.Item2.Item2.X, line.Item2.Item2.Y);
+                    Gfx.FillRectangle(RectanglesToRender[i].Item1, RectanglesToRender[i].Item2.Item1.X, RectanglesToRender[i].Item2.Item1.Y, RectanglesToRender[i].Item2.Item2.X, RectanglesToRender[i].Item2.Item2.Y);
                 }
 
                 LinesToRender.Clear();

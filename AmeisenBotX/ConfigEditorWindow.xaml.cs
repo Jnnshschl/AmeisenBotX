@@ -48,9 +48,9 @@ namespace AmeisenBotX
         {
             comboboxBuiltInCombatClass.Items.Add("None");
 
-            foreach (ICombatClass combatClass in AmeisenBot.CombatClasses)
+            for (int i = 0; i < AmeisenBot.CombatClasses.Count; ++i)
             {
-                comboboxBuiltInCombatClass.Items.Add(combatClass.ToString());
+                comboboxBuiltInCombatClass.Items.Add(AmeisenBot.CombatClasses[i].ToString());
             }
 
             comboboxBuiltInCombatClass.SelectedIndex = 0;

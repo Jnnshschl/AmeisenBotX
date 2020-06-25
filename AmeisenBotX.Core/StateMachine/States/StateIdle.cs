@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -31,14 +31,14 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            while (!WowInterface.ObjectManager.IsWorldLoaded)
-            {
-                WowInterface.ObjectManager.RefreshIsWorldLoaded();
-                Task.Delay(1).Wait();
-            }
-
             if (FirstStart)
             {
+                while (!WowInterface.ObjectManager.IsWorldLoaded)
+                {
+                    WowInterface.ObjectManager.RefreshIsWorldLoaded();
+                    Thread.Sleep(100);
+                }
+
                 FirstStart = false;
                 WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
                 StateMachine.PlayerName = playerName;

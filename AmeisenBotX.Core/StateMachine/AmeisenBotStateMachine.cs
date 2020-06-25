@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Statemachine
     {
         public AmeisenBotStateMachine(string botDataPath, AmeisenBotConfig config, WowInterface wowInterface)
         {
-            AmeisenLogger.Instance.Log("StateMachine", "Starting AmeisenBotStateMachine...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("StateMachine", "Starting AmeisenBotStateMachine", LogLevel.Verbose);
 
             BotDataPath = botDataPath;
             Config = config;
@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Statemachine
             if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
                 && SetState((int)BotState.None))
             {
-                AmeisenLogger.Instance.Log("StateMachine", "WoW crashed...", LogLevel.Verbose);
+                AmeisenLogger.Instance.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
 
                 WowCrashed = true;
                 ((StateIdle)States[(int)BotState.Idle]).FirstStart = true;
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Statemachine
                     if (SetState((int)BotState.LoadingScreen, true))
                     {
                         OnStateOverride?.Invoke(CurrentState.Key);
-                        AmeisenLogger.Instance.Log("StateMachine", "World is not loaded...", LogLevel.Verbose);
+                        AmeisenLogger.Instance.Log("StateMachine", "World is not loaded", LogLevel.Verbose);
                         return;
                     }
                 }

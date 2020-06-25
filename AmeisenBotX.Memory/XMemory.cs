@@ -24,9 +24,12 @@ namespace AmeisenBotX.Memory
         ~XMemory()
         {
             CloseHandle(MainThreadHandle);
-            foreach (IntPtr memAlloc in MemoryAllocations.Keys.ToList())
+
+            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
+
+            for (int i = 0; i < memAllocs.Count; ++i)
             {
-                FreeMemory(memAlloc);
+                FreeMemory(memAllocs[i]);
             }
         }
 
@@ -159,11 +162,12 @@ namespace AmeisenBotX.Memory
             if (Process.MainWindowHandle == null) { return null; }
 
             int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
-            foreach (ProcessThread processThread in Process.Threads)
+
+            for(int i = 0; i < Process.Threads.Count; ++i)
             {
-                if (processThread.Id == id)
+                if (Process.Threads[i].Id == id)
                 {
-                    return processThread;
+                    return Process.Threads[i];
                 }
             }
 

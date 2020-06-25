@@ -55,9 +55,13 @@ namespace AmeisenBotX.Core.Character.Talents
 
             bool result = false;
 
-            foreach (Talent wantedTalent in wantedTree.Values)
+            Talent[] wantedTreeValues = wantedTree.Values.ToArray();
+
+            for (int i = 0; i< wantedTreeValues.Length; ++i)
             {
                 if (talentPoints == 0) { break; }
+
+                Talent wantedTalent = wantedTreeValues[i];
 
                 if (tree.ContainsKey(wantedTalent.Num))
                 {
@@ -82,9 +86,9 @@ namespace AmeisenBotX.Core.Character.Talents
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach ((int, int, int) talent in talentsToSpend)
+            for (int i = 0; i < talentsToSpend.Count; ++i)
             {
-                sb.Append($"AddPreviewTalentPoints({talent.Item1},{talent.Item2},{talent.Item3});");
+                sb.Append($"AddPreviewTalentPoints({talentsToSpend[i].Item1},{talentsToSpend[i].Item2},{talentsToSpend[i].Item3});");
             }
 
             sb.Append("LearnPreviewTalents();");

@@ -88,10 +88,11 @@ namespace AmeisenBotX.Core.Movement
 
         public void LoadPath(List<Vector3> path)
         {
-            CurrentPath = new Queue<Vector3>();
-            foreach (Vector3 v in path)
+            CurrentPath.Clear();
+
+            for (int i = 0; i < path.Count; ++i)
             {
-                CurrentPath.Enqueue(v);
+                CurrentPath.Enqueue(path[i]);
             }
         }
 
@@ -140,6 +141,7 @@ namespace AmeisenBotX.Core.Movement
             Vector3 force = new Vector3(0, 0, 0);
 
             int playersInRange = 0;
+
             foreach (WowPlayer player in ObjectManager.WowObjects.OfType<WowPlayer>())
             {
                 if (player.Guid == ObjectManager.PlayerGuid)

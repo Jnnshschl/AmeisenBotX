@@ -52,9 +52,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine.States
 
                     if (nodeList != null && nodeList.Count > 0)
                     {
-                        foreach (Vector3 node in nodeList)
+                        for (int i = 0; i < nodeList.Count; ++i)
                         {
-                            StateMachine.Nodes.Enqueue(node);
+                            StateMachine.Nodes.Enqueue(nodeList[i]);
                         }
                     }
                 }

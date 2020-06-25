@@ -60,9 +60,11 @@ namespace AmeisenBotX
         {
             if (Directory.Exists(BotDataPath))
             {
-                foreach (string directory in Directory.GetDirectories(BotDataPath))
+                string[] directories = Directory.GetDirectories(BotDataPath);
+
+                for (int i = 0; i < directories.Length; ++i)
                 {
-                    comboboxSelectedConfig.Items.Add(Path.GetFileName(directory));
+                    comboboxSelectedConfig.Items.Add(Path.GetFileName(directories[i]));
                 }
             }
 
