@@ -19,9 +19,9 @@ namespace AmeisenBotX.Core.Event
             SubscribeQueue = new Queue<(string, OnEventFired)>();
             UnsubscribeQueue = new Queue<(string, OnEventFired)>();
 
-            EventFrameName = BotUtils.GenerateUniqueString(8);
-            EventHandlerName = BotUtils.GenerateUniqueString(8);
-            EventTableName = BotUtils.GenerateUniqueString(8);
+            EventFrameName = BotUtils.FastRandomStringOnlyLetters();
+            EventHandlerName = BotUtils.FastRandomStringOnlyLetters();
+            EventTableName = BotUtils.FastRandomStringOnlyLetters();
 
             JsonSerializerSettings = new JsonSerializerSettings()
             {
@@ -195,12 +195,14 @@ namespace AmeisenBotX.Core.Event
             AmeisenLogger.Instance.Log("EventHook", $"Setting up the EventHookManager", LogLevel.Verbose);
 
             StringBuilder luaStuff = new StringBuilder();
-            luaStuff.Append($"{EventFrameName}=CreateFrame(\"FRAME\", \"{BotUtils.GenerateUniqueString(8)}\") ");
+
+            luaStuff.Append($"{EventFrameName}=CreateFrame(\"FRAME\", \"{BotUtils.FastRandomStringOnlyLetters()}\") ");
             luaStuff.Append($"{EventTableName}={{}} ");
             luaStuff.Append($"function {EventHandlerName}(self, event, ...) ");
             luaStuff.Append($"table.insert({EventTableName}, {{time(), event, {{...}}}}) end ");
             luaStuff.Append($"if {EventFrameName}:GetScript(\"OnEvent\") == nil then ");
             luaStuff.Append($"{EventFrameName}:SetScript(\"OnEvent\", {EventHandlerName}) end");
+
             WowInterface.HookManager.LuaDoString(luaStuff.ToString());
         }
     }

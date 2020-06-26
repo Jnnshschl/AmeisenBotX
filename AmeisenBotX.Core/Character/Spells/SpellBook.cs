@@ -44,8 +44,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
-            string rawSpells = WowInterface.HookManager.GetSpells()
-                .Replace(".799999237061", ""); // weird druid bug kekw
+            string rawSpells = WowInterface.HookManager.GetSpells();
 
             try
             {

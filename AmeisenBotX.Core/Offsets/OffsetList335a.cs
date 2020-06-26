@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr PlayerName { get; } = new IntPtr(0xC79D18);
 
-        public IntPtr RaidGroupStart { get; } = new IntPtr(0xBF8258);
+        public IntPtr RaidGroupStart { get; } = new IntPtr(0xBEB568);
 
         public IntPtr RaidLeader { get; } = new IntPtr(0xBD1990);
 

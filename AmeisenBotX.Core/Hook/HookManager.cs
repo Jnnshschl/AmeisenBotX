@@ -18,7 +18,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook
 {
@@ -1079,7 +1078,8 @@ namespace AmeisenBotX.Core.Hook
 
         private byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
-            if (WowInterface.XMemory.Process.HasExited)
+            WowInterface.ObjectManager.RefreshIsWorldLoaded();
+            if (WowInterface.XMemory.Process.HasExited || (!WowInterface.ObjectManager.IsWorldLoaded && !OverrideWorldCheck))
             {
                 return null;
             }
@@ -1199,6 +1199,7 @@ namespace AmeisenBotX.Core.Hook
             string[] debuffs = ExecuteLuaAndRead($"local a,b={{}},1;local c={functionName}(\"{luaunit}\",b)while c do a[#a+1]=c;b=b+1;c={functionName}(\"{luaunit}\",b)end;if#a<1 then a=\"\"else activeAuras=table.concat(a,\",\")end", "activeAuras").Split(',');
 
             List<string> resultLowered = new List<string>();
+
             for (int i = 0; i < debuffs.Length; ++i)
             {
                 string s = debuffs[i];

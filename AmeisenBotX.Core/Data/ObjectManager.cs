@@ -302,14 +302,14 @@ namespace AmeisenBotX.Core.Data
                 }
 
                 // read the party/raid leaders guid and if there is one, the group too
-                PartyleaderGuid = ReadPartyLeaderGuid();
+                PartyleaderGuid = ReadLeaderGuid();
                 if (PartyleaderGuid > 0) { PartymemberGuids = ReadPartymemberGuids(); }
             }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);
         }
 
-        private ulong ReadPartyLeaderGuid()
+        private ulong ReadLeaderGuid()
         {
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.RaidLeader, out ulong partyleaderGuid))
             {
@@ -340,7 +340,16 @@ namespace AmeisenBotX.Core.Data
                 && raidLeader != 0
                 && WowInterface.XMemory.Read(WowInterface.OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
-                partymemberGuids.AddRange(raidStruct.GetGuids());
+                List<IntPtr> raidPointers = raidStruct.GetGuids();
+
+                for (int i = 0; i < raidPointers.Count; ++i)
+                {
+                    if (WowInterface.XMemory.Read(raidPointers[i], out ulong guid)
+                        && guid != 0)
+                    {
+                        partymemberGuids.Add(guid);
+                    }
+                }
             }
 
             return partymemberGuids.Where(e => e != 0).Distinct().ToList();

@@ -101,6 +101,8 @@ namespace AmeisenBotX
 
         private MapWindow MapWindow { get; set; }
 
+        private bool OverlayClear { get; set; }
+
         private PresentationSource PresentationSource { get; set; }
 
         private bool SetupWindowOwner { get; set; }
@@ -398,10 +400,12 @@ namespace AmeisenBotX
                         }
 
                         Overlay?.Draw();
+                        OverlayClear = true;
                     }
-                    else
+                    else if (OverlayClear)
                     {
                         Overlay.Clear();
+                        OverlayClear = false;
                     }
                 }
             });
