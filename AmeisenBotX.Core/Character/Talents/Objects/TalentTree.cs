@@ -11,8 +11,12 @@ namespace AmeisenBotX.Core.Character.Talents.Objects
             Tree2 = new Dictionary<int, Talent>();
             Tree3 = new Dictionary<int, Talent>();
 
-            foreach (string talent in talentString.Split('|'))
+            string[] talentSplits = talentString.Split('|');
+
+            for (int i = 0; i < talentSplits.Length; ++i)
             {
+                string talent = talentSplits[i];
+
                 if (talent.Length < 4) { continue; }
 
                 string[] items = talent.Split(';');

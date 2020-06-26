@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 16
                         && CastSpellIfPossible(iceBlockSpell, 0, true))
-                    || (WowInterface.ObjectManager.Player.HasBuffByName(hotstreakSpell.ToLower()) && CastSpellIfPossible(pyroblastSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.ObjectManager.Player.HasBuffByName(hotstreakSpell.ToLowerInvariant()) && CastSpellIfPossible(pyroblastSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || (WowInterface.ObjectManager.Player.ManaPercentage < 40
                         && CastSpellIfPossible(evocationSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))

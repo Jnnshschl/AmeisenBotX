@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 return;
             }
 
-            WowGameobject = WowInterface.ObjectManager.GetClosestWowGameobjectQuestgiverByDisplayId(ObjectDisplayIds);
+            WowGameobject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(ObjectDisplayIds);
 
             if (WowGameobject != null)
             {

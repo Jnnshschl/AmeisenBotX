@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
                 return;
             }
 
-            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitQuestgiverByDisplayId(UnitDisplayIds);
+            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(UnitDisplayIds);
 
             if (WowUnit != null)
             {

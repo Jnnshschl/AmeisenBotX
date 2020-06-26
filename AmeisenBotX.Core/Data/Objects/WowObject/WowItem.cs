@@ -23,9 +23,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             List<string> enchantments = new List<string>();
 
-            foreach (ItemEnchantment enchant in GetItemEnchantments())
+            List<ItemEnchantment> itemEnchants = GetItemEnchantments();
+
+            for (int i = 0; i < itemEnchants.Count; ++i)
             {
-                if (WowEnchantmentHelper.TryLookupEnchantment(enchant.Id, out string text))
+                if (WowEnchantmentHelper.TryLookupEnchantment(itemEnchants[i].Id, out string text))
                 {
                     enchantments.Add(text);
                 }

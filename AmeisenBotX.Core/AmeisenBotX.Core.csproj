@@ -41,7 +41,7 @@
       <HintPath>..\packages\fasmdll_managed.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -154,9 +154,13 @@
     <Compile Include="Data\Objects\Matrix3x3.cs" />
     <Compile Include="Data\Objects\Structs\CameraInfo.cs" />
     <Compile Include="Data\Objects\Structs\RawPlayerSkillInfo.cs" />
+    <Compile Include="Data\Objects\Structs\RawPartyGuids.cs" />
     <Compile Include="Data\Objects\Structs\RawRaidStruct.cs" />
     <Compile Include="Data\Objects\Structs\RawRaidPlayer.cs" />
     <Compile Include="Data\Objects\Structs\RawWowAura.cs" />
+    <Compile Include="Data\Objects\Structs\IRawWowAuraTable.cs" />
+    <Compile Include="Data\Objects\Structs\RawWowAuraTable40.cs" />
+    <Compile Include="Data\Objects\Structs\RawWowAuraTable16.cs" />
     <Compile Include="Data\Objects\WowAura.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\Enums\WowEnchantmentHelper.cs" />
     <Compile Include="Data\Objects\WowObject\Structs\RawWowDynobject.cs" />
@@ -205,7 +209,7 @@
     <Compile Include="Dungeon\Profiles\WotLK\UtgardeKeepProfile.cs" />
     <Compile Include="Event\EventHook.cs" />
     <Compile Include="Event\Objects\WowEvent.cs" />
-    <Compile Include="Globals.cs" />
+    <Compile Include="AmeisenBotGlobals.cs" />
     <Compile Include="Hook\HookManager.cs" />
     <Compile Include="Hook\IHookManager.cs" />
     <Compile Include="Jobs\Enums\JobType.cs" />
@@ -346,15 +350,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Dungeon\States\" />
     <Folder Include="Jobs\Profiles\Gathering\Herbs\" />
     <Folder Include="Jobs\Profiles\Gathering\Mining\" />
     <Folder Include="Raid\Profiles\Classic\" />
     <Folder Include="Raid\Profiles\TBC\" />
     <Folder Include="Raid\Profiles\WotLK\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

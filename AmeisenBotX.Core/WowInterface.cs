@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core
 
         public EventHook EventHookManager { get; set; }
 
-        public Globals Globals { get; set; }
+        public AmeisenBotGlobals Globals { get; set; }
 
         public IHookManager HookManager { get; set; }
 

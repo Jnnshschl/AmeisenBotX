@@ -55,9 +55,9 @@ namespace AmeisenBotX.Core.Data
 
         T ExecuteWithQueryLock<T>(Func<T> func);
 
-        WowGameobject GetClosestWowGameobjectQuestgiverByDisplayId(List<int> displayIds);
+        WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds);
 
-        WowUnit GetClosestWowUnitQuestgiverByDisplayId(List<int> displayIds, bool onlyQuestgiver = true);
+        WowUnit GetClosestWowUnitByDisplayId(List<int> displayIds, bool onlyQuestgiver = true);
 
         List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
 

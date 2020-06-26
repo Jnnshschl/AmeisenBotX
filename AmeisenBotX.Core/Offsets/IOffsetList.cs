@@ -4,6 +4,14 @@ namespace AmeisenBotX.Core.Offsets
 {
     public interface IOffsetList
     {
+        IntPtr AuraCount1 { get; }
+
+        IntPtr AuraCount2 { get; }
+
+        IntPtr AuraTable1 { get; }
+
+        IntPtr AuraTable2 { get; }
+
         IntPtr BattlegroundFinished { get; }
 
         IntPtr BattlegroundStatus { get; }
@@ -104,13 +112,7 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr PartyLeader { get; }
 
-        IntPtr PartyPlayer1 { get; }
-
-        IntPtr PartyPlayer2 { get; }
-
-        IntPtr PartyPlayer3 { get; }
-
-        IntPtr PartyPlayer4 { get; }
+        IntPtr PartyPlayerGuids { get; }
 
         IntPtr PetGuid { get; }
 
@@ -119,8 +121,6 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr PlayerGuid { get; }
 
         IntPtr PlayerName { get; }
-
-        IntPtr RaidGroupPlayer { get; }
 
         IntPtr RaidGroupStart { get; }
 

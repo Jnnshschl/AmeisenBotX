@@ -59,9 +59,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
                 double totalProgress = 0;
 
-                foreach (IQuestObjective questObjective in Objectives)
+                for (int i = 0; i < Objectives.Count; ++i)
                 {
-                    totalProgress += questObjective.Progress;
+                    totalProgress += Objectives[i].Progress;
                 }
 
                 return Math.Round(totalProgress / (double)Objectives.Count, 1);

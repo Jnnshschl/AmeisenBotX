@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core
 {
-    public class Globals
+    public class AmeisenBotGlobals
     {
         public bool IgnoreCombat { get; set; } = false;
     }

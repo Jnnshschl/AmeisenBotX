@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Hook
     {
         ulong CallCount { get; }
 
-        public bool IsWoWHooked { get; }
+        bool IsWoWHooked { get; }
 
         void AcceptBattlegroundInvite();
 
@@ -46,6 +46,8 @@ namespace AmeisenBotX.Core.Hook
         void DisposeHook();
 
         void EnableClickToMove();
+
+        string ExecuteLuaAndRead((string, string) commandVariableTuple);
 
         string ExecuteLuaAndRead(string command, string variable);
 
@@ -111,7 +113,7 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsSpellKnown(int spellId, bool isPetSpell = false);
 
-        void KickNpcsOutOfMammoth();
+        void KickNpcsOutOfVehicle();
 
         void LearnAllAvaiableSpells();
 
@@ -150,8 +152,6 @@ namespace AmeisenBotX.Core.Hook
         void SendChatMessage(string message);
 
         void SendItemMailToCharacter(string itemName, string receiver);
-
-        void SendMovementPacket(WowUnit unit, int opcode);
 
         void SetFacing(WowUnit unit, float angle);
 

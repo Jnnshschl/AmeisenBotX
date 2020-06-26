@@ -32,8 +32,12 @@ namespace AmeisenBotX.Core.Statemachine.States
             // add nearby Units to the loot List
             if (Config.LootUnits)
             {
-                foreach (WowUnit lootableUnit in StateMachine.GetNearLootableUnits())
+                IEnumerable<WowUnit> wowUnits = StateMachine.GetNearLootableUnits();
+
+                for (int i = 0; i < wowUnits.Count(); ++i)
                 {
+                    WowUnit lootableUnit = wowUnits.ElementAt(i);
+
                     if (!UnitLootQueue.Contains(lootableUnit.Guid))
                     {
                         UnitLootQueue.Enqueue(lootableUnit.Guid);

@@ -90,14 +90,20 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public WowGameobject GetClosestWowGameobjectQuestgiverByDisplayId(List<int> displayIds)
+        public WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds)
         {
-            return WowObjects.OfType<WowGameobject>().Where(e => displayIds.Contains(e.DisplayId)).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            return WowObjects.OfType<WowGameobject>()
+                .Where(e => displayIds.Contains(e.DisplayId))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .FirstOrDefault();
         }
 
-        public WowUnit GetClosestWowUnitQuestgiverByDisplayId(List<int> displayIds, bool onlyQuestgiver = true)
+        public WowUnit GetClosestWowUnitByDisplayId(List<int> displayIds, bool onlyQuestgiver = true)
         {
-            return WowObjects.OfType<WowUnit>().Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId)).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            return WowObjects.OfType<WowUnit>()
+                .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .FirstOrDefault();
         }
 
         public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
@@ -129,11 +135,11 @@ namespace AmeisenBotX.Core.Data
                        .ToList()
                        .OfType<T>()
                        .Where(e => e != null
-                           && e.Guid != PlayerGuid
-                           && !e.IsDead
-                           && !e.IsNotAttackable
-                           && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                           && e.Position.GetDistance(position) < distance)
+                                && e.Guid != PlayerGuid
+                                && !e.IsDead
+                                && !e.IsNotAttackable
+                                && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                                && e.Position.GetDistance(position) < distance)
                        .ToList();
             }
         }
@@ -146,11 +152,11 @@ namespace AmeisenBotX.Core.Data
                        .ToList()
                        .OfType<T>()
                        .Where(e => e != null
-                         && e.Guid != PlayerGuid
-                         && !e.IsDead
-                         && !e.IsNotAttackable
-                         && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
-                         && e.Position.GetDistance(position) < distance)
+                                && e.Guid != PlayerGuid
+                                && !e.IsDead
+                                && !e.IsNotAttackable
+                                && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
+                                && e.Position.GetDistance(position) < distance)
                        .ToList();
             }
         }
@@ -161,11 +167,11 @@ namespace AmeisenBotX.Core.Data
             {
                 return wowObjects.OfType<WowPlayer>()
                   .Where(e => e != null
-                    && e.Guid != PlayerGuid
-                    && !e.IsDead
-                    && !e.IsNotAttackable
-                    && PartymemberGuids.Contains(e.Guid)
-                    && e.Position.GetDistance(position) < distance)
+                           && e.Guid != PlayerGuid
+                           && !e.IsDead
+                           && !e.IsNotAttackable
+                           && PartymemberGuids.Contains(e.Guid)
+                           && e.Position.GetDistance(position) < distance)
                   .ToList();
             }
         }
@@ -325,17 +331,14 @@ namespace AmeisenBotX.Core.Data
 
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.PartyLeader, out ulong partyLeader)
                 && partyLeader != 0
-                && WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayer1, out (ulong, ulong, ulong, ulong) partyMembers))
+                && WowInterface.XMemory.Read(WowInterface.OffsetList.PartyPlayerGuids, out RawPartyGuids partyMembers))
             {
-                partymemberGuids.Add(partyMembers.Item1);
-                partymemberGuids.Add(partyMembers.Item2);
-                partymemberGuids.Add(partyMembers.Item3);
-                partymemberGuids.Add(partyMembers.Item4);
+                partymemberGuids.AddRange(partyMembers.AsList());
             }
 
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.RaidLeader, out ulong raidLeader)
                 && raidLeader != 0
-                && WowInterface.XMemory.Read(IntPtr.Add(WowInterface.OffsetList.RaidGroupStart, WowInterface.OffsetList.RaidGroupPlayer.ToInt32()), out RawRaidStruct raidStruct))
+                && WowInterface.XMemory.Read(WowInterface.OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
                 partymemberGuids.AddRange(raidStruct.GetGuids());
             }

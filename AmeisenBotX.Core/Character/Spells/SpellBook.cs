@@ -15,11 +15,18 @@ namespace AmeisenBotX.Core.Character.Spells
             WowInterface = wowInterface;
 
             Spells = new List<Spell>();
+
+            JsonSerializerSettings = new JsonSerializerSettings()
+            {
+                Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
+            };
         }
 
         public delegate void SpellBookUpdate();
 
         public event SpellBookUpdate OnSpellBookUpdate;
+
+        public JsonSerializerSettings JsonSerializerSettings { get; }
 
         public List<Spell> Spells { get; private set; }
 
@@ -42,7 +49,11 @@ namespace AmeisenBotX.Core.Character.Spells
 
             try
             {
-                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells).OrderBy(e => e.Name).ThenByDescending(e => e.Rank).ToList();
+                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells, JsonSerializerSettings)
+                    .OrderBy(e => e.Name)
+                    .ThenByDescending(e => e.Rank)
+                    .ToList();
+
                 OnSpellBookUpdate?.Invoke();
             }
             catch (Exception e)

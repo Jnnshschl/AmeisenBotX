@@ -1,17 +1,28 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
 {
     public class CopperElwynnForestProfile : IMiningProfile
     {
-          public List<Vector3> Path { get; } = new List<Vector3>()
+        public bool IsCirclePath => true;
+
+        public JobType JobType => JobType.Mining;
+
+        public List<Vector3> Mailboxes { get; private set; } = new List<Vector3>()
+        {
+           new Vector3(-9465, -69, 56),
+           new Vector3(-9249, -2144, 64)
+        };
+
+        public List<OreNodes> OreTypes { get; } = new List<OreNodes>()
+        {
+            OreNodes.Copper
+        };
+
+        public List<Vector3> Path { get; } = new List<Vector3>()
           {
               new Vector3(-8803, -1209, 100),
               new Vector3(-8808, -1204, 96),
@@ -48,20 +59,5 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
               new Vector3(-8813, -1198, 93),
               new Vector3(-8809, -1204, 96),
           };
-
-        public List<OreNodes> OreTypes { get; }  = new List<OreNodes>()
-        {
-            OreNodes.Copper
-        };
-
-        public bool IsCirclePath => true;
-
-        public List<Vector3> Mailboxes { get; private set; } = new List<Vector3>()
-        {
-           new Vector3(-9465, -69, 56),
-           new Vector3(-9249, -2144, 64)
-        };
-
-        public JobType JobType => JobType.Mining;
     }
 }

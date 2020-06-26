@@ -138,8 +138,10 @@ namespace AmeisenBotX.Core.Character
                         return true;
                     }
 
-                    foreach (IWowItem matchedItem in matchedItems)
+                    for (int i = 0; i < matchedItems.Count; ++i)
                     {
+                        IWowItem matchedItem = matchedItems[i];
+
                         if (matchedItem != null)
                         {
                             if (ItemComparator.IsBetter(matchedItem, item))
@@ -173,7 +175,7 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateAll()
         {
-            AmeisenLogger.Instance.Log("CharacterManager", $"Updating full character...", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("CharacterManager", $"Updating full character", LogLevel.Verbose);
 
             Inventory.Update();
             Equipment.Update();
@@ -186,8 +188,11 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateCharacterGear()
         {
-            foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
+            System.Collections.IList list = Enum.GetValues(typeof(EquipmentSlot));
+
+            for (int i = 0; i < list.Count; ++i)
             {
+                EquipmentSlot slot = (EquipmentSlot)list[i];
                 if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Items.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
                 {
                     continue;
@@ -199,8 +204,9 @@ namespace AmeisenBotX.Core.Character
                 {
                     if (Equipment.Items.TryGetValue(slot, out IWowItem equippedItem))
                     {
-                        foreach (IWowItem item in itemsLikeEquipped)
+                        for (int f = 0; f < itemsLikeEquipped.Count; ++f)
                         {
+                            IWowItem item = itemsLikeEquipped[f];
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 WowInterface.HookManager.ReplaceItem(null, item);

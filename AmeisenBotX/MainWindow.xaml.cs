@@ -486,7 +486,7 @@ namespace AmeisenBotX
             else
             {
                 labelCurrentTickTime.Foreground = currentTickTimeBadBrush;
-                AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow...", LogLevel.Warning);
+                AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
             labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.CallCount.ToString().PadLeft(2);
@@ -497,7 +497,7 @@ namespace AmeisenBotX
             else
             {
                 labelHookCallCount.Foreground = currentTickTimeBadBrush;
-                AmeisenLogger.Instance.Log("MainWindow", "High HookCall count, maybe increase your FPS...", LogLevel.Warning);
+                AmeisenLogger.Instance.Log("MainWindow", "High HookCall count, maybe increase your FPS", LogLevel.Warning);
             }
 
             labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString().PadLeft(5);

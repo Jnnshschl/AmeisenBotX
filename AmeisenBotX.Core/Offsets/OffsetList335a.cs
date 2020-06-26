@@ -4,11 +4,13 @@ namespace AmeisenBotX.Core.Offsets
 {
     public class OffsetList335a : IOffsetList
     {
-        /* Notes:
-         *
-         * IsIngame: 0xBD0792
-         *
-         */
+        public IntPtr AuraCount1 { get; } = new IntPtr(0xDD0);
+
+        public IntPtr AuraCount2 { get; } = new IntPtr(0xC54);
+
+        public IntPtr AuraTable1 { get; } = new IntPtr(0xC50);
+
+        public IntPtr AuraTable2 { get; } = new IntPtr(0xC58);
 
         public IntPtr BattlegroundFinished { get; } = new IntPtr(0xBEA588);
 
@@ -110,13 +112,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr PartyLeader { get; } = new IntPtr(0xBD1968);
 
-        public IntPtr PartyPlayer1 { get; } = new IntPtr(0xBD1948);
-
-        public IntPtr PartyPlayer2 { get; } = new IntPtr(0xBD1950);
-
-        public IntPtr PartyPlayer3 { get; } = new IntPtr(0xBD1958);
-
-        public IntPtr PartyPlayer4 { get; } = new IntPtr(0xBD1960);
+        public IntPtr PartyPlayerGuids { get; } = new IntPtr(0xBD1948);
 
         public IntPtr PetGuid { get; } = new IntPtr(0xC234D0);
 
@@ -125,8 +121,6 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr PlayerGuid { get; } = new IntPtr(0xCA1238);
 
         public IntPtr PlayerName { get; } = new IntPtr(0xC79D18);
-
-        public IntPtr RaidGroupPlayer { get; } = new IntPtr(0x50);
 
         public IntPtr RaidGroupStart { get; } = new IntPtr(0xBF8258);
 

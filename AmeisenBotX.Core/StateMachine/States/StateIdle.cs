@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -34,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             while (!WowInterface.ObjectManager.IsWorldLoaded)
             {
                 WowInterface.ObjectManager.RefreshIsWorldLoaded();
-                Task.Delay(1).Wait();
+                Thread.Sleep(1);
             }
 
             if (FirstStart)

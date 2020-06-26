@@ -24,9 +24,13 @@ namespace AmeisenBotX.Memory
         ~XMemory()
         {
             CloseHandle(MainThreadHandle);
-            foreach (IntPtr memAlloc in MemoryAllocations.Keys.ToList())
+            CloseHandle(ProcessHandle);
+
+            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
+
+            for (int i = 0; i < memAllocs.Count; ++i)
             {
-                FreeMemory(memAlloc);
+                FreeMemory(memAllocs[i]);
             }
         }
 
@@ -139,10 +143,11 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool FreeMemory(IntPtr address)
         {
-            if (MemoryAllocations.ContainsKey(address))
+            if (MemoryAllocations.ContainsKey(address)
+                && VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release))
             {
                 MemoryAllocations.Remove(address);
-                return VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release);
+                return true;
             }
 
             return false;
@@ -159,11 +164,12 @@ namespace AmeisenBotX.Memory
             if (Process.MainWindowHandle == null) { return null; }
 
             int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
-            foreach (ProcessThread processThread in Process.Threads)
+
+            for (int i = 0; i < Process.Threads.Count; ++i)
             {
-                if (processThread.Id == id)
+                if (Process.Threads[i].Id == id)
                 {
-                    return processThread;
+                    return Process.Threads[i];
                 }
             }
 
@@ -194,9 +200,10 @@ namespace AmeisenBotX.Memory
             return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void MoveWindowWow(int x, int y, int windowHandle, int height, bool repaint)
         {
-            Win32Imports.MoveWindow(Process.MainWindowHandle, x, y, windowHandle, height, repaint);
+            MoveWindow(Process.MainWindowHandle, x, y, windowHandle, height, repaint);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -291,7 +298,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
-            if (OpenMainThread())
+            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThreadSuspendResume(ThreadAccess.SuspendResume))
             {
                 NtResumeThread(MainThreadHandle, out _);
             }
@@ -303,10 +310,11 @@ namespace AmeisenBotX.Memory
             Win32Imports.SetForegroundWindow(windowHandle);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWindowParent(IntPtr childHandle, IntPtr parentHandle)
         {
             HideBordersWindowWow();
-            Win32Imports.SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
 
             SetParent(childHandle, parentHandle);
         }
@@ -359,7 +367,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
-            if (OpenMainThread())
+            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThreadSuspendResume(ThreadAccess.SuspendResume))
             {
                 NtSuspendThread(MainThreadHandle, out _);
             }
@@ -391,11 +399,11 @@ namespace AmeisenBotX.Memory
             return WriteBytes(address, new byte[size]);
         }
 
-        private bool OpenMainThread()
+        private bool TryOpenMainThreadSuspendResume(ThreadAccess threadAccess)
         {
             try
             {
-                MainThreadHandle = OpenThread(ThreadAccess.SuspendResume, false, (uint)GetMainThread().Id);
+                MainThreadHandle = OpenThread(threadAccess, false, (uint)GetMainThread().Id);
             }
             catch { }
 

@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 50
                     && CastSpellIfPossibleDk(vampiricBloodSpell, 0, false, false, true))
                 || (nearEnemies > 2
-                    && CastSpellIfPossibleDk(bloodBoilSpell, 0) || CastSpellIfPossibleDk(deathAndDecaySpell,0))
+                    && CastSpellIfPossibleDk(bloodBoilSpell, 0) || CastSpellIfPossibleDk(deathAndDecaySpell, 0))
                 || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
                 || CastSpellIfPossibleDk(deathStrike, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
                 || CastSpellIfPossibleDk(heartStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true)

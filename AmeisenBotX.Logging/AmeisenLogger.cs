@@ -78,8 +78,11 @@ namespace AmeisenBotX.Logging
         {
             if (Directory.Exists(LogFileFolder))
             {
-                foreach (string file in Directory.GetFiles(LogFileFolder))
+                string[] files = Directory.GetFiles(LogFileFolder);
+
+                for (int i = 0; i < files.Length; ++i)
                 {
+                    string file = files[i];
                     FileInfo fileInfo = new FileInfo(file);
 
                     if (fileInfo.LastAccessTime < DateTime.Now.AddDays(daysToKeep * -1))
@@ -127,7 +130,7 @@ namespace AmeisenBotX.Logging
                     File.AppendAllText(LogFilePath, activeEntry.ToString() + "\n");
                 }
 
-                Task.Delay(1).Wait();
+                Thread.Sleep(1);
             }
         }
     }
