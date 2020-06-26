@@ -31,8 +31,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly;
 
             // get all enemies targeting our group
-            List<WowUnit> enemies = WowInterface.ObjectManager.ExecuteWithQueryLock(() => WowInterface.ObjectManager.GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && e.TargetGuid != 0).ToList());
+            List<WowUnit> enemies = WowInterface.ObjectManager
+                .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100)
+                .Where(e => WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && e.TargetGuid != 0)
+                .ToList();
 
             if (enemies.Count() > 0)
             {

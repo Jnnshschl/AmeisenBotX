@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core
 {
     public class WowInterface
     {
-        public BattlegroundEngine BattlegroundEngine { get; set; }
+        public IBattlegroundEngine BattlegroundEngine { get; set; }
 
         public IAmeisenBotCache BotCache { get; set; }
 

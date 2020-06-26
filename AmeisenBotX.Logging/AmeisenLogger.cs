@@ -12,6 +12,7 @@ namespace AmeisenBotX.Logging
     public class AmeisenLogger
     {
         private static readonly object Padlock = new object();
+        private static readonly object fileLock = new object();
         private static AmeisenLogger instance;
 
         private AmeisenLogger(bool deleteOldLogs = true)
@@ -119,8 +120,11 @@ namespace AmeisenBotX.Logging
 
         private void LogFileWriter_Elapsed(object sender, ElapsedEventArgs e)
         {
-            File.AppendAllText(LogFilePath, LogBuilder.ToString());
-            LogBuilder.Clear();
+            lock (fileLock)
+            {
+                File.AppendAllText(LogFilePath, LogBuilder.ToString());
+                LogBuilder.Clear();
+            }
         }
     }
 }

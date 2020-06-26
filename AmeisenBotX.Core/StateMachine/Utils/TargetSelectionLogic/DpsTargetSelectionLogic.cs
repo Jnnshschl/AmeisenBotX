@@ -29,8 +29,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            List<WowUnit> Enemies = WowInterface.ObjectManager.ExecuteWithQueryLock(() => WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => BotUtils.IsValidUnit(e) && e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)).ToList());
+            List<WowUnit> Enemies = WowInterface.ObjectManager
+                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
+                .Where(e => BotUtils.IsValidUnit(e) && e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid))
+                .ToList();
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable

@@ -12,6 +12,11 @@
 
         public override void Execute()
         {
+            if (WowInterface.BattlegroundEngine == null)
+            {
+                return;
+            }
+
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 0)
             {

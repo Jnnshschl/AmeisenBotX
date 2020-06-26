@@ -1084,16 +1084,15 @@ namespace AmeisenBotX.Core.Hook
                 return null;
             }
 
+            Stopwatch fullStopwatch;
+            List<byte> returnBytes = new List<byte>();
+
+            AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}", LogLevel.Verbose);
+
             lock (hookLock)
             {
-                ++endsceneCalls;
-
-                Stopwatch fullStopwatch = Stopwatch.StartNew();
-
-                AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ", LogLevel.Verbose);
-                AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}", LogLevel.Verbose);
-
-                List<byte> returnBytes = new List<byte>();
+                fullStopwatch = Stopwatch.StartNew();
 
                 // zero our memory
                 if (WowInterface.XMemory.ZeroMemory(CodecaveForExecution, MEM_ALLOC_EXECUTION_SIZE))
@@ -1187,11 +1186,13 @@ namespace AmeisenBotX.Core.Hook
                         }
                     }
                 }
-
-                fullStopwatch.Stop();
-                AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
-                return returnBytes.ToArray();
             }
+
+            fullStopwatch.Stop();
+            AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
+
+            ++endsceneCalls;
+            return returnBytes.ToArray();
         }
 
         private List<string> ReadAuras(WowLuaUnit luaunit, string functionName)

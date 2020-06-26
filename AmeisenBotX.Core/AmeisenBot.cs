@@ -406,26 +406,14 @@ namespace AmeisenBotX.Core
 
         private void OnBgAllianceMessage(long timestamp, List<string> args)
         {
-            if (args.Count > 1)
-            {
-                ProcessBgMessage(args[0], args[1]);
-            }
         }
 
         private void OnBgHordeMessage(long timestamp, List<string> args)
         {
-            if (args.Count > 1)
-            {
-                ProcessBgMessage(args[0], args[1]);
-            }
         }
 
         private void OnBgNeutralMessage(long timestamp, List<string> args)
         {
-            if (args.Count > 1)
-            {
-                ProcessBgMessage(args[0], args[1]);
-            }
         }
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
@@ -522,30 +510,6 @@ namespace AmeisenBotX.Core
         {
         }
 
-        private void ProcessBgMessage(string message, string arg1)
-        {
-            if (message.ToUpper().Contains("ALLIANCE FLAG WAS PICKED UP"))
-            {
-                WowInterface.BattlegroundEngine.AllianceFlagWasPickedUp(arg1);
-            }
-            else if (message.ToUpper().Contains("HORDE FLAG WAS PICKED UP"))
-            {
-                WowInterface.BattlegroundEngine.HordeFlagWasPickedUp(arg1);
-            }
-            else if (message.ToUpper().Contains("ALLIANCE FLAG WAS DROPPED")
-                || message.ToUpper().Contains("CAPTURED THE ALLIANCE FLAG")
-                || message.ToUpper().Contains("THE ALLIANCE FLAG IS NOW PLACED AT ITS BASE"))
-            {
-                WowInterface.BattlegroundEngine.AllianceFlagWasDropped();
-            }
-            else if (message.ToUpper().Contains("HORDE FLAG WAS DROPPED")
-                || message.ToUpper().Contains("CAPTURED THE HORDE FLAG")
-                || message.ToUpper().Contains("THE HORDE FLAG IS NOW PLACED AT ITS BASE"))
-            {
-                WowInterface.BattlegroundEngine.HordeFlagWasDropped();
-            }
-        }
-
         private void SaveBotWindowPosition()
         {
             try
@@ -590,7 +554,7 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
-            WowInterface.BattlegroundEngine = new BattlegroundEngine(WowInterface);
+            // WowInterface.BattlegroundEngine = new IBattlegroundEngine(WowInterface);
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);

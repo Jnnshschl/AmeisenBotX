@@ -53,8 +53,6 @@ namespace AmeisenBotX.Core.Data
 
         string ZoneSubName { get; }
 
-        T ExecuteWithQueryLock<T>(Func<T> func);
-
         WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds);
 
         WowUnit GetClosestWowUnitByDisplayId(List<int> displayIds, bool onlyQuestgiver = true);

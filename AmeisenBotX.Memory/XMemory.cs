@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using static AmeisenBotX.Memory.Win32.Win32Imports;
 
 namespace AmeisenBotX.Memory
 {
-    public class XMemory
+    public unsafe class XMemory
     {
         private ulong rpmCalls;
         private ulong wpmCalls;
 
         public XMemory()
         {
-            SizeCache = new Dictionary<Type, int>();
             MemoryAllocations = new Dictionary<IntPtr, uint>();
         }
 
@@ -72,8 +72,6 @@ namespace AmeisenBotX.Memory
                 }
             }
         }
-
-        private Dictionary<Type, int> SizeCache { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BringWindowToFront(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
@@ -209,7 +207,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
         {
-            uint size = (uint)SizeOf<T>();
+            uint size = (uint)sizeof(T);
 
             if (MemoryProtect(address, size, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldMemoryProtection))
             {
@@ -219,16 +217,15 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool Read<T>(IntPtr address, out T value) where T : unmanaged
+        public bool Read<T>(IntPtr address, out T value) where T : unmanaged
         {
-            int size = SizeOf<T>();
-            byte[] buffer = new byte[size];
+            int size = sizeof(T);
 
-            if (RpmGateWay(address, buffer, size))
+            fixed (byte* pBuffer = new byte[size])
             {
-                fixed (byte* ptr = buffer)
+                if (RpmGateWay(address, pBuffer, size))
                 {
-                    value = *(T*)ptr;
+                    value = *(T*)pBuffer;
                     return true;
                 }
             }
@@ -242,10 +239,13 @@ namespace AmeisenBotX.Memory
         {
             byte[] buffer = new byte[size];
 
-            if (RpmGateWay(address, buffer, size))
+            fixed (byte* pBuffer = buffer)
             {
-                bytes = buffer;
-                return true;
+                if (RpmGateWay(address, pBuffer, size))
+                {
+                    bytes = buffer;
+                    return true;
+                }
             }
 
             bytes = new byte[size];
@@ -255,20 +255,21 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
         {
-            byte[] buffer = new byte[lenght];
-
-            if (RpmGateWay(address, buffer, lenght))
+            fixed (byte* pBuffer = new byte[lenght])
             {
-                List<byte> strBuffer = new List<byte>();
-
-                for (int i = 0; i < lenght; ++i)
+                if (RpmGateWay(address, pBuffer, lenght))
                 {
-                    if (buffer[i] == 0) { break; }
-                    strBuffer.Add(buffer[i]);
-                }
+                    List<byte> strBuffer = new List<byte>();
 
-                value = encoding.GetString(strBuffer.ToArray());
-                return true;
+                    for (int i = 0; i < lenght; ++i)
+                    {
+                        if (pBuffer[i] == 0) { break; }
+                        strBuffer.Add(pBuffer[i]);
+                    }
+
+                    value = encoding.GetString(strBuffer.ToArray());
+                    return true;
+                }
             }
 
             value = string.Empty;
@@ -276,19 +277,17 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool ReadStruct<T>(IntPtr address, out T value) where T : struct
+        public bool ReadStruct<T>(IntPtr address, out T value) where T : unmanaged
         {
-            int size = SizeOf<T>();
-            byte[] buffer = new byte[size];
+            int size = sizeof(T);
 
-            if (RpmGateWay(address, buffer, size))
+            fixed (byte* pBuffer = new byte[size])
             {
-                fixed (byte* pBuffer = buffer)
+                if (RpmGateWay(address, pBuffer, size))
                 {
-                    value = Unsafe.Read<T>(pBuffer);
+                    value = *(T*)pBuffer;
+                    return true;
                 }
-
-                return true;
             }
 
             value = default;
@@ -346,7 +345,7 @@ namespace AmeisenBotX.Memory
         {
             StartupInfo startupInfo = new StartupInfo
             {
-                cb = SizeOf<StartupInfo>(),
+                cb = Marshal.SizeOf<StartupInfo>(),
                 dwFlags = STARTF_USESHOWWINDOW,
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
@@ -374,23 +373,18 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool Write<T>(IntPtr address, T value) where T : struct
+        public bool Write<T>(IntPtr address, T value) where T : unmanaged
         {
-            int size = SizeOf<T>();
-            byte[] buffer = new byte[size];
-
-            fixed (byte* pBuffer = buffer)
-            {
-                Unsafe.Write(pBuffer, value);
-            }
-
-            return WpmGateWay(address, buffer, size);
+            return WpmGateWay(address, &value, sizeof(T));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WriteBytes(IntPtr address, byte[] bytes)
         {
-            return WpmGateWay(address, bytes, bytes.Length);
+            fixed (byte* pBytes = bytes)
+            {
+                return WpmGateWay(address, pBytes, bytes.Length);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -411,25 +405,14 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool RpmGateWay(IntPtr baseAddress, byte[] buffer, int size)
+        private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
         {
             ++rpmCalls;
             return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int SizeOf<T>()
-        {
-            if (!SizeCache.ContainsKey(typeof(T)))
-            {
-                SizeCache.Add(typeof(T), Unsafe.SizeOf<T>());
-            }
-
-            return SizeCache[typeof(T)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool WpmGateWay(IntPtr baseAddress, byte[] buffer, int size)
+        private bool WpmGateWay(IntPtr baseAddress, void* buffer, int size)
         {
             ++wpmCalls;
             return !NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);

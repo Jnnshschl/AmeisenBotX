@@ -1,21 +1,20 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
-    public class Win32Imports
+    public unsafe class Win32Imports
     {
         public const int STARTF_USESHOWWINDOW = 1;
-
         public const int SW_SHOWMINNOACTIVE = 7;
-
         public const int SW_SHOWNOACTIVATE = 4;
 
-        public static int GWL_EXSTYLE = -0x14;
-        public static int GWL_STYLE = -16;
-        public static int WS_CHILD = 0x40000000;
-        public static int WS_EX_APPWINDOW = 0x40000;
-        public static int WS_EX_NOACTIVATE = 0x08000000;
+        public const int GWL_EXSTYLE = -0x14;
+        public const int GWL_STYLE = -16;
+        public const int WS_CHILD = 0x40000000;
+        public const int WS_EX_APPWINDOW = 0x40000;
+        public const int WS_EX_NOACTIVATE = 0x08000000;
 
         [Flags]
         public enum AllocationType : uint
@@ -179,7 +178,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern bool MoveWindow(IntPtr windowHandle, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
         [DllImport("ntdll", SetLastError = true)]
-        public static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesRead);
+        public static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, void* buffer, int size, out IntPtr numberOfBytesRead);
 
         [DllImport("ntdll", SetLastError = true)]
         public static extern bool NtResumeThread(IntPtr threadHandle, out IntPtr suspendCount);
@@ -188,7 +187,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern bool NtSuspendThread(IntPtr threadHandle, out IntPtr previousSuspendCount);
 
         [DllImport("ntdll", SetLastError = true)]
-        public static extern bool NtWriteVirtualMemory(IntPtr processHandle, IntPtr baseAddress, byte[] buffer, int size, out IntPtr numberOfBytesWritten);
+        public static extern bool NtWriteVirtualMemory(IntPtr processHandle, IntPtr baseAddress, void* buffer, int size, out IntPtr numberOfBytesWritten);
 
         [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool inheritHandle, int processId);
@@ -211,7 +210,7 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("user32", SetLastError = true)]
         public static extern int SetWindowLong(IntPtr windowHandle, int nIndex, uint dwNewLong);
 
-        [DllImport("user32")]
+        [DllImport("user32", SetLastError = true)]
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32", SetLastError = true)]

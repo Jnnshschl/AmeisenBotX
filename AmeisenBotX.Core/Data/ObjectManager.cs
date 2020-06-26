@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Data
 
         public List<WowObject> WowObjects
         {
-            get { lock (queryLock) { return wowObjects.ToList(); } }
+            get { lock (queryLock) { return wowObjects; } }
             set { lock (queryLock) { wowObjects = value; } }
         }
 
@@ -81,14 +81,6 @@ namespace AmeisenBotX.Core.Data
         private IntPtr CurrentObjectManager { get; set; }
 
         private WowInterface WowInterface { get; }
-
-        public T ExecuteWithQueryLock<T>(Func<T> func)
-        {
-            lock (queryLock)
-            {
-                return func();
-            }
-        }
 
         public WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds)
         {

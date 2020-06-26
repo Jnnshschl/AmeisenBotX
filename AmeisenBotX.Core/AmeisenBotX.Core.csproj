@@ -55,23 +55,7 @@
   <ItemGroup>
     <Compile Include="AmeisenBotConfig.cs" />
     <Compile Include="AmeisenBot.cs" />
-    <Compile Include="Battleground\BattlegroundEngine.cs" />
-    <Compile Include="Battleground\Enums\BattlegroundType.cs" />
-    <Compile Include="Battleground\Profiles\IBattlegroundProfile.cs" />
-    <Compile Include="Battleground\Profiles\ICtfBattlegroundProfile.cs" />
-    <Compile Include="Battleground\Profiles\WarsongGulchProfile.cs" />
-    <Compile Include="Battleground\States\AssistOwnFlagCarrierBgState.cs" />
-    <Compile Include="Battleground\States\BattlegroundState.cs" />
-    <Compile Include="Battleground\States\BasicBattlegroundState.cs" />
-    <Compile Include="Battleground\States\DefendMyselfBgState.cs" />
-    <Compile Include="Battleground\States\ExitBattlegroundBgState.cs" />
-    <Compile Include="Battleground\States\MoveToEnemyBaseBgState.cs" />
-    <Compile Include="Battleground\States\MoveToEnemyFlagCarrierBgState.cs" />
-    <Compile Include="Battleground\States\MoveToOwnBaseBgState.cs" />
-    <Compile Include="Battleground\States\PickupBuffBgState.cs" />
-    <Compile Include="Battleground\States\PickupEnemyFlagBgState.cs" />
-    <Compile Include="Battleground\States\PickupOwnFlagBgState.cs" />
-    <Compile Include="Battleground\States\WaitingForStartBgState.cs" />
+    <Compile Include="Battleground\IBattlegroundEngine.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
     <Compile Include="Character\Comparators\BasicArmorComparator.cs" />
