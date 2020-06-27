@@ -759,7 +759,12 @@ namespace AmeisenBotX.Core.Hook
         public bool SetupEndsceneHook()
         {
             AmeisenLogger.Instance.Log("HookManager", "Setting up the EndsceneHook", LogLevel.Verbose);
-            EndsceneAddress = GetEndScene();
+
+            do
+            {
+                EndsceneAddress = GetEndScene();
+            }
+            while (EndsceneAddress == IntPtr.Zero);
 
             if (EndsceneAddress == IntPtr.Zero)
             {
