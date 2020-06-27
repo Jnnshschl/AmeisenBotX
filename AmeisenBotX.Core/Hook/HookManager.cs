@@ -763,6 +763,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (EndsceneAddress == IntPtr.Zero)
             {
+                AmeisenLogger.Instance.Log("HookManager", "Unable to find Endscene function, exiting", LogLevel.Verbose);
                 return false;
             }
 

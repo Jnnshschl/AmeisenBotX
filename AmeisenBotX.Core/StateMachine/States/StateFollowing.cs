@@ -80,6 +80,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             // if no portal position was found, follow the player
             if (!moveIntoPortal)
             {
+                if (PlayerToFollow == null)
+                {
+                    return;
+                }
+
                 posToGoTo = PlayerToFollow.Position;
             }
 
