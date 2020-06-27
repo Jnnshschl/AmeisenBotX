@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string ToString()
         {
-            return $"[{Class}] [{Role}] {Displayname}";
+            return $"[{Class}] [{Role}] {Displayname} ({Author})";
         }
 
         protected bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
