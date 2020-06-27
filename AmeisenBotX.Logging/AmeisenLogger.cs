@@ -122,11 +122,12 @@ namespace AmeisenBotX.Logging
         {
             lock (fileLock)
             {
-                if (LogBuilder.Length > 0)
+                try
                 {
                     File.AppendAllText(LogFilePath, LogBuilder.ToString());
                     LogBuilder.Clear();
                 }
+                catch { }
             }
         }
     }
