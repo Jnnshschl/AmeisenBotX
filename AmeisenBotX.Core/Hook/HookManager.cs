@@ -763,14 +763,9 @@ namespace AmeisenBotX.Core.Hook
             do
             {
                 EndsceneAddress = GetEndScene();
+                Thread.Sleep(50);
             }
             while (EndsceneAddress == IntPtr.Zero);
-
-            if (EndsceneAddress == IntPtr.Zero)
-            {
-                AmeisenLogger.Instance.Log("HookManager", "Unable to find Endscene function, exiting", LogLevel.Verbose);
-                return false;
-            }
 
             // we are going to replace the first 7 bytes of EndScene
             int hookSize = 0x7;
