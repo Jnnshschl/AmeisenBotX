@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
     public class WarriorArms : ICombatClass
     {
@@ -26,12 +26,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         private bool hasTargetMoved = false;
         private bool multipleTargets = false;
 
-        public WarriorArms(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public WarriorArms(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
-            PathfindingHandler = pathhandler;
             MovementEngine = movement;
             spells = new WarriorArmSpells(hookManager, objectManager);
         }
@@ -74,11 +73,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private Vector3 LastTargetPosition { get; set; }
 
-        private DefaultMovementEngine MovementEngine { get; set; }
+        private IMovementEngine MovementEngine { get; set; }
 
         private IObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; set; }
 
         public void Execute()
         {
@@ -194,23 +191,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             }
             else if (distanceToTarget >= target.CombatReach)
             {
-                if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
+                if (computeNewRoute || MovementEngine.Path?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
-                    MovementEngine.LoadPath(path);
-                    MovementEngine.PostProcessPath();
-                }
-                else
-                {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
-                    {
-                        CharacterManager.MoveToPosition(positionToGoTo);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                        }
-                    }
+                    MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastTargetPosition, target.Rotation);
                 }
             }
         }

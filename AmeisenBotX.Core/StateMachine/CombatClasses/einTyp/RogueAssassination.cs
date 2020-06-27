@@ -14,42 +14,50 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
-    public class WarriorFury : ICombatClass
+    public class RogueAssassination : ICombatClass
     {
         private readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
-        private readonly WarriorFurySpells spells;
+
+        private readonly RogueAssassinSpells spells;
+
         private readonly string[] standingEmotes = { "/chug", "/pick", "/whistle", "/shimmy", "/dance", "/twiddle", "/bored", "/violin", "/highfive", "/bow" };
 
         private bool computeNewRoute = false;
+
+        private double distanceToBehindTarget = 0;
+
         private double distanceToTarget = 0;
 
         private double distanceTraveled = 0;
 
         private bool hasTargetMoved = false;
-        private bool multipleTargets = false;
+
+        private bool isSneaky = false;
+
         private bool standing = false;
 
-        public WarriorFury(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        private bool wasInStealth = false;
+
+        public RogueAssassination(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
-            PathfindingHandler = pathhandler;
             MovementEngine = movement;
-            spells = new WarriorFurySpells(hookManager, objectManager);
+            spells = new RogueAssassinSpells(hookManager, objectManager);
         }
 
         public string Author => "einTyp";
 
-        public WowClass Class => WowClass.Warrior;
+        public WowClass Class => WowClass.Rogue;
 
         public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public string Description => "...";
 
-        public string Displayname => "Fury Warrior";
+        public string Displayname => "Assasination Rogue";
 
         public bool HandlesMovement => true;
 
@@ -57,7 +65,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public bool IsMelee => true;
 
-        public IWowItemComparator ItemComparator => new FurySwordItemComparator();
+        public IWowItemComparator ItemComparator => new AssassinationItemComparator();
 
         public List<string> PriorityTargets { get; set; }
 
@@ -75,15 +83,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private IHookManager HookManager { get; }
 
+        private Vector3 LastBehindTargetPosition { get; set; }
+
         private Vector3 LastPlayerPosition { get; set; }
 
         private Vector3 LastTargetPosition { get; set; }
 
-        private DefaultMovementEngine MovementEngine { get; set; }
+        private float LastTargetRotation { get; set; }
+
+        private IMovementEngine MovementEngine { get; set; }
 
         private IObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; set; }
 
         public void Execute()
         {
@@ -114,10 +124,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                     targetDistanceChanged = true;
                 }
 
+                if (LastTargetRotation != target.Rotation)
+                {
+                    hasTargetMoved = true;
+                    LastTargetRotation = target.Rotation;
+                }
+
                 if (!LastTargetPosition.Equals(target.Position))
                 {
                     hasTargetMoved = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((2.4f + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((2.4f + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
                     targetDistanceChanged = true;
                 }
                 else if (hasTargetMoved)
@@ -129,6 +146,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 if (targetDistanceChanged)
                 {
                     distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                    distanceToBehindTarget = LastPlayerPosition.GetDistance(LastBehindTargetPosition);
                 }
 
                 HandleMovement(target);
@@ -153,6 +171,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public void OutOfCombatExecute()
         {
+            if (!HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            {
+                HookManager.CastSpell("Stealth");
+                spells.ResetAfterTargetDeath();
+            }
+
             if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
             {
                 distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
@@ -203,7 +227,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private void HandleAttacking(WowUnit target)
         {
-            spells.CastNextSpell(distanceToTarget, target, multipleTargets);
+            spells.CastNextSpell(distanceToTarget, target);
             if (target.IsDead)
             {
                 spells.ResetAfterTargetDeath();
@@ -217,46 +241,55 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 return;
             }
 
-            if (hasTargetMoved || (distanceToTarget < 6.0 && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
+            if (HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            {
+                if (!wasInStealth || hasTargetMoved)
+                {
+                    isSneaky = true;
+                }
+
+                wasInStealth = true;
+            }
+            else
+            {
+                isSneaky = false;
+                wasInStealth = false;
+            }
+
+            bool closeToTarget = distanceToTarget < (6.0 + target.CombatReach);
+            if (hasTargetMoved || closeToTarget)
             {
                 CharacterManager.MoveToPosition(LastTargetPosition);
             }
-            else if (distanceToTarget >= 6.0)
+            else
             {
-                if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
+                if (computeNewRoute || MovementEngine.Path?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
-                    MovementEngine.LoadPath(path);
-                    MovementEngine.PostProcessPath();
-                }
-                else
-                {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
+                    if (isSneaky)
                     {
-                        CharacterManager.MoveToPosition(positionToGoTo);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                        }
+                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastBehindTargetPosition, target.Rotation);
+                    }
+                    else
+                    {
+                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastTargetPosition, target.Rotation);
                     }
                 }
             }
+
         }
 
         private bool SearchNewTarget(ref WowUnit target, bool grinding)
         {
-            if (target != null && !(target.IsDead || target.Health == 0))
+            if ((target != null && !(target.IsDead || target.Health == 0)) || (HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")) && ObjectManager.Player.HealthPercentage <= 20))
             {
                 return false;
             }
 
             List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
-            int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
+            int targetHealth = (target == null || target.IsDead) ? 0 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
             int targetCount = 0;
-            multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
@@ -269,7 +302,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                             targetCount++;
                         }
 
-                        if ((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
+                        if ((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth))
                         {
                             target = unit;
                             targetHealth = unit.Health;
@@ -286,10 +319,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 newTargetFound = false;
                 target = null;
             }
-            else if (targetCount > 1)
-            {
-                multipleTargets = true;
-            }
 
             if (newTargetFound)
             {
@@ -300,91 +329,85 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             return newTargetFound;
         }
 
-        private class WarriorFurySpells
+        private class RogueAssassinSpells
         {
-            private static readonly string BattleShout = "Battle Shout";
-            private static readonly string BattleStance = "Battle Stance";
-            private static readonly string BerserkerRage = "Berserker Rage";
-            private static readonly string BerserkerStance = "Berserker Stance";
-            private static readonly string Bloodthirst = "Bloodthirst";
-            private static readonly string Charge = "Charge";
-            private static readonly string DeathWish = "Death Wish";
-            private static readonly string EnragedRegeneration = "Enraged Regeneration";
-            private static readonly string Execute = "Execute";
-            private static readonly string Hamstring = "Hamstring";
-            private static readonly string HeroicStrike = "Heroic Strike";
-            private static readonly string HeroicThrow = "Heroic Throw";
-            private static readonly string Intercept = "Intercept";
-            private static readonly string Recklessness = "Recklessness";
-            private static readonly string Retaliation = "Retaliation";
-            private static readonly string ShatteringThrow = "Shattering Throw";
-            private static readonly string Slam = "Slam";
-            private static readonly string Whirlwind = "Whirlwind";
+            private static readonly string Ambush = "Ambush";
+            private static readonly string ColdBlood = "Cold Blood";
+            private static readonly string DeadlyThrow = "Deadly Throw";
+            private static readonly string Envenom = "Envenom";
+            private static readonly string Eviscerate = "Eviscerate";
+            private static readonly string Garrote = "Garrote";
+            private static readonly string HungerForBlood = "Hunger For Blood";
+            private static readonly string Kick = "Kick";
+            private static readonly string Mutilate = "Mutilate";
+            private static readonly string Overkill = "Overkill";
+            private static readonly string Rupture = "Rupture";
+            private static readonly string SinisterStrike = "Sinister Strike";
+            private static readonly string SliceAndDice = "Slice and Dice";
+            private static readonly string Sprint = "Sprint";
+            private static readonly string Stealth = "Stealth";
+            private static readonly string ThrowAttack = "Throw";
+            private static readonly string Vanish = "Vanish";
 
             private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
             {
-                { BattleShout, DateTime.Now },
-                { BattleStance, DateTime.Now },
-                { BerserkerStance, DateTime.Now },
-                { BerserkerRage, DateTime.Now },
-                { Slam, DateTime.Now },
-                { Recklessness, DateTime.Now },
-                { DeathWish, DateTime.Now },
-                { Intercept, DateTime.Now },
-                { ShatteringThrow, DateTime.Now },
-                { HeroicThrow, DateTime.Now },
-                { Charge, DateTime.Now },
-                { Bloodthirst, DateTime.Now },
-                { Hamstring, DateTime.Now },
-                { Execute, DateTime.Now },
-                { Whirlwind, DateTime.Now },
-                { Retaliation, DateTime.Now },
-                { EnragedRegeneration, DateTime.Now },
-                { HeroicStrike, DateTime.Now }
+                { Garrote, DateTime.Now },
+                { Ambush, DateTime.Now },
+                { HungerForBlood, DateTime.Now },
+                { SliceAndDice, DateTime.Now },
+                { Mutilate, DateTime.Now },
+                { Envenom, DateTime.Now },
+                { Vanish, DateTime.Now },
+                { Overkill, DateTime.Now },
+                { ColdBlood, DateTime.Now },
+                { Stealth, DateTime.Now },
+                { Sprint, DateTime.Now },
+                { SinisterStrike, DateTime.Now },
+                { Rupture, DateTime.Now },
+                { Eviscerate, DateTime.Now },
+                { DeadlyThrow, DateTime.Now },
+                { Kick, DateTime.Now }
             };
 
             private bool askedForHeal = false;
+
             private bool askedForHelp = false;
 
-            public WarriorFurySpells(IHookManager hookManager, IObjectManager objectManager)
+            private int comboCnt = 0;
+
+            public RogueAssassinSpells(IHookManager hookManager, IObjectManager objectManager)
             {
                 HookManager = hookManager;
                 ObjectManager = objectManager;
-                Player = ObjectManager.Player;
-                IsInBerserkerStance = false;
+                Player = ObjectManager?.Player;
                 NextGCDSpell = DateTime.Now;
-                NextStance = DateTime.Now;
                 NextCast = DateTime.Now;
             }
 
             private IHookManager HookManager { get; set; }
 
-            private bool IsInBerserkerStance { get; set; }
-
             private DateTime NextCast { get; set; }
 
             private DateTime NextGCDSpell { get; set; }
-
-            private DateTime NextStance { get; set; }
 
             private IObjectManager ObjectManager { get; set; }
 
             private WowPlayer Player { get; set; }
 
-            public void CastNextSpell(double distanceToTarget, WowUnit target, bool multipleTargets)
+            public void CastNextSpell(double distanceToTarget, WowUnit target)
             {
                 if (!IsReady(NextCast) || !IsReady(NextGCDSpell))
                 {
                     return;
                 }
 
-                if (!ObjectManager.Player.IsAutoAttacking)
+                if (!ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
                     HookManager.StartAutoAttack(ObjectManager.Target);
                 }
 
                 Player = ObjectManager.Player;
-                int rage = Player.Rage;
+                int energy = Player.Energy;
                 bool lowHealth = Player.HealthPercentage <= 20;
                 bool mediumHealth = !lowHealth && Player.HealthPercentage <= 50;
                 if (!(lowHealth || mediumHealth))
@@ -403,153 +426,123 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                     askedForHeal = true;
                 }
 
-                if (lowHealth && rage > 15 && IsReady(EnragedRegeneration))
+                // -- stealth --
+                if (!IsInStealth())
                 {
-                    HookManager.SendChatMessage("/s Oh shit");
-                    CastSpell(EnragedRegeneration, ref rage, 15, 180, false);
+                    if (!Player.IsInCombat)
+                    {
+                        CastSpell(Stealth, ref energy, 0, 1, false);
+                    }
+                    else if (lowHealth)
+                    {
+                        if (IsReady(Vanish))
+                        {
+                            CastSpell(Vanish, ref energy, 0, 180, false);
+                            HookManager.ClearTarget();
+                            return;
+                        }
+                    }
                 }
 
-                if (!lowHealth && rage > 10 && IsReady(DeathWish))
-                {
-                    CastSpell(DeathWish, ref rage, 10, 120.6, true); // lasts 30 sec
-                }
-                else if (rage > 10 && IsReady(BattleShout))
-                {
-                    HookManager.SendChatMessage("/roar");
-                    CastSpell(BattleShout, ref rage, 10, 120, true); // lasts 2 min
-                }
-                else if (IsInBerserkerStance && rage > 10 && Player.HealthPercentage > 50 && IsReady(Recklessness))
-                {
-                    CastSpell(Recklessness, ref rage, 0, 201, true); // lasts 12 sec
-                }
-                else if (Player.Health < Player.MaxHealth && IsReady(BerserkerRage))
-                {
-                    CastSpell(BerserkerRage, ref rage, 0, 20.1, true); // lasts 10 sec
-                }
-
+                // combat
                 if (distanceToTarget < (29 + target.CombatReach))
                 {
+                    // in range
+                    if (energy > 15 && IsReady(HungerForBlood) && IsTargetBleeding() && !IsInStealth())
+                    {
+                        CastSpell(HungerForBlood, ref energy, 15, 60, true);
+                    }
+
                     if (distanceToTarget < (24 + target.CombatReach))
                     {
                         if (distanceToTarget > (9 + target.CombatReach))
                         {
-                            // -- run to the target! --
-                            if (Player.IsInCombat)
+                            // 9 < distance < 24
+                            // run?
+                            if (energy > 15 && IsReady(Sprint) && IsTargetBleeding())
                             {
-                                if (IsInBerserkerStance)
-                                {
-                                    // intercept
-                                    if (rage > 10 && IsReady(Intercept))
-                                    {
-                                        CastSpell(Intercept, ref rage, 10, 30, true);
-                                    }
-                                }
-                                else
-                                {
-                                    // Berserker Stance
-                                    if (IsReady(NextStance))
-                                    {
-                                        if (IsReady(Retaliation))
-                                        {
-                                            CastSpell(Retaliation, ref rage, 0, 300, false);
-                                        }
-
-                                        ChangeToStance(BerserkerStance, out rage);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (IsInBerserkerStance)
-                                {
-                                    // Battle Stance
-                                    if (IsReady(NextStance))
-                                    {
-                                        ChangeToStance(BattleStance, out rage);
-                                    }
-                                }
-                                else
-                                {
-                                    // charge
-                                    if (IsReady(Charge))
-                                    {
-                                        HookManager.SendChatMessage("/incoming");
-                                        CastSpell(Charge, ref rage, 0, 15, false);
-                                    }
-                                }
+                                CastSpell(Sprint, ref energy, 15, 180, true);
                             }
                         }
-                        else if (distanceToTarget < target.CombatReach)
+                        else if (distanceToTarget <= target.CombatReach)
                         {
-                            // -- close combat --
-                            // Berserker Stance
-                            if (!IsInBerserkerStance && IsReady(NextStance))
+                            // distance <= 9
+                            // close combat
+                            if (IsInStealth())
                             {
-                                if (IsReady(Retaliation))
+                                if (energy > 50 && IsReady(Garrote) && !IsTargetBleeding())
                                 {
-                                    CastSpell(Retaliation, ref rage, 0, 300, false);
+                                    CastSpell(Garrote, ref energy, 50, 3, true);
+                                    comboCnt++;
                                 }
-
-                                ChangeToStance(BerserkerStance, out rage);
-                            }
-                            else if (mediumHealth && rage > 20 && IsReady(Bloodthirst))
-                            {
-                                CastSpell(Bloodthirst, ref rage, 20, 4, true);
+                                else if (energy > 60)
+                                {
+                                    CastSpell(Ambush, ref energy, 60, 0, true);
+                                    comboCnt += 2;
+                                }
                             }
                             else
                             {
-                                List<string> buffs = HookManager.GetBuffs(WowLuaUnit.Player);
-                                if (buffs.Any(e => e.Contains("slam")) && rage > 15)
+                                if (HookManager.GetUnitCastingInfo(WowLuaUnit.Target).Item2 > 0 && energy > 25 && IsReady(Kick))
                                 {
-                                    CastSpell(Slam, ref rage, 15, 0, false);
-                                    NextCast = DateTime.Now.AddSeconds(1.5); // casting time
-                                    NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
+                                    CastSpell(Kick, ref energy, 25, 10, true);
                                 }
-                                else if (rage > 10 && IsReady(Hamstring))
+                                else if (comboCnt > 4 && energy > 35 && IsTargetPoisoned())
                                 {
-                                    CastSpell(Hamstring, ref rage, 10, 15, true);
+                                    if (IsReady(ColdBlood))
+                                    {
+                                        CastSpell(ColdBlood, ref energy, 0, 180, false);
+                                    }
+
+                                    CastSpell(Envenom, ref energy, 35, 0, true);
+                                    comboCnt -= 5;
                                 }
-                                else if (target.HealthPercentage <= 20 && rage > 10)
+                                else if (comboCnt > 4 && energy > 35)
                                 {
-                                    CastSpell(Execute, ref rage, 10, 0, true);
+                                    if (IsReady(ColdBlood))
+                                    {
+                                        CastSpell(ColdBlood, ref energy, 0, 180, false);
+                                    }
+
+                                    CastSpell(Eviscerate, ref energy, 35, 0, true);
+                                    comboCnt -= 5;
                                 }
-                                else if (((multipleTargets && rage > 25) || rage > 50) && IsReady(Whirlwind))
+                                else if (comboCnt > 0 && energy > 25 && IsReady(SliceAndDice))
                                 {
-                                    CastSpell(Whirlwind, ref rage, 25, 10, true);
+                                    int comboCntUsed = Math.Min(5, comboCnt);
+                                    CastSpell(SliceAndDice, ref energy, 25, 6 + (3 * comboCntUsed), true);
+                                    comboCnt -= comboCntUsed;
                                 }
-                                else if (rage > 12 && IsReady(HeroicStrike))
+                                else if (energy > 60 && IsTargetPoisoned())
                                 {
-                                    CastSpell(HeroicStrike, ref rage, 12, 3.6, false);
+                                    CastSpell(Mutilate, ref energy, 60, 0, true);
+                                    comboCnt += 2;
                                 }
-                                else if (!ObjectManager.Player.IsAutoAttacking)
+                                else if (energy > 45)
                                 {
-                                    HookManager.StartAutoAttack(ObjectManager.Target);
+                                    CastSpell(SinisterStrike, ref energy, 45, 0, true);
+                                    comboCnt++;
                                 }
                             }
                         }
                     }
                     else
                     {
-                        // shattering throw (in Battle Stance)
-                        if (rage > 25 && IsReady(ShatteringThrow))
+                        // 24 <= distance < 29
+                        // distance attacks
+                        if (Player.IsInCombat)
                         {
-                            if (IsInBerserkerStance)
+                            if (comboCnt > 4 && energy > 35 && IsReady(DeadlyThrow))
                             {
-                                if (IsReady(NextStance))
-                                {
-                                    ChangeToStance(BattleStance, out rage);
-                                }
+                                CastSpell(DeadlyThrow, ref energy, 35, 1.5, true);
+                                comboCnt -= 5;
                             }
                             else
                             {
-                                CastSpell(ShatteringThrow, ref rage, 25, 301.5, false);
-                                NextCast = DateTime.Now.AddSeconds(1.5); // casting time
-                                NextGCDSpell = DateTime.Now.AddSeconds(3.0); // 1.5 sec gcd after the 1.5 sec casting time
+                                CastSpell(ThrowAttack, ref energy, 0, 2.1, false);
+                                NextCast = DateTime.Now.AddSeconds(0.5); // casting time
+                                NextGCDSpell = DateTime.Now.AddSeconds(2.0); // 1.5 sec gcd after the casting time
                             }
-                        }
-                        else
-                        {
-                            CastSpell(HeroicThrow, ref rage, 0, 60, true);
                         }
                     }
                 }
@@ -557,7 +550,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
             public void ResetAfterTargetDeath()
             {
-                nextActionTime[Hamstring] = DateTime.Now;
+                comboCnt = 0;
+                nextActionTime[HungerForBlood] = DateTime.Now;
+                nextActionTime[Garrote] = DateTime.Now;
             }
 
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
@@ -575,12 +570,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 }
             }
 
-            private void ChangeToStance(string stance, out int rage)
+            private bool IsInStealth()
             {
-                HookManager.CastSpell(stance);
-                rage = UpdateRage();
-                NextStance = DateTime.Now.AddSeconds(1);
-                IsInBerserkerStance = stance == BerserkerStance;
+                return HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth"));
             }
 
             private bool IsReady(DateTime nextAction)
@@ -591,7 +583,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             private bool IsReady(string spell)
             {
                 bool result = true; // begin with neutral element of AND
-                if (spell.Equals(Hamstring) || spell.Equals(BattleShout))
+                if (spell.Equals(HungerForBlood) || spell.Equals(SliceAndDice) || spell.Equals(Garrote))
                 {
                     // only use these spells in a certain interval
                     result &= !nextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable);
@@ -601,11 +593,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 return result;
             }
 
-            private int UpdateRage()
+            private bool IsTargetBleeding()
             {
-                ObjectManager.UpdateObject(ObjectManager.Player.Type, ObjectManager.Player.BaseAddress);
-                Player = ObjectManager.Player;
-                return Player.Rage;
+                return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("acerate") || e.Contains("Bleed") || e.Contains("bleed") || e.Contains("Rip") || e.Contains("rip")
+                 || e.Contains("Rake") || e.Contains("rake") || e.Contains("iercing") || e.Contains("arrote") || e.Contains("emorrhage") || e.Contains("upture") || e.Contains("Wounds") || e.Contains("wounds"));
+            }
+
+            private bool IsTargetPoisoned()
+            {
+                return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("Poison") || e.Contains("poison"));
             }
         }
     }
