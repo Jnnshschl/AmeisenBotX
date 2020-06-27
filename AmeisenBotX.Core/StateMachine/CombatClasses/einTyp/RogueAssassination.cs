@@ -7,7 +7,6 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
