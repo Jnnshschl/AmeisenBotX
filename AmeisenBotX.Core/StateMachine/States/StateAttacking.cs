@@ -22,8 +22,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent FacingCheck { get; set; }
 
-        private ulong LastTarget { get; set; }
-
         private TimegatedEvent<bool> LineOfSightCheck { get; set; }
 
         public override void Enter()
@@ -36,7 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
-                && (WowInterface.BattlegroundEngine == null || !WowInterface.BattlegroundEngine.ForceCombat)
+                && WowInterface.BattlegroundEngine == null
                 && StateMachine.SetState((int)BotState.Idle))
             {
                 return;

@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BehaviorTreeTest.cs" />
     <Compile Include="BotMathTests.cs" />
     <Compile Include="CharacterManagerTests.cs" />
     <Compile Include="ObjectTests.cs" />
@@ -62,6 +63,10 @@
     <Compile Include="BotUtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.BehaviorTree\AmeisenBotX.BehaviorTree.csproj">
+      <Project>{21A6E3BB-BDDE-4B22-A173-AFA9DB913864}</Project>
+      <Name>AmeisenBotX.BehaviorTree</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmeisenBotX.Core\AmeisenBotX.Core.csproj">
       <Project>{6F95990D-D5D9-4242-9992-DEEFBF8D3E60}</Project>
       <Name>AmeisenBotX.Core</Name>
