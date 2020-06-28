@@ -1253,10 +1253,5 @@ namespace AmeisenBotX.Core.Hook
                 }
             }
         }
-
-        public bool IsOutdoors()
-        {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) ? result == 1 : false;
-        }
     }
 }
