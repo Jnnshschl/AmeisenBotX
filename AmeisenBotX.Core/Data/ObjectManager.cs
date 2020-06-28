@@ -552,12 +552,12 @@ namespace AmeisenBotX.Core.Data
                     Player = player;
                 }
 
-                if (player.Guid == TargetGuid
-                    || player.Guid == PlayerGuid
-                    || PartymemberGuids.Contains(player.Guid))
-                {
-                    player.Auras = WowInterface.HookManager.GetUnitAuras(player);
-                }
+                // if (player.Guid == TargetGuid
+                //     || player.Guid == PlayerGuid
+                //     || PartymemberGuids.Contains(player.Guid))
+                // {
+                player.Auras = WowInterface.HookManager.GetUnitAuras(player);
+                // }
 
                 return player;
             }

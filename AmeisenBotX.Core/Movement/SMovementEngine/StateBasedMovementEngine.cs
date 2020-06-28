@@ -56,6 +56,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public List<Vector3> Path => Nodes.ToList();
 
+        public DateTime PathDecay { get; private set; }
+
         public Vector3 VehicleTargetPosition { get; private set; }
 
         public DateTime PathDecay { get; private set; }

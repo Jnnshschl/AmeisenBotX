@@ -125,6 +125,11 @@ namespace AmeisenBotX.Core.Statemachine
 
                     if (WowInterface.ObjectManager.Player != null)
                     {
+                        if (!WowInterface.ObjectManager.Player.IsCasting)
+                        {
+                            WowInterface.MovementEngine.Execute();
+                        }
+
                         if (WowInterface.ObjectManager.Player.IsDead
                             && SetState((int)BotState.Dead, true))
                         {
@@ -157,7 +162,7 @@ namespace AmeisenBotX.Core.Statemachine
                             // TODO: handle combat bug, sometimes when combat ends, the player stays in combot for no reason
                             if (!WowInterface.Globals.IgnoreCombat)
                             {
-                                if ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()) && SetState((int)BotState.Attacking, true))
+                                if ((WowInterface.ObjectManager.Player.IsInCombat || WowInterface.Globals.ForceCombat || IsAnyPartymemberInCombat()) && SetState((int)BotState.Attacking, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
                                     return;
@@ -168,6 +173,8 @@ namespace AmeisenBotX.Core.Statemachine
                 }
             }
 
+            AntiAfkEvent.Run();
+
             // auto disable rendering when not in focus
             if (Config.AutoDisableRender && RenderSwitchEvent.Run())
             {
@@ -177,10 +184,7 @@ namespace AmeisenBotX.Core.Statemachine
 
             // execute the State and Movement
             CurrentState.Value.Execute();
-            WowInterface.MovementEngine.Execute();
-
             OnStateMachineTick?.Invoke();
-            AntiAfkEvent.Run();
         }
 
         internal IEnumerable<WowUnit> GetNearLootableUnits()

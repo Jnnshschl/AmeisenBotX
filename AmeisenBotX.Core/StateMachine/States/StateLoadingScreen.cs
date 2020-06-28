@@ -40,6 +40,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+            WowInterface.MovementEngine.Reset();
+            WowInterface.HookManager.StopClickToMoveIfActive();
         }
     }
 }

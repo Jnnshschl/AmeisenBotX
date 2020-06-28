@@ -32,8 +32,14 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            if (WowInterface.Globals.ForceCombat && WowInterface.ObjectManager.TargetGuid == 0)
+            {
+                WowInterface.Globals.ForceCombat = false;
+            }
+
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
+                && !WowInterface.Globals.ForceCombat
                 && StateMachine.SetState((int)BotState.Idle))
             {
                 return;
