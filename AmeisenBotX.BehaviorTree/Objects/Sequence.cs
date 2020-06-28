@@ -14,16 +14,31 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Func<T, bool> Condition { get; set; }
 
+        public int Counter { get; set; }
+
         public override BehaviorTreeStatus Execute(T blackboard)
         {
-            if (Condition(blackboard))
+            if (Counter == Children.Count)
             {
-                return Children[0].Execute(blackboard);
+                return BehaviorTreeStatus.Success;
             }
-            else
+
+            BehaviorTreeStatus status = Children[Counter].Execute(blackboard);
+
+            if (status == BehaviorTreeStatus.Success)
             {
-                return Children[1].Execute(blackboard);
+                if (Counter < Children.Count)
+                {
+                    ++Counter;
+                }
             }
+            else if (status == BehaviorTreeStatus.Failed)
+            {
+                Counter = 0;
+                return BehaviorTreeStatus.Failed;
+            }
+
+            return BehaviorTreeStatus.Ongoing;
         }
     }
 }

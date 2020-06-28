@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using AmeisenBotX.Core.Movement.SMovementEngine.States;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -55,6 +56,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public List<Vector3> Path => Nodes.ToList();
 
+        public DateTime PathDecay { get; private set; }
+
         public Vector3 VehicleTargetPosition { get; private set; }
 
         internal MovementSettings MovementSettings { get; }
@@ -98,14 +101,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
             else
             {
-                if (positionToGoTo.GetDistance(FinalTargetPosition) > 3.0)
+                if (positionToGoTo.GetDistance(FinalTargetPosition) > 2.0 || DateTime.Now > PathDecay)
                 {
-                    if (positionToGoTo.GetDistance(WowInterface.ObjectManager.Player.Position) < 8.0)
-                    {
-                        Reset();
-                    }
-
+                    Reset();
                     FinalTargetPosition = positionToGoTo;
+                    PathDecay = DateTime.Now + TimeSpan.FromSeconds(8);
                 }
 
                 MovementAction = movementAction;

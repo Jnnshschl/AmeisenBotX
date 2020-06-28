@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Core.Battleground.Jannis;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -478,6 +478,10 @@ namespace AmeisenBotX.Core
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
+            if (args.Count == 1 && args[0] == "1")
+            {
+                WowInterface.HookManager.AcceptBattlegroundInvite();
+            }
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
@@ -554,7 +558,7 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
-            // WowInterface.BattlegroundEngine = new IBattlegroundEngine(WowInterface);
+            WowInterface.BattlegroundEngine = new JBattleGroundEngine(WowInterface);
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
@@ -609,6 +613,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnBattlegroundScoreUpdate);
             WowInterface.EventHookManager.Subscribe("UPDATE_WORLD_STATES", OnWorldStateUpdate);
+            WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
             WowInterface.EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnBgAllianceMessage);
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);

@@ -180,6 +180,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         private RawWowUnit RawWowUnit { get; set; }
 
+        public bool HasBuffById(int spellId)
+        {
+            return Auras != null && Auras.Any(e => e.SpellId == spellId);
+        }
+
         public bool HasBuffByName(string name)
         {
             return Auras != null && Auras.Any(e => e.Name == name);

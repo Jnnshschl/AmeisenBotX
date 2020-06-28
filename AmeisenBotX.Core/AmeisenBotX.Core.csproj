@@ -56,6 +56,10 @@
     <Compile Include="AmeisenBotConfig.cs" />
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Battleground\IBattlegroundEngine.cs" />
+    <Compile Include="Battleground\Jannis\JBattleGroundEngine.cs" />
+    <Compile Include="Battleground\Jannis\JBgBlackboard.cs" />
+    <Compile Include="Battleground\Jannis\Profiles\IBattlegroundProfile.cs" />
+    <Compile Include="Battleground\Jannis\Profiles\WarsongGulchProfile.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
     <Compile Include="Character\Comparators\BasicArmorComparator.cs" />
@@ -324,6 +328,10 @@
     <Compile Include="WowInterface.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.BehaviorTree\AmeisenBotX.BehaviorTree.csproj">
+      <Project>{21A6E3BB-BDDE-4B22-A173-AFA9DB913864}</Project>
+      <Name>AmeisenBotX.BehaviorTree</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
       <Project>{AFE27893-225B-4F90-9CFD-87DB2EE0D7DF}</Project>
       <Name>AmeisenBotX.Logging</Name>

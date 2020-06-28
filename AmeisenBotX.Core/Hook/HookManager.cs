@@ -244,7 +244,14 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
+                    string result = "";
+                    byte[] bytes = InjectAndExecute(asm, true);
+
+                    if (bytes != null)
+                    {
+                        result = Encoding.UTF8.GetString(bytes);
+                    }
+
                     WowInterface.XMemory.FreeMemory(memAllocCmdVar);
 
                     return result;
@@ -404,10 +411,10 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public double GetSpellCooldown(string spellName)
+        public int GetSpellCooldown(string spellName)
         {
-            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}} = GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}} < 0 then {{v:0}} = 0 end;"));
-            double cooldown = 0;
+            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"));
+            int cooldown = 0;
 
             if (result.Contains('.'))
             {
@@ -416,7 +423,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (double.TryParse(result, out double value))
             {
-                cooldown = Math.Round(value);
+                cooldown = (int)Math.Round(value);
             }
 
             AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {cooldown}ms", LogLevel.Verbose);
@@ -553,6 +560,11 @@ namespace AmeisenBotX.Core.Hook
             start.Z += heightAdjust;
             end.Z += heightAdjust;
             return TraceLine(start, end, out _) == 0;
+        }
+
+        public bool IsOutdoors()
+        {
+            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) ? result == 1 : false;
         }
 
         public bool IsRuneReady(int runeId)
