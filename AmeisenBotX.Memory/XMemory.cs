@@ -393,6 +393,13 @@ namespace AmeisenBotX.Memory
             return WriteBytes(address, new byte[size]);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
+        {
+            ++rpmCalls;
+            return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+        }
+
         private bool TryOpenMainThreadSuspendResume(ThreadAccess threadAccess)
         {
             try
@@ -402,13 +409,6 @@ namespace AmeisenBotX.Memory
             catch { }
 
             return MainThreadHandle != IntPtr.Zero;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
-        {
-            ++rpmCalls;
-            return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

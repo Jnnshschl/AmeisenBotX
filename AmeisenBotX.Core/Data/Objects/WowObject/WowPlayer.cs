@@ -84,10 +84,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public bool IsAlliance()
         {
             return Race == WowRace.Draenei
-                       || Race == WowRace.Human
-                       || Race == WowRace.Dwarf
-                       || Race == WowRace.Gnome
-                       || Race == WowRace.Nightelf;
+                        || Race == WowRace.Human
+                        || Race == WowRace.Dwarf
+                        || Race == WowRace.Gnome
+                        || Race == WowRace.Nightelf;
         }
 
         public bool IsHorde()

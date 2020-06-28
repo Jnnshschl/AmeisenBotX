@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
     public class PaladinProtection : ICombatClass
     {
@@ -23,12 +23,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         private bool hasTargetMoved = false;
         private bool multipleTargets = false;
 
-        public PaladinProtection(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public PaladinProtection(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
-            PathfindingHandler = pathhandler;
             MovementEngine = movement;
             Jumped = false;
             LastTargetCheck = DateTime.Now;
@@ -58,7 +57,41 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public CombatClassRole Role => CombatClassRole.Tank;
 
-        public TalentTree Talents { get; } = null;
+        public TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 2, new Talent(1, 2, 5) },
+                { 4, new Talent(1, 4, 5) },
+                { 5, new Talent(1, 5, 2) }
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(2, 1, 5) },
+                { 2, new Talent(2, 2, 5) },
+                { 3, new Talent(2, 3, 3) },
+                { 4, new Talent(2, 4, 2) },
+                { 5, new Talent(2, 5, 5) },
+                { 6, new Talent(2, 6, 1) },
+                { 7, new Talent(2, 7, 3) },
+                { 8, new Talent(2, 8, 5) },
+                { 9, new Talent(2, 9, 2) },
+                { 12, new Talent(2, 12, 1) },
+                { 14, new Talent(2, 14, 2) },
+                { 16, new Talent(2, 16, 2) },
+                { 17, new Talent(2, 17, 1) },
+                { 18, new Talent(2, 18, 3) },
+                { 19, new Talent(2, 19, 3) },
+                { 22, new Talent(2, 22, 1) },
+                { 23, new Talent(2, 23, 2) },
+                { 24, new Talent(2, 24, 3) }
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(3, 1, 5) },
+                { 2, new Talent(3, 2, 5) }
+            }
+        };
 
         public string Version => "1.0";
 
@@ -96,11 +129,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private DateTime LastWisdom { get; set; }
 
-        private DefaultMovementEngine MovementEngine { get; set; }
+        private IMovementEngine MovementEngine { get; set; }
 
         private IObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; set; }
 
         public void Execute()
         {
@@ -347,23 +378,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             }
             else if (distanceToTarget >= target.CombatReach)
             {
-                if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
+                if (computeNewRoute || MovementEngine.Path?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastTargetPosition);
-                    MovementEngine.LoadPath(path);
-                    MovementEngine.PostProcessPath();
-                }
-                else
-                {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
-                    {
-                        CharacterManager.MoveToPosition(positionToGoTo);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                        }
-                    }
+                    MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastTargetPosition, target.Rotation);
                 }
             }
         }

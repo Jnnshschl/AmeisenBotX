@@ -27,7 +27,6 @@ namespace AmeisenBotX.Core.Hook
         private const int MEM_ALLOC_EXECUTION_SIZE = 4096;
         private const int MEM_ALLOC_GATEWAY_SIZE = 12;
         private readonly object hookLock = new object();
-        private ulong endsceneCalls;
 
         public HookManager(WowInterface wowInterface)
         {
@@ -35,18 +34,7 @@ namespace AmeisenBotX.Core.Hook
             OriginalFunctionBytes = new Dictionary<IntPtr, byte>();
         }
 
-        public ulong CallCount
-        {
-            get
-            {
-                unchecked
-                {
-                    ulong val = endsceneCalls;
-                    endsceneCalls = 0;
-                    return val;
-                }
-            }
-        }
+        public ulong PendingCallCount { get; set; }
 
         public IntPtr CodecaveForCheck { get; private set; }
 
@@ -411,10 +399,10 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public double GetSpellCooldown(string spellName)
+        public int GetSpellCooldown(string spellName)
         {
-            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}} = GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}} < 0 then {{v:0}} = 0 end;"));
-            double cooldown = 0;
+            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"));
+            int cooldown = 0;
 
             if (result.Contains('.'))
             {
@@ -423,7 +411,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (double.TryParse(result, out double value))
             {
-                cooldown = Math.Round(value);
+                cooldown = (int)Math.Round(value);
             }
 
             AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {cooldown}ms", LogLevel.Verbose);
@@ -560,6 +548,11 @@ namespace AmeisenBotX.Core.Hook
             start.Z += heightAdjust;
             end.Z += heightAdjust;
             return TraceLine(start, end, out _) == 0;
+        }
+
+        public bool IsOutdoors()
+        {
+            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) ? result == 1 : false;
         }
 
         public bool IsRuneReady(int runeId)
@@ -1098,6 +1091,8 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ", LogLevel.Verbose);
             AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}", LogLevel.Verbose);
 
+            ++PendingCallCount;
+
             lock (hookLock)
             {
                 fullStopwatch = Stopwatch.StartNew();
@@ -1199,7 +1194,7 @@ namespace AmeisenBotX.Core.Hook
             fullStopwatch.Stop();
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
 
-            ++endsceneCalls;
+            --PendingCallCount;
             return returnBytes.ToArray();
         }
 

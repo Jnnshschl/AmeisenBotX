@@ -24,6 +24,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Level => RawWowGameobject.Level;
 
+        public byte Bytes0 => RawWowGameobject.GameobjectBytes0;
+
         private RawWowGameobject RawWowGameobject { get; set; }
 
         public override string ToString()

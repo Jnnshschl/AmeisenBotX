@@ -493,8 +493,8 @@ namespace AmeisenBotX
                 AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
-            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.CallCount.ToString().PadLeft(2);
-            if (AmeisenBot.WowInterface.HookManager.CallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
+            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.PendingCallCount.ToString().PadLeft(2);
+            if (AmeisenBot.WowInterface.HookManager.PendingCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
                 labelHookCallCount.Foreground = currentTickTimeGoodBrush;
             }

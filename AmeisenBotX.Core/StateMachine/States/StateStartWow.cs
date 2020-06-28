@@ -25,6 +25,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.WowProcess.WaitForInputIdle();
                     WowInterface.XMemory.Attach(WowInterface.WowProcess);
 
+                    WowInterface.CharacterManager.AntiAfk();
+
                     if (Config.AutoPositionWow)
                     {
                         WowInterface.XMemory.HideBordersWindowWow();

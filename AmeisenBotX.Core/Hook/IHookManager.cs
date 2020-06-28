@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
-        ulong CallCount { get; }
+        ulong PendingCallCount { get; }
 
         bool IsWoWHooked { get; }
 
@@ -83,7 +83,12 @@ namespace AmeisenBotX.Core.Hook
 
         List<string> GetSkills();
 
-        double GetSpellCooldown(string spellName);
+        /// <summary>
+        /// Get the spells cooldown left in milliseconds
+        /// </summary>
+        /// <param name="spellName"></param>
+        /// <returns>ms cooldown left</returns>
+        int GetSpellCooldown(string spellName);
 
         string GetSpells();
 
@@ -108,6 +113,8 @@ namespace AmeisenBotX.Core.Hook
         bool IsInLfgGroup();
 
         bool IsInLineOfSight(Vector3 start, Vector3 end, float heightAdjust = 1.5f);
+
+        bool IsOutdoors();
 
         bool IsRuneReady(int runeId);
 

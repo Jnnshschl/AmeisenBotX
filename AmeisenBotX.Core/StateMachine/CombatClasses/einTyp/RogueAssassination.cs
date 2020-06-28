@@ -7,16 +7,15 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement;
-using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
-    public class RogueAssassination2 : ICombatClass
+    public class RogueAssassination : ICombatClass
     {
         private readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
 
@@ -40,12 +39,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private bool wasInStealth = false;
 
-        public RogueAssassination2(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IPathfindingHandler pathhandler, DefaultMovementEngine movement)
+        public RogueAssassination(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IMovementEngine movement)
         {
             ObjectManager = objectManager;
             CharacterManager = characterManager;
             HookManager = hookManager;
-            PathfindingHandler = pathhandler;
             MovementEngine = movement;
             spells = new RogueAssassinSpells(hookManager, objectManager);
         }
@@ -72,7 +70,40 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         public CombatClassRole Role => CombatClassRole.Dps;
 
-        public TalentTree Talents { get; } = null;
+        public TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 3, new Talent(1, 3, 5) },
+                { 4, new Talent(1, 4, 3) },
+                { 5, new Talent(1, 5, 2) },
+                { 6, new Talent(1, 6, 3) },
+                { 9, new Talent(1, 9, 5) },
+                { 10, new Talent(1, 10, 3) },
+                { 11, new Talent(1, 11, 5) },
+                { 13, new Talent(1, 13, 1) },
+                { 16, new Talent(1, 16, 5) },
+                { 17, new Talent(1, 17, 2) },
+                { 19, new Talent(1, 19, 1) },
+                { 21, new Talent(1, 21, 3) },
+                { 22, new Talent(1, 22, 3) },
+                { 23, new Talent(1, 23, 3) },
+                { 24, new Talent(1, 24, 1) },
+                { 26, new Talent(1, 26, 5) },
+                { 27, new Talent(1, 27, 1) }
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 3, new Talent(2, 3, 5) },
+                { 6, new Talent(2, 6, 5) },
+                { 9, new Talent(2, 9, 5) },
+                { 12, new Talent(2, 12, 3) }
+            },
+            Tree3 = new Dictionary<int, Talent>()
+            {
+                { 3, new Talent(3, 3, 2) }
+            }
+        };
 
         public string Version => "1.0";
 
@@ -92,11 +123,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         private float LastTargetRotation { get; set; }
 
-        private DefaultMovementEngine MovementEngine { get; set; }
+        private IMovementEngine MovementEngine { get; set; }
 
         private IObjectManager ObjectManager { get; }
-
-        private IPathfindingHandler PathfindingHandler { get; set; }
 
         public void Execute()
         {
@@ -137,7 +166,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 {
                     hasTargetMoved = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((9 + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((9 + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
+                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((2.4f + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((2.4f + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
                     targetDistanceChanged = true;
                 }
                 else if (hasTargetMoved)
@@ -259,52 +288,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
                 wasInStealth = false;
             }
 
-            if (distanceToBehindTarget < 3.0)
+            bool closeToTarget = distanceToTarget < (6.0 + target.CombatReach);
+            if (hasTargetMoved || closeToTarget)
             {
-                if (isSneaky)
-                {
-                    CharacterManager.MoveToPosition(LastTargetPosition);
-                    isSneaky = false;
-                }
-            }
-
-            bool closeToTarget = distanceToTarget < 12.0 + target.CombatReach;
-            if (hasTargetMoved)
-            {
-                CharacterManager.MoveToPosition(LastBehindTargetPosition);
-            }
-            else if (closeToTarget)
-            {
-                if (isSneaky)
-                {
-                    CharacterManager.MoveToPosition(LastBehindTargetPosition);
-                }
-                else if (!BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25))
-                {
-                    CharacterManager.MoveToPosition(LastTargetPosition);
-                }
+                CharacterManager.MoveToPosition(LastTargetPosition);
             }
             else
             {
-                if (computeNewRoute || MovementEngine.CurrentPath?.Count == 0)
+                if (computeNewRoute || MovementEngine.Path?.Count == 0)
                 {
-                    List<Vector3> path = PathfindingHandler.GetPath((int)ObjectManager.MapId, LastPlayerPosition, LastBehindTargetPosition);
-                    MovementEngine.LoadPath(path);
-                    MovementEngine.PostProcessPath();
-                }
-                else
-                {
-                    if (MovementEngine.GetNextStep(LastPlayerPosition, out Vector3 positionToGoTo, out bool needToJump))
+                    if (isSneaky)
                     {
-                        CharacterManager.MoveToPosition(positionToGoTo);
-
-                        if (needToJump)
-                        {
-                            CharacterManager.Jump();
-                        }
+                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastBehindTargetPosition, target.Rotation);
+                    }
+                    else
+                    {
+                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastTargetPosition, target.Rotation);
                     }
                 }
             }
+
         }
 
         private bool SearchNewTarget(ref WowUnit target, bool grinding)

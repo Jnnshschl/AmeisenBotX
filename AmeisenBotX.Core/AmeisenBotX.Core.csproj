@@ -55,8 +55,13 @@
   <ItemGroup>
     <Compile Include="AmeisenBotConfig.cs" />
     <Compile Include="AmeisenBot.cs" />
+    <Compile Include="Battleground\einTyp\RunBoyRunEngine.cs" />
     <Compile Include="Battleground\IBattlegroundEngine.cs" />
     <Compile Include="Battleground\KamelBG\KummelEngine.cs" />
+    <Compile Include="Battleground\Jannis\JBattleGroundEngine.cs" />
+    <Compile Include="Battleground\Jannis\JBgBlackboard.cs" />
+    <Compile Include="Battleground\Jannis\Profiles\IBattlegroundProfile.cs" />
+    <Compile Include="Battleground\Jannis\Profiles\WarsongGulchProfile.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
     <Compile Include="Character\Comparators\BasicArmorComparator.cs" />
@@ -275,7 +280,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Kamel\FuryWarrior.cs" />
-    <Compile Include="Statemachine\CombatClasses\PaladinProtection.cs" />
+    <Compile Include="Statemachine\CombatClasses\einTyp\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightUnholy.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinRetribution.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PriestDiscipline.cs" />
@@ -296,8 +301,8 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\WarlockDestruction.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarlockDemonology.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarlockAffliction.cs" />
-    <Compile Include="Statemachine\CombatClasses\WarriorArms.cs" />
-    <Compile Include="Statemachine\CombatClasses\RogueAssassination2.cs" />
+    <Compile Include="Statemachine\CombatClasses\einTyp\WarriorArms.cs" />
+    <Compile Include="Statemachine\CombatClasses\einTyp\RogueAssassination.cs" />
     <Compile Include="Statemachine\Enums\BotState.cs" />
     <Compile Include="Statemachine\States\BasicState.cs" />
     <Compile Include="Statemachine\States\StateAttacking.cs" />
@@ -315,7 +320,7 @@
     <Compile Include="Statemachine\States\StateSelling.cs" />
     <Compile Include="Statemachine\States\StateRepairing.cs" />
     <Compile Include="Statemachine\States\StateStartWow.cs" />
-    <Compile Include="Statemachine\CombatClasses\WarriorFury.cs" />
+    <Compile Include="Statemachine\CombatClasses\einTyp\WarriorFury.cs" />
     <Compile Include="Statemachine\Utils\GroupAuraManager.cs" />
     <Compile Include="Statemachine\Utils\InterruptManager.cs" />
     <Compile Include="Statemachine\Utils\PetManager.cs" />
@@ -327,6 +332,10 @@
     <Compile Include="WowInterface.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.BehaviorTree\AmeisenBotX.BehaviorTree.csproj">
+      <Project>{21A6E3BB-BDDE-4B22-A173-AFA9DB913864}</Project>
+      <Name>AmeisenBotX.BehaviorTree</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj">
       <Project>{AFE27893-225B-4F90-9CFD-87DB2EE0D7DF}</Project>
       <Name>AmeisenBotX.Logging</Name>

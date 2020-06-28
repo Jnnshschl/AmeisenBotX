@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Battleground.KamelBG;
+using AmeisenBotX.Core.Battleground.einTyp;
+﻿using AmeisenBotX.Core.Battleground.Jannis;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -310,12 +312,12 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
-                new PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
-                new RogueAssassination2(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.PathfindingHandler, new DefaultMovementEngine(WowInterface.ObjectManager, WowInterface.MovementSettings)),
                 new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
                 new Statemachine.CombatClasses.Kamel.FuryWarrior(WowInterface),
+                new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
+                new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
+                new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
+                new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
             };
         }
 
@@ -480,6 +482,10 @@ namespace AmeisenBotX.Core
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
+            if (args.Count == 1 && args[0] == "1")
+            {
+                WowInterface.HookManager.AcceptBattlegroundInvite();
+            }
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
@@ -556,7 +562,8 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
-            WowInterface.BattlegroundEngine = new KummelEngine(WowInterface);
+            WowInterface.BattlegroundEngine = new JBattleGroundEngine(WowInterface);
+
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
@@ -611,6 +618,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnBattlegroundScoreUpdate);
             WowInterface.EventHookManager.Subscribe("UPDATE_WORLD_STATES", OnWorldStateUpdate);
+            WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
             WowInterface.EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnBgAllianceMessage);
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnBgHordeMessage);
