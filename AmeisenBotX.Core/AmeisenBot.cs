@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Battleground;
+using AmeisenBotX.Core.Battleground.einTyp;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -554,7 +555,7 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
-            // WowInterface.BattlegroundEngine = new IBattlegroundEngine(WowInterface);
+            WowInterface.BattlegroundEngine = new RunBoyRunEngine(WowInterface);
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);

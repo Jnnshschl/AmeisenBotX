@@ -184,6 +184,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             return Auras != null && Auras.Any(e => e.Name == name);
         }
+        public bool HasBuffById(int spellId)
+        {
+            return Auras != null && Auras.Any(e => e.SpellId == spellId);
+        }
 
         public bool IsInMeleeRange(WowUnit wowUnit) => Position.GetDistance(wowUnit.Position) < Math.Max(4.5, CombatReach + wowUnit.CombatReach + 1);
 

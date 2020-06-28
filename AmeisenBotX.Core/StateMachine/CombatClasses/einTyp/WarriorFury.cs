@@ -61,7 +61,39 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public CombatClassRole Role => CombatClassRole.Dps;
 
-        public TalentTree Talents { get; } = null;
+        public TalentTree Talents { get; } = new TalentTree()
+        {
+            Tree1 = new Dictionary<int, Talent>()
+            {
+                { 1, new Talent(1, 1, 3) },
+                { 2, new Talent(1, 2, 2) },
+                { 4, new Talent(1, 4, 2) },
+                { 6, new Talent(1, 6, 3) },
+                { 8, new Talent(1, 8, 1) },
+                { 9, new Talent(1, 9, 2) },
+                { 10, new Talent(1, 10, 3) }
+            },
+            Tree2 = new Dictionary<int, Talent>()
+            {
+                { 3, new Talent(2, 3, 5) },
+                { 5, new Talent(2, 5, 5) },
+                { 9, new Talent(2, 9, 5) },
+                { 10, new Talent(2, 10, 5) },
+                { 11, new Talent(2, 11, 2) },
+                { 12, new Talent(2, 12, 5) },
+                { 13, new Talent(2, 13, 3) },
+                { 14, new Talent(2, 14, 1) },
+                { 17, new Talent(2, 17, 5) },
+                { 18, new Talent(2, 18, 3) },
+                { 19, new Talent(2, 19, 1) },
+                { 22, new Talent(2, 22, 5) },
+                { 24, new Talent(2, 24, 1) },
+                { 25, new Talent(2, 25, 3) },
+                { 26, new Talent(2, 26, 5) },
+                { 27, new Talent(2, 27, 1) }
+            },
+            Tree3 = new Dictionary<int, Talent>()
+        };
 
         public string Version => "1.0";
 

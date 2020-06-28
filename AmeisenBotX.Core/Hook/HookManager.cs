@@ -244,7 +244,14 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
+                    string result = "";
+                    byte[] bytes = InjectAndExecute(asm, true);
+
+                    if (bytes != null)
+                    {
+                        result = Encoding.UTF8.GetString(bytes);
+                    }
+
                     WowInterface.XMemory.FreeMemory(memAllocCmdVar);
 
                     return result;
