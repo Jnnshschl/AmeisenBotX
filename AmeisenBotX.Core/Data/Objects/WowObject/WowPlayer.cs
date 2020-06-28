@@ -115,5 +115,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
             return this;
         }
+
+
     }
 }

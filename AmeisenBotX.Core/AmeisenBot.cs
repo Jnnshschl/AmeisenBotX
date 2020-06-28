@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Battleground;
+using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Battleground.einTyp;
 ﻿using AmeisenBotX.Core.Battleground.Jannis;
 using AmeisenBotX.Core.Character;
@@ -311,11 +312,12 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
+                new Statemachine.CombatClasses.Kamel.FuryWarrior(WowInterface),
                 new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
-                new DeathknightBlood(WowInterface),
             };
         }
 
@@ -561,6 +563,7 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
             WowInterface.BattlegroundEngine = new JBattleGroundEngine(WowInterface);
+
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);

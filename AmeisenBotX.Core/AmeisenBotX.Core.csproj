@@ -57,6 +57,7 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Battleground\einTyp\RunBoyRunEngine.cs" />
     <Compile Include="Battleground\IBattlegroundEngine.cs" />
+    <Compile Include="Battleground\KamelBG\KummelEngine.cs" />
     <Compile Include="Battleground\Jannis\JBattleGroundEngine.cs" />
     <Compile Include="Battleground\Jannis\JBgBlackboard.cs" />
     <Compile Include="Battleground\Jannis\Profiles\IBattlegroundProfile.cs" />
@@ -257,7 +258,8 @@
     <Compile Include="Relaxing\RelaxEngine.cs" />
     <Compile Include="Common\AbstractStateMachine.cs" />
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
-    <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\BasicKamelClass.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightFrost.cs" />
@@ -277,6 +279,7 @@
     <Compile Include="Statemachine\CombatClasses\ICombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorProtection.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\FuryWarrior.cs" />
     <Compile Include="Statemachine\CombatClasses\einTyp\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightUnholy.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinRetribution.cs" />
