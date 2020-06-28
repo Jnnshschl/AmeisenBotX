@@ -4,14 +4,17 @@ using System.Linq;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Logging;
 
 namespace AmeisenBotX.Core.Battleground.einTyp
 {
     public class RunBoyRunEngine : IBattlegroundEngine
     {
         private WowInterface WowInterface;
-        private WowUnit EnemyFlagCarrier;
-        private WowUnit TeamFlagCarrier;
+        private ulong EnemyFlagCarrierGuid;
+        private ulong TeamFlagCarrierGuid;
+        private WowObject enemyFlag;
+        private WowObject ownFlag;
         private bool hasStateChanged = true;
         private bool hasFlag = false;
         private bool ownTeamHasFlag = false;
@@ -32,22 +35,27 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         public void Execute()
         {
-            // set new state
+            // --- set new state ---
             if (hasStateChanged)
             {
                 hasStateChanged = false;
                 hasFlag = WowInterface.ObjectManager.Player.Auras != null && WowInterface.ObjectManager.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
-                TeamFlagCarrier = getTeamFlagCarrier();
-                ownTeamHasFlag = TeamFlagCarrier != null;
-                EnemyFlagCarrier = getEnemyFlagCarrier();
-                enemyTeamHasFlag = EnemyFlagCarrier != null;
+                WowUnit teamFlagCarrier = getTeamFlagCarrier();
+                ownTeamHasFlag = teamFlagCarrier != null;
+                if (ownTeamHasFlag)
+                    TeamFlagCarrierGuid = teamFlagCarrier.Guid;
+                WowUnit enemyFlagCarrier = getEnemyFlagCarrier();
+                enemyTeamHasFlag = enemyFlagCarrier != null;
+                if (enemyTeamHasFlag)
+                    EnemyFlagCarrierGuid = enemyFlagCarrier.Guid;
             }
             
-            // reaction
+            // --- reaction ---
             if(hasFlag)
             {
                 // you've got the flag!
-                WowObject ownFlag = getOwnFlagObject();
+                WowObject tmpFlag = getOwnFlagObject();
+                ownFlag = tmpFlag == null ? ownFlag : tmpFlag;
                 if (ownFlag != null)
                 {
                     // own flag lies around
@@ -67,33 +75,72 @@ namespace AmeisenBotX.Core.Battleground.einTyp
             }
             else if(ownTeamHasFlag && enemyTeamHasFlag)
             {
+                // team mate and enemy got the flag
                 if(WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
                 {
-                    EnemyFlagCarrier = getEnemyFlagCarrier();
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, EnemyFlagCarrier.Position, EnemyFlagCarrier.Rotation);
-                    WowInterface.HookManager.TargetGuid(EnemyFlagCarrier.Guid);
+                    // run to the enemy
+                    WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
+                    if(enemyFlagCarrier != null)
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
+                        WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                    } else
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1051, 1398, 340));
                     WowInterface.CombatClass.OutOfCombatExecute();
                 }
                 else
                 {
-                    TeamFlagCarrier = getTeamFlagCarrier();
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, TeamFlagCarrier.Position);
-                    if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
+                    // run to the own flag carrier
+                    WowUnit teamFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(TeamFlagCarrierGuid);
+                    if (teamFlagCarrier != null)
+                    {
+                        if(WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, teamFlagCarrier.Position);
+                        else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
+                        else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
+                    }
+                    else
+                    {
+                        WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
+                        if (enemyFlagCarrier != null)
+                        {
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
+                            if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
+                                WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                        }
+                        else
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1051, 1398, 340));
                         WowInterface.CombatClass.OutOfCombatExecute();
+                    }
                 }
             }
             else if (ownTeamHasFlag)
             {
-                TeamFlagCarrier = getTeamFlagCarrier();
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, TeamFlagCarrier.Position);
+                // a team mate got the flag
+                WowUnit teamFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(TeamFlagCarrierGuid);
+                if (teamFlagCarrier != null)
+                {
+                    if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, teamFlagCarrier.Position);
+                    else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
+                    else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
+                }
+                else
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
                 if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
                     WowInterface.CombatClass.OutOfCombatExecute();
             }
             else if (enemyTeamHasFlag)
             {
-                if(WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
+                // the enemy got the flag
+                if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
                 {
-                    WowObject enemyFlag = getEnemyFlagObject();
+                    WowObject tmpFlag = getEnemyFlagObject();
+                    enemyFlag = tmpFlag == null ? enemyFlag : tmpFlag;
                     if (enemyFlag != null)
                     {
                         // flag lies around
@@ -102,6 +149,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         {
                             // flag reached, save it!
                             hasStateChanged = true;
+                            WowInterface.HookManager.WowObjectOnRightClick(enemyFlag);
                         }
                     }
                     else
@@ -113,16 +161,21 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 }
                 else
                 {
-                    EnemyFlagCarrier = getEnemyFlagCarrier();
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, EnemyFlagCarrier.Position, EnemyFlagCarrier.Rotation);
-                    if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
-                        WowInterface.HookManager.TargetGuid(EnemyFlagCarrier.Guid);
+                    WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
+                    if (enemyFlagCarrier != null)
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
+                        if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
+                            WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                    }
                     WowInterface.CombatClass.OutOfCombatExecute();
                 }
             }
             else
             {
-                WowObject enemyFlag = getEnemyFlagObject();
+                // go and get the enemy flag!!!
+                WowObject tmpFlag = getEnemyFlagObject();
+                enemyFlag = tmpFlag == null ? enemyFlag : tmpFlag;
                 if (enemyFlag != null)
                 {
                     // flag lies around
@@ -131,6 +184,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     {
                         // flag reached, save it!
                         hasStateChanged = true;
+                        WowInterface.HookManager.WowObjectOnRightClick(enemyFlag);
                     }
                 }
                 else
