@@ -27,7 +27,6 @@ namespace AmeisenBotX.Core.Hook
         private const int MEM_ALLOC_EXECUTION_SIZE = 4096;
         private const int MEM_ALLOC_GATEWAY_SIZE = 12;
         private readonly object hookLock = new object();
-        private ulong endsceneCalls;
 
         public HookManager(WowInterface wowInterface)
         {
@@ -35,18 +34,7 @@ namespace AmeisenBotX.Core.Hook
             OriginalFunctionBytes = new Dictionary<IntPtr, byte>();
         }
 
-        public ulong CallCount
-        {
-            get
-            {
-                unchecked
-                {
-                    ulong val = endsceneCalls;
-                    endsceneCalls = 0;
-                    return val;
-                }
-            }
-        }
+        public ulong PendingCallCount { get; set; }
 
         public IntPtr CodecaveForCheck { get; private set; }
 
@@ -1103,6 +1091,8 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ", LogLevel.Verbose);
             AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}", LogLevel.Verbose);
 
+            ++PendingCallCount;
+
             lock (hookLock)
             {
                 fullStopwatch = Stopwatch.StartNew();
@@ -1204,7 +1194,7 @@ namespace AmeisenBotX.Core.Hook
             fullStopwatch.Stop();
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
 
-            ++endsceneCalls;
+            --PendingCallCount;
             return returnBytes.ToArray();
         }
 

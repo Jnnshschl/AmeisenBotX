@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
-        ulong CallCount { get; }
+        ulong PendingCallCount { get; }
 
         bool IsWoWHooked { get; }
 
