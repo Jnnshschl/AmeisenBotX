@@ -203,5 +203,6 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         {
             return $"X: {X}, Y: {Y}, Z: {Z}";
         }
+
     }
 }

@@ -182,5 +182,7 @@ namespace AmeisenBotX.Core.Hook
         void UseItemByName(string itemName);
 
         void WowObjectOnRightClick(WowObject gObject);
+
+        bool IsOutdoors();
     }
 }

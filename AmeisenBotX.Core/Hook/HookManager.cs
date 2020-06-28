@@ -244,7 +244,14 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
+                    string result = "";
+                    byte[] bytes = InjectAndExecute(asm, true);
+
+                    if (bytes != null)
+                    {
+                        result = Encoding.UTF8.GetString(bytes);
+                    }
+
                     WowInterface.XMemory.FreeMemory(memAllocCmdVar);
 
                     return result;
@@ -1250,6 +1257,11 @@ namespace AmeisenBotX.Core.Hook
                     OriginalFunctionBytes[address] = opcode;
                 }
             }
+        }
+
+        public bool IsOutdoors()
+        {
+            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) ? result == 1 : false;
         }
     }
 }

@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
                        || Race == WowRace.Orc
                        || Race == WowRace.Bloodelf
                        || Race == WowRace.Tauren
-                       || Race == WowRace.Undead;
+                       || Race == WowRace.Troll;
         }
 
         public override string ToString()
@@ -115,5 +115,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
             return this;
         }
+
+
     }
 }

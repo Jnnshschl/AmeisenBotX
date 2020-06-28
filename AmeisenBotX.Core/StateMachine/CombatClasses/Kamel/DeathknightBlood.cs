@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     public class DeathknightBlood : ICombatClass
     {
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
             TargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
 
-        public string Author => "Jamsbaer";
+        public string Author => "Kamel";
 
         public WowClass Class => WowClass.Deathknight;
 
