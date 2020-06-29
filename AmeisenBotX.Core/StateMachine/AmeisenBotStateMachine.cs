@@ -83,6 +83,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
+        public BotState StateOverride { get; set; }
+
         public override void Execute()
         {
             // we cant do anything if wow has crashed
@@ -101,6 +103,8 @@ namespace AmeisenBotX.Core.Statemachine
                 return;
             }
 
+            bool setStateOverride = true;
+
             // ingame override states
             if (CurrentState.Key != (int)BotState.None
                 && CurrentState.Key != (int)BotState.StartWow
@@ -111,6 +115,8 @@ namespace AmeisenBotX.Core.Statemachine
 
                 if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
+                    setStateOverride = false;
+
                     if (SetState((int)BotState.LoadingScreen, true))
                     {
                         OnStateOverride?.Invoke(CurrentState.Key);
@@ -130,19 +136,29 @@ namespace AmeisenBotX.Core.Statemachine
                             WowInterface.MovementEngine.Execute();
                         }
 
-                        if (WowInterface.ObjectManager.Player.IsDead
-                            && SetState((int)BotState.Dead, true))
+                        if (WowInterface.ObjectManager.Player.IsDead)
                         {
                             // we are dead, state needs to release the spirit
-                            OnStateOverride?.Invoke(CurrentState.Key);
+                            setStateOverride = false;
+
+                            if (SetState((int)BotState.Dead, true))
+                            {
+                                OnStateOverride?.Invoke(CurrentState.Key);
+                            }
+
                             return;
                         }
                         else if (GhostCheckEvent.Run(out bool isGhost)
-                            && isGhost
-                            && SetState((int)BotState.Ghost, true))
+                            && isGhost)
                         {
                             // we cant be a ghost if we are still dead
-                            OnStateOverride?.Invoke(CurrentState.Key);
+                            setStateOverride = false;
+
+                            if (SetState((int)BotState.Ghost, true))
+                            {
+                                OnStateOverride?.Invoke(CurrentState.Key);
+                            }
+
                             return;
                         }
 
@@ -159,17 +175,28 @@ namespace AmeisenBotX.Core.Statemachine
                             //     return;
                             // }
 
-                            // TODO: handle combat bug, sometimes when combat ends, the player stays in combot for no reason
-                            if (!WowInterface.Globals.IgnoreCombat)
+                            // TODO: handle combat bug, sometimes when combat ends, the player stays in combat for no reason
+                            if (!WowInterface.Globals.IgnoreCombat
+                                && (WowInterface.ObjectManager.Player.IsInCombat
+                                    || WowInterface.Globals.ForceCombat
+                                    || IsAnyPartymemberInCombat()))
                             {
-                                if ((WowInterface.ObjectManager.Player.IsInCombat || WowInterface.Globals.ForceCombat || IsAnyPartymemberInCombat()) && SetState((int)BotState.Attacking, true))
+                                setStateOverride = false;
+
+                                if (SetState((int)BotState.Attacking, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
-                                    return;
                                 }
+
+                                return;
                             }
                         }
                     }
+                }
+
+                if (setStateOverride)
+                {
+                    SetState((int)StateOverride);
                 }
             }
 

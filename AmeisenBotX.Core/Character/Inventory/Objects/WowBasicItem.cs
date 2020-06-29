@@ -6,17 +6,9 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 {
     public class WowBasicItem : IWowItem
     {
-        /**
-         * Default Constructor
-         */
-
         public WowBasicItem()
         {
         }
-
-        /**
-         * Copy Constructor
-         */
 
         public WowBasicItem(WowBasicItem item)
         {

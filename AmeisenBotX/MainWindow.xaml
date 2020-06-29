@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="AmeisenBot" Height="250" Width="420" MinHeight="250" MinWidth="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico" LocationChanged="Window_LocationChanged">
+        Title="AmeisenBot" Height="270" Width="420" MinHeight="250" MinWidth="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico" LocationChanged="Window_LocationChanged">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -18,7 +18,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentState" Content="None" HorizontalAlignment="Left" Margin="49,136,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelCurrentState" Content="None" HorizontalAlignment="Left" Margin="49,130,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -107,17 +107,17 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Label x:Name="labelCurrentLevel" Content="80" HorizontalAlignment="Left" Margin="49,88,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelCurrentLevel" Content="80" HorizontalAlignment="Left" Margin="49,82,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentRace" Content="Race" HorizontalAlignment="Left" Margin="49,104,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelCurrentRace" Content="Race" HorizontalAlignment="Left" Margin="49,98,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentClass" Content="Class" HorizontalAlignment="Left" Margin="49,120,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelCurrentClass" Content="Class" HorizontalAlignment="Left" Margin="49,114,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -161,7 +161,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="6,0,0,28.333" FontFamily="Bahnschrift Light" Padding="0" FontSize="10" Height="12" VerticalAlignment="Bottom">
+        <Label x:Name="labelCurrentCombatclass" Content="CombatClass" HorizontalAlignment="Left" Margin="6,0,0,28.333" FontFamily="Bahnschrift Light" Padding="0" FontSize="9" Height="12" VerticalAlignment="Bottom">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -184,52 +184,52 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Label Content="Level:" HorizontalAlignment="Left" Margin="6,88,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
+        <Label Content="Level:" HorizontalAlignment="Left" Margin="6,82,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label Content="Race:" HorizontalAlignment="Left" Margin="6,104,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
+        <Label Content="Race:" HorizontalAlignment="Left" Margin="6,98,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label Content="Class:" HorizontalAlignment="Left" Margin="6,120,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
+        <Label Content="Class:" HorizontalAlignment="Left" Margin="6,114,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="32">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label Content="State:" HorizontalAlignment="Left" Margin="6,136,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
+        <Label Content="State:" HorizontalAlignment="Left" Margin="6,130,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label Content="Map:" HorizontalAlignment="Left" Margin="6,152,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
+        <Label Content="Map:" HorizontalAlignment="Left" Margin="6,146,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label Content="Zone:" HorizontalAlignment="Left" Margin="6,168,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
+        <Label Content="Zone:" HorizontalAlignment="Left" Margin="6,162,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelMapName" Content="None" HorizontalAlignment="Left" Margin="49,152,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelMapName" Content="None" HorizontalAlignment="Left" Margin="49,146,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelZoneName" Content="None" HorizontalAlignment="Left" Margin="49,168,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelZoneName" Content="None" HorizontalAlignment="Left" Margin="49,162,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label Content="SZone:" HorizontalAlignment="Left" Margin="6,184,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
+        <Label Content="SZone:" HorizontalAlignment="Left" Margin="6,178,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" BorderThickness="0,0,0,1" Width="38">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Label x:Name="labelZoneSubName" Content="None" HorizontalAlignment="Left" Margin="49,184,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
+        <Label x:Name="labelZoneSubName" Content="None" HorizontalAlignment="Left" Margin="49,178,0,0" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Padding="0" Width="145">
             <Label.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
@@ -269,5 +269,6 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}" />
             </Rectangle.Fill>
         </Rectangle>
+        <ComboBox x:Name="comboboxStateOverride" Text="None" Margin="6,198,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="188" Style="{DynamicResource ComboBoxStyleDark}" FontFamily="Bahnschrift Light" SelectionChanged="ComboboxStateOverride_SelectionChanged" />
     </Grid>
 </Window>

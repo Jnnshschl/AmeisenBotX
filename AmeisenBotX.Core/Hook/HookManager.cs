@@ -34,8 +34,6 @@ namespace AmeisenBotX.Core.Hook
             OriginalFunctionBytes = new Dictionary<IntPtr, byte>();
         }
 
-        public ulong PendingCallCount { get; set; }
-
         public IntPtr CodecaveForCheck { get; private set; }
 
         public IntPtr CodecaveForExecution { get; private set; }
@@ -55,6 +53,8 @@ namespace AmeisenBotX.Core.Hook
         public bool OverrideWorldCheck { get; private set; }
 
         public IntPtr OverrideWorldCheckAddress { get; private set; }
+
+        public ulong PendingCallCount { get; set; }
 
         public IntPtr ReturnValueAddress { get; private set; }
 
@@ -364,6 +364,11 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"));
         }
 
+        public string GetMounts()
+        {
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")for b=1,{{v:1}} do _,{{v:2}},{{v:3}},_,_,{{v:4}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"type\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end;{{v:0}}={{v:0}}..\"]\""));
+        }
+
         public Dictionary<RuneType, int> GetRunesReady()
         {
             Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
@@ -637,7 +642,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void QueueBattlegroundByName(string bgName)
         {
-            LuaDoString(BotUtils.ObfuscateLua($"for i=1,GetNumBattlegroundTypes() do local {{v:0}}=GetBattlegroundInfo(i)if {{v:0}}==\"{bgName}\"then JoinBattlefield(i) end end").Item1);
+            LuaDoString(BotUtils.ObfuscateLua($"for i=1,GetNumBattlegroundTypes() do {{v:0}}=GetBattlegroundInfo(i)if {{v:0}}==\"{bgName}\"then JoinBattlefield(i) end end").Item1);
         }
 
         public void ReleaseSpirit()

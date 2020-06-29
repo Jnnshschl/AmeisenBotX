@@ -37,6 +37,12 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", onFlagAlliance);
         }
 
+        public string Name => "Kummel Engine";
+
+        public string Description => "...";
+
+        public string Author => "Kamel";
+
         private void onFlagAlliance(long timestamp, List<string> args)
         {
             hasStateChanged = true;
@@ -44,6 +50,16 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             {
                 startPosition = WowInterface.ObjectManager.Player.Position;
             }
+        }
+
+        public void Enter()
+        {
+
+        }
+
+        public void Exit()
+        {
+
         }
 
         public void Execute()

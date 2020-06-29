@@ -101,6 +101,7 @@
     <Compile Include="Character\Inventory\Objects\WowRecipe.cs" />
     <Compile Include="Character\Inventory\Objects\WowTradegood.cs" />
     <Compile Include="Character\Inventory\Objects\WowWeapon.cs" />
+    <Compile Include="Character\Objects\WowMount.cs" />
     <Compile Include="Character\Spells\Enums\Spellschools.cs" />
     <Compile Include="Character\Spells\Objects\Spell.cs" />
     <Compile Include="Character\Spells\SpellBook.cs" />

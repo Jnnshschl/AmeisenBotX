@@ -31,10 +31,21 @@ namespace AmeisenBotX
 
         private void ComboboxSelectedConfig_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (comboboxSelectedConfig.SelectedItem == null)
+            {
+                return;
+            }
+
             if ((string)comboboxSelectedConfig.SelectedItem == "New Config")
             {
                 ConfigEditorWindow configEditor = new ConfigEditorWindow(BotDataPath, null);
                 configEditor.ShowDialog();
+
+                if (configEditor.Cancel)
+                {
+                    comboboxSelectedConfig.SelectedItem = null;
+                    return;
+                }
 
                 if (configEditor.ConfigName != null && configEditor.Config != null)
                 {
