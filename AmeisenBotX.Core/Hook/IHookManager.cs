@@ -11,9 +11,9 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
-        ulong PendingCallCount { get; }
-
         bool IsWoWHooked { get; }
+
+        ulong PendingCallCount { get; }
 
         void AcceptBattlegroundInvite();
 
@@ -78,6 +78,8 @@ namespace AmeisenBotX.Core.Hook
         string GetLootRollItemLink(int rollId);
 
         string GetMoney();
+
+        string GetMounts();
 
         Dictionary<RuneType, int> GetRunesReady();
 

@@ -12,6 +12,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
+        public byte Bytes0 => RawWowGameobject.GameobjectBytes0;
+
         public int DisplayId => RawWowGameobject.DisplayId;
 
         public BitVector32 DynamicFlags { get; set; }
@@ -23,8 +25,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public WowGameobjectType GameobjectType => (WowGameobjectType)RawWowGameobject.GameobjectBytes1;
 
         public int Level => RawWowGameobject.Level;
-
-        public byte Bytes0 => RawWowGameobject.GameobjectBytes0;
 
         private RawWowGameobject RawWowGameobject { get; set; }
 

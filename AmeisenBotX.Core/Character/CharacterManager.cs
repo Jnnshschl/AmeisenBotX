@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Common;
@@ -11,6 +12,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +41,8 @@ namespace AmeisenBotX.Core.Character
         public IWowItemComparator ItemComparator { get; set; }
 
         public int Money { get; private set; }
+
+        public List<WowMount> Mounts { get; private set; }
 
         public List<string> Skills { get; private set; }
 
@@ -184,6 +188,7 @@ namespace AmeisenBotX.Core.Character
 
             UpdateSkills();
             UpdateMoney();
+            UpdateMounts();
         }
 
         public void UpdateCharacterGear()
@@ -352,6 +357,15 @@ namespace AmeisenBotX.Core.Character
             {
                 Money = money;
             }
+        }
+
+        private void UpdateMounts()
+        {
+            try
+            {
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.HookManager.GetMounts());
+            }
+            catch { }
         }
 
         private void UpdateSkills()

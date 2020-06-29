@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core
     {
         public double AntiAfkMs { get; set; } = 1000;
 
-        public bool AutocloseWow { get; set; } = false;
+        public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
 
@@ -16,17 +16,19 @@ namespace AmeisenBotX.Core
 
         public bool AutojoinBg { get; set; } = false;
 
-        public bool AutoLogin { get; set; } = false;
+        public bool AutoLogin { get; set; } = true;
 
         public bool Autopilot { get; set; } = false;
 
         public bool AutoPositionWow { get; set; } = false;
 
-        public bool AutostartWow { get; set; } = false;
+        public bool AutostartWow { get; set; } = true;
+
+        public string BattlegroundEngine { get; set; } = "";
 
         public Rect BotWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
 
-        public string BuiltInCombatClassName { get; set; } = "ClassSpec";
+        public string BuiltInCombatClassName { get; set; } = "";
 
         public int CharacterSlot { get; set; } = 0;
 

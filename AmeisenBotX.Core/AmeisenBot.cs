@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Battleground;
-using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Battleground.einTyp;
-﻿using AmeisenBotX.Core.Battleground.Jannis;
+using AmeisenBotX.Core.Battleground.Jannis;
+using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -14,7 +14,6 @@ using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Movement.SMovementEngine;
@@ -73,6 +72,8 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
+            BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
             Stopwatch = new Stopwatch();
 
             StateMachineTimer = new Timer(Config.StateMachineTickMs);
@@ -93,6 +94,8 @@ namespace AmeisenBotX.Core
             StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
 
             InitCombatClasses();
+            InitBattlegroundEngines();
+
             if (config.UseBuiltInCombatClass)
             {
                 LoadDefaultCombatClass();
@@ -101,6 +104,8 @@ namespace AmeisenBotX.Core
             {
                 LoadCustomCombatClass();
             }
+
+            LoadBattlegroundEngine();
 
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
@@ -115,6 +120,8 @@ namespace AmeisenBotX.Core
         public event CombatClassCompilationStatus OnCombatClassCompilationStatusChanged;
 
         public string AccountName { get; }
+
+        public List<IBattlegroundEngine> BattlegroundEngines { get; set; }
 
         public string BotDataPath { get; }
 
@@ -170,6 +177,8 @@ namespace AmeisenBotX.Core
             {
                 LoadCustomCombatClass();
             }
+
+            LoadBattlegroundEngine();
         }
 
         public void Resume()
@@ -281,6 +290,16 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void InitBattlegroundEngines()
+        {
+            BattlegroundEngines = new List<IBattlegroundEngine>
+            {
+                new JBattleGroundEngine(WowInterface),
+                new KummelEngine(WowInterface),
+                new RunBoyRunEngine(WowInterface)
+            };
+        }
+
         private void InitCombatClasses()
         {
             CombatClasses = new List<ICombatClass>
@@ -319,6 +338,12 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
             };
+        }
+
+        private void LoadBattlegroundEngine()
+        {
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
+            WowInterface.BattlegroundEngine = BattlegroundEngines.FirstOrDefault(e => e.ToString().Equals(Config.BattlegroundEngine, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadBotWindowPosition()
@@ -562,8 +587,6 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
-            WowInterface.BattlegroundEngine = new JBattleGroundEngine(WowInterface);
-
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
@@ -598,9 +621,6 @@ namespace AmeisenBotX.Core
 
         private void SubscribeToWowEvents()
         {
-            // Prepare stuff
-            BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-
             // Subscribe
             WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
             WowInterface.EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);

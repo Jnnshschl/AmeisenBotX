@@ -536,6 +536,11 @@ namespace AmeisenBotX
                 M22 = PresentationSource.CompositionTarget.TransformToDevice.M22;
             }
 
+            comboboxStateOverride.Items.Add(BotState.Idle);
+            comboboxStateOverride.SelectedIndex = 0;
+
+            comboboxStateOverride.Items.Add(BotState.Job);
+
             if (AmeisenBot != null)
             {
                 AmeisenBot.Start();
@@ -561,6 +566,11 @@ namespace AmeisenBotX
             {
                 AdjustWowWindow();
             }
+        }
+
+        private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
         }
     }
 }
