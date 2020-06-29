@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="AmeisenBot" Height="270" Width="420" MinHeight="250" MinWidth="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico" LocationChanged="Window_LocationChanged">
+        Title="AmeisenBot" Height="270" Width="420" MinHeight="270" MinWidth="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico" LocationChanged="Window_LocationChanged">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>

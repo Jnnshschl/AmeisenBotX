@@ -144,9 +144,8 @@ namespace AmeisenBotX.Core.Statemachine
                             if (SetState((int)BotState.Dead, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);
+                                return;
                             }
-
-                            return;
                         }
                         else if (GhostCheckEvent.Run(out bool isGhost)
                             && isGhost)
@@ -157,9 +156,8 @@ namespace AmeisenBotX.Core.Statemachine
                             if (SetState((int)BotState.Ghost, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);
+                                return;
                             }
-
-                            return;
                         }
 
                         // we cant fight nor do we receive damage when we are dead or a ghost
@@ -186,9 +184,8 @@ namespace AmeisenBotX.Core.Statemachine
                                 if (SetState((int)BotState.Attacking, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
+                                    return;
                                 }
-
-                                return;
                             }
                         }
                     }
