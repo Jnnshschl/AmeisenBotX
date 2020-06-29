@@ -458,7 +458,7 @@ namespace AmeisenBotX
         {
             if (WindowLoaded)
             {
-                if (comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
+                if (comboboxBattlegroundEngine.SelectedItem != null && comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
                 {
                     labelBattlegroundEngineDescription.Content = "...";
                 }
