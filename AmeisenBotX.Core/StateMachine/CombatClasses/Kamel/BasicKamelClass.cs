@@ -32,18 +32,29 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 null,
                 DispellDebuffsFunction
             );
-
+            //Basic
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
+            //FuryWarrior
             TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+
+            //Resto Shaman
+            healingWaveSpellEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+
+            //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
         }
 
         public abstract string Author { get; }
-
+        //Basic
         public TimegatedEvent AutoAttackEvent { get; private set; }
+        //FuryWarrior
         public TimegatedEvent TargetSelectEvent { get; private set; }
         public TimegatedEvent HeroicStrikeEvent { get; private set; }
+        //Resto Shaman
+        public TimegatedEvent healingWaveSpellEvent { get; private set; }
+        //Mount check
         public TimegatedEvent getonthemount { get; private set; }
 
         public abstract WowClass Class { get; }

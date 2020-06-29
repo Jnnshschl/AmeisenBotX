@@ -80,11 +80,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             };
         }
 
-        //public override string ToString()
-        //{
-        //    return $"[{Class}] [{Role}] {Displayname}";
-        //}
-        //
         public override string Author => "Kamel";
 
         public override bool WalkBehindEnemy => false;
@@ -93,7 +88,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "Basic Fury Warrior";
+        public override string Description => "Advanced Fury Warrior";
 
         public override string Displayname => "Warrior Fury";
 
