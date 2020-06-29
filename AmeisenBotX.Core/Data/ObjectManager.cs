@@ -295,7 +295,15 @@ namespace AmeisenBotX.Core.Data
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();
-                if (PartyleaderGuid > 0) { PartymemberGuids = ReadPartymemberGuids(); }
+                if (PartyleaderGuid > 0)
+                {
+                    PartymemberGuids = ReadPartymemberGuids();
+
+                    if (!PartymemberGuids.Contains(PlayerGuid))
+                    {
+                        PartymemberGuids.Add(PlayerGuid);
+                    }
+                }
             }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);
