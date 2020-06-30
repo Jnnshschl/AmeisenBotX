@@ -181,10 +181,8 @@ namespace AmeisenBotX.Core.Statemachine
                     }
                 }
 
-                if (CurrentState.Key != (int)BotState.Dead
-                    && CurrentState.Key != (int)BotState.Ghost
-                    && CurrentState.Key != (int)BotState.Attacking
-                    && CurrentState.Key != (int)BotState.LoadingScreen)
+                if (CurrentState.Key == (int)BotState.Idle
+                    && CurrentState.Key != (int)StateOverride)
                 {
                     SetState((int)StateOverride);
                 }
