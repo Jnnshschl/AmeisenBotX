@@ -364,9 +364,19 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"));
         }
 
+        public void Mount(int index)
+        {
+            LuaDoString($"CallCompanion(\"MOUNT\", {index});");
+        }
+
+        public void Dismount()
+        {
+            LuaDoString("DismissCompanion(\"MOUNT\");");
+        }
+
         public string GetMounts()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")for b=1,{{v:1}} do _,{{v:2}},{{v:3}},_,_,{{v:4}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"type\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end;{{v:0}}={{v:0}}..\"]\""));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")if {{v:1}}>0 then for b=1,{{v:1}} do {{v:4}},{{v:2}},{{v:3}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"index\\\":\"..b..\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"mountId\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end end;{{v:0}}={{v:0}}..\"]\""));
         }
 
         public Dictionary<RuneType, int> GetRunesReady()

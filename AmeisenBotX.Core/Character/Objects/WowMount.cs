@@ -10,7 +10,10 @@ namespace AmeisenBotX.Core.Character.Objects
         [JsonProperty("spellId")]
         public int SpellId { get; set; }
 
-        [JsonProperty("type")]
-        public int Type { get; set; }
+        [JsonProperty("mountId")]
+        public int MountId { get; set; }
+
+        [JsonProperty("index")]
+        public int Index { get; set; }
     }
 }
