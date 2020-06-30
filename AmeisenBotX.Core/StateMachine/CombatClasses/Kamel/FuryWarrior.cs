@@ -150,7 +150,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 {
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-
                         WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                     }
                     if (DateTime.Now > spellCoolDown[berserkerRageSpell] && WowInterface.ObjectManager.Player.IsFleeing)
@@ -161,11 +160,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     }
                     
                     if (DateTime.Now > spellCoolDown[disarmSpell])
-                    {
-                        WowInterface.HookManager.CastSpell(defensiveStanceSpell);
-                        WowInterface.HookManager.CastSpell(disarmSpell);
-                        spellCoolDown[disarmSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(disarmSpell));
-                        return;
+                    {//To Do: Disarm check enemy weapon
+                        if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
+                        {
+                            WowInterface.HookManager.CastSpell(defensiveStanceSpell);
+                            WowInterface.HookManager.CastSpell(disarmSpell);
+                            spellCoolDown[disarmSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(disarmSpell));
+                            return;
+                        }
                     }  
                     
                     if (DateTime.Now > spellCoolDown[heroicFurySpell] && WowInterface.ObjectManager.Player.IsSilenced)
@@ -287,7 +289,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
             else if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 20).FirstOrDefault();
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 50)
+                    .Where(e => e.IsInCombat) // To Do e.IsTaggedByMe
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
 
                 if (nearTarget != null)
                 {

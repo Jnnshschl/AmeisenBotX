@@ -16,6 +16,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
     {
 
         private const string healingWaveSpell = "Healing Wave";
+        private const string riptideSpell = "Riptide";
+        private const string watershieldSpell = "Water shield";
+        private const string LightningShieldSpell = "Lightning Shield";
 
         Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
@@ -23,18 +26,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             WowInterface = wowInterface;
             spellCoolDown.Add(healingWaveSpell, DateTime.Now);
+            spellCoolDown.Add(riptideSpell, DateTime.Now);
+            spellCoolDown.Add(watershieldSpell, DateTime.Now);
+            spellCoolDown.Add(LightningShieldSpell, DateTime.Now);
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, Utils.AuraManager.CastFunction>();
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
-                //if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(berserkerStanceSpell))
-                //{
-                //    MyAuraManager.BuffsToKeepActive.Add(berserkerStanceSpell, () => { WowInterface.HookManager.CastSpell(berserkerStanceSpell); return true; });
-                //}
-                //else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(battleStanceSpell))
-                //{
-                //    MyAuraManager.BuffsToKeepActive.Add(battleStanceSpell, () => { WowInterface.HookManager.CastSpell(berserkerStanceSpell); return true; });
-                //}
+                if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(watershieldSpell))
+                {
+                    MyAuraManager.BuffsToKeepActive.Add(watershieldSpell, () => { WowInterface.HookManager.CastSpell(watershieldSpell); return true; });
+                }
+                else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(LightningShieldSpell))
+                {
+                    MyAuraManager.BuffsToKeepActive.Add(LightningShieldSpell, () => { WowInterface.HookManager.CastSpell(LightningShieldSpell); return true; });
+                }
             };
         }
 
@@ -61,6 +67,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public override CombatClassRole Role => CombatClassRole.Heal;
 
         public override string Version => "1.0";
+        public bool targetIsInRange { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -99,31 +106,56 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.TargetGuid != 0)
-            {
-                if (healingWaveSpellEvent.Run() && WowInterface.ObjectManager.Target.HealthPercentage < 100)
-                {
-                    WowInterface.HookManager.CastSpell(healingWaveSpell);
-                    spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
-                    return;
-                }
-            }
-            else if (TargetSelectEvent.Run())
+            MyAuraManager.Tick();
+
+            if (TargetSelectEvent.Run())
             {
                 //WowUnit partyMember = WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 20).FirstOrDefault();
-                WowUnit partyMember = WowInterface.ObjectManager.Partymembers.OrderBy(e => e.HealthPercentage).FirstOrDefault();
+                WowUnit partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage < 100).OrderBy(e => e.HealthPercentage).FirstOrDefault();//FirstOrDefault => tolist
 
-                if (partyMember != null)
+                if (partyMemberToHeal != null)
                 {
-                    WowInterface.HookManager.TargetGuid(partyMember.Guid);
-                    // AmeisenLogger.Instance.Log("FuryWarri", $"Target: {nearTarget}");
+                    if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.Guid)
+                    {
+                        WowInterface.HookManager.TargetGuid(partyMemberToHeal.Guid);
+                    }
+
+                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.Guid).Position) <= 30;
+                    if (targetIsInRange)
+                    {
+                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        {
+                            WowInterface.HookManager.StopClickToMoveIfActive();
+                            WowInterface.MovementEngine.Reset();
+                        }
+                        if (WowInterface.ObjectManager.Target != null)
+                        {
+                            if (riptideSpellEvent.Run() && WowInterface.ObjectManager.Target.HealthPercentage <= 98 && !WowInterface.ObjectManager.Target.HasBuffByName("Riptide"))
+                            {
+                                WowInterface.HookManager.CastSpell(riptideSpell);
+                                spellCoolDown[riptideSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(riptideSpell));
+                                return;
+                            }
+
+                            if (healingWaveSpellEvent.Run() && WowInterface.ObjectManager.Target.HealthPercentage < 70)
+                            {
+                                WowInterface.HookManager.CastSpell(healingWaveSpell);
+                                spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
+                                return;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //Attacken
                 }
             }
         }
 
         public override void OutOfCombatExecute()
         {
-            throw new NotImplementedException();
+
         }
     }
 }
