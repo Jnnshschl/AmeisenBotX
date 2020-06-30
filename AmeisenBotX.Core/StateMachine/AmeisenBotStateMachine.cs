@@ -103,8 +103,6 @@ namespace AmeisenBotX.Core.Statemachine
                 return;
             }
 
-            bool setStateOverride = true;
-
             // ingame override states
             if (CurrentState.Key != (int)BotState.None
                 && CurrentState.Key != (int)BotState.StartWow
@@ -115,8 +113,6 @@ namespace AmeisenBotX.Core.Statemachine
 
                 if (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
-                    setStateOverride = false;
-
                     if (SetState((int)BotState.LoadingScreen, true))
                     {
                         OnStateOverride?.Invoke(CurrentState.Key);
@@ -139,8 +135,6 @@ namespace AmeisenBotX.Core.Statemachine
                         if (WowInterface.ObjectManager.Player.IsDead)
                         {
                             // we are dead, state needs to release the spirit
-                            setStateOverride = false;
-
                             if (SetState((int)BotState.Dead, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);
@@ -151,8 +145,6 @@ namespace AmeisenBotX.Core.Statemachine
                             && isGhost)
                         {
                             // we cant be a ghost if we are still dead
-                            setStateOverride = false;
-
                             if (SetState((int)BotState.Ghost, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);
@@ -179,8 +171,6 @@ namespace AmeisenBotX.Core.Statemachine
                                     || WowInterface.Globals.ForceCombat
                                     || IsAnyPartymemberInCombat()))
                             {
-                                setStateOverride = false;
-
                                 if (SetState((int)BotState.Attacking, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
@@ -191,7 +181,10 @@ namespace AmeisenBotX.Core.Statemachine
                     }
                 }
 
-                if (setStateOverride)
+                if (CurrentState.Key != (int)BotState.Dead
+                    && CurrentState.Key != (int)BotState.Ghost
+                    && CurrentState.Key != (int)BotState.Attacking
+                    && CurrentState.Key != (int)BotState.LoadingScreen)
                 {
                     SetState((int)StateOverride);
                 }
