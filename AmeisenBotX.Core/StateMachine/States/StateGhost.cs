@@ -47,9 +47,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                     return;
                 }
                 else if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap)
-                         && WowInterface.DungeonEngine?.DungeonProfile != null)
+                         && WowInterface.DungeonEngine?.Profile != null)
                 {
-                    CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                    CorpsePosition = WowInterface.DungeonEngine.Profile.WorldEntry;
                 }
                 else
                 {

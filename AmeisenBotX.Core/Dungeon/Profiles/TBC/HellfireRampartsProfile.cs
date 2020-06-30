@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[58-62] Hellfire Ramparts";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(-1355, 1641, 68)),
             new DungeonNode(new Vector3(-1350, 1647, 69)),

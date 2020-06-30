@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
 
         public string Name { get; } = "[70-80] Azjol Nerub";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(413, 796, 831)),
             new DungeonNode(new Vector3(418, 790, 830)),

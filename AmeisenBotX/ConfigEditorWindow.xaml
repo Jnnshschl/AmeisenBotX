@@ -438,7 +438,7 @@
                         <ComboBox x:Name="comboboxBattlegroundEngine" Text="None" Margin="4,35,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="180" Style="{DynamicResource ComboBoxStyleDark}" FontFamily="Bahnschrift Light" SelectionChanged="ComboboxBattlegroundEngine_SelectionChanged" />
                         <Label x:Name="labelBattlegroundEngineDescription" Content="..." HorizontalAlignment="Left" Margin="4,64,0,0" VerticalAlignment="Top" Width="280">
                             <Label.Foreground>
-                                <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
                     </Grid>

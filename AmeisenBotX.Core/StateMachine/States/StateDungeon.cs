@@ -9,6 +9,7 @@
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
+            WowInterface.DungeonEngine.Enter();
             StateMachine.OnStateOverride += StateMachine_OnStateOverride;
         }
 
@@ -28,7 +29,7 @@
         {
             StateMachine.OnStateOverride -= StateMachine_OnStateOverride;
             WowInterface.MovementEngine.Reset();
-            WowInterface.DungeonEngine.Reset();
+            WowInterface.DungeonEngine.Exit();
         }
 
         private void StateMachine_OnStateOverride(int botState)

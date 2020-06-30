@@ -185,9 +185,11 @@
     <Compile Include="Data\Objects\Enums\WowUnitFlags.cs" />
     <Compile Include="Data\Cache\InMemoryBotCache.cs" />
     <Compile Include="Data\Cache\IAmeisenBotCache.cs" />
+    <Compile Include="Dungeon\DungeonBlackboard.cs" />
     <Compile Include="Dungeon\DungeonEngine.cs" />
     <Compile Include="Dungeon\Enums\DungeonFactionType.cs" />
     <Compile Include="Dungeon\Enums\DungeonNodeType.cs" />
+    <Compile Include="Dungeon\IDungeonEngine.cs" />
     <Compile Include="Dungeon\Profiles\Classic\DeadminesProfile.cs" />
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />

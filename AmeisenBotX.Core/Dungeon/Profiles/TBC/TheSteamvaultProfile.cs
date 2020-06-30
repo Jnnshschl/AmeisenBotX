@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[62-66] The Steamvault";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(-14, 7, -4)),
             new DungeonNode(new Vector3(-6, 5, -4)),

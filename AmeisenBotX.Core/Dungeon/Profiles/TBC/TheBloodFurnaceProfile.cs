@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[59-63] The Blood Furnace";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(-4, 15, -45)),
             new DungeonNode(new Vector3(-2, 7, -45)),

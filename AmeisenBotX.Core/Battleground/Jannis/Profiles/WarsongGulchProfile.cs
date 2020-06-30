@@ -23,43 +23,52 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
-            JBgBlackboard = new JBgBlackboard();
+            JBgBlackboard = new JBgBlackboard(UpdateBattlegroundInfo);
 
             KillEnemyFlagCarrierSelector = new Selector<JBgBlackboard>
             (
+                "EnemyTeamFlagCarrierInRange",
                 (b) => b.EnemyTeamFlagCarrier != null,
                 new Selector<JBgBlackboard>
                 (
+                    "HasFlag",
                     (b) => b.MyTeamHasFlag
                         || b.EnemyTeamFlagCarrier.Position.GetDistance(WsgDataset.EnemyBasePosition)
                          < WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition),
-                    new Leaf<JBgBlackboard>(KillEnemyFlagCarrier),
-                    new Leaf<JBgBlackboard>(MoveToEnemyBaseAndGetFlag)
+                    new Leaf<JBgBlackboard>("KillEnemyFlagCarrier", KillEnemyFlagCarrier),
+                    new Leaf<JBgBlackboard>("MoveToEnemyBaseAndGetFlag", MoveToEnemyBaseAndGetFlag)
                 ),
                 new Selector<JBgBlackboard>
                 (
+                    "IsFlagNearOwnOrEnemyBase",
                     (b) => b.EnemyTeamFlagPos.GetDistanceIgnoreZ(WsgDataset.EnemyBasePositionMapCoords)
                          < b.EnemyTeamFlagPos.GetDistanceIgnoreZ(WsgDataset.OwnBasePositionMapCoords),
-                    new Leaf<JBgBlackboard>(MoveToEnemyBase),
-                    new Leaf<JBgBlackboard>(MoveToOwnBase)
+                    new Leaf<JBgBlackboard>("MoveToEnemyBase", (b) => MoveToPosition(WsgDataset.EnemyBasePosition)),
+                    new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                 )
             );
 
-            FlagSelector = new DuoSelector<JBgBlackboard>
+            FlagSelector = new DualSelector<JBgBlackboard>
             (
+                "WhoHasTheFlag",
                 (b) => b.MyTeamHasFlag,
                 (b) => b.EnemyTeamHasFlag,
+
+                // no team has the flag
+                new Leaf<JBgBlackboard>("MoveToEnemyBaseAndGetFlag", MoveToEnemyBaseAndGetFlag),
 
                 // only my team has the flag
                 new Selector<JBgBlackboard>
                 (
+                    "AmITheFlagCarrier",
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid,
-                    new Leaf<JBgBlackboard>(MoveToOwnBase),
+                    new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition)),
                     new Selector<JBgBlackboard>
                     (
+                        "IsTheFlagCarrierInRange",
                         (b) => b.MyTeamFlagCarrier != null,
-                        new Leaf<JBgBlackboard>(MoveToOwnFlagCarrier),
-                        new Leaf<JBgBlackboard>(DefendOwnBase)
+                        new Leaf<JBgBlackboard>("MoveToOwnFlagCarrier", (b) => MoveToPosition(b.MyTeamFlagCarrier.Position)),
+                        new Leaf<JBgBlackboard>("DefendOwnBase", DefendOwnBase)
                     )
                 ),
 
@@ -69,61 +78,70 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 // both teams have the flag
                 new Selector<JBgBlackboard>
                 (
+                    "AmITheFlagCarrier",
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid,
                     new Selector<JBgBlackboard>
                     (
+                        "AreEnemiesNearFlagCarrier",
                         (b) => EnemiesNearFlagCarrier(b),
-                        new Leaf<JBgBlackboard>(FleeFromComingEnemies),
+                        new Leaf<JBgBlackboard>("FleeFromComingEnemies", FleeFromComingEnemies),
                         new Selector<JBgBlackboard>
                         (
+                            "AmINearOwnBase",
                             (b) => WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0,
-                            new Leaf<JBgBlackboard>(MoveToOwnBaseHidingSpot),
-                            new Leaf<JBgBlackboard>(MoveToOwnBase)
+                            new Leaf<JBgBlackboard>("MoveToHidingSpot", (b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
+                            new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                         )
                     ),
                     new Selector<JBgBlackboard>
                     (
+                        "AmINearOwnFlagCarrierAndEnemiesNearFlagCarrier",
                         (b) => AmINearOwnFlagCarrier(b) && EnemiesNearFlagCarrier(b),
-                        new Leaf<JBgBlackboard>(MoveToCarrierAndHelp),
+                        new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
                         new Selector<JBgBlackboard>
                         (
+                            "AmIOneOfTheClosestToOwnFlagCarrier",
                             (b) => AmIOneOfTheClosestToOwnFlagCarrier(b, Math.Min(wowInterface.ObjectManager.PartymemberGuids.Count - 2, 2)),
-                            new Leaf<JBgBlackboard>(MoveToCarrierAndHelp),
+                            new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
                             KillEnemyFlagCarrierSelector
                         )
                     )
-                ),
-                new Leaf<JBgBlackboard>(MoveToEnemyBaseAndGetFlag)
+                )
+            );
+
+            MainSelector = new Selector<JBgBlackboard>
+            (
+                "IsGateOpen",
+                (b) => IsGateOpen(),
+                 new Selector<JBgBlackboard>
+                 (
+                     "IsFlagNear",
+                     (b) => IsFlagNear(),
+                     new Leaf<JBgBlackboard>("UseNearestFlag", UseNearestFlag),
+                     new Selector<JBgBlackboard>
+                     (
+                         "IsAnyBuffNearMe",
+                         (b) => IsAnyBuffNearMe(16.0),
+                         new Leaf<JBgBlackboard>("MoveToNearestBuff", MoveToNearestBuff),
+                         new Selector<JBgBlackboard>
+                         (
+                             "DoWeOutnumberOurEnemies",
+                             (b) => DoWeOutnumberOurEnemies(b),
+                             new Leaf<JBgBlackboard>("AttackNearWeakestEnemy", AttackNearWeakestEnemy),
+                             FlagSelector
+                         )
+                     )
+                 ),
+                 new Leaf<JBgBlackboard>("MoveToGatePosition", (b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
             BehaviorTree = new AmeisenBotBehaviorTree<JBgBlackboard>
             (
-                new Selector<JBgBlackboard>
-                (
-                    (b) => IsGateOpen(),
-                     new Selector<JBgBlackboard>
-                     (
-                         (b) => IsFlagNear(),
-                         new Leaf<JBgBlackboard>(UseNearestFlag),
-                         new Selector<JBgBlackboard>
-                         (
-                             (b) => IsAnyBuffNearMe(16.0),
-                             new Leaf<JBgBlackboard>(MoveToNearestBuff),
-                             new Selector<JBgBlackboard>
-                             (
-                                 (b) => DoWeOutnumberOurEnemies(b),
-                                 new Leaf<JBgBlackboard>(AttackNearWeakestEnemy),
-                                 FlagSelector
-                             )
-                         )
-                     ),
-                     new Leaf<JBgBlackboard>(MoveToGatesAndWait)
-                ),
-                JBgBlackboard
+                "JBgWarsongGulchBehaviorTree",
+                MainSelector,
+                JBgBlackboard,
+                TimeSpan.FromSeconds(1)
             );
-
-            RefreshScoreEvent = new TimegatedEvent(TimeSpan.FromSeconds(1), UpdateBattlegroundInfo);
-            SetTargetEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
         public interface IWsgDataset
@@ -143,19 +161,17 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         public AmeisenBotBehaviorTree<JBgBlackboard> BehaviorTree { get; }
 
-        public DuoSelector<JBgBlackboard> FlagSelector { get; }
+        public DualSelector<JBgBlackboard> FlagSelector { get; }
 
         public JBgBlackboard JBgBlackboard { get; set; }
+
+        public Selector<JBgBlackboard> MainSelector { get; }
 
         public IWsgDataset WsgDataset { get; set; }
 
         private TimegatedEvent ActionEvent { get; }
 
         private Selector<JBgBlackboard> KillEnemyFlagCarrierSelector { get; }
-
-        private TimegatedEvent RefreshScoreEvent { get; }
-
-        private TimegatedEvent SetTargetEvent { get; }
 
         private WowInterface WowInterface { get; }
 
@@ -171,11 +187,6 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 {
                     WsgDataset = new HordeWsgDataset();
                 }
-            }
-
-            if (RefreshScoreEvent.Run())
-            {
-                return;
             }
 
             BehaviorTree.Tick();
@@ -286,9 +297,12 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             if (nearestEnemy != null)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Fleeing, nearestEnemy.Position, nearestEnemy.Rotation);
+                return BehaviorTreeStatus.Ongoing;
             }
-
-            return BehaviorTreeStatus.Ongoing;
+            else
+            {
+                return BehaviorTreeStatus.Success;
+            }
         }
 
         private bool IsAnyBuffNearMe(double distance)
@@ -345,7 +359,40 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             return BehaviorTreeStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToCarrierAndHelp(JBgBlackboard blackboard)
+        private BehaviorTreeStatus MoveToEnemyBaseAndGetFlag(JBgBlackboard blackboard)
+        {
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
+
+            if (distance > 2.0)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
+            }
+            else
+            {
+                return UseNearestFlag(blackboard);
+            }
+
+            return BehaviorTreeStatus.Ongoing;
+        }
+
+        private BehaviorTreeStatus MoveToNearestBuff(JBgBlackboard blackboard)
+        {
+            WowGameobject buffObject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(new List<int>() { 5991, 5995, 5931 });
+
+            if (buffObject != null
+                && buffObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, buffObject.Position);
+            }
+            else
+            {
+                return BehaviorTreeStatus.Failed;
+            }
+
+            return BehaviorTreeStatus.Ongoing;
+        }
+
+        private BehaviorTreeStatus MoveToOwnFlagCarrierAndHelp(JBgBlackboard blackboard)
         {
             if (JBgBlackboard.MyTeamFlagCarrier == null)
             {
@@ -382,87 +429,19 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             return BehaviorTreeStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToEnemyBase(JBgBlackboard blackboard)
+        private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5)
         {
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
-            return BehaviorTreeStatus.Ongoing;
-        }
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
 
-        private BehaviorTreeStatus MoveToEnemyBaseAndGetFlag(JBgBlackboard blackboard)
-        {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
-
-            if (distance > 2.0)
+            if (distance > minDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
-            }
-            else
-            {
-                return UseNearestFlag(blackboard);
-            }
-
-            return BehaviorTreeStatus.Ongoing;
-        }
-
-        private BehaviorTreeStatus MoveToGatesAndWait(JBgBlackboard blackboard)
-        {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.GatePosition);
-
-            if (distance > 4.0)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.GatePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, position);
+                return BehaviorTreeStatus.Ongoing;
             }
             else
             {
                 return BehaviorTreeStatus.Success;
             }
-
-            return BehaviorTreeStatus.Ongoing;
-        }
-
-        private BehaviorTreeStatus MoveToNearestBuff(JBgBlackboard blackboard)
-        {
-            WowGameobject buffObject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(new List<int>() { 5991, 5995, 5931 });
-
-            if (buffObject != null
-                && buffObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, buffObject.Position);
-            }
-            else
-            {
-                return BehaviorTreeStatus.Failed;
-            }
-
-            return BehaviorTreeStatus.Ongoing;
-        }
-
-        private BehaviorTreeStatus MoveToOwnBase(JBgBlackboard blackboard)
-        {
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.OwnBasePosition);
-            return BehaviorTreeStatus.Ongoing;
-        }
-
-        private BehaviorTreeStatus MoveToOwnBaseHidingSpot(JBgBlackboard blackboard)
-        {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.FlagHidingSpot);
-
-            if (distance > 2.0)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.FlagHidingSpot);
-            }
-            else
-            {
-                return BehaviorTreeStatus.Success;
-            }
-
-            return BehaviorTreeStatus.Ongoing;
-        }
-
-        private BehaviorTreeStatus MoveToOwnFlagCarrier(JBgBlackboard blackboard)
-        {
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, JBgBlackboard.MyTeamFlagCarrier.Position);
-            return BehaviorTreeStatus.Ongoing;
         }
 
         private void UpdateBattlegroundInfo()

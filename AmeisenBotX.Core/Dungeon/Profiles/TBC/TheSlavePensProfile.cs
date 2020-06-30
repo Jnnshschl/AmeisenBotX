@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[60-64] The Slave Pens";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(120, -132, -1)),
             new DungeonNode(new Vector3(122, -124, 0)),

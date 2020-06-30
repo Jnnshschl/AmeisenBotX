@@ -72,8 +72,6 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
-            BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-
             Stopwatch = new Stopwatch();
 
             StateMachineTimer = new Timer(Config.StateMachineTickMs);
@@ -154,6 +152,8 @@ namespace AmeisenBotX.Core
         private TimegatedEvent BagUpdateEvent { get; set; }
 
         private int CurrentExecutionCount { get; set; }
+
+        private TimegatedEvent EquipmentUpdateEvent { get; set; }
 
         private Timer StateMachineTimer { get; }
 
@@ -453,7 +453,10 @@ namespace AmeisenBotX.Core
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
-            WowInterface.CharacterManager.Equipment.Update();
+            if (EquipmentUpdateEvent.Run())
+            {
+                OnBagChanged(timestamp, args);
+            }
         }
 
         private void OnLfgProposalShow(long timestamp, List<string> args)
@@ -622,6 +625,9 @@ namespace AmeisenBotX.Core
 
         private void SubscribeToWowEvents()
         {
+            BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            EquipmentUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
             // Subscribe
             WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
             WowInterface.EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);

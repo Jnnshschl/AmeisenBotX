@@ -928,11 +928,13 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    byte returnedByte = InjectAndExecute(asm, true)[0];
-                    // WowInterface.XMemory.Read(resultPointer, out result);
-
+                    byte[] bytes = InjectAndExecute(asm, true);
                     WowInterface.XMemory.FreeMemory(tracelineCodecave);
-                    return returnedByte;
+
+                    if (bytes != null && bytes.Length > 0)
+                    {
+                        return bytes[0];
+                    }
                 }
             }
 

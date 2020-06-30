@@ -154,10 +154,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (StateMachine.CurrentState.Key == (int)BotState.Dungeon
                     && WowInterface.DungeonEngine != null
-                    && WowInterface.DungeonEngine.DungeonProfile.PriorityUnits != null
-                    && WowInterface.DungeonEngine.DungeonProfile.PriorityUnits.Count > 0)
+                    && WowInterface.DungeonEngine.Profile.PriorityUnits != null
+                    && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
                 {
-                    TargetManager.PriorityTargets = WowInterface.DungeonEngine.DungeonProfile.PriorityUnits.ToList();
+                    TargetManager.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits.ToList();
                 }
             }
 
