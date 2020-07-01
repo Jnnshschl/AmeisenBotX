@@ -598,7 +598,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();
-            WowInterface.MovementEngine = new StateBasedMovementEngine(WowInterface, Config, WowInterface.MovementSettings, WowInterface.PathfindingHandler);
+            WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)

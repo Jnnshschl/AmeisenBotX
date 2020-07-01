@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out List<WowUnit> targetToSelect)
         {
-            if (WowInterface.ObjectManager.Target != null
+            if (WowInterface.ObjectManager.TargetGuid != 0
                 && (WowInterface.ObjectManager.Target.IsDead
                     || WowInterface.ObjectManager.Target.IsNotAttackable
                     || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
@@ -45,6 +45,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 {
                     return true;
                 }
+            }
+            else
+            {
+                Enemies = WowInterface.ObjectManager
+                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
+                .Where(e => e.IsTaggedByMe || e.GetType() == typeof(WowPlayer))
+                .ToList();
             }
 
             // remove all invalid, dead units

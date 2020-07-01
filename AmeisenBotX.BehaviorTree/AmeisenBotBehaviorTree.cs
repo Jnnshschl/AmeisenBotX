@@ -63,6 +63,8 @@ namespace AmeisenBotX.BehaviorTree
 
         private bool BlackboardUpdateEnabled { get; set; }
 
+        public string LastExecutedName { get; private set; }
+
         public BehaviorTreeStatus Tick()
         {
             if (BlackboardUpdateEnabled && LastBlackBoardUpdate + BlackboardUpdateTime < DateTime.Now)
@@ -98,7 +100,9 @@ namespace AmeisenBotX.BehaviorTree
             }
             else
             {
-                return RootNode.Execute(Blackboard);
+                Node<T> nodeToExecute = RootNode.GetNodeToExecute(Blackboard);
+                LastExecutedName = nodeToExecute.Name;
+                return nodeToExecute.Execute(Blackboard);
             }
         }
     }

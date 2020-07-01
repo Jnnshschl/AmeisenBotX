@@ -140,9 +140,9 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         public void Limit(float maxSpeed)
         {
-            X = X < 0 ? X <= maxSpeed * -1 ? maxSpeed * -1 : X : X >= maxSpeed ? maxSpeed : X;
-            Y = Y < 0 ? Y <= maxSpeed * -1 ? maxSpeed * -1 : Y : Y >= maxSpeed ? maxSpeed : Y;
-            Z = Z < 0 ? Z <= maxSpeed * -1 ? maxSpeed * -1 : Z : Z >= maxSpeed ? maxSpeed : Z;
+            X = X < 0f ? Math.Max(X, maxSpeed * -1) : Math.Min(X, maxSpeed);
+            Y = Y < 0f ? Math.Max(Y, maxSpeed * -1) : Math.Min(Y, maxSpeed);
+            Z = Z < 0f ? Math.Max(Z, maxSpeed * -1) : Math.Min(Z, maxSpeed);
         }
 
         public void Multiply(Vector3 vector)

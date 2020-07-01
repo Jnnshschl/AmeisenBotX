@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 // use the default MovementEngine to move if the CombatClass doesnt
                 if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
-                    if (WowInterface.ObjectManager.Target != null)
+                    if (WowInterface.ObjectManager.TargetGuid != 0)
                     {
                         if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
                             || WowInterface.ObjectManager.Target.IsDead
@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance > DistanceToTarget || !TargetInLos)
             {
-                Vector3 positionToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), target.Position, 3.0); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                Vector3 positionToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), target.Position, 1.0); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }

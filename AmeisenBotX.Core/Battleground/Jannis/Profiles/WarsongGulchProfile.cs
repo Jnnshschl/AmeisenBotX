@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     new Selector<JBgBlackboard>
                     (
                         "AreEnemiesNearFlagCarrier",
-                        (b) => EnemiesNearFlagCarrier(b),
+                        (b) => !DoWeOutnumberOurEnemies(b),
                         new Leaf<JBgBlackboard>("FleeFromComingEnemies", FleeFromComingEnemies),
                         new Selector<JBgBlackboard>
                         (
@@ -93,19 +93,20 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                             new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                         )
                     ),
-                    new Selector<JBgBlackboard>
-                    (
-                        "AmINearOwnFlagCarrierAndEnemiesNearFlagCarrier",
-                        (b) => AmINearOwnFlagCarrier(b) && EnemiesNearFlagCarrier(b),
-                        new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
-                        new Selector<JBgBlackboard>
-                        (
-                            "AmIOneOfTheClosestToOwnFlagCarrier",
-                            (b) => AmIOneOfTheClosestToOwnFlagCarrier(b, Math.Min(wowInterface.ObjectManager.PartymemberGuids.Count - 2, 2)),
-                            new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
-                            KillEnemyFlagCarrierSelector
-                        )
-                    )
+                    KillEnemyFlagCarrierSelector
+                    // new Selector<JBgBlackboard>
+                    // (
+                    //     "AmINearOwnFlagCarrierAndEnemiesNearFlagCarrier",
+                    //     (b) => AmINearOwnFlagCarrier(b) && EnemiesNearFlagCarrier(b),
+                    //     new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
+                    //     new Selector<JBgBlackboard>
+                    //     (
+                    //         "AmIOneOfTheClosestToOwnFlagCarrier",
+                    //         (b) => AmIOneOfTheClosestToOwnFlagCarrier(b, Math.Min(wowInterface.ObjectManager.PartymemberGuids.Count - 2, 2)),
+                    //         new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
+                    //         KillEnemyFlagCarrierSelector
+                    //     )
+                    // )
                 )
             );
 
@@ -212,7 +213,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                             .Select((player, id) => new { Player = player, Index = id })
                             .FirstOrDefault(_ => _.Player.Guid == WowInterface.ObjectManager.PlayerGuid)?.Index ?? -1;
 
-            return index > -1 && index < memberCount;
+            return index > -1 && index <= memberCount;
         }
 
         private BehaviorTreeStatus AttackNearWeakestEnemy(JBgBlackboard blackboard)

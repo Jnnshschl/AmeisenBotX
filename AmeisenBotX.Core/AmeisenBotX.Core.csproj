@@ -222,11 +222,8 @@
     <Compile Include="Movement\Pathfinding\Objects\Vector3.cs" />
     <Compile Include="Movement\Settings\MovementSettings.cs" />
     <Compile Include="Movement\SMovementEngine\Enums\MovementState.cs" />
-    <Compile Include="Movement\SMovementEngine\StateBasedMovementEngine.cs" />
-    <Compile Include="Movement\SMovementEngine\States\BasicMovementState.cs" />
-    <Compile Include="Movement\SMovementEngine\States\StateMovementMoveToNode.cs" />
-    <Compile Include="Movement\SMovementEngine\States\StateMovementPathfinding.cs" />
-    <Compile Include="Movement\SMovementEngine\States\StateMovementNone.cs" />
+    <Compile Include="Movement\SMovementEngine\MovementBlackboard.cs" />
+    <Compile Include="Movement\SMovementEngine\SickMovementEngine.cs" />
     <Compile Include="Offsets\OffsetList335a.cs" />
     <Compile Include="Offsets\IOffsetList.cs" />
     <Compile Include="Personality\BotPersonality.cs" />

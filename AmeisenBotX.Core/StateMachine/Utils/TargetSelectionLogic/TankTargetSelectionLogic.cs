@@ -20,12 +20,16 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out List<WowUnit> possibleTargets)
         {
-            if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0 && (WowInterface.ObjectManager.Target.IsDead || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
+            if (WowInterface.ObjectManager.Target != null 
+                && WowInterface.ObjectManager.TargetGuid != 0 
+                && (WowInterface.ObjectManager.Target.IsDead 
+                || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
             {
                 WowInterface.HookManager.ClearTarget();
             }
 
-            bool insertCurrentTargetToTop = WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0
+            bool insertCurrentTargetToTop = WowInterface.ObjectManager.Target != null 
+                && WowInterface.ObjectManager.TargetGuid != 0
                 && !WowInterface.ObjectManager.Target.IsDead && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
                 && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
                 && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly;
