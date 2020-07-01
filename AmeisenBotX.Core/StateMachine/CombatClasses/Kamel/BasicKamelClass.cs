@@ -40,8 +40,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
 
             //Resto Shaman
-            healingWaveSpellEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            riptideSpellEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
+            
 
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
@@ -55,6 +54,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public TimegatedEvent HeroicStrikeEvent { get; private set; }
         //Resto Shaman
         public TimegatedEvent healingWaveSpellEvent { get; private set; }
+        public TimegatedEvent naturesswiftEvent { get; private set; }
         public TimegatedEvent riptideSpellEvent { get; private set; }
         //Mount check
         public TimegatedEvent getonthemount { get; private set; }
