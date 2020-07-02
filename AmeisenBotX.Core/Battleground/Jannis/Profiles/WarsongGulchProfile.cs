@@ -82,31 +82,12 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid,
                     new Selector<JBgBlackboard>
                     (
-                        "AreEnemiesNearFlagCarrier",
-                        (b) => !DoWeOutnumberOurEnemies(b),
-                        new Leaf<JBgBlackboard>("FleeFromComingEnemies", FleeFromComingEnemies),
-                        new Selector<JBgBlackboard>
-                        (
-                            "AmINearOwnBase",
-                            (b) => WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0,
-                            new Leaf<JBgBlackboard>("MoveToHidingSpot", (b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
-                            new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
-                        )
+                        "AmINearOwnBase",
+                        (b) => WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0,
+                        new Leaf<JBgBlackboard>("MoveToHidingSpot", (b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
+                        new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                     ),
                     KillEnemyFlagCarrierSelector
-                    // new Selector<JBgBlackboard>
-                    // (
-                    //     "AmINearOwnFlagCarrierAndEnemiesNearFlagCarrier",
-                    //     (b) => AmINearOwnFlagCarrier(b) && EnemiesNearFlagCarrier(b),
-                    //     new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
-                    //     new Selector<JBgBlackboard>
-                    //     (
-                    //         "AmIOneOfTheClosestToOwnFlagCarrier",
-                    //         (b) => AmIOneOfTheClosestToOwnFlagCarrier(b, Math.Min(wowInterface.ObjectManager.PartymemberGuids.Count - 2, 2)),
-                    //         new Leaf<JBgBlackboard>("MoveToOwnFlagCarrierAndHelp", MoveToOwnFlagCarrierAndHelp),
-                    //         KillEnemyFlagCarrierSelector
-                    //     )
-                    // )
                 )
             );
 

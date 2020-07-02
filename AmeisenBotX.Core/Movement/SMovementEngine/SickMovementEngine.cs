@@ -183,6 +183,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             TargetPosition = Vector3.Zero;
             TargetRotation = 0f;
 
+            StuckCounter = 0;
+            StuckPosition = default;
+
             if (Nodes.Count > 0)
             {
                 Nodes.Clear();
@@ -225,7 +228,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 StuckRotation = WowInterface.ObjectManager.Player.Rotation;
 
                 double angle = Math.PI + ((new Random().NextDouble() * Math.PI) - Math.PI / 2.0);
-                UnstuckTargetPosition = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 4.0);
+                UnstuckTargetPosition = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 10.0);
             }
             else
             {
@@ -236,8 +239,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 }
                 else
                 {
-                    StuckCounter = 0;
-                    StuckPosition = default;
+                    Reset();
                     return BehaviorTreeStatus.Success;
                 }
             }

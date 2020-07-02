@@ -204,14 +204,15 @@ namespace AmeisenBotX.Core.Movement.Objects
 
                     if (enablePlayerForces)
                     {
-                        forces.Add(Seperate(1f));
+                        forces.Add(Seperate(0.5f));
                     }
+
                     // forces.Add(PlayerVehicle.AvoidObstacles(2f));
                     break;
 
                 case MovementAction.Following:
                     forces.Add(Seek(targetPosition, 1f));
-                    forces.Add(Seperate(1f));
+                    forces.Add(Seperate(0.5f));
                     // forces.Add(PlayerVehicle.AvoidObstacles(2f));
                     break;
 
