@@ -212,7 +212,6 @@
     <Compile Include="Jobs\Profiles\IMiningProfile.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
     <Compile Include="Jobs\Profiles\IJobsProfiles.cs" />
-    <Compile Include="Movement\DefaultMovementEngine.cs" />
     <Compile Include="Movement\Enums\MovementAction.cs" />
     <Compile Include="Movement\IMovementEngine.cs" />
     <Compile Include="Movement\Pathfinding\IPathfindingHandler.cs" />

@@ -9,22 +9,12 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(WowInterface wowInterface, float maxSteering, float maxVelocity, float maxAcceleration)
+        public BasicVehicle(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Velocity = new Vector3(0, 0, 0);
-            MaxSteering = maxSteering;
-            MaxVelocity = maxVelocity;
-            MaxAcceleration = maxAcceleration;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
-
-        public float MaxAcceleration { get; private set; }
-
-        public float MaxSteering { get; private set; }
-
-        public float MaxVelocity { get; private set; }
 
         public Vector3 Velocity { get; private set; }
 
@@ -37,7 +27,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             acceleration += GetObjectForceAroundMe<WowObject>(12);
             // acceleration += GetNearestBlacklistForce(12);
 
-            acceleration.Limit(MaxAcceleration);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
 
             return acceleration;
@@ -57,7 +47,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             desired -= position;
             desired.Normalize(desired.GetMagnitude());
-            desired.Multiply(MaxVelocity);
+            desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
 
             if (distanceToTarget > 20)
             {
@@ -73,11 +63,11 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Vector3 steering = desired;
             steering -= Velocity;
-            steering.Limit(MaxSteering);
+            steering.Limit(WowInterface.MovementSettings.MaxSteering);
 
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
-            acceleration.Limit(MaxAcceleration);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -96,7 +86,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             desired -= currentPosition;
             desired.Normalize(desired.GetMagnitude());
-            desired.Multiply(MaxVelocity);
+            desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
 
             if (distanceToTarget < 4)
             {
@@ -105,11 +95,11 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Vector3 steering = desired;
             steering -= Velocity;
-            steering.Limit(MaxSteering);
+            steering.Limit(WowInterface.MovementSettings.MaxSteering);
 
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
-            acceleration.Limit(MaxAcceleration);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -117,8 +107,8 @@ namespace AmeisenBotX.Core.Movement.Objects
         public Vector3 Seperate(float multiplier)
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<WowPlayer>(2);
-            acceleration.Limit(MaxAcceleration);
+            acceleration += GetObjectForceAroundMe<WowPlayer>(WowInterface.MovementSettings.SeperationDistance);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -144,12 +134,63 @@ namespace AmeisenBotX.Core.Movement.Objects
                 Velocity += forces[i];
             }
 
-            Velocity.Limit(MaxVelocity);
+            Velocity.Limit(WowInterface.MovementSettings.MaxVelocity);
 
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             currentPosition.Add(Velocity);
 
             moveCharacter?.Invoke(currentPosition);
+        }
+
+        public Vector3 Wander(float multiplier)
+        {
+            // TODO: implement some sort of radius where the target wanders around.
+            //       maybe add a very weak force keeping it inside a given circle...
+            // TODO: implement some sort of delay so that the target is not constantly walking
+            Random rnd = new Random();
+            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
+
+            Vector3 newRandomPosition = new Vector3(0, 0, 0);
+            newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.ObjectManager.Player.Rotation, Convert.ToSingle((rnd.NextDouble() * 4) + 4));
+
+            // rotate the vector by random amount of degrees
+            newRandomPosition.Rotate(rnd.Next(-14, 14));
+
+            return Seek(newRandomPosition, multiplier);
+        }
+
+        private static Vector3 CalculateFuturePosition(Vector3 position, float targetRotation, float targetVelocity)
+        {
+            float rotation = targetRotation;
+            double x = position.X + (Math.Cos(rotation) * targetVelocity);
+            double y = position.Y + (Math.Sin(rotation) * targetVelocity);
+
+            return new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = position.Z
+            };
+        }
+
+        private static Vector3 CalculatPositionBehind(Vector3 position, float targetRotation, float targetVelocity)
+        {
+            float rotation = targetRotation + Convert.ToSingle(Math.PI);
+
+            if (rotation > 2 * Math.PI)
+            {
+                rotation -= Convert.ToSingle(2 * Math.PI);
+            }
+
+            double x = position.X + (Math.Cos(rotation) * targetVelocity);
+            double y = position.Y + (Math.Sin(rotation) * targetVelocity);
+
+            return new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = position.Z
+            };
         }
 
         private List<Vector3> GetForces(MovementAction movementAction, Vector3 targetPosition, float rotation = 0f, bool enablePlayerForces = false)
@@ -203,57 +244,6 @@ namespace AmeisenBotX.Core.Movement.Objects
             }
 
             return forces;
-        }
-
-        public Vector3 Wander(float multiplier)
-        {
-            // TODO: implement some sort of radius where the target wanders around.
-            //       maybe add a very weak force keeping it inside a given circle...
-            // TODO: implement some sort of delay so that the target is not constantly walking
-            Random rnd = new Random();
-            Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
-
-            Vector3 newRandomPosition = new Vector3(0, 0, 0);
-            newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.ObjectManager.Player.Rotation, Convert.ToSingle((rnd.NextDouble() * 4) + 4));
-
-            // rotate the vector by random amount of degrees
-            newRandomPosition.Rotate(rnd.Next(-14, 14));
-
-            return Seek(newRandomPosition, multiplier);
-        }
-
-        private static Vector3 CalculateFuturePosition(Vector3 position, float targetRotation, float targetVelocity)
-        {
-            float rotation = targetRotation;
-            double x = position.X + (Math.Cos(rotation) * targetVelocity);
-            double y = position.Y + (Math.Sin(rotation) * targetVelocity);
-
-            return new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = position.Z
-            };
-        }
-
-        private static Vector3 CalculatPositionBehind(Vector3 position, float targetRotation, float targetVelocity)
-        {
-            float rotation = targetRotation + Convert.ToSingle(Math.PI);
-
-            if (rotation > 2 * Math.PI)
-            {
-                rotation -= Convert.ToSingle(2 * Math.PI);
-            }
-
-            double x = position.X + (Math.Cos(rotation) * targetVelocity);
-            double y = position.Y + (Math.Sin(rotation) * targetVelocity);
-
-            return new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = position.Z
-            };
         }
 
         private Vector3 GetNearestBlacklistForce(double maxDistance = 8)

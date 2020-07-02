@@ -163,6 +163,11 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString($"SelectGossipActiveQuest(max({gossipId}, GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId});");
         }
 
+        public void Dismount()
+        {
+            LuaDoString("DismissCompanion(\"MOUNT\");");
+        }
+
         public void DisposeHook()
         {
             if (IsWoWHooked)
@@ -362,16 +367,6 @@ namespace AmeisenBotX.Core.Hook
         public string GetMoney()
         {
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"));
-        }
-
-        public void Mount(int index)
-        {
-            LuaDoString($"CallCompanion(\"MOUNT\", {index});");
-        }
-
-        public void Dismount()
-        {
-            LuaDoString("DismissCompanion(\"MOUNT\");");
         }
 
         public string GetMounts()
@@ -631,6 +626,11 @@ namespace AmeisenBotX.Core.Hook
                     WowInterface.XMemory.FreeMemory(memAlloc);
                 }
             }
+        }
+
+        public void Mount(int index)
+        {
+            LuaDoString($"CallCompanion(\"MOUNT\", {index});");
         }
 
         public void OverrideWorldCheckOff()
