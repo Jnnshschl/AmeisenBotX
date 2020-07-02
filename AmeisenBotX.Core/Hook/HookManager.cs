@@ -535,7 +535,7 @@ namespace AmeisenBotX.Core.Hook
             return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end")), out int result) ? result == 1 : false;
         }
 
-        public bool IsClickToMoveActive(WowPlayer player)
+        public bool IsClickToMoveActive()
         {
             return WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveAction, out int ctmState)
                        && (ClickToMoveType)ctmState != ClickToMoveType.None
@@ -882,8 +882,9 @@ namespace AmeisenBotX.Core.Hook
 
         public void StopClickToMoveIfActive()
         {
-            if (IsClickToMoveActive(WowInterface.ObjectManager.Player))
+            if (IsClickToMoveActive())
             {
+                AmeisenLogger.Instance.Log("Movement", "Stopping ClickToMove", LogLevel.Verbose);
                 CallObjectFunction(WowInterface.ObjectManager.Player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
             }
         }

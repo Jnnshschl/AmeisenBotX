@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine
 {
@@ -28,62 +29,68 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 "MovementTree",
                 new Selector<MovementBlackboard>
                 (
-                    "NeedToUnstuck",
-                    (b) => StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
-                    new Leaf<MovementBlackboard>((b) => DoUnstuck()),
+                    "DoINeedToMove",
+                    (b) => WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > MinDistanceToMove,
                     new Selector<MovementBlackboard>
                     (
-                        "NeedToJump",
-                        (b) => JumpOnNextMove,
-                        new Leaf<MovementBlackboard>((b) =>
-                        {
-                            WowInterface.CharacterManager.Jump();
-                            JumpOnNextMove = false;
-                            return BehaviorTreeStatus.Success;
-                        }),
+                        "NeedToUnstuck",
+                        (b) => StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                        new Leaf<MovementBlackboard>((b) => DoUnstuck()),
                         new Selector<MovementBlackboard>
                         (
-                            "IsDirectMovingState",
-                            (b) => IsDirectMovingState(),
+                            "NeedToJump",
+                            (b) => JumpOnNextMove,
                             new Leaf<MovementBlackboard>((b) =>
                             {
-                                if (Nodes.Count > 0)
-                                {
-                                    Nodes.Clear();
-                                }
-
-                                PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, TargetPosition, TargetRotation);
-                                return WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
+                                WowInterface.CharacterManager.Jump();
+                                JumpOnNextMove = false;
+                                return BehaviorTreeStatus.Success;
                             }),
                             new Selector<MovementBlackboard>
                             (
-                                "DoINeedToFindAPath",
-                                (b) => DoINeedToFindAPath(),
-                                new Leaf<MovementBlackboard>("FindPathToTargetPosition", FindPathToTargetPosition),
+                                "IsDirectMovingState",
+                                (b) => IsDirectMovingState(),
+                                new Leaf<MovementBlackboard>((b) =>
+                                {
+                                    if (Nodes.Count > 0)
+                                    {
+                                        Nodes.Clear();
+                                    }
+
+                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, TargetPosition, TargetRotation);
+                                    return WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
+                                }),
                                 new Selector<MovementBlackboard>
                                 (
-                                    "NeedToCheckANode",
-                                    (b) => Nodes.Peek().GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold,
-                                    new Leaf<MovementBlackboard>("CheckWaypoint", (b) =>
-                                    {
-                                        Nodes.Dequeue();
-
-                                        if (Nodes.Count == 0)
+                                    "DoINeedToFindAPath",
+                                    (b) => DoINeedToFindAPath(),
+                                    new Leaf<MovementBlackboard>("FindPathToTargetPosition", FindPathToTargetPosition),
+                                    new Selector<MovementBlackboard>
+                                    (
+                                        "NeedToCheckANode",
+                                        (b) => Nodes.Peek().GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold,
+                                        new Leaf<MovementBlackboard>("CheckWaypoint", (b) =>
                                         {
-                                            MovementAction = MovementAction.None;
-                                        }
+                                            Nodes.Dequeue();
 
-                                        return BehaviorTreeStatus.Success;
-                                    }),
-                                    new Leaf<MovementBlackboard>("Move", (b) =>
-                                    {
-                                        PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, Nodes.Peek(), TargetRotation);
-                                        return BehaviorTreeStatus.Ongoing;
-                                    })
+                                            if (Nodes.Count == 0)
+                                            {
+                                                MovementAction = MovementAction.None;
+                                            }
+
+                                            return BehaviorTreeStatus.Success;
+                                        }),
+                                        new Leaf<MovementBlackboard>("Move", (b) =>
+                                        {
+                                            PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, Nodes.Peek(), TargetRotation);
+                                            return BehaviorTreeStatus.Ongoing;
+                                        })
+                                    )
                                 )
                             )
                         )
-                    )
+                    ),
+                    new Leaf<MovementBlackboard>((b) => { return BehaviorTreeStatus.Success; })
                 ),
                 Blackboard
             );
@@ -118,6 +125,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public Vector3 TargetPositionLastPathfinding { get; private set; }
 
         public float TargetRotation { get; private set; }
+
+        public double MinDistanceToMove { get; private set; }
 
         public Vector3 UnstuckTargetPosition { get; private set; }
 
@@ -180,11 +189,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f)
+        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, double minDistanceToMove = 1.5)
         {
             MovementAction = movementAction;
             TargetPosition = positionToGoTo;
             TargetRotation = targetRotation;
+            MinDistanceToMove = minDistanceToMove;
         }
 
         public void StopMovement()

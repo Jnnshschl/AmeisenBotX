@@ -380,11 +380,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CastSpell(string spellName, bool castOnSelf)
         {
-            if (!castOnSelf && WowInterface.ObjectManager.Target != null)
-            {
-                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
-            }
-
             bool result = false;
             double cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
 

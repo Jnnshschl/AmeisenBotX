@@ -123,10 +123,10 @@ namespace AmeisenBotX.Core.Dungeon
         {
             Profile = profile;
 
-            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
-            int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
+            // DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            // int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
 
-            for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
+            for (int i = 0; i < profile.Nodes.Count; ++i)
             {
                 CurrentNodes.Enqueue(profile.Nodes[i]);
             }

@@ -166,9 +166,11 @@ namespace AmeisenBotX.Core.Character
             BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
         }
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 1.5f)
         {
             if (pos == default) { return; }
+
+            AmeisenLogger.Instance.Log("Movement", $"MoveToPosition: {pos}", LogLevel.Verbose);
 
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);

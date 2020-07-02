@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsBgInviteReady();
 
-        bool IsClickToMoveActive(WowPlayer player);
+        bool IsClickToMoveActive();
 
         bool IsGhost(WowLuaUnit luaUnit);
 

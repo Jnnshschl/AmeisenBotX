@@ -10,11 +10,11 @@
 
         public float JumpCheckHeight { get; set; } = 0.5f;
 
-        public float MaxAcceleration { get; set; } = 3f;
+        public float MaxAcceleration { get; set; } = 2f;
 
         public double MaxDistanceMovedJumpUnstuck { get; set; } = 0.2;
 
-        public float MaxSteering { get; set; } = 1.5f;
+        public float MaxSteering { get; set; } = 1f;
 
         public float MaxVelocity { get; set; } = 8f;
 
@@ -26,6 +26,6 @@
 
         public int StuckCounterUnstuck { get; set; } = 1;
 
-        public double WaypointCheckThreshold { get; set; } = 3.0;
+        public double WaypointCheckThreshold { get; set; } = 1.5;
     }
 }
