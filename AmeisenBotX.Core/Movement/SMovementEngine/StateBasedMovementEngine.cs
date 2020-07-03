@@ -60,8 +60,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public Vector3 VehicleTargetPosition { get; private set; }
 
-        public DateTime PathDecay { get; private set; }
-
         internal MovementSettings MovementSettings { get; }
 
         internal IPathfindingHandler PathfindingHandler { get; }

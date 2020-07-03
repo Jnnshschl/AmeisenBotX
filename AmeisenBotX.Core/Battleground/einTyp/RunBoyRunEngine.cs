@@ -26,6 +26,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
             wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", onFlagAlliance);
             wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", onFlagAlliance);
             wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", onFlagAlliance);
+            wowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", onFlagAlliance);
         }
 
         private void onFlagAlliance(long timestamp, List<string> args)
@@ -194,8 +195,12 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowInterface.CombatClass.OutOfCombatExecute();
                 }
             }
-            if (WowInterface.MovementEngine.IsAtTargetPosition)
+            if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == Movement.Enums.MovementAction.None)
+            {
                 hasStateChanged = true;
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                WowInterface.CombatClass.OutOfCombatExecute();
+            }
         }
 
         private WowUnit getEnemyFlagCarrier()
