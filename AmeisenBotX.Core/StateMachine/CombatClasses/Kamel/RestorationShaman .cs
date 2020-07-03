@@ -141,53 +141,56 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         WowInterface.HookManager.TargetGuid(partyMemberToHeal.Guid);
                     }
-
+                    
                     targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.Guid).Position) <= 30;
                     if (targetIsInRange)
                     {
-                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        if (!WowInterface.ObjectManager.Target.IsDead)
                         {
-                            WowInterface.HookManager.StopClickToMoveIfActive();
-                            WowInterface.MovementEngine.Reset();
-                        }
-                        if (WowInterface.ObjectManager.Target != null)
-                        {
-                            if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                &&  WowInterface.ObjectManager.Player.ManaPercentage >= 5)
+                            if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
                             {
-                                WowInterface.HookManager.CastSpell(CalloftheElementsSpell);
-                                spellCoolDown[CalloftheElementsSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(CalloftheElementsSpell));
-                                return;
+                                WowInterface.HookManager.StopClickToMoveIfActive();
+                                WowInterface.MovementEngine.Reset();
                             }
-
-                            if (DateTime.Now > spellCoolDown[naturesswiftSpell] && !WowInterface.ObjectManager.Player.HasBuffByName("Nature's Swiftness") 
-                                && WowInterface.ObjectManager.Target.HealthPercentage <= 30 
-                                && WowInterface.ObjectManager.Player.ManaPercentage >= 2)
+                            if (WowInterface.ObjectManager.Target != null)
                             {
-                                if (DateTime.Now > spellCoolDown[healingWaveSpell])
+                                if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
+                                    || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
+                                    || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
+                                    && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
                                 {
-                                    WowInterface.HookManager.CastSpell(naturesswiftSpell);
-                                    spellCoolDown[naturesswiftSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(naturesswiftSpell));
+                                    WowInterface.HookManager.CastSpell(CalloftheElementsSpell);
+                                    spellCoolDown[CalloftheElementsSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(CalloftheElementsSpell));
+                                    return;
+                                }
+
+                                if (DateTime.Now > spellCoolDown[naturesswiftSpell] && !WowInterface.ObjectManager.Player.HasBuffByName("Nature's Swiftness")
+                                    && WowInterface.ObjectManager.Target.HealthPercentage <= 30
+                                    && WowInterface.ObjectManager.Player.ManaPercentage >= 2)
+                                {
+                                    if (DateTime.Now > spellCoolDown[healingWaveSpell])
+                                    {
+                                        WowInterface.HookManager.CastSpell(naturesswiftSpell);
+                                        spellCoolDown[naturesswiftSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(naturesswiftSpell));
+                                        WowInterface.HookManager.CastSpell(healingWaveSpell);
+                                        spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
+                                        return;
+                                    }
+                                }
+
+                                if (DateTime.Now > spellCoolDown[riptideSpell] && WowInterface.ObjectManager.Target.HealthPercentage <= 95 && !WowInterface.ObjectManager.Target.HasBuffByName("Riptide"))
+                                {
+                                    WowInterface.HookManager.CastSpell(riptideSpell);
+                                    spellCoolDown[riptideSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(riptideSpell));
+                                    return;
+                                }
+
+                                if (DateTime.Now > spellCoolDown[healingWaveSpell] && WowInterface.ObjectManager.Target.HealthPercentage < 70)
+                                {
                                     WowInterface.HookManager.CastSpell(healingWaveSpell);
                                     spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
                                     return;
                                 }
-                            }
-
-                            if (DateTime.Now > spellCoolDown[riptideSpell] && WowInterface.ObjectManager.Target.HealthPercentage <= 95 && !WowInterface.ObjectManager.Target.HasBuffByName("Riptide"))
-                            {
-                                WowInterface.HookManager.CastSpell(riptideSpell);
-                                spellCoolDown[riptideSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(riptideSpell));
-                                return;
-                            }
-
-                            if (DateTime.Now > spellCoolDown[healingWaveSpell] && WowInterface.ObjectManager.Target.HealthPercentage < 70)
-                            {
-                                WowInterface.HookManager.CastSpell(healingWaveSpell);
-                                spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
-                                return;
                             }
                         }
                     }

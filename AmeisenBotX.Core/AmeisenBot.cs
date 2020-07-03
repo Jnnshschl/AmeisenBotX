@@ -336,7 +336,7 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Kamel.RestorationShaman (WowInterface),
                 new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
-                new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
+                new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface),
                 new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
             };
         }

@@ -42,6 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string slamSpell = "Slam";
         private const string recklessnessSpell = "Recklessness";
         private const string defensiveStanceSpell = "Defensive Stance";
+        private const string deathWishSpell = "Death Wish";
 
         Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
@@ -65,19 +66,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(heroicFurySpell, DateTime.Now);
             spellCoolDown.Add(berserkerRageSpell, DateTime.Now);
             spellCoolDown.Add(disarmSpell, DateTime.Now);
-
-            MyAuraManager.BuffsToKeepActive = new Dictionary<string, Utils.AuraManager.CastFunction>();
-            WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
-            {
-                if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(berserkerStanceSpell))
-                {
-                    MyAuraManager.BuffsToKeepActive.Add(berserkerStanceSpell, () => { WowInterface.HookManager.CastSpell(berserkerStanceSpell); return true; });
-                }
-                else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(battleStanceSpell))
-                {
-                    MyAuraManager.BuffsToKeepActive.Add(battleStanceSpell, () => { WowInterface.HookManager.CastSpell(berserkerStanceSpell); return true; });
-                }
-            };
+            spellCoolDown.Add(deathWishSpell, DateTime.Now);
+            spellCoolDown.Add(rendSpell, DateTime.Now);
         }
 
         public override string Author => "Kamel";
@@ -142,8 +132,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void ExecuteCC()
         {
-            MyAuraManager.Tick();
-
             if (WowInterface.ObjectManager.TargetGuid != 0)
             {
                 if (WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
@@ -154,42 +142,61 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     }
                     if (DateTime.Now > spellCoolDown[berserkerRageSpell] && WowInterface.ObjectManager.Player.IsFleeing)
                     {
-                        WowInterface.HookManager.CastSpell(berserkerRageSpell);
+                        CustomCastSpell(berserkerRageSpell);
                         spellCoolDown[berserkerRageSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(berserkerRageSpell));
                         return;
                     }
-                    
+
+                    if (DateTime.Now > spellCoolDown[deathWishSpell] && WowInterface.ObjectManager.Player.Rage >= 10)
+                    {
+                        CustomCastSpell(deathWishSpell);
+                        spellCoolDown[deathWishSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(deathWishSpell));
+                        return;
+                    }
+
                     if (DateTime.Now > spellCoolDown[disarmSpell])
                     {//To Do: Disarm check enemy weapon
                         if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
                         {
-                            WowInterface.HookManager.CastSpell(defensiveStanceSpell);
-                            WowInterface.HookManager.CastSpell(disarmSpell);
+                            CustomCastSpell(disarmSpell, defensiveStanceSpell);
                             spellCoolDown[disarmSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(disarmSpell));
                             return;
                         }
-                    }  
-                    
+                    }
+
                     if (DateTime.Now > spellCoolDown[heroicFurySpell] && WowInterface.ObjectManager.Player.IsSilenced)
                     {
-                        WowInterface.HookManager.CastSpell(heroicFurySpell);
+                        CustomCastSpell(heroicFurySpell);
                         spellCoolDown[heroicFurySpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(heroicFurySpell));
                         return;
                     }
 
                     if (DateTime.Now > spellCoolDown[retaliationSpell] && WowInterface.ObjectManager.Player.HealthPercentage < 60)
                     {
-                        WowInterface.HookManager.CastSpell(battleStanceSpell);
-                        WowInterface.HookManager.CastSpell(retaliationSpell);
+                        CustomCastSpell(retaliationSpell, battleStanceSpell);
                         spellCoolDown[retaliationSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(retaliationSpell));
                         return;
                     }
+
+                    if (DateTime.Now > spellCoolDown[executeSpell] && WowInterface.ObjectManager.Player.Rage >= 15 && WowInterface.ObjectManager.Target.Health <= 20)
+                    {
+                        CustomCastSpell(executeSpell);
+                        spellCoolDown[executeSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(executeSpell));
+                        return;
+                    }
+
+                    //if (DateTime.Now > spellCoolDown[rendSpell] && !WowInterface.ObjectManager.Target.HasBuffByName("Rend") && WowInterface.ObjectManager.Player.Rage >= 10)
+                    //{
+                    //    CustomCastSpell(rendSpell, battleStanceSpell);
+                    //    spellCoolDown[rendSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(rendSpell));
+                    //    return;
+                    //}
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50)
                     {
                         if (DateTime.Now > spellCoolDown[bloodrageSpell] && WowInterface.ObjectManager.Player.Rage >= 15 && WowInterface.ObjectManager.Player.HealthPercentage <= 30)
                         {
-                            WowInterface.HookManager.CastSpell(bloodrageSpell);
+                            CustomCastSpell(bloodrageSpell);
                             spellCoolDown[bloodrageSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(bloodrageSpell));
                             return;
                         }
@@ -197,7 +204,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             if (DateTime.Now > spellCoolDown[enragedregenerationSpell] && WowInterface.ObjectManager.Player.Rage >= 15 && WowInterface.ObjectManager.Player.HealthPercentage <= 30)
                             {
-                                WowInterface.HookManager.CastSpell(enragedregenerationSpell);
+                                CustomCastSpell(enragedregenerationSpell);
                                 spellCoolDown[enragedregenerationSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(enragedregenerationSpell));
                                 return;
                             }
@@ -208,13 +215,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         if (DateTime.Now > spellCoolDown[recklessnessSpell])
                         {
-                            WowInterface.HookManager.CastSpell(recklessnessSpell);
+                            CustomCastSpell(recklessnessSpell);
                             spellCoolDown[recklessnessSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(recklessnessSpell));
                             return;
                         }
                         if (DateTime.Now > spellCoolDown[slamSpell])
                         {
-                            WowInterface.HookManager.CastSpell(slamSpell);
+                            CustomCastSpell(slamSpell);
                             spellCoolDown[slamSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(slamSpell));
                             return;
                         }
@@ -222,36 +229,41 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                     if (DateTime.Now > spellCoolDown[bloodthirstSpell] && WowInterface.ObjectManager.Player.Rage >= 20 && WowInterface.ObjectManager.Player.HealthPercentage <= 80)
                     {
-                        WowInterface.HookManager.CastSpell(bloodthirstSpell);
+                        CustomCastSpell(bloodthirstSpell);
                         spellCoolDown[bloodthirstSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(bloodthirstSpell));
                         return;
                     }
 
                     if (DateTime.Now > spellCoolDown[whirlwindSpell] && WowInterface.ObjectManager.Player.Rage >= 25)
                     {
-                        WowInterface.HookManager.CastSpell(whirlwindSpell);
+                        CustomCastSpell(whirlwindSpell);
                         spellCoolDown[whirlwindSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(whirlwindSpell));
                         return;
                     }
 
                     if (HeroicStrikeEvent.Run() && DateTime.Now > spellCoolDown[heroicStrikeSpell] && WowInterface.ObjectManager.Player.Rage >= 25)
                     {
-                        WowInterface.HookManager.CastSpell(heroicStrikeSpell);
+                        CustomCastSpell(heroicStrikeSpell);
                         spellCoolDown[heroicStrikeSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(heroicStrikeSpell));
-                    }
-
-                    if (DateTime.Now > spellCoolDown[executeSpell] && WowInterface.ObjectManager.Player.Rage >= 15 && WowInterface.ObjectManager.Target.Health <= 20)
-                    {
-                        WowInterface.HookManager.CastSpell(executeSpell);
-                        spellCoolDown[executeSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(executeSpell));
-                        return;
                     }
 
                     if (DateTime.Now > spellCoolDown[pummelSpell] && WowInterface.ObjectManager.Player.Rage >= 10 && WowInterface.ObjectManager.Target.IsCasting)
                     {
-                        WowInterface.HookManager.CastSpell(pummelSpell);
+                        CustomCastSpell(pummelSpell);
                         spellCoolDown[pummelSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(pummelSpell));
                         return;
+                    }
+
+                    if (WowInterface.ObjectManager.Player.Rage >= 25)
+                    {
+                        if (DateTime.Now > spellCoolDown[intimidatingShoutSpell] && WowInterface.ObjectManager.Player.HealthPercentage < 60
+                            || WowInterface.ObjectManager.Target.IsCasting)
+                        {
+                            CustomCastSpell(intimidatingShoutSpell);
+                            spellCoolDown[intimidatingShoutSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(intimidatingShoutSpell));
+                            //WowInterface.HookManager.SendChatMessage("/y OGERGRUNZEN");
+                            return;
+                        }
                     }
 
                 }
@@ -261,35 +273,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                     if (DateTime.Now > spellCoolDown[interceptSpell] && distance <= 20 && distance >= 8)
                     {
-                        WowInterface.HookManager.CastSpell(interceptSpell);
+                        CustomCastSpell(interceptSpell);
                         spellCoolDown[interceptSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(interceptSpell));
                         return;
                     }
 
                     if (DateTime.Now > spellCoolDown[heroicThrowSpell] && distance <= 30)
                     {
-                        WowInterface.HookManager.CastSpell(heroicThrowSpell);
+                        CustomCastSpell(heroicThrowSpell);
                         spellCoolDown[heroicThrowSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(heroicThrowSpell));
                         //WowInterface.HookManager.SendChatMessage("/y Du kack haiter");
                         return;
-                    }
-
-                    if (WowInterface.ObjectManager.Player.Rage >= 25 && distance <= 8)
-                    {
-                        if (DateTime.Now > spellCoolDown[intimidatingShoutSpell] && WowInterface.ObjectManager.Player.HealthPercentage < 60
-                            || WowInterface.ObjectManager.Target.IsCasting)
-                        {
-                            WowInterface.HookManager.CastSpell(intimidatingShoutSpell);
-                            spellCoolDown[intimidatingShoutSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(intimidatingShoutSpell));
-                            //WowInterface.HookManager.SendChatMessage("/y OGERGRUNZEN");
-                            return;
-                        }
                     }
                 }
             }
             else if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 50)
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 30)
                     .Where(e => e.IsInCombat) // To Do e.IsTaggedByMe
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
@@ -307,7 +307,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (DateTime.Now > spellCoolDown[commandingShoutSpell] && WowInterface.ObjectManager.Player.Rage >= 10 && !WowInterface.ObjectManager.Player.HasBuffByName("Commanding Shout"))
             {
-                WowInterface.HookManager.CastSpell(commandingShoutSpell);
+                CustomCastSpell(commandingShoutSpell);
                 spellCoolDown[commandingShoutSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(commandingShoutSpell));
                 return;
             }
@@ -330,6 +330,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 }
             }
 
+        }
+
+        private void CustomCastSpell(string spell, string stance = "Berserker Stance")
+        {
+            if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
+            {
+                WowInterface.HookManager.CastSpell(stance);
+            }
+            else
+            {
+                WowInterface.HookManager.CastSpell(spell);
+            }
         }
     }
 }
