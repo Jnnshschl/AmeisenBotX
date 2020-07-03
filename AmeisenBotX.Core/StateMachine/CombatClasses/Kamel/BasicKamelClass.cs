@@ -113,6 +113,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public WowInterface WowInterface { get; internal set; }
 
+        public bool TargetInLineOfSight { get; set; }
+
         public void Execute()
         {
             MyAuraManager.Tick();

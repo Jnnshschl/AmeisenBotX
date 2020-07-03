@@ -10,13 +10,11 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(2500));
+            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
+            LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(1000));
         }
 
         public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
-
-        public bool IsFacing { get; private set; }
 
         public bool TargetInLos { get; private set; }
 
@@ -63,6 +61,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         else
                         {
                             HandleMovement(WowInterface.ObjectManager.Target);
+                            WowInterface.CombatClass.TargetInLineOfSight = TargetInLos;
                         }
                     }
                 }

@@ -57,6 +57,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private IObjectManager ObjectManager { get; }
 
+        public bool TargetInLineOfSight { get; set; }
+
         public void Execute()
         {
             ulong targetGuid = ObjectManager.TargetGuid;
