@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                     if(enemyFlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
                         WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
                     } else
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1051, 1398, 340));
@@ -112,9 +112,9 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     if (teamFlagCarrier != null)
                     {
                         if(WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, teamFlagCarrier.Position);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
                         else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
                         else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
                             WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
                     }
@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                         if (enemyFlagCarrier != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
                             if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
                                 WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
                         }
@@ -140,9 +140,9 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 if (teamFlagCarrier != null)
                 {
                     if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, teamFlagCarrier.Position);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
                     else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
                     else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
                 }
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                     if (enemyFlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
                         if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
                             WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
                     }

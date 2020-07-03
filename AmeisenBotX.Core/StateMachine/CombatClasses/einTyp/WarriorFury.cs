@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     leader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid);
                 if (leaderGuid != 0 && leaderGuid != WowInterface.ObjectManager.PlayerGuid && leader != null && !leader.IsDead)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Following, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
                 }
                 else if (SearchNewTarget(ref target, true))
                 {
@@ -224,7 +224,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if(computeNewRoute)
             {
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, target.Position, target.Rotation);
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, target.Position, target.Rotation);
             }
         }
 
@@ -253,7 +254,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                             targetCount++;
                         }
 
-                        if ((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth))
+                        if (((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth)) && WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, unit.Position))
                         {
                             target = unit;
                             targetHealth = unit.Health;

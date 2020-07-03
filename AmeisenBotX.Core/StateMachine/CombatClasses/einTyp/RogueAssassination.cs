@@ -291,6 +291,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             bool closeToTarget = distanceToTarget < (6.0 + target.CombatReach);
             if (hasTargetMoved || closeToTarget)
             {
+                HookManager.FacePosition(ObjectManager.Player, target.Position);
                 CharacterManager.MoveToPosition(LastTargetPosition);
             }
             else
@@ -299,11 +300,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 {
                     if (isSneaky)
                     {
-                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastBehindTargetPosition, target.Rotation);
+                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastBehindTargetPosition, target.Rotation);
                     }
                     else
                     {
-                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastTargetPosition, target.Rotation);
+                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastTargetPosition, target.Rotation);
                     }
                 }
             }
@@ -334,7 +335,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                             targetCount++;
                         }
 
-                        if ((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth))
+                        if (((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth)) && HookManager.IsInLineOfSight(ObjectManager.Player.Position, unit.Position))
                         {
                             target = unit;
                             targetHealth = unit.Health;
