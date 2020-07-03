@@ -146,6 +146,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private AmeisenBotStateMachine StateMachine { get; }
 
+        public bool TargetInLineOfSight { get; set; }
+
         public void Execute()
         {
             if (!ActionEvent.Run() || WowInterface.ObjectManager.Player.IsCasting) { return; }
@@ -231,6 +233,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
+                if(!isTargetMyself && !TargetInLineOfSight)
+                {
+                    return false;
+                }
+
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
@@ -285,6 +292,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
+                if (!isTargetMyself && !TargetInLineOfSight)
+                {
+                    return false;
+                }
+
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsRuneenergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Runeenergy)
@@ -319,6 +331,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (GetValidTarget(guid, out WowUnit target))
             {
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
+
+                if (!isTargetMyself && !TargetInLineOfSight)
+                {
+                    return false;
+                }
 
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)

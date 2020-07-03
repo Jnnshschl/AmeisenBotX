@@ -63,6 +63,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         else
                         {
                             HandleMovement(WowInterface.ObjectManager.Target);
+                            WowInterface.CombatClass.TargetInLineOfSight = TargetInLos;
                         }
                     }
                 }

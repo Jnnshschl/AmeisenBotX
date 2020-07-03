@@ -34,6 +34,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         bool WalkBehindEnemy { get; }
 
+        bool TargetInLineOfSight { get; set; }
+
         void Execute();
 
         void OutOfCombatExecute();

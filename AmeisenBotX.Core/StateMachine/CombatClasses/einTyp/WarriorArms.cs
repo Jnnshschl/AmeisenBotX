@@ -55,6 +55,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public List<string> PriorityTargets { get; set; }
 
+        public bool TargetInLineOfSight { get; set; }
+
         public CombatClassRole Role => CombatClassRole.Dps;
 
         public TalentTree Talents { get; } = new TalentTree()
