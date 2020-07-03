@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             //FuryWarrior
             TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
             //Resto Shaman
             
