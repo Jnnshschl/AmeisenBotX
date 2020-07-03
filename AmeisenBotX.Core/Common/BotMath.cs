@@ -5,20 +5,20 @@ namespace AmeisenBotX.Core.Common
 {
     public class BotMath
     {
-        public static Vector3 CalculatePositionAround(Vector3 position, float rotation, double angle, double distance = 2.0)
+        public static Vector3 CalculatePositionAround(Vector3 position, float rotation, float angle, float distance = 2.0f)
         {
-            double s = Math.Round(Math.Sin(rotation + angle), 4);
-            double c = Math.Round(Math.Cos(rotation + angle), 4);
+            float rSin = (float)Math.Sin(rotation + angle) * distance;
+            float cSin = (float)Math.Cos(rotation + angle) * distance;
 
-            float x = Convert.ToSingle((position.X + distance) * c);
-            float y = Convert.ToSingle((position.Y + distance) * s);
+            float x = position.X + cSin;
+            float y = position.Y + rSin;
 
             return new Vector3(x, y, position.Z);
         }
 
-        public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, double distanceToMove = 2.0)
+        public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
         {
-            return CalculatePositionAround(position, rotation, Math.PI, distanceToMove);
+            return CalculatePositionAround(position, rotation, (float)Math.PI, distanceToMove);
         }
 
         public static float ClampAngles(float rotation)

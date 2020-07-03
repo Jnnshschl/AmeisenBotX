@@ -6,7 +6,7 @@
 
         public bool EnableTracelineJumpCheck { get; set; } = true;
 
-        public double JumpCheckDistance { get; set; } = 0.2;
+        public float JumpCheckDistance { get; set; } = 0.2f;
 
         public float JumpCheckHeight { get; set; } = 0.5f;
 

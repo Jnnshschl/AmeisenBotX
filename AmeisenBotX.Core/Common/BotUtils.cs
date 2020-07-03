@@ -184,14 +184,14 @@ namespace AmeisenBotX.Core.Common
                 && !unit.IsNotAttackable;
         }
 
-        public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, double offset)
+        public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, float offset)
         {
             return MoveAhead(targetPosition, BotMath.GetFacingAngle2D(origin, targetPosition), offset);
         }
 
-        public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, double offset)
+        public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, float offset)
         {
-            return BotMath.CalculatePositionAround(targetPosition, rotation, 0.0, offset);
+            return BotMath.CalculatePositionAround(targetPosition, rotation, (float)0.0, offset);
         }
 
         public static void RealeaseKey(IntPtr windowHandle, IntPtr key)

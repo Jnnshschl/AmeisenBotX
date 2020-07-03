@@ -330,7 +330,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > threshold && !WowInterface.ObjectManager.Player.IsCasting)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0));
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
             }
             else if (ActionEvent.Run())
             {

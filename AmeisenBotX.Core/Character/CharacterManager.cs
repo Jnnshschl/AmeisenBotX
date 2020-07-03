@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Character
 {
@@ -164,7 +165,7 @@ namespace AmeisenBotX.Core.Character
         public void Jump()
         {
             AmeisenLogger.Instance.Log("Movement", $"Jumping", LogLevel.Verbose);
-            BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE), 500, 1000);
+            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 1.5f)

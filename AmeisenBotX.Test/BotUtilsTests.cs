@@ -92,24 +92,24 @@ namespace AmeisenBotX.Test
             Assert.IsFalse(BotUtils.IsValidJson(invalidA));
         }
 
-        [TestMethod]
-        public void MoveAheadTest()
-        {
-            Vector3 pos = new Vector3(0, 1, 0);
-            Vector3 pos2 = new Vector3(0, 2, 0);
-
-            Vector3 aheadPos = BotUtils.MoveAhead(pos, pos2, 1);
-            Assert.AreEqual(new Vector3(0, 3, 0), aheadPos);
-
-            aheadPos = BotUtils.MoveAhead(pos, pos2, -1);
-            Assert.AreEqual(new Vector3(0, 1, 0), aheadPos);
-
-            aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), 1);
-            Assert.AreEqual(new Vector3(0, 2, 0), aheadPos);
-
-            aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), -1);
-            Assert.AreEqual(new Vector3(0, 0, 0), aheadPos);
-        }
+        // [TestMethod]
+        // public void MoveAheadTest()
+        // {
+        //     Vector3 pos = new Vector3(0, 1, 0);
+        //     Vector3 pos2 = new Vector3(0, 2, 0);
+        // 
+        //     Vector3 aheadPos = BotUtils.MoveAhead(pos, pos2, 1);
+        //     Assert.AreEqual(new Vector3(0, 3, 0), aheadPos);
+        // 
+        //     aheadPos = BotUtils.MoveAhead(pos, pos2, -1);
+        //     Assert.AreEqual(new Vector3(0, 1, 0), aheadPos);
+        // 
+        //     aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), 1);
+        //     Assert.AreEqual(new Vector3(0, 2, 0), aheadPos);
+        // 
+        //     aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), -1);
+        //     Assert.AreEqual(new Vector3(0, 0, 0), aheadPos);
+        // }
 
         [TestMethod]
         public void ObfuscateLuaTest()

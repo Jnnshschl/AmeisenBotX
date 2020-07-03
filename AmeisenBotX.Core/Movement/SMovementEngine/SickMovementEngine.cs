@@ -161,15 +161,20 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
                 if (WowInterface.MovementSettings.EnableTracelineJumpCheck
                     && !JumpOnNextMove
-                    && JumpCheckEvent.Run()
-                    && !WowInterface.HookManager.IsInLineOfSight
+                    && JumpCheckEvent.Run())
+                {
+
+                    Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance);
+
+                    if (!WowInterface.HookManager.IsInLineOfSight
                     (
                         WowInterface.ObjectManager.Player.Position,
-                        BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance),
+                        pos,
                         WowInterface.MovementSettings.JumpCheckHeight
                     ))
-                {
-                    JumpOnNextMove = true;
+                    {
+                        JumpOnNextMove = true;
+                    }
                 }
 
                 BehaviorTree.Tick();
@@ -227,7 +232,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 StuckRotation = WowInterface.ObjectManager.Player.Rotation;
 
                 double angle = Math.PI + ((new Random().NextDouble() * Math.PI) - Math.PI / 2.0);
-                UnstuckTargetPosition = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 10.0);
+                UnstuckTargetPosition = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, (float)angle, 10.0f);
             }
             else
             {

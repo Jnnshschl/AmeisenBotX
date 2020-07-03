@@ -109,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance > DistanceToTarget || !TargetInLos)
             {
-                Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), 2.0); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), 2.0f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetMovementAction(distance > 8.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }
