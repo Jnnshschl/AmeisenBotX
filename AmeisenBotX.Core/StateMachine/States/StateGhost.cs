@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (nearestPortal != null)
                     {
-                        CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                        CorpsePosition = BotUtils.MoveAhead(nearestPortal.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), 6);
                         NeedToEnterPortal = true;
                     }
                     else

@@ -372,7 +372,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 return;
             }
 
-            if (hasTargetMoved || (distanceToTarget < target.CombatReach && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.75, 1.25)))
+            if (hasTargetMoved || (distanceToTarget < target.CombatReach && !BotMath.IsFacing(LastPlayerPosition, ObjectManager.Player.Rotation, LastTargetPosition, 0.5f)))
             {
                 CharacterManager.MoveToPosition(LastTargetPosition);
             }

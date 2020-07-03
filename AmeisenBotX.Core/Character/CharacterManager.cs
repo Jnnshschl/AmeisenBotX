@@ -163,7 +163,8 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump()
         {
-            BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
+            AmeisenLogger.Instance.Log("Movement", $"Jumping", LogLevel.Verbose);
+            BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE), 500, 1000);
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 1.5f)
@@ -216,6 +217,7 @@ namespace AmeisenBotX.Core.Character
                             IWowItem item = itemsLikeEquipped[f];
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
+                                AmeisenLogger.Instance.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
                                 WowInterface.HookManager.ReplaceItem(null, item);
                                 Equipment.Update();
                                 break;
@@ -229,6 +231,7 @@ namespace AmeisenBotX.Core.Character
                         if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)itemToEquip))
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
+                            AmeisenLogger.Instance.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
                             WowInterface.HookManager.ReplaceItem(null, itemToEquip);
                             Equipment.Update();
                         }
@@ -354,8 +357,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            string rawMoney = WowInterface.HookManager.GetMoney();
-            if (int.TryParse(rawMoney, out int money))
+            if (int.TryParse(WowInterface.HookManager.GetMoney(), out int money))
             {
                 Money = money;
             }

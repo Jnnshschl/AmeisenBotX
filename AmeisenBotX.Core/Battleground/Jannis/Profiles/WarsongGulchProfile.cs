@@ -41,8 +41,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 new Selector<JBgBlackboard>
                 (
                     "IsFlagNearOwnOrEnemyBase",
-                    (b) => b.EnemyTeamFlagPos.GetDistanceIgnoreZ(WsgDataset.EnemyBasePositionMapCoords)
-                         < b.EnemyTeamFlagPos.GetDistanceIgnoreZ(WsgDataset.OwnBasePositionMapCoords),
+                    (b) => b.EnemyTeamFlagPos.GetDistance2D(WsgDataset.EnemyBasePositionMapCoords)
+                         < b.EnemyTeamFlagPos.GetDistance2D(WsgDataset.OwnBasePositionMapCoords),
                     new Leaf<JBgBlackboard>("MoveToEnemyBase", (b) => MoveToPosition(WsgDataset.EnemyBasePosition)),
                     new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                 )
@@ -330,7 +330,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > threshold && !WowInterface.ObjectManager.Player.IsCasting)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Rotation, JBgBlackboard.EnemyTeamFlagCarrier.Position, 1.0));
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0));
             }
             else if (ActionEvent.Run())
             {

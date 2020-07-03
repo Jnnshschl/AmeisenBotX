@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (distanceToPortal < 4.0)
                 {
                     // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
-                    posToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                    posToGoTo = BotUtils.MoveAhead(nearestPortal.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), 6);
                     moveIntoPortal = true;
                 }
             }

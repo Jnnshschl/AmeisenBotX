@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
 
             desired -= position;
-            desired.Normalize(desired.GetMagnitude());
+            desired.Normalize2D(desired.GetMagnitude2D());
             desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
 
             if (distanceToTarget > 20)
@@ -85,7 +85,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
 
             desired -= currentPosition;
-            desired.Normalize(desired.GetMagnitude());
+            desired.Normalize2D(desired.GetMagnitude2D());
             desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
 
             if (distanceToTarget < 4)

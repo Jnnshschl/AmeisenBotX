@@ -8,7 +8,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine
 {
@@ -100,11 +99,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public MovementBlackboard Blackboard { get; }
 
-        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistanceIgnoreZ(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
+        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
 
         public bool JumpOnNextMove { get; private set; }
 
         public Vector3 LastPlayerPosition { get; private set; }
+
+        public double MinDistanceToMove { get; private set; }
 
         public double MovedDistance { get; private set; }
 
@@ -125,8 +126,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public Vector3 TargetPositionLastPathfinding { get; private set; }
 
         public float TargetRotation { get; private set; }
-
-        public double MinDistanceToMove { get; private set; }
 
         public Vector3 UnstuckTargetPosition { get; private set; }
 
@@ -166,7 +165,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     && !WowInterface.HookManager.IsInLineOfSight
                     (
                         WowInterface.ObjectManager.Player.Position,
-                        BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Rotation, WowInterface.ObjectManager.Player.Position, WowInterface.MovementSettings.JumpCheckDistance),
+                        BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance),
                         WowInterface.MovementSettings.JumpCheckHeight
                     ))
                 {

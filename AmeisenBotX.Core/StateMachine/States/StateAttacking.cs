@@ -97,26 +97,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 TargetInLos = isInLos;
             }
 
-            if (!WowInterface.HookManager.IsClickToMoveActive() && FacingCheck.Run())
+            if (!WowInterface.HookManager.IsClickToMoveActive()
+                && FacingCheck.Run()
+                && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
             {
-                float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
-                float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
-                float maxAngle = (float)(Math.PI * 2);
-
-                if (angleDiff < 0)
-                {
-                    angleDiff += maxAngle;
-                }
-
-                if (angleDiff > maxAngle)
-                {
-                    angleDiff -= maxAngle;
-                }
-
-                if (angleDiff > 1.5)
-                {
-                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
-                }
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
             }
 
             // if we are close enough, stop movement and start attacking
@@ -124,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance > DistanceToTarget || !TargetInLos)
             {
-                Vector3 positionToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), target.Position, 2.0); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), 2.0); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetMovementAction(distance > 8.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }

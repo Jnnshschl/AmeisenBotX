@@ -55,11 +55,6 @@ namespace AmeisenBotX.Core.Common
             return BitConverter.ToString(bytes).Replace("-", " ");
         }
 
-        public static string Capitalize(string input)
-        {
-            return input.First().ToString().ToUpper() + input.Substring(1);
-        }
-
         public static void HoldKey(IntPtr windowHandle, IntPtr key)
         {
             SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
@@ -117,12 +112,9 @@ namespace AmeisenBotX.Core.Common
             return (input, returnValueName);
         }
 
-        public static string GenerateUniqueString(int lenght)
+        public static string GenerateUniqueString(int byteCount)
         {
             using RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-
-            int bitCount = (lenght * 6);
-            int byteCount = ((bitCount + 7) / 8);
 
             byte[] bytes = new byte[byteCount];
             rng.GetBytes(bytes);
@@ -138,11 +130,6 @@ namespace AmeisenBotX.Core.Common
         public static string FastRandomString()
         {
             return Path.GetRandomFileName().Replace(".", string.Empty);
-        }
-
-        public static string RandomStringOnlyLetters(int lenght = 8, string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-        {
-            return RandomString(lenght, chars);
         }
 
         public static string GetColorByQuality(ItemQuality itemQuality)
@@ -161,22 +148,9 @@ namespace AmeisenBotX.Core.Common
             };
         }
 
-        public static string FirstCharToUpper(string input)
+        public static string Capitalize(string input)
         {
             return input.First().ToString().ToUpper() + input.Substring(1);
-        }
-
-        public static string RandomString(int lenght = 8, string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
-        {
-            char[] stringChars = new char[lenght];
-            Random random = new Random();
-
-            for (int i = 0; i < stringChars.Length; ++i)
-            {
-                stringChars[i] = chars[random.Next(chars.Length)];
-            }
-
-            return new string(stringChars);
         }
 
         public static bool IsValidJson(string strInput)
@@ -212,20 +186,12 @@ namespace AmeisenBotX.Core.Common
 
         public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, double offset)
         {
-            return MoveAhead(BotMath.GetFacingAngle2D(origin, targetPosition), targetPosition, offset);
+            return MoveAhead(targetPosition, BotMath.GetFacingAngle2D(origin, targetPosition), offset);
         }
 
-        public static Vector3 MoveAhead(float rotation, Vector3 targetPosition, double offset)
+        public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, double offset)
         {
-            double x = targetPosition.X + (Math.Cos(rotation) * offset);
-            double y = targetPosition.Y + (Math.Sin(rotation) * offset);
-
-            return new Vector3()
-            {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
-                Z = targetPosition.Z
-            };
+            return BotMath.CalculatePositionAround(targetPosition, rotation, 0.0, offset);
         }
 
         public static void RealeaseKey(IntPtr windowHandle, IntPtr key)
@@ -275,11 +241,10 @@ namespace AmeisenBotX.Core.Common
             return new IntPtr((p2 << 16) | (p & 0xFFFF));
         }
 
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("user32", SetLastError = true)]
         private static extern bool PostMessage(IntPtr windowHandle, uint msg, IntPtr param, IntPtr parameter);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32", SetLastError = true)]
         private static extern IntPtr SendMessage(IntPtr windowHandle, uint msg, IntPtr param, IntPtr parameter);
     }
 }

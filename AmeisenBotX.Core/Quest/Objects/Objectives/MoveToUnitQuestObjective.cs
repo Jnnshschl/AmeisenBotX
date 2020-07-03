@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistanceIgnoreZ(WowInterface.ObjectManager.Player.Position) > Distance)
+                if (WowUnit.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position) > Distance)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowUnit.Position);
                 }
