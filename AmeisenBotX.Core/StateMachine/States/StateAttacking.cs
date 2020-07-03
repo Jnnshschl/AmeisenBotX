@@ -16,8 +16,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
 
-        public bool IsFacing { get; private set; }
-
         public bool TargetInLos { get; private set; }
 
         private TimegatedEvent FacingCheck { get; set; }

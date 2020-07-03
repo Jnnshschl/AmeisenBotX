@@ -21,6 +21,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             LastDistanceEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
             BehaviorTree = new AmeisenBotBehaviorTree<MovementBlackboard>
@@ -129,6 +130,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public Vector3 UnstuckTargetPosition { get; private set; }
 
+        public TimegatedEvent PathDecayEvent { get; private set; }
+
         internal BasicVehicle PlayerVehicle { get; }
 
         internal WowInterface WowInterface { get; }
@@ -216,7 +219,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 || MovementAction == MovementAction.Moving
                 || MovementAction == MovementAction.Following)
             {
-                return Path == null || Path.Count == 0 || TargetPositionLastPathfinding.GetDistance(TargetPosition) > 1.5;
+                return Path == null || Path.Count == 0 || PathDecayEvent.Run() || TargetPositionLastPathfinding.GetDistance(TargetPosition) > 1.5;
             }
             else
             {
