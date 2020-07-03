@@ -57,6 +57,7 @@
     <Compile Include="AmeisenBot.cs" />
     <Compile Include="Battleground\einTyp\RunBoyRunEngine.cs" />
     <Compile Include="Battleground\IBattlegroundEngine.cs" />
+    <Compile Include="Battleground\KamelBG\KummelEngine.cs" />
     <Compile Include="Battleground\Jannis\JBattleGroundEngine.cs" />
     <Compile Include="Battleground\Jannis\JBgBlackboard.cs" />
     <Compile Include="Battleground\Jannis\Profiles\IBattlegroundProfile.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Character\Inventory\Objects\WowRecipe.cs" />
     <Compile Include="Character\Inventory\Objects\WowTradegood.cs" />
     <Compile Include="Character\Inventory\Objects\WowWeapon.cs" />
+    <Compile Include="Character\Objects\WowMount.cs" />
     <Compile Include="Character\Spells\Enums\Spellschools.cs" />
     <Compile Include="Character\Spells\Objects\Spell.cs" />
     <Compile Include="Character\Spells\SpellBook.cs" />
@@ -183,10 +185,14 @@
     <Compile Include="Data\Objects\Enums\WowUnitFlags.cs" />
     <Compile Include="Data\Cache\InMemoryBotCache.cs" />
     <Compile Include="Data\Cache\IAmeisenBotCache.cs" />
+    <Compile Include="Dungeon\DungeonBlackboard.cs" />
     <Compile Include="Dungeon\DungeonEngine.cs" />
     <Compile Include="Dungeon\Enums\DungeonFactionType.cs" />
     <Compile Include="Dungeon\Enums\DungeonNodeType.cs" />
+    <Compile Include="Dungeon\IDungeonEngine.cs" />
     <Compile Include="Dungeon\Profiles\Classic\DeadminesProfile.cs" />
+    <Compile Include="Dungeon\Profiles\Classic\WailingCavernsProfile.cs" />
+    <Compile Include="Dungeon\Profiles\Classic\RagefireChasmProfile.cs" />
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
     <Compile Include="Dungeon\Objects\DungeonNode.cs" />
     <Compile Include="Dungeon\Profiles\TBC\HellfireRampartsProfile.cs" />
@@ -206,7 +212,6 @@
     <Compile Include="Jobs\Profiles\IMiningProfile.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
     <Compile Include="Jobs\Profiles\IJobsProfiles.cs" />
-    <Compile Include="Movement\DefaultMovementEngine.cs" />
     <Compile Include="Movement\Enums\MovementAction.cs" />
     <Compile Include="Movement\IMovementEngine.cs" />
     <Compile Include="Movement\Pathfinding\IPathfindingHandler.cs" />
@@ -218,11 +223,8 @@
     <Compile Include="Movement\Pathfinding\Objects\Vector3.cs" />
     <Compile Include="Movement\Settings\MovementSettings.cs" />
     <Compile Include="Movement\SMovementEngine\Enums\MovementState.cs" />
-    <Compile Include="Movement\SMovementEngine\StateBasedMovementEngine.cs" />
-    <Compile Include="Movement\SMovementEngine\States\BasicMovementState.cs" />
-    <Compile Include="Movement\SMovementEngine\States\StateMovementMoveToNode.cs" />
-    <Compile Include="Movement\SMovementEngine\States\StateMovementPathfinding.cs" />
-    <Compile Include="Movement\SMovementEngine\States\StateMovementNone.cs" />
+    <Compile Include="Movement\SMovementEngine\MovementBlackboard.cs" />
+    <Compile Include="Movement\SMovementEngine\SickMovementEngine.cs" />
     <Compile Include="Offsets\OffsetList335a.cs" />
     <Compile Include="Offsets\IOffsetList.cs" />
     <Compile Include="Personality\BotPersonality.cs" />
@@ -257,7 +259,8 @@
     <Compile Include="Relaxing\RelaxEngine.cs" />
     <Compile Include="Common\AbstractStateMachine.cs" />
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
-    <Compile Include="Statemachine\CombatClasses\DeathknightBlood.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\BasicKamelClass.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\BasicCombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightBlood.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightFrost.cs" />
@@ -277,6 +280,7 @@
     <Compile Include="Statemachine\CombatClasses\ICombatClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\WarriorProtection.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\FuryWarrior.cs" />
     <Compile Include="Statemachine\CombatClasses\einTyp\PaladinProtection.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\DeathknightUnholy.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PaladinRetribution.cs" />
@@ -286,6 +290,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\ShamanElemental.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\PriestShadow.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\RogueAssassination.cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\RestorationShaman .cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
     <Compile Include="Common\IState.cs" />
     <Compile Include="Statemachine\States\StateQuesting.cs" />

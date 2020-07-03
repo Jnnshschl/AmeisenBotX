@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -8,24 +9,12 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(WowInterface wowInterface, float maxSteering, float maxVelocity, float maxAcceleration)
+        public BasicVehicle(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Velocity = new Vector3(0, 0, 0);
-            MaxSteering = maxSteering;
-            MaxVelocity = maxVelocity;
-            MaxAcceleration = maxAcceleration;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
-
-        public event MoveCharacter OnMoveCharacter;
-
-        public float MaxAcceleration { get; private set; }
-
-        public float MaxSteering { get; private set; }
-
-        public float MaxVelocity { get; private set; }
 
         public Vector3 Velocity { get; private set; }
 
@@ -38,7 +27,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             acceleration += GetObjectForceAroundMe<WowObject>(12);
             // acceleration += GetNearestBlacklistForce(12);
 
-            acceleration.Limit(MaxAcceleration);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
 
             return acceleration;
@@ -57,8 +46,8 @@ namespace AmeisenBotX.Core.Movement.Objects
             float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
 
             desired -= position;
-            desired.Normalize(desired.GetMagnitude());
-            desired.Multiply(MaxVelocity);
+            desired.Normalize2D(desired.GetMagnitude2D());
+            desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
 
             if (distanceToTarget > 20)
             {
@@ -74,11 +63,11 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Vector3 steering = desired;
             steering -= Velocity;
-            steering.Limit(MaxSteering);
+            steering.Limit(WowInterface.MovementSettings.MaxSteering);
 
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
-            acceleration.Limit(MaxAcceleration);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -96,8 +85,8 @@ namespace AmeisenBotX.Core.Movement.Objects
             float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
 
             desired -= currentPosition;
-            desired.Normalize(desired.GetMagnitude());
-            desired.Multiply(MaxVelocity);
+            desired.Normalize2D(desired.GetMagnitude2D());
+            desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
 
             if (distanceToTarget < 4)
             {
@@ -106,11 +95,11 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Vector3 steering = desired;
             steering -= Velocity;
-            steering.Limit(MaxSteering);
+            steering.Limit(WowInterface.MovementSettings.MaxSteering);
 
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
-            acceleration.Limit(MaxAcceleration);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -118,8 +107,8 @@ namespace AmeisenBotX.Core.Movement.Objects
         public Vector3 Seperate(float multiplier)
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<WowPlayer>(2);
-            acceleration.Limit(MaxAcceleration);
+            acceleration += GetObjectForceAroundMe<WowPlayer>(WowInterface.MovementSettings.SeperationDistance);
+            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -130,19 +119,27 @@ namespace AmeisenBotX.Core.Movement.Objects
             return Seek(positionBehindMe, multiplier);
         }
 
-        public void Update(List<Vector3> forces)
+        public void Update(MoveCharacter moveCharacter, MovementAction movementAction, Vector3 targetPosition, float rotation = 0f)
         {
+            if (movementAction == MovementAction.DirectMove)
+            {
+                moveCharacter?.Invoke(targetPosition);
+                return;
+            }
+
+            List<Vector3> forces = GetForces(movementAction, targetPosition, rotation);
+
             for (int i = 0; i < forces.Count; ++i)
             {
                 Velocity += forces[i];
             }
 
-            Velocity.Limit(MaxVelocity);
+            Velocity.Limit(WowInterface.MovementSettings.MaxVelocity);
 
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             currentPosition.Add(Velocity);
 
-            OnMoveCharacter?.Invoke(currentPosition);
+            moveCharacter?.Invoke(currentPosition);
         }
 
         public Vector3 Wander(float multiplier)
@@ -194,6 +191,60 @@ namespace AmeisenBotX.Core.Movement.Objects
                 Y = Convert.ToSingle(y),
                 Z = position.Z
             };
+        }
+
+        private List<Vector3> GetForces(MovementAction movementAction, Vector3 targetPosition, float rotation = 0f, bool enablePlayerForces = false)
+        {
+            List<Vector3> forces = new List<Vector3>();
+
+            switch (movementAction)
+            {
+                case MovementAction.Moving:
+                    forces.Add(Seek(targetPosition, 1f));
+
+                    if (enablePlayerForces)
+                    {
+                        forces.Add(Seperate(0.5f));
+                    }
+
+                    // forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    break;
+
+                case MovementAction.Following:
+                    forces.Add(Seek(targetPosition, 1f));
+                    forces.Add(Seperate(0.5f));
+                    // forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    break;
+
+                case MovementAction.Chasing:
+                    forces.Add(Seek(targetPosition, 1f));
+                    break;
+
+                case MovementAction.Fleeing:
+                    Vector3 fleeForce = Flee(targetPosition, 1f);
+                    fleeForce.Z = 0; // set z to zero to avoid going under the terrain
+                    forces.Add(fleeForce);
+                    break;
+
+                case MovementAction.Evading:
+                    forces.Add(Evade(targetPosition, 1f, rotation));
+                    break;
+
+                case MovementAction.Wandering:
+                    Vector3 wanderForce = Wander(1f);
+                    wanderForce.Z = 0; // set z to zero to avoid going under the terrain
+                    forces.Add(wanderForce);
+                    break;
+
+                case MovementAction.Unstuck:
+                    forces.Add(Unstuck(1f));
+                    break;
+
+                default:
+                    break;
+            }
+
+            return forces;
         }
 
         private Vector3 GetNearestBlacklistForce(double maxDistance = 8)

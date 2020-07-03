@@ -34,8 +34,6 @@ namespace AmeisenBotX.Core.Hook
             OriginalFunctionBytes = new Dictionary<IntPtr, byte>();
         }
 
-        public ulong PendingCallCount { get; set; }
-
         public IntPtr CodecaveForCheck { get; private set; }
 
         public IntPtr CodecaveForExecution { get; private set; }
@@ -55,6 +53,8 @@ namespace AmeisenBotX.Core.Hook
         public bool OverrideWorldCheck { get; private set; }
 
         public IntPtr OverrideWorldCheckAddress { get; private set; }
+
+        public ulong PendingCallCount { get; set; }
 
         public IntPtr ReturnValueAddress { get; private set; }
 
@@ -161,6 +161,11 @@ namespace AmeisenBotX.Core.Hook
         public void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId)
         {
             LuaDoString($"SelectGossipActiveQuest(max({gossipId}, GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId});");
+        }
+
+        public void Dismount()
+        {
+            LuaDoString("DismissCompanion(\"MOUNT\");");
         }
 
         public void DisposeHook()
@@ -364,6 +369,11 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"));
         }
 
+        public string GetMounts()
+        {
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")if {{v:1}}>0 then for b=1,{{v:1}} do {{v:4}},{{v:2}},{{v:3}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"index\\\":\"..b..\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"mountId\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end end;{{v:0}}={{v:0}}..\"]\""));
+        }
+
         public Dictionary<RuneType, int> GetRunesReady()
         {
             Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
@@ -525,7 +535,7 @@ namespace AmeisenBotX.Core.Hook
             return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end")), out int result) ? result == 1 : false;
         }
 
-        public bool IsClickToMoveActive(WowPlayer player)
+        public bool IsClickToMoveActive()
         {
             return WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveAction, out int ctmState)
                        && (ClickToMoveType)ctmState != ClickToMoveType.None
@@ -618,6 +628,11 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
+        public void Mount(int index)
+        {
+            LuaDoString($"CallCompanion(\"MOUNT\", {index});");
+        }
+
         public void OverrideWorldCheckOff()
         {
             OverrideWorldCheck = false;
@@ -637,7 +652,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void QueueBattlegroundByName(string bgName)
         {
-            LuaDoString(BotUtils.ObfuscateLua($"for i=1,GetNumBattlegroundTypes() do local {{v:0}}=GetBattlegroundInfo(i)if {{v:0}}==\"{bgName}\"then JoinBattlefield(i) end end").Item1);
+            LuaDoString(BotUtils.ObfuscateLua($"for i=1,GetNumBattlegroundTypes() do {{v:0}}=GetBattlegroundInfo(i)if {{v:0}}==\"{bgName}\"then JoinBattlefield(i) end end").Item1);
         }
 
         public void ReleaseSpirit()
@@ -867,8 +882,9 @@ namespace AmeisenBotX.Core.Hook
 
         public void StopClickToMoveIfActive()
         {
-            if (IsClickToMoveActive(WowInterface.ObjectManager.Player))
+            if (IsClickToMoveActive())
             {
+                AmeisenLogger.Instance.Log("Movement", "Stopping ClickToMove", LogLevel.Verbose);
                 CallObjectFunction(WowInterface.ObjectManager.Player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);
             }
         }
@@ -923,11 +939,13 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    byte returnedByte = InjectAndExecute(asm, true)[0];
-                    // WowInterface.XMemory.Read(resultPointer, out result);
-
+                    byte[] bytes = InjectAndExecute(asm, true);
                     WowInterface.XMemory.FreeMemory(tracelineCodecave);
-                    return returnedByte;
+
+                    if (bytes != null && bytes.Length > 0)
+                    {
+                        return bytes[0];
+                    }
                 }
             }
 

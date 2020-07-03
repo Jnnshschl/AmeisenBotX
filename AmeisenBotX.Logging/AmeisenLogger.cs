@@ -1,9 +1,12 @@
 ﻿using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Logging.Objects;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -11,13 +14,13 @@ namespace AmeisenBotX.Logging
 {
     public class AmeisenLogger
     {
-        private static readonly object fileLock = new object();
-        private static readonly object Padlock = new object();
+        private int timerBusy;
+        private static readonly object padlock = new object();
         private static AmeisenLogger instance;
 
         private AmeisenLogger(bool deleteOldLogs = true)
         {
-            LogBuilder = new StringBuilder();
+            LogBuilder = new ConcurrentQueue<LogEntry>();
 
             LogFileWriter = new Timer(1000);
             LogFileWriter.Elapsed += LogFileWriter_Elapsed;
@@ -38,7 +41,7 @@ namespace AmeisenBotX.Logging
         {
             get
             {
-                lock (Padlock)
+                lock (padlock)
                 {
                     if (instance == null)
                     {
@@ -58,7 +61,7 @@ namespace AmeisenBotX.Logging
 
         public string LogFilePath { get; private set; }
 
-        private StringBuilder LogBuilder { get; }
+        private ConcurrentQueue<LogEntry> LogBuilder { get; }
 
         private Timer LogFileWriter { get; set; }
 
@@ -99,10 +102,13 @@ namespace AmeisenBotX.Logging
 
         public void Log(string tag, string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName]string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
-            if (logLevel <= ActiveLogLevel)
+            Task.Run(() =>
             {
-                LogBuilder.AppendLine(new LogEntry(logLevel, $"{$"[{tag}]",-24} {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline).ToString());
-            }
+                if (logLevel <= ActiveLogLevel)
+                {
+                    LogBuilder.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",-24} {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+                }
+            });
         }
 
         public void Start()
@@ -120,14 +126,26 @@ namespace AmeisenBotX.Logging
 
         private void LogFileWriter_Elapsed(object sender, ElapsedEventArgs e)
         {
-            lock (fileLock)
+            // only start one timer tick at a time
+            if (Interlocked.CompareExchange(ref timerBusy, 1, 0) == 1)
             {
-                try
+                return;
+            }
+
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+
+                while (!LogBuilder.IsEmpty && LogBuilder.TryDequeue(out LogEntry logEntry))
                 {
-                    File.AppendAllText(LogFilePath, LogBuilder.ToString());
-                    LogBuilder.Clear();
+                    sb.AppendLine(logEntry.ToString());
                 }
-                catch { }
+
+                File.AppendAllText(LogFilePath, sb.ToString());
+            }
+            finally
+            {
+                timerBusy = 0;
             }
         }
     }

@@ -43,10 +43,12 @@
   <ItemGroup>
     <Compile Include="AmeisenBotBehaviorTree.cs" />
     <Compile Include="Enums\BehaviorTreeStatus.cs" />
+    <Compile Include="Interfaces\IBlackboard.cs" />
     <Compile Include="Objects\Composite.cs" />
+    <Compile Include="Objects\Inverter.cs" />
     <Compile Include="Objects\Leaf.cs" />
     <Compile Include="Objects\Node.cs" />
-    <Compile Include="Objects\DuoSelector.cs" />
+    <Compile Include="Objects\DualSelector.cs" />
     <Compile Include="Objects\Sequence.cs" />
     <Compile Include="Objects\Selector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

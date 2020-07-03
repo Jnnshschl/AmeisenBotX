@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[61-65] The Underbog";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(10, -16, -3)),
             new DungeonNode(new Vector3(16, -21, -3)),

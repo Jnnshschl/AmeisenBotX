@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (distanceToPortal < 4.0)
                 {
                     // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
-                    posToGoTo = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                    posToGoTo = BotUtils.MoveAhead(nearestPortal.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), 6);
                     moveIntoPortal = true;
                 }
             }
@@ -109,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             Vector3 posToGoToZMod = posToGoTo;
             posToGoToZMod.Z += 1f;
 
-            if ((distance < 8.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
+            if ((distance < 4.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
                 || (distance < 32.0 && zDiff < 0.0 && WowInterface.HookManager.IsInLineOfSight(playerPosZMod, posToGoToZMod))) // target is below us and in line of sight, just run down
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);

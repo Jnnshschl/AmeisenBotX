@@ -154,10 +154,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (StateMachine.CurrentState.Key == (int)BotState.Dungeon
                     && WowInterface.DungeonEngine != null
-                    && WowInterface.DungeonEngine.DungeonProfile.PriorityUnits != null
-                    && WowInterface.DungeonEngine.DungeonProfile.PriorityUnits.Count > 0)
+                    && WowInterface.DungeonEngine.Profile.PriorityUnits != null
+                    && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
                 {
-                    TargetManager.PriorityTargets = WowInterface.DungeonEngine.DungeonProfile.PriorityUnits.ToList();
+                    TargetManager.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits.ToList();
                 }
             }
 
@@ -243,6 +243,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         // stop pending movement if we cast something
                         WowInterface.MovementEngine.Reset();
                         WowInterface.HookManager.StopClickToMoveIfActive();
+
+                        CheckFacing(target);
                     }
 
                     CastSpell(spellName, isTargetMyself);
@@ -251,6 +253,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
+        }
+
+        private void CheckFacing(WowUnit target)
+        {
+            float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
+            float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
+            float maxAngle = (float)(Math.PI * 2);
+
+            if (angleDiff < 0)
+            {
+                angleDiff += maxAngle;
+            }
+
+            if (angleDiff > maxAngle)
+            {
+                angleDiff -= maxAngle;
+            }
+
+            if (angleDiff > 1.5)
+            {
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+            }
         }
 
         protected bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
@@ -276,6 +300,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         // stop pending movement if we cast something
                         WowInterface.MovementEngine.Reset();
                         WowInterface.HookManager.StopClickToMoveIfActive();
+
+                        CheckFacing(target);
                     }
 
                     CastSpell(spellName, isTargetMyself);
@@ -307,6 +333,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         // stop pending movement if we cast something
                         WowInterface.MovementEngine.Reset();
                         WowInterface.HookManager.StopClickToMoveIfActive();
+
+                        CheckFacing(target);
                     }
 
                     CastSpell(spellName, isTargetMyself);
@@ -380,11 +408,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CastSpell(string spellName, bool castOnSelf)
         {
-            if (!castOnSelf && WowInterface.ObjectManager.Target != null)
-            {
-                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
-            }
-
             bool result = false;
             double cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
 

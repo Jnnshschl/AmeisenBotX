@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         string Name { get; }
 
-        List<DungeonNode> Path { get; }
+        List<DungeonNode> Nodes { get; }
 
         List<string> PriorityUnits { get; }
 

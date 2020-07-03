@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core
 
         public CombatLogParser CombatLogParser { get; set; }
 
-        public DungeonEngine DungeonEngine { get; set; }
+        public IDungeonEngine DungeonEngine { get; set; }
 
         public EventHook EventHookManager { get; set; }
 

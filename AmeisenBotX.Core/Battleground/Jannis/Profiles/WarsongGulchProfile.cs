@@ -23,291 +23,181 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
-            JBgBlackboard = new JBgBlackboard();
+            JBgBlackboard = new JBgBlackboard(UpdateBattlegroundInfo);
 
             KillEnemyFlagCarrierSelector = new Selector<JBgBlackboard>
             (
+                "EnemyTeamFlagCarrierInRange",
                 (b) => b.EnemyTeamFlagCarrier != null,
-
-                // is he further away from flag than me
                 new Selector<JBgBlackboard>
                 (
-                    (b) => b.MyTeamHasFlag || b.EnemyTeamFlagCarrier.Position.GetDistance(WsgDataset.EnemyBasePosition) < WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition),
-
-                    // try to kill flag carrier
-                    new Leaf<JBgBlackboard>
-                    (
-                        (b) =>
-                        {
-                            KillEnemyFlagCarrier();
-                            return BehaviorTreeStatus.Success;
-                        }
-                    ),
-
-                    // get the flag asap
-                    new Leaf<JBgBlackboard>
-                    (
-                        (b) =>
-                        {
-                            MoveToEnemyBaseAndGetFlag();
-                            return BehaviorTreeStatus.Success;
-                        }
-                    )
+                    "HasFlag",
+                    (b) => b.MyTeamHasFlag
+                        || b.EnemyTeamFlagCarrier.Position.GetDistance(WsgDataset.EnemyBasePosition)
+                         < WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition),
+                    new Leaf<JBgBlackboard>("KillEnemyFlagCarrier", KillEnemyFlagCarrier),
+                    new Leaf<JBgBlackboard>("MoveToEnemyBaseAndGetFlag", MoveToEnemyBaseAndGetFlag)
                 ),
-
                 new Selector<JBgBlackboard>
                 (
-                    (b) => b.EnemyTeamFlagPos.GetDistanceIgnoreZ(WsgDataset.EnemyBasePositionMapCoords) < b.EnemyTeamFlagPos.GetDistanceIgnoreZ(WsgDataset.OwnBasePositionMapCoords),
-
-                    // go to enemy base to locate enemy flag carrier
-                    new Leaf<JBgBlackboard>
-                    (
-                        (b) =>
-                        {
-                            MoveToEnemyBase();
-                            return BehaviorTreeStatus.Success;
-                        }
-                    ),
-
-                    // go to own base to locate enemy flag carrier
-                    new Leaf<JBgBlackboard>
-                    (
-                        (b) =>
-                        {
-                            MoveToOwnBase();
-                            return BehaviorTreeStatus.Success;
-                        }
-                    )
+                    "IsFlagNearOwnOrEnemyBase",
+                    (b) => b.EnemyTeamFlagPos.GetDistance2D(WsgDataset.EnemyBasePositionMapCoords)
+                         < b.EnemyTeamFlagPos.GetDistance2D(WsgDataset.OwnBasePositionMapCoords),
+                    new Leaf<JBgBlackboard>("MoveToEnemyBase", (b) => MoveToPosition(WsgDataset.EnemyBasePosition)),
+                    new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                 )
             );
 
-            FlagSelector = new DuoSelector<JBgBlackboard>
+            FlagSelector = new DualSelector<JBgBlackboard>
             (
+                "WhoHasTheFlag",
                 (b) => b.MyTeamHasFlag,
                 (b) => b.EnemyTeamHasFlag,
+
+                // no team has the flag
+                new Leaf<JBgBlackboard>("MoveToEnemyBaseAndGetFlag", MoveToEnemyBaseAndGetFlag),
 
                 // only my team has the flag
                 new Selector<JBgBlackboard>
                 (
+                    "AmITheFlagCarrier",
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid,
-
-                    // i'm the flag carrier
-                    new Leaf<JBgBlackboard>
-                    (
-                         (b) =>
-                         {
-                             MoveToOwnBase();
-                             return BehaviorTreeStatus.Success;
-                         }
-                    ),
-
-                    // help flag carrier or go to base
+                    new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition)),
                     new Selector<JBgBlackboard>
                     (
+                        "IsTheFlagCarrierInRange",
                         (b) => b.MyTeamFlagCarrier != null,
-
-                        // assist the carrier
-                        new Leaf<JBgBlackboard>
-                        (
-                            (b) =>
-                            {
-                                MoveToOwnFlagCarrier();
-                                return BehaviorTreeStatus.Success;
-                            }
-                        ),
-
-                        // go to base to defend it
-                        new Leaf<JBgBlackboard>
-                        (
-                            (b) =>
-                            {
-                                DefendOwnBase();
-                                return BehaviorTreeStatus.Success;
-                            }
-                        )
+                        new Leaf<JBgBlackboard>("MoveToOwnFlagCarrier", (b) => MoveToPosition(b.MyTeamFlagCarrier.Position)),
+                        new Leaf<JBgBlackboard>("DefendOwnBase", DefendOwnBase)
                     )
                 ),
 
                 // only enemy team has the flag
-                // if flag carrier is visible
                 KillEnemyFlagCarrierSelector,
 
                 // both teams have the flag
-                // is me flag carrier
                 new Selector<JBgBlackboard>
                 (
+                    "AmITheFlagCarrier",
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid,
-
                     new Selector<JBgBlackboard>
                     (
-                        (b) => WowInterface.ObjectManager.GetNearEnemies<WowUnit>(b.MyTeamFlagCarrier.Position, 48.0).Count(e => !e.IsDead) > 0,
-
-                        // am i close to the base
-                        new Selector<JBgBlackboard>
-                        (
-                            (b) => WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0,
-
-                            // move to hiding spot
-                            new Leaf<JBgBlackboard>
-                            (
-                                (b) =>
-                                {
-                                    MoveToOwnBaseHidingSpot();
-                                    return BehaviorTreeStatus.Success;
-                                }
-                            ),
-
-                            // move to own base
-                            new Leaf<JBgBlackboard>
-                            (
-                                (b) =>
-                                {
-                                    MoveToOwnBase();
-                                    return BehaviorTreeStatus.Success;
-                                }
-                            )
-                        ),
-
-                        // flee from enemies
-                        new Leaf<JBgBlackboard>
-                        (
-                            (b) =>
-                            {
-                                FleeFromComingEnemies();
-                                return BehaviorTreeStatus.Success;
-                            }
-                        )
+                        "AmINearOwnBase",
+                        (b) => WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0,
+                        new Leaf<JBgBlackboard>("MoveToHidingSpot", (b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
+                        new Leaf<JBgBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                     ),
-
-                    // do we need to help out carrier
-                    new Selector<JBgBlackboard>
-                    (
-                        (b) => b.MyTeamFlagCarrier.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 32.0
-                               && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(b.MyTeamFlagCarrier.Position, 48.0).Count(e => !e.IsDead) > 0,
-
-                        // go to own carrier and help
-                        new Leaf<JBgBlackboard>
-                        (
-                            (b) =>
-                            {
-                                MoveToCarrierAndHelp();
-                                return BehaviorTreeStatus.Success;
-                            }
-                        ),
-
-                        // go to kill enemy flag carrier
-                        KillEnemyFlagCarrierSelector
-                    )
-                ),
-
-                // no team has the flag
-                // go to enemy base and get flag
-                new Leaf<JBgBlackboard>
-                (
-                    (b) =>
-                    {
-                        MoveToEnemyBaseAndGetFlag();
-                        return BehaviorTreeStatus.Success;
-                    }
+                    KillEnemyFlagCarrierSelector
                 )
+            );
+
+            MainSelector = new Selector<JBgBlackboard>
+            (
+                "IsGateOpen",
+                (b) => IsGateOpen(),
+                 new Selector<JBgBlackboard>
+                 (
+                     "IsFlagNear",
+                     (b) => IsFlagNear(),
+                     new Leaf<JBgBlackboard>("UseNearestFlag", UseNearestFlag),
+                     new Selector<JBgBlackboard>
+                     (
+                         "IsAnyBuffNearMe",
+                         (b) => IsAnyBuffNearMe(16.0),
+                         new Leaf<JBgBlackboard>("MoveToNearestBuff", MoveToNearestBuff),
+                         new Selector<JBgBlackboard>
+                         (
+                             "DoWeOutnumberOurEnemies",
+                             (b) => DoWeOutnumberOurEnemies(b),
+                             new Leaf<JBgBlackboard>("AttackNearWeakestEnemy", AttackNearWeakestEnemy),
+                             FlagSelector
+                         )
+                     )
+                 ),
+                 new Leaf<JBgBlackboard>("MoveToGatePosition", (b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
             BehaviorTree = new AmeisenBotBehaviorTree<JBgBlackboard>
             (
-                // is the bg gate open
-                new Selector<JBgBlackboard>
-                (
-                    (b) => IsGateOpen(),
-
-                     // is flag near
-                     new Selector<JBgBlackboard>
-                     (
-                         (b) => IsFlagNear(),
-
-                         // use the flag
-                         new Leaf<JBgBlackboard>
-                         (
-                             (b) =>
-                             {
-                                 UseNearestFlag();
-                                 return BehaviorTreeStatus.Success;
-                             }
-                         ),
-
-                         // check for buffs
-                         new Selector<JBgBlackboard>
-                         (
-                             (b) => IsAnyBuffNearMe(16.0),
-
-                             // get the buff
-                             new Leaf<JBgBlackboard>
-                             (
-                                 (b) =>
-                                 {
-                                     MoveToNearestBuff();
-                                     return BehaviorTreeStatus.Success;
-                                 }
-                             ),
-
-                             // check for near enemies
-                             new Selector<JBgBlackboard>
-                             (
-                                 (b) =>
-                                 {
-                                     if (b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid)
-                                     {
-                                         return false;
-                                     }
-
-                                     int friends = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count;
-                                     int enemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count;
-
-                                     return enemies > 0 && friends >= enemies;
-                                 },
-
-                                 // attack near enemies
-                                 new Leaf<JBgBlackboard>
-                                 (
-                                     (b) =>
-                                     {
-                                         AttackNearWeakestEnemy();
-                                         return BehaviorTreeStatus.Success;
-                                     }
-                                 ),
-
-                                 FlagSelector
-                             )
-                         )
-                     ),
-
-                     // idle until gates are open
-                     new Leaf<JBgBlackboard>
-                     (
-                         (b) =>
-                         {
-                             MoveToGatesAndWait();
-                             return BehaviorTreeStatus.Success;
-                         }
-                     )
-                ),
-                JBgBlackboard
+                "JBgWarsongGulchBehaviorTree",
+                MainSelector,
+                JBgBlackboard,
+                TimeSpan.FromSeconds(1)
             );
-
-            RefreshScoreEvent = new TimegatedEvent(TimeSpan.FromSeconds(1), UpdateBattlegroundInfo);
-            SetTargetEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
-        private void MoveToGatesAndWait()
+        public interface IWsgDataset
         {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.GatePosition);
+            Vector3 EnemyBasePosition { get; }
 
-            if (distance > 4.0)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.GatePosition);
-            }
+            Vector3 EnemyBasePositionMapCoords { get; }
+
+            Vector3 FlagHidingSpot { get; }
+
+            Vector3 GatePosition { get; }
+
+            Vector3 OwnBasePosition { get; }
+
+            Vector3 OwnBasePositionMapCoords { get; }
         }
 
-        private void AttackNearWeakestEnemy()
+        public AmeisenBotBehaviorTree<JBgBlackboard> BehaviorTree { get; }
+
+        public DualSelector<JBgBlackboard> FlagSelector { get; }
+
+        public JBgBlackboard JBgBlackboard { get; set; }
+
+        public Selector<JBgBlackboard> MainSelector { get; }
+
+        public IWsgDataset WsgDataset { get; set; }
+
+        private TimegatedEvent ActionEvent { get; }
+
+        private Selector<JBgBlackboard> KillEnemyFlagCarrierSelector { get; }
+
+        private WowInterface WowInterface { get; }
+
+        public void Execute()
+        {
+            if (WsgDataset == null)
+            {
+                if (WowInterface.ObjectManager.Player.IsAlliance())
+                {
+                    WsgDataset = new AllianceWsgDataset();
+                }
+                else
+                {
+                    WsgDataset = new HordeWsgDataset();
+                }
+            }
+
+            BehaviorTree.Tick();
+        }
+
+        private bool AmINearOwnFlagCarrier(JBgBlackboard blackboard)
+        {
+            return WowInterface.ObjectManager.GetNearEnemies<WowUnit>(blackboard.MyTeamFlagCarrier.Position, 48.0).Count(e => !e.IsDead) > 0;
+        }
+
+        private bool AmIOneOfTheClosestToOwnFlagCarrier(JBgBlackboard blackboard, int memberCount)
+        {
+            if (memberCount <= 0 || blackboard.MyTeamFlagCarrier == null)
+            {
+                return false;
+            }
+
+            // check wether i'm part of the closest x (memberCount) members to the flag carrier
+            int index = WowInterface.ObjectManager.Partymembers
+                            .OfType<WowPlayer>()
+                            .Where(e => e.Guid != blackboard.MyTeamFlagCarrier.Guid)
+                            .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                            .Select((player, id) => new { Player = player, Index = id })
+                            .FirstOrDefault(_ => _.Player.Guid == WowInterface.ObjectManager.PlayerGuid)?.Index ?? -1;
+
+            return index > -1 && index <= memberCount;
+        }
+
+        private BehaviorTreeStatus AttackNearWeakestEnemy(JBgBlackboard blackboard)
         {
             WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 20.0).OrderBy(e => e.Health).FirstOrDefault();
 
@@ -326,82 +216,15 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     WowInterface.HookManager.TargetGuid(weakestPlayer.Guid);
                 }
             }
-        }
-
-        private bool IsGateOpen()
-        {
-            if (WowInterface.ObjectManager.Player.IsAlliance())
-            {
-                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                                    .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 411)
-                                    .FirstOrDefault();
-
-                return obj == null || obj.Bytes0 == 0;
-            }
             else
             {
-                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                                    .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 850)
-                                    .FirstOrDefault();
-
-                return obj == null || obj.Bytes0 == 0;
-            }
-        }
-
-        public interface IWsgDataset
-        {
-            Vector3 EnemyBasePosition { get; }
-
-            Vector3 EnemyBasePositionMapCoords { get; }
-
-            Vector3 FlagHidingSpot { get; }
-
-            Vector3 OwnBasePosition { get; }
-
-            Vector3 OwnBasePositionMapCoords { get; }
-
-            Vector3 GatePosition { get; }
-        }
-
-        public AmeisenBotBehaviorTree<JBgBlackboard> BehaviorTree { get; }
-
-        public DuoSelector<JBgBlackboard> FlagSelector { get; }
-
-        public JBgBlackboard JBgBlackboard { get; set; }
-
-        public IWsgDataset WsgDataset { get; set; }
-
-        private Selector<JBgBlackboard> KillEnemyFlagCarrierSelector { get; }
-
-        private TimegatedEvent RefreshScoreEvent { get; }
-
-        private TimegatedEvent SetTargetEvent { get; }
-
-        private WowInterface WowInterface { get; }
-
-        public void Execute()
-        {
-            if (WsgDataset == null)
-            {
-                if (WowInterface.ObjectManager.Player.IsAlliance())
-                {
-                    WsgDataset = new AllianceWsgDataset();
-                }
-                else
-                {
-                    WsgDataset = new HordeWsgDataset();
-                }
+                return BehaviorTreeStatus.Failed;
             }
 
-            if (RefreshScoreEvent.Run())
-            {
-                return;
-            }
-
-            BehaviorTree.Tick();
+            return BehaviorTreeStatus.Ongoing;
         }
 
-        private void DefendOwnBase()
+        private BehaviorTreeStatus DefendOwnBase(JBgBlackboard blackboard)
         {
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.OwnBasePosition);
 
@@ -428,15 +251,39 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     }
                 }
             }
+            return BehaviorTreeStatus.Ongoing;
         }
 
-        private void FleeFromComingEnemies()
+        private bool DoWeOutnumberOurEnemies(JBgBlackboard blackboard)
+        {
+            if (blackboard.MyTeamFlagCarrier != null && blackboard.MyTeamFlagCarrier.Guid == WowInterface.ObjectManager.PlayerGuid)
+            {
+                return false;
+            }
+
+            int friends = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count;
+            int enemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count;
+
+            return enemies > 0 && friends >= enemies;
+        }
+
+        private bool EnemiesNearFlagCarrier(JBgBlackboard blackboard)
+        {
+            return blackboard.MyTeamFlagCarrier.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 32.0;
+        }
+
+        private BehaviorTreeStatus FleeFromComingEnemies(JBgBlackboard blackboard)
         {
             WowUnit nearestEnemy = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 48.0).OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
 
             if (nearestEnemy != null)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Fleeing, nearestEnemy.Position, nearestEnemy.Rotation);
+                return BehaviorTreeStatus.Ongoing;
+            }
+            else
+            {
+                return BehaviorTreeStatus.Success;
             }
         }
 
@@ -450,17 +297,32 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             return JBgBlackboard.NearFlags != null && JBgBlackboard.NearFlags.Any(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 8.0);
         }
 
-        private void KillEnemyFlagCarrier()
+        private bool IsGateOpen()
+        {
+            if (WowInterface.ObjectManager.Player.IsAlliance())
+            {
+                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                                    .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 411)
+                                    .FirstOrDefault();
+
+                return obj == null || obj.Bytes0 == 0;
+            }
+            else
+            {
+                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                                    .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 850)
+                                    .FirstOrDefault();
+
+                return obj == null || obj.Bytes0 == 0;
+            }
+        }
+
+        private BehaviorTreeStatus KillEnemyFlagCarrier(JBgBlackboard blackboard)
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
                 WowInterface.Globals.ForceCombat = false;
-                return;
-            }
-
-            if (SetTargetEvent.Run())
-            {
-                WowInterface.HookManager.TargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
+                return BehaviorTreeStatus.Success;
             }
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(JBgBlackboard.EnemyTeamFlagCarrier.Position);
@@ -468,20 +330,55 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > threshold && !WowInterface.ObjectManager.Player.IsCasting)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Rotation, JBgBlackboard.EnemyTeamFlagCarrier.Position, 1.0));
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
             }
             else if (ActionEvent.Run())
             {
                 WowInterface.Globals.ForceCombat = true;
                 WowInterface.HookManager.TargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
+
+            return BehaviorTreeStatus.Ongoing;
         }
 
-        private void MoveToCarrierAndHelp()
+        private BehaviorTreeStatus MoveToEnemyBaseAndGetFlag(JBgBlackboard blackboard)
+        {
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
+
+            if (distance > 2.0)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
+            }
+            else
+            {
+                return UseNearestFlag(blackboard);
+            }
+
+            return BehaviorTreeStatus.Ongoing;
+        }
+
+        private BehaviorTreeStatus MoveToNearestBuff(JBgBlackboard blackboard)
+        {
+            WowGameobject buffObject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(new List<int>() { 5991, 5995, 5931 });
+
+            if (buffObject != null
+                && buffObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, buffObject.Position);
+            }
+            else
+            {
+                return BehaviorTreeStatus.Failed;
+            }
+
+            return BehaviorTreeStatus.Ongoing;
+        }
+
+        private BehaviorTreeStatus MoveToOwnFlagCarrierAndHelp(JBgBlackboard blackboard)
         {
             if (JBgBlackboard.MyTeamFlagCarrier == null)
             {
-                return;
+                return BehaviorTreeStatus.Failed;
             }
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(JBgBlackboard.MyTeamFlagCarrier.Position);
@@ -510,56 +407,23 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     }
                 }
             }
+
+            return BehaviorTreeStatus.Ongoing;
         }
 
-        private void MoveToEnemyBase()
+        private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5)
         {
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
-        }
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
 
-        private void MoveToEnemyBaseAndGetFlag()
-        {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
-
-            if (distance > 2.0)
+            if (distance > minDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, position);
+                return BehaviorTreeStatus.Ongoing;
             }
             else
             {
-                UseNearestFlag();
+                return BehaviorTreeStatus.Success;
             }
-        }
-
-        private void MoveToNearestBuff()
-        {
-            WowGameobject buffObject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(new List<int>() { 5991, 5995, 5931 });
-
-            if (buffObject != null
-                && buffObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, buffObject.Position);
-            }
-        }
-
-        private void MoveToOwnBase()
-        {
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.OwnBasePosition);
-        }
-
-        private void MoveToOwnBaseHidingSpot()
-        {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WsgDataset.FlagHidingSpot);
-
-            if (distance > 2.0)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.FlagHidingSpot);
-            }
-        }
-
-        private void MoveToOwnFlagCarrier()
-        {
-            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, JBgBlackboard.MyTeamFlagCarrier.Position);
         }
 
         private void UpdateBattlegroundInfo()
@@ -638,9 +502,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             catch { }
         }
 
-        private TimegatedEvent ActionEvent { get; }
-
-        private void UseNearestFlag()
+        private BehaviorTreeStatus UseNearestFlag(JBgBlackboard blackboard)
         {
             WowGameobject nearestFlag = JBgBlackboard.NearFlags.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
 
@@ -657,6 +519,12 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     WowInterface.HookManager.WowObjectOnRightClick(nearestFlag);
                 }
             }
+            else
+            {
+                return BehaviorTreeStatus.Failed;
+            }
+
+            return BehaviorTreeStatus.Ongoing;
         }
 
         public class AllianceWsgDataset : IWsgDataset
@@ -667,9 +535,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             public Vector3 FlagHidingSpot { get; } = new Vector3(1519, 1467, 374);
 
-            public Vector3 OwnBasePosition { get; } = new Vector3(1539, 1481, 352);
-
             public Vector3 GatePosition { get; } = new Vector3(1494, 1457, 343);
+
+            public Vector3 OwnBasePosition { get; } = new Vector3(1539, 1481, 352);
 
             public Vector3 OwnBasePositionMapCoords { get; } = new Vector3(49, 15, 0);
         }
@@ -682,9 +550,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             public Vector3 FlagHidingSpot { get; } = new Vector3(949, 1449, 367);
 
-            public Vector3 OwnBasePosition { get; } = new Vector3(916, 1434, 346);
-
             public Vector3 GatePosition { get; } = new Vector3(951, 1459, 342);
+
+            public Vector3 OwnBasePosition { get; } = new Vector3(916, 1434, 346);
 
             public Vector3 OwnBasePositionMapCoords { get; } = new Vector3(53, 90, 0);
         }

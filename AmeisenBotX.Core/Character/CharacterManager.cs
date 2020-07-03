@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Common;
@@ -11,9 +12,11 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Character
 {
@@ -39,6 +42,8 @@ namespace AmeisenBotX.Core.Character
         public IWowItemComparator ItemComparator { get; set; }
 
         public int Money { get; private set; }
+
+        public List<WowMount> Mounts { get; private set; }
 
         public List<string> Skills { get; private set; }
 
@@ -159,12 +164,15 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump()
         {
-            BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE));
+            AmeisenLogger.Instance.Log("Movement", $"Jumping", LogLevel.Verbose);
+            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE), 500, 1000));
         }
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 1.5f)
         {
             if (pos == default) { return; }
+
+            AmeisenLogger.Instance.Log("Movement", $"MoveToPosition: {pos}", LogLevel.Verbose);
 
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
@@ -184,6 +192,7 @@ namespace AmeisenBotX.Core.Character
 
             UpdateSkills();
             UpdateMoney();
+            UpdateMounts();
         }
 
         public void UpdateCharacterGear()
@@ -209,6 +218,7 @@ namespace AmeisenBotX.Core.Character
                             IWowItem item = itemsLikeEquipped[f];
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
+                                AmeisenLogger.Instance.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
                                 WowInterface.HookManager.ReplaceItem(null, item);
                                 Equipment.Update();
                                 break;
@@ -222,6 +232,7 @@ namespace AmeisenBotX.Core.Character
                         if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)itemToEquip))
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
+                            AmeisenLogger.Instance.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
                             WowInterface.HookManager.ReplaceItem(null, itemToEquip);
                             Equipment.Update();
                         }
@@ -347,11 +358,19 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            string rawMoney = WowInterface.HookManager.GetMoney();
-            if (int.TryParse(rawMoney, out int money))
+            if (int.TryParse(WowInterface.HookManager.GetMoney(), out int money))
             {
                 Money = money;
             }
+        }
+
+        private void UpdateMounts()
+        {
+            try
+            {
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.HookManager.GetMounts());
+            }
+            catch { }
         }
 
         private void UpdateSkills()

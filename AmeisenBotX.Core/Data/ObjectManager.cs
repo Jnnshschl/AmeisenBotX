@@ -47,10 +47,7 @@ namespace AmeisenBotX.Core.Data
             private set { lock (queryLock) { partymemberGuids = value; } }
         }
 
-        public List<WowUnit> Partymembers
-        {
-            get { lock (queryLock) { return wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList(); } }
-        }
+        public List<WowUnit> Partymembers { get; set; }
 
         public WowUnit Pet { get; private set; }
 
@@ -81,6 +78,8 @@ namespace AmeisenBotX.Core.Data
         private IntPtr CurrentObjectManager { get; set; }
 
         private WowInterface WowInterface { get; }
+
+        public WowUnit Partyleader { get; private set; }
 
         public WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds)
         {
@@ -287,6 +286,7 @@ namespace AmeisenBotX.Core.Data
                         if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
                         if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
                         if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
+                        if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
                     }
 
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
@@ -295,7 +295,13 @@ namespace AmeisenBotX.Core.Data
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();
-                if (PartyleaderGuid > 0) { PartymemberGuids = ReadPartymemberGuids(); }
+
+                if (PartyleaderGuid > 0)
+                {
+                    PartymemberGuids = ReadPartymemberGuids();
+                }
+
+                Partymembers = wowObjects.OfType<WowUnit>().Where(e => e.Guid == PlayerGuid || PartymemberGuids.Contains(e.Guid)).ToList();
             }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);

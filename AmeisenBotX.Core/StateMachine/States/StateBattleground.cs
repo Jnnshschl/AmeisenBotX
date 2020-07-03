@@ -8,6 +8,7 @@
 
         public override void Enter()
         {
+            WowInterface.BattlegroundEngine?.Enter();
         }
 
         public override void Execute()
@@ -36,6 +37,7 @@
 
         public override void Exit()
         {
+            WowInterface.BattlegroundEngine?.Exit();
             WowInterface.MovementEngine.Reset();
         }
     }

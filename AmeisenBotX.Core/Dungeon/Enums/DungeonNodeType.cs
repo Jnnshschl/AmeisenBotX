@@ -6,6 +6,7 @@
         Boss,
         Use,
         Collect,
-        Door
+        Door,
+        Jump
     }
 }

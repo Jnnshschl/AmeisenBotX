@@ -6,7 +6,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Selector<T> : Composite<T>
     {
-        public Selector(Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB)
+        public Selector(Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base("")
+        {
+            Condition = condition;
+            Children = new List<Node<T>>() { nodeA, nodeB };
+        }
+
+        public Selector(string name, Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base(name)
         {
             Condition = condition;
             Children = new List<Node<T>>() { nodeA, nodeB };
@@ -16,13 +22,18 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public override BehaviorTreeStatus Execute(T blackboard)
         {
+            return GetNodeToExecute(blackboard).Execute(blackboard);
+        }
+
+        internal override Node<T> GetNodeToExecute(T blackboard)
+        {
             if (Condition(blackboard))
             {
-                return Children[0].Execute(blackboard);
+                return Children[0];
             }
             else
             {
-                return Children[1].Execute(blackboard);
+                return Children[1];
             }
         }
     }

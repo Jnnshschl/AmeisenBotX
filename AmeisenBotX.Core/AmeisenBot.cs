@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Battleground.einTyp;
-﻿using AmeisenBotX.Core.Battleground.Jannis;
+using AmeisenBotX.Core.Battleground.Jannis;
+using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
@@ -13,7 +14,6 @@ using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Movement.SMovementEngine;
@@ -92,6 +92,8 @@ namespace AmeisenBotX.Core
             StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
 
             InitCombatClasses();
+            InitBattlegroundEngines();
+
             if (config.UseBuiltInCombatClass)
             {
                 LoadDefaultCombatClass();
@@ -100,6 +102,8 @@ namespace AmeisenBotX.Core
             {
                 LoadCustomCombatClass();
             }
+
+            LoadBattlegroundEngine();
 
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
@@ -114,6 +118,8 @@ namespace AmeisenBotX.Core
         public event CombatClassCompilationStatus OnCombatClassCompilationStatusChanged;
 
         public string AccountName { get; }
+
+        public List<IBattlegroundEngine> BattlegroundEngines { get; set; }
 
         public string BotDataPath { get; }
 
@@ -147,6 +153,8 @@ namespace AmeisenBotX.Core
 
         private int CurrentExecutionCount { get; set; }
 
+        private TimegatedEvent EquipmentUpdateEvent { get; set; }
+
         private Timer StateMachineTimer { get; }
 
         private bool TalentUpdateRunning { get; set; }
@@ -169,6 +177,8 @@ namespace AmeisenBotX.Core
             {
                 LoadCustomCombatClass();
             }
+
+            LoadBattlegroundEngine();
         }
 
         public void Resume()
@@ -280,6 +290,16 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void InitBattlegroundEngines()
+        {
+            BattlegroundEngines = new List<IBattlegroundEngine>
+            {
+                new JBattleGroundEngine(WowInterface),
+                new KummelEngine(WowInterface),
+                new RunBoyRunEngine(WowInterface)
+            };
+        }
+
         private void InitCombatClasses()
         {
             CombatClasses = new List<ICombatClass>
@@ -311,12 +331,20 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
+                new Statemachine.CombatClasses.Kamel.FuryWarrior(WowInterface),
+                new Statemachine.CombatClasses.Kamel.RestorationShaman (WowInterface),
                 new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface),
                 new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
-                new DeathknightBlood(WowInterface),
             };
+        }
+
+        private void LoadBattlegroundEngine()
+        {
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
+            WowInterface.BattlegroundEngine = BattlegroundEngines.FirstOrDefault(e => e.ToString().Equals(Config.BattlegroundEngine, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadBotWindowPosition()
@@ -425,7 +453,10 @@ namespace AmeisenBotX.Core
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
-            WowInterface.CharacterManager.Equipment.Update();
+            if (EquipmentUpdateEvent.Run())
+            {
+                OnBagChanged(timestamp, args);
+            }
         }
 
         private void OnLfgProposalShow(long timestamp, List<string> args)
@@ -560,7 +591,6 @@ namespace AmeisenBotX.Core
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
-            WowInterface.BattlegroundEngine = new JBattleGroundEngine(WowInterface);
             WowInterface.JobEngine = new JobEngine(WowInterface);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
@@ -568,7 +598,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();
-            WowInterface.MovementEngine = new StateBasedMovementEngine(WowInterface, Config, WowInterface.MovementSettings, WowInterface.PathfindingHandler);
+            WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)
@@ -595,8 +625,8 @@ namespace AmeisenBotX.Core
 
         private void SubscribeToWowEvents()
         {
-            // Prepare stuff
             BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            EquipmentUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             // Subscribe
             WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);

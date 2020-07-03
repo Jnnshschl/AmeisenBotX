@@ -47,9 +47,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                     return;
                 }
                 else if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap)
-                         && WowInterface.DungeonEngine?.DungeonProfile != null)
+                         && WowInterface.DungeonEngine?.Profile != null)
                 {
-                    CorpsePosition = WowInterface.DungeonEngine.DungeonProfile.WorldEntry;
+                    CorpsePosition = WowInterface.DungeonEngine.Profile.WorldEntry;
                 }
                 else
                 {
@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (nearestPortal != null)
                     {
-                        CorpsePosition = BotUtils.MoveAhead(BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), nearestPortal.Position, 6);
+                        CorpsePosition = BotUtils.MoveAhead(nearestPortal.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), 6);
                         NeedToEnterPortal = true;
                     }
                     else

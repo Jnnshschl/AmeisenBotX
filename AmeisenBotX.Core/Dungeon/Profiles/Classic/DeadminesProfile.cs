@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public string Name { get; } = "[15-18] Deadmines";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(-16, -383, 62)),
             new DungeonNode(new Vector3(-34, -375, 59)),

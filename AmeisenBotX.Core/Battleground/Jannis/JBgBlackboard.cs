@@ -1,11 +1,18 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.BehaviorTree.Interfaces;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Battleground.Jannis
 {
-    public class JBgBlackboard
+    public class JBgBlackboard : IBlackboard
     {
+        public JBgBlackboard(Action updateAction)
+        {
+            UpdateAction = updateAction;
+        }
+
         public WowUnit EnemyTeamFlagCarrier { get; set; }
 
         public Vector3 EnemyTeamFlagPos { get; set; }
@@ -27,5 +34,12 @@ namespace AmeisenBotX.Core.Battleground.Jannis
         public int MyTeamScore { get; set; }
 
         public List<WowGameobject> NearFlags { get; set; }
+
+        private Action UpdateAction { get; }
+
+        public void Update()
+        {
+            UpdateAction();
+        }
     }
 }

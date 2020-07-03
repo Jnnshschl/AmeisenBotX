@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
 
         public string Name { get; } = "[68-80] Utgarde Keep";
 
-        public List<DungeonNode> Path { get; private set; } = new List<DungeonNode>()
+        public List<DungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new DungeonNode(new Vector3(157, -85, 13)),
             new DungeonNode(new Vector3(165, -83, 13)),

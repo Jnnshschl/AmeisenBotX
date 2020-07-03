@@ -950,5 +950,49 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <SolidColorBrush x:Key="TabItem.Static.Background" Color="{StaticResource DarkBackground}" />
+        <SolidColorBrush x:Key="TabItem.Static.Border" Color="#00000000" />
+        <SolidColorBrush x:Key="TabItem.MouseOver.Background" Color="#00000000" />
+        <SolidColorBrush x:Key="TabItem.MouseOver.Border" Color="{StaticResource DarkForeground}" />
+        <SolidColorBrush x:Key="TabItem.Disabled.Background" Color="{StaticResource DarkBackground}" />
+        <SolidColorBrush x:Key="TabItem.Disabled.Border" Color="#00000000" />
+        <SolidColorBrush x:Key="TabItem.Selected.Border" Color="{StaticResource DarkForeground}" />
+        <SolidColorBrush x:Key="TabItem.Selected.Background" Color="{StaticResource DarkBackground}" />
+        <Style TargetType="{x:Type TabItem}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Background" Value="{StaticResource TabItem.Static.Background}" />
+            <Setter Property="BorderBrush" Value="{StaticResource TabItem.Static.Border}" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="6,2,6,2" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
+                            <Border x:Name="mainBorder" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1,1,1,0" Background="{TemplateBinding Background}" Margin="0" />
+                            <ContentPresenter x:Name="contentPresenter" ContentSource="Header" Focusable="False" HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="true" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" TargetName="mainBorder" Value="{StaticResource TabItem.MouseOver.Background}" />
+                                <Setter Property="BorderBrush" TargetName="mainBorder" Value="{StaticResource TabItem.MouseOver.Border}" />
+                            </MultiDataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="true" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" TargetName="mainBorder" Value="{StaticResource TabItem.MouseOver.Background}" />
+                                <Setter Property="BorderBrush" TargetName="mainBorder" Value="{StaticResource TabItem.MouseOver.Border}" />
+                            </MultiDataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

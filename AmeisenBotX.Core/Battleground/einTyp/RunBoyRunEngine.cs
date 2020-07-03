@@ -29,9 +29,25 @@ namespace AmeisenBotX.Core.Battleground.einTyp
             wowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_SCORE", onFlagAlliance);
         }
 
+        public string Name => "RunBoyRunEngine";
+
+        public string Description => "...";
+
+        public string Author => "einTyp";
+
         private void onFlagAlliance(long timestamp, List<string> args)
         {
             hasStateChanged = true;
+        }
+
+        public void Enter()
+        {
+
+        }
+
+        public void Exit()
+        {
+
         }
 
         public void Execute()

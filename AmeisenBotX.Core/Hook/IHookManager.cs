@@ -11,9 +11,9 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
-        ulong PendingCallCount { get; }
-
         bool IsWoWHooked { get; }
+
+        ulong PendingCallCount { get; }
 
         void AcceptBattlegroundInvite();
 
@@ -79,6 +79,8 @@ namespace AmeisenBotX.Core.Hook
 
         string GetMoney();
 
+        string GetMounts();
+
         Dictionary<RuneType, int> GetRunesReady();
 
         List<string> GetSkills();
@@ -106,7 +108,7 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsBgInviteReady();
 
-        bool IsClickToMoveActive(WowPlayer player);
+        bool IsClickToMoveActive();
 
         bool IsGhost(WowLuaUnit luaUnit);
 

@@ -1,18 +1,19 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
-using System;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Sequence<T> : Composite<T>
     {
-        public Sequence(Func<T, bool> condition, List<Node<T>> children)
+        public Sequence(params Node<T>[] children)
         {
-            Condition = condition;
-            Children = children;
+            Children = children.ToList();
         }
 
-        public Func<T, bool> Condition { get; set; }
+        public Sequence(string name, params Node<T>[] children) : base(name)
+        {
+            Children = children.ToList();
+        }
 
         public int Counter { get; set; }
 
@@ -30,6 +31,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
                 if (Counter < Children.Count)
                 {
                     ++Counter;
+
+                    if (Counter == Children.Count)
+                    {
+                        return BehaviorTreeStatus.Success;
+                    }
                 }
             }
             else if (status == BehaviorTreeStatus.Failed)
@@ -39,6 +45,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
             }
 
             return BehaviorTreeStatus.Ongoing;
+        }
+
+        internal override Node<T> GetNodeToExecute(T blackboard)
+        {
+            return this;
         }
     }
 }
