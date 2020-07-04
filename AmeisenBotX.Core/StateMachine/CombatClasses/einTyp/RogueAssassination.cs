@@ -1,12 +1,8 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
@@ -17,11 +13,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
     public class RogueAssassination : ICombatClass
     {
-        private readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
+        private readonly string[] standingEmotes = { "/bored" };
 
         private readonly RogueAssassinSpells spells;
-
-        private readonly string[] standingEmotes = { "/chug", "/pick", "/whistle", "/shimmy", "/dance", "/twiddle", "/bored", "/violin", "/highfive", "/bow" };
 
         private bool computeNewRoute = false;
 
@@ -39,13 +33,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool wasInStealth = false;
 
-        public RogueAssassination(IObjectManager objectManager, ICharacterManager characterManager, IHookManager hookManager, IMovementEngine movement)
+        private WowInterface WowInterface;
+
+        public RogueAssassination(WowInterface wowInterface)
         {
-            ObjectManager = objectManager;
-            CharacterManager = characterManager;
-            HookManager = hookManager;
-            MovementEngine = movement;
-            spells = new RogueAssassinSpells(hookManager, objectManager);
+            WowInterface = wowInterface;
+            spells = new RogueAssassinSpells(wowInterface);
         }
 
         public string Author => "einTyp";
@@ -111,11 +104,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public bool WalkBehindEnemy => false;
 
-        private ICharacterManager CharacterManager { get; }
-
         private bool Dancing { get; set; }
-
-        private IHookManager HookManager { get; }
 
         private Vector3 LastBehindTargetPosition { get; set; }
 
@@ -125,56 +114,34 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private float LastTargetRotation { get; set; }
 
-        private IMovementEngine MovementEngine { get; set; }
-
-        private IObjectManager ObjectManager { get; }
-
         public void Execute()
         {
-            ulong targetGuid = ObjectManager.TargetGuid;
-            /*Character.Inventory.Objects.IWowItem weapon;
-            if(CharacterManager.Equipment.Equipment.TryGetValue(Character.Inventory.Enums.EquipmentSlot.INVSLOT_MAINHAND, out weapon))
-            {
-                if(mainhandSpeed != 1 && weapon != null && weapon.Stats != null && weapon.Stats.Keys != null)
-                {
-                    foreach (string stat in weapon.Stats.Keys)
-                    {
-                        Console.WriteLine(stat);
-                        mainhandSpeed = 1;
-                    }
-                }
-                //mainhandSpeed = weapon.Stats["ITEM_MOD_SPEED_SHORT"];
-            }*/
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
+            computeNewRoute = false;
+            WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.TargetGuid);
             SearchNewTarget(ref target, false);
             if (target != null)
             {
                 Dancing = false;
                 bool targetDistanceChanged = false;
-                if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
+                if (!LastPlayerPosition.Equals(WowInterface.ObjectManager.Player.Position))
                 {
-                    distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
-                    LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
+                    distanceTraveled = WowInterface.ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                    LastPlayerPosition = new Vector3(WowInterface.ObjectManager.Player.Position.X, WowInterface.ObjectManager.Player.Position.Y, WowInterface.ObjectManager.Player.Position.Z);
                     targetDistanceChanged = true;
                 }
 
                 if (LastTargetRotation != target.Rotation)
                 {
-                    hasTargetMoved = true;
+                    computeNewRoute = true;
                     LastTargetRotation = target.Rotation;
                 }
 
                 if (!LastTargetPosition.Equals(target.Position))
                 {
-                    hasTargetMoved = true;
+                    computeNewRoute = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                     LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((2.4f + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((2.4f + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
                     targetDistanceChanged = true;
-                }
-                else if (hasTargetMoved)
-                {
-                    hasTargetMoved = false;
-                    computeNewRoute = true;
                 }
 
                 if (targetDistanceChanged)
@@ -190,14 +157,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             {
                 if (distanceTraveled < 0.001)
                 {
-                    HookManager.ClearTarget();
-                    HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    WowInterface.HookManager.ClearTarget();
+                    WowInterface.HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                 }
                 else
                 {
-                    HookManager.ClearTarget();
-                    HookManager.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    WowInterface.HookManager.ClearTarget();
                     Dancing = true;
                 }
             }
@@ -205,45 +171,46 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public void OutOfCombatExecute()
         {
-            if (!HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            computeNewRoute = false;
+            List<string> buffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
+            if (!buffs.Any(e => e.Contains("tealth")))
             {
-                HookManager.CastSpell("Stealth");
+                WowInterface.HookManager.CastSpell("Stealth");
                 spells.ResetAfterTargetDeath();
             }
 
-            if (!LastPlayerPosition.Equals(ObjectManager.Player.Position))
+            if (!LastPlayerPosition.Equals(WowInterface.ObjectManager.Player.Position))
             {
-                distanceTraveled = ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
-                LastPlayerPosition = new Vector3(ObjectManager.Player.Position.X, ObjectManager.Player.Position.Y, ObjectManager.Player.Position.Z);
+                distanceTraveled = WowInterface.ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
+                LastPlayerPosition = new Vector3(WowInterface.ObjectManager.Player.Position.X, WowInterface.ObjectManager.Player.Position.Y, WowInterface.ObjectManager.Player.Position.Z);
             }
 
             if (distanceTraveled < 0.001)
             {
-                ulong leaderGuid = ObjectManager.PartyleaderGuid;
+                ulong leaderGuid = WowInterface.ObjectManager.PartyleaderGuid;
                 WowUnit target = null;
-                if (leaderGuid == ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
+                if (leaderGuid == WowInterface.ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
                 {
                     if (!LastTargetPosition.Equals(target.Position))
                     {
-                        hasTargetMoved = true;
-                        LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
-                    }
-                    else
-                    {
                         computeNewRoute = true;
-                        hasTargetMoved = false;
+                        LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+                        LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((2.4f + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((2.4f + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
+                        distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
+                        distanceToBehindTarget = LastPlayerPosition.GetDistance(LastBehindTargetPosition);
                     }
 
                     Dancing = false;
                     HandleMovement(target);
+                    WowInterface.Globals.ForceCombat = true;
                     HandleAttacking(target);
+                    WowInterface.Globals.ForceCombat = false;
                 }
                 else if (!Dancing || standing)
                 {
                     standing = false;
-                    HookManager.ClearTarget();
-                    HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    WowInterface.HookManager.ClearTarget();
+                    WowInterface.HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -252,8 +219,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 if (!Dancing || !standing)
                 {
                     standing = true;
-                    HookManager.ClearTarget();
-                    HookManager.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    WowInterface.HookManager.ClearTarget();
                     Dancing = true;
                 }
             }
@@ -275,7 +241,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 return;
             }
 
-            if (HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            if (WowInterface.HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
             {
                 if (!wasInStealth || hasTargetMoved)
                 {
@@ -290,23 +256,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 wasInStealth = false;
             }
 
-            bool closeToTarget = distanceToTarget < (6.0 + target.CombatReach);
-            if (hasTargetMoved || closeToTarget)
+            if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
             {
-                CharacterManager.MoveToPosition(LastTargetPosition);
+                WowInterface.MovementEngine.StopMovement();
             }
-            else
+
+            if (computeNewRoute)
             {
-                if (computeNewRoute || MovementEngine.Path?.Count == 0)
+                if(isSneaky && distanceToBehindTarget > 2.4f)
                 {
-                    if (isSneaky)
-                    {
-                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastBehindTargetPosition, target.Rotation);
-                    }
-                    else
-                    {
-                        MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Chasing, LastTargetPosition, target.Rotation);
-                    }
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastBehindTargetPosition);
+                }
+                else
+                {
+                    if (!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
+                        WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastTargetPosition, LastTargetRotation);
                 }
             }
 
@@ -314,12 +279,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool SearchNewTarget(ref WowUnit target, bool grinding)
         {
-            if ((target != null && !(target.IsDead || target.Health == 0)) || (HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")) && ObjectManager.Player.HealthPercentage <= 20))
+            List<string> buffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
+            if ((target != null && !(target.IsDead || target.Health == 0)) || (buffs.Any(e => e.Contains("tealth")) && WowInterface.ObjectManager.Player.HealthPercentage <= 20))
             {
                 return false;
             }
 
-            List<WowUnit> wowUnits = ObjectManager.WowObjects.OfType<WowUnit>().Where(e => HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Friendly && HookManager.GetUnitReaction(ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
+            List<WowUnit> wowUnits = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead) ? 0 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
@@ -328,7 +294,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             {
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
-                    double tmpDistance = ObjectManager.Player.Position.GetDistance(unit.Position);
+                    double tmpDistance = WowInterface.ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < 100.0)
                     {
                         if (tmpDistance < 6.0)
@@ -336,7 +302,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                             targetCount++;
                         }
 
-                        if ((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth))
+                        if (((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth)) && WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, unit.Position))
                         {
                             target = unit;
                             targetHealth = unit.Health;
@@ -349,14 +315,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (target == null || target.IsDead)
             {
-                HookManager.ClearTarget();
+                WowInterface.HookManager.ClearTarget();
                 newTargetFound = false;
                 target = null;
             }
 
             if (newTargetFound)
             {
-                HookManager.TargetGuid(target.Guid);
+                WowInterface.HookManager.TargetGuid(target.Guid);
                 spells.ResetAfterTargetDeath();
             }
 
@@ -409,22 +375,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private int comboCnt = 0;
 
-            public RogueAssassinSpells(IHookManager hookManager, IObjectManager objectManager)
+            private WowInterface WowInterface;
+
+            public RogueAssassinSpells(WowInterface wowInterface)
             {
-                HookManager = hookManager;
-                ObjectManager = objectManager;
-                Player = ObjectManager?.Player;
+                WowInterface = wowInterface;
+                Player = WowInterface.ObjectManager.Player;
                 NextGCDSpell = DateTime.Now;
                 NextCast = DateTime.Now;
             }
 
-            private IHookManager HookManager { get; set; }
-
             private DateTime NextCast { get; set; }
 
             private DateTime NextGCDSpell { get; set; }
-
-            private IObjectManager ObjectManager { get; set; }
 
             private WowPlayer Player { get; set; }
 
@@ -435,12 +398,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     return;
                 }
 
-                if (!ObjectManager.Player.IsAutoAttacking && !IsInStealth())
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
-                    HookManager.StartAutoAttack(ObjectManager.Target);
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                 }
 
-                Player = ObjectManager.Player;
+                Player = WowInterface.ObjectManager.Player;
                 int energy = Player.Energy;
                 bool lowHealth = Player.HealthPercentage <= 20;
                 bool mediumHealth = !lowHealth && Player.HealthPercentage <= 50;
@@ -451,12 +414,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 }
                 else if (lowHealth && !askedForHelp)
                 {
-                    HookManager.SendChatMessage("/helpme");
+                    WowInterface.HookManager.SendChatMessage("/helpme");
                     askedForHelp = true;
                 }
                 else if (mediumHealth && !askedForHeal)
                 {
-                    HookManager.SendChatMessage("/healme");
+                    WowInterface.HookManager.SendChatMessage("/healme");
                     askedForHeal = true;
                 }
 
@@ -472,7 +435,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                         if (IsReady(Vanish))
                         {
                             CastSpell(Vanish, ref energy, 0, 180, false);
-                            HookManager.ClearTarget();
+                            WowInterface.HookManager.ClearTarget();
                             return;
                         }
                     }
@@ -517,7 +480,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                             }
                             else
                             {
-                                if (HookManager.GetUnitCastingInfo(WowLuaUnit.Target).Item2 > 0 && energy > 25 && IsReady(Kick))
+                                if (WowInterface.HookManager.GetUnitCastingInfo(WowLuaUnit.Target).Item2 > 0 && energy > 25 && IsReady(Kick))
                                 {
                                     CastSpell(Kick, ref energy, 25, 10, true);
                                 }
@@ -591,7 +554,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
-                HookManager.CastSpell(spell);
+                WowInterface.HookManager.CastSpell(spell);
                 rage -= rageCosts;
                 if (cooldown > 0)
                 {
@@ -606,7 +569,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private bool IsInStealth()
             {
-                return HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth"));
+                List<string> buffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
+                return buffs.Any(e => e.Contains("tealth"));
             }
 
             private bool IsReady(DateTime nextAction)
@@ -623,19 +587,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     result &= !nextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable);
                 }
 
-                result &= HookManager.GetSpellCooldown(spell) <= 0 && HookManager.GetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0;
+                result &= WowInterface.HookManager.GetSpellCooldown(spell) <= 0 && WowInterface.HookManager.GetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0;
                 return result;
             }
 
             private bool IsTargetBleeding()
             {
-                return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("acerate") || e.Contains("Bleed") || e.Contains("bleed") || e.Contains("Rip") || e.Contains("rip")
+                List<string> buffs = WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList();
+                return buffs.Any(e => e.Contains("acerate") || e.Contains("Bleed") || e.Contains("bleed") || e.Contains("Rip") || e.Contains("rip")
                  || e.Contains("Rake") || e.Contains("rake") || e.Contains("iercing") || e.Contains("arrote") || e.Contains("emorrhage") || e.Contains("upture") || e.Contains("Wounds") || e.Contains("wounds"));
             }
 
             private bool IsTargetPoisoned()
             {
-                return HookManager.GetDebuffs(WowLuaUnit.Target).Any(e => e.Contains("Poison") || e.Contains("poison"));
+                List<string> buffs = WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList();
+                return buffs.Any(e => e.Contains("Poison") || e.Contains("poison"));
             }
         }
     }
