@@ -18,6 +18,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 #pragma warning disable IDE0051
         private const string battleStanceSpell = "Battle Stance";
         private const string berserkerRageSpell = "Berserker Rage";
+        private const string bloodrageSpell = "Bloodrage";
         private const string challengingShoutSpell = "Challenging Shout";
         private const string chargeSpell = "Charge";
         private const string commandingShoutSpell = "Commanding Shout";
@@ -40,6 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string spellReflectionSpell = "Spell Reflection";
         private const string tauntSpell = "Taunt";
         private const string thunderClapSpell = "Thunder Clap";
+        private const string victoryRushSpell = "Victory Rush";
 #pragma warning restore IDE0051
 
         public WarriorProtection(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
@@ -151,15 +153,33 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
 
                     if (WowInterface.ObjectManager.Target.IsCasting
-                        && CastSpellIfPossible(spellReflectionSpell, 0))
+                        && (CastSpellIfPossible(shieldBashSpell, WowInterface.ObjectManager.Target.Guid)
+                            || CastSpellIfPossible(spellReflectionSpell, 0)))
                     {
                         return;
+                    }
+
+
+                    if (WowInterface.ObjectManager.Player.HasBuffByName(victoryRushSpell))
+                    {
+                        if (CastSpellIfPossible(victoryRushSpell, WowInterface.ObjectManager.Target.Guid))
+                        {
+                            return;
+                        }
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HealthPercentage > 50)
+                    {
+                        if (CastSpellIfPossible(bloodrageSpell, 0))
+                        {
+                            return;
+                        }
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 40)
                     {
                         if (CastSpellIfPossible(lastStandSpell, 0)
-                            && CastSpellIfPossible(shieldWallSpell, 0))
+                            || CastSpellIfPossible(shieldWallSpell, 0))
                         {
                             return;
                         }

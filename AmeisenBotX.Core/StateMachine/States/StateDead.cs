@@ -34,7 +34,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
 
-                WowInterface.HookManager.ReleaseSpirit();
+                if (Config.ReleaseSpirit)
+                {
+                    WowInterface.HookManager.ReleaseSpirit();
+                }
             }
             else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
             {
