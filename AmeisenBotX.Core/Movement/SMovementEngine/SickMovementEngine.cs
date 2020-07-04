@@ -116,6 +116,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public List<Vector3> Path => Nodes.ToList();
 
+        public TimegatedEvent PathDecayEvent { get; private set; }
+
         public int StuckCounter { get; private set; }
 
         public Vector3 StuckPosition { get; private set; }
@@ -129,8 +131,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public float TargetRotation { get; private set; }
 
         public Vector3 UnstuckTargetPosition { get; private set; }
-
-        public TimegatedEvent PathDecayEvent { get; private set; }
 
         internal BasicVehicle PlayerVehicle { get; }
 
@@ -151,7 +151,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     MovedDistance = LastPlayerPosition.GetDistance(WowInterface.ObjectManager.Player.Position);
                     LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
 
-                    if (MovedDistance > WowInterface.MovementSettings.MinDistanceMovedJumpUnstuck && MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
+                    if (MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
                     {
                         ++StuckCounter;
                         JumpOnNextMove = true;
@@ -166,7 +166,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     && !JumpOnNextMove
                     && JumpCheckEvent.Run())
                 {
-
                     Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance);
 
                     if (!WowInterface.HookManager.IsInLineOfSight

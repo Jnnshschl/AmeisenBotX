@@ -30,11 +30,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         TalentTree Talents { get; }
 
+        bool TargetInLineOfSight { get; set; }
+
         string Version { get; }
 
         bool WalkBehindEnemy { get; }
-
-        bool TargetInLineOfSight { get; set; }
 
         void Execute();
 

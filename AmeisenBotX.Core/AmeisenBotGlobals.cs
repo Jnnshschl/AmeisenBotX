@@ -2,7 +2,8 @@
 {
     public class AmeisenBotGlobals
     {
+        public bool ForceCombat { get; set; } = false;
+
         public bool IgnoreCombat { get; set; } = false;
-        public bool ForceCombat { get; internal set; }
     }
 }

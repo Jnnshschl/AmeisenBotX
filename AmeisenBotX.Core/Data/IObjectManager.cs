@@ -21,11 +21,11 @@ namespace AmeisenBotX.Core.Data
 
         WowUnit LastTarget { get; }
 
-        WowUnit Partyleader { get; }
-
         ulong LastTargetGuid { get; }
 
         MapId MapId { get; }
+
+        WowUnit Partyleader { get; }
 
         ulong PartyleaderGuid { get; }
 

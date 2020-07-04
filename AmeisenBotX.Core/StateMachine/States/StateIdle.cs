@@ -56,13 +56,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            // StateMachine.SetState((int)BotState.Questing);
-
-            if (Config.AutojoinBg)
-            {
-                CheckForBattlegroundInvites();
-            }
-
             // do we need to loot stuff
             if (LastLoot.Run()
                 && StateMachine.GetNearLootableUnits().Count() > 0)
@@ -83,14 +76,16 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // we are on a battleground
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
-                && bgStatus == 3)
+                && bgStatus == 3
+                && !Config.BattlegroundUsePartyMode)
             {
                 StateMachine.SetState((int)BotState.Battleground);
                 return;
             }
 
             // we are in a dungeon
-            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
+            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId)
+                && !Config.DungeonUsePartyMode)
             {
                 StateMachine.SetState((int)BotState.Dungeon);
                 return;

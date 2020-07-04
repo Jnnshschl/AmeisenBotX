@@ -191,6 +191,8 @@
     <Compile Include="Dungeon\Enums\DungeonNodeType.cs" />
     <Compile Include="Dungeon\IDungeonEngine.cs" />
     <Compile Include="Dungeon\Profiles\Classic\DeadminesProfile.cs" />
+    <Compile Include="Dungeon\Profiles\Classic\StockadeProfile.cs" />
+    <Compile Include="Dungeon\Profiles\Classic\ShadowfangKeepProfile.cs" />
     <Compile Include="Dungeon\Profiles\Classic\WailingCavernsProfile.cs" />
     <Compile Include="Dungeon\Profiles\Classic\RagefireChasmProfile.cs" />
     <Compile Include="Dungeon\Profiles\IDungeonProfile.cs" />
@@ -291,6 +293,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\PriestShadow.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\RogueAssassination.cs" />
     <Compile Include="Statemachine\CombatClasses\Kamel\RestorationShaman .cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\WarriorFury.cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
     <Compile Include="Common\IState.cs" />
     <Compile Include="Statemachine\States\StateQuesting.cs" />

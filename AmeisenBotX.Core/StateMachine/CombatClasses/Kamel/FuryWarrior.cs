@@ -132,8 +132,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void ExecuteCC()
         {
+            if (!TargetInLineOfSight)
+            {
+                return;
+            }
             if (WowInterface.ObjectManager.TargetGuid != 0)
             {
+                if (WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
+                {
+                    WowInterface.HookManager.ClearTarget();
+                    return;
+                }
+
                 if (WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
                 {
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
@@ -160,6 +170,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             CustomCastSpell(disarmSpell, defensiveStanceSpell);
                             spellCoolDown[disarmSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(disarmSpell));
+                            return;
+                        }
+                    }
+
+                    if (WowInterface.ObjectManager.Player.Rage >= 25)
+                    {
+                        if (DateTime.Now > spellCoolDown[intimidatingShoutSpell] && WowInterface.ObjectManager.Player.HealthPercentage < 80
+                            || WowInterface.ObjectManager.Target.IsCasting)
+                        {
+                            CustomCastSpell(intimidatingShoutSpell);
+                            spellCoolDown[intimidatingShoutSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(intimidatingShoutSpell));
                             return;
                         }
                     }
@@ -252,18 +273,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         CustomCastSpell(pummelSpell);
                         spellCoolDown[pummelSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(pummelSpell));
                         return;
-                    }
-
-                    if (WowInterface.ObjectManager.Player.Rage >= 25)
-                    {
-                        if (DateTime.Now > spellCoolDown[intimidatingShoutSpell] && WowInterface.ObjectManager.Player.HealthPercentage < 60
-                            || WowInterface.ObjectManager.Target.IsCasting)
-                        {
-                            CustomCastSpell(intimidatingShoutSpell);
-                            spellCoolDown[intimidatingShoutSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(intimidatingShoutSpell));
-                            //WowInterface.HookManager.SendChatMessage("/y OGERGRUNZEN");
-                            return;
-                        }
                     }
 
                 }

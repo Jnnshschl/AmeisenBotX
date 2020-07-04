@@ -333,6 +333,7 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
                 new Statemachine.CombatClasses.Kamel.FuryWarrior(WowInterface),
+                new Statemachine.CombatClasses.Kamel.WarriorFury(WowInterface),
                 new Statemachine.CombatClasses.Kamel.RestorationShaman (WowInterface),
                 new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface),
@@ -506,14 +507,22 @@ namespace AmeisenBotX.Core
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
+            if (Config.OnlyFriendsMode && args.Count >= 1 && Config.Friends.Split(',').Contains(args[0]))
+            {
+                return;
+            }
+
             WowInterface.HookManager.AcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
-            if (args.Count == 1 && args[0] == "1")
+            if (Config.AutojoinBg)
             {
-                WowInterface.HookManager.AcceptBattlegroundInvite();
+                if (args.Count == 1 && args[0] == "1")
+                {
+                    WowInterface.HookManager.AcceptBattlegroundInvite();
+                }
             }
         }
 
@@ -656,7 +665,17 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
 
+            WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
+
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+        }
+
+        private void OnShowQuestFrame(long timestamp, List<string> args)
+        {
+            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
+            {
+                WowInterface.HookManager.ClickUiElement("QuestFrameAcceptButton");
+            }
         }
     }
 }

@@ -8,6 +8,8 @@ namespace AmeisenBotX.Core
     {
         public double AntiAfkMs { get; set; } = 1000;
 
+        public bool AutoAcceptQuests { get; set; } = true;
+
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
@@ -26,6 +28,8 @@ namespace AmeisenBotX.Core
 
         public string BattlegroundEngine { get; set; } = "";
 
+        public bool BattlegroundUsePartyMode { get; set; } = false;
+
         public Rect BotWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
 
         public string BuiltInCombatClassName { get; set; } = "";
@@ -36,6 +40,8 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = "";
 
+        public bool DungeonUsePartyMode { get; set; } = false;
+
         public double EventPullMs { get; set; } = 1000;
 
         public bool FollowGroupLeader { get; set; } = false;
@@ -43,6 +49,8 @@ namespace AmeisenBotX.Core
         public bool FollowGroupMembers { get; set; } = false;
 
         public bool FollowSpecificCharacter { get; set; } = false;
+
+        public string Friends { get; set; } = "";
 
         public double GhostCheckMs { get; set; } = 5000;
 
@@ -67,6 +75,8 @@ namespace AmeisenBotX.Core
         public int NameshServerPort { get; set; } = 47110;
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
+
+        public bool OnlyFriendsMode { get; set; } = false;
 
         public string Password { get; set; } = string.Empty;
 

@@ -53,6 +53,8 @@ namespace AmeisenBotX.BehaviorTree
 
         public DateTime LastBlackBoardUpdate { get; set; }
 
+        public string LastExecutedName { get; private set; }
+
         public string Name { get; }
 
         public Node<T> OngoingNode { get; private set; }
@@ -62,8 +64,6 @@ namespace AmeisenBotX.BehaviorTree
         public Node<T> RootNode { get; set; }
 
         private bool BlackboardUpdateEnabled { get; set; }
-
-        public string LastExecutedName { get; private set; }
 
         public BehaviorTreeStatus Tick()
         {

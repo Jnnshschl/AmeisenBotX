@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -14,12 +15,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     class RestorationShaman : BasicKamelClass
     {
-        //Spells
+        //Spells / DMG
+        private const string LightningBoltSpell = "Lightning Bolt";
+        //Spells / Heal
         private const string healingWaveSpell = "Healing Wave";
+        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
         private const string riptideSpell = "Riptide";
         private const string watershieldSpell = "Water shield";
         private const string LightningShieldSpell = "Lightning Shield";
         private const string ancestralSpiritSpell = "Ancestral Spirit";
+        private const string chainHealSpell = "Chain Heal";
+        private const string earthlivingBuff = "Earthliving ";
+        private const string earthlivingWeaponSpell = "Earthliving Weapon";
         //CD|Buffs
         private const string naturesswiftSpell = "Nature's Swiftness";
         private const string Bloodlust = "Bloodlust";
@@ -36,12 +43,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public RestorationShaman(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
+            //Spells / DMG
+            spellCoolDown.Add(LightningBoltSpell, DateTime.Now);
             //Spells
             spellCoolDown.Add(healingWaveSpell, DateTime.Now);
+            spellCoolDown.Add(lesserHealingWaveSpell, DateTime.Now);
             spellCoolDown.Add(riptideSpell, DateTime.Now);
             spellCoolDown.Add(watershieldSpell, DateTime.Now);
             spellCoolDown.Add(LightningShieldSpell, DateTime.Now);
             spellCoolDown.Add(ancestralSpiritSpell, DateTime.Now);
+            spellCoolDown.Add(chainHealSpell, DateTime.Now);
             //CD|Buffs
             spellCoolDown.Add(naturesswiftSpell, DateTime.Now);
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
@@ -88,7 +99,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
-        public override string Version => "1.0";
+        public override string Version => "2.0";
         public bool targetIsInRange { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
@@ -128,105 +139,41 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void ExecuteCC()
         {
-            MyAuraManager.Tick();
-
-            if (TargetSelectEvent.Run())
-            {
-                //WowUnit partyMember = WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 20).FirstOrDefault();
-                WowUnit partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage < 95).OrderBy(e => e.HealthPercentage).FirstOrDefault();//FirstOrDefault => tolist
-
-                if (partyMemberToHeal != null)
-                {
-                    if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.Guid)
-                    {
-                        WowInterface.HookManager.TargetGuid(partyMemberToHeal.Guid);
-                    }
-                    
-                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.Guid).Position) <= 30;
-                    if (targetIsInRange)
-                    {
-                        if (!WowInterface.ObjectManager.Target.IsDead)
-                        {
-                            if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
-                            {
-                                WowInterface.HookManager.StopClickToMoveIfActive();
-                                WowInterface.MovementEngine.Reset();
-                            }
-                            if (WowInterface.ObjectManager.Target != null)
-                            {
-                                if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
-                                    || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
-                                    || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                    && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
-                                {
-                                    WowInterface.HookManager.CastSpell(CalloftheElementsSpell);
-                                    spellCoolDown[CalloftheElementsSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(CalloftheElementsSpell));
-                                    return;
-                                }
-
-                                if (DateTime.Now > spellCoolDown[naturesswiftSpell] && !WowInterface.ObjectManager.Player.HasBuffByName("Nature's Swiftness")
-                                    && WowInterface.ObjectManager.Target.HealthPercentage <= 30
-                                    && WowInterface.ObjectManager.Player.ManaPercentage >= 2)
-                                {
-                                    if (DateTime.Now > spellCoolDown[healingWaveSpell])
-                                    {
-                                        WowInterface.HookManager.CastSpell(naturesswiftSpell);
-                                        spellCoolDown[naturesswiftSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(naturesswiftSpell));
-                                        WowInterface.HookManager.CastSpell(healingWaveSpell);
-                                        spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
-                                        return;
-                                    }
-                                }
-
-                                if (DateTime.Now > spellCoolDown[riptideSpell] && WowInterface.ObjectManager.Target.HealthPercentage <= 95 && !WowInterface.ObjectManager.Target.HasBuffByName("Riptide"))
-                                {
-                                    WowInterface.HookManager.CastSpell(riptideSpell);
-                                    spellCoolDown[riptideSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(riptideSpell));
-                                    return;
-                                }
-
-                                if (DateTime.Now > spellCoolDown[healingWaveSpell] && WowInterface.ObjectManager.Target.HealthPercentage < 70)
-                                {
-                                    WowInterface.HookManager.CastSpell(healingWaveSpell);
-                                    spellCoolDown[healingWaveSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(healingWaveSpell));
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    //Attacken
-                }
-            }
+            StartHeal();
         }
 
         public override void OutOfCombatExecute()
         {
-            MyAuraManager.Tick();
-
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring") && WowInterface.ObjectManager.Player.ManaPercentage < 50)
+            //if (WowInterface.ObjectManager.Target.IsDead)
+            //{
+            //
+            //}
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
-                WowInterface.HookManager.CastSpell(ManaSpringTotemSpell);
-                spellCoolDown[ManaSpringTotemSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(ManaSpringTotemSpell));
                 return;
             }
+            StartHeal();
+        }
+
+        private void StartHeal()
+        {
+            MyAuraManager.Tick();
+
             if (TargetSelectEvent.Run())
             {
-                //WowUnit partyMember = WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 20).FirstOrDefault();
-                WowUnit partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage < 95).OrderBy(e => e.HealthPercentage).FirstOrDefault();//FirstOrDefault => tolist
+                List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage < 95 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
 
-                if (partyMemberToHeal != null)
+                if (partyMemberToHeal.Count > 0)
                 {
-                    if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.Guid)
+                    if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.FirstOrDefault().Guid)
                     {
-                        WowInterface.HookManager.TargetGuid(partyMemberToHeal.Guid);
+                        WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                     }
 
-                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.Guid).Position) <= 30;
+                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
                     if (targetIsInRange)
                     {
+
                         if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
                         {
                             WowInterface.HookManager.StopClickToMoveIfActive();
@@ -234,27 +181,108 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         }
                         if (WowInterface.ObjectManager.Target != null)
                         {
-                            if (DateTime.Now > spellCoolDown[ancestralSpiritSpell] && WowInterface.ObjectManager.Target.IsDead && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
+                            if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
+                                || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
+                                || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
+                                && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
                             {
-                                WowInterface.HookManager.CastSpell(ancestralSpiritSpell);
-                                spellCoolDown[ancestralSpiritSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(ancestralSpiritSpell));
-                                return;
-                            }   
-                            
-                            if (DateTime.Now > spellCoolDown[riptideSpell] && WowInterface.ObjectManager.Target.HealthPercentage <= 95 && !WowInterface.ObjectManager.Target.HasBuffByName("Riptide"))
+                                if (CustomCastSpell(CalloftheElementsSpell))
+                                {
+                                    return;
+                                }
+                            }
+
+                            if (partyMemberToHeal.Count >= 3 && CustomCastSpell(Bloodlust) && WowInterface.ObjectManager.Target.HealthPercentage < 50)
                             {
-                                WowInterface.HookManager.CastSpell(riptideSpell);
-                                spellCoolDown[riptideSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(riptideSpell));
                                 return;
                             }
+
+                            if (partyMemberToHeal.Count >= 3 && CustomCastSpell(chainHealSpell) && WowInterface.ObjectManager.Target.HealthPercentage < 60)
+                            {
+                                return;
+                            }
+
+                            if (WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(healingWaveSpell))
+                            {
+                                return;
+                            }
+
+                            if (WowInterface.ObjectManager.Target.HealthPercentage < 85 && CustomCastSpell(lesserHealingWaveSpell))
+                            {
+                                return;
+                            }
+
+                            if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 95 && CustomCastSpell(riptideSpell))
+                            {
+                                return;
+                            }
+
                         }
+
                     }
                 }
                 else
                 {
+                    //WowInterface.HookManager.ClearTarget();
+                    //return;
                     //Attacken
                 }
             }
+        }
+
+        private bool CustomCastSpell(string spellName)
+        {
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.ObjectManager.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            WowInterface.HookManager.CastSpell(spellName);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        private bool IsSpellReady(string spellName)
+        {
+            if (DateTime.Now > spellCoolDown[spellName])
+            {
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(spellName));
+                return true;
+            }
+
+            return false;
+        }
+
+        protected bool CheckForWeaponEnchantment(EquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
+        {
+            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            {
+                int itemId = WowInterface.CharacterManager.Equipment.Items[slot].Id;
+
+                if (itemId > 0)
+                {
+                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+
+                    if (item != null
+                        && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
+                        && CustomCastSpell(spellToCastEnchantment))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

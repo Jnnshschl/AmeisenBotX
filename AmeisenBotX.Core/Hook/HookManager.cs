@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Hook
         public void AcceptPartyInvite()
         {
             ClickUiElement("StaticPopup1Button1");
-            // LuaDoString("AcceptGroup();");
+            LuaDoString("AcceptGroup();");
         }
 
         public void AcceptQuest(int gossipId)
@@ -81,13 +81,19 @@ namespace AmeisenBotX.Core.Hook
         public void AcceptResurrect()
         {
             ClickUiElement("StaticPopup1Button1");
-            // LuaDoString("AcceptResurrect();");
+            LuaDoString("AcceptResurrect();");
         }
 
         public void AcceptSummon()
         {
             ClickUiElement("StaticPopup1Button1");
-            // LuaDoString("ConfirmSummon();");
+            LuaDoString("ConfirmSummon();");
+        }
+
+        public void CancelSummon()
+        {
+            ClickUiElement("StaticPopup1Button1");
+            LuaDoString("CancelSummon();");
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
@@ -161,6 +167,17 @@ namespace AmeisenBotX.Core.Hook
         public void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId)
         {
             LuaDoString($"SelectGossipActiveQuest(max({gossipId}, GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId});");
+        }
+
+        public void DeclinePartyInvite()
+        {
+            LuaDoString("StaticPopup_Hide(\"PARTY_INVITE\");");
+        }
+
+        public void DeclineResurrect()
+        {
+            ClickUiElement("StaticPopup1Button1");
+            LuaDoString("DeclineResurrect();");
         }
 
         public void Dismount()

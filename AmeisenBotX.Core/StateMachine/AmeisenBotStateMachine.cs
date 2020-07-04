@@ -69,6 +69,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         public string PlayerName { get; internal set; }
 
+        public BotState StateOverride { get; set; }
+
         public bool WowCrashed { get; internal set; }
 
         internal WowInterface WowInterface { get; }
@@ -82,8 +84,6 @@ namespace AmeisenBotX.Core.Statemachine
         private TimegatedEvent<bool> GhostCheckEvent { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
-
-        public BotState StateOverride { get; set; }
 
         public override void Execute()
         {
@@ -250,12 +250,18 @@ namespace AmeisenBotX.Core.Statemachine
 
         internal bool IsDungeonMap(MapId map)
         {
-            return map == MapId.Deadmines
+            return map == MapId.RagefireChasm
+                       || map == MapId.WailingCaverns
+                       || map == MapId.Deadmines
+                       || map == MapId.ShadowfangKeep
+                       || map == MapId.StormwindStockade
+
                        || map == MapId.HellfireRamparts
                        || map == MapId.TheBloodFurnace
                        || map == MapId.TheSlavePens
                        || map == MapId.TheUnderbog
                        || map == MapId.TheSteamvault
+
                        || map == MapId.UtgardeKeep
                        || map == MapId.AzjolNerub;
         }

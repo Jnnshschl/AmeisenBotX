@@ -10,11 +10,16 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateAttacking(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
+            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(100));
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(1000));
         }
 
-        public double DistanceToTarget => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
+        public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
+
+        private double GetMeeleRange()
+        {
+            return Math.Min(8.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
+        }
 
         public bool TargetInLos { get; private set; }
 
@@ -30,11 +35,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (WowInterface.Globals.ForceCombat && WowInterface.ObjectManager.TargetGuid == 0)
-            {
-                WowInterface.Globals.ForceCombat = false;
-            }
-
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
                 && !WowInterface.Globals.ForceCombat
@@ -78,6 +78,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowInterface.CombatClass.Execute();
                 }
+
+                if (WowInterface.Globals.ForceCombat && WowInterface.ObjectManager.TargetGuid == 0)
+                {
+                    WowInterface.Globals.ForceCombat = false;
+                }
             }
         }
 
@@ -106,7 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             // if we are close enough, stop movement and start attacking
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
 
-            if (distance > DistanceToTarget || !TargetInLos)
+            if (distance > DistanceToKeep || !TargetInLos)
             {
                 Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), 2.0f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetMovementAction(distance > 8.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);

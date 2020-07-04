@@ -14,9 +14,9 @@ namespace AmeisenBotX.Logging
 {
     public class AmeisenLogger
     {
-        private int timerBusy;
         private static readonly object padlock = new object();
         private static AmeisenLogger instance;
+        private int timerBusy;
 
         private AmeisenLogger(bool deleteOldLogs = true)
         {

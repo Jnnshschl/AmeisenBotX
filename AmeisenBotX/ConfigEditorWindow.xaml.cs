@@ -78,39 +78,41 @@ namespace AmeisenBotX
             if (ValidateFields())
             {
                 ConfigName = textboxConfigName.Text.Trim();
-                Config = new AmeisenBotConfig()
-                {
-                    AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false),
-                    AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false),
-                    AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false),
-                    AutoPositionWow = checkboxAutoPositionWow.IsChecked.GetValueOrDefault(false),
-                    AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false),
-                    BattlegroundEngine = comboboxBattlegroundEngine.SelectedItem != null ? comboboxBattlegroundEngine.SelectedItem.ToString() : string.Empty,
-                    BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty,
-                    CharacterSlot = int.Parse(textboxCharacterSlot.Text),
-                    CustomCombatClassFile = textboxCombatClassFile.Text,
-                    FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false),
-                    FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false),
-                    FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false),
-                    LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false),
-                    LootUnitsRadius = Math.Round(sliderLootRadius.Value),
-                    MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value),
-                    MaxFps = (int)Math.Round(sliderMaxFps.Value),
-                    MaxFpsCombat = (int)Math.Round(sliderMaxFpsCombat.Value),
-                    MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value),
-                    NameshServerPort = int.Parse(textboxNavmeshServerPort.Text),
-                    NavmeshServerIp = textboxNavmeshServerIp.Text,
-                    Password = textboxPassword.Password,
-                    PathToWowExe = textboxWowPath.Text,
-                    PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false),
-                    PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false),
-                    ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false),
-                    SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false),
-                    SaveWowWindowPosition = checkboxSaveWowWindowPosition.IsChecked.GetValueOrDefault(false),
-                    SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text,
-                    UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true),
-                    Username = textboxUsername.Text
-                };
+
+                Config.AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false);
+                Config.AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
+                Config.AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false);
+                Config.AutoPositionWow = checkboxAutoPositionWow.IsChecked.GetValueOrDefault(false);
+                Config.AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false);
+                Config.BattlegroundEngine = comboboxBattlegroundEngine.SelectedItem != null ? comboboxBattlegroundEngine.SelectedItem.ToString() : string.Empty;
+                Config.BattlegroundUsePartyMode = checkboxBattlegroundUsePartyMode.IsChecked.GetValueOrDefault(false);
+                Config.BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty;
+                Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text);
+                Config.CustomCombatClassFile = textboxCombatClassFile.Text;
+                Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
+                Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
+                Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
+                Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
+                Config.Friends = textboxFriends.Text;
+                Config.LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false);
+                Config.LootUnitsRadius = Math.Round(sliderLootRadius.Value);
+                Config.MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value);
+                Config.MaxFps = (int)Math.Round(sliderMaxFps.Value);
+                Config.MaxFpsCombat = (int)Math.Round(sliderMaxFpsCombat.Value);
+                Config.MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value);
+                Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text);
+                Config.NavmeshServerIp = textboxNavmeshServerIp.Text;
+                Config.OnlyFriendsMode = checkboxOnlyFriendsMode.IsChecked.GetValueOrDefault(false);
+                Config.Password = textboxPassword.Password;
+                Config.PathToWowExe = textboxWowPath.Text;
+                Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
+                Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
+                Config.ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false);
+                Config.SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false);
+                Config.SaveWowWindowPosition = checkboxSaveWowWindowPosition.IsChecked.GetValueOrDefault(false);
+                Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
+                Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
+                Config.Username = textboxUsername.Text;
 
                 SaveConfig = true;
                 Close();
@@ -211,8 +213,32 @@ namespace AmeisenBotX
             }
         }
 
+        private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                if (comboboxBattlegroundEngine.SelectedItem == null || comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
+                {
+                    labelBattlegroundEngineDescription.Content = "...";
+                }
+                else
+                {
+                    IBattlegroundEngine battlegroundEngine = AmeisenBot.BattlegroundEngines.FirstOrDefault(e => e.ToString().Equals(comboboxBattlegroundEngine.SelectedItem.ToString(), StringComparison.OrdinalIgnoreCase));
+
+                    if (battlegroundEngine != null)
+                    {
+                        labelBattlegroundEngineDescription.Content = battlegroundEngine.Description;
+                    }
+                }
+            }
+        }
+
         private void LoadConfigToUi()
         {
+            checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
+            checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
+            checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
+            textboxFriends.Text = Config.Friends;
             checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
             checkboxAutoLogin.IsChecked = Config.AutoLogin;
             checkboxAutoPositionWow.IsChecked = Config.AutoPositionWow;
@@ -454,23 +480,19 @@ namespace AmeisenBotX
             DragMove();
         }
 
-        private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void CheckboxOnlyFriendsMode_Checked(object sender, RoutedEventArgs e)
         {
-            if (WindowLoaded)
+            if(textboxFriends!= null)
             {
-                if (comboboxBattlegroundEngine.SelectedItem == null || comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
-                {
-                    labelBattlegroundEngineDescription.Content = "...";
-                }
-                else
-                {
-                    IBattlegroundEngine battlegroundEngine = AmeisenBot.BattlegroundEngines.FirstOrDefault(e => e.ToString().Equals(comboboxBattlegroundEngine.SelectedItem.ToString(), StringComparison.OrdinalIgnoreCase));
+                textboxFriends.IsEnabled = true;
+            }
+        }
 
-                    if (battlegroundEngine != null)
-                    {
-                        labelBattlegroundEngineDescription.Content = battlegroundEngine.Description;
-                    }
-                }
+        private void CheckboxOnlyFriendsMode_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (textboxFriends != null)
+            {
+                textboxFriends.IsEnabled = false;
             }
         }
     }

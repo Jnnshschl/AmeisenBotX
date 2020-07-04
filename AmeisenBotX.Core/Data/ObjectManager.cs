@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Data
 
         public MapId MapId { get; private set; }
 
+        public WowUnit Partyleader { get; private set; }
+
         public ulong PartyleaderGuid { get; private set; }
 
         public List<ulong> PartymemberGuids
@@ -79,8 +81,6 @@ namespace AmeisenBotX.Core.Data
 
         private WowInterface WowInterface { get; }
 
-        public WowUnit Partyleader { get; private set; }
-
         public WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds)
         {
             return WowObjects.OfType<WowGameobject>()
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return wowObjects.OfType<WowUnit>()
+                return GetNearEnemies<WowUnit>(position, distance)
                   .Where(e => e != null
                     && e.Guid != PlayerGuid
                     && !e.IsDead
