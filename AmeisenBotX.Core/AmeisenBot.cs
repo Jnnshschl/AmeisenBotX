@@ -665,7 +665,17 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
 
+            WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
+
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+        }
+
+        private void OnShowQuestFrame(long timestamp, List<string> args)
+        {
+            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
+            {
+                WowInterface.HookManager.ClickUiElement("QuestFrameAcceptButton");
+            }
         }
     }
 }

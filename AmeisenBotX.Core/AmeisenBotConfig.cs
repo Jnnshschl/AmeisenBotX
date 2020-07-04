@@ -8,6 +8,8 @@ namespace AmeisenBotX.Core
     {
         public double AntiAfkMs { get; set; } = 1000;
 
+        public bool AutoAcceptQuests { get; set; } = true;
+
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
