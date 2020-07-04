@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             if (PriorityTargets != null && PriorityTargets.Count > 0)
             {
                 IEnumerable<WowUnit> nearPriorityEnemies = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead &&PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
+                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
                 if (nearPriorityEnemies != null && nearPriorityEnemies.Count() > 0)
@@ -48,7 +48,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
                 .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
                 .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead)
-                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+                .OrderByDescending(e => e.IsFleeing)
+                .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
             // get enemies targeting my partymembers
             IEnumerable<WowUnit> enemies = nearEnemies

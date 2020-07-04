@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.IsCasting)
+            if (WowInterface.ObjectManager.Player.IsCasting || PlayerToFollow.IsDead)
             {
                 return;
             }
