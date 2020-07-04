@@ -1,12 +1,8 @@
-﻿using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Movement;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
@@ -17,9 +13,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
     public class WarriorFury : ICombatClass
     {
-        private readonly string[] runningEmotes = { "/train", "/fart", "/burp", "/moo", "/lost", "/puzzled", "/cackle", "/silly", "/question", "/talk" };
+        private readonly string[] runningEmotes = { "/train", "/cackle", "/silly" };
+        private readonly string[] standingEmotes = { "/shimmy", "/dance", "/twiddle", "/highfive" };
         private readonly WarriorFurySpells spells;
-        private readonly string[] standingEmotes = { "/chug", "/pick", "/whistle", "/shimmy", "/dance", "/twiddle", "/bored", "/violin", "/highfive", "/bow" };
 
         private bool computeNewRoute = false;
         private double distanceToTarget = 0;
@@ -106,6 +102,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public void Execute()
         {
+            computeNewRoute = false;
             WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.TargetGuid);
             SearchNewTarget(ref target, false);
             if (target != null)
@@ -153,6 +150,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public void OutOfCombatExecute()
         {
+            computeNewRoute = false;
             if (!LastPlayerPosition.Equals(WowInterface.ObjectManager.Player.Position))
             {
                 distanceTraveled = WowInterface.ObjectManager.Player.Position.GetDistance(LastPlayerPosition);
@@ -181,7 +179,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
+                    WowInterface.Globals.ForceCombat = true;
                     HandleAttacking(target);
+                    WowInterface.Globals.ForceCombat = false;
                 }
                 else if (!Dancing || standing)
                 {
@@ -221,12 +221,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if(WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
             {
-                WowInterface.MovementEngine.Reset();
+                WowInterface.MovementEngine.StopMovement();
             }
 
             if(computeNewRoute)
             {
-                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                if(!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
+                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, target.Position, target.Rotation);
             }
         }
@@ -369,8 +370,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                 Player = WowInterface.ObjectManager.Player;
                 int rage = Player.Rage;
-                bool lowHealth = Player.HealthPercentage <= 20;
-                bool mediumHealth = !lowHealth && Player.HealthPercentage <= 50;
+                bool lowHealth = Player.HealthPercentage <= 25;
+                bool mediumHealth = !lowHealth && Player.HealthPercentage <= 75;
                 if (!(lowHealth || mediumHealth))
                 {
                     askedForHelp = false;
@@ -433,11 +434,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                                     // Berserker Stance
                                     if (IsReady(NextStance))
                                     {
-                                        if (IsReady(Retaliation))
-                                        {
-                                            CastSpell(Retaliation, ref rage, 0, 300, false);
-                                        }
-
                                         ChangeToStance(BerserkerStance, out rage);
                                     }
                                 }
@@ -541,7 +537,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             public void ResetAfterTargetDeath()
             {
-                nextActionTime[Hamstring] = DateTime.Now;
+                nextActionTime[Hamstring].AddSeconds(-15.0);
+                nextActionTime[HeroicStrike].AddSeconds(-3.6);
             }
 
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
