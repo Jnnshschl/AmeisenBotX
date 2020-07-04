@@ -24,7 +24,7 @@
 
         public double SeperationDistance { get; set; } = 4.0;
 
-        public int StuckCounterUnstuck { get; set; } = 1;
+        public int StuckCounterUnstuck { get; set; } = 3;
 
         public double WaypointCheckThreshold { get; set; } = 1.0;
     }
