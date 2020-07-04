@@ -250,12 +250,18 @@ namespace AmeisenBotX.Core.Statemachine
 
         internal bool IsDungeonMap(MapId map)
         {
-            return map == MapId.Deadmines
+            return map == MapId.RagefireChasm
+                       || map == MapId.WailingCaverns
+                       || map == MapId.Deadmines
+                       || map == MapId.ShadowfangKeep
+                       || map == MapId.StormwindStockade
+
                        || map == MapId.HellfireRamparts
                        || map == MapId.TheBloodFurnace
                        || map == MapId.TheSlavePens
                        || map == MapId.TheUnderbog
                        || map == MapId.TheSteamvault
+
                        || map == MapId.UtgardeKeep
                        || map == MapId.AzjolNerub;
         }

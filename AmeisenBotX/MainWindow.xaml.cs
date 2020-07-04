@@ -381,29 +381,6 @@ namespace AmeisenBotX
                             }
                         }
 
-                        if (AmeisenBot.WowInterface.DungeonEngine.Nodes != null
-                        && AmeisenBot.WowInterface.DungeonEngine.Nodes.Count > 0)
-                        {
-                            for (int i = 0; i < AmeisenBot.WowInterface.DungeonEngine.Nodes.Count; ++i)
-                            {
-                                Vector3 start = AmeisenBot.WowInterface.DungeonEngine.Nodes[i].Position;
-                                Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.DungeonEngine.Nodes[i - 1].Position;
-
-                                Color lineColor = Colors.White;
-                                Color startDot = Colors.Gray;
-                                Color endDot = i == 0 ? Colors.Orange : Colors.Gray;
-
-                                Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
-                                if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
-                                && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
-                                {
-                                    Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
-                                    Overlay.AddRectangle((int)startPoint.X - 3, (int)startPoint.Y - 3, 5, 5, startDot);
-                                    Overlay.AddRectangle((int)endPoint.X - 3, (int)endPoint.Y - 3, 5, 5, endDot);
-                                }
-                            }
-                        }
-
                         Overlay?.Draw();
                         OverlayClear = true;
                     }
@@ -545,6 +522,7 @@ namespace AmeisenBotX
             comboboxStateOverride.SelectedIndex = 0;
 
             comboboxStateOverride.Items.Add(BotState.Job);
+            comboboxStateOverride.Items.Add(BotState.Questing);
 
             if (AmeisenBot != null)
             {

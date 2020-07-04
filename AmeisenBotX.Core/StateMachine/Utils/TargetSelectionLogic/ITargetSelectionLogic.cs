@@ -8,5 +8,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         void Reset();
 
         bool SelectTarget(out List<WowUnit> wowUnit);
+
+        List<string> PriorityTargets { get; set; }
     }
 }

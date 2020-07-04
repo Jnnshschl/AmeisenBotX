@@ -38,6 +38,8 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = "";
 
+        public bool DungeonUsePartyMode { get; set; } = false;
+
         public double EventPullMs { get; set; } = 1000;
 
         public bool FollowGroupLeader { get; set; } = false;

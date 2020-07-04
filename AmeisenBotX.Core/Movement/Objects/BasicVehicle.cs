@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
 
-            acceleration += GetObjectForceAroundMe<WowObject>(12);
+            acceleration += GetObjectForceAroundMe<WowObject>();
             // acceleration += GetNearestBlacklistForce(12);
 
             acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
@@ -212,8 +212,8 @@ namespace AmeisenBotX.Core.Movement.Objects
 
                 case MovementAction.Following:
                     forces.Add(Seek(targetPosition, 1f));
-                    forces.Add(Seperate(0.5f));
-                    // forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    //forces.Add(Seperate(0.3f));
+                    forces.Add(AvoidObstacles(0.1f));
                     break;
 
                 case MovementAction.Chasing:
@@ -262,7 +262,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             return force;
         }
 
-        private Vector3 GetObjectForceAroundMe<T>(double maxDistance = 16) where T : WowObject
+        private Vector3 GetObjectForceAroundMe<T>(double maxDistance = 6) where T : WowObject
         {
             Vector3 force = new Vector3(0, 0, 0);
             Vector3 vehiclePosition = WowInterface.ObjectManager.Player.Position;

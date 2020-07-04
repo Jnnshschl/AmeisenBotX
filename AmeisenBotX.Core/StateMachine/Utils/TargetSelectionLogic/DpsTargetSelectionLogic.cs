@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,6 +12,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
             WowInterface = wowInterface;
         }
+
+        public List<string> PriorityTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -27,6 +30,19 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly))
             {
                 WowInterface.HookManager.ClearTarget();
+            }
+
+            if (PriorityTargets != null && PriorityTargets.Count > 0)
+            {
+                IEnumerable<WowUnit> nearPriorityEnemies = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead &&PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+
+                if (nearPriorityEnemies != null && nearPriorityEnemies.Count() > 0)
+                {
+                    targetToSelect = nearPriorityEnemies.ToList();
+                    return true;
+                }
             }
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager

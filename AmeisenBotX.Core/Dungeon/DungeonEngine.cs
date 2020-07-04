@@ -143,6 +143,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public void Reset()
         {
+            Profile = null;
         }
 
         private bool AreAllPlayersPresent(double distance)
@@ -199,14 +200,21 @@ namespace AmeisenBotX.Core.Dungeon
         {
             return WowInterface.ObjectManager.MapId switch
             {
+                MapId.RagefireChasm => new RagefireChasmProfile(),
+                MapId.WailingCaverns => new WailingCavernsProfile(),
                 MapId.Deadmines => new DeadminesProfile(),
+                MapId.ShadowfangKeep => new ShadowfangKeepProfile(),
+                MapId.StormwindStockade => new StockadeProfile(),
+
                 MapId.HellfireRamparts => new HellfireRampartsProfile(),
                 MapId.TheBloodFurnace => new TheBloodFurnaceProfile(),
                 MapId.TheSlavePens => new TheSlavePensProfile(),
                 MapId.TheUnderbog => new TheUnderbogProfile(),
                 MapId.TheSteamvault => new TheSteamvaultProfile(),
+
                 MapId.UtgardeKeep => new UtgardeKeepProfile(),
                 MapId.AzjolNerub => new AzjolNerubProfile(),
+
                 _ => null
             };
         }

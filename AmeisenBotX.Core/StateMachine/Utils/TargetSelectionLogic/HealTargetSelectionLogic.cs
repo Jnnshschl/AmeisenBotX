@@ -19,6 +19,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         private WowInterface WowInterface { get; }
 
+        public List<string> PriorityTargets { get; set; }
+
         public void Reset()
         {
         }

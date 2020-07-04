@@ -151,7 +151,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     MovedDistance = LastPlayerPosition.GetDistance(WowInterface.ObjectManager.Player.Position);
                     LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
 
-                    if (MovedDistance > WowInterface.MovementSettings.MinDistanceMovedJumpUnstuck && MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
+                    if (MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
                     {
                         ++StuckCounter;
                         JumpOnNextMove = true;

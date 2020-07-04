@@ -507,14 +507,22 @@ namespace AmeisenBotX.Core
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
+            if (Config.OnlyFriendsMode && args.Count >= 1 && Config.Friends.Split(',').Contains(args[0]))
+            {
+                return;
+            }
+
             WowInterface.HookManager.AcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
-            if (args.Count == 1 && args[0] == "1")
+            if (Config.AutojoinBg)
             {
-                WowInterface.HookManager.AcceptBattlegroundInvite();
+                if (args.Count == 1 && args[0] == "1")
+                {
+                    WowInterface.HookManager.AcceptBattlegroundInvite();
+                }
             }
         }
 
