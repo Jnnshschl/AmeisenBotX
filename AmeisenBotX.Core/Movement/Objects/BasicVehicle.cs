@@ -212,7 +212,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
                 case MovementAction.Following:
                     forces.Add(Seek(targetPosition, 1f));
-                    //forces.Add(Seperate(0.3f));
+                    forces.Add(Seperate(0.6f));
                     forces.Add(AvoidObstacles(0.1f));
                     break;
 
