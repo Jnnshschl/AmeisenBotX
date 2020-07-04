@@ -38,6 +38,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             //FuryWarrior
             TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(3));
+            RendEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
+            ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             //Resto Shaman
             
@@ -52,6 +54,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         //FuryWarrior
         public TimegatedEvent TargetSelectEvent { get; private set; }
         public TimegatedEvent HeroicStrikeEvent { get; private set; }
+        public TimegatedEvent RendEvent { get; private set; }
+        public TimegatedEvent ExecuteEvent { get; private set; }
         //Resto Shaman
         public TimegatedEvent healingWaveSpellEvent { get; private set; }
         public TimegatedEvent naturesswiftEvent { get; private set; }

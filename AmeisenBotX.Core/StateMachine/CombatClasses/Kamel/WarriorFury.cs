@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
@@ -9,6 +10,7 @@ using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,57 +18,67 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     class WarriorFury : BasicKamelClass
     {
+        //Stances
+        private const string defensiveStanceSpell = "Defensive Stance";
         private const string battleStanceSpell = "Battle Stance";
         private const string berserkerStanceSpell = "Berserker Stance";
-        private const string berserkerRageSpell = "Berserker Rage";
-        private const string bladestormSpell = "Bladestorm";
+
+        //Spells
         private const string bloodthirstSpell = "Bloodthirst";
         private const string chargeSpell = "Charge";
         private const string cleaveSpell = "Cleave";
-        private const string commandingShoutSpell = "Commanding Shout";
         private const string disarmSpell = "Disarm";
         private const string executeSpell = "Execute";
         private const string hamstringSpell = "Hamstring";
         private const string heroicStrikeSpell = "Heroic Strike";
         private const string heroicThrowSpell = "Heroic Throw";
-        private const string heroicFurySpell = "Heroic Fury";
         private const string interceptSpell = "Intercept";
-        private const string intimidatingShoutSpell = "Intimidating Shout";
         private const string rendSpell = "Rend";
         private const string whirlwindSpell = "Whirlwind";
-        private const string retaliationSpell = "Retaliation";
-        private const string enragedregenerationSpell = "Enraged Regeneration";
-        private const string bloodrageSpell = "Bloodrage";
         private const string pummelSpell = "Pummel";
         private const string slamSpell = "Slam";
-        private const string recklessnessSpell = "Recklessness";
-        private const string defensiveStanceSpell = "Defensive Stance";
+
+        //Buffs||Defensive||Enrage
+        private const string retaliationSpell = "Retaliation";
+        private const string berserkerRageSpell = "Berserker Rage";
+        private const string commandingShoutSpell = "Commanding Shout";
         private const string deathWishSpell = "Death Wish";
+        private const string enragedregenerationSpell = "Enraged Regeneration";
+        private const string heroicFurySpell = "Heroic Fury";
+        private const string intimidatingShoutSpell = "Intimidating Shout";
+        private const string recklessnessSpell = "Recklessness";
+        private const string bloodrageSpell = "Bloodrage";
 
         Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public WarriorFury(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
+            //Stances
+            spellCoolDown.Add(defensiveStanceSpell, DateTime.Now);
+            spellCoolDown.Add(battleStanceSpell, DateTime.Now);
+            spellCoolDown.Add(berserkerStanceSpell, DateTime.Now);
+            //Spells
+            spellCoolDown.Add(heroicStrikeSpell, DateTime.Now);
             spellCoolDown.Add(interceptSpell, DateTime.Now);
             spellCoolDown.Add(heroicThrowSpell, DateTime.Now);
-            spellCoolDown.Add(intimidatingShoutSpell, DateTime.Now);
-            spellCoolDown.Add(retaliationSpell, DateTime.Now);
-            spellCoolDown.Add(heroicStrikeSpell, DateTime.Now);
             spellCoolDown.Add(executeSpell, DateTime.Now);
-            spellCoolDown.Add(enragedregenerationSpell, DateTime.Now);
-            spellCoolDown.Add(bloodrageSpell, DateTime.Now);
             spellCoolDown.Add(pummelSpell, DateTime.Now);
             spellCoolDown.Add(bloodthirstSpell, DateTime.Now);
-            spellCoolDown.Add(commandingShoutSpell, DateTime.Now);
             spellCoolDown.Add(slamSpell, DateTime.Now);
-            spellCoolDown.Add(recklessnessSpell, DateTime.Now);
             spellCoolDown.Add(whirlwindSpell, DateTime.Now);
+            spellCoolDown.Add(disarmSpell, DateTime.Now);
+            spellCoolDown.Add(rendSpell, DateTime.Now);
+            //Buffs||Defensive||Enrage
+            spellCoolDown.Add(intimidatingShoutSpell, DateTime.Now);
+            spellCoolDown.Add(retaliationSpell, DateTime.Now);
+            spellCoolDown.Add(enragedregenerationSpell, DateTime.Now);
+            spellCoolDown.Add(bloodrageSpell, DateTime.Now);
+            spellCoolDown.Add(commandingShoutSpell, DateTime.Now);
+            spellCoolDown.Add(recklessnessSpell, DateTime.Now);
             spellCoolDown.Add(heroicFurySpell, DateTime.Now);
             spellCoolDown.Add(berserkerRageSpell, DateTime.Now);
-            spellCoolDown.Add(disarmSpell, DateTime.Now);
             spellCoolDown.Add(deathWishSpell, DateTime.Now);
-            spellCoolDown.Add(rendSpell, DateTime.Now);
         }
 
         public override string Author => "Kamel";
@@ -160,11 +172,72 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                     }
+
+                    if (CustomCastSpell(deathWishSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && IsSpellReady(enragedregenerationSpell) && IsSpellReady(bloodrageSpell))
+                    {
+                        WowInterface.HookManager.CastSpell(bloodrageSpell);
+                        if (CustomCastSpell(enragedregenerationSpell))
+                        {
+                            return;
+                        }
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
+                    {
+                        return;
+                    } 
+                    
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 60 && CustomCastSpell(retaliationSpell, battleStanceSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HasBuffByName("Slam!") && CustomCastSpell(slamSpell) && CustomCastSpell(recklessnessSpell))
+                    {
+                        return;
+                    }
+
+                    if (CustomCastSpell(bloodthirstSpell) || CustomCastSpell(whirlwindSpell))
+                    {
+                        return;
+                    }
+
+                    if (RendEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
+                    {
+                        return;
+                    }
+
+                    if (HeroicStrikeEvent.Run() && CustomCastSpell(heroicStrikeSpell))
+                    {
+                        return;
+                    }
+
                 }
                 else//Range
                 {
-                    double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
-
+                    if (CustomCastSpell(interceptSpell))
+                    {
+                        return;
+                    }
+                    if (CustomCastSpell(heroicThrowSpell))
+                    {
+                        return;
+                    }
                 }
             }
             else if (TargetSelectEvent.Run())
@@ -177,20 +250,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 if (nearTarget != null)
                 {
                     WowInterface.HookManager.TargetGuid(nearTarget.Guid);
-                    // AmeisenLogger.Instance.Log("FuryWarri", $"Target: {nearTarget}");
                 }
             }
         }
-        private void CustomCastSpell(string spell, string stance = "Berserker Stance")
+        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
         {
-            if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
-                WowInterface.HookManager.CastSpell(stance);
+                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                if ((WowInterface.ObjectManager.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                {
+                    if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                    {
+                        if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
+                        {
+                            WowInterface.HookManager.CastSpell(stance);
+                            return true;
+                        }
+                        else
+                        {
+                            WowInterface.HookManager.CastSpell(spellName);
+                            return true;
+                        }
+                    }
+                }
             }
-            else
+
+            return false;
+        }
+        private bool IsSpellReady(string spellName)
+        {
+            if (DateTime.Now > spellCoolDown[spellName])
             {
-                WowInterface.HookManager.CastSpell(spell);
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(spellName));
+                return true;
             }
+
+            return false;
         }
     }
 }
