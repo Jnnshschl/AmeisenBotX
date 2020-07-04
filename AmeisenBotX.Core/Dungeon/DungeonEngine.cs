@@ -100,6 +100,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public void Enter()
         {
+            Reset();
         }
 
         public void Execute()
@@ -116,7 +117,6 @@ namespace AmeisenBotX.Core.Dungeon
 
         public void Exit()
         {
-            Reset();
         }
 
         public void LoadProfile(IDungeonProfile profile)
