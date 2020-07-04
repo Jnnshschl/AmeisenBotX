@@ -333,6 +333,7 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
                 new Statemachine.CombatClasses.Kamel.FuryWarrior(WowInterface),
+                new Statemachine.CombatClasses.Kamel.WarriorFury(WowInterface),
                 new Statemachine.CombatClasses.Kamel.RestorationShaman (WowInterface),
                 new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface.ObjectManager, WowInterface.CharacterManager, WowInterface.HookManager, WowInterface.MovementEngine),

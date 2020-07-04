@@ -291,6 +291,7 @@
     <Compile Include="Statemachine\CombatClasses\Jannis\PriestShadow.cs" />
     <Compile Include="Statemachine\CombatClasses\Jannis\RogueAssassination.cs" />
     <Compile Include="Statemachine\CombatClasses\Kamel\RestorationShaman .cs" />
+    <Compile Include="Statemachine\CombatClasses\Kamel\WarriorFury.cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
     <Compile Include="Common\IState.cs" />
     <Compile Include="Statemachine\States\StateQuesting.cs" />
