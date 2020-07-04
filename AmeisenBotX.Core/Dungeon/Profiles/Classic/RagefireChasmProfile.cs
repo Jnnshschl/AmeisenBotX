@@ -3,11 +3,7 @@ using AmeisenBotX.Core.Dungeon.Enums;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 {
@@ -26,16 +22,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
         public int MaxLevel { get; } = 18;
 
         public string Name { get; } = "[13-18] Ragefire Chasm";
-
-        public List<string> PriorityUnits { get; } = new List<string>();
-
-        public int RequiredItemLevel { get; } = 10;
-
-        public int RequiredLevel { get; } = 13;
-
-        public Vector3 WorldEntry { get; } = new Vector3(1816, -4422, -19);
-
-        public MapId WorldEntryMapId { get; } = MapId.Kalimdor;
 
         public List<DungeonNode> Nodes { get; } = new List<DungeonNode>()
         {
@@ -230,5 +216,14 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
             new DungeonNode(new Vector3(-368, 207, -22)),
         };
 
+        public List<string> PriorityUnits { get; } = new List<string>();
+
+        public int RequiredItemLevel { get; } = 10;
+
+        public int RequiredLevel { get; } = 13;
+
+        public Vector3 WorldEntry { get; } = new Vector3(1816, -4422, -19);
+
+        public MapId WorldEntryMapId { get; } = MapId.Kalimdor;
     }
 }

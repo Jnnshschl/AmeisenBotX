@@ -69,6 +69,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         public string PlayerName { get; internal set; }
 
+        public BotState StateOverride { get; set; }
+
         public bool WowCrashed { get; internal set; }
 
         internal WowInterface WowInterface { get; }
@@ -82,8 +84,6 @@ namespace AmeisenBotX.Core.Statemachine
         private TimegatedEvent<bool> GhostCheckEvent { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
-
-        public BotState StateOverride { get; set; }
 
         public override void Execute()
         {

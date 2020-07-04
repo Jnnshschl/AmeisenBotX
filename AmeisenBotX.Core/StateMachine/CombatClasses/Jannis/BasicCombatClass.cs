@@ -128,6 +128,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public AuraManager TargetAuraManager { get; private set; }
 
+        public bool TargetInLineOfSight { get; set; }
+
         public InterruptManager TargetInterruptManager { get; private set; }
 
         public TargetManager TargetManager { get; private set; }
@@ -145,8 +147,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public WowInterface WowInterface { get; internal set; }
 
         private AmeisenBotStateMachine StateMachine { get; }
-
-        public bool TargetInLineOfSight { get; set; }
 
         public void Execute()
         {
@@ -233,7 +233,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
-                if(!isTargetMyself && !TargetInLineOfSight)
+                if (!isTargetMyself && !TargetInLineOfSight)
                 {
                     return false;
                 }
@@ -260,28 +260,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
-        }
-
-        private void CheckFacing(WowUnit target)
-        {
-            float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
-            float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
-            float maxAngle = (float)(Math.PI * 2);
-
-            if (angleDiff < 0)
-            {
-                angleDiff += maxAngle;
-            }
-
-            if (angleDiff > maxAngle)
-            {
-                angleDiff -= maxAngle;
-            }
-
-            if (angleDiff > 1.5)
-            {
-                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
-            }
         }
 
         protected bool CastSpellIfPossibleDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
@@ -439,6 +417,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"", LogLevel.Verbose);
             CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
             return result;
+        }
+
+        private void CheckFacing(WowUnit target)
+        {
+            float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
+            float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
+            float maxAngle = (float)(Math.PI * 2);
+
+            if (angleDiff < 0)
+            {
+                angleDiff += maxAngle;
+            }
+
+            if (angleDiff > maxAngle)
+            {
+                angleDiff -= maxAngle;
+            }
+
+            if (angleDiff > 1.5)
+            {
+                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+            }
         }
 
         private bool DoIKnowSpell(string spellName)

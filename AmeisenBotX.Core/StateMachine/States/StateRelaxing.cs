@@ -29,7 +29,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
-
         }
     }
 }

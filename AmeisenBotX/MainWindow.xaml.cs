@@ -255,6 +255,11 @@ namespace AmeisenBotX
             }
         }
 
+        private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+        }
+
         private AmeisenBotConfig LoadConfig()
         {
             LoadConfigWindow loadConfigWindow = new LoadConfigWindow(BotDataPath);
@@ -566,11 +571,6 @@ namespace AmeisenBotX
             {
                 AdjustWowWindow();
             }
-        }
-
-        private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
         }
     }
 }

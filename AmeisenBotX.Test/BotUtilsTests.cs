@@ -1,7 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -97,16 +95,16 @@ namespace AmeisenBotX.Test
         // {
         //     Vector3 pos = new Vector3(0, 1, 0);
         //     Vector3 pos2 = new Vector3(0, 2, 0);
-        // 
+        //
         //     Vector3 aheadPos = BotUtils.MoveAhead(pos, pos2, 1);
         //     Assert.AreEqual(new Vector3(0, 3, 0), aheadPos);
-        // 
+        //
         //     aheadPos = BotUtils.MoveAhead(pos, pos2, -1);
         //     Assert.AreEqual(new Vector3(0, 1, 0), aheadPos);
-        // 
+        //
         //     aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), 1);
         //     Assert.AreEqual(new Vector3(0, 2, 0), aheadPos);
-        // 
+        //
         //     aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), -1);
         //     Assert.AreEqual(new Vector3(0, 0, 0), aheadPos);
         // }

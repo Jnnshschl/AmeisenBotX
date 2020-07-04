@@ -211,6 +211,26 @@ namespace AmeisenBotX
             }
         }
 
+        private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                if (comboboxBattlegroundEngine.SelectedItem == null || comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
+                {
+                    labelBattlegroundEngineDescription.Content = "...";
+                }
+                else
+                {
+                    IBattlegroundEngine battlegroundEngine = AmeisenBot.BattlegroundEngines.FirstOrDefault(e => e.ToString().Equals(comboboxBattlegroundEngine.SelectedItem.ToString(), StringComparison.OrdinalIgnoreCase));
+
+                    if (battlegroundEngine != null)
+                    {
+                        labelBattlegroundEngineDescription.Content = battlegroundEngine.Description;
+                    }
+                }
+            }
+        }
+
         private void LoadConfigToUi()
         {
             checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
@@ -452,26 +472,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if (WindowLoaded)
-            {
-                if (comboboxBattlegroundEngine.SelectedItem == null || comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
-                {
-                    labelBattlegroundEngineDescription.Content = "...";
-                }
-                else
-                {
-                    IBattlegroundEngine battlegroundEngine = AmeisenBot.BattlegroundEngines.FirstOrDefault(e => e.ToString().Equals(comboboxBattlegroundEngine.SelectedItem.ToString(), StringComparison.OrdinalIgnoreCase));
-
-                    if (battlegroundEngine != null)
-                    {
-                        labelBattlegroundEngineDescription.Content = battlegroundEngine.Description;
-                    }
-                }
-            }
         }
     }
 }

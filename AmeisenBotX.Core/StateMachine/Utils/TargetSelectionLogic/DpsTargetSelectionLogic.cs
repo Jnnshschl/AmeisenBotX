@@ -29,92 +29,34 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            List<WowUnit> Enemies = WowInterface.ObjectManager
+            IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
                 .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => BotUtils.IsValidUnit(e) && e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid))
-                .ToList();
+                .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead)
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+
+            // get enemies targeting my partymembers
+            IEnumerable<WowUnit> enemies = nearEnemies
+                .Where(e => e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid));
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
-
-            if (Enemies.Count > 0)
+            if (enemies.Count() > 0)
             {
-                targetToSelect = new List<WowUnit>() { Enemies.FirstOrDefault(e => BotUtils.IsValidUnit(e) && !e.IsDead) };
+                targetToSelect = new List<WowUnit>() { enemies.FirstOrDefault() };
 
                 if (targetToSelect != null)
                 {
                     return true;
                 }
             }
-            else
+
+            // get enemies tagged by me or no one, or players
+            enemies = nearEnemies
+                .Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
+
+            if (enemies.Count() > 0)
             {
-                Enemies = WowInterface.ObjectManager
-                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => e.IsTaggedByMe || e.GetType() == typeof(WowPlayer))
-                .ToList();
-            }
-
-            // remove all invalid, dead units
-            List<WowUnit> nonFriendlyUnits = Enemies.Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && !e.IsNotAttackable).ToList();
-
-            // if there are no non Friendly units, we can't attack anything
-            if (nonFriendlyUnits.Count > 0)
-            {
-                List<WowUnit> unitsInCombatTargetingUs = nonFriendlyUnits
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).ToList();
-
-                targetToSelect = unitsInCombatTargetingUs;
-                if (targetToSelect != null && targetToSelect.Count > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    // maybe we are able to assist our partymembers
-                    if (WowInterface.ObjectManager.PartymemberGuids.Count > 0)
-                    {
-                        Dictionary<WowUnit, int> partymemberTargets = new Dictionary<WowUnit, int>();
-
-                        for (int i = 0; i < WowInterface.ObjectManager.Partymembers.Count; ++i)
-                        {
-                            WowUnit partymember = WowInterface.ObjectManager.Partymembers[i];
-
-                            if (partymember.TargetGuid > 0)
-                            {
-                                WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partymember.TargetGuid);
-
-                                if (target != null
-                                    && BotUtils.IsValidUnit(target)
-                                    && target.IsInCombat
-                                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, target) != WowUnitReaction.Friendly)
-                                {
-                                    if (partymemberTargets.ContainsKey(target))
-                                    {
-                                        partymemberTargets[target]++;
-                                    }
-                                    else
-                                    {
-                                        partymemberTargets.Add(target, 1);
-                                    }
-                                }
-                            }
-                        }
-
-                        List<KeyValuePair<WowUnit, int>> selectedTargets = partymemberTargets.OrderByDescending(e => e.Value).ToList();
-
-                        if (selectedTargets != null && selectedTargets.Count > 0)
-                        {
-                            targetToSelect = selectedTargets.Select(e => e.Key).ToList();
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            WowUnit lastFallbackUnit = Enemies.Where(e => e.IsTaggedByMe).FirstOrDefault();
-            if (lastFallbackUnit != null)
-            {
-                targetToSelect = new List<WowUnit>() { lastFallbackUnit };
+                targetToSelect = enemies.ToList();
                 return true;
             }
 
