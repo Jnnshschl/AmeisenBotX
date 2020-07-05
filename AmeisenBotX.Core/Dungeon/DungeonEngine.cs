@@ -80,6 +80,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         public Vector3 DeathPosition { get; private set; }
 
+        public Vector3 DeathEntrancePosition { get; private set; }
+
         public DungeonBlackboard DungeonBlackboard { get; }
 
         public bool IDied { get; private set; }
@@ -139,6 +141,7 @@ namespace AmeisenBotX.Core.Dungeon
         {
             IDied = true;
             DeathPosition = WowInterface.ObjectManager.Player.Position;
+            DeathEntrancePosition = Profile.WorldEntry;
         }
 
         public void Reset()

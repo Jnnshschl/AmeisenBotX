@@ -40,6 +40,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string shieldWallSpell = "Shield Wall";
         private const string shockwaveSpell = "Shockwave";
         private const string spellReflectionSpell = "Spell Reflection";
+        private const string stoneformSpell = "Stoneform";
         private const string tauntSpell = "Taunt";
         private const string thunderClapSpell = "Thunder Clap";
         private const string victoryRushSpell = "Victory Rush";
@@ -139,6 +140,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
 
+            if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
+                && WowInterface.ObjectManager.Player.HealthPercentage < 50
+                && CastSpellIfPossible(stoneformSpell, 0))
+            {
+                return;
+            }
+
             if (WowInterface.ObjectManager.Target != null)
             {
                 double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
@@ -189,21 +197,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 40)
                     {
                         if (CastSpellIfPossible(lastStandSpell, 0)
-                            || CastSpellIfPossible(shieldWallSpell, 0))
+                            || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(shieldWallSpell, 0))
+                            || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(shieldBlockSpell, WowInterface.ObjectManager.Target.Guid, true)))
                         {
                             return;
                         }
                     }
 
                     if (CastSpellIfPossible(berserkerRageSpell, 0, true)
-                        || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(revengeSpell, WowInterface.ObjectManager.Target.Guid, true))
-                        || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(shieldBlockSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(shieldSlamSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || CastSpellIfPossible(thunderClapSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || CastSpellIfPossible(mockingBlowSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 5).Count() > 2 && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || (WowInterface.ObjectManager.Target.HealthPercentage < 20) && CastSpellIfPossible(executeSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || CastSpellIfPossible(devastateSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(revengeSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
