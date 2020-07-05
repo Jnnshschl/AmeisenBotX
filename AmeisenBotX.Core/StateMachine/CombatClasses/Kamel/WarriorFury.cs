@@ -37,6 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string whirlwindSpell = "Whirlwind";
         private const string pummelSpell = "Pummel";
         private const string slamSpell = "Slam";
+        private const string victoryRushSpell = "Victory Rush";
 
         //Buffs||Defensive||Enrage
         private const string retaliationSpell = "Retaliation";
@@ -69,6 +70,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(whirlwindSpell, DateTime.Now);
             spellCoolDown.Add(disarmSpell, DateTime.Now);
             spellCoolDown.Add(rendSpell, DateTime.Now);
+            spellCoolDown.Add(victoryRushSpell, DateTime.Now);
+            spellCoolDown.Add(chargeSpell, DateTime.Now);
             //Buffs||Defensive||Enrage
             spellCoolDown.Add(intimidatingShoutSpell, DateTime.Now);
             spellCoolDown.Add(retaliationSpell, DateTime.Now);
@@ -178,6 +181,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
+                    if (WowInterface.ObjectManager.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
+                    {
+                        return;
+                    }   
+                    
                     if (WowInterface.ObjectManager.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell))
                     {
                         return;
@@ -217,6 +225,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
+                    if (WowInterface.ObjectManager.Player.HasBuffByName("Victory Rush") && CustomCastSpell(victoryRushSpell))
+                    {
+                        return;
+                    }
+
                     if (RendEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
                     {
                         return;
@@ -234,6 +247,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         return;
                     }
+                    if (CustomCastSpell(chargeSpell))
+                    {
+                        return;
+                    }
                     if (CustomCastSpell(heroicThrowSpell))
                     {
                         return;
@@ -242,7 +259,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
             else if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 30)
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
                     .Where(e => e.IsInCombat) // To Do e.IsTaggedByMe
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
@@ -253,7 +270,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 }
             }
         }
-        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
+        private bool CustomCastSpell(string spellName, string stance = "Battle Stance")//string stance = "Berserker Stance"
         {
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {

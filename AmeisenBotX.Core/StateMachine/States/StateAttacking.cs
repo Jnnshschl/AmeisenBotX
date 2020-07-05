@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private double GetMeeleRange()
         {
-            return Math.Min(8.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
+            return Math.Max(WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) ? 1.5 : 3.2, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
         }
 
         public bool TargetInLos { get; private set; }
@@ -113,8 +113,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance > DistanceToKeep || !TargetInLos)
             {
-                Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), 1.0f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
-                WowInterface.MovementEngine.SetMovementAction(distance > 8.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
+                Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), 0.5f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }
 

@@ -507,7 +507,7 @@ namespace AmeisenBotX.Core
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
-            if (Config.OnlyFriendsMode && args.Count >= 1 && Config.Friends.Split(',').Contains(args[0]))
+            if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
             {
                 return;
             }
@@ -667,7 +667,25 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
 
+            WowInterface.EventHookManager.Subscribe("TRADE_REQUEST", OnTradeRequest);
+            WowInterface.EventHookManager.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
+
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+        }
+
+        private void OnTradeAcceptUpdate(long timestamp, List<string> args)
+        {
+            WowInterface.HookManager.LuaDoString("AcceptTrade();");
+        }
+
+        private void OnTradeRequest(long timestamp, List<string> args)
+        {
+            if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
+            {
+                return;
+            }
+
+            WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
         }
 
         private void OnShowQuestFrame(long timestamp, List<string> args)

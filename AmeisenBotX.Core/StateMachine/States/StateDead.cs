@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap))
                     {
                         // when we died in a dungeon, we need to return to its portal
-                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.Profile.WorldEntry;
+                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.DeathEntrancePosition;
                     }
                     else
                     {
@@ -34,7 +34,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
 
-                WowInterface.HookManager.ReleaseSpirit();
+                if (Config.ReleaseSpirit)
+                {
+                    WowInterface.HookManager.ReleaseSpirit();
+                }
             }
             else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
             {
