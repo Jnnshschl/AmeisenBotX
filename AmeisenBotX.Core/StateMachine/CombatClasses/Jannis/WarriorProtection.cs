@@ -160,15 +160,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         return;
                     }
 
-
-                    if (WowInterface.ObjectManager.Player.HasBuffByName(victoryRushSpell))
-                    {
-                        if (CastSpellIfPossible(victoryRushSpell, WowInterface.ObjectManager.Target.Guid))
-                        {
-                            return;
-                        }
-                    }
-
                     if (WowInterface.ObjectManager.Player.HealthPercentage > 50)
                     {
                         if (CastSpellIfPossible(bloodrageSpell, 0))

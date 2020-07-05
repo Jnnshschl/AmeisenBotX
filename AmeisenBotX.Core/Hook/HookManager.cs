@@ -1252,14 +1252,9 @@ namespace AmeisenBotX.Core.Hook
         {
             List<WowAura> buffs = new List<WowAura>();
 
-            if (auraCount == 0)
-            {
-                return buffs;
-            }
-
             if (WowInterface.XMemory.Read(buffBase, out T auraTable))
             {
-                List<RawWowAura> list = auraTable.AsList().GetRange(0, auraCount - 1);
+                List<RawWowAura> list = auraTable.AsList().GetRange(0, Math.Min(auraCount, 39));
                 for (int i = 0; i < list.Count; ++i)
                 {
                     RawWowAura aura = list[i];
