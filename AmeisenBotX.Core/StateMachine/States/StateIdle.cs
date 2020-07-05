@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do i need to follow someone
-            if (IsUnitToFollowThere())
+            if (!Config.Autopilot && IsUnitToFollowThere())
             {
                 StateMachine.SetState((int)BotState.Following);
                 return;
