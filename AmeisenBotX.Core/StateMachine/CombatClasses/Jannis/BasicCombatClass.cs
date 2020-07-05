@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
@@ -152,6 +153,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (!ActionEvent.Run() || WowInterface.ObjectManager.Player.IsCasting) { return; }
 
+            // Update Priority Units
+            // --------------------------- >
+
             if (UpdatePriorityUnits.Run())
             {
                 if (StateMachine.CurrentState.Key == (int)BotState.Dungeon
@@ -162,6 +166,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     TargetManager.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits.ToList();
                 }
             }
+
+            // Target selection
+            // --------------------------- >
 
             if (UseDefaultTargetSelection)
             {
@@ -184,20 +191,48 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
 
+            // Autoattacks
+            // --------------------------- >
+
             if (UseAutoAttacks && (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target)))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
+
+            // Interrupting
+            // --------------------------- >
 
             if (NearInterruptUnitsEvent.Run())
             {
                 TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 30.0).ToList();
             }
 
+            // Buffs, Debuffs
+            // --------------------------- >
+
             if (MyAuraManager.Tick()
                 || GroupAuraManager.Tick()
                 || TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick())
+            {
+                return;
+            }
+
+            // Race abilities, items, etc.
+            // --------------------------- >
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 30)
+            {
+                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == 5512 || e.Id == 5511);
+                if (healthstone != null)
+                {
+                    WowInterface.HookManager.UseItemByName(healthstone.Name);
+                }
+            }
+
+            if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
+                && WowInterface.ObjectManager.Player.HealthPercentage < 50
+                && CastSpellIfPossible("Stoneform", 0))
             {
                 return;
             }
