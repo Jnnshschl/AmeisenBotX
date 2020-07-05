@@ -536,6 +536,14 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.AcceptResurrect();
         }
 
+        private void OnShowQuestFrame(long timestamp, List<string> args)
+        {
+            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
+            {
+                WowInterface.HookManager.ClickUiElement("QuestFrameAcceptButton");
+            }
+        }
+
         private void OnSummonRequest(long timestamp, List<string> args)
         {
             WowInterface.HookManager.AcceptSummon();
@@ -550,6 +558,21 @@ namespace AmeisenBotX.Core
                 WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.HookManager.GetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
+        }
+
+        private void OnTradeAcceptUpdate(long timestamp, List<string> args)
+        {
+            WowInterface.HookManager.LuaDoString("AcceptTrade();");
+        }
+
+        private void OnTradeRequest(long timestamp, List<string> args)
+        {
+            if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
+            {
+                return;
+            }
+
+            WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
         }
 
         private void OnWorldStateUpdate(long timestamp, List<string> args)
@@ -671,29 +694,6 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
-        }
-
-        private void OnTradeAcceptUpdate(long timestamp, List<string> args)
-        {
-            WowInterface.HookManager.LuaDoString("AcceptTrade();");
-        }
-
-        private void OnTradeRequest(long timestamp, List<string> args)
-        {
-            if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
-            {
-                return;
-            }
-
-            WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
-        }
-
-        private void OnShowQuestFrame(long timestamp, List<string> args)
-        {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
-            {
-                WowInterface.HookManager.ClickUiElement("QuestFrameAcceptButton");
-            }
         }
     }
 }

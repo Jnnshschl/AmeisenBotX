@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.Utils
 {

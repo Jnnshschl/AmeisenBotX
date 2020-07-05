@@ -7,11 +7,11 @@ namespace AmeisenBotX.Core.Dungeon
 {
     public interface IDungeonEngine
     {
+        Vector3 DeathEntrancePosition { get; }
+
         List<DungeonNode> Nodes { get; }
 
         IDungeonProfile Profile { get; }
-
-        Vector3 DeathEntrancePosition { get; }
 
         void Enter();
 

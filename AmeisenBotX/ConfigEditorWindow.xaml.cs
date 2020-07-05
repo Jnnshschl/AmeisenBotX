@@ -213,6 +213,22 @@ namespace AmeisenBotX
             }
         }
 
+        private void CheckboxOnlyFriendsMode_Checked(object sender, RoutedEventArgs e)
+        {
+            if (textboxFriends != null)
+            {
+                textboxFriends.IsEnabled = true;
+            }
+        }
+
+        private void CheckboxOnlyFriendsMode_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (textboxFriends != null)
+            {
+                textboxFriends.IsEnabled = false;
+            }
+        }
+
         private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (WindowLoaded)
@@ -478,22 +494,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void CheckboxOnlyFriendsMode_Checked(object sender, RoutedEventArgs e)
-        {
-            if(textboxFriends!= null)
-            {
-                textboxFriends.IsEnabled = true;
-            }
-        }
-
-        private void CheckboxOnlyFriendsMode_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (textboxFriends != null)
-            {
-                textboxFriends.IsEnabled = false;
-            }
         }
     }
 }
