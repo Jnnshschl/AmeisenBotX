@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -129,6 +130,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 30)
+            {
+                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == 5512);
+                if (healthstone != null)
+                {
+                    WowInterface.HookManager.UseItemByName(healthstone.Name);
+                }
+            }
+
             if (WowInterface.ObjectManager.Target != null)
             {
                 double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
