@@ -30,6 +30,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         //CD|Buffs
         private const string naturesswiftSpell = "Nature's Swiftness";
         private const string Bloodlust = "Bloodlust";
+        private const string earthShieldSpell = "Earth Shield";
+        private const string tidalForceSpell = "Tidal Force";
         //Race (Troll)
         private const string BerserkingSpell = "Berserking";
         //Totem
@@ -53,6 +55,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(LightningShieldSpell, DateTime.Now);
             spellCoolDown.Add(ancestralSpiritSpell, DateTime.Now);
             spellCoolDown.Add(chainHealSpell, DateTime.Now);
+            spellCoolDown.Add(earthlivingBuff, DateTime.Now);
+            spellCoolDown.Add(earthlivingWeaponSpell, DateTime.Now);
             //CD|Buffs
             spellCoolDown.Add(naturesswiftSpell, DateTime.Now);
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
@@ -95,7 +99,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override bool UseAutoAttacks => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
@@ -144,10 +148,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void OutOfCombatExecute()
         {
-            //if (WowInterface.ObjectManager.Target.IsDead)
-            //{
-            //
-            //}
+            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+            if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
+            {
+                WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                WowInterface.HookManager.CastSpell(ancestralSpiritSpell); 
+            }
+
             if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
                 return;
@@ -170,7 +177,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                     }
 
-                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
+                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 40;
                     if (targetIsInRange)
                     {
 
@@ -181,23 +188,39 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         }
                         if (WowInterface.ObjectManager.Target != null)
                         {
-                            if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
+                            if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
+                                WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
+                                WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
+                                WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)))
                             {
-                                if (CustomCastSpell(CalloftheElementsSpell))
+                                if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
+                                    || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
+                                    || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
+                                    && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
                                 {
-                                    return;
+                                    if (CustomCastSpell(CalloftheElementsSpell))
+                                    {
+                                        return;
+                                    }
                                 }
                             }
 
-                            if (partyMemberToHeal.Count >= 3 && CustomCastSpell(Bloodlust) && WowInterface.ObjectManager.Target.HealthPercentage < 50)
+                            if (WowInterface.ObjectManager.Target.HealthPercentage < 20 && CustomCastSpell(naturesswiftSpell) && CustomCastSpell(healingWaveSpell))
                             {
                                 return;
                             }
 
-                            if (partyMemberToHeal.Count >= 3 && CustomCastSpell(chainHealSpell) && WowInterface.ObjectManager.Target.HealthPercentage < 60)
+                            if (WowInterface.ObjectManager.Target.HealthPercentage < 40 && CustomCastSpell(tidalForceSpell))
+                            {
+                                return;
+                            }
+
+                            if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(Bloodlust))
+                            {
+                                return;
+                            }
+
+                            if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
                             {
                                 return;
                             }
@@ -208,6 +231,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             }
 
                             if (WowInterface.ObjectManager.Target.HealthPercentage < 85 && CustomCastSpell(lesserHealingWaveSpell))
+                            {
+                                return;
+                            }
+
+                            if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
                             {
                                 return;
                             }
@@ -230,23 +258,37 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
         }
 
-        private bool CustomCastSpell(string spellName)
+        private bool CustomCastSpell(string spellName, bool castOnSelf = false)
         {
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
                 if (WowInterface.ObjectManager.Target != null)
                 {
-                    double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
                     Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
                     if ((WowInterface.ObjectManager.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
                     {
+                        double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
                             WowInterface.HookManager.CastSpell(spellName);
                             return true;
                         }
                     }
+                }
+                else
+                {
+                    WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.ObjectManager.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        WowInterface.HookManager.CastSpell(spellName);
+                        return true;
+                    }
+
                 }
             }
 
