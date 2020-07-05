@@ -6,6 +6,7 @@
         DalaranSharp = 414,
         ConjuredBread = 1113,
         ConjuredRye = 1113,
+        StormwindBrie = 1707,
         DarnassianBleu = 2070,
         MuttonChop = 3770,
         ShinyApple = 4536,

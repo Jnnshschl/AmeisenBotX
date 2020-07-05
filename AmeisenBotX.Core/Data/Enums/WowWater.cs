@@ -6,6 +6,7 @@
         MelonJuice = 1205,
         ConjuredFreshWater = 2288,
         ConjuredPurifiedWater = 2136,
+        ConjuredSpringWater = 3772,
         ConjuredWater = 5350,
         BubblingWater = 9451,
         ConjuredGlacierWater = 22018
