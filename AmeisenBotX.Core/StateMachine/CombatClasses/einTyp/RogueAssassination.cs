@@ -188,8 +188,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             if (distanceTraveled < 0.001)
             {
                 ulong leaderGuid = WowInterface.ObjectManager.PartyleaderGuid;
-                WowUnit target = null;
-                if (leaderGuid == WowInterface.ObjectManager.PlayerGuid && SearchNewTarget(ref target, true))
+                WowUnit target = WowInterface.ObjectManager.Target;
+                if (target != null || SearchNewTarget(ref target, true))
                 {
                     if (!LastTargetPosition.Equals(target.Position))
                     {
@@ -295,7 +295,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
                 {
                     double tmpDistance = WowInterface.ObjectManager.Player.Position.GetDistance(unit.Position);
-                    if (tmpDistance < 100.0)
+                    if ((isSneaky && tmpDistance < 100.0) || isSneaky && tmpDistance < 50.0)
                     {
                         if (tmpDistance < 6.0)
                         {
