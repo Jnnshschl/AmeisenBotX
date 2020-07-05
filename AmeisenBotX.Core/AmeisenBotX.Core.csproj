@@ -64,6 +64,7 @@
     <Compile Include="Battleground\Jannis\Profiles\WarsongGulchProfile.cs" />
     <Compile Include="Character\CharacterManager.cs" />
     <Compile Include="Character\Comparators\BasicAgilityComparator.cs" />
+    <Compile Include="Character\Comparators\BasicStaminaComparator.cs" />
     <Compile Include="Character\Comparators\BasicArmorComparator.cs" />
     <Compile Include="Character\Enums\ClickToMoveType.cs" />
     <Compile Include="Character\Comparators\AssassinationItemComparator.cs" />
