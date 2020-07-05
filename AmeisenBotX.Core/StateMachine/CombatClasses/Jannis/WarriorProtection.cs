@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES, WeaponType.MISCELLANEOUS });
 
         public override CombatClassRole Role => CombatClassRole.Tank;
 
