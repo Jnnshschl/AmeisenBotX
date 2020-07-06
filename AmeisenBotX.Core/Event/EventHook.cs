@@ -15,6 +15,8 @@ namespace AmeisenBotX.Core.Event
         {
             WowInterface = wowInterface;
 
+            Setup();
+
             JsonSerializerSettings = new JsonSerializerSettings()
             {
                 Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
@@ -106,14 +108,7 @@ namespace AmeisenBotX.Core.Event
             if (IsActive)
             {
                 AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager", LogLevel.Verbose);
-
-                EventDictionary = new Dictionary<string, List<WowEventAction>>();
-                SubscribeQueue = new Queue<(string, WowEventAction)>();
-                UnsubscribeQueue = new Queue<(string, WowEventAction)>();
-
-                EventFrameName = BotUtils.FastRandomStringOnlyLetters();
-                EventHandlerName = BotUtils.FastRandomStringOnlyLetters();
-                EventTableName = BotUtils.FastRandomStringOnlyLetters();
+                Setup();
 
                 IsActive = false;
 
@@ -192,6 +187,17 @@ namespace AmeisenBotX.Core.Event
             {
                 AmeisenLogger.Instance.Log("EventHook", $"Failed unsubscribe from event:\n{e}", LogLevel.Error);
             }
+        }
+
+        private void Setup()
+        {
+            EventDictionary = new Dictionary<string, List<WowEventAction>>();
+            SubscribeQueue = new Queue<(string, WowEventAction)>();
+            UnsubscribeQueue = new Queue<(string, WowEventAction)>();
+
+            EventFrameName = BotUtils.FastRandomStringOnlyLetters();
+            EventHandlerName = BotUtils.FastRandomStringOnlyLetters();
+            EventTableName = BotUtils.FastRandomStringOnlyLetters();
         }
 
         private void SetupEventHook()

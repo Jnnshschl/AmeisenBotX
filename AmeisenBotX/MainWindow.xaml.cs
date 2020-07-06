@@ -69,6 +69,8 @@ namespace AmeisenBotX
         {
             InitializeComponent();
 
+            Config = LoadConfig();
+
             darkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
             textAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
 
@@ -81,6 +83,12 @@ namespace AmeisenBotX
 
         public string ConfigPath { get; private set; }
 
+        public bool IsAutoPositionSetup { get; private set; }
+        public WindowInteropHelper InteropHelper { get; private set; }
+        public double M11 { get; private set; }
+
+        public double M22 { get; private set; }
+
         public AmeisenBotOverlay Overlay { get; private set; }
 
         public bool RenderState { get; set; }
@@ -92,8 +100,6 @@ namespace AmeisenBotX
         private InfoWindow InfoWindow { get; set; }
 
         private TimegatedEvent LabelUpdateEvent { get; }
-
-        private DateTime LastStateMachineTickUpdate { get; set; }
 
         private MapWindow MapWindow { get; set; }
 
@@ -108,13 +114,19 @@ namespace AmeisenBotX
         {
             Size size = base.MeasureOverride(availableSize);
 
-            AmeisenBot.WowInterface.XMemory.ResizeParentWindow
-            (
-                (int)wowRect.Margin.Left,
-                (int)wowRect.Margin.Top,
-                (int)wowRect.Width,
-                (int)wowRect.Height
-            );
+            if (AmeisenBot != null && IsAutoPositionSetup)
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    AmeisenBot.WowInterface.XMemory.ResizeParentWindow
+                    (
+                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
+                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
+                        (int)Math.Floor(wowRect.ActualWidth * M11),
+                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                    );
+                });
+            }
 
             return size;
         }
@@ -195,13 +207,58 @@ namespace AmeisenBotX
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+            if (AmeisenBot != null)
+            {
+                AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+            }
+        }
+
+        private AmeisenBotConfig LoadConfig()
+        {
+            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(BotDataPath);
+            loadConfigWindow.ShowDialog();
+
+            if (loadConfigWindow.ConfigToLoad.Length > 0)
+            {
+                AmeisenBotConfig config;
+                if (File.Exists(loadConfigWindow.ConfigToLoad))
+                {
+                    config = JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(loadConfigWindow.ConfigToLoad));
+                }
+                else
+                {
+                    config = new AmeisenBotConfig();
+                }
+
+                ConfigPath = loadConfigWindow.ConfigToLoad;
+                return config;
+            }
+            else
+            {
+                Close();
+            }
+
+            return null;
         }
 
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
+                if (!IsAutoPositionSetup)
+                {
+                    IsAutoPositionSetup = true;
+
+                    AmeisenBot.WowInterface.XMemory.SetupAutoPosition
+                    (
+                        InteropHelper.EnsureHandle(),
+                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
+                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
+                        (int)Math.Floor(wowRect.ActualWidth * M11),
+                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                    );
+                }
+
                 // Update the main view
                 // -------------------- >
                 WowPlayer player = AmeisenBot.WowInterface.ObjectManager.Player;
@@ -275,6 +332,14 @@ namespace AmeisenBotX
             });
         }
 
+        private void OnStateMachineStateChange()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                labelCurrentState.Content = $"{(BotState)AmeisenBot.StateMachine.CurrentState.Key}";
+            });
+        }
+
         private void OverlayRenderCurrentPath()
         {
             if (AmeisenBot.WowInterface.MovementEngine.Path != null
@@ -298,29 +363,6 @@ namespace AmeisenBotX
                         Overlay.AddRectangle((int)endPoint.X - 4, (int)endPoint.Y - 4, 7, 7, endDot);
                     }
                 }
-            }
-        }
-
-        private void OnStateMachineStateChange()
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                labelCurrentState.Content = $"{(BotState)AmeisenBot.StateMachine.CurrentState.Key}";
-            });
-        }
-
-        private void OnWowStarted()
-        {
-            if (AmeisenBot.Config.AutoPositionWow)
-            {
-                AmeisenBot.WowInterface.XMemory.SetupAutoPosition
-                (
-                    new WindowInteropHelper(this).Handle,
-                    (int)wowRect.Margin.Left,
-                    (int)wowRect.Margin.Top,
-                    (int)wowRect.Width,
-                    (int)wowRect.Height
-                );
             }
         }
 
@@ -415,6 +457,10 @@ namespace AmeisenBotX
             labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString().PadLeft(3);
         }
 
+        private void Window_Activated(object sender, EventArgs e)
+        {
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             AmeisenBot?.Stop();
@@ -428,7 +474,11 @@ namespace AmeisenBotX
         {
             // Init GUI stuff
             // -------------- >
-            LastStateMachineTickUpdate = DateTime.Now;
+            InteropHelper = new WindowInteropHelper(this);
+
+            PresentationSource presentationSource = PresentationSource.FromVisual(this);
+            M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
+            M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
             comboboxStateOverride.Items.Add(BotState.Idle);
             comboboxStateOverride.Items.Add(BotState.Job);
@@ -446,11 +496,10 @@ namespace AmeisenBotX
             // Init the bot
             // ------------ >
             string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
-            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, Process.GetCurrentProcess().MainWindowHandle);
+            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, InteropHelper.EnsureHandle());
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
-            AmeisenBot.StateMachine.OnWowStarted += OnWowStarted;
 
             AmeisenBot.Start();
         }

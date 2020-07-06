@@ -50,13 +50,8 @@ namespace AmeisenBotX.Core
         private double currentExecutionMs;
         private int stateMachineTimerBusy;
 
-        public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config, IntPtr mainWindowHandle = default)
+        public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config, IntPtr mainWindowHandle)
         {
-            if (mainWindowHandle == default)
-            {
-                mainWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
-            }
-
             SetupLogging(botDataPath, accountName);
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -359,11 +354,7 @@ namespace AmeisenBotX.Core
             {
                 try
                 {
-                    if (Config.BotWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 }
-                        && Config.BotWindowRect.Top >= 0
-                        && Config.BotWindowRect.Left >= 0
-                        && Config.BotWindowRect.Right <= SystemParameters.VirtualScreenWidth
-                        && Config.BotWindowRect.Right <= SystemParameters.VirtualScreenHeight)
+                    if (Config.BotWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
                         XMemory.SetWindowPosition(MainWindowHandle, Config.BotWindowRect);
                         AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded bot window position: {Config.BotWindowRect}", LogLevel.Verbose);

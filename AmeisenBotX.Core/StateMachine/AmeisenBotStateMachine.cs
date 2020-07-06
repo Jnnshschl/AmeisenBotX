@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Statemachine
                 { (int)BotState.StartWow, new StateStartWow(this, config, WowInterface) }
             };
 
-            ((StateStartWow)States[(int)BotState.StartWow]).OnWoWStarted += OnWowStarted;
+            ((StateStartWow)States[(int)BotState.StartWow]).OnWoWStarted += () => OnWowStarted?.Invoke();
 
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
@@ -188,7 +188,8 @@ namespace AmeisenBotX.Core.Statemachine
                 }
 
                 if (CurrentState.Key == (int)BotState.Idle
-                    && CurrentState.Key != (int)StateOverride)
+                    && CurrentState.Key != (int)StateOverride
+                    && StateOverride != (int)BotState.None)
                 {
                     SetState((int)StateOverride);
                 }

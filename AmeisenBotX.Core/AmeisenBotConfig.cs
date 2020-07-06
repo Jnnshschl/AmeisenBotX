@@ -40,18 +40,6 @@ namespace AmeisenBotX.Core
 
         public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
 
-        public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
-
-        public bool SellGrayItems { get; set; } = true;
-
-        public bool SellWhiteItems { get; set; } = false;
-
-        public bool SellGreenItems { get; set; } = false;
-
-        public bool SellBlueItems { get; set; } = false;
-
-        public bool SellPurpleItems { get; set; } = false;
-
         public string CustomCombatClassFile { get; set; } = "";
 
         public double DrinkHealthPercent { get; set; } = 75;
@@ -79,6 +67,8 @@ namespace AmeisenBotX.Core
         public double GhostResurrectThreshold { get; set; } = 24;
 
         public double ItemRepairThreshold { get; set; } = 25;
+
+        public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
 
         public bool LootUnits { get; set; } = true;
 
@@ -117,6 +107,16 @@ namespace AmeisenBotX.Core
         public bool SaveBotWindowPosition { get; set; } = false;
 
         public bool SaveWowWindowPosition { get; set; } = false;
+
+        public bool SellBlueItems { get; set; } = false;
+
+        public bool SellGrayItems { get; set; } = true;
+
+        public bool SellGreenItems { get; set; } = false;
+
+        public bool SellPurpleItems { get; set; } = false;
+
+        public bool SellWhiteItems { get; set; } = false;
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 

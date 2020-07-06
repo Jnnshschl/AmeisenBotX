@@ -724,11 +724,6 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
         }
 
-        public void SellItemsByQuality(ItemQuality itemQuality)
-        {
-            LuaDoString($"local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"{BotUtils.GetColorByQuality(itemQuality).Substring(1)}\") then N={{GetItemInfo(n)}} p=p+N[11] UseContainerItem(b,s) end end end");
-        }
-
         public void SellAllItems()
         {
             LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
@@ -737,6 +732,11 @@ namespace AmeisenBotX.Core.Hook
         public void SellItemsByName(string itemName)
         {
             LuaDoString($"for bag = 0,4,1 do for slot = 1, GetContainerNumSlots(bag), 1 do local name = GetContainerItemLink(bag,slot); if name and string.find(name,\"{itemName}\") then UseContainerItem(bag,slot) end end end");
+        }
+
+        public void SellItemsByQuality(ItemQuality itemQuality)
+        {
+            LuaDoString($"local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"{BotUtils.GetColorByQuality(itemQuality).Substring(1)}\") then N={{GetItemInfo(n)}} p=p+N[11] UseContainerItem(b,s) end end end");
         }
 
         public void SendChatMessage(string message)

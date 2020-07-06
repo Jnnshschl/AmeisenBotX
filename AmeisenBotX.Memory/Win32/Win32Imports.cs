@@ -211,7 +211,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32", SetLastError = true)]
-        public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
+        public static extern IntPtr SetWindowPos(IntPtr windowHandle, IntPtr windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
         [DllImport("user32", SetLastError = true)]
         public static extern bool ShowWindow(IntPtr windowHandle, int nCmdShow);

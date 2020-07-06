@@ -97,7 +97,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // dont follow when casting, or player is dead/ghost
-            if (WowInterface.ObjectManager.Player.IsCasting 
+            if (WowInterface.ObjectManager.Player.IsCasting
                 || PlayerToFollow.IsDead
                 || PlayerToFollow.Health == 1)
             {

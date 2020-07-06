@@ -81,7 +81,7 @@ namespace AmeisenBotX.Memory
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+                SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Memory
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                SetWindowPos(windowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+                SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 
@@ -294,6 +294,16 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
+        public void ResizeParentWindow(int offsetX, int offsetY, int width, int height)
+        {
+            if (Process == null)
+            {
+                return;
+            }
+
+            SetWindowPos(Process.MainWindowHandle, IntPtr.Zero, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
@@ -307,6 +317,17 @@ namespace AmeisenBotX.Memory
         public void SetForegroundWindow(IntPtr windowHandle)
         {
             Win32Imports.SetForegroundWindow(windowHandle);
+        }
+
+        public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
+        {
+            SetParent(Process.MainWindowHandle, mainWindowHandle);
+
+            int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
+            style = style & ~(int)WindowStyles.WS_CAPTION & ~(int)WindowStyles.WS_THICKFRAME;
+            SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
+
+            ResizeParentWindow(offsetX, offsetY, width, height);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -326,7 +347,7 @@ namespace AmeisenBotX.Memory
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                SetWindowPos(Process.MainWindowHandle, 0, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+                SetWindowPos(Process.MainWindowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 
@@ -339,27 +360,6 @@ namespace AmeisenBotX.Memory
         public void ShowWindow(IntPtr windowHandle)
         {
             Win32Imports.ShowWindow(windowHandle, 0x5);
-        }
-
-        public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
-        {
-            SetParent(Process.MainWindowHandle, mainWindowHandle);
-
-            int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
-            style = style & ~(int)WindowStyles.WS_CAPTION & ~(int)WindowStyles.WS_THICKFRAME;
-            SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
-
-            ResizeParentWindow(offsetX, offsetY, width, height);
-        }
-
-        public void ResizeParentWindow(int offsetX, int offsetY, int width, int height)
-        {
-            if (Process == null)
-            {
-                return;
-            }
-
-            SetWindowPos(Process.MainWindowHandle, 0, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         public Process StartProcessNoActivate(string processCmd)

@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Logging;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -20,10 +21,10 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (File.Exists(Config.PathToWowExe))
             {
-                WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
-
-                if (WowInterface.WowProcess != null)
+                if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
                 {
+                    WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
+
                     WowInterface.WowProcess.WaitForInputIdle();
                     WowInterface.XMemory.Attach(WowInterface.WowProcess);
 
@@ -59,7 +60,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             try
             {
-                string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+                string configWtfPath = System.IO.Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
                 if (File.Exists(configWtfPath))
                 {
                     string content = File.ReadAllText(configWtfPath).ToUpper();

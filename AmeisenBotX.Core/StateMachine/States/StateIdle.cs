@@ -171,16 +171,16 @@ namespace AmeisenBotX.Core.Statemachine.States
         internal bool IsRepairNpcNear()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer) 
-                       && e.IsRepairVendor 
+                       .Any(e => e.GetType() != typeof(WowPlayer)
+                       && e.IsRepairVendor
                        && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
         }
 
         internal bool IsVendorNpcNear()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer) 
-                       && e.IsVendor 
+                       .Any(e => e.GetType() != typeof(WowPlayer)
+                       && e.IsVendor
                        && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.MerchantNpcSearchRadius);
         }
 
