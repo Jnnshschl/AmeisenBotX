@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
+        public event Action OnWoWStarted;
+
         private DateTime WowStart { get; set; }
 
         public override void Enter()
@@ -25,14 +27,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.WowProcess.WaitForInputIdle();
                     WowInterface.XMemory.Attach(WowInterface.WowProcess);
 
-                    WowInterface.CharacterManager.AntiAfk();
-
-                    if (Config.AutoPositionWow)
-                    {
-                        WowInterface.XMemory.HideBordersWindowWow();
-                    }
-
                     WowStart = DateTime.Now;
+                    OnWoWStarted?.Invoke();
                 }
             }
         }

@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
     public unsafe class Win32Imports
     {
+        public const int GWL_EXSTYLE = -0x14;
+        public const int GWL_STYLE = -16;
         public const int STARTF_USESHOWWINDOW = 1;
         public const int SW_SHOWMINNOACTIVE = 7;
         public const int SW_SHOWNOACTIVATE = 4;
-
-        public const int GWL_EXSTYLE = -0x14;
-        public const int GWL_STYLE = -16;
-        public const int WS_CHILD = 0x40000000;
-        public const int WS_EX_APPWINDOW = 0x40000;
-        public const int WS_EX_NOACTIVATE = 0x08000000;
+        public const int SWP_NOACTIVATE = 0x10;
+        public const int SWP_NOZORDER = 0x4;
 
         [Flags]
         public enum AllocationType : uint

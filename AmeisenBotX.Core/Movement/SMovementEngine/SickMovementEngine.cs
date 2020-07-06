@@ -234,7 +234,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 StuckRotation = WowInterface.ObjectManager.Player.Rotation;
 
                 double angle = Math.PI + ((new Random().NextDouble() * Math.PI) - Math.PI / 2.0);
-                UnstuckTargetPosition = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, (float)angle, 10.0f);
+                UnstuckTargetPosition = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, (float)angle, WowInterface.MovementSettings.UnstuckDistance);
             }
             else
             {

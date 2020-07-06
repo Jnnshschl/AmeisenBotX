@@ -52,7 +52,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                 else if (DateTime.Now > RepairActionGo)
                 {
                     WowInterface.HookManager.RepairAllItems();
-                    WowInterface.HookManager.SellAllGrayItems();
                     WowInterface.CharacterManager.Equipment.Update();
                 }
             }

@@ -26,6 +26,8 @@ namespace AmeisenBotX.Core
 
         public bool AutostartWow { get; set; } = true;
 
+        public int BagSlotsToGoSell { get; set; } = 4;
+
         public string BattlegroundEngine { get; set; } = "";
 
         public bool BattlegroundUsePartyMode { get; set; } = false;
@@ -38,9 +40,25 @@ namespace AmeisenBotX.Core
 
         public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
 
+        public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
+
+        public bool SellGrayItems { get; set; } = true;
+
+        public bool SellWhiteItems { get; set; } = false;
+
+        public bool SellGreenItems { get; set; } = false;
+
+        public bool SellBlueItems { get; set; } = false;
+
+        public bool SellPurpleItems { get; set; } = false;
+
         public string CustomCombatClassFile { get; set; } = "";
 
+        public double DrinkHealthPercent { get; set; } = 75;
+
         public bool DungeonUsePartyMode { get; set; } = false;
+
+        public double EatHealthPercent { get; set; } = 75;
 
         public double EventPullMs { get; set; } = 1000;
 
@@ -60,6 +78,8 @@ namespace AmeisenBotX.Core
 
         public double GhostResurrectThreshold { get; set; } = 24;
 
+        public double ItemRepairThreshold { get; set; } = 25;
+
         public bool LootUnits { get; set; } = true;
 
         public double LootUnitsRadius { get; set; } = 20.0;
@@ -69,6 +89,8 @@ namespace AmeisenBotX.Core
         public int MaxFps { get; set; } = 20;
 
         public int MaxFpsCombat { get; set; } = 30;
+
+        public double MerchantNpcSearchRadius { get; set; } = 50;
 
         public int MinFollowDistance { get; set; } = 6;
 
@@ -89,6 +111,8 @@ namespace AmeisenBotX.Core
         public string Realm { get; set; } = "AmeisenRealm";
 
         public bool ReleaseSpirit { get; set; } = false;
+
+        public double RepairNpcSearchRadius { get; set; } = 50;
 
         public bool SaveBotWindowPosition { get; set; } = false;
 

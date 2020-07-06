@@ -69,7 +69,6 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptPartyInvite()
         {
-            ClickUiElement("StaticPopup1Button1");
             LuaDoString("AcceptGroup();");
         }
 
@@ -80,19 +79,16 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptResurrect()
         {
-            ClickUiElement("StaticPopup1Button1");
             LuaDoString("AcceptResurrect();");
         }
 
         public void AcceptSummon()
         {
-            ClickUiElement("StaticPopup1Button1");
             LuaDoString("ConfirmSummon();");
         }
 
         public void CancelSummon()
         {
-            ClickUiElement("StaticPopup1Button1");
             LuaDoString("CancelSummon();");
         }
 
@@ -155,7 +151,6 @@ namespace AmeisenBotX.Core.Hook
 
         public void CofirmBop()
         {
-            LuaDoString("ConfirmBindOnUse();");
             ClickUiElement("StaticPopup1Button1");
         }
 
@@ -176,7 +171,6 @@ namespace AmeisenBotX.Core.Hook
 
         public void DeclineResurrect()
         {
-            ClickUiElement("StaticPopup1Button1");
             LuaDoString("DeclineResurrect();");
         }
 
@@ -730,9 +724,9 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
         }
 
-        public void SellAllGrayItems()
+        public void SellItemsByQuality(ItemQuality itemQuality)
         {
-            LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"9d9d9d\") then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
+            LuaDoString($"local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"{BotUtils.GetColorByQuality(itemQuality).Substring(1)}\") then N={{GetItemInfo(n)}} p=p+N[11] UseContainerItem(b,s) end end end");
         }
 
         public void SellAllItems()

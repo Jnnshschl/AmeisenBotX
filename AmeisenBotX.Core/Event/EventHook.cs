@@ -15,35 +15,27 @@ namespace AmeisenBotX.Core.Event
         {
             WowInterface = wowInterface;
 
-            EventDictionary = new Dictionary<string, List<OnEventFired>>();
-            SubscribeQueue = new Queue<(string, OnEventFired)>();
-            UnsubscribeQueue = new Queue<(string, OnEventFired)>();
-
-            EventFrameName = BotUtils.FastRandomStringOnlyLetters();
-            EventHandlerName = BotUtils.FastRandomStringOnlyLetters();
-            EventTableName = BotUtils.FastRandomStringOnlyLetters();
-
             JsonSerializerSettings = new JsonSerializerSettings()
             {
                 Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
             };
         }
 
-        public delegate void OnEventFired(long timestamp, List<string> args);
+        public delegate void WowEventAction(long timestamp, List<string> args);
 
-        public Dictionary<string, List<OnEventFired>> EventDictionary { get; }
+        public Dictionary<string, List<WowEventAction>> EventDictionary { get; private set; }
 
         public bool IsActive { get; private set; }
 
-        public Queue<(string, OnEventFired)> SubscribeQueue { get; }
+        public Queue<(string, WowEventAction)> SubscribeQueue { get; private set; }
 
-        public Queue<(string, OnEventFired)> UnsubscribeQueue { get; }
+        public Queue<(string, WowEventAction)> UnsubscribeQueue { get; private set; }
 
-        private string EventFrameName { get; }
+        private string EventFrameName { get; set; }
 
-        private string EventHandlerName { get; }
+        private string EventHandlerName { get; set; }
 
-        private string EventTableName { get; }
+        private string EventTableName { get; set; }
 
         private JsonSerializerSettings JsonSerializerSettings { get; }
 
@@ -115,19 +107,31 @@ namespace AmeisenBotX.Core.Event
             {
                 AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager", LogLevel.Verbose);
 
+                EventDictionary = new Dictionary<string, List<WowEventAction>>();
+                SubscribeQueue = new Queue<(string, WowEventAction)>();
+                UnsubscribeQueue = new Queue<(string, WowEventAction)>();
+
+                EventFrameName = BotUtils.FastRandomStringOnlyLetters();
+                EventHandlerName = BotUtils.FastRandomStringOnlyLetters();
+                EventTableName = BotUtils.FastRandomStringOnlyLetters();
+
                 IsActive = false;
-                WowInterface.HookManager.LuaDoString($"{EventFrameName}:UnregisterAllEvents();");
-                WowInterface.HookManager.LuaDoString($"{EventFrameName}:SetScript(\"OnEvent\", nil);");
+
+                if (WowInterface.HookManager.IsWoWHooked)
+                {
+                    WowInterface.HookManager.LuaDoString($"{EventFrameName}:UnregisterAllEvents();");
+                    WowInterface.HookManager.LuaDoString($"{EventFrameName}:SetScript(\"OnEvent\", nil);");
+                }
             }
         }
 
-        public void Subscribe(string eventName, OnEventFired onEventFired)
+        public void Subscribe(string eventName, WowEventAction onEventFired)
         {
             AmeisenLogger.Instance.Log("EventHook", $"Subscribing to event: {eventName}", LogLevel.Verbose);
             SubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
-        public void Unsubscribe(string eventName, OnEventFired onEventFired)
+        public void Unsubscribe(string eventName, WowEventAction onEventFired)
         {
             AmeisenLogger.Instance.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
             UnsubscribeQueue.Enqueue((eventName, onEventFired));
@@ -143,11 +147,11 @@ namespace AmeisenBotX.Core.Event
 
                     while (SubscribeQueue.Count > 0)
                     {
-                        (string, OnEventFired) queueElement = SubscribeQueue.Dequeue();
+                        (string, WowEventAction) queueElement = SubscribeQueue.Dequeue();
 
                         if (!EventDictionary.ContainsKey(queueElement.Item1))
                         {
-                            EventDictionary.Add(queueElement.Item1, new List<OnEventFired>() { queueElement.Item2 });
+                            EventDictionary.Add(queueElement.Item1, new List<WowEventAction>() { queueElement.Item2 });
                             sb.Append($"{EventFrameName}:RegisterEvent(\"{queueElement.Item1}\");");
                         }
                         else
@@ -171,7 +175,7 @@ namespace AmeisenBotX.Core.Event
             {
                 if (IsActive && UnsubscribeQueue.Count > 0)
                 {
-                    (string, OnEventFired) queueElement = SubscribeQueue.Dequeue();
+                    (string, WowEventAction) queueElement = SubscribeQueue.Dequeue();
 
                     if (EventDictionary.ContainsKey(queueElement.Item1))
                     {

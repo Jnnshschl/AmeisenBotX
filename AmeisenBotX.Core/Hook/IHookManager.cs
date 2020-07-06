@@ -151,10 +151,10 @@ namespace AmeisenBotX.Core.Hook
         void RollOnItem(int rollId, RollType rollType);
 
         void SelectLfgRole(CombatClassRole combatClassRole);
-
-        void SellAllGrayItems();
-
+        
         void SellAllItems();
+
+        void SellItemsByQuality(ItemQuality itemQuality);
 
         void SellItemsByName(string itemName);
 

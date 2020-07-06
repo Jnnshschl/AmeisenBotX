@@ -30,19 +30,19 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !UnitIsOutOfRange(p)).Guid;
+                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p)).Guid;
                 }
 
                 // check the group/raid leader
                 if (PlayerToFollow == null && Config.FollowGroupLeader)
                 {
-                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid && !UnitIsOutOfRange(p)).Guid;
+                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid && !IsUnitOutOfRange(p)).Guid;
                 }
 
                 // check the group members
                 if (PlayerToFollow == null && Config.FollowGroupMembers)
                 {
-                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid) && !UnitIsOutOfRange(p)).Guid;
+                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid) && !IsUnitOutOfRange(p)).Guid;
                 }
             }
 
@@ -96,7 +96,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.IsCasting || PlayerToFollow.IsDead)
+            // dont follow when casting, or player is dead/ghost
+            if (WowInterface.ObjectManager.Player.IsCasting 
+                || PlayerToFollow.IsDead
+                || PlayerToFollow.Health == 1)
             {
                 return;
             }
@@ -126,10 +129,10 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowInterface.HookManager.StopClickToMoveIfActive();
         }
 
-        private bool UnitIsOutOfRange(WowPlayer playerToFollow)
+        private bool IsUnitOutOfRange(WowPlayer playerToFollow)
         {
             double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
-            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+            return distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance;
         }
     }
 }

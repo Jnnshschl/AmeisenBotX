@@ -80,8 +80,6 @@ namespace AmeisenBotX.Core.Jobs
                 if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
                     ++CurrentNodeCounter;
-                    // [0][1][2]
-                    // Count = 3
 
                     if (CurrentNodeCounter >= miningProfile.Path.Count)
                     {

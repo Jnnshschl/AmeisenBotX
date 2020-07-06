@@ -313,7 +313,7 @@ namespace AmeisenBotX.Memory
         public void SetWindowParent(IntPtr childHandle, IntPtr parentHandle)
         {
             HideBordersWindowWow();
-            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | WS_CHILD);
+            SetWindowLong(childHandle, GWL_STYLE, GetWindowLong(childHandle, GWL_STYLE) | (int)WindowStyles.WS_CHILD);
 
             SetParent(childHandle, parentHandle);
         }
@@ -339,6 +339,27 @@ namespace AmeisenBotX.Memory
         public void ShowWindow(IntPtr windowHandle)
         {
             Win32Imports.ShowWindow(windowHandle, 0x5);
+        }
+
+        public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
+        {
+            SetParent(Process.MainWindowHandle, mainWindowHandle);
+
+            int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
+            style = style & ~(int)WindowStyles.WS_CAPTION & ~(int)WindowStyles.WS_THICKFRAME;
+            SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
+
+            ResizeParentWindow(offsetX, offsetY, width, height);
+        }
+
+        public void ResizeParentWindow(int offsetX, int offsetY, int width, int height)
+        {
+            if (Process == null)
+            {
+                return;
+            }
+
+            SetWindowPos(Process.MainWindowHandle, 0, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         public Process StartProcessNoActivate(string processCmd)

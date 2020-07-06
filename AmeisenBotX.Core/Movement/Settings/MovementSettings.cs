@@ -26,6 +26,8 @@
 
         public int StuckCounterUnstuck { get; set; } = 3;
 
+        public float UnstuckDistance { get; set; } = 6.0;
+
         public double WaypointCheckThreshold { get; set; } = 1.0;
     }
 }
