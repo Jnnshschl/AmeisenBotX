@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         }
 
-        public override string Author => "Kamel";
+        public override string Author => "Lukas";
 
         public override bool WalkBehindEnemy => false;
 
