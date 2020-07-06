@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (WowInterface.HookManager.GetFreeBagSlotCount() > 4
+            if (WowInterface.HookManager.GetFreeBagSlotCount() > Config.BagSlotsToGoSell
                || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
                 WowInterface.CharacterManager.Inventory.Update();
