@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "Advanced Fury Warrior";
+        public override string Description => "Fury Warrior just a test class";
 
         public override string Displayname => "Warrior Fury";
 

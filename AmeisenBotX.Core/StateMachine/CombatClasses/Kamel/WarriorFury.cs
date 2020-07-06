@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(deathWishSpell, DateTime.Now);
         }
 
-        public override string Author => "Kamel";
+        public override string Author => "Lukas";
 
         public override bool WalkBehindEnemy => false;
 
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override string Description => "Warrior Fury 2.0";
 
-        public override string Displayname => "Warrior Fury Algea";
+        public override string Displayname => "Warrior Fury Final";
 
         public override bool HandlesMovement => false;
 
