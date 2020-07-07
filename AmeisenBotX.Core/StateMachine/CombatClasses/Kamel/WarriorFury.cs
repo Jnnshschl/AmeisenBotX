@@ -146,16 +146,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void ExecuteCC()
         {
-            if (!TargetInLineOfSight)
-            {
-                return;
-            }
             StartAttack();
         }
 
         public override void OutOfCombatExecute()
         {
-
+            Targetselection();
         }
 
 
@@ -184,8 +180,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (WowInterface.ObjectManager.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
-                    }   
-                    
+                    }
+
                     if (WowInterface.ObjectManager.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell))
                     {
                         return;
@@ -203,8 +199,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
-                    } 
-                    
+                    }
+
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 60 && CustomCastSpell(retaliationSpell, battleStanceSpell))
                     {
                         return;
@@ -257,21 +253,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     }
                 }
             }
-            else if (TargetSelectEvent.Run())
+            else
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 50)
-                    .Where(e => e.IsInCombat) // To Do e.IsTaggedByMe
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                    .FirstOrDefault();
+                Targetselection();
+            }
+        }
 
+        private void Targetselection()
+        {
+            if (TargetSelectEvent.Run())
+            {
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 80)
+                .Where(e => e.IsInCombat) // To Do e.IsTaggedByMe
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .FirstOrDefault();
+
+                //WowUnit nearTargetPartymember = WowInterface.ObjectManager.Partymembers.Where(e => e.IsInCombat).FirstOrDefault();
+                //OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).
                 if (nearTarget != null)
                 {
                     WowInterface.HookManager.TargetGuid(nearTarget.Guid);
+
+                    if (!TargetInLineOfSight)
+                    {
+                        return;
+                    }
                 }
+                //else if (nearTargetPartymember != null) 
+                //{
+                //    WowInterface.HookManager.TargetGuid(nearTargetPartymember.Guid);
+                //}
             }
         }
-        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")//string stance = "Berserker Stance"string stance = "Battle Stance"
+        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
         {
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(stance))
+            {
+                stance = "Battle Stance";
+            }
+
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
                 double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);

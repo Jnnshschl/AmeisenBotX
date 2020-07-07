@@ -66,6 +66,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(naturesswiftSpell, DateTime.Now);
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
             spellCoolDown.Add(Bloodlust, DateTime.Now);
+            spellCoolDown.Add(tidalForceSpell, DateTime.Now);
             //Totem
             spellCoolDown.Add(WindfuryTotemSpell, DateTime.Now);
             spellCoolDown.Add(StrengthofEarthTotemSpell, DateTime.Now);
@@ -144,10 +145,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void ExecuteCC()
         {
-            if (!TargetInLineOfSight)
-            {
-                return;
-            }
             Shield();
             StartHeal();
         }
@@ -183,14 +180,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
                 if (targetIsInRange)
                 {
-
-                    if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
-                    {
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-                        WowInterface.MovementEngine.Reset();
-                    }
                     if (WowInterface.ObjectManager.Target != null)
                     {
+                        if (!TargetInLineOfSight)
+                        {
+                            return;
+                        }
+                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        {
+                            WowInterface.HookManager.StopClickToMoveIfActive();
+                            WowInterface.MovementEngine.Reset();
+                        }
                         if (hasTotemItems)
                         {
                             if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
