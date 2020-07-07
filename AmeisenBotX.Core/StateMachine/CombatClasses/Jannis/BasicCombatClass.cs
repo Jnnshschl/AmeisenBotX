@@ -223,10 +223,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (WowInterface.ObjectManager.Player.HealthPercentage < 30)
             {
-                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == 5512 || e.Id == 5511);
+                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(
+                    e => e.Id == 5512
+                    || e.Id == 5511
+                    || e.Id == 5509);
+
                 if (healthstone != null)
                 {
                     WowInterface.HookManager.UseItemByName(healthstone.Name);
+                }
+
+                IWowItem healthPotion = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(
+                    e => e.Id == 118
+                    || e.Id == 929
+                    || e.Id == 1710
+                    || e.Id == 2938
+                    || e.Id == 3928
+                    || e.Id == 5509
+                    || e.Id == 13446);
+
+                if (healthPotion != null)
+                {
+                    WowInterface.HookManager.UseItemByName(healthPotion.Name);
                 }
             }
 

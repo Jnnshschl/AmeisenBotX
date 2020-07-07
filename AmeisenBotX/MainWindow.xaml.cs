@@ -245,7 +245,7 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (!IsAutoPositionSetup)
+                if (Config.AutoPositionWow && !IsAutoPositionSetup)
                 {
                     IsAutoPositionSetup = true;
 

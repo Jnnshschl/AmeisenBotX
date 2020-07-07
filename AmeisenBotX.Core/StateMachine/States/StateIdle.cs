@@ -75,7 +75,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                      || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatHealthPercent
                          && WowInterface.CharacterManager.HasFoodInBag())
                      // Water
-                     || (WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkHealthPercent
+                     || (WowInterface.ObjectManager.Player.MaxMana > 0
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkHealthPercent
                          && WowInterface.CharacterManager.HasWaterInBag())))
             {
                 StateMachine.SetState((int)BotState.Eating);
