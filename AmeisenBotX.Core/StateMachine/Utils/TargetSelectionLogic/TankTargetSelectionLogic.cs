@@ -12,9 +12,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             WowInterface = wowInterface;
         }
 
-        private WowInterface WowInterface { get; }
-
         public List<string> PriorityTargets { get; set; }
+
+        private WowInterface WowInterface { get; }
 
         public void Reset()
         {
@@ -44,7 +44,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // get all enemies targeting our group
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
-                .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100);
+                .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100)
+                .Where(e => e.IsInCombat);
 
             if (enemies.Count() > 0)
             {

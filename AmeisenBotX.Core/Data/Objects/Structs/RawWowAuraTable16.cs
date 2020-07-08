@@ -6,6 +6,8 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
     [StructLayout(LayoutKind.Sequential)]
     public struct RawWowAuraTable16 : IRawWowAuraTable
     {
+        public int MaxBuffs => 16;
+
         public RawWowAura Aura1 { get; set; }
 
         public RawWowAura Aura2 { get; set; }

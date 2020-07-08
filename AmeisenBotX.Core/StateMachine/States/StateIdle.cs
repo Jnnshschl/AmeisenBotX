@@ -13,6 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             FirstStart = true;
+
             LastBagSlotCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
             LastEatCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
             LastLoot = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
@@ -66,9 +67,17 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // do we need to eat something
             if (LastEatCheck.Run()
-                && ((WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasRefreshmentInBag())
-                     || (WowInterface.ObjectManager.Player.HealthPercentage < 75 && WowInterface.CharacterManager.HasFoodInBag())
-                     || (WowInterface.ObjectManager.Player.ManaPercentage < 75 && WowInterface.CharacterManager.HasWaterInBag())))
+                // Refreshment
+                && ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatHealthPercent
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkHealthPercent
+                         && WowInterface.CharacterManager.HasRefreshmentInBag())
+                     // Food
+                     || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatHealthPercent
+                         && WowInterface.CharacterManager.HasFoodInBag())
+                     // Water
+                     || (WowInterface.ObjectManager.Player.MaxMana > 0
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkHealthPercent
+                         && WowInterface.CharacterManager.HasWaterInBag())))
             {
                 StateMachine.SetState((int)BotState.Eating);
                 return;
@@ -103,7 +112,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && IsRepairNpcNear())
             {
                 WowInterface.CharacterManager.Equipment.Update();
-                if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability == 0))
+                if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability <= Config.ItemRepairThreshold))
                 {
                     StateMachine.SetState((int)BotState.Repairing);
                     return;
@@ -113,7 +122,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do we need to sell stuff
             if (LastBagSlotCheck.Run()
                 && IsVendorNpcNear()
-                && WowInterface.HookManager.GetFreeBagSlotCount() < 4)
+                && WowInterface.HookManager.GetFreeBagSlotCount() < Config.BagSlotsToGoSell)
             {
                 StateMachine.SetState((int)BotState.Selling);
                 return;
@@ -138,7 +147,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow);
+                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase));
                     playerToFollow = SkipIfOutOfRange(playerToFollow);
                 }
 
@@ -163,13 +172,17 @@ namespace AmeisenBotX.Core.Statemachine.States
         internal bool IsRepairNpcNear()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer) && e.IsRepairVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+                       .Any(e => e.GetType() != typeof(WowPlayer)
+                       && e.IsRepairVendor
+                       && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
         }
 
         internal bool IsVendorNpcNear()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer) && e.IsVendor && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
+                       .Any(e => e.GetType() != typeof(WowPlayer)
+                       && e.IsVendor
+                       && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.MerchantNpcSearchRadius);
         }
 
         private void CheckForBattlegroundInvites()

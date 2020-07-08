@@ -78,9 +78,9 @@ namespace AmeisenBotX.Core.Dungeon
 
         public Queue<DungeonNode> CurrentNodes { get; private set; }
 
-        public Vector3 DeathPosition { get; private set; }
-
         public Vector3 DeathEntrancePosition { get; private set; }
+
+        public Vector3 DeathPosition { get; private set; }
 
         public DungeonBlackboard DungeonBlackboard { get; }
 

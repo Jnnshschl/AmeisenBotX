@@ -29,6 +29,8 @@ namespace AmeisenBotX.Core.Jobs
 
         private int CurrentNodeCounter { get; set; }
 
+        private bool OreIsInRange { get; set; }
+
         private TimegatedEvent MiningEvent { get; }
 
         private WowInterface WowInterface { get; }
@@ -54,7 +56,7 @@ namespace AmeisenBotX.Core.Jobs
                 .OfType<WowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(OreNodes), x.DisplayId) // make sure the displayid is a ore node
                          && miningProfile.OreTypes.Contains((OreNodes)x.DisplayId) // onlynodes in profile
-                         && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 100) // only nodes that are closer than 100m to me
+                         && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 100m to me
                 .ToList(); // convert to list
 
             if (oreNodes.Count > 0)
@@ -62,14 +64,22 @@ namespace AmeisenBotX.Core.Jobs
                 WowGameobject nearNode = oreNodes
                     .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position)) // order by distance to me
                     .First(); // get the closest node to me
+                OreIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(nearNode.Position) <= 4;
 
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
-
-                if (WowInterface.MovementEngine.IsAtTargetPosition
-                    && MiningEvent.Run()) // limit the executions
+                if (OreIsInRange)
                 {
-                    WowInterface.HookManager.WowObjectOnRightClick(nearNode);
-                    WowInterface.HookManager.LootEveryThing();
+                    WowInterface.HookManager.StopClickToMoveIfActive();
+                    WowInterface.MovementEngine.Reset();
+
+                    if (MiningEvent.Run()) // limit the executions
+                    {
+                        WowInterface.HookManager.WowObjectOnRightClick(nearNode);
+                        WowInterface.HookManager.LootEveryThing();
+                    }
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
                 }
             }
             else
@@ -80,8 +90,6 @@ namespace AmeisenBotX.Core.Jobs
                 if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
                     ++CurrentNodeCounter;
-                    // [0][1][2]
-                    // Count = 3
 
                     if (CurrentNodeCounter >= miningProfile.Path.Count)
                     {

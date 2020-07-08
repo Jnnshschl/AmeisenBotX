@@ -5,13 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="AmeisenBot" Height="270" Width="420" MinHeight="270" MinWidth="420" Closing="Window_Closing" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico" LocationChanged="Window_LocationChanged">
+        Title="AmeisenBot" Height="270" Width="420" MinHeight="270" MinWidth="420" Closing="Window_Closing" WindowStyle="None" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.ico" Activated="Window_Activated" AllowsTransparency="False">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
     <Window.Background>
         <SolidColorBrush Color="{DynamicResource DarkBackground}" />
     </Window.Background>
+    <WindowChrome.WindowChrome>
+        <WindowChrome
+        CaptionHeight="0"
+        ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
     <Grid>
         <Label x:Name="labelPlayerName" Content="BotName" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="0,-2,0,0" FontFamily="Bahnschrift Light">
             <Label.Foreground>
@@ -259,16 +264,12 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonDebug" Content="Toggle Render" Margin="290,0,0,30.333" Click="ButtonDebug_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Left" Width="71" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom">
+        <Button x:Name="buttonDebug" Content="Toggle Render" Margin="290,0,0,30.333" Click="ButtonToggleRendering_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Left" Width="71" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Rectangle x:Name="wowRect" Margin="201,28,0.333,51.333" SizeChanged="WowRect_SizeChanged">
-            <Rectangle.Fill>
-                <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}" />
-            </Rectangle.Fill>
-        </Rectangle>
+        <Rectangle x:Name="wowRect" Margin="201,28,0.333,51.333" />
         <ComboBox x:Name="comboboxStateOverride" Text="None" Margin="6,198,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="188" Style="{DynamicResource ComboBoxStyleDark}" FontFamily="Bahnschrift Light" SelectionChanged="ComboboxStateOverride_SelectionChanged" />
     </Grid>
 </Window>

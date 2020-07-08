@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -40,7 +39,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string shieldWallSpell = "Shield Wall";
         private const string shockwaveSpell = "Shockwave";
         private const string spellReflectionSpell = "Spell Reflection";
-        private const string stoneformSpell = "Stoneform";
         private const string tauntSpell = "Taunt";
         private const string thunderClapSpell = "Thunder Clap";
         private const string victoryRushSpell = "Victory Rush";
@@ -131,22 +129,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 30)
-            {
-                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == 5512);
-                if (healthstone != null)
-                {
-                    WowInterface.HookManager.UseItemByName(healthstone.Name);
-                }
-            }
-
-            if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
-                && WowInterface.ObjectManager.Player.HealthPercentage < 50
-                && CastSpellIfPossible(stoneformSpell, 0))
-            {
-                return;
-            }
-
             if (WowInterface.ObjectManager.Target != null)
             {
                 double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
@@ -175,15 +157,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                             || CastSpellIfPossible(spellReflectionSpell, 0)))
                     {
                         return;
-                    }
-
-
-                    if (WowInterface.ObjectManager.Player.HasBuffByName(victoryRushSpell))
-                    {
-                        if (CastSpellIfPossible(victoryRushSpell, WowInterface.ObjectManager.Target.Guid))
-                        {
-                            return;
-                        }
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage > 50)

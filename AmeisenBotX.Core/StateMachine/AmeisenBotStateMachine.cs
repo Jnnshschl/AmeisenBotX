@@ -45,6 +45,8 @@ namespace AmeisenBotX.Core.Statemachine
                 { (int)BotState.StartWow, new StateStartWow(this, config, WowInterface) }
             };
 
+            ((StateStartWow)States[(int)BotState.StartWow]).OnWoWStarted += () => OnWowStarted?.Invoke();
+
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
             GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
@@ -60,6 +62,8 @@ namespace AmeisenBotX.Core.Statemachine
         public override event StateMachineTick OnStateMachineTick;
 
         public override event StateMachineOverride OnStateOverride;
+
+        public event Action OnWowStarted;
 
         public string BotDataPath { get; }
 
@@ -87,7 +91,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         public override void Execute()
         {
-            // we cant do anything if wow has crashed
+            // Handle Wow crash
+            // ---------------- >
             if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
                 && SetState((int)BotState.None))
             {
@@ -103,7 +108,8 @@ namespace AmeisenBotX.Core.Statemachine
                 return;
             }
 
-            // ingame override states
+            // Override states
+            // --------------->
             if (CurrentState.Key != (int)BotState.None
                 && CurrentState.Key != (int)BotState.StartWow
                 && CurrentState.Key != (int)BotState.Login
@@ -182,7 +188,8 @@ namespace AmeisenBotX.Core.Statemachine
                 }
 
                 if (CurrentState.Key == (int)BotState.Idle
-                    && CurrentState.Key != (int)StateOverride)
+                    && CurrentState.Key != (int)StateOverride
+                    && StateOverride != (int)BotState.None)
                 {
                     SetState((int)StateOverride);
                 }
@@ -206,7 +213,7 @@ namespace AmeisenBotX.Core.Statemachine
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
                        .Where(e => e.IsLootable
-                                && !((StateLooting)States[12]).UnitsAlreadyLootedList.Contains(e.Guid)
+                                && !((StateLooting)States[(int)BotState.Looting]).UnitsAlreadyLootedList.Contains(e.Guid)
                                 && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
         }
 

@@ -14,9 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace AmeisenBotX
@@ -74,12 +74,20 @@ namespace AmeisenBotX
             darkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
             textAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
 
-            DrawOverlay = false;
+            LabelUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
+            RenderState = true;
         }
 
         public AmeisenBotConfig Config { get; private set; }
 
         public string ConfigPath { get; private set; }
+
+        public bool IsAutoPositionSetup { get; private set; }
+        public WindowInteropHelper InteropHelper { get; private set; }
+        public double M11 { get; private set; }
+
+        public double M22 { get; private set; }
 
         public AmeisenBotOverlay Overlay { get; private set; }
 
@@ -91,59 +99,36 @@ namespace AmeisenBotX
 
         private InfoWindow InfoWindow { get; set; }
 
-        private Memory.Win32.Rect LastBotWindowPosition { get; set; }
-
-        private DateTime LastStateMachineTickUpdate { get; set; }
-
-        private double M11 { get; set; }
-
-        private double M22 { get; set; }
+        private TimegatedEvent LabelUpdateEvent { get; }
 
         private MapWindow MapWindow { get; set; }
 
-        private bool OverlayClear { get; set; }
+        private bool NeedToClearOverlay { get; set; }
 
-        private PresentationSource PresentationSource { get; set; }
-
-        private bool SetupWindowOwner { get; set; }
-
-        private void AdjustWowWindow()
+        /// <summary>
+        /// Used to resize the wow window when autoposition is enabled
+        /// </summary>
+        /// <param name="availableSize"></param>
+        /// <returns></returns>
+        protected override Size MeasureOverride(Size availableSize)
         {
-            Point screenCoordinates = PointToScreen(new Point(0, 0));
-            Point screenCoordinatesWowRect = wowRect.PointToScreen(new Point(0, 0));
+            Size size = base.MeasureOverride(availableSize);
 
-            double pixelHeight = Height * M22;
-            double pixelWidth = Width * M11;
-
-            double pixelHeightWowRect = wowRect.ActualHeight * M22;
-            double pixelWidthWowRect = wowRect.ActualWidth * M11;
-
-            Memory.Win32.Rect botPos = new Memory.Win32.Rect()
+            if (AmeisenBot != null && IsAutoPositionSetup)
             {
-                Left = (int)screenCoordinates.X,
-                Bottom = (int)screenCoordinates.Y + (int)pixelHeight,
-                Top = (int)screenCoordinates.Y,
-                Right = (int)screenCoordinates.X + (int)pixelWidth
-            };
-
-            // Memory.Win32.Rect wowPos = AmeisenBot.WowInterface.XMemory.GetWindowPositionWow();
-
-            if (botPos != LastBotWindowPosition)
-            {
-                // int height = (int)Math.Ceiling(pixelHeight * (4.0 / 3.0));
-                // int width = (int)Math.Ceiling(pixelHeight * 1.25);
-
-                Memory.Win32.Rect newPos = new Memory.Win32.Rect()
+                Dispatcher.InvokeAsync(() =>
                 {
-                    Left = (int)screenCoordinatesWowRect.X,
-                    Bottom = (int)screenCoordinatesWowRect.Y + (int)pixelHeightWowRect,
-                    Top = (int)screenCoordinatesWowRect.Y,
-                    Right = (int)screenCoordinatesWowRect.X + (int)pixelWidthWowRect
-                };
-
-                Task.Run(() => AmeisenBot.WowInterface.XMemory.SetWindowPositionWow(newPos));
-                LastBotWindowPosition = botPos;
+                    AmeisenBot.WowInterface.XMemory.ResizeParentWindow
+                    (
+                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
+                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
+                        (int)Math.Floor(wowRect.ActualWidth * M11),
+                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                    );
+                });
             }
+
+            return size;
         }
 
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
@@ -164,26 +149,9 @@ namespace AmeisenBotX
             }
         }
 
-        private void ButtonDbg_Click(object sender, RoutedEventArgs e)
-        {
-            // AmeisenBot.WowInterface.XMemory.SetWindowParent(AmeisenBot.WowInterface.WowProcess.MainWindowHandle, Process.GetCurrentProcess().MainWindowHandle);
-        }
-
-        private void ButtonDebug_Click(object sender, RoutedEventArgs e)
-        {
-            AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
-            RenderState = !RenderState;
-        }
-
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             Close();
-        }
-
-        private void ButtonFaceTarget_Click(object sender, RoutedEventArgs e)
-        {
-            float angle = BotMath.GetFacingAngle2D(AmeisenBot.WowInterface.ObjectManager.Player.Position, AmeisenBot.WowInterface.ObjectManager.Target.Position);
-            AmeisenBot.WowInterface.HookManager.SetFacing(AmeisenBot.WowInterface.ObjectManager.Player, angle);
         }
 
         private void ButtonSettings_Click(object sender, RoutedEventArgs e)
@@ -209,55 +177,40 @@ namespace AmeisenBotX
 
         private void ButtonToggleAutopilot_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot.Config.Autopilot)
-            {
-                AmeisenBot.Config.Autopilot = false;
-                buttonToggleAutopilot.Foreground = darkForegroundBrush;
-            }
-            else
-            {
-                AmeisenBot.Config.Autopilot = true;
-                buttonToggleAutopilot.Foreground = currentTickTimeGoodBrush;
-            }
+            AmeisenBot.Config.Autopilot = !AmeisenBot.Config.Autopilot;
+            buttonToggleAutopilot.Foreground = AmeisenBot.Config.Autopilot ? currentTickTimeGoodBrush : darkForegroundBrush;
         }
 
         private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e)
         {
-            if (InfoWindow == null)
-            {
-                InfoWindow = new InfoWindow(AmeisenBot);
-            }
-
+            InfoWindow ??= new InfoWindow(AmeisenBot);
             InfoWindow.Show();
         }
 
         private void ButtonToggleMapWindow_Click(object sender, RoutedEventArgs e)
         {
-            if (MapWindow == null)
-            {
-                MapWindow = new MapWindow(AmeisenBot);
-            }
-
+            MapWindow ??= new MapWindow(AmeisenBot);
             MapWindow.Show();
         }
 
         private void ButtonToggleOverlay_Click(object sender, RoutedEventArgs e)
         {
-            if (DrawOverlay)
-            {
-                DrawOverlay = false;
-                buttonToggleOverlay.Foreground = darkForegroundBrush;
-            }
-            else
-            {
-                DrawOverlay = true;
-                buttonToggleOverlay.Foreground = currentTickTimeGoodBrush;
-            }
+            DrawOverlay = !DrawOverlay;
+            buttonToggleOverlay.Foreground = DrawOverlay ? currentTickTimeGoodBrush : darkForegroundBrush;
+        }
+
+        private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
+        {
+            RenderState = !RenderState;
+            AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+            if (AmeisenBot != null)
+            {
+                AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+            }
         }
 
         private AmeisenBotConfig LoadConfig()
@@ -292,103 +245,89 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow && !SetupWindowOwner)
+                if (Config.AutoPositionWow && !IsAutoPositionSetup)
                 {
-                    AmeisenBot.WowInterface.XMemory.SetWowWindowOwner(Process.GetCurrentProcess().MainWindowHandle);
-                    SetupWindowOwner = true;
+                    IsAutoPositionSetup = true;
+
+                    AmeisenBot.WowInterface.XMemory.SetupAutoPosition
+                    (
+                        InteropHelper.EnsureHandle(),
+                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
+                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
+                        (int)Math.Floor(wowRect.ActualWidth * M11),
+                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                    );
                 }
 
-                // update health and secodary power bar and
-                // the colors corresponding to the class
-                switch (AmeisenBot.WowInterface.ObjectManager.Player.Class)
+                // Update the main view
+                // -------------------- >
+                WowPlayer player = AmeisenBot.WowInterface.ObjectManager.Player;
+
+                switch (player.Class)
                 {
                     case WowClass.Deathknight:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxRuneenergy, AmeisenBot.WowInterface.ObjectManager.Player.Runeenergy, dkPrimaryBrush, dkSecondaryBrush);
+                        UpdateBotInfo(player.MaxRuneenergy, player.Runeenergy, dkPrimaryBrush, dkSecondaryBrush);
                         break;
 
                     case WowClass.Druid:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, druidPrimaryBrush, druidSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, druidPrimaryBrush, druidSecondaryBrush);
                         break;
 
                     case WowClass.Hunter:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, hunterPrimaryBrush, hunterSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, hunterPrimaryBrush, hunterSecondaryBrush);
                         break;
 
                     case WowClass.Mage:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, magePrimaryBrush, mageSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, magePrimaryBrush, mageSecondaryBrush);
                         break;
 
                     case WowClass.Paladin:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, paladinPrimaryBrush, paladinSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, paladinPrimaryBrush, paladinSecondaryBrush);
                         break;
 
                     case WowClass.Priest:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, priestPrimaryBrush, priestSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, priestPrimaryBrush, priestSecondaryBrush);
                         break;
 
                     case WowClass.Rogue:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxEnergy, AmeisenBot.WowInterface.ObjectManager.Player.Energy, roguePrimaryBrush, rogueSecondaryBrush);
+                        UpdateBotInfo(player.MaxEnergy, player.Energy, roguePrimaryBrush, rogueSecondaryBrush);
                         break;
 
                     case WowClass.Shaman:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, shamanPrimaryBrush, shamanSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, shamanPrimaryBrush, shamanSecondaryBrush);
                         break;
 
                     case WowClass.Warlock:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxMana, AmeisenBot.WowInterface.ObjectManager.Player.Mana, warlockPrimaryBrush, warlockSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, warlockPrimaryBrush, warlockSecondaryBrush);
                         break;
 
                     case WowClass.Warrior:
-                        UpdateBotInfo(AmeisenBot.WowInterface.ObjectManager.Player.MaxRage, AmeisenBot.WowInterface.ObjectManager.Player.Rage, warriorPrimaryBrush, warriorSecondaryBrush);
+                        UpdateBotInfo(player.MaxRage, player.Rage, warriorPrimaryBrush, warriorSecondaryBrush);
                         break;
                 }
 
-                // update the ms label every second
-                if (LastStateMachineTickUpdate + TimeSpan.FromSeconds(1) < DateTime.Now)
+                // Bottom labels
+                // ------------- >
+                if (LabelUpdateEvent.Run())
                 {
                     UpdateBottomLabels();
-                    LastStateMachineTickUpdate = DateTime.Now;
                 }
 
-                if (Overlay == null)
+                // Overlay drawing
+                // --------------- >
+                Overlay ??= new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
+
+                if (DrawOverlay)
                 {
-                    Overlay = new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
+                    OverlayRenderCurrentPath();
+
+                    Overlay?.Draw();
+                    NeedToClearOverlay = true;
                 }
-                else
+                else if (NeedToClearOverlay)
                 {
-                    if (DrawOverlay)
-                    {
-                        if (AmeisenBot.WowInterface.MovementEngine.Path != null
-                        && AmeisenBot.WowInterface.MovementEngine.Path.Count > 0)
-                        {
-                            for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count; ++i)
-                            {
-                                Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
-                                Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
-
-                                Color lineColor = Colors.LightCyan;
-                                Color startDot = Colors.Red;
-                                Color endDot = i == 0 ? Colors.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? Colors.Orange : Colors.Cyan;
-
-                                Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
-                                if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
-                                && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
-                                {
-                                    Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
-                                    Overlay.AddRectangle((int)startPoint.X - 4, (int)startPoint.Y - 4, 7, 7, startDot);
-                                    Overlay.AddRectangle((int)endPoint.X - 4, (int)endPoint.Y - 4, 7, 7, endDot);
-                                }
-                            }
-                        }
-
-                        Overlay?.Draw();
-                        OverlayClear = true;
-                    }
-                    else if (OverlayClear)
-                    {
-                        Overlay.Clear();
-                        OverlayClear = false;
-                    }
+                    Overlay.Clear();
+                    NeedToClearOverlay = false;
                 }
             });
         }
@@ -401,9 +340,37 @@ namespace AmeisenBotX
             });
         }
 
+        private void OverlayRenderCurrentPath()
+        {
+            if (AmeisenBot.WowInterface.MovementEngine.Path != null
+            && AmeisenBot.WowInterface.MovementEngine.Path.Count > 0)
+            {
+                for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count; ++i)
+                {
+                    Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
+                    Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
+
+                    Color lineColor = Colors.LightCyan;
+                    Color startDot = Colors.Red;
+                    Color endDot = i == 0 ? Colors.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? Colors.Orange : Colors.Cyan;
+
+                    Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
+                    && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
+                    {
+                        Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
+                        Overlay.AddRectangle((int)startPoint.X - 4, (int)startPoint.Y - 4, 7, 7, startDot);
+                        Overlay.AddRectangle((int)endPoint.X - 4, (int)endPoint.Y - 4, 7, 7, endDot);
+                    }
+                }
+            }
+        }
+
         private void SaveConfig()
         {
-            if (!string.IsNullOrEmpty(ConfigPath) && Config != null)
+            if (Config != null
+                && !string.IsNullOrEmpty(ConfigPath)
+                && Directory.Exists(Path.GetDirectoryName(ConfigPath)))
             {
                 File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(AmeisenBot.Config, Formatting.Indented));
             }
@@ -411,7 +378,8 @@ namespace AmeisenBotX
 
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
-            // generic stuff
+            // Generic lab-els
+            // ------------- >
             labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
 
             labelMapName.Content = AmeisenBot.WowInterface.ObjectManager.MapId.ToString();
@@ -432,37 +400,32 @@ namespace AmeisenBotX
 
             labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.ToString();
 
-            // class specific stuff
+            // Class specific labels
+            // --------------------- >
             progressbarSecondary.Maximum = maxSecondary;
             progressbarSecondary.Value = secondary;
             labelCurrentSecondary.Content = BotUtils.BigValueToString(secondary);
 
-            if (progressbarHealth.Foreground != primaryBrush)
-            {
-                progressbarHealth.Foreground = primaryBrush;
-            }
-
-            if (progressbarSecondary.Foreground != secondaryBrush)
-            {
-                progressbarSecondary.Foreground = secondaryBrush;
-            }
-
-            if (labelCurrentClass.Foreground != primaryBrush)
-            {
-                labelCurrentClass.Foreground = primaryBrush;
-            }
+            // Colors
+            // ------ >
+            progressbarHealth.Foreground = primaryBrush;
+            progressbarSecondary.Foreground = secondaryBrush;
+            labelCurrentClass.Foreground = primaryBrush;
         }
 
         private void UpdateBottomLabels()
         {
+            // Object count label
+            // ------------------ >
+            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.WowObjects.Count.ToString().PadLeft(4);
+
+            // Tick time label
+            // --------------- >
             double executionMs = AmeisenBot.CurrentExecutionMs;
             if (double.IsNaN(executionMs) || double.IsInfinity(executionMs))
             {
                 executionMs = 0;
             }
-
-            // update the object count label
-            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.WowObjects.Count.ToString().PadLeft(4);
 
             labelCurrentTickTime.Content = executionMs.ToString().PadLeft(4);
             if (executionMs <= Config.StateMachineTickMs)
@@ -475,6 +438,8 @@ namespace AmeisenBotX
                 AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
+            // HookCall label
+            // -------------- >
             labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.PendingCallCount.ToString().PadLeft(2);
             if (AmeisenBot.WowInterface.HookManager.PendingCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
@@ -486,8 +451,14 @@ namespace AmeisenBotX
                 AmeisenLogger.Instance.Log("MainWindow", "High HookCall count, maybe increase your FPS", LogLevel.Warning);
             }
 
+            // RPM/WPM labels
+            // -------------- >
             labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString().PadLeft(5);
             labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString().PadLeft(3);
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -501,54 +472,41 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
+            // Init GUI stuff
+            // -------------- >
+            InteropHelper = new WindowInteropHelper(this);
 
-            if (Config != null)
-            {
-                string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
-                AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, Process.GetCurrentProcess().MainWindowHandle);
-
-                AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
-                AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
-
-                LastStateMachineTickUpdate = DateTime.Now;
-                PresentationSource = PresentationSource.FromVisual(this);
-
-                M11 = PresentationSource.CompositionTarget.TransformToDevice.M11;
-                M22 = PresentationSource.CompositionTarget.TransformToDevice.M22;
-            }
+            PresentationSource presentationSource = PresentationSource.FromVisual(this);
+            M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
+            M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
             comboboxStateOverride.Items.Add(BotState.Idle);
-            comboboxStateOverride.SelectedIndex = 0;
-
             comboboxStateOverride.Items.Add(BotState.Job);
             comboboxStateOverride.Items.Add(BotState.Questing);
 
-            if (AmeisenBot != null)
-            {
-                AmeisenBot.Start();
-            }
-        }
+            comboboxStateOverride.SelectedIndex = 0;
 
-        private void Window_LocationChanged(object sender, EventArgs e)
-        {
-            if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow)
+            labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
+
+            if (Config.Autopilot)
             {
-                AdjustWowWindow();
+                buttonToggleAutopilot.Foreground = currentTickTimeGoodBrush;
             }
+
+            // Init the bot
+            // ------------ >
+            string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
+            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, InteropHelper.EnsureHandle());
+
+            AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
+            AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
+
+            AmeisenBot.Start();
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void WowRect_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (AmeisenBot?.WowInterface?.XMemory?.Process != null && AmeisenBot.Config.AutoPositionWow)
-            {
-                AdjustWowWindow();
-            }
         }
     }
 }

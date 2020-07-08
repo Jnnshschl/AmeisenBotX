@@ -17,9 +17,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public int HealthThreshold { get; set; }
 
-        private WowInterface WowInterface { get; }
-
         public List<string> PriorityTargets { get; set; }
+
+        private WowInterface WowInterface { get; }
 
         public void Reset()
         {

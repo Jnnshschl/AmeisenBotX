@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (WowInterface.HookManager.GetFreeBagSlotCount() > 4
+            if (WowInterface.HookManager.GetFreeBagSlotCount() > Config.BagSlotsToGoSell
                || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
             {
                 WowInterface.CharacterManager.Inventory.Update();
@@ -55,21 +55,31 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
                 else if (DateTime.Now > SellActionGo)
                 {
-                    WowInterface.HookManager.SellAllGrayItems();
                     WowInterface.HookManager.RepairAllItems();
 
                     foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
                     {
                         IWowItem itemToSell = item;
+
+                        if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+                            || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
+                            || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
+                            || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
+                            || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
+                            || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
+                        {
+                            continue;
+                        }
+
                         if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                         {
+                            // equip item and sell the other after
                             itemToSell = itemToReplace;
                             WowInterface.HookManager.ReplaceItem(null, item);
                         }
 
                         if (itemToSell != null
-                            && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile))
-                            && itemToSell.ItemQuality != ItemQuality.Epic)
+                            && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
                         {
                             WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
                             WowInterface.HookManager.CofirmBop();

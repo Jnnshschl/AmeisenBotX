@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
     public unsafe class Win32Imports
     {
+        public const int GWL_EXSTYLE = -0x14;
+        public const int GWL_STYLE = -16;
         public const int STARTF_USESHOWWINDOW = 1;
         public const int SW_SHOWMINNOACTIVE = 7;
         public const int SW_SHOWNOACTIVATE = 4;
-
-        public const int GWL_EXSTYLE = -0x14;
-        public const int GWL_STYLE = -16;
-        public const int WS_CHILD = 0x40000000;
-        public const int WS_EX_APPWINDOW = 0x40000;
-        public const int WS_EX_NOACTIVATE = 0x08000000;
+        public const int SWP_NOACTIVATE = 0x10;
+        public const int SWP_NOZORDER = 0x4;
 
         [Flags]
         public enum AllocationType : uint
@@ -214,7 +211,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32", SetLastError = true)]
-        public static extern IntPtr SetWindowPos(IntPtr windowHandle, int windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
+        public static extern IntPtr SetWindowPos(IntPtr windowHandle, IntPtr windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
         [DllImport("user32", SetLastError = true)]
         public static extern bool ShowWindow(IntPtr windowHandle, int nCmdShow);

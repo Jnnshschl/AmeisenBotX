@@ -16,11 +16,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
 
-        private double GetMeeleRange()
-        {
-            return Math.Max(WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) ? 1.5 : 3.2, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
-        }
-
         public bool TargetInLos { get; private set; }
 
         private TimegatedEvent FacingCheck { get; set; }
@@ -92,6 +87,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // set our normal maxfps
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFps);
+        }
+
+        private double GetMeeleRange()
+        {
+            return Math.Max(WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) ? 1.5 : 3.2, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
         }
 
         private bool HandleMovement(WowUnit target)
