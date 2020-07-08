@@ -19,6 +19,9 @@ namespace AmeisenBotX.Core.Battleground.einTyp
         private bool hasFlag = false;
         private bool ownTeamHasFlag = false;
         private bool enemyTeamHasFlag = false;
+        private bool isHorde = false;
+        private Vector3 baseAlly = new Vector3(1539, 1481, 352);
+        private Vector3 baseHord = new Vector3(916, 1434, 346);
 
         public RunBoyRunEngine(WowInterface wowInterface)
         {
@@ -42,7 +45,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         public void Enter()
         {
-
+            this.isHorde = WowInterface.ObjectManager.Player.IsHorde();
         }
 
         public void Exit()
@@ -93,7 +96,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 else
                 {
                     // bring it outside!
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseHord : baseAlly);
                 }
             }
             else if(ownTeamHasFlag && enemyTeamHasFlag)
@@ -113,7 +116,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                             return;
                         }
                     } else
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseAlly : baseHord);
                     WowInterface.CombatClass.OutOfCombatExecute();
                 }
                 else
@@ -149,7 +152,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                             }
                         }
                         else
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseHord : baseAlly);
                         WowInterface.CombatClass.OutOfCombatExecute();
                     }
                 }
@@ -173,7 +176,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     }
                 }
                 else
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseHord : baseAlly);
                 if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
                 {
                     if (isEnemyClose())
@@ -205,7 +208,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     else
                     {
                         // go outside!
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseAlly : baseHord);
                         WowInterface.CombatClass.OutOfCombatExecute();
                     }
                 }
@@ -245,14 +248,14 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 else
                 {
                     // go outside!
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseAlly : baseHord);
                     WowInterface.CombatClass.OutOfCombatExecute();
                 }
             }
-            if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == Movement.Enums.MovementAction.None)
+            if (WowInterface.MovementEngine.MovementAction == Movement.Enums.MovementAction.None)
             {
                 hasStateChanged = true;
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(1055, 1395, 340));
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, this.isHorde ? baseAlly : baseHord);
                 if (isEnemyClose())
                 {
                     WowInterface.Globals.ForceCombat = true;
@@ -316,7 +319,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
         }
         private bool isEnemyClose()
         {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>() != null && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Any(e => WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 50 && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral);
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>() != null && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Any(e => WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral);
         }
         private bool IsGateOpen()
         {

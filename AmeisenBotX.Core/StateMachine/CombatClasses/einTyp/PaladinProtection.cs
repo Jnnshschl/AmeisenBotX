@@ -24,7 +24,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         public PaladinProtection(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Jumped = false;
             LastTargetCheck = DateTime.Now;
         }
 
@@ -45,8 +44,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         public bool IsMelee => true;
 
         public IWowItemComparator ItemComparator => new TankItemComparator();
-
-        public bool Jumped { get; set; }
 
         public List<string> PriorityTargets { get; set; }
 
@@ -127,8 +124,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             computeNewRoute = false;
             ulong targetGuid = WowInterface.ObjectManager.TargetGuid;
             WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(targetGuid);
-            SearchNewTarget(ref target, false);
-            if (target != null)
+            if ((target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
             {
                 bool targetDistanceChanged = false;
                 if (!LastPlayerPosition.Equals(WowInterface.ObjectManager.Player.Position))
@@ -171,11 +167,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 WowUnit leader = null;
                 if (leaderGuid != 0)
                     leader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid);
-                if (leaderGuid != 0 && leaderGuid != WowInterface.ObjectManager.PlayerGuid && leader != null && !leader.IsDead)
+                if (leaderGuid != 0 && leaderGuid != WowInterface.ObjectManager.PlayerGuid && leader != null && !(leader.IsDead || leader.Health < 1))
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
                 }
-                else if (target != null || SearchNewTarget(ref target, true))
+                else if ((target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
                     if (!LastTargetPosition.Equals(target.Position))
                     {
@@ -188,7 +184,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     HandleMovement(target);
                     WowInterface.Globals.ForceCombat = true;
                     HandleAttacking(target);
-                    WowInterface.Globals.ForceCombat = false;
                 }
                 else if (!Dancing || standing)
                 {
@@ -408,7 +403,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool SearchNewTarget(ref WowUnit target, bool grinding)
         {
-            if (DateTime.Now.Subtract(LastTargetCheck).TotalSeconds < 1 && target != null && !(target.IsDead || target.Health == 0))
+            if (DateTime.Now.Subtract(LastTargetCheck).TotalSeconds < 1 || (target != null && !(target.IsDead || target.Health < 1)))
             {
                 return false;
             }
@@ -417,16 +412,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             List<WowUnit> wowUnits = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int areaToLookAt = grinding ? 100 : 50;
-            bool inCombat = (target == null || target.IsDead) ? false : target.IsInCombat;
-            int targetHealth = (target == null || target.IsDead) ? 2147483647 : target.Health;
-            ulong memberGuid = (target == null || target.IsDead) ? 0 : target.TargetGuid;
-            WowUnit member = (target == null || target.IsDead) ? null : WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(memberGuid);
+            bool inCombat = (target == null || target.IsDead || target.Health < 1) ? false : target.IsInCombat;
+            int targetHealth = (target == null || target.IsDead || target.Health < 1) ? 2147483647 : target.Health;
+            ulong memberGuid = (target == null || target.IsDead || target.Health < 1) ? 0 : target.TargetGuid;
+            WowUnit member = (target == null || target.IsDead || target.Health < 1) ? null : WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(memberGuid);
             int memberHealth = member == null ? 2147483647 : member.Health;
             int targetCount = 0;
             multipleTargets = false;
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !unit.IsDead)
+                if (BotUtils.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1))
                 {
                     double tmpDistance = WowInterface.ObjectManager.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < areaToLookAt)
@@ -458,7 +453,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 }
             }
 
-            if (target == null || target.IsDead)
+            if (target == null || target.IsDead || target.Health < 1)
             {
                 WowInterface.HookManager.ClearTarget();
                 newTargetFound = false;

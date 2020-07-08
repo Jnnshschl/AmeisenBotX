@@ -4,8 +4,14 @@ using System.Globalization;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class ArmsAxeItemComparator : IWowItemComparator
+    public class ArmsItemComparator : IWowItemComparator
     {
+        bool IsAxeComparator;
+
+        public ArmsItemComparator(bool isAxeComparer)
+        {
+            this.IsAxeComparator = isAxeComparer;
+        }
         public bool IsBetter(IWowItem current, IWowItem item)
         {
             if (item == null)
@@ -46,7 +52,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             else if (slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
             {
                 // axes
-                if (item.GetType() == typeof(WowWeapon) && (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)))
+                if (item.GetType() == typeof(WowWeapon) && IsAxeComparator ? (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)) : (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_MACES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_MACES)))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
                     {
