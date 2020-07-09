@@ -151,7 +151,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     MovedDistance = LastPlayerPosition.GetDistance(WowInterface.ObjectManager.Player.Position);
                     LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
 
-                    if (MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
+                    if (MovedDistance > 0.0 && MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
                     {
                         ++StuckCounter;
                         JumpOnNextMove = true;
@@ -256,11 +256,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
         {
-            Nodes.Clear();
             List<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
             if (path != null && path.Count > 0)
             {
+                Nodes.Clear();
+
                 for (int i = 0; i < path.Count; ++i)
                 {
                     Nodes.Enqueue(path[i]);
