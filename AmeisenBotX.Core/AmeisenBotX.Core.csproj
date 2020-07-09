@@ -46,6 +46,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -350,6 +351,10 @@
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj">
       <Project>{FF4DC905-1E4E-44A5-A5A7-C65E5CDA1E9A}</Project>
       <Name>AmeisenBotX.Memory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AmeisenBotX.RconClient\AmeisenBotX.RconClient.csproj">
+      <Project>{6B5885F6-2EC5-463A-BB5C-C884ABDAAD53}</Project>
+      <Name>AmeisenBotX.RconClient</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

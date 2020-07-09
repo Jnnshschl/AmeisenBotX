@@ -13,6 +13,11 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
         {
+            if (basicItem == null)
+            {
+                return null;
+            }
+
             return (basicItem.Type.ToUpper()) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
