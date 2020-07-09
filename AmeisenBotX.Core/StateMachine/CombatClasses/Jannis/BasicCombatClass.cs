@@ -226,6 +226,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(
                     e => e.Id == 5512
                     || e.Id == 5511
+                    || e.Id == 5510
                     || e.Id == 5509);
 
                 if (healthstone != null)
@@ -268,6 +269,54 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         }
 
         protected bool CastSpellIfPossible(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
+        {
+            if (!DoIKnowSpell(spellName)) { return false; }
+
+            if (GetValidTarget(guid, out WowUnit target))
+            {
+                if (currentResourceAmount == 0)
+                {
+                    currentResourceAmount = WowInterface.ObjectManager.Player.Class switch
+                    {
+                        WowClass.Deathknight => WowInterface.ObjectManager.Player.Runeenergy,
+                        WowClass.Rogue => WowInterface.ObjectManager.Player.Energy,
+                        WowClass.Warrior => WowInterface.ObjectManager.Player.Rage,
+                        _ => WowInterface.ObjectManager.Player.Mana,
+                    };
+                }
+
+                bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
+
+                if (!isTargetMyself && !TargetInLineOfSight)
+                {
+                    return false;
+                }
+
+                if (Spells[spellName] != null
+                    && !CooldownManager.IsSpellOnCooldown(spellName)
+                    && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
+                    && (target == null || IsInRange(Spells[spellName], target)))
+                {
+                    HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
+
+                    if (Spells[spellName].CastTime > 0)
+                    {
+                        // stop pending movement if we cast something
+                        WowInterface.MovementEngine.Reset();
+                        WowInterface.HookManager.StopClickToMoveIfActive();
+
+                        CheckFacing(target);
+                    }
+
+                    CastSpell(spellName, isTargetMyself);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        protected bool CastSpellIfPossibleWarrior(string spellName, string requiredStance, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
             if (!DoIKnowSpell(spellName)) { return false; }
 
