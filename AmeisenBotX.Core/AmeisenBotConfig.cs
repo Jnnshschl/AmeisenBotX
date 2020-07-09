@@ -48,6 +48,8 @@ namespace AmeisenBotX.Core
 
         public double EatHealthPercent { get; set; } = 75;
 
+        public bool EnabledRconServer { get; set; } = false;
+
         public double EventPullMs { get; set; } = 1000;
 
         public bool FollowGroupLeader { get; set; } = false;
@@ -97,6 +99,14 @@ namespace AmeisenBotX.Core
         public bool PermanentNameCache { get; set; } = true;
 
         public bool PermanentReactionCache { get; set; } = true;
+
+        public string RconServerAddress { get; set; } = "https://localhost:47111";
+
+        public string RconServerGuid { get; set; } = Guid.NewGuid().ToString();
+
+        public string RconServerImage { get; set; } = "";
+
+        public double RconTickMs { get; set; } = 1000;
 
         public string Realm { get; set; } = "AmeisenRealm";
 

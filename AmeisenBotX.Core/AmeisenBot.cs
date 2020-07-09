@@ -10,6 +10,7 @@ using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
@@ -29,11 +30,15 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
+using AmeisenBotX.RconClient;
+using AmeisenBotX.RconClient.Messages;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -48,6 +53,7 @@ namespace AmeisenBotX.Core
     public class AmeisenBot
     {
         private double currentExecutionMs;
+        private int rconTimerBusy;
         private int stateMachineTimerBusy;
 
         public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config, IntPtr mainWindowHandle)
@@ -76,6 +82,9 @@ namespace AmeisenBotX.Core
             WowInterface = new WowInterface();
             SetupWowInterface();
 
+            RconClientTimer = new Timer(Config.RconTickMs);
+            RconClientTimer.Elapsed += RconClientTimer_Elapsed;
+
             AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
 
             if (!Directory.Exists(BotDataPath))
@@ -86,6 +95,11 @@ namespace AmeisenBotX.Core
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
             StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
+
+            if (Config.EnabledRconServer)
+            {
+                WowInterface.ObjectManager.OnObjectUpdateComplete += ObjectManager_OnObjectUpdateComplete;
+            }
 
             InitCombatClasses();
             InitBattlegroundEngines();
@@ -135,6 +149,8 @@ namespace AmeisenBotX.Core
             private set => currentExecutionMs = value;
         }
 
+        public bool FirstStart { get; set; }
+
         public bool IsRunning { get; private set; }
 
         public IntPtr MainWindowHandle { get; private set; }
@@ -150,6 +166,8 @@ namespace AmeisenBotX.Core
         private int CurrentExecutionCount { get; set; }
 
         private TimegatedEvent EquipmentUpdateEvent { get; set; }
+
+        private Timer RconClientTimer { get; }
 
         private Timer StateMachineTimer { get; }
 
@@ -188,6 +206,12 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Starting", LogLevel.Debug);
             StateMachineTimer.Start();
+
+            if (Config.EnabledRconServer)
+            {
+                RconClientTimer.Start();
+            }
+
             WowInterface.BotCache.Load();
             SubscribeToWowEvents();
             IsRunning = true;
@@ -196,7 +220,12 @@ namespace AmeisenBotX.Core
         public void Stop()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Stopping", LogLevel.Debug);
-            StateMachineTimer.Stop();
+            RconClientTimer.Stop();
+
+            if (Config.EnabledRconServer)
+            {
+                RconClientTimer.Stop();
+            }
 
             WowInterface.HookManager.DisposeHook();
             WowInterface.EventHookManager.Stop();
@@ -423,6 +452,25 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void ObjectManager_OnObjectUpdateComplete(List<WowObject> wowObjects)
+        {
+            if (!FirstStart && WowInterface.ObjectManager.Player != null)
+            {
+                FirstStart = true;
+                WowInterface.RconClient = new AmeisenBotRconClient
+                (
+                    Config.RconServerAddress,
+                    WowInterface.ObjectManager.Player.Name,
+                    WowInterface.ObjectManager.Player.Race.ToString(),
+                    WowInterface.ObjectManager.Player.Gender.ToString(),
+                    WowInterface.ObjectManager.Player.Class.ToString(),
+                    WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps",
+                    Config.RconServerImage,
+                    Config.RconServerGuid
+                );
+            }
+        }
+
         private void OnBagChanged(long timestamp, List<string> args)
         {
             if (BagUpdateEvent.Run())
@@ -552,6 +600,84 @@ namespace AmeisenBotX.Core
         private void OnTradeAcceptUpdate(long timestamp, List<string> args)
         {
             WowInterface.HookManager.LuaDoString("AcceptTrade();");
+        }
+
+        private void RconClientTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // only start one timer tick at a time
+            if (Interlocked.CompareExchange(ref rconTimerBusy, 1, 0) == 1)
+            {
+                return;
+            }
+
+            try
+            {
+                if (WowInterface.RconClient != null)
+                {
+                    try
+                    {
+                        if (WowInterface.RconClient.NeedToRegister)
+                        {
+                            WowInterface.RconClient.Register().Wait();
+                        }
+                        else
+                        {
+                            int currentResource = WowInterface.ObjectManager.Player.Class switch
+                            {
+                                WowClass.Deathknight => WowInterface.ObjectManager.Player.Runeenergy,
+                                WowClass.Rogue => WowInterface.ObjectManager.Player.Energy,
+                                WowClass.Warrior => WowInterface.ObjectManager.Player.Rage,
+                                _ => WowInterface.ObjectManager.Player.Mana,
+                            };
+
+                            int maxResource = WowInterface.ObjectManager.Player.Class switch
+                            {
+                                WowClass.Deathknight => WowInterface.ObjectManager.Player.MaxRuneenergy,
+                                WowClass.Rogue => WowInterface.ObjectManager.Player.MaxEnergy,
+                                WowClass.Warrior => WowInterface.ObjectManager.Player.MaxRage,
+                                _ => WowInterface.ObjectManager.Player.MaxMana,
+                            };
+
+                            WowInterface.RconClient.SendData(new DataMessage()
+                            {
+                                BagSlotsFree = 0,
+                                CombatClass = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "NoCombatClass",
+                                CurrentProfile = "",
+                                Energy = currentResource,
+                                Exp = WowInterface.ObjectManager.Player.Xp,
+                                Health = WowInterface.ObjectManager.Player.Health,
+                                ItemLevel = (int)Math.Round(WowInterface.CharacterManager.Equipment.AverageItemLevel),
+                                Level = WowInterface.ObjectManager.Player.Level,
+                                MapName = WowInterface.ObjectManager.MapId.ToString(),
+                                MaxEnergy = maxResource,
+                                MaxExp = WowInterface.ObjectManager.Player.NextLevelXp,
+                                MaxHealth = WowInterface.ObjectManager.Player.MaxHealth,
+                                Money = WowInterface.CharacterManager.Money,
+                                PosX = WowInterface.ObjectManager.Player.Position.X,
+                                PosY = WowInterface.ObjectManager.Player.Position.Y,
+                                PosZ = WowInterface.ObjectManager.Player.Position.Z,
+                                State = ((BotState)StateMachine.CurrentState.Key).ToString(),
+                                SubZoneName = WowInterface.ObjectManager.ZoneSubName,
+                                ZoneName = WowInterface.ObjectManager.ZoneName,
+                            }).Wait();
+
+                            Bitmap bmp = WowInterface.XMemory.GetScreenshot();
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                bmp.Save(ms, ImageFormat.Png);
+                                WowInterface.RconClient.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}").Wait();
+                            }
+
+                            WowInterface.RconClient.PullPendingActions().Wait();
+                        }
+                    }
+                    catch { }
+                }
+            }
+            finally
+            {
+                rconTimerBusy = 0;
+            }
         }
 
         private void SaveBotWindowPosition()

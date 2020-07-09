@@ -3,6 +3,8 @@ using Fasm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -83,6 +85,22 @@ namespace AmeisenBotX.Memory
             {
                 SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Bitmap GetScreenshot()
+        {
+            Rect rc = new Rect();
+            GetWindowRect(Process.MainWindowHandle, ref rc);
+
+            Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
+            }
+
+            return bmp;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int DisplayId => RawWowUnit.DisplayId;
 
-        public int Energy => RawWowUnit.Power3;
+        public int Energy => RawWowUnit.Power4;
 
         public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
 
@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
 
-        public int MaxEnergy => RawWowUnit.MaxPower3;
+        public int MaxEnergy => RawWowUnit.MaxPower4;
 
         public int MaxHealth => RawWowUnit.MaxHealth;
 

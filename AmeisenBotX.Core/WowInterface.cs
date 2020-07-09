@@ -16,6 +16,7 @@ using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Memory;
+using AmeisenBotX.RconClient;
 using System.Diagnostics;
 
 namespace AmeisenBotX.Core
@@ -61,5 +62,7 @@ namespace AmeisenBotX.Core
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
+
+        public AmeisenBotRconClient RconClient { get; set; }
     }
 }
