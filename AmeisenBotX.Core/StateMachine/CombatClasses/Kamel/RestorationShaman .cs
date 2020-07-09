@@ -41,6 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string WindfuryTotemSpell = "Windfury Totem";
         private const string StrengthofEarthTotemSpell = "Strength of Earth Totem";
         private const string ManaSpringTotemSpell = "Mana Spring Totem";
+        private const string ManaTideTotemSpell = "Mana Tide Totem";
         private const string CalloftheElementsSpell = "Call of the Elements";
 
         Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
@@ -71,15 +72,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(WindfuryTotemSpell, DateTime.Now);
             spellCoolDown.Add(StrengthofEarthTotemSpell, DateTime.Now);
             spellCoolDown.Add(ManaSpringTotemSpell, DateTime.Now);
+            spellCoolDown.Add(ManaTideTotemSpell, DateTime.Now);
             spellCoolDown.Add(CalloftheElementsSpell, DateTime.Now);
 
-            if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
-                 WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
-                 WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
-                 WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)))
-            {
+            //if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
+            //     WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
+            //     WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
+            //     WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)) ||
+            //     (WowInterface.CharacterManager.Equipment.Items.ContainsKey(EquipmentSlot.INVSLOT_RANGED) &&
+            //     WowInterface.CharacterManager.Equipment.Items[EquipmentSlot.INVSLOT_RANGED] != null))
+            //{
                 hasTotemItems = true;
-            }
+            //}
 
         }
 
@@ -193,10 +197,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         }
                         if (hasTotemItems)
                         {
-                            if (!WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
+                            if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell)) 
+                            {
+                                return;
+                            }
+                            if (totemcastEvent.Run() 
+                                && WowInterface.ObjectManager.Player.ManaPercentage >= 50
+                                && !WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
                                 || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
                                 || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                && WowInterface.ObjectManager.Player.ManaPercentage >= 5)
+                                || !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem"))
                             {
                                 if (CustomCastSpell(CalloftheElementsSpell))
                                 {

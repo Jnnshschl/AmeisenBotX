@@ -216,7 +216,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (CustomCastSpell(bloodthirstSpell) || CustomCastSpell(whirlwindSpell))
+                    if (CustomCastSpell(whirlwindSpell))
+                    {
+                        return;
+                    }   
+                    
+                    if (CustomCastSpell(bloodthirstSpell))
                     {
                         return;
                     }
@@ -243,7 +248,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         return;
                     }
-                    if (CustomCastSpell(chargeSpell))
+                    if (CustomCastSpell(chargeSpell, battleStanceSpell))
                     {
                         return;
                     }
