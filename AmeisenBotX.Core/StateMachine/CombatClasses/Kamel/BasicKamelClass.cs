@@ -43,6 +43,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             //Resto Shaman
             revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
+            manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
+            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
@@ -61,6 +63,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public TimegatedEvent healingWaveSpellEvent { get; private set; }
         public TimegatedEvent naturesswiftEvent { get; private set; }
         public TimegatedEvent riptideSpellEvent { get; private set; }
+        public TimegatedEvent manaTideTotemEvent { get; private set; }
+        public TimegatedEvent totemcastEvent { get; private set; }
         //Mount check
         public TimegatedEvent getonthemount { get; private set; }
 
@@ -122,7 +126,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public void Execute()
         {
-            MyAuraManager.Tick();
             ExecuteCC();
         }
         public abstract void ExecuteCC();
