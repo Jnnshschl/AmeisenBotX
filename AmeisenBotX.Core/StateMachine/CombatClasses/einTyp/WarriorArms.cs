@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public bool IsMelee => true;
 
-        public IWowItemComparator ItemComparator => new ArmsItemComparator(WowInterface.ObjectManager.Player.IsAlliance());
+        public IWowItemComparator ItemComparator => new ArmsItemComparator(WowInterface);
 
         public List<string> PriorityTargets { get; set; }
 
@@ -106,8 +106,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         public void Execute()
         {
             computeNewRoute = false;
-            WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.TargetGuid);
-            if ((target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
             {
                 bool targetDistanceChanged = false;
                 if (!LastPlayerPosition.Equals(WowInterface.ObjectManager.Player.Position))
@@ -132,6 +132,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 HandleMovement(target);
                 HandleAttacking(target);
             }
+            WowInterface.Globals.ForceCombat = false;
         }
 
         public void OutOfCombatExecute()
@@ -154,7 +155,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
                 }
-                else if ((target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
+                else if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
                     if (!LastTargetPosition.Equals(target.Position))
                     {
@@ -219,7 +220,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool SearchNewTarget(ref WowUnit target, bool grinding)
         {
-            if (target != null && !(target.IsDead || target.Health < 1))
+            if (WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1))
             {
                 return false;
             }
@@ -466,7 +467,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                                 }
                             }
                         }
-                        else if (distanceToTarget < target.CombatReach)
+                        else if (distanceToTarget <= 0.75f * (Player.CombatReach + target.CombatReach))
                         {
                             // -- close combat --
                             // Battle Stance

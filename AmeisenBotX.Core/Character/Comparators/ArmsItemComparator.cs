@@ -6,11 +6,11 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class ArmsItemComparator : IWowItemComparator
     {
-        bool IsAxeComparator;
+        WowInterface WowInterface;
 
-        public ArmsItemComparator(bool isAxeComparer)
+        public ArmsItemComparator(WowInterface wowInterface)
         {
-            this.IsAxeComparator = isAxeComparer;
+            this.WowInterface = wowInterface;
         }
         public bool IsBetter(IWowItem current, IWowItem item)
         {
@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             else if (slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
             {
                 // axes
-                if (item.GetType() == typeof(WowWeapon) && IsAxeComparator ? (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)) : (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_MACES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_MACES)))
+                if (item.GetType() == typeof(WowWeapon) && WowInterface.ObjectManager.Player.IsAlliance() ? (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)) : (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_MACES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_MACES)))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
                     {

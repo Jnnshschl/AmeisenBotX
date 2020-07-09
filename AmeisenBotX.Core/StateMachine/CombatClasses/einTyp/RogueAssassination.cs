@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool wasInStealth = false;
 
-        private bool isAttackingFromBehind = false;
+        bool isAttackingFromBehind = false;
 
         private WowInterface WowInterface;
 
@@ -119,8 +119,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         public void Execute()
         {
             computeNewRoute = false;
-            WowUnit target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(WowInterface.ObjectManager.TargetGuid);
-            if ((target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
             {
                 Dancing = false;
                 bool targetDistanceChanged = false;
@@ -161,6 +161,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     WowInterface.HookManager.ClearTarget();
                     WowInterface.HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
+                    WowInterface.Globals.ForceCombat = false;
                 }
                 else
                 {
@@ -190,7 +191,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             {
                 ulong leaderGuid = WowInterface.ObjectManager.PartyleaderGuid;
                 WowUnit target = WowInterface.ObjectManager.Target;
-                if ((target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
+                if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
                     if (!LastTargetPosition.Equals(target.Position))
                     {
@@ -256,10 +257,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 wasInStealth = false;
             }
 
-            if (this.isAttackingFromBehind && WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+            if (this.isAttackingFromBehind)
             {
-                this.isAttackingFromBehind = false;
-                WowInterface.MovementEngine.StopMovement();
+                if(WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                    WowInterface.MovementEngine.StopMovement();
+                if(WowInterface.ObjectManager.Player.IsInCombat)
+                    isAttackingFromBehind = false;
             }
 
             if (computeNewRoute)
@@ -282,7 +285,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         private bool SearchNewTarget(ref WowUnit target, bool grinding)
         {
             List<string> buffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
-            if ((target != null && !(target.IsDead || target.Health < 1)) || (buffs.Any(e => e.Contains("tealth")) && WowInterface.ObjectManager.Player.HealthPercentage <= 20))
+            if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || (buffs.Any(e => e.Contains("tealth")) && WowInterface.ObjectManager.Player.HealthPercentage <= 20))
             {
                 return false;
             }
@@ -402,7 +405,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                 if (!WowInterface.ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
-                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                    WowInterface.HookManager.StartAutoAttack(target);
                 }
 
                 Player = WowInterface.ObjectManager.Player;
@@ -463,7 +466,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                                 CastSpell(Sprint, ref energy, 15, 180, true);
                             }
                         }
-                        else if (distanceToTarget <= target.CombatReach)
+                        else if (distanceToTarget <= 0.75f * (Player.CombatReach + target.CombatReach))
                         {
                             // distance <= 9
                             // close combat
