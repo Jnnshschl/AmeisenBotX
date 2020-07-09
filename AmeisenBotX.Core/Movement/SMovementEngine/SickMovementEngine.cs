@@ -238,7 +238,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
             else
             {
-                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
+                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 0.0
+                    && StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
                 {
                     PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction.DirectMove, UnstuckTargetPosition);
                     WowInterface.CharacterManager.Jump();

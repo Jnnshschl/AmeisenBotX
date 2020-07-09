@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                if (distanceToTarget > 3)
+                if (distanceToTarget > 8.0)
                 {
                     if (CastSpellIfPossible(heroicThrowSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || (SwitchStance(battleStanceSpell) && CastSpellIfPossible(chargeSpell, WowInterface.ObjectManager.Target.Guid, true)))
@@ -143,6 +143,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
                 else
                 {
+                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count;
+
+                    if (nearEnemies > 2
+                        && CastSpellIfPossible(thunderClapSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    {
+                        return;
+                    }
+
                     if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid)
                     {
                         if ((SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(tauntSpell, WowInterface.ObjectManager.Target.Guid))
@@ -179,10 +187,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     if (CastSpellIfPossible(berserkerRageSpell, 0, true)
                         || CastSpellIfPossible(shieldSlamSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || CastSpellIfPossible(thunderClapSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || CastSpellIfPossible(mockingBlowSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 5).Count() > 2 && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
-                        || (WowInterface.ObjectManager.Target.HealthPercentage < 20) && CastSpellIfPossible(executeSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || (nearEnemies > 2 && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(devastateSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(revengeSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.TargetGuid, true))

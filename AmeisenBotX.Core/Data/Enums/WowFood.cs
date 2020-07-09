@@ -19,6 +19,7 @@
         ConjuredMuffin = 5349,
         RawSlitherskinMackerel = 6303,
         Lolipop = 7803,
+        ComjuredSourdough = 8075,
         ConjuredCroissant = 22019
     }
 }
