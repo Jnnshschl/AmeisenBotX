@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         {
             computeNewRoute = false;
             WowUnit target = WowInterface.ObjectManager.Target;
-            if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
+            if ((WowInterface.ObjectManager.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
             {
                 Dancing = false;
                 bool targetDistanceChanged = false;
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 {
                     computeNewRoute = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                    LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((2.4f + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((2.4f + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
+                    LastBehindTargetPosition = BotMath.CalculatePositionBehind(target.Position, target.Rotation, 2f);
                     targetDistanceChanged = true;
                 }
 
@@ -191,13 +191,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             {
                 ulong leaderGuid = WowInterface.ObjectManager.PartyleaderGuid;
                 WowUnit target = WowInterface.ObjectManager.Target;
-                if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
+                if ((WowInterface.ObjectManager.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
                     if (!LastTargetPosition.Equals(target.Position))
                     {
                         computeNewRoute = true;
                         LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                        LastBehindTargetPosition = new Vector3(LastTargetPosition.X - ((2.4f + target.CombatReach) * (float)Math.Cos(LastTargetRotation)), LastTargetPosition.Y, LastTargetPosition.Z - ((2.4f + target.CombatReach) * (float)Math.Sin(LastTargetRotation)));
+                        LastBehindTargetPosition = BotMath.CalculatePositionBehind(target.Position, target.Rotation, 5f);
                         distanceToTarget = LastPlayerPosition.GetDistance(LastTargetPosition);
                         distanceToBehindTarget = LastPlayerPosition.GetDistance(LastBehindTargetPosition);
                     }
@@ -228,6 +228,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private void HandleAttacking(WowUnit target)
         {
+            WowInterface.HookManager.TargetGuid(target.Guid);
             spells.CastNextSpell(distanceToTarget, target);
             if (target.IsDead || target.Health < 1)
             {
@@ -242,7 +243,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 return;
             }
 
-            if (WowInterface.HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            if (WowInterface.ObjectManager.Player.Auras.Any(e => e.Name.Contains("tealth")))
             {
                 if (!wasInStealth || hasTargetMoved)
                 {
@@ -285,7 +286,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         private bool SearchNewTarget(ref WowUnit target, bool grinding)
         {
             List<string> buffs = WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList();
-            if ((WowInterface.ObjectManager.TargetGuid != 0 && !(target.IsDead || target.Health < 1)) || (buffs.Any(e => e.Contains("tealth")) && WowInterface.ObjectManager.Player.HealthPercentage <= 20))
+            if ((WowInterface.ObjectManager.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1 || target.Auras.Any(e => e.Name.Contains("Spirit of Redem")))) || (buffs.Any(e => e.Contains("tealth")) && WowInterface.ObjectManager.Player.HealthPercentage <= 20))
             {
                 return false;
             }
@@ -297,7 +298,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             int targetCount = 0;
             foreach (WowUnit unit in wowUnits)
             {
-                if (BotUtils.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1))
+                if (BotUtils.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => e.Name.Contains("Spirit of Redem"))))
                 {
                     double tmpDistance = WowInterface.ObjectManager.Player.Position.GetDistance(unit.Position);
                     if ((isSneaky && tmpDistance < 100.0) || isSneaky && tmpDistance < 50.0)
@@ -318,7 +319,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 }
             }
 
-            if (target == null || target.IsDead || target.Health < 1)
+            if (target == null || target.IsDead || target.Health < 1 || target.Auras.Any(e => e.Name.Contains("Spirit of Redem")))
             {
                 WowInterface.HookManager.ClearTarget();
                 newTargetFound = false;
