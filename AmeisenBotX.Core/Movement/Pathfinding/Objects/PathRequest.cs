@@ -4,10 +4,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
     public struct PathRequest
     {
-        public PathRequest(Vector3 a, Vector3 b, int mapId, PathRequestFlags flags = PathRequestFlags.None, MovementType movementType = MovementType.MoveToPosition)
+        public PathRequest(Vector3 a, Vector3 b, float maxRadius, int mapId, PathRequestFlags flags = PathRequestFlags.None, MovementType movementType = MovementType.MoveToPosition)
         {
             A = a;
             B = b;
+            MaxRadius = maxRadius;
             MapId = mapId;
             Flags = flags;
             MovementType = movementType;
@@ -20,6 +21,8 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         public PathRequestFlags Flags { get; set; }
 
         public int MapId { get; set; }
+
+        public float MaxRadius { get; set; }
 
         public MovementType MovementType { get; set; }
 
@@ -34,20 +37,18 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         public override bool Equals(object obj)
-        {
-            return obj.GetType() == typeof(PathRequest)
-                       && ((PathRequest)obj).A == A
-                       && ((PathRequest)obj).B == B
-                       && ((PathRequest)obj).MapId == MapId
-                       && ((PathRequest)obj).Flags == Flags
-                       && ((PathRequest)obj).MovementType == MovementType;
-        }
+            => obj.GetType() == typeof(PathRequest)
+            && ((PathRequest)obj).A == A
+            && ((PathRequest)obj).B == B
+            && ((PathRequest)obj).MapId == MapId
+            && ((PathRequest)obj).Flags == Flags
+            && ((PathRequest)obj).MovementType == MovementType;
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return 17 + (A.GetHashCode() * 23) + (B.GetHashCode() * 23) + (MapId * 23) + ((int)Flags * 23) + ((int)MovementType * 23);
+                return (int)(17 + (A.GetHashCode() * 23) + (B.GetHashCode() * 23) + (MaxRadius * 23) + (MapId * 23) + ((int)Flags * 23) + ((int)MovementType * 23));
             }
         }
     }

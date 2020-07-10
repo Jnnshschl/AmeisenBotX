@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
             new Vector3(-9170, 304, 80),
             new Vector3(-9169, 296, 79),
             new Vector3(-9169, 288, 78),
-           	new Vector3(-9169, 280, 77),
+               new Vector3(-9169, 280, 77),
             new Vector3(-9168, 272, 77),
             new Vector3(-9168, 264, 76),
             new Vector3(-9167, 256, 77),

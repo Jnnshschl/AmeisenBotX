@@ -4,6 +4,8 @@
     {
         MoveToPosition,
         CastMovementRay,
-        MoveAlongSurface
+        MoveAlongSurface,
+        GetRandomPoint,
+        GetRandomPointAround,
     }
 }

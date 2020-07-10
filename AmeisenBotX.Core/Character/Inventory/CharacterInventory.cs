@@ -36,10 +36,13 @@ namespace AmeisenBotX.Core.Character.Inventory
             }
         }
 
+        public int FreeBagSlots { get; private set; }
+
         private WowInterface WowInterface { get; }
 
         public void Update()
         {
+            FreeBagSlots = WowInterface.HookManager.GetFreeBagSlotCount();
             string resultJson = WowInterface.HookManager.GetInventoryItems();
 
             try

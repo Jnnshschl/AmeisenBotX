@@ -25,8 +25,14 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (WowInterface.HookManager.GetFreeBagSlotCount() > Config.BagSlotsToGoSell
-               || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots > Config.BagSlotsToGoSell
+               || !WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
+                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
+                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
+                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
+                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
+                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
+               .Any(e => e.Price > 0))
             {
                 WowInterface.CharacterManager.Inventory.Update();
                 StateMachine.SetState((int)BotState.Idle);

@@ -83,8 +83,10 @@ namespace AmeisenBotX
 
         public string ConfigPath { get; private set; }
 
-        public bool IsAutoPositionSetup { get; private set; }
         public WindowInteropHelper InteropHelper { get; private set; }
+
+        public bool IsAutoPositionSetup { get; private set; }
+
         public double M11 { get; private set; }
 
         public double M22 { get; private set; }

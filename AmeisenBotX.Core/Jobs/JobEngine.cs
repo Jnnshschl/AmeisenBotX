@@ -29,9 +29,9 @@ namespace AmeisenBotX.Core.Jobs
 
         private int CurrentNodeCounter { get; set; }
 
-        private bool OreIsInRange { get; set; }
-
         private TimegatedEvent MiningEvent { get; }
+
+        private bool OreIsInRange { get; set; }
 
         private WowInterface WowInterface { get; }
 

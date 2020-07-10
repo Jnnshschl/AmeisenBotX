@@ -88,22 +88,6 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Bitmap GetScreenshot()
-        {
-            Rect rc = new Rect();
-            GetWindowRect(Process.MainWindowHandle, ref rc);
-
-            Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
-
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
-            }
-
-            return bmp;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
             Rect rect = new Rect();
@@ -190,6 +174,22 @@ namespace AmeisenBotX.Memory
             }
 
             return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Bitmap GetScreenshot()
+        {
+            Rect rc = new Rect();
+            GetWindowRect(Process.MainWindowHandle, ref rc);
+
+            Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
+            }
+
+            return bmp;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

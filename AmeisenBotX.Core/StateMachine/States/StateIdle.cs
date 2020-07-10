@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
@@ -122,7 +123,14 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do we need to sell stuff
             if (LastBagSlotCheck.Run()
                 && IsVendorNpcNear()
-                && WowInterface.HookManager.GetFreeBagSlotCount() < Config.BagSlotsToGoSell)
+                && WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
+                && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
+                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
+                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
+                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
+                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
+                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
+                   .Any(e => e.Price > 0))
             {
                 StateMachine.SetState((int)BotState.Selling);
                 return;
