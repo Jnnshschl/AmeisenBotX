@@ -174,6 +174,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public ulong TargetGuid => RawWowUnit.Target;
 
+        public ulong SummonedByGuid => RawWowUnit.SummonedBy;
+
         public BitVector32 UnitFlags => RawWowUnit.Flags1;
 
         public BitVector32 UnitFlagsDynamic => RawWowUnit.DynamicFlags;

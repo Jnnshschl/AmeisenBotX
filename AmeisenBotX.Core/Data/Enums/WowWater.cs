@@ -11,6 +11,7 @@
         ConjuredSpringWater = 3772,
         ConjuredWater = 5350,
         ConjuredMineralWater = 8077,
+        MorningDewGlory = 8766,
         BubblingWater = 9451,
         ConjuredGlacierWater = 22018
     }

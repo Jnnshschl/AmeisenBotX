@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES, WeaponType.MISCELLANEOUS });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES, WeaponType.MISCELLANEOUS, WeaponType.STAVES, WeaponType.POLEARMS, WeaponType.THROWN, WeaponType.WANDS, WeaponType.DAGGERS });
 
         public override CombatClassRole Role => CombatClassRole.Tank;
 
@@ -131,6 +131,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.ObjectManager.Target != null)
             {
+                if ((WowInterface.ObjectManager.Player.IsFleeing 
+                    || WowInterface.ObjectManager.Player.IsDazed
+                    || WowInterface.ObjectManager.Player.IsDisarmed)
+                    && CastSpellIfPossible(berserkerRageSpell, 0, false))
+                {
+                    return;
+                }
+
                 double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
                 if (distanceToTarget > 8.0)

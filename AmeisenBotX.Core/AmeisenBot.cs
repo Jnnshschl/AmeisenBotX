@@ -220,6 +220,7 @@ namespace AmeisenBotX.Core
         public void Stop()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Stopping", LogLevel.Debug);
+            StateMachine.ShouldExit = true;
             RconClientTimer.Stop();
 
             if (Config.EnabledRconServer)
@@ -772,7 +773,7 @@ namespace AmeisenBotX.Core
             // ---------------- >
             WowInterface.EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
             WowInterface.EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
-            WowInterface.EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmBindOnPickup);
+            WowInterface.EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
             WowInterface.EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             WowInterface.EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
             WowInterface.EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
@@ -800,6 +801,11 @@ namespace AmeisenBotX.Core
             // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+        }
+
+        private void OnConfirmLootRoll(long timestamp, List<string> args)
+        {
+            WowInterface.HookManager.CofirmLootRoll();
         }
     }
 }

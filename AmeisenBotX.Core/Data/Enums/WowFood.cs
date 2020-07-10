@@ -20,6 +20,7 @@
         RawSlitherskinMackerel = 6303,
         Lolipop = 7803,
         ComjuredSourdough = 8075,
+        HomemadeCherryPie = 8950,
         ConjuredCroissant = 22019
     }
 }

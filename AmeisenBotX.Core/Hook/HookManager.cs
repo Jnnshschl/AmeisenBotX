@@ -151,7 +151,12 @@ namespace AmeisenBotX.Core.Hook
 
         public void CofirmBop()
         {
-            ClickUiElement("StaticPopup1Button1");
+            LuaDoString("ConfirmBindOnUse();");
+        }
+
+        public void CofirmLootRoll()
+        {
+            LuaDoString("ConfirmBindOnUse();");
         }
 
         public void CofirmReadyCheck(bool isReady)

@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Hook
 
         void CofirmBop();
 
+        void CofirmLootRoll();
+
         void CofirmReadyCheck(bool isReady);
 
         void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId);

@@ -89,6 +89,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
+        public bool ShouldExit { get; set; }
+
         public override void Execute()
         {
             // Handle Wow crash

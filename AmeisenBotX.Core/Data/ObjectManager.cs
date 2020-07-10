@@ -51,6 +51,10 @@ namespace AmeisenBotX.Core.Data
 
         public List<WowUnit> Partymembers { get; set; }
 
+        public List<WowUnit> PartyPets { get; private set; }
+
+        public List<ulong> PartyPetGuids { get; private set; }
+
         public WowUnit Pet { get; private set; }
 
         public ulong PetGuid { get; private set; }
@@ -106,7 +110,8 @@ namespace AmeisenBotX.Core.Data
                     && e.Guid != PlayerGuid
                     && !e.IsDead
                     && !e.IsNotAttackable
-                    && PartymemberGuids.Contains(e.TargetGuid)
+                    && (PartymemberGuids.Contains(e.TargetGuid)
+                        || PartyPetGuids.Contains(e.TargetGuid))
                     && e.Position.GetDistance(position) < distance)
                   .ToList();
             }
@@ -302,6 +307,9 @@ namespace AmeisenBotX.Core.Data
                 }
 
                 Partymembers = wowObjects.OfType<WowUnit>().Where(e => e.Guid == PlayerGuid || PartymemberGuids.Contains(e.Guid)).ToList();
+
+                PartyPets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
+                PartyPetGuids = PartyPets.Select(e => e.Guid).ToList();
             }
 
             OnObjectUpdateComplete?.Invoke(WowObjects);

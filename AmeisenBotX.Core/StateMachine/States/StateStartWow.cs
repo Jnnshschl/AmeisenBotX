@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             CheckTosAndEula();
 
-            if (File.Exists(Config.PathToWowExe))
+            if (!StateMachine.ShouldExit && File.Exists(Config.PathToWowExe))
             {
                 if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
                 {
