@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                 new Selector<MovementBlackboard>
                                 (
                                     "DoINeedToFindAPath",
-                                    (b) => DoINeedToFindAPath() && PathRefreshEvent.Run(),
+                                    (b) => DoINeedToFindAPath() && (Nodes == null || Nodes.Count == 0 || PathRefreshEvent.Run()),
                                     new Leaf<MovementBlackboard>
                                     (
                                         "FindPathToTargetPosition",
