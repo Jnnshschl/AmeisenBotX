@@ -28,6 +28,6 @@
 
         public float UnstuckDistance { get; set; } = 6.0f;
 
-        public double WaypointCheckThreshold { get; set; } = 1.0;
+        public double WaypointCheckThreshold { get; set; } = 2.0;
     }
 }

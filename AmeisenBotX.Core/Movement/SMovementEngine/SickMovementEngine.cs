@@ -28,6 +28,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 MovementWatchdog.Start();
             }
 
+            PathRefreshEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
 
@@ -60,7 +61,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             new Selector<MovementBlackboard>
                             (
                                 "IsDirectMovingState",
-                                (b) => IsDirectMovingState() && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0,
+                                (b) => IsDirectMovingState() && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < 5.0,
                                 new Leaf<MovementBlackboard>((b) =>
                                 {
                                     if (Nodes.Count > 0)
@@ -76,7 +77,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                 new Selector<MovementBlackboard>
                                 (
                                     "DoINeedToFindAPath",
-                                    (b) => DoINeedToFindAPath(),
+                                    (b) => DoINeedToFindAPath() && PathRefreshEvent.Run(),
                                     new Leaf<MovementBlackboard>
                                     (
                                         "FindPathToTargetPosition",
@@ -153,7 +154,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public float TargetRotation { get; private set; }
 
         public Vector3 UnstuckTargetPosition { get; private set; }
-
+        public TimegatedEvent PathRefreshEvent { get; }
         private TimegatedEvent JumpCheckEvent { get; }
 
         private Timer MovementWatchdog { get; }
@@ -259,12 +260,14 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             if (path != null && path.Count > 0)
             {
-                Nodes.Clear();
+                Queue<Vector3> newPath = new Queue<Vector3>();
 
                 for (int i = 0; i < path.Count; ++i)
                 {
-                    Nodes.Enqueue(path[i]);
+                    newPath.Enqueue(path[i]);
                 }
+
+                Nodes = newPath;
 
                 TargetPositionLastPathfinding = TargetPosition;
                 return BehaviorTreeStatus.Success;

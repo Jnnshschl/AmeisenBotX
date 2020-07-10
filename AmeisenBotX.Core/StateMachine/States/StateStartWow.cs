@@ -26,7 +26,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
 
                     WowInterface.WowProcess.WaitForInputIdle();
-                    Task.Delay(1000).Wait();
                     WowInterface.XMemory.Attach(WowInterface.WowProcess);
 
                     WowStart = DateTime.Now;

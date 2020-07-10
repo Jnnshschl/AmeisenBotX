@@ -1109,7 +1109,7 @@ namespace AmeisenBotX.Core.Hook
         private byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName] string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
-            if (WowInterface.XMemory.Process.HasExited || (!WowInterface.ObjectManager.IsWorldLoaded && !OverrideWorldCheck))
+            if (!IsWoWHooked || WowInterface.XMemory.Process.HasExited || (!WowInterface.ObjectManager.IsWorldLoaded && !OverrideWorldCheck))
             {
                 return null;
             }

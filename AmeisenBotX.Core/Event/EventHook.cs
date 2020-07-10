@@ -45,7 +45,10 @@ namespace AmeisenBotX.Core.Event
 
         public void Pull()
         {
-            if (!IsActive) { return; }
+            if (!IsActive || !WowInterface.HookManager.IsWoWHooked)
+            {
+                return;
+            }
 
             HandleSubEventQueue();
             HandleUnsubEventQueue();
