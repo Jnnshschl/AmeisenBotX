@@ -534,14 +534,14 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.Instance.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    if (WowInterface.HookManager.CanNeedOnRoll(rollId))
-                    {
-                        WowInterface.HookManager.RollOnItem(rollId, RollType.Need);
-                    }
-                    else
-                    {
-                        WowInterface.HookManager.RollOnItem(rollId, RollType.Greed);
-                    }
+                    // if (WowInterface.HookManager.CanNeedOnRoll(rollId))
+                    // {
+                    WowInterface.HookManager.RollOnItem(rollId, RollType.Need);
+                    // }
+                    // else
+                    // {
+                    //     WowInterface.HookManager.RollOnItem(rollId, RollType.Greed);
+                    // }
 
                     return;
                 }
