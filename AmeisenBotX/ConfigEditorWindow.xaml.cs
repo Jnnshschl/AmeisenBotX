@@ -79,6 +79,7 @@ namespace AmeisenBotX
             {
                 ConfigName = textboxConfigName.Text.Trim();
 
+                Config.AutoChangeRealmlist = checkboxAutoChangeRealmlist.IsChecked.GetValueOrDefault(false);
                 Config.AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false);
                 Config.AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
                 Config.AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false);
@@ -89,11 +90,14 @@ namespace AmeisenBotX
                 Config.BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty;
                 Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text);
                 Config.CustomCombatClassFile = textboxCombatClassFile.Text;
+                Config.DrinkUntilPercent = sliderDrinkUntil.Value;
                 Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
+                Config.EatUntilPercent = sliderEatUntil.Value;
                 Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
                 Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
                 Config.Friends = textboxFriends.Text;
+                Config.ItemSellBlacklist = textboxItemSellBlacklist.Text.Split(',');
                 Config.LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false);
                 Config.LootUnitsRadius = Math.Round(sliderLootRadius.Value);
                 Config.MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value);
@@ -107,9 +111,15 @@ namespace AmeisenBotX
                 Config.PathToWowExe = textboxWowPath.Text;
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
+                Config.Realmlist = textboxRealmlist.Text;
                 Config.ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false);
                 Config.SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false);
                 Config.SaveWowWindowPosition = checkboxSaveWowWindowPosition.IsChecked.GetValueOrDefault(false);
+                Config.SellBlueItems = checkboxSellBlueItems.IsChecked.GetValueOrDefault(false);
+                Config.SellGrayItems = checkboxSellGrayItems.IsChecked.GetValueOrDefault(false);
+                Config.SellGreenItems = checkboxSellGreenItems.IsChecked.GetValueOrDefault(false);
+                Config.SellPurpleItems = checkboxSellPurpleItems.IsChecked.GetValueOrDefault(false);
+                Config.SellWhiteItems = checkboxSellWhiteItems.IsChecked.GetValueOrDefault(false);
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
                 Config.Username = textboxUsername.Text;
@@ -251,27 +261,34 @@ namespace AmeisenBotX
 
         private void LoadConfigToUi()
         {
-            checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
-            checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
-            checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
-            textboxFriends.Text = Config.Friends;
+            checkboxAutoChangeRealmlist.IsChecked = Config.AutoChangeRealmlist;
             checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
             checkboxAutoLogin.IsChecked = Config.AutoLogin;
             checkboxAutoPositionWow.IsChecked = Config.AutoPositionWow;
             checkboxAutoStartWow.IsChecked = Config.AutostartWow;
             checkboxAvoidAoe.IsChecked = Config.AutoDodgeAoeSpells;
+            checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
             checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
+            checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
             checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
             checkboxLooting.IsChecked = Config.LootUnits;
+            checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
             checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
             checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
             checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
             checkboxSaveBotWindowPosition.IsChecked = Config.SaveBotWindowPosition;
             checkboxSaveWowWindowPosition.IsChecked = Config.SaveWowWindowPosition;
+            checkboxSellBlueItems.IsChecked = Config.SellBlueItems;
+            checkboxSellGrayItems.IsChecked = Config.SellGrayItems;
+            checkboxSellGreenItems.IsChecked = Config.SellGreenItems;
+            checkboxSellPurpleItems.IsChecked = Config.SellPurpleItems;
+            checkboxSellWhiteItems.IsChecked = Config.SellWhiteItems;
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
             comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
+            sliderDrinkUntil.Value = Config.DrinkUntilPercent;
+            sliderEatUntil.Value = Config.EatUntilPercent;
             sliderLootRadius.Value = Math.Round(Config.LootUnitsRadius);
             sliderMaxFollowDistance.Value = Config.MaxFollowDistance;
             sliderMaxFps.Value = Config.MaxFps;
@@ -280,9 +297,12 @@ namespace AmeisenBotX
             textboxCharacterSlot.Text = Config.CharacterSlot.ToString();
             textboxCombatClassFile.Text = Config.CustomCombatClassFile;
             textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
+            textboxFriends.Text = Config.Friends;
+            textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist);
             textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
             textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
             textboxPassword.Password = Config.Password;
+            textboxRealmlist.Text = Config.Realmlist;
             textboxUsername.Text = Config.Username;
             textboxWowPath.Text = Config.PathToWowExe;
         }
@@ -494,6 +514,22 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void SliderEatUntil_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelEatUntil.Content = $"Eat Until: {Math.Round(e.NewValue)} %";
+            }
+        }
+
+        private void SliderDrinkUntil_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelDrinkUntil.Content = $"Drink Until: {Math.Round(e.NewValue)} %";
+            }
         }
     }
 }

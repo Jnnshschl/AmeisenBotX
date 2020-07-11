@@ -69,15 +69,15 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do we need to eat something
             if (LastEatCheck.Run()
                 // Refreshment
-                && ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatHealthPercent
-                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkHealthPercent
+                && ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
                          && WowInterface.CharacterManager.HasRefreshmentInBag())
                      // Food
-                     || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatHealthPercent
+                     || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                          && WowInterface.CharacterManager.HasFoodInBag())
                      // Water
                      || (WowInterface.ObjectManager.Player.MaxMana > 0
-                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkHealthPercent
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
                          && WowInterface.CharacterManager.HasWaterInBag())))
             {
                 StateMachine.SetState((int)BotState.Eating);

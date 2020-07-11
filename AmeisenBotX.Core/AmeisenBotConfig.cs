@@ -42,11 +42,11 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = "";
 
-        public double DrinkHealthPercent { get; set; } = 75;
+        public double DrinkUntilPercent { get; set; } = 75;
 
         public bool DungeonUsePartyMode { get; set; } = false;
 
-        public double EatHealthPercent { get; set; } = 75;
+        public double EatUntilPercent { get; set; } = 75;
 
         public bool EnabledRconServer { get; set; } = false;
 
@@ -130,7 +130,9 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public bool StartWowAsChild { get; set; } = false;
+        public bool AutoChangeRealmlist { get; set; } = false;
+
+        public string Realmlist { get; set; } = "127.0.0.1";
 
         public double StateMachineTickMs { get; set; } = 50;
 
