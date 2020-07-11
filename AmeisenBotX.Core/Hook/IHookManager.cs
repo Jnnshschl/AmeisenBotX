@@ -79,6 +79,8 @@ namespace AmeisenBotX.Core.Hook
 
         string GetLootRollItemLink(int rollId);
 
+        bool CanNeedOnRoll(int rollId);
+
         string GetMoney();
 
         string GetMounts();

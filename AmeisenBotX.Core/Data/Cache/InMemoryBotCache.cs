@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -88,6 +90,7 @@ namespace AmeisenBotX.Core.Data.Cache
 
             if (File.Exists(FilePath))
             {
+                AmeisenLogger.Instance.Log("Cache", "Loading Cache", LogLevel.Debug);
                 using Stream stream = File.Open(FilePath, FileMode.Open);
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
 
@@ -110,6 +113,7 @@ namespace AmeisenBotX.Core.Data.Cache
                 }
                 catch
                 {
+                    AmeisenLogger.Instance.Log("Cache", "Deleting invalid cache", LogLevel.Debug);
                     stream.Close();
                     File.Delete(FilePath);
                     Clear();

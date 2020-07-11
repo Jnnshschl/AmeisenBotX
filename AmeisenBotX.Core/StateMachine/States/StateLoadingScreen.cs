@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Logging;
 using System;
 using System.Text;
 
@@ -12,6 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
+            AmeisenLogger.Instance.Log("LoadingScreen", "Entered loading screen");
         }
 
         public override void Execute()
@@ -42,6 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             WowInterface.MovementEngine.Reset();
             WowInterface.HookManager.StopClickToMoveIfActive();
+            AmeisenLogger.Instance.Log("LoadingScreen", "Exited loading screen");
         }
     }
 }

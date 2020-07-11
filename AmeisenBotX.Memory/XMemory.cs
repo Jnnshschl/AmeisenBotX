@@ -389,7 +389,7 @@ namespace AmeisenBotX.Memory
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
 
-            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            if (CreateProcess(null, $"{processCmd} -windowed", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 CloseHandle(processInformation.hProcess);
                 CloseHandle(processInformation.hThread);

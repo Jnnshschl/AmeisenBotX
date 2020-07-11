@@ -209,12 +209,15 @@ namespace AmeisenBotX.Core
 
             if (Config.EnabledRconServer)
             {
+                AmeisenLogger.Instance.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
                 RconClientTimer.Start();
             }
 
             WowInterface.BotCache.Load();
             SubscribeToWowEvents();
             IsRunning = true;
+
+            AmeisenLogger.Instance.Log("AmeisenBot", "Setup done", LogLevel.Debug);
         }
 
         public void Stop()
@@ -530,7 +533,16 @@ namespace AmeisenBotX.Core
                 if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                 {
                     AmeisenLogger.Instance.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
-                    WowInterface.HookManager.RollOnItem(rollId, RollType.Need);
+
+                    if (WowInterface.HookManager.CanNeedOnRoll(rollId))
+                    {
+                        WowInterface.HookManager.RollOnItem(rollId, RollType.Need);
+                    }
+                    else
+                    {
+                        WowInterface.HookManager.RollOnItem(rollId, RollType.Greed);
+                    }
+
                     return;
                 }
             }
@@ -773,6 +785,7 @@ namespace AmeisenBotX.Core
             // ---------------- >
             WowInterface.EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
             WowInterface.EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
+            WowInterface.EventHookManager.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
             WowInterface.EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
             WowInterface.EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             WowInterface.EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);

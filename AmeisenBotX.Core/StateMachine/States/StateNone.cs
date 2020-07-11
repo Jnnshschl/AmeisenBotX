@@ -1,4 +1,6 @@
-﻿namespace AmeisenBotX.Core.Statemachine.States
+﻿using AmeisenBotX.Logging;
+
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateNone : BasicState
     {
@@ -10,6 +12,7 @@
         {
             if (Config.AutostartWow)
             {
+                AmeisenLogger.Instance.Log("StateNone", "Need to start WoW");
                 StateMachine.SetState((int)BotState.StartWow);
             }
             else if (Config.AutoLogin)

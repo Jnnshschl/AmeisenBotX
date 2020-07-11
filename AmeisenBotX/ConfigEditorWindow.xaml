@@ -669,6 +669,88 @@
                     </Grid>
                 </Border>
             </TabItem>
+            <TabItem x:Name="tabitemMisc_Copy" Header="Rcon" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Label x:Name="labelCaching1" Content="Remote Control" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                            </Label.BorderBrush>
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxEnableRcon" Content="" HorizontalAlignment="Left" Margin="168,10,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="17">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <TextBox x:Name="textboxRconAddress" HorizontalAlignment="Left" Height="18" Margin="4,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="4" Style="{DynamicResource TextBoxStyleDark}" Text="https://localhost:47111">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <TextBox x:Name="textboxRconGUID" HorizontalAlignment="Left" Height="18" Margin="4,83,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="4" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelLootRadius_Copy" Content="Rcon GUID:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,58,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label x:Name="labelLootRadius_Copy1" Content="Rcon Base64 Image:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,106,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxRconImage" HorizontalAlignment="Left" Height="18" Margin="4,131,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="4" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Button x:Name="buttonOpenImage" Content="📁 Open Image" HorizontalAlignment="Left" Margin="4,154,0,0" VerticalAlignment="Top" Width="100" Height="18" Click="ButtonOpenImage_Click" TabIndex="7" FontSize="10" Style="{DynamicResource ButtonStyleDark}" FontFamily="Bahnschrift Light">
+                            <Button.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </Button.BorderBrush>
+                            <Button.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Button.Foreground>
+                            <Button.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </Button.Background>
+                        </Button>
+                    </Grid>
+                </Border>
+            </TabItem>
             <TabItem x:Name="tabitemMisc" Header="Misc" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
@@ -734,7 +816,7 @@
                         </TextBox>
                     </Grid>
                 </Border>
-            </TabItem>
+            </TabItem>            
         </TabControl>
     </Grid>
 </Window>

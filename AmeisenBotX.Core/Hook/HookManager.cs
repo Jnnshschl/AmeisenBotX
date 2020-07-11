@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptPartyInvite()
         {
-            LuaDoString("AcceptGroup();");
+            LuaDoString("AcceptGroup();StaticPopup_Hide(\"PARTY_INVITE\");");
         }
 
         public void AcceptQuest(int gossipId)
@@ -84,12 +84,17 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptSummon()
         {
-            LuaDoString("ConfirmSummon();");
+            LuaDoString("ConfirmSummon();StaticPopup_Hide(\"CONFIRM_SUMMON\");");
         }
 
         public void CancelSummon()
         {
             LuaDoString("CancelSummon();");
+        }
+
+        public bool CanNeedOnRoll(int rollId)
+        {
+            return bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("_,_,_,_,_,{v:0}=GetLootRollItemInfo(RollID);")), out bool result) && result;
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
@@ -151,12 +156,12 @@ namespace AmeisenBotX.Core.Hook
 
         public void CofirmBop()
         {
-            LuaDoString("ConfirmBindOnUse();");
+            LuaDoString("ConfirmBindOnUse();StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\")");
         }
 
         public void CofirmLootRoll()
         {
-            LuaDoString("ConfirmBindOnUse();");
+            CofirmBop();
         }
 
         public void CofirmReadyCheck(bool isReady)

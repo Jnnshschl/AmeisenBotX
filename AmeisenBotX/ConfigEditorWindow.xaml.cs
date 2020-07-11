@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Views;
 using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -93,6 +94,7 @@ namespace AmeisenBotX
                 Config.DrinkUntilPercent = sliderDrinkUntil.Value;
                 Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
                 Config.EatUntilPercent = sliderEatUntil.Value;
+                Config.EnabledRconServer = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
                 Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
                 Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
@@ -111,6 +113,9 @@ namespace AmeisenBotX
                 Config.PathToWowExe = textboxWowPath.Text;
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
+                Config.RconServerAddress = textboxRconAddress.Text;
+                Config.RconServerGuid = textboxRconGUID.Text;
+                Config.RconServerImage = textboxRconImage.Text;
                 Config.Realmlist = textboxRealmlist.Text;
                 Config.ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false);
                 Config.SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false);
@@ -270,6 +275,7 @@ namespace AmeisenBotX
             checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
             checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
             checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
+            checkboxEnableRcon.IsChecked = Config.EnabledRconServer;
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
             checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
@@ -302,6 +308,9 @@ namespace AmeisenBotX
             textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
             textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
             textboxPassword.Password = Config.Password;
+            textboxRconAddress.Text = Config.RconServerAddress;
+            textboxRconGUID.Text = Config.RconServerGuid;
+            textboxRconImage.Text = Config.RconServerImage;
             textboxRealmlist.Text = Config.Realmlist;
             textboxUsername.Text = Config.Username;
             textboxWowPath.Text = Config.PathToWowExe;
@@ -529,6 +538,20 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelDrinkUntil.Content = $"Drink Until: {Math.Round(e.NewValue)} %";
+            }
+        }
+
+        private void ButtonOpenImage_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "PNG|*.png|JPEG|*.jpg;"
+            };
+
+            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
+            {
+                string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
+                textboxRconImage.Text = $"data:image/{fileExtension};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
             }
         }
     }

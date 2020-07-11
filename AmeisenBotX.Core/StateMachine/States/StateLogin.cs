@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Logging;
 using System;
 using System.Text;
 
@@ -17,10 +18,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            if (!WowInterface.HookManager.IsWoWHooked)
-            {
-                WowInterface.HookManager.SetupEndsceneHook();
-            }
+            WowInterface.HookManager.SetupEndsceneHook();
         }
 
         public override void Execute()
@@ -34,11 +32,13 @@ namespace AmeisenBotX.Core.Statemachine.States
                     switch (gameState.ToUpper())
                     {
                         case "LOGIN":
+                            AmeisenLogger.Instance.Log("Login", "Logging in");
                             WowInterface.HookManager.LuaDoString($"if(AccountLoginUI and AccountLoginUI:IsVisible()) then DefaultServerLogin('{Config.Username}', '{Config.Password}');elseif (RealmList and RealmList:IsVisible()) then for i = 1, select('#', GetRealmCategories()), 1 do local numRealms = GetNumRealms(i);for j = 1, numRealms, 1 do local name, numCharacters = GetRealmInfo(i, j);if (name ~= nil and name == '{Config.Realm}') then ChangeRealm(i,j); RealmList:Hide();end end end end");
                             ++LoginCounter;
                             break;
 
                         case "CHARSELECT":
+                            AmeisenLogger.Instance.Log("Login", "Selecting Character");
                             WowInterface.HookManager.LuaDoString($"if(CharacterSelectUI and CharacterSelectUI:IsVisible()) then CharacterSelect_SelectCharacter({Config.CharacterSlot});EnterWorld();end");
                             StateMachine.SetState((int)BotState.Idle);
                             break;
