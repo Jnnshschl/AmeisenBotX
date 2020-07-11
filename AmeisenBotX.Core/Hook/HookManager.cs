@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool CanNeedOnRoll(int rollId)
         {
-            return bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("_,_,_,_,_,{v:0}=GetLootRollItemInfo(RollID);")), out bool result) && result;
+            return bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"_,_,_,_,_,{{v:0}}=GetLootRollItemInfo({rollId});")), out bool result) && result;
         }
 
         public void CastSpell(string name, bool castOnSelf = false)

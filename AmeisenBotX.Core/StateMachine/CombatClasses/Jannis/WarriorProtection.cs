@@ -32,6 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string heroicThrowSpell = "Heroic Throw";
         private const string lastStandSpell = "Last Stand";
         private const string mockingBlowSpell = "Mocking Blow";
+        private const string retaliationSpell = "Retaliation";
         private const string revengeSpell = "Revenge";
         private const string shieldBashSpell = "Shield Bash";
         private const string shieldBlockSpell = "Shield Block";
@@ -143,8 +144,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (distanceToTarget > 8.0)
                 {
-                    if (CastSpellIfPossible(heroicThrowSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (SwitchStance(battleStanceSpell) && CastSpellIfPossible(chargeSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                    if (CastSpellIfPossibleWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         return;
                     }
@@ -154,22 +154,40 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count;
 
                     if (nearEnemies > 2
-                        && CastSpellIfPossible(thunderClapSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        && CastSpellIfPossibleWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         return;
                     }
 
                     if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid)
                     {
-                        if ((SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(tauntSpell, WowInterface.ObjectManager.Target.Guid))
-                            || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10).Count() > 3 && CastSpellIfPossible(challengingShoutSpell, 0, true)))
+                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10).Count() > 3 && CastSpellIfPossible(challengingShoutSpell, 0, true))
+                            || CastSpellIfPossibleWarrior(tauntSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid))
+                        {
+                            return;
+                        }
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 25)
+                    {
+                        if (CastSpellIfPossibleWarrior(retaliationSpell, battleStanceSpell, 0))
+                        {
+                            return;
+                        }
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40)
+                    {
+                        if (CastSpellIfPossible(lastStandSpell, 0)
+                            || CastSpellIfPossibleWarrior(shieldWallSpell, defensiveStanceSpell, 0)
+                            || CastSpellIfPossibleWarrior(shieldBlockSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
                     }
 
                     if (WowInterface.ObjectManager.Target.IsCasting
-                        && (CastSpellIfPossible(shieldBashSpell, WowInterface.ObjectManager.Target.Guid)
+                        && (CastSpellIfPossibleWarrior(shieldBashSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid)
                             || CastSpellIfPossible(spellReflectionSpell, 0)))
                     {
                         return;
@@ -183,23 +201,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         }
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40)
-                    {
-                        if (CastSpellIfPossible(lastStandSpell, 0)
-                            || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(shieldWallSpell, 0))
-                            || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(shieldBlockSpell, WowInterface.ObjectManager.Target.Guid, true)))
-                        {
-                            return;
-                        }
-                    }
-
                     if (CastSpellIfPossible(berserkerRageSpell, 0, true)
                         || CastSpellIfPossible(shieldSlamSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || CastSpellIfPossible(mockingBlowSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || (nearEnemies > 2 && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(devastateSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(revengeSpell, WowInterface.ObjectManager.Target.Guid, true))
-                        || CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || CastSpellIfPossibleWarrior(revengeSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         return;
                     }

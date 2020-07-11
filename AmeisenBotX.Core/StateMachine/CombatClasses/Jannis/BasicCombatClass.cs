@@ -356,6 +356,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
+                    if (!WowInterface.ObjectManager.Player.HasBuffByName(requiredStance))
+                    {
+                        CastSpell(requiredStance, true);
+                    }
+
                     CastSpell(spellName, isTargetMyself);
                     return true;
                 }
