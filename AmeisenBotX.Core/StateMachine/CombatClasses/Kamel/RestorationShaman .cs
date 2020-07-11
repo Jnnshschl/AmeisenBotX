@@ -68,6 +68,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
             spellCoolDown.Add(Bloodlust, DateTime.Now);
             spellCoolDown.Add(tidalForceSpell, DateTime.Now);
+            spellCoolDown.Add(earthShieldSpell, DateTime.Now);
             //Totem
             spellCoolDown.Add(WindfuryTotemSpell, DateTime.Now);
             spellCoolDown.Add(StrengthofEarthTotemSpell, DateTime.Now);
@@ -235,7 +236,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
+                        if (partyMemberToHeal.Count >= 43 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
                         {
                             return;
                         }
@@ -250,10 +251,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
-                        {
-                            return;
-                        }
+                        //if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
+                        //{
+                        //    return;
+                        //}
 
                         if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 95 && CustomCastSpell(riptideSpell))
                         {
