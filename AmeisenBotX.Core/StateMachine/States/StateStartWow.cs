@@ -1,8 +1,11 @@
 ﻿using AmeisenBotX.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -21,7 +24,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             AmeisenLogger.Instance.Log("StartWow", "Setting TOS and EULA to 1 in config");
             CheckTosAndEula();
 
-            if(Config.AutoChangeRealmlist)
+            if (Config.AutoChangeRealmlist)
             {
                 AmeisenLogger.Instance.Log("StartWow", "Changing Realmlist");
                 ChangeRealmlist();
@@ -54,14 +57,22 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (File.Exists(configWtfPath))
                 {
                     File.SetAttributes(configWtfPath, FileAttributes.Normal);
-                    string[] content = File.ReadAllLines(configWtfPath);
+                    List<string> content = File.ReadAllLines(configWtfPath).ToList();
 
-                    for (int i = 0; i < content.Length; i++)
+                    bool found = false;
+                    for (int i = 0; i < content.Count; i++)
                     {
                         if (content[i].ToUpper().Contains("SET REALMLIST"))
                         {
                             content[i] = $"SET REALMLIST {Config.Realmlist}";
+                            found = true;
+                            break;
                         }
+                    }
+
+                    if (!found)
+                    {
+                        content.Add($"SET REALMLIST {Config.Realmlist}");
                     }
 
                     File.WriteAllLines(configWtfPath, content);

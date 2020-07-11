@@ -130,9 +130,9 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public bool AutoChangeRealmlist { get; set; } = false;
+        public bool AutoChangeRealmlist { get; set; } = true;
 
-        public string Realmlist { get; set; } = "127.0.0.1";
+        public string Realmlist { get; set; } = "152.89.105.84";
 
         public double StateMachineTickMs { get; set; } = 50;
 
