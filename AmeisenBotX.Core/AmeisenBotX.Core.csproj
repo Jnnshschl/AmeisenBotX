@@ -215,6 +215,7 @@
     <Compile Include="Jobs\Enums\JobType.cs" />
     <Compile Include="Jobs\Enums\MailBox.cs" />
     <Compile Include="Jobs\Profiles\Gathering\CopperElwynnForestProfile.cs" />
+    <Compile Include="Jobs\Profiles\Gathering\CopperTinSilverWestfallProfile.cs" />
     <Compile Include="Jobs\Profiles\IMiningProfile.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
     <Compile Include="Jobs\Profiles\IJobsProfiles.cs" />

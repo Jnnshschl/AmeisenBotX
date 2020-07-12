@@ -23,7 +23,8 @@ namespace AmeisenBotX.Core.Jobs
             WowInterface = wowInterface;
             MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
             MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
-            JobProfile = new CopperElwynnForestProfile();
+            //JobProfile = new CopperElwynnForestProfile();
+            JobProfile = new CopperTinSilverWestfallProfile();
         }
 
         public IJobProfile JobProfile { get; set; }
@@ -53,7 +54,8 @@ namespace AmeisenBotX.Core.Jobs
         }
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0)
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0
+                )
             {
                 //List<WowGameobject> Objectlist = WowInterface.ObjectManager.WowObjects
                 //.OfType<WowGameobject>() // only WowGameobjects
