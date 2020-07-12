@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability <= Config.ItemRepairThreshold))
+            if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold))
             {
                 WowInterface.CharacterManager.Equipment.Update();
                 StateMachine.SetState((int)BotState.Idle);
