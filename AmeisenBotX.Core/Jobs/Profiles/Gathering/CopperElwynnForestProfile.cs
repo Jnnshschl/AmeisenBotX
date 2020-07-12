@@ -11,12 +11,17 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
 
         public JobType JobType => JobType.Mining;
 
-        public List<Vector3> Mailboxes { get; private set; } = new List<Vector3>()
+        public List<Vector3> MailboxNodes { get; private set; } = new List<Vector3>()
         {
-           new Vector3(-9465, -69, 56),
-           new Vector3(-9249, -2144, 64)
+           new Vector3(-9456, 48, 56),
+           //new Vector3(-9249, -2144, 64)
         };
 
+        //public List<MailBox> MailBoxes { get; } = new List<MailBox>()
+        //{
+        //    MailBox.MailboxGoldShire
+        //}; 
+        
         public List<OreNodes> OreTypes { get; } = new List<OreNodes>()
         {
             OreNodes.Copper
@@ -24,9 +29,6 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
 
         public List<Vector3> Path { get; } = new List<Vector3>()
         {
-            new Vector3(-9144, 377, 91),
-            new Vector3(-9149, 371, 91),
-            new Vector3(-9154, 364, 90),
             new Vector3(-9159, 357, 89),
             new Vector3(-9163, 350, 88),
             new Vector3(-9167, 343, 86),

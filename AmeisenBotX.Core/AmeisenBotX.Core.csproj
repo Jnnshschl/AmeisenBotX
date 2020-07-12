@@ -213,6 +213,7 @@
     <Compile Include="Hook\HookManager.cs" />
     <Compile Include="Hook\IHookManager.cs" />
     <Compile Include="Jobs\Enums\JobType.cs" />
+    <Compile Include="Jobs\Enums\MailBox.cs" />
     <Compile Include="Jobs\Profiles\Gathering\CopperElwynnForestProfile.cs" />
     <Compile Include="Jobs\Profiles\IMiningProfile.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
