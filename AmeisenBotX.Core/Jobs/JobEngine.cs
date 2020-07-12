@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Jobs
         }
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0 && )
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0)
             {
                 //List<WowGameobject> Objectlist = WowInterface.ObjectManager.WowObjects
                 //.OfType<WowGameobject>() // only WowGameobjects
