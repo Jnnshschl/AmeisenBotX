@@ -31,7 +31,7 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\</OutputPath>
@@ -51,6 +51,10 @@
     <StartupObject>AmeisenBotX.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="fasmdll_managed, Version=1.0.5080.15965, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\fasmdll_managed.dll</HintPath>
+    </Reference>
     <Reference Include="GameOverlay, Version=4.2.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
