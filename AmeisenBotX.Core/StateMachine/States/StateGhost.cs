@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateGhost(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
+            Blackboard = new GhostBlackboard(wowInterface);
+
             DungeonSelector = new Selector<GhostBlackboard>
             (
                 (b) => Config.DungeonUsePartyMode,
@@ -52,7 +54,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                         new Leaf<GhostBlackboard>(RunToCorpseAndRetrieveIt)
                     )
                 ),
-                Blackboard
+                Blackboard,
+                TimeSpan.FromSeconds(1)
             );
         }
 
@@ -199,7 +202,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private void RunToNearestPortal(GhostBlackboard blackboard)
         {
-            if (blackboard.NearPortals.Count > 0)
+            if (blackboard.NearPortals?.Count > 0)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position);
             }

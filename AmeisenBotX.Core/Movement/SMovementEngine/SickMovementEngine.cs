@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                     new Selector<MovementBlackboard>
                                     (
                                         "NeedToCheckANode",
-                                        (b) => Nodes.Peek().GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold,
+                                        (b) => Nodes.Peek().GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold,
                                         new Leaf<MovementBlackboard>("CheckWaypoint", (b) =>
                                         {
                                             Nodes.Dequeue();

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Character.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
@@ -112,8 +113,15 @@ namespace AmeisenBotX.Core.Statemachine.States
             Vector3 posToGoToZMod = posToGoTo;
             posToGoToZMod.Z += 1f;
 
+            if (WowInterface.CharacterManager.Mounts.Count > 0 && PlayerToFollow != null && PlayerToFollow.IsMounted)
+            {
+                WowMount mount = WowInterface.CharacterManager.Mounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
+                WowInterface.HookManager.Mount(mount.Index);
+                return;
+            }
+
             if ((distance < 4.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
-                || (distance < 32.0 && zDiff < 0.0 && WowInterface.HookManager.IsInLineOfSight(playerPosZMod, posToGoToZMod))) // target is below us and in line of sight, just run down
+            || (distance < 32.0 && zDiff < 0.0 && WowInterface.HookManager.IsInLineOfSight(playerPosZMod, posToGoToZMod))) // target is below us and in line of sight, just run down
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
             }

@@ -11,7 +11,6 @@ namespace AmeisenBotX.BehaviorTree
         {
             RootNode = node;
             Blackboard = blackboard;
-            BlackboardUpdateTime = TimeSpan.FromSeconds(1);
             ResumeOngoingNodes = resumeOngoingNodes;
 
             BlackboardUpdateEnabled = false;
@@ -32,7 +31,6 @@ namespace AmeisenBotX.BehaviorTree
             Name = name;
             RootNode = node;
             Blackboard = blackboard;
-            BlackboardUpdateTime = TimeSpan.FromSeconds(1);
             ResumeOngoingNodes = resumeOngoingNodes;
 
             BlackboardUpdateEnabled = false;
