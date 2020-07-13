@@ -251,10 +251,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Water Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
-                        {
-                            return;
-                        }
+                        //if (!WowInterface.ObjectManager.Target.HasBuffByName("Water Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
+                        //{
+                        //    return;
+                        //}
 
                         if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 95 && CustomCastSpell(riptideSpell))
                         {

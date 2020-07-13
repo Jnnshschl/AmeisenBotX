@@ -23,8 +23,8 @@ namespace AmeisenBotX.Core.Jobs
             WowInterface = wowInterface;
             MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
             MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
-            //JobProfile = new CopperElwynnForestProfile();
-            JobProfile = new CopperTinSilverWestfallProfile();
+            JobProfile = new CopperElwynnForestProfile();
+            //JobProfile = new CopperTinSilverWestfallProfile();
         }
 
         public IJobProfile JobProfile { get; set; }
@@ -54,8 +54,7 @@ namespace AmeisenBotX.Core.Jobs
         }
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0
-                )
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0)
             {
                 //List<WowGameobject> Objectlist = WowInterface.ObjectManager.WowObjects
                 //.OfType<WowGameobject>() // only WowGameobjects
@@ -88,7 +87,7 @@ namespace AmeisenBotX.Core.Jobs
                             WowInterface.HookManager.WowObjectOnRightClick(nearNode);
                             WowInterface.HookManager.SendChatMessage("/y /run MailFrameTab2: Click()");
                             WowInterface.HookManager.SendChatMessage("/y /run for b = 0, 4 do for s = 0, 22 do l = GetContainerItemLink(b, s) if l and l:find('Copper Ore')then UseContainerItem(b, s) end end end");
-                            WowInterface.HookManager.SendChatMessage("/y /run SendMail('Kamel', 'Ore Farming', 'New items for you')") ;
+                            WowInterface.HookManager.SendChatMessage("/y /run SendMail('Jamsbaerx', 'Ore', 'New items for you')") ;
                             return;
                         }
                         return;
