@@ -104,25 +104,25 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         }),
                                         new Leaf<MovementBlackboard>("Move", (b) =>
                                         {
-                                            if (MountCheck.Run() && wowInterface.CharacterManager.Mounts.Count > 0 && wowInterface.HookManager.IsOutdoors())
-                                            {
-                                                WowMount mount = wowInterface.CharacterManager.Mounts[new Random().Next(0, wowInterface.CharacterManager.Mounts.Count)];
-                                                wowInterface.HookManager.Mount(mount.Index);
-                                                IsCastingMount = true;
-                                                return BehaviorTreeStatus.Ongoing;
-                                            }
-
-                                            if (IsCastingMount)
-                                            {
-                                                if (wowInterface.ObjectManager.Player.IsCasting)
-                                                {
-                                                    return BehaviorTreeStatus.Ongoing;
-                                                }
-                                                else
-                                                {
-                                                    IsCastingMount = false;
-                                                }
-                                            }
+                                            // if (MountCheck.Run() && wowInterface.CharacterManager.Mounts.Count > 0 && wowInterface.HookManager.IsOutdoors())
+                                            // {
+                                            //     WowMount mount = wowInterface.CharacterManager.Mounts[new Random().Next(0, wowInterface.CharacterManager.Mounts.Count)];
+                                            //     wowInterface.HookManager.Mount(mount.Index);
+                                            //     IsCastingMount = true;
+                                            //     return BehaviorTreeStatus.Ongoing;
+                                            // }
+                                            // 
+                                            // if (IsCastingMount)
+                                            // {
+                                            //     if (wowInterface.ObjectManager.Player.IsCasting)
+                                            //     {
+                                            //         return BehaviorTreeStatus.Ongoing;
+                                            //     }
+                                            //     else
+                                            //     {
+                                            //         IsCastingMount = false;
+                                            //     }
+                                            // }
 
                                             ShouldBeMoving = true;
                                             PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, Nodes.Peek(), TargetRotation);

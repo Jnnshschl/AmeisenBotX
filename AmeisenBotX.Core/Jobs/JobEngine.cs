@@ -15,14 +15,18 @@ namespace AmeisenBotX.Core.Jobs
 {
     public class JobEngine
     {
-        public JobEngine(WowInterface wowInterface)
+        public JobEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
             AmeisenLogger.Instance.Log("JobEngine", $"Initializing", LogLevel.Verbose);
 
             WowInterface = wowInterface;
+            Config = config;
+
             MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
             MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
         }
+
+        public AmeisenBotConfig Config { get; set; }
 
         public IJobProfile JobProfile { get; set; }
 
@@ -40,11 +44,14 @@ namespace AmeisenBotX.Core.Jobs
 
         public void Execute()
         {
-            switch (JobProfile.JobType)
+            if (JobProfile != null)
             {
-                case JobType.Mining:
-                    ExecuteMining((IMiningProfile)JobProfile);
-                    break;
+                switch (JobProfile.JobType)
+                {
+                    case JobType.Mining:
+                        ExecuteMining((IMiningProfile)JobProfile);
+                        break;
+                }
             }
         }
 
@@ -87,9 +94,9 @@ namespace AmeisenBotX.Core.Jobs
                         if (MailSentEvent.Run())
                         {
                             WowInterface.HookManager.WowObjectOnRightClick(nearNode);
-                            WowInterface.HookManager.SendChatMessage("/y /run MailFrameTab2: Click()");
-                            WowInterface.HookManager.SendChatMessage("/y /run for b = 0, 4 do for s = 0, 22 do l = GetContainerItemLink(b, s) if l and l:find('Copper Ore')then UseContainerItem(b, s) end end end");
-                            WowInterface.HookManager.SendChatMessage("/y /run SendMail('Kamel', 'Ore Farming', 'New items for you')");
+                            WowInterface.HookManager.ClickUiElement("MailFrameTab2");
+                            WowInterface.HookManager.LuaDoString("for b = 0, 4 do for s = 0, 22 do l = GetContainerItemLink(b, s) if l and l:find('Copper Ore')then UseContainerItem(b, s) end end end");
+                            WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
                             return;
                         }
                         return;
