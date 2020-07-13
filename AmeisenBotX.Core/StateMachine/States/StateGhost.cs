@@ -59,8 +59,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             );
         }
 
-        public Vector3 CorpsePosition { get; private set; }
-
         public bool NeedToEnterPortal { get; private set; }
 
         public TimegatedEvent PortalSearchEvent { get; private set; }
@@ -89,7 +87,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
-            CorpsePosition = default;
             NeedToEnterPortal = false;
         }
 
@@ -170,9 +167,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private BehaviorTreeStatus RunToCorpseAndRetrieveIt(GhostBlackboard blackboard)
         {
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(blackboard.CorpsePosition) > Config.GhostResurrectThreshold)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, CorpsePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, blackboard.CorpsePosition);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
