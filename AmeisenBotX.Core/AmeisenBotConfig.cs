@@ -28,21 +28,27 @@ namespace AmeisenBotX.Core
 
         public int BagSlotsToGoSell { get; set; } = 4;
 
-        public string BattlegroundEngine { get; set; } = "";
+        public string BattlegroundEngine { get; set; } = string.Empty;
 
         public bool BattlegroundUsePartyMode { get; set; } = false;
 
         public Rect BotWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
 
-        public string BuiltInCombatClassName { get; set; } = "";
+        public string BuiltInCombatClassName { get; set; } = string.Empty;
 
         public int CharacterSlot { get; set; } = 0;
 
         public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
 
-        public string CustomCombatClassFile { get; set; } = "";
+        public string CustomCombatClassFile { get; set; } = string.Empty;
 
         public double DrinkUntilPercent { get; set; } = 75;
+
+        public string JobEngineMailReceiver { get; set; } = string.Empty;
+
+        public string JobEngineMailHeader { get; set; } = string.Empty;
+
+        public string JobEngineMailText { get; set; } = string.Empty;
 
         public bool DungeonUsePartyMode { get; set; } = false;
 
@@ -58,7 +64,7 @@ namespace AmeisenBotX.Core
 
         public bool FollowSpecificCharacter { get; set; } = false;
 
-        public string Friends { get; set; } = "";
+        public string Friends { get; set; } = string.Empty;
 
         public double GhostCheckMs { get; set; } = 5000;
 
@@ -104,7 +110,7 @@ namespace AmeisenBotX.Core
 
         public string RconServerGuid { get; set; } = Guid.NewGuid().ToString();
 
-        public string RconServerImage { get; set; } = "";
+        public string RconServerImage { get; set; } = string.Empty;
 
         public double RconTickMs { get; set; } = 1000;
 
@@ -143,5 +149,7 @@ namespace AmeisenBotX.Core
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
+
+        public string JobProfile { get; set; } = string.Empty;
     }
 }

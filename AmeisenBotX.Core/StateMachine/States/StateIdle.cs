@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -33,12 +33,12 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            if (FirstStart)
+            if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
             {
                 while (!WowInterface.ObjectManager.IsWorldLoaded)
                 {
                     WowInterface.ObjectManager.RefreshIsWorldLoaded();
-                    Thread.Sleep(100);
+                    Task.Delay(100).Wait();
                 }
 
                 FirstStart = false;
@@ -49,11 +49,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowInterface.EventHookManager.Start();
                 }
-            }
 
-            WowInterface.CharacterManager.UpdateAll();
-            WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
-            WowInterface.HookManager.EnableClickToMove();
+                WowInterface.CharacterManager.UpdateAll();
+                WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
+                WowInterface.HookManager.EnableClickToMove();
+            }
         }
 
         public override void Execute()
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // we are in a dungeon
-            if (StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId)
+            if (WowInterface.ObjectManager.MapId.IsDungeonMap()
                 && !Config.DungeonUsePartyMode)
             {
                 StateMachine.SetState((int)BotState.Dungeon);

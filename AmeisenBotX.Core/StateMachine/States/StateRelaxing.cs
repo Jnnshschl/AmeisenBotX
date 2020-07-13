@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using System;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -17,8 +18,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             // if we are not in a group and in a relaxing zone
             if (WowInterface.ObjectManager.PartyleaderGuid == 0
-                && (Enum.IsDefined(typeof(ZoneId), WowInterface.ObjectManager.ZoneId)
-                && StateMachine.IsCapitalCityZone((ZoneId)WowInterface.ObjectManager.ZoneId)))
+                && Enum.IsDefined(typeof(ZoneId), WowInterface.ObjectManager.ZoneId)
+                && ((ZoneId)WowInterface.ObjectManager.ZoneId).IsCapitalCityZone(WowInterface.ObjectManager.Player.IsAlliance()))
             {
                 WowInterface.RelaxEngine.Execute();
             }

@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.Hook
         private const int MEM_ALLOC_GATEWAY_SIZE = 12;
         private readonly object hookLock = new object();
 
+        private ulong hookCalls;
+
         public HookManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
@@ -46,15 +48,26 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr EndsceneReturnAddress { get; private set; }
 
-        public bool IsWoWHooked => WowInterface.XMemory.Read(EndsceneAddress, out byte c) ? c == 0xE9 : false;
+        public ulong HookCallCount
+        {
+            get
+            {
+                unchecked
+                {
+                    ulong val = hookCalls;
+                    hookCalls = 0;
+                    return val;
+                }
+            }
+        }
+
+        public bool IsWoWHooked => WowInterface.XMemory.Read(EndsceneAddress, out byte c) && c == 0xE9;
 
         public byte[] OriginalEndsceneBytes { get; private set; }
 
         public bool OverrideWorldCheck { get; private set; }
 
         public IntPtr OverrideWorldCheckAddress { get; private set; }
-
-        public ulong PendingCallCount { get; set; }
 
         public IntPtr ReturnValueAddress { get; private set; }
 
@@ -549,12 +562,12 @@ namespace AmeisenBotX.Core.Hook
 
         public bool HasUnitStealableBuffs(WowLuaUnit luaUnit)
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,{{v:1}}=UnitAura(\"{luaUnit}\",i);if {{v:1}}==1 then {{v:0}}=1;end end")), out int result) ? result == 1 : false;
+            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,{{v:1}}=UnitAura(\"{luaUnit}\",i);if {{v:1}}==1 then {{v:0}}=1;end end")), out int result) && result == 1;
         }
 
         public bool IsBgInviteReady()
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end")), out int result) ? result == 1 : false;
+            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end")), out int result) && result == 1;
         }
 
         public bool IsClickToMoveActive()
@@ -584,7 +597,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsOutdoors()
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) ? result == 1 : false;
+            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) && result == 1;
         }
 
         public bool IsRuneReady(int runeId)
@@ -594,7 +607,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsSpellKnown(int spellId, bool isPetSpell = false)
         {
-            return bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLFGInfoServer({spellId}, {isPetSpell});")), out bool result) ? result : false;
+            return bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLFGInfoServer({spellId}, {isPetSpell});")), out bool result) && result;
         }
 
         public void KickNpcsOutOfVehicle()
@@ -1131,8 +1144,6 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ", LogLevel.Verbose);
             AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}", LogLevel.Verbose);
 
-            ++PendingCallCount;
-
             lock (hookLock)
             {
                 fullStopwatch = Stopwatch.StartNew();
@@ -1234,7 +1245,7 @@ namespace AmeisenBotX.Core.Hook
             fullStopwatch.Stop();
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
 
-            --PendingCallCount;
+            ++hookCalls;
             return returnBytes.ToArray();
         }
 

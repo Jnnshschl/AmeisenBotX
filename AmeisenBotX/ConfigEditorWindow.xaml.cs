@@ -134,16 +134,23 @@ namespace AmeisenBotX
             }
         }
 
+        public bool ChangedSomething { get; set; }
+
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
-            ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
-            confirmWindow.ShowDialog();
-
-            if (confirmWindow.OkayPressed)
+            if (ChangedSomething)
             {
-                Cancel = true;
-                Close();
+                ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
+                confirmWindow.ShowDialog();
+
+                if (!confirmWindow.OkayPressed)
+                {
+                    return;
+                }
             }
+
+            Cancel = true;
+            Close();
         }
 
         private void ButtonOpenCombatClassFile_Click(object sender, RoutedEventArgs e)
@@ -156,6 +163,7 @@ namespace AmeisenBotX
             if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
                 textboxCombatClassFile.Text = openFileDialog.FileName;
+                ChangedSomething = true;
             }
         }
 
@@ -169,6 +177,7 @@ namespace AmeisenBotX
             if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
                 textboxWowPath.Text = openFileDialog.FileName;
+                ChangedSomething = true;
             }
         }
 
@@ -178,6 +187,7 @@ namespace AmeisenBotX
             {
                 textboxWowPath.IsEnabled = true;
                 buttonOpenWowExe.IsEnabled = true;
+                ChangedSomething = true;
             }
         }
 
@@ -188,6 +198,7 @@ namespace AmeisenBotX
                 textboxWowPath.IsEnabled = false;
                 textboxWowPath.Text = string.Empty;
                 buttonOpenWowExe.IsEnabled = false;
+                ChangedSomething = true;
             }
         }
 
@@ -198,6 +209,7 @@ namespace AmeisenBotX
                 buttonOpenCombatClassFile.Visibility = Visibility.Hidden;
                 textboxCombatClassFile.Visibility = Visibility.Hidden;
                 comboboxBuiltInCombatClass.Visibility = Visibility.Visible;
+                ChangedSomething = true;
             }
         }
 
@@ -208,6 +220,7 @@ namespace AmeisenBotX
                 buttonOpenCombatClassFile.Visibility = Visibility.Visible;
                 textboxCombatClassFile.Visibility = Visibility.Visible;
                 comboboxBuiltInCombatClass.Visibility = Visibility.Hidden;
+                ChangedSomething = true;
             }
         }
 
@@ -216,6 +229,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 textboxFollowSpecificCharacterName.IsEnabled = true;
+                ChangedSomething = true;
             }
         }
 
@@ -225,6 +239,7 @@ namespace AmeisenBotX
             {
                 textboxFollowSpecificCharacterName.IsEnabled = false;
                 textboxFollowSpecificCharacterName.Text = string.Empty;
+                ChangedSomething = true;
             }
         }
 
@@ -233,6 +248,7 @@ namespace AmeisenBotX
             if (textboxFriends != null)
             {
                 textboxFriends.IsEnabled = true;
+                ChangedSomething = true;
             }
         }
 
@@ -241,6 +257,7 @@ namespace AmeisenBotX
             if (textboxFriends != null)
             {
                 textboxFriends.IsEnabled = false;
+                ChangedSomething = true;
             }
         }
 
@@ -251,6 +268,7 @@ namespace AmeisenBotX
                 if (comboboxBattlegroundEngine.SelectedItem == null || comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
                 {
                     labelBattlegroundEngineDescription.Content = "...";
+                    ChangedSomething = true;
                 }
                 else
                 {
@@ -259,6 +277,7 @@ namespace AmeisenBotX
                     if (battlegroundEngine != null)
                     {
                         labelBattlegroundEngineDescription.Content = battlegroundEngine.Description;
+                        ChangedSomething = true;
                     }
                 }
             }
@@ -314,6 +333,8 @@ namespace AmeisenBotX
             textboxRealmlist.Text = Config.Realmlist;
             textboxUsername.Text = Config.Username;
             textboxWowPath.Text = Config.PathToWowExe;
+
+            ChangedSomething = false;
         }
 
         private void SliderLootRadius_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -321,6 +342,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelLootRadius.Content = $"Loot Radius: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
             }
         }
 
@@ -329,6 +351,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFollowDistance.Content = $"Max Follow Distance: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
             }
         }
 
@@ -337,6 +360,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFps.Content = $"Max FPS: {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
             }
         }
 
@@ -345,6 +369,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFpsCombat.Content = $"Max FPS Combat: {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
             }
         }
 
@@ -353,6 +378,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMinFollowDistance.Content = $"Min Follow Distance: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
             }
         }
 
@@ -530,6 +556,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelEatUntil.Content = $"Eat Until: {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
             }
         }
 
@@ -538,6 +565,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelDrinkUntil.Content = $"Drink Until: {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
             }
         }
 
@@ -552,6 +580,7 @@ namespace AmeisenBotX
             {
                 string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
                 textboxRconImage.Text = $"data:image/{fileExtension};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
+                ChangedSomething = true;
             }
         }
     }

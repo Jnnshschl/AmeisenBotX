@@ -1,11 +1,8 @@
 ﻿using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -49,6 +46,28 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
+        public override void Execute()
+        {
+            if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
+            {
+                StateMachine.SetState((int)BotState.None);
+                return;
+            }
+
+            if (Config.AutoLogin)
+            {
+                StateMachine.SetState((int)BotState.Login);
+            }
+            else
+            {
+                StateMachine.SetState((int)BotState.Idle);
+            }
+        }
+
+        public override void Exit()
+        {
+        }
+
         private void ChangeRealmlist()
         {
             try
@@ -83,28 +102,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 AmeisenLogger.Instance.Log("StartWow", "Cannot write realmlist to config.wtf");
             }
-        }
-
-        public override void Execute()
-        {
-            if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
-            {
-                StateMachine.SetState((int)BotState.None);
-                return;
-            }
-
-            if (Config.AutoLogin)
-            {
-                StateMachine.SetState((int)BotState.Login);
-            }
-            else
-            {
-                StateMachine.SetState((int)BotState.Idle);
-            }
-        }
-
-        public override void Exit()
-        {
         }
 
         private void CheckTosAndEula()

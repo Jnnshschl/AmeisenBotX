@@ -20,8 +20,8 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
         //public List<MailBox> MailBoxes { get; } = new List<MailBox>()
         //{
         //    MailBox.MailboxGoldShire
-        //}; 
-        
+        //};
+
         public List<OreNodes> OreTypes { get; } = new List<OreNodes>()
         {
             OreNodes.Copper
@@ -497,5 +497,10 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
             new Vector3(-9235, -627, 62),
             new Vector3(-9242, -631, 63),
         };
+
+        public override string ToString()
+        {
+            return $"[{JobType}] (Copper) Elwynn Forest (Kamel)";
+        }
     }
 }

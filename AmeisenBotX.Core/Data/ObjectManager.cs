@@ -20,7 +20,6 @@ namespace AmeisenBotX.Core.Data
         {
             WowInterface = wowInterface;
 
-            IsWorldLoaded = true;
             wowObjects = new List<WowObject>();
             PartymemberGuids = new List<ulong>();
         }
@@ -51,9 +50,9 @@ namespace AmeisenBotX.Core.Data
 
         public List<WowUnit> Partymembers { get; set; }
 
-        public List<WowUnit> PartyPets { get; private set; }
-
         public List<ulong> PartyPetGuids { get; private set; }
+
+        public List<WowUnit> PartyPets { get; private set; }
 
         public WowUnit Pet { get; private set; }
 

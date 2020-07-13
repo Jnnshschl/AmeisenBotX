@@ -13,9 +13,17 @@ namespace AmeisenBotX.Core.Hook
     {
         bool IsWoWHooked { get; }
 
-        ulong PendingCallCount { get; }
+        ulong HookCallCount { get; }
 
         void AcceptBattlegroundInvite();
+
+        void DeclinePartyInvite();
+
+        void DeclineResurrect();
+
+        void Dismount();
+
+        void Mount(int index);
 
         void AcceptPartyInvite();
 
@@ -24,6 +32,8 @@ namespace AmeisenBotX.Core.Hook
         void AcceptResurrect();
 
         void AcceptSummon();
+
+        bool CanNeedOnRoll(int rollId);
 
         void CastSpell(string name, bool castOnSelf = false);
 
@@ -78,8 +88,6 @@ namespace AmeisenBotX.Core.Hook
         string GetLocalizedText(string variable);
 
         string GetLootRollItemLink(int rollId);
-
-        bool CanNeedOnRoll(int rollId);
 
         string GetMoney();
 

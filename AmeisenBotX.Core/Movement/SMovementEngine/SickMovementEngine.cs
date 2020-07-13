@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
+using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
@@ -14,6 +15,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 {
     public class SickMovementEngine : IMovementEngine
     {
+        public bool IsCastingMount { get; set; }
+
         public SickMovementEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
@@ -30,6 +33,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             PathRefreshEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(1));
             PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
@@ -86,7 +90,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                     new Selector<MovementBlackboard>
                                     (
                                         "NeedToCheckANode",
-                                        (b) => Nodes.Peek().GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold,
+                                        (b) => Nodes.Peek().GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold,
                                         new Leaf<MovementBlackboard>("CheckWaypoint", (b) =>
                                         {
                                             Nodes.Dequeue();
@@ -100,6 +104,26 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         }),
                                         new Leaf<MovementBlackboard>("Move", (b) =>
                                         {
+                                            // if (MountCheck.Run() && wowInterface.CharacterManager.Mounts.Count > 0 && wowInterface.HookManager.IsOutdoors())
+                                            // {
+                                            //     WowMount mount = wowInterface.CharacterManager.Mounts[new Random().Next(0, wowInterface.CharacterManager.Mounts.Count)];
+                                            //     wowInterface.HookManager.Mount(mount.Index);
+                                            //     IsCastingMount = true;
+                                            //     return BehaviorTreeStatus.Ongoing;
+                                            // }
+                                            // 
+                                            // if (IsCastingMount)
+                                            // {
+                                            //     if (wowInterface.ObjectManager.Player.IsCasting)
+                                            //     {
+                                            //         return BehaviorTreeStatus.Ongoing;
+                                            //     }
+                                            //     else
+                                            //     {
+                                            //         IsCastingMount = false;
+                                            //     }
+                                            // }
+
                                             ShouldBeMoving = true;
                                             PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, Nodes.Peek(), TargetRotation);
                                             return BehaviorTreeStatus.Ongoing;
@@ -137,6 +161,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public TimegatedEvent PathDecayEvent { get; private set; }
 
+        public TimegatedEvent PathRefreshEvent { get; }
+
         public BasicVehicle PlayerVehicle { get; }
 
         public bool ShouldBeMoving { get; private set; }
@@ -154,9 +180,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public float TargetRotation { get; private set; }
 
         public Vector3 UnstuckTargetPosition { get; private set; }
-        public TimegatedEvent PathRefreshEvent { get; }
-        private TimegatedEvent JumpCheckEvent { get; }
 
+        private TimegatedEvent JumpCheckEvent { get; }
+        public TimegatedEvent MountCheck { get; }
         private Timer MovementWatchdog { get; }
 
         private WowInterface WowInterface { get; }
@@ -220,8 +246,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         private bool DoINeedToFindAPath()
         {
             return Path == null
-                || Path.Count == 0 
-                || PathDecayEvent.Run() 
+                || Path.Count == 0
+                || PathDecayEvent.Run()
                 || TargetPositionLastPathfinding.GetDistance(TargetPosition) > 1.0;
         }
 

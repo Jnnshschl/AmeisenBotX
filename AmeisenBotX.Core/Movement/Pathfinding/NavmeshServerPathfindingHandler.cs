@@ -27,6 +27,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveToPosition);
         }
 
+        public List<Vector3> GetPath(int mapId, Vector3 start, float maxRadius)
+        {
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, Vector3.Zero, maxRadius, MovementType.GetRandomPoint);
+        }
+
+        public List<Vector3> GetRandomPoint(int mapId)
+        {
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, Vector3.Zero, Vector3.Zero, 0f, MovementType.GetRandomPoint);
+        }
+
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
             List<Vector3> path = BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveAlongSurface);
@@ -37,16 +47,6 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             }
 
             return path.FirstOrDefault();
-        }
-
-        public List<Vector3> GetRandomPoint(int mapId)
-        {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, Vector3.Zero, Vector3.Zero, 0f, MovementType.GetRandomPoint);
-        }
-
-        public List<Vector3> GetPath(int mapId, Vector3 start, float maxRadius)
-        {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, Vector3.Zero, maxRadius, MovementType.GetRandomPoint);
         }
 
         private T BuildAndSendPathRequest<T>(int mapId, Vector3 start, Vector3 end, float maxRadius, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
