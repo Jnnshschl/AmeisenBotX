@@ -15,5 +15,6 @@
         MorningDewGlory = 8766,
         BubblingWater = 9451,
         ConjuredGlacierWater = 22018
+        FilteredDraenicWater = 28399,
     }
 }

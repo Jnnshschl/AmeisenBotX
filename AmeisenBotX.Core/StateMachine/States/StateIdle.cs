@@ -49,11 +49,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowInterface.EventHookManager.Start();
                 }
-
-                WowInterface.CharacterManager.UpdateAll();
-                WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
-                WowInterface.HookManager.EnableClickToMove();
             }
+
+            WowInterface.CharacterManager.UpdateAll();
+            WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
+            WowInterface.HookManager.EnableClickToMove();
         }
 
         public override void Execute()

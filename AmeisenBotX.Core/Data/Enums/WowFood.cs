@@ -25,6 +25,7 @@
         DriedKingBolete = 8948,
         HomemadeCherryPie = 8950,
         RoastedQuail = 8952,
-        ConjuredCroissant = 22019
+        ConjuredCroissant = 22019,
+        SmokedTalbukVenison = 27854
     }
 }
