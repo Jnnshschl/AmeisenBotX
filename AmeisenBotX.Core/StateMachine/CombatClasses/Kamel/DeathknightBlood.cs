@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public TalentTree Talents { get; } = null;
 
+        public bool TargetInLineOfSight { get; set; }
+
         public TargetManager TargetManager { get; internal set; }
 
         public string Version => "1.0";
@@ -56,8 +58,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private IHookManager HookManager { get; }
 
         private IObjectManager ObjectManager { get; }
-
-        public bool TargetInLineOfSight { get; set; }
 
         public void Execute()
         {

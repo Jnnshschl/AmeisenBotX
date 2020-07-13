@@ -143,5 +143,7 @@ namespace AmeisenBotX.Core
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
+
+        public string JobProfile { get; set; } = string.Empty;
     }
 }

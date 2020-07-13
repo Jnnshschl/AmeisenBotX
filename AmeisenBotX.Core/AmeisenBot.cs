@@ -15,6 +15,8 @@ using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
+using AmeisenBotX.Core.Jobs.Profiles;
+using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Movement.SMovementEngine;
@@ -103,6 +105,7 @@ namespace AmeisenBotX.Core
 
             InitCombatClasses();
             InitBattlegroundEngines();
+            InitJobProfiles();
 
             if (config.UseBuiltInCombatClass)
             {
@@ -113,14 +116,15 @@ namespace AmeisenBotX.Core
                 LoadCustomCombatClass();
             }
 
-            LoadBattlegroundEngine();
-
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
             if (WowInterface.CombatClass?.ItemComparator != null)
             {
                 WowInterface.CharacterManager.ItemComparator = WowInterface.CombatClass.ItemComparator;
             }
+
+            LoadBattlegroundEngine();
+            LoadJobProfile();
         }
 
         public delegate void CombatClassCompilationStatus(bool succeeded, string heading, string message);
@@ -129,7 +133,7 @@ namespace AmeisenBotX.Core
 
         public string AccountName { get; }
 
-        public List<IBattlegroundEngine> BattlegroundEngines { get; set; }
+        public List<IBattlegroundEngine> BattlegroundEngines { get; private set; }
 
         public string BotDataPath { get; }
 
@@ -152,6 +156,8 @@ namespace AmeisenBotX.Core
         public bool FirstStart { get; set; }
 
         public bool IsRunning { get; private set; }
+
+        public List<IJobProfile> JobProfiles { get; private set; }
 
         public IntPtr MainWindowHandle { get; private set; }
 
@@ -193,6 +199,8 @@ namespace AmeisenBotX.Core
             }
 
             LoadBattlegroundEngine();
+
+            LoadJobProfile();
         }
 
         public void Resume()
@@ -374,6 +382,17 @@ namespace AmeisenBotX.Core
             };
         }
 
+        private void InitJobProfiles()
+        {
+            // Add your custom job profiles here!
+            // ---------------------------------- >
+            JobProfiles = new List<IJobProfile>
+            {
+                new CopperElwynnForestProfile(),
+                new CopperTinSilverWestfallProfile()
+            };
+        }
+
         private void LoadBattlegroundEngine()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
@@ -431,6 +450,13 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
             WowInterface.CombatClass = CombatClasses
                 .FirstOrDefault(e => e.ToString().Equals(Config.BuiltInCombatClassName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void LoadJobProfile()
+        {
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in JobProfile: {Config.JobProfile}", LogLevel.Verbose);
+            WowInterface.JobEngine.JobProfile = JobProfiles
+                .FirstOrDefault(e => e.ToString().Equals(Config.BattlegroundEngine, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadWowWindowPosition()
@@ -491,6 +517,11 @@ namespace AmeisenBotX.Core
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
             WowInterface.HookManager.CofirmBop();
+        }
+
+        private void OnConfirmLootRoll(long timestamp, List<string> args)
+        {
+            WowInterface.HookManager.CofirmLootRoll();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
@@ -813,12 +844,7 @@ namespace AmeisenBotX.Core
             // Misc Events
             // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
-        }
-
-        private void OnConfirmLootRoll(long timestamp, List<string> args)
-        {
-            WowInterface.HookManager.CofirmLootRoll();
+            WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }
     }
 }

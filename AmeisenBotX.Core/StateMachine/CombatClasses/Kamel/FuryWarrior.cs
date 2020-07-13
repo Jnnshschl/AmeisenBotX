@@ -1,50 +1,44 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
-    class FuryWarrior : BasicKamelClass
+    internal class FuryWarrior : BasicKamelClass
     {
-
         private const string battleStanceSpell = "Battle Stance";
-        private const string berserkerStanceSpell = "Berserker Stance";
         private const string berserkerRageSpell = "Berserker Rage";
+        private const string berserkerStanceSpell = "Berserker Stance";
         private const string bladestormSpell = "Bladestorm";
+        private const string bloodrageSpell = "Bloodrage";
         private const string bloodthirstSpell = "Bloodthirst";
         private const string chargeSpell = "Charge";
         private const string cleaveSpell = "Cleave";
         private const string commandingShoutSpell = "Commanding Shout";
+        private const string deathWishSpell = "Death Wish";
+        private const string defensiveStanceSpell = "Defensive Stance";
         private const string disarmSpell = "Disarm";
+        private const string enragedregenerationSpell = "Enraged Regeneration";
         private const string executeSpell = "Execute";
         private const string hamstringSpell = "Hamstring";
+        private const string heroicFurySpell = "Heroic Fury";
         private const string heroicStrikeSpell = "Heroic Strike";
         private const string heroicThrowSpell = "Heroic Throw";
-        private const string heroicFurySpell = "Heroic Fury";
         private const string interceptSpell = "Intercept";
         private const string intimidatingShoutSpell = "Intimidating Shout";
-        private const string rendSpell = "Rend";
-        private const string whirlwindSpell = "Whirlwind";
-        private const string retaliationSpell = "Retaliation";
-        private const string enragedregenerationSpell = "Enraged Regeneration";
-        private const string bloodrageSpell = "Bloodrage";
         private const string pummelSpell = "Pummel";
-        private const string slamSpell = "Slam";
         private const string recklessnessSpell = "Recklessness";
-        private const string defensiveStanceSpell = "Defensive Stance";
-        private const string deathWishSpell = "Death Wish";
-
-        Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        private const string rendSpell = "Rend";
+        private const string retaliationSpell = "Retaliation";
+        private const string slamSpell = "Slam";
+        private const string whirlwindSpell = "Whirlwind";
+        private Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public FuryWarrior(WowInterface wowInterface) : base()
         {
@@ -72,8 +66,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override string Author => "Kamel";
 
-        public override bool WalkBehindEnemy => false;
-
         public override WowClass Class => WowClass.Warrior;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
@@ -86,13 +78,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override bool IsMelee => true;
 
-        public override bool UseAutoAttacks => true;
-
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -129,6 +117,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             },
             Tree3 = new Dictionary<int, Talent>(),
         };
+
+        public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {
@@ -274,7 +268,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         spellCoolDown[pummelSpell] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(pummelSpell));
                         return;
                     }
-
                 }
                 else//Range
                 {
@@ -309,7 +302,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     // AmeisenLogger.Instance.Log("FuryWarri", $"Target: {nearTarget}");
                 }
             }
-
         }
 
         public override void OutOfCombatExecute()
@@ -338,7 +330,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     WowInterface.HookManager.CastSpell("Mechano-hog");
                 }
             }
-
         }
 
         private void CustomCastSpell(string spell, string stance = "Berserker Stance")

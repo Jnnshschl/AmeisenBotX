@@ -28,7 +28,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
             </Button.Background>
             <Button.Foreground>
-                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
         <Rectangle Margin="0,27,0,0" Height="1" VerticalAlignment="Top">
@@ -602,6 +602,23 @@
                     </Grid>
                 </Border>
             </TabItem>
+            <TabItem x:Name="tabitemJobs" Header="Jobs" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Label x:Name="labelCombatClass1" Content="Job Engine" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                            </Label.BorderBrush>
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                    </Grid>
+                </Border>
+            </TabItem>
             <TabItem x:Name="tabitemBattleground" Header="Battleground" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
@@ -816,7 +833,7 @@
                         </TextBox>
                     </Grid>
                 </Border>
-            </TabItem>            
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

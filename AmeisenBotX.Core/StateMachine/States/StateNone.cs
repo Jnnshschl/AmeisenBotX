@@ -15,14 +15,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                 AmeisenLogger.Instance.Log("StateNone", "Need to start WoW");
                 StateMachine.SetState((int)BotState.StartWow);
             }
-            else if (Config.AutoLogin)
-            {
-                StateMachine.SetState((int)BotState.Login);
-            }
-            else
-            {
-                StateMachine.SetState((int)BotState.Idle);
-            }
         }
 
         public override void Execute()

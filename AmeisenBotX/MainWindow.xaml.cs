@@ -9,6 +9,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Overlay;
 using AmeisenBotX.Overlay.Utils;
+using AmeisenBotX.StateConfig;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -64,6 +65,8 @@ namespace AmeisenBotX
         private readonly Brush warriorSecondaryBrush = new SolidColorBrush(Color.FromRgb(255, 0, 0));
 
         #endregion ClassBrushes
+
+        private Dictionary<BotState, Window> StateConfigWindows;
 
         public MainWindow()
         {
@@ -177,6 +180,21 @@ namespace AmeisenBotX
             }
         }
 
+        private void ButtonStateConfig_Click(object sender, RoutedEventArgs e)
+        {
+            if (StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem))
+            {
+                Window selectedWindow = StateConfigWindows[(BotState)comboboxStateOverride.SelectedItem];
+                selectedWindow.ShowDialog();
+
+                if (((IStateConfigWindow)selectedWindow).ShouldSave)
+                {
+                    AmeisenBot.Config = ((IStateConfigWindow)selectedWindow).Config;
+                    AmeisenBot.ReloadConfig();
+                }
+            }
+        }
+
         private void ButtonToggleAutopilot_Click(object sender, RoutedEventArgs e)
         {
             AmeisenBot.Config.Autopilot = !AmeisenBot.Config.Autopilot;
@@ -212,6 +230,7 @@ namespace AmeisenBotX
             if (AmeisenBot != null)
             {
                 AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+                buttonStateConfig.IsEnabled = StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem);
             }
         }
 
@@ -442,8 +461,8 @@ namespace AmeisenBotX
 
             // HookCall label
             // -------------- >
-            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.PendingCallCount.ToString().PadLeft(2);
-            if (AmeisenBot.WowInterface.HookManager.PendingCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
+            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString().PadLeft(2);
+            if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
                 labelHookCallCount.Foreground = currentTickTimeGoodBrush;
             }
@@ -469,6 +488,12 @@ namespace AmeisenBotX
             Overlay?.Exit();
             InfoWindow?.Close();
             MapWindow?.Close();
+
+            foreach (Window window in StateConfigWindows.Values)
+            {
+                window.Close();
+            }
+
             SaveConfig();
         }
 
@@ -504,6 +529,11 @@ namespace AmeisenBotX
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
 
             AmeisenBot.Start();
+
+            StateConfigWindows = new Dictionary<BotState, Window>()
+            {
+                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config)}
+            };
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

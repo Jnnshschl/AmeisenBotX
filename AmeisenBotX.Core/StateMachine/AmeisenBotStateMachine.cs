@@ -73,6 +73,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         public string PlayerName { get; internal set; }
 
+        public bool ShouldExit { get; set; }
+
         public BotState StateOverride { get; set; }
 
         public bool WowCrashed { get; internal set; }
@@ -88,8 +90,6 @@ namespace AmeisenBotX.Core.Statemachine
         private TimegatedEvent<bool> GhostCheckEvent { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
-
-        public bool ShouldExit { get; set; }
 
         public override void Execute()
         {
@@ -224,55 +224,6 @@ namespace AmeisenBotX.Core.Statemachine
             return WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
                        .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 64.0)
                        .Any(r => r.IsInCombat);
-        }
-
-        internal bool IsBattlegroundMap(MapId map)
-        {
-            return map == MapId.AlteracValley
-                       || map == MapId.WarsongGulch
-                       || map == MapId.ArathiBasin
-                       || map == MapId.EyeOfTheStorm
-                       || map == MapId.StrandOfTheAncients;
-        }
-
-        internal bool IsCapitalCityZone(ZoneId zone)
-        {
-            if (WowInterface.ObjectManager.Player.IsAlliance())
-            {
-                return zone == ZoneId.StormwindCity
-                            || zone == ZoneId.Ironforge
-                            || zone == ZoneId.Teldrassil
-                            || zone == ZoneId.TheExodar;
-            }
-            else if (WowInterface.ObjectManager.Player.IsHorde())
-            {
-                return zone == ZoneId.Orgrimmar
-                            || zone == ZoneId.Undercity
-                            || zone == ZoneId.ThunderBluff
-                            || zone == ZoneId.SilvermoonCity;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        internal bool IsDungeonMap(MapId map)
-        {
-            return map == MapId.RagefireChasm
-                       || map == MapId.WailingCaverns
-                       || map == MapId.Deadmines
-                       || map == MapId.ShadowfangKeep
-                       || map == MapId.StormwindStockade
-
-                       || map == MapId.HellfireRamparts
-                       || map == MapId.TheBloodFurnace
-                       || map == MapId.TheSlavePens
-                       || map == MapId.TheUnderbog
-                       || map == MapId.TheSteamvault
-
-                       || map == MapId.UtgardeKeep
-                       || map == MapId.AzjolNerub;
         }
     }
 }

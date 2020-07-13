@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Character.Inventory
             Items = new List<IWowItem>();
         }
 
+        public int FreeBagSlots { get; private set; }
+
         public List<IWowItem> Items
         {
             get
@@ -35,8 +37,6 @@ namespace AmeisenBotX.Core.Character.Inventory
                 }
             }
         }
-
-        public int FreeBagSlots { get; private set; }
 
         private WowInterface WowInterface { get; }
 

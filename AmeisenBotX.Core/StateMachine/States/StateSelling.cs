@@ -55,6 +55,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                     if (WowInterface.MovementEngine.IsAtTargetPosition)
                     {
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+
+                        if(selectedUnit.IsGossip)
+                        {
+                            WowInterface.HookManager.UnitSelectGossipOption(1);
+                        }
+
                         SellActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
                         IsAtNpc = true;
                     }

@@ -111,6 +111,7 @@
     <Compile Include="Character\Talents\Objects\TalentTree.cs" />
     <Compile Include="Character\Talents\Objects\Talent.cs" />
     <Compile Include="Character\Talents\TalentManager.cs" />
+    <Compile Include="Common\AmeisenBotExtensions.cs" />
     <Compile Include="Common\BotMath.cs" />
     <Compile Include="Common\BotUtils.cs" />
     <Compile Include="Common\CustomTcpClient.cs" />
@@ -218,7 +219,7 @@
     <Compile Include="Jobs\Profiles\Gathering\CopperTinSilverWestfallProfile.cs" />
     <Compile Include="Jobs\Profiles\IMiningProfile.cs" />
     <Compile Include="Jobs\JobEngine.cs" />
-    <Compile Include="Jobs\Profiles\IJobsProfiles.cs" />
+    <Compile Include="Jobs\Profiles\IJobProfile.cs" />
     <Compile Include="Movement\Enums\MovementAction.cs" />
     <Compile Include="Movement\IMovementEngine.cs" />
     <Compile Include="Movement\Pathfinding\IPathfindingHandler.cs" />

@@ -1,16 +1,10 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Core.Statemachine.Utils;
-using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +14,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     public abstract class BasicKamelClass : ICombatClass
     {
-        protected BasicKamelClass() 
+        protected BasicKamelClass()
         {
             MyAuraManager = new AuraManager
             (
@@ -51,22 +45,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         }
 
         public abstract string Author { get; }
+
         //Basic
         public TimegatedEvent AutoAttackEvent { get; private set; }
-        //FuryWarrior
-        public TimegatedEvent TargetSelectEvent { get; private set; }
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
-        public TimegatedEvent RendEvent { get; private set; }
-        public TimegatedEvent ExecuteEvent { get; private set; }
-        //Resto Shaman
-        public TimegatedEvent revivePlayerEvent { get; private set; }
-        public TimegatedEvent healingWaveSpellEvent { get; private set; }
-        public TimegatedEvent naturesswiftEvent { get; private set; }
-        public TimegatedEvent riptideSpellEvent { get; private set; }
-        public TimegatedEvent manaTideTotemEvent { get; private set; }
-        public TimegatedEvent totemcastEvent { get; private set; }
-        //Mount check
-        public TimegatedEvent getonthemount { get; private set; }
 
         public abstract WowClass Class { get; }
 
@@ -82,21 +63,41 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public abstract string Displayname { get; }
 
+        public TimegatedEvent ExecuteEvent { get; private set; }
+
+        //Mount check
+        public TimegatedEvent getonthemount { get; private set; }
+
         public GroupAuraManager GroupAuraManager { get; private set; }
 
         public abstract bool HandlesMovement { get; }
+
+        public TimegatedEvent healingWaveSpellEvent { get; private set; }
+
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
 
         public abstract bool IsMelee { get; }
 
         public abstract IWowItemComparator ItemComparator { get; set; }
 
+        public TimegatedEvent manaTideTotemEvent { get; private set; }
+
         public AuraManager MyAuraManager { get; private set; }
+
+        public TimegatedEvent naturesswiftEvent { get; private set; }
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 
         public List<string> PriorityTargets { get => TargetManager.PriorityTargets; set => TargetManager.PriorityTargets = value; }
 
+        public TimegatedEvent RendEvent { get; private set; }
+
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
+
+        //Resto Shaman
+        public TimegatedEvent revivePlayerEvent { get; private set; }
+
+        public TimegatedEvent riptideSpellEvent { get; private set; }
 
         public abstract CombatClassRole Role { get; }
 
@@ -106,9 +107,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public AuraManager TargetAuraManager { get; private set; }
 
+        public bool TargetInLineOfSight { get; set; }
+
         public InterruptManager TargetInterruptManager { get; private set; }
 
         public TargetManager TargetManager { get; private set; }
+
+        //FuryWarrior
+        public TimegatedEvent TargetSelectEvent { get; private set; }
+
+        public TimegatedEvent totemcastEvent { get; private set; }
 
         public TimegatedEvent UpdatePriorityUnits { get; set; }
 
@@ -122,12 +130,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public WowInterface WowInterface { get; internal set; }
 
-        public bool TargetInLineOfSight { get; set; }
-
         public void Execute()
         {
             ExecuteCC();
         }
+
         public abstract void ExecuteCC();
 
         public abstract void OutOfCombatExecute();
