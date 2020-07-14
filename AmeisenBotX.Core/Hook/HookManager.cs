@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void AutoAcceptQuests()
         {
-            LuaDoString("active=GetNumGossipActiveQuests()if active>0 then for a=1,active do if IsGossipQuestCompleted(a)then SelectGossipActiveQuest(a)end end end;available=GetNumGossipAvailableQuests()if available>0 then for a=1,available do if not IsGossipQuestTrivial(a)or IsTrackingTrivial()then SelectGossipAvailableQuest(a)end end end;if available==0 and active==0 and GetNumGossipOptions()==1 then _,type=GetGossipOptions()if type=='gossip'then SelectGossipOption(1)return end end");
+            LuaDoString("active=GetNumGossipActiveQuests()if active>0 then for a=1,active do if not not select(((a * 5) - 5) + 4, GetGossipActiveQuests())then SelectGossipActiveQuest(a)end end end;available=GetNumGossipAvailableQuests()if available>0 then for a=1,available do if not not not select(((a * 6) - 6) + 3, GetGossipAvailableQuests())then SelectGossipAvailableQuest(a)end end end;if available==0 and active==0 and GetNumGossipOptions()==1 then _,type=GetGossipOptions()if type=='gossip'then SelectGossipOption(1)return end end");
         }
 
         public void CancelSummon()

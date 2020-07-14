@@ -15,8 +15,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            CastMountEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1500));
+            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+            CastMountEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
         }
 
         public bool InLos { get; private set; }
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private ulong PlayerToFollowGuid { get; set; }
 
-        private Vector3 Offset { get; set; }
+        public Vector3 Offset { get; private set; }
 
         public override void Enter()
         {
@@ -64,6 +64,19 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 StateMachine.SetState((int)BotState.Idle);
                 return;
+            }
+            else
+            {
+                Vector3 randomPosAroundPlayer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, 3f);
+
+                if (randomPosAroundPlayer != default)
+                {
+                    Offset = PlayerToFollow.Position - randomPosAroundPlayer;
+                }
+                else
+                {
+                    Offset = default;
+                }
             }
         }
 
@@ -99,19 +112,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             Vector3 posToGoTo;
 
-            if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
+            if (Config.FollowPositionDynamic)
             {
-                Vector3 randomPosAroundPlayer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance / 2f);
-
-                if (randomPosAroundPlayer != default)
-                {
-                    Offset = PlayerToFollow.Position - randomPosAroundPlayer;
-                }
-                else
-                {
-                    Offset = default;
-                }
-
                 posToGoTo = PlayerToFollow.Position + Offset;
             }
             else
@@ -153,8 +155,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
             }
 
-            if ((distance < 4.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
-                || (distance < 32.0 && zDiff < 0.0 && InLos)) // target is below us and in line of sight, just run down
+            if (!Config.FollowPositionDynamic
+                && ((distance < 4.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
+                || (distance < 32.0 && zDiff < 0.0 && InLos))) // target is below us and in line of sight, just run down
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
             }
@@ -166,7 +169,10 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
-            WowInterface.MovementEngine.StopMovement();
+            if (!Config.FollowPositionDynamic)
+            {
+                WowInterface.MovementEngine.StopMovement();
+            }
         }
 
         private bool IsUnitOutOfRange(WowPlayer playerToFollow)

@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (Config.AutoTalkToNearQuestgivers
                 && QuestgiverCheckEvent.Run())
             {
-                if (IsUnitToFollowThere(out WowPlayer wowPlayer)
+                if (IsUnitToFollowThere(out WowPlayer wowPlayer, true)
                     && wowPlayer.TargetGuid != 0)
                 {
                     WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
@@ -182,10 +182,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                                 if (possibleQuestgiver.IsQuestgiver)
                                 {
                                     // complete/accept quests
-                                }
-                                else if (possibleQuestgiver.IsGossip)
-                                {
-                                    // talk to the unit
+                                    WowInterface.HookManager.AutoAcceptQuests();
                                 }
                             }
                         }
@@ -201,7 +198,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        public bool IsUnitToFollowThere(out WowPlayer playerToFollow)
+        public bool IsUnitToFollowThere(out WowPlayer playerToFollow, bool ignoreRange = false)
         {
             playerToFollow = null;
 
@@ -213,21 +210,33 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (Config.FollowSpecificCharacter)
                 {
                     playerToFollow = wowPlayers.FirstOrDefault(p => p.Name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase));
-                    playerToFollow = SkipIfOutOfRange(playerToFollow);
+
+                    if (!ignoreRange)
+                    {
+                        playerToFollow = SkipIfOutOfRange(playerToFollow);
+                    }
                 }
 
                 // check the group/raid leader
                 if (playerToFollow == null && Config.FollowGroupLeader)
                 {
                     playerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid);
-                    playerToFollow = SkipIfOutOfRange(playerToFollow);
+
+                    if (!ignoreRange)
+                    {
+                        playerToFollow = SkipIfOutOfRange(playerToFollow);
+                    }
                 }
 
                 // check the group members
                 if (playerToFollow == null && Config.FollowGroupMembers)
                 {
                     playerToFollow = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
-                    playerToFollow = SkipIfOutOfRange(playerToFollow);
+
+                    if (!ignoreRange)
+                    {
+                        playerToFollow = SkipIfOutOfRange(playerToFollow);
+                    }
                 }
             }
 
