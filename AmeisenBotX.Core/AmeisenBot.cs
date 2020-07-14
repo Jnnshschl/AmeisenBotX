@@ -668,7 +668,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
             {
-                WowInterface.HookManager.LuaDoString("if(IsQuestCompletable()) then CompleteQuest()end");
+                WowInterface.HookManager.LuaDoString("QuestFrameCompleteQuestButton:Click()");
             }
         }
 
@@ -907,6 +907,7 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
             WowInterface.EventHookManager.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
             WowInterface.EventHookManager.Subscribe("QUEST_GREETING", OnQuestGreeting);
+            WowInterface.EventHookManager.Subscribe("QUEST_COMPLETE", OnQuestProgress);
             WowInterface.EventHookManager.Subscribe("QUEST_PROGRESS", OnQuestProgress);
             WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
 
