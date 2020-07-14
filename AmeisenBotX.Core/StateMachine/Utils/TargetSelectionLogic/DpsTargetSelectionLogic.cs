@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
                 .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
-                .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead)
+                .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.IsInCombat)
                 .OrderByDescending(e => e.IsFleeing)
                 .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 

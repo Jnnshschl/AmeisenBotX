@@ -430,74 +430,76 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         {
             try
             {
-                string result = WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""));
-                dynamic bgState = JsonConvert.DeserializeObject(result);
-
-                if (WowInterface.ObjectManager.Player.IsAlliance())
+                if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
                 {
-                    string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
-                    JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0]);
-                    JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1]);
+                    dynamic bgState = JsonConvert.DeserializeObject(result);
 
-                    string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
-                    JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0]);
-                    JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1]);
+                    if (WowInterface.ObjectManager.Player.IsAlliance())
+                    {
+                        string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
+                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0]);
+                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1]);
 
-                    JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.allianceState) == 2;
-                    JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.hordeState) == 2;
+                        string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
+                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0]);
+                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1]);
 
-                    JBgBlackboard.MyTeamFlagPos = new Vector3
-                    (
-                        float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        0f
-                    );
+                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.allianceState) == 2;
+                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.hordeState) == 2;
 
-                    JBgBlackboard.EnemyTeamFlagPos = new Vector3
-                    (
-                        float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        0f
-                    );
+                        JBgBlackboard.MyTeamFlagPos = new Vector3
+                        (
+                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            0f
+                        );
 
-                    JBgBlackboard.MyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
-                    JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.EnemyTeamFlagPos = new Vector3
+                        (
+                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            0f
+                        );
+
+                        JBgBlackboard.MyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                    }
+                    else
+                    {
+                        string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
+                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0]);
+                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1]);
+
+                        string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
+                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0]);
+                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1]);
+
+                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.hordeState) == 2;
+                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.allianceState) == 2;
+
+                        JBgBlackboard.MyTeamFlagPos = new Vector3
+                        (
+                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            0f
+                        );
+
+                        JBgBlackboard.EnemyTeamFlagPos = new Vector3
+                        (
+                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            0f
+                        );
+
+                        JBgBlackboard.MyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                    }
+
+                    JBgBlackboard.NearFlags = WowInterface.ObjectManager.WowObjects
+                                                  .OfType<WowGameobject>()
+                                                  .Where(e => e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
+                                                  .ToList();
                 }
-                else
-                {
-                    string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
-                    JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0]);
-                    JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1]);
-
-                    string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
-                    JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0]);
-                    JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1]);
-
-                    JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.hordeState) == 2;
-                    JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.allianceState) == 2;
-
-                    JBgBlackboard.MyTeamFlagPos = new Vector3
-                    (
-                        float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        0f
-                    );
-
-                    JBgBlackboard.EnemyTeamFlagPos = new Vector3
-                    (
-                        float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                        0f
-                    );
-
-                    JBgBlackboard.MyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
-                    JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
-                }
-
-                JBgBlackboard.NearFlags = WowInterface.ObjectManager.WowObjects
-                                              .OfType<WowGameobject>()
-                                              .Where(e => e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
-                                              .ToList();
             }
             catch { }
         }

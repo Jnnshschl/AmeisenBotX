@@ -14,11 +14,24 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
+            LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            CastMountEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1500));
         }
+
+        public bool InLos { get; private set; }
+
+        private TimegatedEvent LosCheckEvent { get; }
+
+        private TimegatedEvent OffsetCheckEvent { get; }
+
+        private TimegatedEvent CastMountEvent { get; }
 
         private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(PlayerToFollowGuid);
 
         private ulong PlayerToFollowGuid { get; set; }
+
+        private Vector3 Offset { get; set; }
 
         public override void Enter()
         {
@@ -56,36 +69,53 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            Vector3 posToGoTo = default;
-
-            // handle nearby portals, if our groupleader enters a portal, we follow
-            WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
-                .OfType<WowGameobject>()
-                .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
-                .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.GhostPortalScanThreshold);
-
-            bool moveIntoPortal = false;
-
-            if (nearestPortal != null)
+            // dont follow when casting, or player is dead/ghost
+            if (WowInterface.ObjectManager.Player.IsCasting
+                || PlayerToFollow.IsDead
+                || PlayerToFollow.Health == 1)
             {
-                double distanceToPortal = PlayerToFollow.Position.GetDistance(nearestPortal.Position);
-
-                if (distanceToPortal < 4.0)
-                {
-                    // move into portal, MoveAhead is used to go beyond the portals entry point to make sure enter it
-                    posToGoTo = BotUtils.MoveAhead(nearestPortal.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, nearestPortal.Position), 6);
-                    moveIntoPortal = true;
-                }
+                return;
             }
 
-            // if no portal position was found, follow the player
-            if (!moveIntoPortal)
+            if (PlayerToFollow == null)
             {
-                if (PlayerToFollow == null)
+                // handle nearby portals, if our groupleader enters a portal, we follow
+                WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
+                    .OfType<WowGameobject>()
+                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                    .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 12.0);
+
+                if (nearestPortal != null)
                 {
-                    return;
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, nearestPortal.Position, 6f));
+                }
+                else
+                {
+                    StateMachine.SetState((int)BotState.Idle);
                 }
 
+                return;
+            }
+
+            Vector3 posToGoTo;
+
+            if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
+            {
+                Vector3 randomPosAroundPlayer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance / 2f);
+
+                if (randomPosAroundPlayer != default)
+                {
+                    Offset = PlayerToFollow.Position - randomPosAroundPlayer;
+                }
+                else
+                {
+                    Offset = default;
+                }
+
+                posToGoTo = PlayerToFollow.Position + Offset;
+            }
+            else
+            {
                 posToGoTo = PlayerToFollow.Position;
             }
 
@@ -97,31 +127,34 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            // dont follow when casting, or player is dead/ghost
-            if (WowInterface.ObjectManager.Player.IsCasting
-                || PlayerToFollow.IsDead
-                || PlayerToFollow.Health == 1)
+            double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
+
+            if (WowInterface.CharacterManager.Mounts.Count > 0 && PlayerToFollow != null && PlayerToFollow.IsMounted && !WowInterface.ObjectManager.Player.IsMounted)
             {
+                if (CastMountEvent.Run())
+                {
+                    WowMount mount = WowInterface.CharacterManager.Mounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
+                    WowInterface.MovementEngine.StopMovement();
+                    WowInterface.HookManager.Mount(mount.Index);
+                }
+
                 return;
             }
 
-            double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
-
-            Vector3 playerPosZMod = WowInterface.ObjectManager.Player.Position;
-            playerPosZMod.Z += 1f;
-
-            Vector3 posToGoToZMod = posToGoTo;
-            posToGoToZMod.Z += 1f;
-
-            if (WowInterface.CharacterManager.Mounts.Count > 0 && PlayerToFollow != null && PlayerToFollow.IsMounted)
+            if (LosCheckEvent.Run())
             {
-                WowMount mount = WowInterface.CharacterManager.Mounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
-                WowInterface.HookManager.Mount(mount.Index);
-                return;
+                if (WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2f))
+                {
+                    InLos = true;
+                }
+                else
+                {
+                    InLos = false;
+                }
             }
 
             if ((distance < 4.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
-            || (distance < 32.0 && zDiff < 0.0 && WowInterface.HookManager.IsInLineOfSight(playerPosZMod, posToGoToZMod))) // target is below us and in line of sight, just run down
+                || (distance < 32.0 && zDiff < 0.0 && InLos)) // target is below us and in line of sight, just run down
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
             }
@@ -133,8 +166,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
-            WowInterface.MovementEngine.Reset();
-            WowInterface.HookManager.StopClickToMoveIfActive();
+            WowInterface.MovementEngine.StopMovement();
         }
 
         private bool IsUnitOutOfRange(WowPlayer playerToFollow)

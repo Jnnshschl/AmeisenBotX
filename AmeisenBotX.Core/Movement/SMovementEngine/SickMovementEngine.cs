@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
-using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
@@ -15,8 +14,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 {
     public class SickMovementEngine : IMovementEngine
     {
-        public bool IsCastingMount { get; set; }
-
         public SickMovementEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
@@ -111,7 +108,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                             //     IsCastingMount = true;
                                             //     return BehaviorTreeStatus.Ongoing;
                                             // }
-                                            // 
+                                            //
                                             // if (IsCastingMount)
                                             // {
                                             //     if (wowInterface.ObjectManager.Player.IsCasting)
@@ -143,13 +140,17 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public MovementBlackboard Blackboard { get; }
 
-        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold + 0.5;
+        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
+
+        public bool IsCastingMount { get; set; }
 
         public bool JumpOnNextMove { get; private set; }
 
         public Vector3 LastPlayerPosition { get; private set; }
 
         public double MinDistanceToMove { get; private set; }
+
+        public TimegatedEvent MountCheck { get; }
 
         public double MovedDistance { get; private set; }
 
@@ -182,7 +183,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public Vector3 UnstuckTargetPosition { get; private set; }
 
         private TimegatedEvent JumpCheckEvent { get; }
-        public TimegatedEvent MountCheck { get; }
+
         private Timer MovementWatchdog { get; }
 
         private WowInterface WowInterface { get; }

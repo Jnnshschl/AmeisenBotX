@@ -62,8 +62,7 @@ namespace AmeisenBotX.Core.Jobs
 
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0
-                )
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0)
             {
                 //List<WowGameobject> Objectlist = WowInterface.ObjectManager.WowObjects
                 //.OfType<WowGameobject>() // only WowGameobjects
@@ -94,9 +93,7 @@ namespace AmeisenBotX.Core.Jobs
                         if (MailSentEvent.Run())
                         {
                             WowInterface.HookManager.WowObjectOnRightClick(nearNode);
-                            WowInterface.HookManager.ClickUiElement("MailFrameTab2");
-                            WowInterface.HookManager.LuaDoString("for b = 0, 4 do for s = 0, 22 do l = GetContainerItemLink(b, s) if l and l:find('Copper Ore')then UseContainerItem(b, s) end end end");
-                            WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
+
                             return;
                         }
                         return;

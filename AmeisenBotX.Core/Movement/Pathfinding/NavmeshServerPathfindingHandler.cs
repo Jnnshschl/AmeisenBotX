@@ -27,14 +27,14 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveToPosition);
         }
 
-        public List<Vector3> GetPath(int mapId, Vector3 start, float maxRadius)
+        public Vector3 GetRandomPoint(int mapId)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, Vector3.Zero, maxRadius, MovementType.GetRandomPoint);
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, Vector3.Zero, Vector3.Zero, 0f, MovementType.GetRandomPoint).FirstOrDefault();
         }
 
-        public List<Vector3> GetRandomPoint(int mapId)
+        public Vector3 GetRandomPointAround(int mapId, Vector3 start, float maxRadius)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, Vector3.Zero, Vector3.Zero, 0f, MovementType.GetRandomPoint);
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, Vector3.Zero, maxRadius, MovementType.GetRandomPointAround).FirstOrDefault();
         }
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)

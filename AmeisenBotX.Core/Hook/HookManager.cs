@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
@@ -100,15 +99,14 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString("ConfirmSummon();StaticPopup_Hide(\"CONFIRM_SUMMON\");");
         }
 
+        public void AutoAcceptQuests()
+        {
+            LuaDoString("active=GetNumGossipActiveQuests()if active>0 then for a=1,active do if IsGossipQuestCompleted(a)then SelectGossipActiveQuest(a)end end end;available=GetNumGossipAvailableQuests()if available>0 then for a=1,available do if not IsGossipQuestTrivial(a)or IsTrackingTrivial()then SelectGossipAvailableQuest(a)end end end;if available==0 and active==0 and GetNumGossipOptions()==1 then _,type=GetGossipOptions()if type=='gossip'then SelectGossipOption(1)return end end");
+        }
+
         public void CancelSummon()
         {
             LuaDoString("CancelSummon();");
-        }
-
-        public bool CanNeedOnRoll(int rollId)
-        {
-            string s = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"_,_,_,_,_,{{v:0}}=GetLootRollItemInfo({rollId});"));
-            return bool.TryParse(s, out bool result) && result;
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
@@ -147,7 +145,7 @@ namespace AmeisenBotX.Core.Hook
                     "RETN",
                 };
 
-                InjectAndExecute(asm, false);
+                InjectAndExecute(asm, false, out _);
                 WowInterface.XMemory.FreeMemory(codeCaveVector3);
             }
         }
@@ -232,12 +230,12 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        public string ExecuteLuaAndRead((string, string) cmdVarTuple)
+        public bool ExecuteLuaAndRead((string, string) cmdVarTuple, out string result)
         {
-            return ExecuteLuaAndRead(cmdVarTuple.Item1, cmdVarTuple.Item2);
+            return ExecuteLuaAndRead(cmdVarTuple.Item1, cmdVarTuple.Item2, out result);
         }
 
-        public string ExecuteLuaAndRead(string command, string variable)
+        public bool ExecuteLuaAndRead(string command, string variable, out string result)
         {
             AmeisenLogger.Instance.Log("HookManager", $"ExecuteLuaAndRead: command: \"{command}\" variable: \"{variable}\"", LogLevel.Verbose);
 
@@ -272,21 +270,21 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    string result = "";
-                    byte[] bytes = InjectAndExecute(asm, true);
-
-                    if (bytes != null)
+                    if (InjectAndExecute(asm, true, out byte[] bytes))
                     {
-                        result = Encoding.UTF8.GetString(bytes);
+                        if (bytes != null)
+                        {
+                            result = Encoding.UTF8.GetString(bytes);
+
+                            WowInterface.XMemory.FreeMemory(memAllocCmdVar);
+                            return true;
+                        }
                     }
-
-                    WowInterface.XMemory.FreeMemory(memAllocCmdVar);
-
-                    return result;
                 }
             }
 
-            return string.Empty;
+            result = string.Empty;
+            return false;
         }
 
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
@@ -294,119 +292,118 @@ namespace AmeisenBotX.Core.Hook
             SetFacing(player, BotMath.GetFacingAngle2D(player.Position, positionToFace));
         }
 
-        [Obsolete]
-        public List<string> GetAuras(WowLuaUnit luaunit)
-        {
-            return ReadAuras(luaunit, "UnitAura");
-        }
-
-        [Obsolete]
-        public List<string> GetBuffs(WowLuaUnit luaunit)
-        {
-            return ReadAuras(luaunit, "UnitBuff");
-        }
-
         public List<int> GetCompletedQuests()
         {
-            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=''for a,b in pairs(GetQuestsCompleted())do if b then {{v:0}}={{v:0}}..a..';'end end;"));
-
-            if (result != null && result.Length > 0)
+            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=''for a,b in pairs(GetQuestsCompleted())do if b then {{v:0}}={{v:0}}..a..';'end end;"), out string result))
             {
-                return result.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(e => int.TryParse(e, out int n) ? n : (int?)null)
-                    .Where(e => e.HasValue)
-                    .Select(e => e.Value)
-                    .ToList();
+                if (result != null && result.Length > 0)
+                {
+                    return result.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(e => int.TryParse(e, out int n) ? n : (int?)null)
+                        .Where(e => e.HasValue)
+                        .Select(e => e.Value)
+                        .ToList();
+                }
             }
 
             return new List<int>();
         }
 
-        [Obsolete]
-        public List<string> GetDebuffs(WowLuaUnit luaunit)
-        {
-            return ReadAuras(luaunit, "UnitDebuff");
-        }
-
         public string GetEquipmentItems()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"[\"for a=0,23 do {v:1}=GetInventoryItemID(\"player\",a)if string.len(tostring({v:1} or\"\"))>0 then {v:2}=GetInventoryItemLink(\"player\",a){v:3}=GetInventoryItemCount(\"player\",a){v:4},{v:5}=GetInventoryItemDurability(a){v:6},{v:7}=GetInventoryItemCooldown(\"player\",a){v:8},{v:9},{v:10},{v:11},{v:12},{v:13},{v:14},{v:15},{v:16},{v:17},{v:18}=GetItemInfo({v:2}){v:19}=GetItemStats({v:2}){v:20}={}for b,c in pairs({v:19})do table.insert({v:20},string.format(\"\\\"%s\\\":\\\"%s\\\"\",b,c))end;{v:0}={v:0}..'{'..'\"id\": \"'..tostring({v:1} or 0)..'\",'..'\"count\": \"'..tostring({v:3} or 0)..'\",'..'\"quality\": \"'..tostring({v:10} or 0)..'\",'..'\"curDurability\": \"'..tostring({v:4} or 0)..'\",'..'\"maxDurability\": \"'..tostring({v:5} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({v:6} or 0)..'\",'..'\"cooldownEnd\": '..tostring({v:7} or 0)..','..'\"name\": \"'..tostring({v:8} or 0)..'\",'..'\"link\": \"'..tostring({v:9} or 0)..'\",'..'\"level\": \"'..tostring({v:11} or 0)..'\",'..'\"minLevel\": \"'..tostring({v:12} or 0)..'\",'..'\"type\": \"'..tostring({v:13} or 0)..'\",'..'\"subtype\": \"'..tostring({v:14} or 0)..'\",'..'\"maxStack\": \"'..tostring({v:15} or 0)..'\",'..'\"equipslot\": \"'..tostring(a or 0)..'\",'..'\"equiplocation\": \"'..tostring({v:16} or 0)..'\",'..'\"stats\": '..\"{\"..table.concat({v:20},\",\")..\"}\"..','..'\"sellprice\": \"'..tostring({v:18} or 0)..'\"'..'}'if a<23 then {v:0}={v:0}..\",\"end end end;{v:0}={v:0}..\"]\""));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"[\"for a=0,23 do {v:1}=GetInventoryItemID(\"player\",a)if string.len(tostring({v:1} or\"\"))>0 then {v:2}=GetInventoryItemLink(\"player\",a){v:3}=GetInventoryItemCount(\"player\",a){v:4},{v:5}=GetInventoryItemDurability(a){v:6},{v:7}=GetInventoryItemCooldown(\"player\",a){v:8},{v:9},{v:10},{v:11},{v:12},{v:13},{v:14},{v:15},{v:16},{v:17},{v:18}=GetItemInfo({v:2}){v:19}=GetItemStats({v:2}){v:20}={}for b,c in pairs({v:19})do table.insert({v:20},string.format(\"\\\"%s\\\":\\\"%s\\\"\",b,c))end;{v:0}={v:0}..'{'..'\"id\": \"'..tostring({v:1} or 0)..'\",'..'\"count\": \"'..tostring({v:3} or 0)..'\",'..'\"quality\": \"'..tostring({v:10} or 0)..'\",'..'\"curDurability\": \"'..tostring({v:4} or 0)..'\",'..'\"maxDurability\": \"'..tostring({v:5} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({v:6} or 0)..'\",'..'\"cooldownEnd\": '..tostring({v:7} or 0)..','..'\"name\": \"'..tostring({v:8} or 0)..'\",'..'\"link\": \"'..tostring({v:9} or 0)..'\",'..'\"level\": \"'..tostring({v:11} or 0)..'\",'..'\"minLevel\": \"'..tostring({v:12} or 0)..'\",'..'\"type\": \"'..tostring({v:13} or 0)..'\",'..'\"subtype\": \"'..tostring({v:14} or 0)..'\",'..'\"maxStack\": \"'..tostring({v:15} or 0)..'\",'..'\"equipslot\": \"'..tostring(a or 0)..'\",'..'\"equiplocation\": \"'..tostring({v:16} or 0)..'\",'..'\"stats\": '..\"{\"..table.concat({v:20},\",\")..\"}\"..','..'\"sellprice\": \"'..tostring({v:18} or 0)..'\"'..'}'if a<23 then {v:0}={v:0}..\",\"end end end;{v:0}={v:0}..\"]\""), out string result) ? result : string.Empty;
         }
 
         public int GetFreeBagSlotCount()
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0 for i=1,5 do {v:0}={v:0}+GetContainerNumFreeSlots(i-1)end")), out int bagSlots) ? bagSlots : 0;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0 for i=1,5 do {v:0}={v:0}+GetContainerNumFreeSlots(i-1)end"), out string sresult)
+                && int.TryParse(sresult, out int freeBagSlots)
+                 ? freeBagSlots : 0;
+        }
+
+        public int GetGossipOptionCount()
+        {
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetNumGossipOptions()"), out string sresult)
+                && int.TryParse(sresult, out int gossipCount)
+                 ? gossipCount : 0;
         }
 
         public string GetInventoryItems()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"[\"for a=0,4 do {v:1}=GetContainerNumSlots(a)for b=1,{v:1} do {v:2}=GetContainerItemID(a,b)if string.len(tostring({v:2} or\"\"))>0 then {v:3}=GetContainerItemLink(a,b){v:4},{v:5}=GetContainerItemDurability(a,b){v:6},{v:7}=GetContainerItemCooldown(a,b){v:8},{v:9},{v:10},{v:11},{v:12},{v:13},{v:3},{v:14}=GetContainerItemInfo(a,b){v:15},{v:16},{v:17},{v:18},{v:19},{v:20},{v:21},{v:22},{v:23},{v:8},{v:24}=GetItemInfo({v:3}){v:25}=GetItemStats({v:3}){v:26}={}for c,d in pairs({v:25})do table.insert({v:26},string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;{v:0}={v:0}..\"{\"..'\"id\": \"'..tostring({v:2} or 0)..'\",'..'\"count\": \"'..tostring({v:9} or 0)..'\",'..'\"quality\": \"'..tostring({v:17} or 0)..'\",'..'\"curDurability\": \"'..tostring({v:4} or 0)..'\",'..'\"maxDurability\": \"'..tostring({v:5} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({v:6} or 0)..'\",'..'\"cooldownEnd\": \"'..tostring({v:7} or 0)..'\",'..'\"name\": \"'..tostring({v:15} or 0)..'\",'..'\"lootable\": \"'..tostring({v:13} or 0)..'\",'..'\"readable\": \"'..tostring({v:12} or 0)..'\",'..'\"link\": \"'..tostring({v:3} or 0)..'\",'..'\"level\": \"'..tostring({v:18} or 0)..'\",'..'\"minLevel\": \"'..tostring({v:19} or 0)..'\",'..'\"type\": \"'..tostring({v:20} or 0)..'\",'..'\"subtype\": \"'..tostring({v:21} or 0)..'\",'..'\"maxStack\": \"'..tostring({v:22} or 0)..'\",'..'\"equiplocation\": \"'..tostring({v:23} or 0)..'\",'..'\"sellprice\": \"'..tostring({v:24} or 0)..'\",'..'\"stats\": '..\"{\"..table.concat({v:26},\",\")..\"}\"..','..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..\"}\"{v:0}={v:0}..\",\"end end end;{v:0}={v:0}..\"]\""));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"[\"for a=0,4 do {v:1}=GetContainerNumSlots(a)for b=1,{v:1} do {v:2}=GetContainerItemID(a,b)if string.len(tostring({v:2} or\"\"))>0 then {v:3}=GetContainerItemLink(a,b){v:4},{v:5}=GetContainerItemDurability(a,b){v:6},{v:7}=GetContainerItemCooldown(a,b){v:8},{v:9},{v:10},{v:11},{v:12},{v:13},{v:3},{v:14}=GetContainerItemInfo(a,b){v:15},{v:16},{v:17},{v:18},{v:19},{v:20},{v:21},{v:22},{v:23},{v:8},{v:24}=GetItemInfo({v:3}){v:25}=GetItemStats({v:3}){v:26}={}for c,d in pairs({v:25})do table.insert({v:26},string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;{v:0}={v:0}..\"{\"..'\"id\": \"'..tostring({v:2} or 0)..'\",'..'\"count\": \"'..tostring({v:9} or 0)..'\",'..'\"quality\": \"'..tostring({v:17} or 0)..'\",'..'\"curDurability\": \"'..tostring({v:4} or 0)..'\",'..'\"maxDurability\": \"'..tostring({v:5} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({v:6} or 0)..'\",'..'\"cooldownEnd\": \"'..tostring({v:7} or 0)..'\",'..'\"name\": \"'..tostring({v:15} or 0)..'\",'..'\"lootable\": \"'..tostring({v:13} or 0)..'\",'..'\"readable\": \"'..tostring({v:12} or 0)..'\",'..'\"link\": \"'..tostring({v:3} or 0)..'\",'..'\"level\": \"'..tostring({v:18} or 0)..'\",'..'\"minLevel\": \"'..tostring({v:19} or 0)..'\",'..'\"type\": \"'..tostring({v:20} or 0)..'\",'..'\"subtype\": \"'..tostring({v:21} or 0)..'\",'..'\"maxStack\": \"'..tostring({v:22} or 0)..'\",'..'\"equiplocation\": \"'..tostring({v:23} or 0)..'\",'..'\"sellprice\": \"'..tostring({v:24} or 0)..'\",'..'\"stats\": '..\"{\"..table.concat({v:26},\",\")..\"}\"..','..'\"bagid\": \"'..tostring(a or 0)..'\",'..'\"bagslot\": \"'..tostring(b or 0)..'\"'..\"}\"{v:0}={v:0}..\",\"end end end;{v:0}={v:0}..\"]\""), out string result) ? result : string.Empty;
         }
 
         public string GetItemBySlot(int itemslot)
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:8}}={itemslot};{{v:0}}='noItem';{{v:1}}=GetInventoryItemID('player',{{v:8}});{{v:2}}=GetInventoryItemCount('player',{{v:8}});{{v:3}}=GetInventoryItemQuality('player',{{v:8}});{{v:4}},{{v:5}}=GetInventoryItemDurability({{v:8}});{{v:6}},{{v:7}}=GetInventoryItemCooldown('player',{{v:8}});{{v:9}},{{v:10}},{{v:11}},{{v:12}},{{v:13}},{{v:14}},{{v:15}},{{v:16}},{{v:17}},{{v:18}},{{v:19}}=GetItemInfo(GetInventoryItemLink('player',{{v:8}}));{{v:0}}='{{'..'\"id\": \"'..tostring({{v:1}} or 0)..'\",'..'\"count\": \"'..tostring({{v:2}} or 0)..'\",'..'\"quality\": \"'..tostring({{v:3}} or 0)..'\",'..'\"curDurability\": \"'..tostring({{v:4}} or 0)..'\",'..'\"maxDurability\": \"'..tostring({{v:5}} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({{v:6}} or 0)..'\",'..'\"cooldownEnd\": '..tostring({{v:7}} or 0)..','..'\"name\": \"'..tostring({{v:9}} or 0)..'\",'..'\"link\": \"'..tostring({{v:10}} or 0)..'\",'..'\"level\": \"'..tostring({{v:12}} or 0)..'\",'..'\"minLevel\": \"'..tostring({{v:13}} or 0)..'\",'..'\"type\": \"'..tostring({{v:14}} or 0)..'\",'..'\"subtype\": \"'..tostring({{v:15}} or 0)..'\",'..'\"maxStack\": \"'..tostring({{v:16}} or 0)..'\",'..'\"equipslot\": \"'..tostring({{v:17}} or 0)..'\",'..'\"sellprice\": \"'..tostring({{v:19}} or 0)..'\"'..'}}';"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:8}}={itemslot};{{v:0}}='noItem';{{v:1}}=GetInventoryItemID('player',{{v:8}});{{v:2}}=GetInventoryItemCount('player',{{v:8}});{{v:3}}=GetInventoryItemQuality('player',{{v:8}});{{v:4}},{{v:5}}=GetInventoryItemDurability({{v:8}});{{v:6}},{{v:7}}=GetInventoryItemCooldown('player',{{v:8}});{{v:9}},{{v:10}},{{v:11}},{{v:12}},{{v:13}},{{v:14}},{{v:15}},{{v:16}},{{v:17}},{{v:18}},{{v:19}}=GetItemInfo(GetInventoryItemLink('player',{{v:8}}));{{v:0}}='{{'..'\"id\": \"'..tostring({{v:1}} or 0)..'\",'..'\"count\": \"'..tostring({{v:2}} or 0)..'\",'..'\"quality\": \"'..tostring({{v:3}} or 0)..'\",'..'\"curDurability\": \"'..tostring({{v:4}} or 0)..'\",'..'\"maxDurability\": \"'..tostring({{v:5}} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({{v:6}} or 0)..'\",'..'\"cooldownEnd\": '..tostring({{v:7}} or 0)..','..'\"name\": \"'..tostring({{v:9}} or 0)..'\",'..'\"link\": \"'..tostring({{v:10}} or 0)..'\",'..'\"level\": \"'..tostring({{v:12}} or 0)..'\",'..'\"minLevel\": \"'..tostring({{v:13}} or 0)..'\",'..'\"type\": \"'..tostring({{v:14}} or 0)..'\",'..'\"subtype\": \"'..tostring({{v:15}} or 0)..'\",'..'\"maxStack\": \"'..tostring({{v:16}} or 0)..'\",'..'\"equipslot\": \"'..tostring({{v:17}} or 0)..'\",'..'\"sellprice\": \"'..tostring({{v:19}} or 0)..'\"'..'}}';"), out string result) ? result : string.Empty;
         }
 
         public string GetItemJsonByNameOrLink(string itemName)
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}}=\"{itemName}\";{{v:0}}='noItem';{{v:2}},{{v:3}},{{v:4}},{{v:5}},{{v:6}},{{v:7}},{{v:8}},{{v:9}},{{v:10}},{{v:11}},{{v:12}}=GetItemInfo({{v:1}});{{v:13}}=GetItemStats({{v:3}}){{v:14}}={{}}for c,d in pairs({{v:13}})do table.insert({{v:14}},string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;{{v:0}}='{{'..'\"id\": \"0\",'..'\"count\": \"1\",'..'\"quality\": \"'..tostring({{v:4}} or 0)..'\",'..'\"curDurability\": \"0\",'..'\"maxDurability\": \"0\",'..'\"cooldownStart\": \"0\",'..'\"cooldownEnd\": \"0\",'..'\"name\": \"'..tostring({{v:2}} or 0)..'\",'..'\"link\": \"'..tostring({{v:3}} or 0)..'\",'..'\"level\": \"'..tostring({{v:5}} or 0)..'\",'..'\"minLevel\": \"'..tostring({{v:6}} or 0)..'\",'..'\"type\": \"'..tostring({{v:7}} or 0)..'\",'..'\"subtype\": \"'..tostring({{v:8}} or 0)..'\",'..'\"maxStack\": \"'..tostring({{v:9}} or 0)..'\",'..'\"equiplocation\": \"'..tostring({{v:10}} or 0)..'\",'..'\"sellprice\": \"'..tostring({{v:12}} or 0)..'\",'..'\"stats\": '..\"{{\"..table.concat({{v:14}},\",\")..\"}}\"..'}}';"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}}=\"{itemName}\";{{v:0}}='noItem';{{v:2}},{{v:3}},{{v:4}},{{v:5}},{{v:6}},{{v:7}},{{v:8}},{{v:9}},{{v:10}},{{v:11}},{{v:12}}=GetItemInfo({{v:1}});{{v:13}}=GetItemStats({{v:3}}){{v:14}}={{}}for c,d in pairs({{v:13}})do table.insert({{v:14}},string.format(\"\\\"%s\\\":\\\"%s\\\"\",c,d))end;{{v:0}}='{{'..'\"id\": \"0\",'..'\"count\": \"1\",'..'\"quality\": \"'..tostring({{v:4}} or 0)..'\",'..'\"curDurability\": \"0\",'..'\"maxDurability\": \"0\",'..'\"cooldownStart\": \"0\",'..'\"cooldownEnd\": \"0\",'..'\"name\": \"'..tostring({{v:2}} or 0)..'\",'..'\"link\": \"'..tostring({{v:3}} or 0)..'\",'..'\"level\": \"'..tostring({{v:5}} or 0)..'\",'..'\"minLevel\": \"'..tostring({{v:6}} or 0)..'\",'..'\"type\": \"'..tostring({{v:7}} or 0)..'\",'..'\"subtype\": \"'..tostring({{v:8}} or 0)..'\",'..'\"maxStack\": \"'..tostring({{v:9}} or 0)..'\",'..'\"equiplocation\": \"'..tostring({{v:10}} or 0)..'\",'..'\"sellprice\": \"'..tostring({{v:12}} or 0)..'\",'..'\"stats\": '..\"{{\"..table.concat({{v:14}},\",\")..\"}}\"..'}}';"), out string result) ? result : string.Empty;
         }
 
         public string GetItemStats(string itemLink)
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}}=\"{itemLink}\"{{v:0}}=''{{v:2}}={{}}{{v:3}}=GetItemStats({{v:1}},{{v:2}}){{v:0}}='{{'..'\"stamina\": \"'..tostring({{v:2}}[\"ITEM_MOD_STAMINA_SHORT\"]or 0)..'\",'..'\"agility\": \"'..tostring({{v:2}}[\"ITEM_MOD_AGILITY_SHORT\"]or 0)..'\",'..'\"strenght\": \"'..tostring({{v:2}}[\"ITEM_MOD_STRENGHT_SHORT\"]or 0)..'\",'..'\"intellect\": \"'..tostring({{v:2}}[\"ITEM_MOD_INTELLECT_SHORT\"]or 0)..'\",'..'\"spirit\": \"'..tostring({{v:2}}[\"ITEM_MOD_SPIRIT_SHORT\"]or 0)..'\",'..'\"attackpower\": \"'..tostring({{v:2}}[\"ITEM_MOD_ATTACK_POWER_SHORT\"]or 0)..'\",'..'\"spellpower\": \"'..tostring({{v:2}}[\"ITEM_MOD_SPELL_POWER_SHORT\"]or 0)..'\",'..'\"mana\": \"'..tostring({{v:2}}[\"ITEM_MOD_MANA_SHORT\"]or 0)..'\"'..'}}'"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}}=\"{itemLink}\"{{v:0}}=''{{v:2}}={{}}{{v:3}}=GetItemStats({{v:1}},{{v:2}}){{v:0}}='{{'..'\"stamina\": \"'..tostring({{v:2}}[\"ITEM_MOD_STAMINA_SHORT\"]or 0)..'\",'..'\"agility\": \"'..tostring({{v:2}}[\"ITEM_MOD_AGILITY_SHORT\"]or 0)..'\",'..'\"strenght\": \"'..tostring({{v:2}}[\"ITEM_MOD_STRENGHT_SHORT\"]or 0)..'\",'..'\"intellect\": \"'..tostring({{v:2}}[\"ITEM_MOD_INTELLECT_SHORT\"]or 0)..'\",'..'\"spirit\": \"'..tostring({{v:2}}[\"ITEM_MOD_SPIRIT_SHORT\"]or 0)..'\",'..'\"attackpower\": \"'..tostring({{v:2}}[\"ITEM_MOD_ATTACK_POWER_SHORT\"]or 0)..'\",'..'\"spellpower\": \"'..tostring({{v:2}}[\"ITEM_MOD_SPELL_POWER_SHORT\"]or 0)..'\",'..'\"mana\": \"'..tostring({{v:2}}[\"ITEM_MOD_MANA_SHORT\"]or 0)..'\"'..'}}'"), out string result) ? result : string.Empty;
         }
 
-        public string GetLocalizedText(string variable)
+        public bool GetLocalizedText(string variable, out string result)
         {
             AmeisenLogger.Instance.Log("HookManager", $"GetLocalizedText: {variable}", LogLevel.Verbose);
 
             if (variable.Length > 0)
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(variable);
-                if (WowInterface.XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
+                byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
+                if (WowInterface.XMemory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAlloc))
                 {
-                    WowInterface.XMemory.WriteBytes(memAlloc, bytes);
-                    WowInterface.XMemory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
+                    WowInterface.XMemory.WriteBytes(memAlloc, variableBytes);
+                    WowInterface.XMemory.Write<byte>(memAlloc + (variableBytes.Length + 1), 0);
 
-                    if (memAlloc == IntPtr.Zero)
+                    if (memAlloc != IntPtr.Zero)
                     {
-                        return string.Empty;
+                        string[] asm = new string[]
+                        {
+                            $"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
+                            "MOV ECX, EAX",
+                            "PUSH -1",
+                            $"PUSH {memAlloc.ToInt32()}",
+                            $"CALL {WowInterface.OffsetList.FunctionGetLocalizedText.ToInt32()}",
+                            "RETN",
+                        };
+
+                        if (InjectAndExecute(asm, true, out byte[] bytes))
+                        {
+                            result = Encoding.UTF8.GetString(bytes);
+                            WowInterface.XMemory.FreeMemory(memAlloc);
+                            return true;
+                        }
                     }
-
-                    string[] asm = new string[]
-                    {
-                        $"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject.ToInt32()}",
-                        "MOV ECX, EAX",
-                        "PUSH -1",
-                        $"PUSH {memAlloc.ToInt32()}",
-                        $"CALL {WowInterface.OffsetList.FunctionGetLocalizedText.ToInt32()}",
-                        "RETN",
-                    };
-
-                    string result = Encoding.UTF8.GetString(InjectAndExecute(asm, true));
-                    WowInterface.XMemory.FreeMemory(memAlloc);
-                    return result;
                 }
             }
 
-            return string.Empty;
+            result = string.Empty;
+            return false;
         }
 
         public string GetLootRollItemLink(int rollId)
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLootRollItemLink({rollId});"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLootRollItemLink({rollId});"), out string result) ? result : string.Empty;
         }
 
         public string GetMoney()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"), out string result) ? result : string.Empty;
         }
 
         public string GetMounts()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")if {{v:1}}>0 then for b=1,{{v:1}} do {{v:4}},{{v:2}},{{v:3}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"index\\\":\"..b..\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"mountId\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end end;{{v:0}}={{v:0}}..\"]\""));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")if {{v:1}}>0 then for b=1,{{v:1}} do {{v:4}},{{v:2}},{{v:3}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"index\\\":\"..b..\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"mountId\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end end;{{v:0}}={{v:0}}..\"]\""), out string result) ? result : string.Empty;
+        }
+
+        public void GetQuestReward(int id)
+        {
+            LuaDoString($"GetQuestReward({id})");
         }
 
         public Dictionary<RuneType, int> GetRunesReady()
@@ -436,46 +433,51 @@ namespace AmeisenBotX.Core.Hook
         {
             try
             {
-                return new List<string>(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\"; \"end end end")).Split(';')).Select(s => s.Trim()).ToList();
+                if (ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\"; \"end end end"), out string result))
+                {
+                    return new List<string>(result.Split(';')).Select(s => s.Trim()).ToList();
+                }
             }
-            catch
-            {
-                return new List<string>();
-            }
+            catch { }
+
+            return new List<string>();
         }
 
         public int GetSpellCooldown(string spellName)
         {
-            string result = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"));
             int cooldown = 0;
 
-            if (result.Contains('.'))
+            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"), out string result))
             {
-                result = result.Split('.')[0];
+                if (result.Contains('.'))
+                {
+                    result = result.Split('.')[0];
+                }
+
+                if (double.TryParse(result, out double value))
+                {
+                    cooldown = (int)Math.Round(value);
+                }
+
+                AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {cooldown}ms", LogLevel.Verbose);
             }
 
-            if (double.TryParse(result, out double value))
-            {
-                cooldown = (int)Math.Round(value);
-            }
-
-            AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {cooldown}ms", LogLevel.Verbose);
             return cooldown;
         }
 
         public string GetSpellNameById(int spellId)
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetSpellInfo({spellId});"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetSpellInfo({spellId});"), out string result) ? result : string.Empty;
         }
 
         public string GetSpells()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}='['{v:1}=GetNumSpellTabs()for a=1,{v:1} do {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)for b={v:4}+1,{v:4}+{v:5} do {v:6},{v:7}=GetSpellName(b,\"BOOKTYPE_SPELL\")if {v:6} then {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6},{v:7}){v:0}={v:0}..'{'..'\"spellbookName\": \"'..tostring({v:2} or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring({v:6} or 0)..'\",'..'\"rank\": \"'..tostring({v:9} or 0)..'\",'..'\"castTime\": \"'..tostring({v:11} or 0)..'\",'..'\"minRange\": \"'..tostring({v:12} or 0)..'\",'..'\"maxRange\": \"'..tostring({v:13} or 0)..'\",'..'\"costs\": \"'..tostring({v:10} or 0)..'\"'..'}'if a<{v:1} or b<{v:4}+{v:5} then {v:0}={v:0}..','end end end end;{v:0}={v:0}..']'"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}='['{v:1}=GetNumSpellTabs()for a=1,{v:1} do {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)for b={v:4}+1,{v:4}+{v:5} do {v:6},{v:7}=GetSpellName(b,\"BOOKTYPE_SPELL\")if {v:6} then {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6},{v:7}){v:0}={v:0}..'{'..'\"spellbookName\": \"'..tostring({v:2} or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring({v:6} or 0)..'\",'..'\"rank\": \"'..tostring({v:9} or 0)..'\",'..'\"castTime\": \"'..tostring({v:11} or 0)..'\",'..'\"minRange\": \"'..tostring({v:12} or 0)..'\",'..'\"maxRange\": \"'..tostring({v:13} or 0)..'\",'..'\"costs\": \"'..tostring({v:10} or 0)..'\"'..'}'if a<{v:1} or b<{v:4}+{v:5} then {v:0}={v:0}..','end end end end;{v:0}={v:0}..']'"), out string result) ? result : string.Empty;
         }
 
         public string GetTalents()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"));
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"), out string result) ? result : string.Empty;
         }
 
         public List<WowAura> GetUnitAuras(WowUnit wowUnit)
@@ -510,7 +512,7 @@ namespace AmeisenBotX.Core.Hook
         /// <returns>(Spellname, duration)</returns>
         public (string, int) GetUnitCastingInfo(WowLuaUnit luaunit)
         {
-            string str = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"none,0\";{{v:1}},x,x,x,x,{{v:2}}=UnitCastingInfo(\"{luaunit}\");{{v:3}}=(({{v:2}}/1000)-GetTime())*1000;{{v:0}}={{v:1}}..\",\"..{{v:3}};"));
+            string str = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"none,0\";{{v:1}},x,x,x,x,{{v:2}}=UnitCastingInfo(\"{luaunit}\");{{v:3}}=(({{v:2}}/1000)-GetTime())*1000;{{v:0}}={{v:1}}..\",\"..{{v:3}};"), out string result) ? result : string.Empty;
 
             if (double.TryParse(str.Split(',')[1], out double timeRemaining))
             {
@@ -557,17 +559,23 @@ namespace AmeisenBotX.Core.Hook
 
         public int GetUnspentTalentPoints()
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetUnspentTalentPoints()")), out int talentPoints) ? talentPoints : 0;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetUnspentTalentPoints()"), out string sresult)
+                && int.TryParse(sresult, out int talentPoints)
+                 ? talentPoints : 0;
         }
 
         public bool HasUnitStealableBuffs(WowLuaUnit luaUnit)
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,{{v:1}}=UnitAura(\"{luaUnit}\",i);if {{v:1}}==1 then {{v:0}}=1;end end")), out int result) && result == 1;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,{{v:1}}=UnitAura(\"{luaUnit}\",i);if {{v:1}}==1 then {{v:0}}=1;end end"), out string sresult)
+                && int.TryParse(sresult, out int result)
+                && result == 1;
         }
 
         public bool IsBgInviteReady()
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end")), out int result) && result == 1;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end"), out string sresult)
+                && int.TryParse(sresult, out int result)
+                && result == 1;
         }
 
         public bool IsClickToMoveActive()
@@ -579,12 +587,14 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsGhost(WowLuaUnit luaUnit)
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=UnitIsGhost(\"{luaUnit}\");")), out int isGhost) && isGhost == 1;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=UnitIsGhost(\"{luaUnit}\");"), out string sresult)
+                && int.TryParse(sresult, out int isGhost)
+                && isGhost == 1;
         }
 
         public bool IsInLfgGroup()
         {
-            string lfgMode = ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:1},{v:0}=GetLFGInfoServer()"));
+            string lfgMode = ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:1},{v:0}=GetLFGInfoServer()"), out string result) ? result : string.Empty;
             return bool.TryParse(lfgMode, out bool isInLfg) && isInLfg;
         }
 
@@ -597,7 +607,9 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsOutdoors()
         {
-            return int.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()")), out int result) && result == 1;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()"), out string sresult)
+                && int.TryParse(sresult, out int result)
+                && result == 1;
         }
 
         public bool IsRuneReady(int runeId)
@@ -607,7 +619,9 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsSpellKnown(int spellId, bool isPetSpell = false)
         {
-            return bool.TryParse(ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLFGInfoServer({spellId}, {isPetSpell});")), out bool result) && result;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLFGInfoServer({spellId}, {isPetSpell});"), out string sresult)
+                && bool.TryParse(sresult, out bool result)
+                && result;
         }
 
         public void KickNpcsOutOfVehicle()
@@ -630,7 +644,7 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString(BotUtils.ObfuscateLua("{v:0}=GetNumLootItems();for i={v:0},1,-1 do LootSlot(i); ConfirmLootSlot(i); end").Item1);
         }
 
-        public void LuaDoString(string command)
+        public bool LuaDoString(string command)
         {
             AmeisenLogger.Instance.Log("HookManager", $"LuaDoString: {command}", LogLevel.Verbose);
 
@@ -642,25 +656,26 @@ namespace AmeisenBotX.Core.Hook
                     WowInterface.XMemory.WriteBytes(memAlloc, bytes);
                     WowInterface.XMemory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
 
-                    if (memAlloc == IntPtr.Zero)
+                    if (memAlloc != IntPtr.Zero)
                     {
-                        return;
+                        string[] asm = new string[]
+                        {
+                            "PUSH 0",
+                            $"PUSH {memAlloc.ToInt32()}",
+                            $"PUSH {memAlloc.ToInt32()}",
+                            $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
+                            "ADD ESP, 0xC",
+                            "RETN",
+                        };
+
+                        bool status = InjectAndExecute(asm, false, out _);
+                        WowInterface.XMemory.FreeMemory(memAlloc);
+                        return status;
                     }
-
-                    string[] asm = new string[]
-                    {
-                        "PUSH 0",
-                        $"PUSH {memAlloc.ToInt32()}",
-                        $"PUSH {memAlloc.ToInt32()}",
-                        $"CALL {WowInterface.OffsetList.FunctionLuaDoString.ToInt32()}",
-                        "ADD ESP, 0xC",
-                        "RETN",
-                    };
-
-                    InjectAndExecute(asm, false);
-                    WowInterface.XMemory.FreeMemory(memAlloc);
                 }
             }
+
+            return false;
         }
 
         public void Mount(int index)
@@ -726,8 +741,14 @@ namespace AmeisenBotX.Core.Hook
         /// <param name="rollType">Need, Greed or Pass</param>
         public void RollOnItem(int rollId, RollType rollType)
         {
-            LuaDoString($"RollOnLoot({rollId}, {(int)rollType});");
-            ClickUiElement("StaticPopup1Button1");
+            if (rollType == RollType.Need)
+            {
+                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, {RollType.Greed}) end");
+            }
+            else
+            {
+                LuaDoString($"RollOnLoot({rollId}, {(int)rollType});");
+            }
         }
 
         public void SelectLfgRole(CombatClassRole combatClassRole)
@@ -813,15 +834,19 @@ namespace AmeisenBotX.Core.Hook
             do
             {
                 EndsceneAddress = GetEndScene();
-                Thread.Sleep(50);
+                AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: 0x{EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
+
+                if (EndsceneAddress == IntPtr.Zero)
+                {
+                    AmeisenLogger.Instance.Log("HookManager", $"Wow seems to not be started completely, retry in 500ms", LogLevel.Verbose);
+                    Thread.Sleep(500);
+                }
             }
             while (EndsceneAddress == IntPtr.Zero);
 
             // we are going to replace the first 7 bytes of EndScene
             int hookSize = 0x7;
             EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, hookSize);
-
-            AmeisenLogger.Instance.Log("HookManager", $"Endscene is at: 0x{EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
 
             // if WoW is already hooked, unhook it, wont do anything if wow is not hooked
             DisposeHook();
@@ -848,6 +873,7 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.Fasm.AddLine("JE @out");
 
             // check if we want to override our is ingame check
+            // going to be used while we are in the login screen
             WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{OverrideWorldCheckAddress.ToInt32()}], 1");
             WowInterface.XMemory.Fasm.AddLine("JNE @ovr");
 
@@ -938,7 +964,7 @@ namespace AmeisenBotX.Core.Hook
                 "RETN"
             };
 
-            InjectAndExecute(asm, false);
+            InjectAndExecute(asm, false, out _);
         }
 
         public void TargetLuaUnit(WowLuaUnit unit)
@@ -974,12 +1000,14 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    byte[] bytes = InjectAndExecute(asm, true);
-                    WowInterface.XMemory.FreeMemory(tracelineCodecave);
-
-                    if (bytes != null && bytes.Length > 0)
+                    if (InjectAndExecute(asm, true, out byte[] bytes))
                     {
-                        return bytes[0];
+                        WowInterface.XMemory.FreeMemory(tracelineCodecave);
+
+                        if (bytes != null && bytes.Length > 0)
+                        {
+                            return bytes[0];
+                        }
                     }
                 }
             }
@@ -1090,7 +1118,7 @@ namespace AmeisenBotX.Core.Hook
             asm.Add($"CALL {functionAddress}");
             asm.Add("RETN");
 
-            return InjectAndExecute(asm.ToArray(), readReturnBytes);
+            return InjectAndExecute(asm.ToArray(), readReturnBytes, out byte[] bytes) ? bytes : null;
         }
 
         private void DisableFunction(IntPtr address)
@@ -1130,19 +1158,20 @@ namespace AmeisenBotX.Core.Hook
             }
         }
 
-        private byte[] InjectAndExecute(string[] asm, bool readReturnBytes, [CallerFilePath] string callingClass = "", [CallerMemberName] string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
+        private bool InjectAndExecute(string[] asm, bool readReturnBytes, out byte[] bytes)
         {
+            bytes = null;
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
+
             if (!IsWoWHooked || WowInterface.XMemory.Process.HasExited || (!WowInterface.ObjectManager.IsWorldLoaded && !OverrideWorldCheck))
             {
-                return null;
+                return false;
             }
 
             Stopwatch fullStopwatch;
             List<byte> returnBytes = new List<byte>();
 
-            AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute called by {callingClass}.{callingFunction}:{callingCodeline} ", LogLevel.Verbose);
-            AmeisenLogger.Instance.Log("HookManager", $"Injecting: {JsonConvert.SerializeObject(asm)}", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", $"Injecting: {string.Join(",", asm)}", LogLevel.Verbose);
 
             lock (hookLock)
             {
@@ -1231,6 +1260,8 @@ namespace AmeisenBotX.Core.Hook
 
                         // now there is no more code to be executed
                         WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
+
+                        return false;
                     }
                     finally
                     {
@@ -1246,22 +1277,8 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.Instance.Log("HookManager", $"InjectAndExecute took {fullStopwatch.ElapsedMilliseconds}ms", LogLevel.Verbose);
 
             ++hookCalls;
-            return returnBytes.ToArray();
-        }
-
-        private List<string> ReadAuras(WowLuaUnit luaunit, string functionName)
-        {
-            string[] debuffs = ExecuteLuaAndRead($"local a,b={{}},1;local c={functionName}(\"{luaunit}\",b)while c do a[#a+1]=c;b=b+1;c={functionName}(\"{luaunit}\",b)end;if#a<1 then a=\"\"else activeAuras=table.concat(a,\",\")end", "activeAuras").Split(',');
-
-            List<string> resultLowered = new List<string>();
-
-            for (int i = 0; i < debuffs.Length; ++i)
-            {
-                string s = debuffs[i];
-                resultLowered.Add(s.Trim().ToLowerInvariant());
-            }
-
-            return resultLowered;
+            bytes = returnBytes.ToArray();
+            return true;
         }
 
         private List<WowAura> ReadAuraTable<T>(IntPtr buffBase, int auraCount) where T : unmanaged, IRawWowAuraTable

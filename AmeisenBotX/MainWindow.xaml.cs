@@ -489,9 +489,12 @@ namespace AmeisenBotX
             InfoWindow?.Close();
             MapWindow?.Close();
 
-            foreach (Window window in StateConfigWindows.Values)
+            if (StateConfigWindows != null)
             {
-                window.Close();
+                foreach (Window window in StateConfigWindows.Values)
+                {
+                    window.Close();
+                }
             }
 
             SaveConfig();

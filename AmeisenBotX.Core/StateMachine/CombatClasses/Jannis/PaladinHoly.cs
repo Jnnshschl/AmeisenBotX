@@ -48,7 +48,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
 
             FaceEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
@@ -74,8 +73,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override string Version => "1.0";
 
         private TimegatedEvent FaceEvent { get; set; }
-
-        private TimegatedEvent AutoAttackEvent { get; set; }
 
         private DateTime LastHealAction { get; set; }
 

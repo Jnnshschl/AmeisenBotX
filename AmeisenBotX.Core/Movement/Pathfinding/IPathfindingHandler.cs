@@ -9,6 +9,10 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end);
 
+        Vector3 GetRandomPoint(int mapId);
+
+        Vector3 GetRandomPointAround(int mapId, Vector3 start, float maxRadius);
+
         Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end);
     }
 }

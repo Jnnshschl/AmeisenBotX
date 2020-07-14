@@ -10,13 +10,15 @@ namespace AmeisenBotX.Core
 
         public bool AutoAcceptQuests { get; set; } = true;
 
+        public bool AutoChangeRealmlist { get; set; } = true;
+
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
 
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
-        public bool AutojoinBg { get; set; } = false;
+        public bool AutojoinBg { get; set; } = true;
 
         public bool AutoLogin { get; set; } = true;
 
@@ -24,7 +26,13 @@ namespace AmeisenBotX.Core
 
         public bool AutoPositionWow { get; set; } = false;
 
+        public bool AutoRepair { get; set; } = true;
+
+        public bool AutoSell { get; set; } = true;
+
         public bool AutostartWow { get; set; } = true;
+
+        public bool AutoTalkToNearQuestgivers { get; set; } = true;
 
         public int BagSlotsToGoSell { get; set; } = 4;
 
@@ -44,12 +52,6 @@ namespace AmeisenBotX.Core
 
         public double DrinkUntilPercent { get; set; } = 75;
 
-        public string JobEngineMailReceiver { get; set; } = string.Empty;
-
-        public string JobEngineMailHeader { get; set; } = string.Empty;
-
-        public string JobEngineMailText { get; set; } = string.Empty;
-
         public bool DungeonUsePartyMode { get; set; } = false;
 
         public double EatUntilPercent { get; set; } = 75;
@@ -61,6 +63,8 @@ namespace AmeisenBotX.Core
         public bool FollowGroupLeader { get; set; } = false;
 
         public bool FollowGroupMembers { get; set; } = false;
+
+        public bool FollowPositionDynamic { get; set; } = false;
 
         public bool FollowSpecificCharacter { get; set; } = false;
 
@@ -77,6 +81,14 @@ namespace AmeisenBotX.Core
         public double ItemRepairThreshold { get; set; } = 25;
 
         public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
+
+        public string JobEngineMailHeader { get; set; } = string.Empty;
+
+        public string JobEngineMailReceiver { get; set; } = string.Empty;
+
+        public string JobEngineMailText { get; set; } = string.Empty;
+
+        public string JobProfile { get; set; } = string.Empty;
 
         public bool LootUnits { get; set; } = true;
 
@@ -116,6 +128,8 @@ namespace AmeisenBotX.Core
 
         public string Realm { get; set; } = "AmeisenRealm";
 
+        public string Realmlist { get; set; } = "127.0.0.1";
+
         public bool ReleaseSpirit { get; set; } = false;
 
         public double RepairNpcSearchRadius { get; set; } = 50;
@@ -136,20 +150,12 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public bool AutoChangeRealmlist { get; set; } = true;
-
-        public string Realmlist { get; set; } = "127.0.0.1";
-
         public double StateMachineTickMs { get; set; } = 50;
 
         public bool UseBuiltInCombatClass { get; set; } = true;
 
-        public bool UseClickToMove { get; set; } = true;
-
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
-
-        public string JobProfile { get; set; } = string.Empty;
     }
 }

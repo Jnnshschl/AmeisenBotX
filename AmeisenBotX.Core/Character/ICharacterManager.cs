@@ -17,9 +17,9 @@ namespace AmeisenBotX.Core.Character
 
         IWowItemComparator ItemComparator { get; set; }
 
-        List<WowMount> Mounts { get; }
-
         int Money { get; }
+
+        List<WowMount> Mounts { get; }
 
         List<string> Skills { get; }
 

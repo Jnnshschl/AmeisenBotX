@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Battleground.Jannis;
 using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
@@ -586,6 +587,46 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.LootEveryThing();
         }
 
+        private void OnMerchantShow(long timestamp, List<string> args)
+        {
+            if (Config.AutoRepair)
+            {
+                WowInterface.HookManager.RepairAllItems();
+            }
+
+            if (Config.AutoSell)
+            {
+                foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                {
+                    IWowItem itemToSell = item;
+
+                    if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+                        || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
+                        || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
+                        || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
+                        || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
+                        || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
+                    {
+                        continue;
+                    }
+
+                    if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                    {
+                        // equip item and sell the other after
+                        itemToSell = itemToReplace;
+                        WowInterface.HookManager.ReplaceItem(null, item);
+                    }
+
+                    if (itemToSell != null
+                        && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
+                    {
+                        WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                        WowInterface.HookManager.CofirmBop();
+                    }
+                }
+            }
+        }
+
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
             if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
@@ -607,6 +648,30 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void OnQuestAcceptConfirm(long timestamp, List<string> args)
+        {
+            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
+            {
+                WowInterface.HookManager.LuaDoString("ConfirmAcceptQuest();");
+            }
+        }
+
+        private void OnQuestGreeting(long timestamp, List<string> args)
+        {
+            if (Config.AutoAcceptQuests)
+            {
+                WowInterface.HookManager.AutoAcceptQuests();
+            }
+        }
+
+        private void OnQuestProgress(long timestamp, List<string> args)
+        {
+            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
+            {
+                WowInterface.HookManager.LuaDoString("if(IsQuestCompletable()) then CompleteQuest()end");
+            }
+        }
+
         private void OnReadyCheck(long timestamp, List<string> args)
         {
             WowInterface.HookManager.CofirmReadyCheck(true);
@@ -621,7 +686,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != (int)BotState.Questing)
             {
-                WowInterface.HookManager.ClickUiElement("QuestFrameAcceptButton");
+                WowInterface.HookManager.LuaDoString("AcceptQuest();");
             }
         }
 
@@ -823,6 +888,10 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
             // WowInterface.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
+            // Merchant Events
+            // --------------- >
+            WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+
             // PvP Events
             // ---------- >
             WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
@@ -836,6 +905,10 @@ namespace AmeisenBotX.Core
             // Quest Events
             // ------------ >
             WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
+            WowInterface.EventHookManager.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
+            WowInterface.EventHookManager.Subscribe("QUEST_GREETING", OnQuestGreeting);
+            WowInterface.EventHookManager.Subscribe("QUEST_PROGRESS", OnQuestProgress);
+            WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
 
             // Trading Events
             // -------------- >

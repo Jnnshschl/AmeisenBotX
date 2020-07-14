@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,21 +16,31 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             FirstStart = true;
 
-            LastBagSlotCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
-            LastEatCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
-            LastLoot = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
-            LastRepairCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
+            BagSlotCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
+            EatCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            LootCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            RepairCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
+            QuestgiverCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            QuestgiverRightClickEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
         }
 
         public bool FirstStart { get; set; }
 
-        private TimegatedEvent LastBagSlotCheck { get; set; }
+        public bool QuestgiverGossipOpen { get; set; }
 
-        private TimegatedEvent LastEatCheck { get; set; }
+        public int QuestgiverGossipOptionCount { get; set; }
 
-        private TimegatedEvent LastLoot { get; set; }
+        private TimegatedEvent BagSlotCheckEvent { get; }
 
-        private TimegatedEvent LastRepairCheck { get; set; }
+        private TimegatedEvent EatCheckEvent { get; }
+
+        private TimegatedEvent LootCheckEvent { get; }
+
+        private TimegatedEvent QuestgiverCheckEvent { get; }
+
+        private TimegatedEvent QuestgiverRightClickEvent { get; }
+
+        private TimegatedEvent RepairCheckEvent { get; }
 
         public override void Enter()
         {
@@ -49,6 +60,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowInterface.EventHookManager.Start();
                 }
+
+                WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnGossipShow);
+                WowInterface.EventHookManager.Subscribe("GOSSIP_CLOSED", OnGossipClosed);
             }
 
             WowInterface.CharacterManager.UpdateAll();
@@ -59,7 +73,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Execute()
         {
             // do we need to loot stuff
-            if (LastLoot.Run()
+            if (LootCheckEvent.Run()
                 && StateMachine.GetNearLootableUnits().Count() > 0)
             {
                 StateMachine.SetState((int)BotState.Looting);
@@ -67,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do we need to eat something
-            if (LastEatCheck.Run()
+            if (EatCheckEvent.Run()
                 // Refreshment
                 && ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                          && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
@@ -102,14 +116,15 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do i need to follow someone
-            if (!Config.Autopilot && IsUnitToFollowThere())
+            if (!Config.Autopilot && IsUnitToFollowThere(out _))
             {
                 StateMachine.SetState((int)BotState.Following);
                 return;
             }
 
             // do we need to repair our equipment
-            if (LastRepairCheck.Run()
+            if (Config.AutoRepair
+                && RepairCheckEvent.Run()
                 && IsRepairNpcNear())
             {
                 WowInterface.CharacterManager.Equipment.Update();
@@ -121,7 +136,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do we need to sell stuff
-            if (LastBagSlotCheck.Run()
+            if (Config.AutoSell
+                && BagSlotCheckEvent.Run()
                 && IsVendorNpcNear()
                 && WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
                 && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
@@ -136,6 +152,47 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
+            // do i need to complete/get quests
+            if (Config.AutoTalkToNearQuestgivers
+                && QuestgiverCheckEvent.Run())
+            {
+                if (IsUnitToFollowThere(out WowPlayer wowPlayer)
+                    && wowPlayer.TargetGuid != 0)
+                {
+                    WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
+
+                    if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
+                    {
+                        if (WowInterface.ObjectManager.Player.Position.GetDistance(possibleQuestgiver.Position) > 4.0)
+                        {
+                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
+                            return;
+                        }
+                        else
+                        {
+                            if (!QuestgiverGossipOpen)
+                            {
+                                if (QuestgiverRightClickEvent.Run())
+                                {
+                                    WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
+                                }
+                            }
+                            else
+                            {
+                                if (possibleQuestgiver.IsQuestgiver)
+                                {
+                                    // complete/accept quests
+                                }
+                                else if (possibleQuestgiver.IsGossip)
+                                {
+                                    // talk to the unit
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // do buffing etc...
             WowInterface.CombatClass?.OutOfCombatExecute();
         }
@@ -144,9 +201,9 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        public bool IsUnitToFollowThere()
+        public bool IsUnitToFollowThere(out WowPlayer playerToFollow)
         {
-            WowPlayer playerToFollow = null;
+            playerToFollow = null;
 
             // TODO: make this crap less redundant
             // check the specific character
@@ -200,6 +257,18 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 WowInterface.HookManager.AcceptBattlegroundInvite();
             }
+        }
+
+        private void OnGossipClosed(long timestamp, List<string> args)
+        {
+            QuestgiverGossipOpen = false;
+            QuestgiverGossipOptionCount = 0;
+        }
+
+        private void OnGossipShow(long timestamp, List<string> args)
+        {
+            QuestgiverGossipOpen = true;
+            QuestgiverGossipOptionCount = WowInterface.HookManager.GetGossipOptionCount();
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)

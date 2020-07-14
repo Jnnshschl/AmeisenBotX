@@ -132,7 +132,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.ObjectManager.Target != null)
             {
-                if ((WowInterface.ObjectManager.Player.IsFleeing 
+                if ((WowInterface.ObjectManager.Player.IsFleeing
                     || WowInterface.ObjectManager.Player.IsDazed
                     || WowInterface.ObjectManager.Player.IsDisarmed)
                     && CastSpellIfPossible(berserkerRageSpell, 0, false))

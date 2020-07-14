@@ -7,6 +7,8 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
     [Serializable]
     public class BasicCombatLogEntry
     {
+        public List<string> Args { get; set; }
+
         public int DestinationFlags { get; set; }
 
         public string DestinationGuid { get; set; }
@@ -28,8 +30,6 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
         public string Timestamp { get; set; }
 
         public CombatLogEntryType Type { get; set; }
-
-        public List<string> Args { get; set; }
 
         public static bool TryParse(List<string> eventArgs, out BasicCombatLogEntry basicCombatLogEntry)
         {

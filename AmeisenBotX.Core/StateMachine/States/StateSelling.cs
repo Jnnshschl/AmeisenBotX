@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
 
-                        if(selectedUnit.IsGossip)
+                        if (selectedUnit.IsGossip)
                         {
                             WowInterface.HookManager.UnitSelectGossipOption(1);
                         }

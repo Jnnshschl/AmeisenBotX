@@ -51,6 +51,7 @@
     <Compile Include="Objects\DualSelector.cs" />
     <Compile Include="Objects\Sequence.cs" />
     <Compile Include="Objects\Selector.cs" />
+    <Compile Include="Objects\Waterfall.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

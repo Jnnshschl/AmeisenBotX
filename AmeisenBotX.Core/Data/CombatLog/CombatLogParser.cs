@@ -16,9 +16,9 @@ namespace AmeisenBotX.Core.Data.CombatLog
             CombatLogEntries = new Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>>();
         }
 
-        private WowInterface WowInterface { get; }
-
         public Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> CombatLogEntries { get; }
+
+        private WowInterface WowInterface { get; }
 
         public void Parse(long timestamp, List<string> args)
         {

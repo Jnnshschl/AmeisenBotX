@@ -171,6 +171,11 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        public List<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance)
+        {
+            return WowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance).ToList();
+        }
+
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
         {
             lock (queryLock) { return wowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid); }

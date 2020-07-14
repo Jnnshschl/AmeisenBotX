@@ -241,7 +241,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 return;
             }
 
-            if (WowInterface.HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("tealth")))
+            if (WowInterface.ObjectManager.Player.Auras.Any(e => e.Name.Contains("tealth")))
             {
                 if (!wasInStealth || hasTargetMoved)
                 {

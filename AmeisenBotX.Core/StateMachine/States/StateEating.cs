@@ -27,9 +27,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (DateTime.Now - LastAction > TimeSpan.FromSeconds(1))
             {
                 Type t = default;
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 95
+                if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                     && WowInterface.ObjectManager.Player.MaxMana > 0
-                    && WowInterface.ObjectManager.Player.ManaPercentage < 95
+                    && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
                     && WowInterface.CharacterManager.HasRefreshmentInBag())
                 {
                     t = typeof(WowRefreshment);
@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         return;
                     }
                 }
-                else if (WowInterface.ObjectManager.Player.HealthPercentage < 95
+                else if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                          && WowInterface.CharacterManager.HasFoodInBag())
                 {
                     t = typeof(WowFood);
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
                 else if (WowInterface.ObjectManager.Player.MaxMana > 0
-                         && WowInterface.ObjectManager.Player.ManaPercentage < 95
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
                          && WowInterface.CharacterManager.HasWaterInBag())
                 {
                     t = typeof(WowWater);
