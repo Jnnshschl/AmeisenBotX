@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 else
                 {
                     // exit if we have no more food left or are near full hp/power
-                    StateMachine.SetState((int)BotState.Idle);
+                    StateMachine.SetState(BotState.Idle);
                     return;
                 }
 
@@ -90,6 +90,20 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+        }
+
+        internal bool NeedToEat()
+        {
+            return ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
+                         && WowInterface.CharacterManager.HasRefreshmentInBag())
+                     // Food
+                     || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
+                         && WowInterface.CharacterManager.HasFoodInBag())
+                     // Water
+                     || (WowInterface.ObjectManager.Player.MaxMana > 0
+                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
+                         && WowInterface.CharacterManager.HasWaterInBag()));
         }
     }
 }

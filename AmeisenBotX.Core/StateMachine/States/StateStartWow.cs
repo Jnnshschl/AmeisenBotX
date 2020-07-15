@@ -50,17 +50,17 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
             {
-                StateMachine.SetState((int)BotState.None);
+                StateMachine.SetState(BotState.None);
                 return;
             }
 
             if (Config.AutoLogin)
             {
-                StateMachine.SetState((int)BotState.Login);
+                StateMachine.SetState(BotState.Login);
             }
             else
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 

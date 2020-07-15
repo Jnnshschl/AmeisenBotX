@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Statemachine.States;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {

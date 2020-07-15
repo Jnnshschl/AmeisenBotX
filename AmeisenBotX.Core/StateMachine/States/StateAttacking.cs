@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat()
                 && !WowInterface.Globals.ForceCombat
-                && StateMachine.SetState((int)BotState.Idle))
+                && StateMachine.SetState(BotState.Idle))
             {
                 return;
             }
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private double GetMeeleRange()
         {
-            return Math.Max(WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) ? 1.5 : 3.2, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
+            return Math.Max(WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) ? 1.5 : 3.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
         }
 
         private bool HandleMovement(WowUnit target)

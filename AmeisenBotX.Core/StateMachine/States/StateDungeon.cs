@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (!WowInterface.ObjectManager.MapId.IsDungeonMap())
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -34,9 +34,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowInterface.DungeonEngine.Exit();
         }
 
-        private void StateMachine_OnStateOverride(int botState)
+        private void StateMachine_OnStateOverride(BotState botState)
         {
-            if (botState == (int)BotState.Dead)
+            if (botState == BotState.Dead)
             {
                 WowInterface.DungeonEngine.OnDeath();
             }

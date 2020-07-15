@@ -15,23 +15,23 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(4000));
+            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(60000));
             CastMountEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
         }
 
         public bool InLos { get; private set; }
 
+        public Vector3 Offset { get; private set; }
+
+        private TimegatedEvent CastMountEvent { get; }
+
         private TimegatedEvent LosCheckEvent { get; }
 
         private TimegatedEvent OffsetCheckEvent { get; }
 
-        private TimegatedEvent CastMountEvent { get; }
-
         private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(PlayerToFollowGuid);
 
         private ulong PlayerToFollowGuid { get; set; }
-
-        public Vector3 Offset { get; private set; }
 
         public override void Enter()
         {
@@ -62,21 +62,18 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (PlayerToFollow == null)
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
-            else
+            else if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
-                Vector3 randomPosAroundPlayer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, 3f);
-
-                if (randomPosAroundPlayer != default)
-                {
-                    Offset = PlayerToFollow.Position - randomPosAroundPlayer;
-                }
-                else
-                {
-                    Offset = default;
-                }
+                Random rnd = new Random();
+                Offset = new Vector3
+                (
+                    ((float)rnd.NextDouble() * 4f) + 2f, 
+                    ((float)rnd.NextDouble() * 4f) + 2f, 
+                    ((float)rnd.NextDouble() * 4f) + 2f
+                );
             }
         }
 
@@ -105,7 +102,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
                 else
                 {
-                    StateMachine.SetState((int)BotState.Idle);
+                    StateMachine.SetState(BotState.Idle);
                 }
 
                 return;
@@ -126,7 +123,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 

@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 

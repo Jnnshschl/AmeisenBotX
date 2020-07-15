@@ -158,7 +158,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (UpdatePriorityUnits.Run())
             {
-                if (StateMachine.CurrentState.Key == (int)BotState.Dungeon
+                if (StateMachine.CurrentState.Key == BotState.Dungeon
                     && WowInterface.DungeonEngine != null
                     && WowInterface.DungeonEngine.Profile.PriorityUnits != null
                     && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)

@@ -110,6 +110,8 @@ namespace AmeisenBotX.Core
 
         public bool OnlyFriendsMode { get; set; } = false;
 
+        public double PartyCombatRange { get; set; } = 64.0;
+
         public string Password { get; set; } = string.Empty;
 
         public string PathToWowExe { get; set; } = string.Empty;

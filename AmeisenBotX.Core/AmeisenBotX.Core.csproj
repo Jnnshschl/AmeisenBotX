@@ -266,7 +266,6 @@
     <Compile Include="Raid\RaidEngine.cs" />
     <Compile Include="Raid\Profiles\IRaidProfile.cs" />
     <Compile Include="Relaxing\RelaxEngine.cs" />
-    <Compile Include="Common\AbstractStateMachine.cs" />
     <Compile Include="Statemachine\AmeisenBotStateMachine.cs" />
     <Compile Include="Statemachine\CombatClasses\Kamel\BasicKamelClass.cs" />
     <Compile Include="Statemachine\CombatClasses\Kamel\DeathknightBlood.cs" />
@@ -302,7 +301,7 @@
     <Compile Include="Statemachine\CombatClasses\Kamel\RestorationShaman .cs" />
     <Compile Include="Statemachine\CombatClasses\Kamel\WarriorFury.cs" />
     <Compile Include="Statemachine\Enums\CombatClassRole.cs" />
-    <Compile Include="Common\IState.cs" />
+    <Compile Include="Statemachine\States\IState.cs" />
     <Compile Include="Statemachine\States\StateQuesting.cs" />
     <Compile Include="Statemachine\States\StateRelaxing.cs" />
     <Compile Include="Statemachine\States\StateDungeon.cs" />

@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -76,25 +75,15 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (LootCheckEvent.Run()
                 && StateMachine.GetNearLootableUnits().Count() > 0)
             {
-                StateMachine.SetState((int)BotState.Looting);
+                StateMachine.SetState(BotState.Looting);
                 return;
             }
 
             // do we need to eat something
             if (EatCheckEvent.Run()
-                // Refreshment
-                && ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
-                         && WowInterface.CharacterManager.HasRefreshmentInBag())
-                     // Food
-                     || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                         && WowInterface.CharacterManager.HasFoodInBag())
-                     // Water
-                     || (WowInterface.ObjectManager.Player.MaxMana > 0
-                         && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
-                         && WowInterface.CharacterManager.HasWaterInBag())))
+                && StateMachine.GetState<StateEating>().NeedToEat())
             {
-                StateMachine.SetState((int)BotState.Eating);
+                StateMachine.SetState(BotState.Eating);
                 return;
             }
 
@@ -103,7 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && bgStatus == 3
                 && !Config.BattlegroundUsePartyMode)
             {
-                StateMachine.SetState((int)BotState.Battleground);
+                StateMachine.SetState(BotState.Battleground);
                 return;
             }
 
@@ -111,14 +100,14 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (WowInterface.ObjectManager.MapId.IsDungeonMap()
                 && !Config.DungeonUsePartyMode)
             {
-                StateMachine.SetState((int)BotState.Dungeon);
+                StateMachine.SetState(BotState.Dungeon);
                 return;
             }
 
             // do i need to follow someone
             if (!Config.Autopilot && IsUnitToFollowThere(out _))
             {
-                StateMachine.SetState((int)BotState.Following);
+                StateMachine.SetState(BotState.Following);
                 return;
             }
 
@@ -130,7 +119,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 WowInterface.CharacterManager.Equipment.Update();
                 if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability) * 100.0 <= Config.ItemRepairThreshold))
                 {
-                    StateMachine.SetState((int)BotState.Repairing);
+                    StateMachine.SetState(BotState.Repairing);
                     return;
                 }
             }
@@ -138,17 +127,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do we need to sell stuff
             if (Config.AutoSell
                 && BagSlotCheckEvent.Run()
-                && IsVendorNpcNear()
-                && WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
-                && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
-                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
-                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
-                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
-                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
-                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
-                   .Any(e => e.Price > 0))
+                && StateMachine.GetState<StateSelling>().NeedToSell())
             {
-                StateMachine.SetState((int)BotState.Selling);
+                StateMachine.SetState(BotState.Selling);
                 return;
             }
 
@@ -249,14 +230,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                        .Any(e => e.GetType() != typeof(WowPlayer)
                        && e.IsRepairVendor
                        && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
-        }
-
-        internal bool IsVendorNpcNear()
-        {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer)
-                       && e.IsVendor
-                       && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.MerchantNpcSearchRadius);
         }
 
         private void CheckForBattlegroundInvites()

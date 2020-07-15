@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
+using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
@@ -30,7 +31,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             PathRefreshEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
             PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
@@ -62,7 +63,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             new Selector<MovementBlackboard>
                             (
                                 "IsDirectMovingState",
-                                (b) => IsDirectMovingState() && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < 5.0,
+                                (b) => IsDirectMovingState() && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < 8.0,
                                 new Leaf<MovementBlackboard>((b) =>
                                 {
                                     if (Nodes.Count > 0)
@@ -71,7 +72,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                     }
 
                                     ShouldBeMoving = true;
-                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, TargetPosition, TargetRotation);
+
+                                    Vector3 tPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, tPos, TargetRotation);
+
                                     return WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold
                                            ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
                                 }),
@@ -101,25 +105,29 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         }),
                                         new Leaf<MovementBlackboard>("Move", (b) =>
                                         {
-                                            // if (MountCheck.Run() && wowInterface.CharacterManager.Mounts.Count > 0 && wowInterface.HookManager.IsOutdoors())
-                                            // {
-                                            //     WowMount mount = wowInterface.CharacterManager.Mounts[new Random().Next(0, wowInterface.CharacterManager.Mounts.Count)];
-                                            //     wowInterface.HookManager.Mount(mount.Index);
-                                            //     IsCastingMount = true;
-                                            //     return BehaviorTreeStatus.Ongoing;
-                                            // }
-                                            //
-                                            // if (IsCastingMount)
-                                            // {
-                                            //     if (wowInterface.ObjectManager.Player.IsCasting)
-                                            //     {
-                                            //         return BehaviorTreeStatus.Ongoing;
-                                            //     }
-                                            //     else
-                                            //     {
-                                            //         IsCastingMount = false;
-                                            //     }
-                                            // }
+                                            if (MountCheck.Run() 
+                                                && wowInterface.CharacterManager.Mounts.Count > 0 
+                                                && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 50.0
+                                                && !WowInterface.ObjectManager.Player.IsMounted
+                                                && wowInterface.HookManager.IsOutdoors())
+                                            {
+                                                WowMount mount = wowInterface.CharacterManager.Mounts[new Random().Next(0, wowInterface.CharacterManager.Mounts.Count)];
+                                                wowInterface.HookManager.Mount(mount.Index);
+                                                IsCastingMount = true;
+                                                return BehaviorTreeStatus.Ongoing;
+                                            }
+                                            
+                                            if (IsCastingMount)
+                                            {
+                                                if (wowInterface.ObjectManager.Player.IsCasting)
+                                                {
+                                                    return BehaviorTreeStatus.Ongoing;
+                                                }
+                                                else
+                                                {
+                                                    IsCastingMount = false;
+                                                }
+                                            }
 
                                             ShouldBeMoving = true;
                                             PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, Nodes.Peek(), TargetRotation);

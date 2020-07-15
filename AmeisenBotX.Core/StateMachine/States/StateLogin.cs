@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         case "CHARSELECT":
                             AmeisenLogger.Instance.Log("Login", "Selecting Character");
                             WowInterface.HookManager.LuaDoString($"if(CharacterSelectUI and CharacterSelectUI:IsVisible()) then CharacterSelect_SelectCharacter({Config.CharacterSlot});EnterWorld();end");
-                            StateMachine.SetState((int)BotState.Idle);
+                            StateMachine.SetState(BotState.Idle);
                             break;
 
                         default:

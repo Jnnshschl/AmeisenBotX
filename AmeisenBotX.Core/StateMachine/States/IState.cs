@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Common
+﻿namespace AmeisenBotX.Statemachine.States
 {
     public interface IState
     {

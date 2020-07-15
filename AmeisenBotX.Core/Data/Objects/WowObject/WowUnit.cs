@@ -74,19 +74,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsInCombat => UnitFlags[(int)WowUnitFlags.Combat];
 
-        public bool IsInTaxiFlight => UnitFlags[(int)WowUnitFlags.TaxiFlight];
-
         public bool IsInfluenced => UnitFlags[(int)WowUnitFlags.Influenced];
 
-        public bool IsPossessed => UnitFlags[(int)WowUnitFlags.Possessed];
-
-        public bool IsPlayerControlled => UnitFlags[(int)WowUnitFlags.PlayerControlled];
-
-        public bool IsNotSelectable => UnitFlags[(int)WowUnitFlags.NotSelectable];
-
-        public bool IsPlusMob => UnitFlags[(int)WowUnitFlags.PlusMob];
-
         public bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlags.Innkeeper];
+
+        public bool IsInTaxiFlight => UnitFlags[(int)WowUnitFlags.TaxiFlight];
 
         public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags.Lootable];
 
@@ -98,11 +90,19 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsNotAttackable => UnitFlags[(int)WowUnitFlags.NotAttackable];
 
+        public bool IsNotSelectable => UnitFlags[(int)WowUnitFlags.NotSelectable];
+
         public bool IsPetInCombat => UnitFlags[(int)WowUnitFlags.PetInCombat];
 
         public bool IsPetition => NpcFlags[(int)WowUnitNpcFlags.Petitioner];
 
+        public bool IsPlayerControlled => UnitFlags[(int)WowUnitFlags.PlayerControlled];
+
+        public bool IsPlusMob => UnitFlags[(int)WowUnitFlags.PlusMob];
+
         public bool IsPoisonVendor => NpcFlags[(int)WowUnitNpcFlags.PoisonVendor];
+
+        public bool IsPossessed => UnitFlags[(int)WowUnitFlags.Possessed];
 
         public bool IsProfessionTrainer => NpcFlags[(int)WowUnitNpcFlags.ProfessionTrainer];
 
@@ -182,9 +182,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
 
-        public ulong TargetGuid => RawWowUnit.Target;
-
         public ulong SummonedByGuid => RawWowUnit.SummonedBy;
+
+        public ulong TargetGuid => RawWowUnit.Target;
 
         public BitVector32 UnitFlags => RawWowUnit.Flags1;
 

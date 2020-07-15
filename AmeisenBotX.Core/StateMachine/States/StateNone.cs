@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (Config.AutostartWow)
             {
                 AmeisenLogger.Instance.Log("StateNone", "Need to start WoW");
-                StateMachine.SetState((int)BotState.StartWow);
+                StateMachine.SetState(BotState.StartWow);
             }
         }
 

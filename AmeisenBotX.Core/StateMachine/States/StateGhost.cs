@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.ObjectManager.Player.Health > 1)
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
