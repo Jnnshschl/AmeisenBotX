@@ -14,8 +14,6 @@ namespace AmeisenBotX.Core.Quest
         {
             WowInterface = wowInterface;
 
-            WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
-
             CompletedQuests = new List<int>();
             QueryCompletedQuestsEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
@@ -30,8 +28,16 @@ namespace AmeisenBotX.Core.Quest
 
         private WowInterface WowInterface { get; }
 
+        private bool NeedToSetup { get; set; }
+
         public void Execute()
         {
+            if (NeedToSetup)
+            {
+                WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
+                NeedToSetup = false;
+            }
+
             if (QuestProfile == null)
             {
                 LoadProfile(new DeathknightStartAreaQuestProfile(WowInterface));

@@ -206,15 +206,15 @@ namespace AmeisenBotX.Core.Statemachine
                 {
                     SetState(StateOverride);
                 }
-            }
 
-            AntiAfkEvent.Run();
+                AntiAfkEvent.Run();
 
-            // auto disable rendering when not in focus
-            if (Config.AutoDisableRender && RenderSwitchEvent.Run())
-            {
-                IntPtr foregroundWindow = WowInterface.XMemory.GetForegroundWindow();
-                WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+                // auto disable rendering when not in focus
+                if (Config.AutoDisableRender && RenderSwitchEvent.Run())
+                {
+                    IntPtr foregroundWindow = WowInterface.XMemory.GetForegroundWindow();
+                    WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+                }
             }
 
             // execute the State and Movement
@@ -224,7 +224,7 @@ namespace AmeisenBotX.Core.Statemachine
 
         public T GetState<T>() where T : BasicState
         {
-            return (T)States.FirstOrDefault(e => e.GetType() == typeof(T)).Value;
+            return (T)States.FirstOrDefault(e => e.Value.GetType() == typeof(T)).Value;
         }
 
         public bool SetState(BotState state, bool ignoreExit = false)
@@ -234,6 +234,8 @@ namespace AmeisenBotX.Core.Statemachine
                 // we are already in this state
                 return false;
             }
+
+            AmeisenLogger.Instance.Log("StateMachine", $"Changing State to {state}");
 
             LastState = CurrentState.Key;
 

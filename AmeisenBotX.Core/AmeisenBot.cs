@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
-            WowInterface = SetupWowInterface();
+            SetupWowInterface();
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
             StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
@@ -796,34 +796,32 @@ namespace AmeisenBotX.Core
             }
         }
 
-        private WowInterface SetupWowInterface()
+        private void SetupWowInterface()
         {
-            return new WowInterface
-            {
-                Globals = new AmeisenBotGlobals(),
+            WowInterface = new WowInterface();
+            WowInterface.Globals = new AmeisenBotGlobals();
 
-                OffsetList = new OffsetList335a(),
-                XMemory = new XMemory(),
+            WowInterface.OffsetList = new OffsetList335a();
+            WowInterface.XMemory = new XMemory();
 
-                BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, AccountName, "cache.bin")),
-                BotPersonality = new BotPersonality(Path.Combine(BotDataPath, AccountName, "personality.bin")),
+            WowInterface.BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, AccountName, "cache.bin"));
+            WowInterface.BotPersonality = new BotPersonality(Path.Combine(BotDataPath, AccountName, "personality.bin"));
 
-                CombatLogParser = new CombatLogParser(WowInterface),
+            WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
 
-                ObjectManager = new ObjectManager(WowInterface),
-                HookManager = new HookManager(WowInterface),
-                CharacterManager = new CharacterManager(Config, WowInterface),
-                EventHookManager = new EventHook(WowInterface),
+            WowInterface.ObjectManager = new ObjectManager(WowInterface);
+            WowInterface.HookManager = new HookManager(WowInterface);
+            WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
+            WowInterface.EventHookManager = new EventHook(WowInterface);
 
-                JobEngine = new JobEngine(WowInterface, Config),
-                DungeonEngine = new DungeonEngine(WowInterface, StateMachine),
-                RelaxEngine = new RelaxEngine(WowInterface),
-                QuestEngine = new QuestEngine(WowInterface),
+            WowInterface.JobEngine = new JobEngine(WowInterface, Config);
+            WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
+            WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
+            WowInterface.QuestEngine = new QuestEngine(WowInterface);
 
-                PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort),
-                MovementSettings = new MovementSettings(),
-                MovementEngine = new SickMovementEngine(WowInterface, Config)
-            };
+            WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
+            WowInterface.MovementSettings = new MovementSettings();
+            WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
         }
 
         private void StateMachineTimerTick(object sender, ElapsedEventArgs e)

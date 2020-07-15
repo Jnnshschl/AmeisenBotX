@@ -48,19 +48,15 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
-            {
-                StateMachine.SetState(BotState.None);
-                return;
-            }
-
             if (Config.AutoLogin)
             {
                 StateMachine.SetState(BotState.Login);
+                return;
             }
             else
             {
                 StateMachine.SetState(BotState.Idle);
+                return;
             }
         }
 
