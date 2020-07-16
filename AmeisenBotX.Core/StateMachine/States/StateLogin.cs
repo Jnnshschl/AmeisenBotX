@@ -18,12 +18,23 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            WowInterface.HookManager.SetupEndsceneHook();
-            WowInterface.HookManager.OverrideWorldCheckOn();
+            if (!WowInterface.HookManager.IsWoWHooked)
+            {
+                WowInterface.HookManager.SetupEndsceneHook();
+            }
+
+            if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
+            {
+                StateMachine.SetState(BotState.Idle);
+                WowInterface.HookManager.OverrideWorldCheckOff();
+                return;
+            }
         }
 
         public override void Execute()
         {
+            WowInterface.HookManager.OverrideWorldCheckOn();
+
             if (LoginAttemptEvent.Run())
             {
                 if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.UTF8, out string gameState))
@@ -50,6 +61,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
                 {
                     StateMachine.SetState(BotState.Idle);
+                    WowInterface.HookManager.OverrideWorldCheckOff();
                     return;
                 }
 
@@ -67,7 +79,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
-            WowInterface.HookManager.OverrideWorldCheckOff();
         }
     }
 }

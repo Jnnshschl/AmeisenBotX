@@ -44,19 +44,34 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p)).Guid;
+                    WowPlayer player = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+
+                    if (player != null)
+                    {
+                        PlayerToFollowGuid = player.Guid;
+                    }
                 }
 
                 // check the group/raid leader
                 if (PlayerToFollow == null && Config.FollowGroupLeader)
                 {
-                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid && !IsUnitOutOfRange(p)).Guid;
+                    WowPlayer player = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid && !IsUnitOutOfRange(p));
+
+                    if (player != null)
+                    {
+                        PlayerToFollowGuid = player.Guid;
+                    }
                 }
 
                 // check the group members
                 if (PlayerToFollow == null && Config.FollowGroupMembers)
                 {
-                    PlayerToFollowGuid = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid) && !IsUnitOutOfRange(p)).Guid;
+                    WowPlayer player = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
+
+                    if (player != null)
+                    {
+                        PlayerToFollowGuid = player.Guid;
+                    }
                 }
             }
 
@@ -72,7 +87,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 (
                     ((float)rnd.NextDouble() * 4f) + 2f,
                     ((float)rnd.NextDouble() * 4f) + 2f,
-                    ((float)rnd.NextDouble() * 4f) + 2f
+                    0
                 );
             }
         }

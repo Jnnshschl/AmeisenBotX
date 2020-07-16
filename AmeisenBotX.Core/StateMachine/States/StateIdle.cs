@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -253,7 +254,15 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (playerToFollow != null)
             {
-                double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                Vector3 pos = playerToFollow.Position;
+
+                if (Config.FollowPositionDynamic)
+                {
+                    pos += StateMachine.GetState<StateFollowing>().Offset;
+                }
+
+                double distance = pos.GetDistance(WowInterface.ObjectManager.Player.Position);
+
                 if (UnitIsOutOfRange(distance))
                 {
                     playerToFollow = null;

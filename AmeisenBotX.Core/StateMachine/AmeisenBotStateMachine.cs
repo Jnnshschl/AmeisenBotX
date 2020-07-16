@@ -127,9 +127,7 @@ namespace AmeisenBotX.Core.Statemachine
                 if (CurrentState.Key != BotState.Login
                   && WowInterface.ObjectManager != null)
                 {
-                    WowInterface.ObjectManager.RefreshIsWorldLoaded();
-
-                    if (!WowInterface.ObjectManager.IsWorldLoaded)
+                    if (!WowInterface.ObjectManager.RefreshIsWorldLoaded())
                     {
                         if (SetState(BotState.LoadingScreen, true))
                         {
