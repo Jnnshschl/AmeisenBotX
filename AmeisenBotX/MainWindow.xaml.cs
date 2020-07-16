@@ -277,6 +277,8 @@ namespace AmeisenBotX
                         (int)Math.Floor(wowRect.ActualHeight * M22)
                     );
                 });
+
+                IsAutoPositionSetup = false;
             }
         }
 
