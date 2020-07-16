@@ -85,8 +85,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                 Random rnd = new Random();
                 Offset = new Vector3
                 (
-                    ((float)rnd.NextDouble() * 4f) + 2f,
-                    ((float)rnd.NextDouble() * 4f) + 2f,
+                    ((float)rnd.NextDouble() * Config.MinFollowDistance) + 1f,
+                    ((float)rnd.NextDouble() * Config.MinFollowDistance) + 1f,
                     0
                 );
             }

@@ -190,7 +190,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void CofirmBop()
         {
-            LuaDoString("ConfirmBindOnUse();StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\")");
+            LuaDoString($"ConfirmBindOnUse();StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\"){(!WowInterface.ObjectManager.Player.IsDead ? "StaticPopup1Button1:Click()": "")}");
         }
 
         public void CofirmLootRoll()
