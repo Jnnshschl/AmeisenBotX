@@ -266,14 +266,17 @@ namespace AmeisenBotX
         {
             if (Config.AutoPositionWow)
             {
-                AmeisenBot.WowInterface.XMemory.SetupAutoPosition
-                (
-                    InteropHelper.EnsureHandle(),
-                    (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
-                    (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
-                    (int)Math.Floor(wowRect.ActualWidth * M11),
-                    (int)Math.Floor(wowRect.ActualHeight * M22)
-                );
+                Dispatcher.Invoke(() =>
+                {
+                    AmeisenBot.WowInterface.XMemory.SetupAutoPosition
+                    (
+                        InteropHelper.EnsureHandle(),
+                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
+                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
+                        (int)Math.Floor(wowRect.ActualWidth * M11),
+                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                    );
+                });
             }
         }
 

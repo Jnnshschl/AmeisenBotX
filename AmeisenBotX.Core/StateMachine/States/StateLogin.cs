@@ -39,19 +39,18 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                         case "CHARSELECT":
                             AmeisenLogger.Instance.Log("Login", $"Selecting character slot: {Config.CharacterSlot}");
-
-                            if (WowInterface.HookManager.LuaDoString($"if CharacterSelectUI and CharacterSelectUI:IsVisible()then CharacterSelect_SelectCharacter({Config.CharacterSlot})elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()then CharacterCreate_Back()end"))
-                            {
-                                return;
-                            }
-                            else
-                            {
-                                break;
-                            }
+                            WowInterface.HookManager.LuaDoString($"if CharacterSelectUI and CharacterSelectUI:IsVisible()then CharacterSelect_SelectCharacter({Config.CharacterSlot})EnterWorld();elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()then CharacterCreate_Back()end");
+                            break;
 
                         default:
                             break;
                     }
+                }
+
+                if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
+                {
+                    StateMachine.SetState(BotState.Idle);
+                    return;
                 }
 
                 // WowInterface.HookManager.LuaDoString($"if(AccountLoginUI and AccountLoginUI:IsVisible()) then DefaultServerLogin('{Config.Username}', '{Config.Password}');elseif (RealmList and RealmList:IsVisible()) then for i = 1, select('#', GetRealmCategories()), 1 do local numRealms = GetNumRealms(i);for j = 1, numRealms, 1 do local name, numCharacters = GetRealmInfo(i, j);if (name ~= nil and name == '{Config.Realm}') then ChangeRealm(i,j); RealmList:Hide();end end end elseif(CharacterSelectUI and CharacterSelectUI:IsVisible()) then CharacterSelect_SelectCharacter({Config.CharacterSlot});EnterWorld();elseif(CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then CharacterCreate_Back();end;");
@@ -68,7 +67,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
-            WowInterface.HookManager.LuaDoString("EnterWorld();");
             WowInterface.HookManager.OverrideWorldCheckOff();
         }
     }
