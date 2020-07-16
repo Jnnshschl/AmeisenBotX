@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -45,12 +44,6 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
             {
-                while (!WowInterface.ObjectManager.IsWorldLoaded)
-                {
-                    WowInterface.ObjectManager.RefreshIsWorldLoaded();
-                    Task.Delay(100).Wait();
-                }
-
                 FirstStart = false;
                 WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
                 StateMachine.PlayerName = playerName;
@@ -135,40 +128,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
-                && QuestgiverCheckEvent.Run())
+                && QuestgiverCheckEvent.Run()
+                && IsUnitToFollowThere(out WowPlayer unitToFollow, true)
+                && unitToFollow.TargetGuid != 0)
             {
-                if (IsUnitToFollowThere(out WowPlayer wowPlayer, true)
-                    && wowPlayer.TargetGuid != 0)
-                {
-                    WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
-
-                    if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
-                    {
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance(possibleQuestgiver.Position) > 4.0)
-                        {
-                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
-                            return;
-                        }
-                        else
-                        {
-                            if (!QuestgiverGossipOpen)
-                            {
-                                if (QuestgiverRightClickEvent.Run())
-                                {
-                                    WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
-                                }
-                            }
-                            else
-                            {
-                                if (possibleQuestgiver.IsQuestgiver)
-                                {
-                                    // complete/accept quests
-                                    WowInterface.HookManager.AutoAcceptQuests();
-                                }
-                            }
-                        }
-                    }
-                }
+                HandleAutoQuestMode(unitToFollow);
             }
 
             // do buffing etc...
@@ -238,6 +202,38 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && bgStatus == 2)
             {
                 WowInterface.HookManager.AcceptBattlegroundInvite();
+            }
+        }
+
+        private void HandleAutoQuestMode(WowPlayer wowPlayer)
+        {
+            WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
+
+            if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(possibleQuestgiver.Position) > 4.0)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
+                    return;
+                }
+                else
+                {
+                    if (!QuestgiverGossipOpen)
+                    {
+                        if (QuestgiverRightClickEvent.Run())
+                        {
+                            WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
+                        }
+                    }
+                    else
+                    {
+                        if (possibleQuestgiver.IsQuestgiver)
+                        {
+                            // complete/accept quests
+                            WowInterface.HookManager.AutoAcceptQuests();
+                        }
+                    }
+                }
             }
         }
 

@@ -14,8 +14,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public event Action OnWoWStarted;
 
-        private DateTime WowStart { get; set; }
-
         public override void Enter()
         {
             AmeisenLogger.Instance.Log("StartWow", "Setting TOS and EULA to 1 in config");
@@ -26,7 +24,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                 AmeisenLogger.Instance.Log("StartWow", "Changing Realmlist");
                 ChangeRealmlist();
             }
+        }
 
+        public override void Execute()
+        {
             if (!StateMachine.ShouldExit && File.Exists(Config.PathToWowExe))
             {
                 if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
@@ -36,27 +37,19 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     AmeisenLogger.Instance.Log("StartWow", "Waiting for input idle");
                     WowInterface.WowProcess.WaitForInputIdle();
+                    return;
+                }
 
+                if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited)
+                {
                     AmeisenLogger.Instance.Log("StartWow", "Attaching XMemory");
                     WowInterface.XMemory.Attach(WowInterface.WowProcess);
 
-                    WowStart = DateTime.Now;
                     OnWoWStarted?.Invoke();
-                }
-            }
-        }
 
-        public override void Execute()
-        {
-            if (Config.AutoLogin)
-            {
-                StateMachine.SetState(BotState.Login);
-                return;
-            }
-            else
-            {
-                StateMachine.SetState(BotState.Idle);
-                return;
+                    StateMachine.SetState(BotState.Login);
+                    return;
+                }
             }
         }
 

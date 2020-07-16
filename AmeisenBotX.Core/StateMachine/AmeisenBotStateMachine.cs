@@ -51,8 +51,6 @@ namespace AmeisenBotX.Core.Statemachine
                 { BotState.StartWow, new StateStartWow(this, config, WowInterface) }
             };
 
-            GetState<StateStartWow>().OnWoWStarted += () => OnWowStarted?.Invoke();
-
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
             GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
@@ -67,8 +65,6 @@ namespace AmeisenBotX.Core.Statemachine
         public event StateMachineTick OnStateMachineTick;
 
         public event StateMachineOverride OnStateOverride;
-
-        public event Action OnWowStarted;
 
         public string BotDataPath { get; }
 
@@ -104,116 +100,118 @@ namespace AmeisenBotX.Core.Statemachine
 
         public void Execute()
         {
-            // Handle Wow crash
-            // ---------------- >
-            if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
-                && SetState((int)BotState.None))
-            {
-                AmeisenLogger.Instance.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
-
-                WowCrashed = true;
-                GetState<StateIdle>().FirstStart = true;
-
-                WowInterface.MovementEngine.Reset();
-                WowInterface.ObjectManager.WowObjects.Clear();
-                WowInterface.EventHookManager.Stop();
-
-                return;
-            }
-
             // Override states
             // --------------->
             if (CurrentState.Key != BotState.None
-                && CurrentState.Key != BotState.StartWow
-                && CurrentState.Key != BotState.Login
-                && WowInterface.ObjectManager != null)
+                && CurrentState.Key != BotState.StartWow)
             {
-                WowInterface.ObjectManager.RefreshIsWorldLoaded();
-
-                if (!WowInterface.ObjectManager.IsWorldLoaded)
+                // Handle Wow crash
+                // ---------------- >
+                if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
+                    && SetState((int)BotState.None))
                 {
-                    if (SetState(BotState.LoadingScreen, true))
-                    {
-                        OnStateOverride?.Invoke(CurrentState.Key);
-                        AmeisenLogger.Instance.Log("StateMachine", "World is not loaded", LogLevel.Verbose);
-                        return;
-                    }
+                    AmeisenLogger.Instance.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
+
+                    WowCrashed = true;
+                    GetState<StateIdle>().FirstStart = true;
+
+                    WowInterface.MovementEngine.Reset();
+                    WowInterface.ObjectManager.WowObjects.Clear();
+                    WowInterface.EventHookManager.Stop();
+
+                    return;
                 }
-                else
+
+                AntiAfkEvent.Run();
+
+                if (CurrentState.Key != BotState.Login
+                  && WowInterface.ObjectManager != null)
                 {
-                    WowInterface.ObjectManager.UpdateWowObjects();
-                    EventPullEvent.Run();
+                    WowInterface.ObjectManager.RefreshIsWorldLoaded();
 
-                    if (WowInterface.ObjectManager.Player != null)
+                    if (!WowInterface.ObjectManager.IsWorldLoaded)
                     {
-                        if (!WowInterface.ObjectManager.Player.IsCasting)
+                        if (SetState(BotState.LoadingScreen, true))
                         {
-                            WowInterface.MovementEngine.Execute();
+                            OnStateOverride?.Invoke(CurrentState.Key);
+                            AmeisenLogger.Instance.Log("StateMachine", "World is not loaded", LogLevel.Verbose);
+                            return;
                         }
+                    }
+                    else
+                    {
+                        WowInterface.ObjectManager.UpdateWowObjects();
+                        EventPullEvent.Run();
 
-                        if (WowInterface.ObjectManager.Player.IsDead)
+                        if (WowInterface.ObjectManager.Player != null)
                         {
-                            // we are dead, state needs to release the spirit
-                            if (SetState(BotState.Dead, true))
+                            if (!WowInterface.ObjectManager.Player.IsCasting)
                             {
-                                OnStateOverride?.Invoke(CurrentState.Key);
-                                return;
-                            }
-                        }
-                        else if (GhostCheckEvent.Run(out bool isGhost)
-                            && isGhost)
-                        {
-                            // we cant be a ghost if we are still dead
-                            if (SetState(BotState.Ghost, true))
-                            {
-                                OnStateOverride?.Invoke(CurrentState.Key);
-                                return;
-                            }
-                        }
-
-                        // we cant fight nor do we receive damage when we are dead or a ghost
-                        // so ignore these overrides
-                        if (CurrentState.Key != BotState.Dead
-                            && CurrentState.Key != BotState.Ghost)
-                        {
-                            if (Config.AutoDodgeAoeSpells
-                                && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
-                                && SetState(BotState.InsideAoeDamage, true))
-                            {
-                                OnStateOverride(CurrentState.Key);
-                                return;
+                                WowInterface.MovementEngine.Execute();
                             }
 
-                            // TODO: handle combat bug, sometimes when combat ends, the player stays in combat for no reason
-                            if (!WowInterface.Globals.IgnoreCombat
-                                && (WowInterface.ObjectManager.Player.IsInCombat
-                                    || WowInterface.Globals.ForceCombat
-                                    || IsAnyPartymemberInCombat()))
+                            if (WowInterface.ObjectManager.Player.IsDead)
                             {
-                                if (SetState(BotState.Attacking, true))
+                                // we are dead, state needs to release the spirit
+                                if (SetState(BotState.Dead, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
                                     return;
                                 }
                             }
+                            else if (GhostCheckEvent.Run(out bool isGhost)
+                                && isGhost)
+                            {
+                                // we cant be a ghost if we are still dead
+                                if (SetState(BotState.Ghost, true))
+                                {
+                                    OnStateOverride?.Invoke(CurrentState.Key);
+                                    return;
+                                }
+                            }
+
+                            // we cant fight nor do we receive damage when we are dead or a ghost
+                            // so ignore these overrides
+                            if (CurrentState.Key != BotState.Dead
+                                && CurrentState.Key != BotState.Ghost)
+                            {
+                                if (Config.AutoDodgeAoeSpells
+                                    && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
+                                    && SetState(BotState.InsideAoeDamage, true))
+                                {
+                                    OnStateOverride(CurrentState.Key);
+                                    return;
+                                }
+
+                                // TODO: handle combat bug, sometimes when combat ends, the player stays in combat for no reason
+                                if (!WowInterface.Globals.IgnoreCombat
+                                    && (WowInterface.ObjectManager.Player.IsInCombat
+                                        || WowInterface.Globals.ForceCombat
+                                        || IsAnyPartymemberInCombat()))
+                                {
+                                    if (SetState(BotState.Attacking, true))
+                                    {
+                                        OnStateOverride?.Invoke(CurrentState.Key);
+                                        return;
+                                    }
+                                }
+                            }
                         }
                     }
-                }
 
-                if (CurrentState.Key == BotState.Idle
-                    && CurrentState.Key != StateOverride
-                    && StateOverride != BotState.None)
-                {
-                    SetState(StateOverride);
-                }
+                    if (CurrentState.Key == BotState.Idle
+                        && CurrentState.Key != StateOverride
+                        && StateOverride != BotState.None)
+                    {
+                        SetState(StateOverride);
+                    }
 
-                AntiAfkEvent.Run();
-
-                // auto disable rendering when not in focus
-                if (Config.AutoDisableRender && RenderSwitchEvent.Run())
-                {
-                    IntPtr foregroundWindow = WowInterface.XMemory.GetForegroundWindow();
-                    WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+                    // auto disable rendering when not in focus
+                    if (Config.AutoDisableRender && RenderSwitchEvent.Run())
+                    {
+                        IntPtr foregroundWindow = WowInterface.XMemory.GetForegroundWindow();
+                        WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+                    }
                 }
             }
 

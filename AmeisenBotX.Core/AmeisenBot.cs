@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core
             SetupWowInterface();
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
-            StateMachine.OnStateMachineStateChanged += HandleLoadWowPosition;
+            StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
 
             StateMachineTimer = new Timer(Config.StateMachineTickMs);
             StateMachineTimer.Elapsed += StateMachineTimerTick;
@@ -253,6 +253,19 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Start();
         }
 
+        private void AmeisenBot_OnWoWStarted()
+        {
+            if (Config.SaveWowWindowPosition)
+            {
+                LoadWowWindowPosition();
+            }
+
+            if (Config.SaveBotWindowPosition)
+            {
+                LoadBotWindowPosition();
+            }
+        }
+
         private ICombatClass CompileCustomCombatClass()
         {
             CompilerParameters parameters = new CompilerParameters
@@ -286,29 +299,13 @@ namespace AmeisenBotX.Core
             return (ICombatClass)results.CompiledAssembly.CreateInstance(typeof(ICombatClass).ToString());
         }
 
-        private void HandleLoadWowPosition()
-        {
-            if (StateMachine.CurrentState.Key == BotState.Login)
-            {
-                if (Config.SaveWowWindowPosition)
-                {
-                    LoadWowWindowPosition();
-                }
-
-                if (Config.SaveBotWindowPosition)
-                {
-                    LoadBotWindowPosition();
-                }
-            }
-        }
-
         private void InitBattlegroundEngines()
         {
             // Add your custom battleground engines here!
             // ------------------------------------------ >
             BattlegroundEngines = new List<IBattlegroundEngine>
             {
-                new JBattleGroundEngine(WowInterface),
+                new UniversalBattlegroundEngine(WowInterface),
                 new KummelEngine(WowInterface),
                 new RunBoyRunEngine(WowInterface)
             };
@@ -523,12 +520,18 @@ namespace AmeisenBotX.Core
 
         private void OnLfgProposalShow(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+            if (Config.AutojoinLfg)
+            {
+                WowInterface.HookManager.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+            }
         }
 
         private void OnLfgRoleCheckShow(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.SelectLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : CombatClassRole.Dps);
+            if (Config.AutojoinLfg)
+            {
+                WowInterface.HookManager.SelectLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : CombatClassRole.Dps);
+            }
         }
 
         private void OnLootRollStarted(long timestamp, List<string> args)

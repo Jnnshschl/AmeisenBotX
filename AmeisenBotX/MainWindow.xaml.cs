@@ -262,24 +262,25 @@ namespace AmeisenBotX
             return null;
         }
 
+        private void MainWindow_OnWoWStarted()
+        {
+            if (Config.AutoPositionWow)
+            {
+                AmeisenBot.WowInterface.XMemory.SetupAutoPosition
+                (
+                    InteropHelper.EnsureHandle(),
+                    (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
+                    (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
+                    (int)Math.Floor(wowRect.ActualWidth * M11),
+                    (int)Math.Floor(wowRect.ActualHeight * M22)
+                );
+            }
+        }
+
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (Config.AutoPositionWow && !IsAutoPositionSetup)
-                {
-                    IsAutoPositionSetup = true;
-
-                    AmeisenBot.WowInterface.XMemory.SetupAutoPosition
-                    (
-                        InteropHelper.EnsureHandle(),
-                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
-                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
-                        (int)Math.Floor(wowRect.ActualWidth * M11),
-                        (int)Math.Floor(wowRect.ActualHeight * M22)
-                    );
-                }
-
                 // Update the main view
                 // -------------------- >
                 WowPlayer player = AmeisenBot.WowInterface.ObjectManager.Player;
@@ -530,6 +531,7 @@ namespace AmeisenBotX
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
+            AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += MainWindow_OnWoWStarted;
 
             AmeisenBot.Start();
 

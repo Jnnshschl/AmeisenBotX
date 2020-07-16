@@ -161,7 +161,7 @@ namespace AmeisenBotX.Memory
 
         public ProcessThread GetMainThread()
         {
-            if (Process.MainWindowHandle == null) { return null; }
+            if (Process?.MainWindowHandle == null) { return null; }
 
             int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
 
@@ -369,6 +369,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWowWindowOwner(IntPtr owner)
         {
             Win32Imports.SetWindowLong(Process.MainWindowHandle, -8, owner);
@@ -389,7 +390,7 @@ namespace AmeisenBotX.Memory
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
 
-            if (CreateProcess(null, $"{processCmd} -windowed", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            if (CreateProcess(null, $"{processCmd} -windowed -d3d9", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 CloseHandle(processInformation.hProcess);
                 CloseHandle(processInformation.hThread);

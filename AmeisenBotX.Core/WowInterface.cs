@@ -57,12 +57,12 @@ namespace AmeisenBotX.Core
 
         public QuestEngine QuestEngine { get; set; }
 
+        public AmeisenBotRconClient RconClient { get; set; }
+
         public RelaxEngine RelaxEngine { get; set; }
 
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
-
-        public AmeisenBotRconClient RconClient { get; set; }
     }
 }

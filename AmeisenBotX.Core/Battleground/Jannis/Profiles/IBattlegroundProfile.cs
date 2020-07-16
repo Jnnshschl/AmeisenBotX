@@ -2,7 +2,7 @@
 {
     public interface IBattlegroundProfile
     {
-        JBgBlackboard JBgBlackboard { get; }
+        CtfBlackboard JBgBlackboard { get; }
 
         void Execute();
     }

@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Battleground.Jannis
 {
-    public class JBgBlackboard : IBlackboard
+    public class CtfBlackboard : IBlackboard
     {
-        public JBgBlackboard(Action updateAction)
+        public CtfBlackboard(Action updateAction)
         {
             UpdateAction = updateAction;
         }

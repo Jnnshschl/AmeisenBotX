@@ -20,6 +20,8 @@ namespace AmeisenBotX.Core
 
         public bool AutojoinBg { get; set; } = true;
 
+        public bool AutojoinLfg { get; set; } = true;
+
         public bool AutoLogin { get; set; } = true;
 
         public bool Autopilot { get; set; } = false;
@@ -71,10 +73,6 @@ namespace AmeisenBotX.Core
         public string Friends { get; set; } = string.Empty;
 
         public double GhostCheckMs { get; set; } = 5000;
-
-        public double GhostPortalScanThreshold { get; set; } = 24;
-
-        public double GhostPortalSearchMs { get; set; } = 1000;
 
         public double GhostResurrectThreshold { get; set; } = 24;
 

@@ -8,9 +8,6 @@ using Path = System.IO.Path;
 
 namespace AmeisenBotX
 {
-    /// <summary>
-    /// Interaktionslogik für LoadConfigWindow.xaml
-    /// </summary>
     public partial class LoadConfigWindow : Window
     {
         public LoadConfigWindow(string botDataPath)
@@ -69,6 +66,8 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            comboboxSelectedConfig.Items.Add("New Config");
+
             if (Directory.Exists(BotDataPath))
             {
                 string[] directories = Directory.GetDirectories(BotDataPath);
@@ -78,8 +77,6 @@ namespace AmeisenBotX
                     comboboxSelectedConfig.Items.Add(Path.GetFileName(directories[i]));
                 }
             }
-
-            comboboxSelectedConfig.Items.Add("New Config");
 
             string[] args = Environment.GetCommandLineArgs();
             if (args.Length > 1)

@@ -118,24 +118,22 @@ namespace AmeisenBotX.Core.Data
 
         public List<WowDynobject> GetNearAoeSpells()
         {
-            // TODO: recognize spells that harm me
-            return new List<WowDynobject>();
+            return WowObjects.OfType<WowDynobject>().ToList();
         }
 
         public List<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
-                return wowObjects
-                       .ToList()
-                       .OfType<T>()
-                       .Where(e => e != null
-                                && e.Guid != PlayerGuid
-                                && !e.IsDead
-                                && !e.IsNotAttackable
-                                && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                                && e.Position.GetDistance(position) < distance)
-                       .ToList();
+                return WowObjects
+                    .OfType<T>()
+                    .Where(e => e != null
+                             && e.Guid != PlayerGuid
+                             && !e.IsDead
+                             && !e.IsNotAttackable
+                             && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                             && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
@@ -143,16 +141,15 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return wowObjects
-                       .ToList()
-                       .OfType<T>()
-                       .Where(e => e != null
-                                && e.Guid != PlayerGuid
-                                && !e.IsDead
-                                && !e.IsNotAttackable
-                                && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
-                                && e.Position.GetDistance(position) < distance)
-                       .ToList();
+                return WowObjects
+                    .OfType<T>()
+                    .Where(e => e != null
+                             && e.Guid != PlayerGuid
+                             && !e.IsDead
+                             && !e.IsNotAttackable
+                             && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
+                             && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
@@ -161,13 +158,13 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return wowObjects.OfType<WowPlayer>()
-                  .Where(e => e != null
-                           && e.Guid != PlayerGuid
-                           && !e.IsDead
-                           && !e.IsNotAttackable
-                           && PartymemberGuids.Contains(e.Guid)
-                           && e.Position.GetDistance(position) < distance)
-                  .ToList();
+                    .Where(e => e != null
+                             && e.Guid != PlayerGuid
+                             && !e.IsDead
+                             && !e.IsNotAttackable
+                             && PartymemberGuids.Contains(e.Guid)
+                             && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
@@ -350,7 +347,7 @@ namespace AmeisenBotX.Core.Data
                 && raidLeader != 0
                 && WowInterface.XMemory.Read(WowInterface.OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
-                List<IntPtr> raidPointers = raidStruct.GetGuids();
+                List<IntPtr> raidPointers = raidStruct.GetPointers();
 
                 for (int i = 0; i < raidPointers.Count; ++i)
                 {
@@ -570,13 +567,7 @@ namespace AmeisenBotX.Core.Data
                     Player = player;
                 }
 
-                // if (player.Guid == TargetGuid
-                //     || player.Guid == PlayerGuid
-                //     || PartymemberGuids.Contains(player.Guid))
-                // {
                 player.Auras = WowInterface.HookManager.GetUnitAuras(player);
-                // }
-
                 return player;
             }
 
@@ -606,11 +597,7 @@ namespace AmeisenBotX.Core.Data
                 unit.UpdateRawWowUnit(WowInterface.XMemory);
                 unit.Name = ReadUnitName(activeObject, unit.Guid);
 
-                if (unit.Guid == TargetGuid)
-                {
-                    unit.Auras = WowInterface.HookManager.GetUnitAuras(unit);
-                }
-
+                unit.Auras = WowInterface.HookManager.GetUnitAuras(unit);
                 return unit;
             }
 

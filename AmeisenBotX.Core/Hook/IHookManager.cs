@@ -29,6 +29,8 @@ namespace AmeisenBotX.Core.Hook
 
         void CancelSummon();
 
+        int CastAndGetSpellCooldown(string spellName, bool castOnSelf = false);
+
         void CastSpell(string name, bool castOnSelf = false);
 
         void CastSpellById(int spellId);

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="MainWindow" Height="340" Width="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Icon="icon.ico" Loaded="Window_Loaded">
+        Title="MainWindow" Height="390" Width="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Icon="icon.ico" Loaded="Window_Loaded">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -197,7 +197,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <TextBox x:Name="textboxNavmeshServerPort" HorizontalAlignment="Left" Height="18" Margin="244,247,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="2" Style="{DynamicResource TextBoxStyleDark}">
+                        <TextBox x:Name="textboxNavmeshServerPort" HorizontalAlignment="Left" Height="18" Margin="244,247,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="2" Style="{DynamicResource TextBoxStyleDark}" PreviewTextInput="NumberValidationTextBox">
                             <TextBox.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
                             </TextBox.BorderBrush>
@@ -247,6 +247,22 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
+                        <Label x:Name="labelRealm" Content="Realm:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,270,0,0" Width="186" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxRealm" HorizontalAlignment="Left" Margin="4,300,0,-7" VerticalAlignment="Top" Width="180" Height="18" BorderThickness="1,0,0,1" TabIndex="3" Style="{DynamicResource TextBoxStyleDark}" FontFamily="Bahnschrift Light">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
                     </Grid>
                 </Border>
             </TabItem>
@@ -418,6 +434,39 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
+                        <CheckBox x:Name="checkboxDynamicPosition" Content="Dynamic Positioning (BETA)" HorizontalAlignment="Left" Margin="3,224,0,0" VerticalAlignment="Top" Checked="CheckboxFollowSpecificCharacter_Checked" Unchecked="CheckboxFollowSpecificCharacter_Unchecked" TabIndex="11" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <CheckBox x:Name="checkboxAutoTalkToQuestgivers" Content="Auto Talk to Questgivers" HorizontalAlignment="Left" Margin="3,244,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <CheckBox x:Name="checkboxAutoAcceptQuests" Content="Auto Accept/Finish Quests" HorizontalAlignment="Left" Margin="3,264,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
                     </Grid>
                 </Border>
             </TabItem>
@@ -427,7 +476,7 @@
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                     </Border.BorderBrush>
                     <Grid>
-                        <Label x:Name="labelSelling" Content="Selling" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                        <Label x:Name="labelSelling" Content="Vendor" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
                             </Label.BorderBrush>
@@ -511,6 +560,34 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
                             </Label.Foreground>
                         </Label>
+                        <Label x:Name="labelWindowPositions_Copy1" Content="Thresholds" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,4,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label x:Name="labelMinFreeBagSlots" Content="Min Free Bag Slots:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,34,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderMinFreeBagSlots" HorizontalAlignment="Left" Margin="472,58,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFreeBagSlots_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelRepairThreshold" Content="Repair:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,81,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderRepair" HorizontalAlignment="Left" Margin="472,105,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderRepair_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <CheckBox x:Name="checkboxAutoRepair" Content="Auto Repair" HorizontalAlignment="Left" Margin="3,150,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
                     </Grid>
                 </Border>
             </TabItem>
@@ -608,10 +685,58 @@
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                     </Border.BorderBrush>
                     <Grid>
-                        <Label x:Name="labelCombatClass1" Content="Job Engine" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                        <Label x:Name="labelCombatClass1" Content="Mail" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
                             </Label.BorderBrush>
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxMailReceiver" HorizontalAlignment="Left" Height="18" Margin="4,64,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy1" Content="Mail Receiver:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,34,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxMailHeader" HorizontalAlignment="Left" Height="18" Margin="4,117,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy2" Content="Mail Header:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,87,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxMailText" HorizontalAlignment="Left" Height="18" Margin="4,170,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy3" Content="Mail Text:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,140,0,0" Width="180" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
@@ -655,6 +780,17 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
+                        <CheckBox x:Name="checkboxAutoJoinBg" Content="Auto Join BG" HorizontalAlignment="Left" Margin="243,55,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
                     </Grid>
                 </Border>
             </TabItem>
@@ -673,6 +809,17 @@
                             </Label.Foreground>
                         </Label>
                         <CheckBox x:Name="checkboxDungeonUsePartyMode" Content="Use Party Mode" HorizontalAlignment="Left" Margin="3,35,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <CheckBox x:Name="checkboxAutoJoinLfg" Content="Auto Joing LFG" HorizontalAlignment="Left" Margin="3,55,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>
@@ -831,6 +978,75 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </TextBox.Background>
                         </TextBox>
+                        <Label x:Name="labelWindowPositions_Copy" Content="Experimental Stuff" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,4,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxAutoDisableRendering" Content="Auto Disable Rendering" HorizontalAlignment="Left" Margin="471,34,0,0" VerticalAlignment="Top" TabIndex="17" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="174" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <Label x:Name="labelAutologin_Copy" Content="Bot Ticks" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,80,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxStatemachineTick" HorizontalAlignment="Left" Height="18" Margin="4,141,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}" PreviewTextInput="NumberValidationTextBox">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy4" Content="StateMachine Tick (ms):" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,111,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxEventPull" HorizontalAlignment="Left" Height="18" Margin="3,194,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}" PreviewTextInput="NumberValidationTextBox">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy5" Content="EventPull Tick (ms):" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="3,164,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxAntiAfk" HorizontalAlignment="Left" Height="18" Margin="3,247,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}" PreviewTextInput="NumberValidationTextBox">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy6" Content="AntiAFK Tick (ms):" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="3,217,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
                     </Grid>
                 </Border>
             </TabItem>

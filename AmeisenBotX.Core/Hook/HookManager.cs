@@ -81,12 +81,12 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptPartyInvite()
         {
-            LuaDoString("AcceptGroup();StaticPopup_Hide(\"PARTY_INVITE\");");
+            LuaDoString("AcceptGroup();StaticPopup_Hide(\"PARTY_INVITE\")");
         }
 
         public void AcceptQuest(int gossipId)
         {
-            LuaDoString($"SelectGossipAvailableQuest({gossipId});AcceptQuest();");
+            LuaDoString($"SelectGossipAvailableQuest({gossipId});AcceptQuest()");
         }
 
         public void AcceptResurrect()
@@ -96,23 +96,45 @@ namespace AmeisenBotX.Core.Hook
 
         public void AcceptSummon()
         {
-            LuaDoString("ConfirmSummon();StaticPopup_Hide(\"CONFIRM_SUMMON\");");
+            LuaDoString("ConfirmSummon();StaticPopup_Hide(\"CONFIRM_SUMMON\")");
         }
 
         public void AutoAcceptQuests()
         {
-            LuaDoString("active=GetNumGossipActiveQuests()if active>0 then for a=1,active do if not not select(((a * 5) - 5) + 4, GetGossipActiveQuests())then SelectGossipActiveQuest(a)end end end;available=GetNumGossipAvailableQuests()if available>0 then for a=1,available do if not not not select(((a * 6) - 6) + 3, GetGossipAvailableQuests())then SelectGossipAvailableQuest(a)end end end;if available==0 and active==0 and GetNumGossipOptions()==1 then _,type=GetGossipOptions()if type=='gossip'then SelectGossipOption(1)return end end");
+            LuaDoString("active=GetNumGossipActiveQuests()if active>0 then for a=1,active do if not not select(a*5-5+4,GetGossipActiveQuests())then SelectGossipActiveQuest(a)end end end;available=GetNumGossipAvailableQuests()if available>0 then for a=1,available do if not not not select(a*6-6+3,GetGossipAvailableQuests())then SelectGossipAvailableQuest(a)end end end;if available==0 and active==0 and GetNumGossipOptions()==1 then _,type=GetGossipOptions()if type=='gossip'then SelectGossipOption(1)return end end");
         }
 
         public void CancelSummon()
         {
-            LuaDoString("CancelSummon();");
+            LuaDoString("CancelSummon()");
+        }
+
+        public int CastAndGetSpellCooldown(string spellName, bool castOnSelf = false)
+        {
+            int cooldown = 0;
+
+            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)});{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"), out string result))
+            {
+                if (result.Contains('.'))
+                {
+                    result = result.Split('.')[0];
+                }
+
+                if (double.TryParse(result, out double value))
+                {
+                    cooldown = (int)Math.Round(value);
+                }
+
+                AmeisenLogger.Instance.Log("HookManager", $"{spellName} has a cooldown of {cooldown}ms", LogLevel.Verbose);
+            }
+
+            return cooldown;
         }
 
         public void CastSpell(string name, bool castOnSelf = false)
         {
             AmeisenLogger.Instance.Log("HookManager", $"Casting spell with name: {name}", LogLevel.Verbose);
-            LuaDoString($"CastSpellByName(\"{name}\"{(castOnSelf ? ", \"player\"" : string.Empty)});");
+            LuaDoString($"CastSpellByName(\"{name}\"{(castOnSelf ? ", \"player\"" : string.Empty)})");
         }
 
         public void CastSpellById(int spellId)
@@ -121,7 +143,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (spellId > 0)
             {
-                LuaDoString($"CastSpellByID({spellId});");
+                LuaDoString($"CastSpellByID({spellId})");
             }
         }
 
@@ -178,46 +200,43 @@ namespace AmeisenBotX.Core.Hook
 
         public void CofirmReadyCheck(bool isReady)
         {
-            LuaDoString($"ConfirmReadyCheck({isReady});");
+            LuaDoString($"ConfirmReadyCheck({isReady})");
         }
 
         public void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId)
         {
-            LuaDoString($"SelectGossipActiveQuest(max({gossipId}, GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId});");
+            LuaDoString($"SelectGossipActiveQuest(max({gossipId},GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId})");
         }
 
         public void DeclinePartyInvite()
         {
-            LuaDoString("StaticPopup_Hide(\"PARTY_INVITE\");");
+            LuaDoString("StaticPopup_Hide(\"PARTY_INVITE\")");
         }
 
         public void DeclineResurrect()
         {
-            LuaDoString("DeclineResurrect();");
+            LuaDoString("DeclineResurrect()");
         }
 
         public void Dismount()
         {
-            LuaDoString("DismissCompanion(\"MOUNT\");");
+            LuaDoString("DismissCompanion(\"MOUNT\")");
         }
 
         public void DisposeHook()
         {
-            if (IsWoWHooked)
-            {
-                AmeisenLogger.Instance.Log("HookManager", "Disposing EnsceneHook", LogLevel.Verbose);
+            AmeisenLogger.Instance.Log("HookManager", "Disposing EnsceneHook", LogLevel.Verbose);
 
-                WowInterface.XMemory.SuspendMainThread();
-                WowInterface.XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
-                WowInterface.XMemory.ResumeMainThread();
+            WowInterface.XMemory.SuspendMainThread();
+            WowInterface.XMemory.WriteBytes(EndsceneAddress, OriginalEndsceneBytes);
+            WowInterface.XMemory.ResumeMainThread();
 
-                WowInterface.XMemory.FreeMemory(CodecaveForCheck);
-                WowInterface.XMemory.FreeMemory(CodecaveForExecution);
-                WowInterface.XMemory.FreeMemory(CodecaveForGateway);
-                WowInterface.XMemory.FreeMemory(OverrideWorldCheckAddress);
-                WowInterface.XMemory.FreeMemory(CodeToExecuteAddress);
-                WowInterface.XMemory.FreeMemory(ReturnValueAddress);
-            }
+            WowInterface.XMemory.FreeMemory(CodecaveForCheck);
+            WowInterface.XMemory.FreeMemory(CodecaveForExecution);
+            WowInterface.XMemory.FreeMemory(CodecaveForGateway);
+            WowInterface.XMemory.FreeMemory(OverrideWorldCheckAddress);
+            WowInterface.XMemory.FreeMemory(CodeToExecuteAddress);
+            WowInterface.XMemory.FreeMemory(ReturnValueAddress);
         }
 
         public void EnableClickToMove()
@@ -631,7 +650,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void LearnAllAvaiableSpells()
         {
-            LuaDoString("LoadAddOn\"Blizzard_TrainerUI\" f=ClassTrainerTrainButton f.e=0 if f:GetScript\"OnUpdate\" then f:SetScript(\"OnUpdate\", nil)else f:SetScript(\"OnUpdate\", function(f,e) f.e=f.e+e if f.e>.01 then f.e=0 f:Click() end end)end");
+            LuaDoString("LoadAddOn\"Blizzard_TrainerUI\"f=ClassTrainerTrainButton;f.e=0;if f:GetScript\"OnUpdate\"then f:SetScript(\"OnUpdate\",nil)else f:SetScript(\"OnUpdate\",function(f,a)f.e=f.e+a;if f.e>.01 then f.e=0;f:Click()end end)end");
         }
 
         public void LeaveBattleground()
@@ -641,7 +660,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void LootEveryThing()
         {
-            LuaDoString(BotUtils.ObfuscateLua("{v:0}=GetNumLootItems();for i={v:0},1,-1 do LootSlot(i); ConfirmLootSlot(i); end").Item1);
+            LuaDoString(BotUtils.ObfuscateLua("{v:0}=GetNumLootItems()for a={v:0},1,-1 do LootSlot(a)ConfirmLootSlot(a)end").Item1);
         }
 
         public bool LuaDoString(string command)
@@ -680,7 +699,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void Mount(int index)
         {
-            LuaDoString($"CallCompanion(\"MOUNT\", {index});");
+            LuaDoString($"CallCompanion(\"MOUNT\", {index})");
         }
 
         public void OverrideWorldCheckOff()
@@ -697,7 +716,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void QueryQuestsCompleted()
         {
-            LuaDoString("QueryQuestsCompleted();");
+            LuaDoString("QueryQuestsCompleted()");
         }
 
         public void QueueBattlegroundByName(string bgName)
@@ -707,23 +726,23 @@ namespace AmeisenBotX.Core.Hook
 
         public void ReleaseSpirit()
         {
-            LuaDoString("RepopMe();");
+            LuaDoString("RepopMe()");
         }
 
         public void RepairAllItems()
         {
-            LuaDoString("RepairAllItems();");
+            LuaDoString("RepairAllItems()");
         }
 
         public void ReplaceItem(IWowItem currentItem, IWowItem newItem)
         {
             if (currentItem == null)
             {
-                LuaDoString($"EquipItemByName(\"{newItem.Name}\");");
+                LuaDoString($"EquipItemByName(\"{newItem.Name}\")");
             }
             else
             {
-                LuaDoString($"EquipItemByName(\"{newItem.Name}\", {(int)currentItem.EquipSlot});");
+                LuaDoString($"EquipItemByName(\"{newItem.Name}\", {(int)currentItem.EquipSlot})");
             }
 
             CofirmBop();
@@ -731,7 +750,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void RetrieveCorpse()
         {
-            LuaDoString("RetrieveCorpse();");
+            LuaDoString("RetrieveCorpse()");
         }
 
         /// <summary>
@@ -743,45 +762,39 @@ namespace AmeisenBotX.Core.Hook
         {
             if (rollType == RollType.Need)
             {
-                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, {RollType.Greed}) end");
+                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, {(int)RollType.Greed}) end");
             }
             else
             {
-                LuaDoString($"RollOnLoot({rollId}, {(int)rollType});");
+                LuaDoString($"RollOnLoot({rollId}, {(int)rollType})");
             }
         }
 
         public void SelectLfgRole(CombatClassRole combatClassRole)
         {
-            string selectRoleUiElement = combatClassRole switch
+            bool[] roleBools = new bool[3]
             {
-                CombatClassRole.Tank => "LFDRoleCheckPopupRoleButtonTank",
-                CombatClassRole.Heal => "LFDRoleCheckPopupRoleButtonHealer",
-                CombatClassRole.Dps => "LFDRoleCheckPopupRoleButtonDPS",
-                _ => "LFDRoleCheckPopupRoleButtonDPS", // should never happen but in case, queue as DPS
+                combatClassRole == CombatClassRole.Tank,
+                combatClassRole == CombatClassRole.Heal,
+                combatClassRole == CombatClassRole.Dps
             };
 
-            // do this twice to ensure that we join the queue
-            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
-            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
-
-            WowInterface.HookManager.ClickUiElement(selectRoleUiElement);
-            WowInterface.HookManager.ClickUiElement("LFDRoleCheckPopupAcceptButton");
+            LuaDoString($"LFDRoleCheckPopupRoleButtonTank:SetChecked({roleBools[0]});LFDRoleCheckPopupRoleButtonHealer:SetChecked({roleBools[1]});LFDRoleCheckPopupRoleButtonDPS:SetChecked({roleBools[2]});LFDRoleCheckPopupAcceptButton:Click()");
         }
 
         public void SellAllItems()
         {
-            LuaDoString("local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n then N={GetItemInfo(n)} p=p+N[11] UseContainerItem(b,s) end end end");
+            LuaDoString("local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c then b={GetItemInfo(c)}a=a+b[11]UseContainerItem(d,e)end end end");
         }
 
         public void SellItemsByName(string itemName)
         {
-            LuaDoString($"for bag = 0,4,1 do for slot = 1, GetContainerNumSlots(bag), 1 do local name = GetContainerItemLink(bag,slot); if name and string.find(name,\"{itemName}\") then UseContainerItem(bag,slot) end end end");
+            LuaDoString($"for a=0,4,1 do for b=1,GetContainerNumSlots(a),1 do local c=GetContainerItemLink(a,b)if c and string.find(c,\"{itemName}\")then UseContainerItem(a,b)end end end");
         }
 
         public void SellItemsByQuality(ItemQuality itemQuality)
         {
-            LuaDoString($"local p,N,n=0 for b=0,4 do for s=1,GetContainerNumSlots(b) do n=GetContainerItemLink(b,s) if n and string.find(n,\"{BotUtils.GetColorByQuality(itemQuality).Substring(1)}\") then N={{GetItemInfo(n)}} p=p+N[11] UseContainerItem(b,s) end end end");
+            LuaDoString($"local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c and string.find(c,\"{BotUtils.GetColorByQuality(itemQuality).Substring(1)}\")then b={{GetItemInfo(c)}}a=a+b[11]UseContainerItem(d,e)end end end");
         }
 
         public void SendChatMessage(string message)
@@ -791,7 +804,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void SendItemMailToCharacter(string itemName, string receiver)
         {
-            LuaDoString($"for b=0,4 do for s=0,36 do I=GetContainerItemLink(b,s) if I and I:find(\"{itemName}\")then UseContainerItem(b,s) end end end SendMailNameEditBox:SetText(\"{receiver}\"))");
+            LuaDoString($"for a=0,4 do for b=0,36 do I=GetContainerItemLink(a,b)if I and I:find(\"{itemName}\")then UseContainerItem(a,b)end end end;SendMailNameEditBox:SetText(\"{receiver}\")");
             ClickUiElement("SendMailMailButton");
         }
 
@@ -849,7 +862,10 @@ namespace AmeisenBotX.Core.Hook
             EndsceneReturnAddress = IntPtr.Add(EndsceneAddress, hookSize);
 
             // if WoW is already hooked, unhook it, wont do anything if wow is not hooked
-            DisposeHook();
+            if (IsWoWHooked)
+            {
+                DisposeHook();
+            }
 
             if (WowInterface.XMemory.ReadBytes(EndsceneAddress, hookSize, out byte[] bytes))
             {
@@ -1024,7 +1040,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void UnitSelectGossipOption(int gossipId)
         {
-            LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
+            LuaDoString($"SelectGossipOption(max({gossipId},GetNumGossipOptions()))");
         }
 
         public void UseInventoryItem(EquipmentSlot equipmentSlot)
@@ -1034,7 +1050,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void UseItemByBagAndSlot(int bagId, int bagSlot)
         {
-            LuaDoString($"UseContainerItem({bagId}, {bagSlot});");
+            LuaDoString($"UseContainerItem({bagId}, {bagSlot})");
         }
 
         public void UseItemByName(string itemName)

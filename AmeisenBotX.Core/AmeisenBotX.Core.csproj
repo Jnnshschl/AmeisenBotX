@@ -60,8 +60,8 @@
     <Compile Include="Battleground\einTyp\RunBoyRunEngine.cs" />
     <Compile Include="Battleground\IBattlegroundEngine.cs" />
     <Compile Include="Battleground\KamelBG\KummelEngine.cs" />
-    <Compile Include="Battleground\Jannis\JBattleGroundEngine.cs" />
-    <Compile Include="Battleground\Jannis\JBgBlackboard.cs" />
+    <Compile Include="Battleground\Jannis\UniversalBattlegroundEngine.cs" />
+    <Compile Include="Battleground\Jannis\CtfBlackboard.cs" />
     <Compile Include="Battleground\Jannis\Profiles\IBattlegroundProfile.cs" />
     <Compile Include="Battleground\Jannis\Profiles\WarsongGulchProfile.cs" />
     <Compile Include="Character\CharacterManager.cs" />

@@ -3,9 +3,9 @@ using AmeisenBotX.Core.Data.Enums;
 
 namespace AmeisenBotX.Core.Battleground.Jannis
 {
-    public class JBattleGroundEngine : IBattlegroundEngine
+    public class UniversalBattlegroundEngine : IBattlegroundEngine
     {
-        public JBattleGroundEngine(WowInterface wowInterface)
+        public UniversalBattlegroundEngine(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
         }

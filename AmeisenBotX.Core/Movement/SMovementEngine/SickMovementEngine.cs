@@ -105,8 +105,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         }),
                                         new Leaf<MovementBlackboard>("Move", (b) =>
                                         {
-                                            if (MountCheck.Run() 
-                                                && wowInterface.CharacterManager.Mounts.Count > 0 
+                                            if (MountCheck.Run()
+                                                && wowInterface.CharacterManager.Mounts.Count > 0
                                                 && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 50.0
                                                 && !WowInterface.ObjectManager.Player.IsMounted
                                                 && wowInterface.HookManager.IsOutdoors())
@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                                 IsCastingMount = true;
                                                 return BehaviorTreeStatus.Ongoing;
                                             }
-                                            
+
                                             if (IsCastingMount)
                                             {
                                                 if (wowInterface.ObjectManager.Player.IsCasting)
