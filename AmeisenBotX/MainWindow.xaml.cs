@@ -278,7 +278,7 @@ namespace AmeisenBotX
                     );
                 });
 
-                IsAutoPositionSetup = false;
+                IsAutoPositionSetup = true;
             }
         }
 
