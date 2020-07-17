@@ -40,7 +40,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { lightningShieldSpell, () => CastSpellIfPossible(lightningShieldSpell, 0, true) }
+                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0, true) },
+                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -121,12 +122,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if ((!WowInterface.ObjectManager.Player.HasBuffByName(lightningShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0))
-                || !WowInterface.ObjectManager.Player.HasBuffByName(waterShieldSpell) && WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0))
-            {
-                return;
-            }
-
             if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                 && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
                 && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))

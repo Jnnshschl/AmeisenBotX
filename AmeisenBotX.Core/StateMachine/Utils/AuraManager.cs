@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
             if (Debuffs?.Count > 0 && DispellDebuffs != null)
             {
-                DispellDebuffs();
+                // DispellDebuffs();
             }
 
             return false;

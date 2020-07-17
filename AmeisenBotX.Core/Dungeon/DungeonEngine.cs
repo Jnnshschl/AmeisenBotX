@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Dungeon
                     new Selector<DungeonBlackboard>
                     (
                         "AmITheLeader",
-                        (b) => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid,
+                        (b) => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid || WowInterface.ObjectManager.PartymemberGuids.Count == 0,
                         new Selector<DungeonBlackboard>
                         (
                             "AreAllPlayersPresent",
@@ -174,7 +174,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool AreAllPlayersPresent(double distance)
         {
-            return WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, distance)
+            return WowInterface.ObjectManager.Partymembers.Count == 0 
+                || WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, distance)
                    .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count - 1;
         }
 
