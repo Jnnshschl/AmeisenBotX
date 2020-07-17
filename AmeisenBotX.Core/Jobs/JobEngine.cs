@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Jobs
 
         public AmeisenBotConfig Config { get; set; }
 
-        public IJobProfile JobProfile { get; set; }
+        public IJobProfile Profile { get; set; }
 
         private int CurrentNodeCounter { get; set; }
 
@@ -44,12 +44,12 @@ namespace AmeisenBotX.Core.Jobs
 
         public void Execute()
         {
-            if (JobProfile != null)
+            if (Profile != null)
             {
-                switch (JobProfile.JobType)
+                switch (Profile.JobType)
                 {
                     case JobType.Mining:
-                        ExecuteMining((IMiningProfile)JobProfile);
+                        ExecuteMining((IMiningProfile)Profile);
                         break;
                 }
             }

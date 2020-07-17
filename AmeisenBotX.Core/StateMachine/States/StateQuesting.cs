@@ -8,6 +8,7 @@
 
         public override void Enter()
         {
+            WowInterface.QuestEngine.Start();
         }
 
         public override void Execute()

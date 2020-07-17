@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX.Views"
         mc:Ignorable="d"
-        Title="Confirm" Height="140" Width="420" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" Icon="../icon.ico" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
+        Title="Confirm" Height="140" Width="420" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" Icon="/icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>

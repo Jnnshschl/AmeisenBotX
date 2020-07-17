@@ -24,7 +24,7 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        public readonly string BotDataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
+        public readonly string DataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
 
         private readonly Brush darkForegroundBrush;
         private readonly Brush textAccentBrush;
@@ -143,7 +143,7 @@ namespace AmeisenBotX
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            ConfigEditorWindow configWindow = new ConfigEditorWindow(BotDataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            ConfigEditorWindow configWindow = new ConfigEditorWindow(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
             configWindow.ShowDialog();
 
             if (configWindow.SaveConfig)
@@ -191,6 +191,7 @@ namespace AmeisenBotX
                 {
                     AmeisenBot.Config = ((IStateConfigWindow)selectedWindow).Config;
                     AmeisenBot.ReloadConfig();
+                    SaveConfig();
                 }
             }
         }
@@ -236,7 +237,7 @@ namespace AmeisenBotX
 
         private AmeisenBotConfig LoadConfig()
         {
-            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(BotDataPath);
+            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(DataPath);
             loadConfigWindow.ShowDialog();
 
             if (loadConfigWindow.ConfigToLoad.Length > 0)
@@ -342,10 +343,9 @@ namespace AmeisenBotX
 
                 // Overlay drawing
                 // --------------- >
-                Overlay ??= new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
-
                 if (DrawOverlay)
                 {
+                    Overlay ??= new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
                     OverlayRenderCurrentPath();
 
                     Overlay?.Draw();
@@ -363,7 +363,7 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                labelCurrentState.Content = $"{(BotState)AmeisenBot.StateMachine.CurrentState.Key}";
+                labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}";
             });
         }
 
@@ -377,13 +377,13 @@ namespace AmeisenBotX
                     Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
                     Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
 
-                    Color lineColor = Colors.LightCyan;
-                    Color startDot = Colors.Red;
-                    Color endDot = i == 0 ? Colors.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? Colors.Orange : Colors.Cyan;
+                    System.Drawing.Color lineColor = System.Drawing.Color.White;
+                    System.Drawing.Color startDot = System.Drawing.Color.Cyan;
+                    System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
                     Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
-                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
-                    && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
+                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out System.Drawing.Point startPoint)
+                        && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out System.Drawing.Point endPoint))
                     {
                         Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
                         Overlay.AddRectangle((int)startPoint.X - 4, (int)startPoint.Y - 4, 7, 7, startDot);
@@ -484,10 +484,6 @@ namespace AmeisenBotX
             labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString().PadLeft(3);
         }
 
-        private void Window_Activated(object sender, EventArgs e)
-        {
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             AmeisenBot?.Stop();
@@ -517,6 +513,7 @@ namespace AmeisenBotX
             M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
             comboboxStateOverride.Items.Add(BotState.Idle);
+            comboboxStateOverride.Items.Add(BotState.Grinding);
             comboboxStateOverride.Items.Add(BotState.Job);
             comboboxStateOverride.Items.Add(BotState.Questing);
 
@@ -531,8 +528,7 @@ namespace AmeisenBotX
 
             // Init the bot
             // ------------ >
-            string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
-            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, InteropHelper.EnsureHandle());
+            AmeisenBot = new AmeisenBot(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
@@ -542,7 +538,9 @@ namespace AmeisenBotX
 
             StateConfigWindows = new Dictionary<BotState, Window>()
             {
-                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config)}
+                { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config)},
+                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config)},
+                { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config)},
             };
         }
 

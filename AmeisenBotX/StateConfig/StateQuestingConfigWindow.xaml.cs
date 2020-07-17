@@ -5,9 +5,9 @@ using System.Windows.Input;
 
 namespace AmeisenBotX.StateConfig
 {
-    public partial class StateJobConfigWindow : Window, IStateConfigWindow
+    public partial class StateQuestingConfigWindow : Window, IStateConfigWindow
     {
-        public StateJobConfigWindow(AmeisenBot ameisenBot, AmeisenBotConfig config)
+        public StateQuestingConfigWindow(AmeisenBot ameisenBot, AmeisenBotConfig config)
         {
             AmeisenBot = ameisenBot;
             Config = config;
@@ -28,9 +28,9 @@ namespace AmeisenBotX.StateConfig
         {
             comboboxProfile.Items.Add("None");
 
-            for (int i = 0; i < AmeisenBot.JobProfiles.Count; ++i)
+            for (int i = 0; i < AmeisenBot.QuestProfiles.Count; ++i)
             {
-                comboboxProfile.Items.Add(AmeisenBot.JobProfiles[i].ToString());
+                comboboxProfile.Items.Add(AmeisenBot.QuestProfiles[i].ToString());
             }
 
             comboboxProfile.SelectedIndex = 0;
@@ -38,7 +38,7 @@ namespace AmeisenBotX.StateConfig
 
         private void ButtonDone_Click(object sender, RoutedEventArgs e)
         {
-            Config.JobProfile = comboboxProfile.Text;
+            Config.QuestProfile = comboboxProfile.Text;
 
             ShouldSave = true;
             Hide();
@@ -74,9 +74,9 @@ namespace AmeisenBotX.StateConfig
 
             AddProfiles();
 
-            if (!string.IsNullOrEmpty(Config.JobProfile))
+            if (!string.IsNullOrEmpty(Config.QuestProfile))
             {
-                comboboxProfile.Text = Config.JobProfile;
+                comboboxProfile.Text = Config.QuestProfile;
             }
         }
 

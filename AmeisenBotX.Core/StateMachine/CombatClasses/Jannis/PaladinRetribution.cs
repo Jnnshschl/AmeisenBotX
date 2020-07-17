@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if ((MyAuraManager.Buffs.Contains(sealOfVengeanceSpell.ToLowerInvariant())
+            if ((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell)
                     && CastSpellIfPossible(judgementOfLightSpell, 0))
                 || CastSpellIfPossible(avengingWrathSpell, 0, true)
                 || (WowInterface.ObjectManager.Player.ManaPercentage < 80

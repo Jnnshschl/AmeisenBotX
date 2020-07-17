@@ -14,6 +14,8 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
+using AmeisenBotX.Core.Grinding;
+using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Jobs.Profiles;
@@ -24,6 +26,8 @@ using AmeisenBotX.Core.Movement.SMovementEngine;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Quest;
+using AmeisenBotX.Core.Quest.Profiles;
+using AmeisenBotX.Core.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
@@ -76,6 +80,7 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
+            WowInterface = new WowInterface();
             SetupWowInterface();
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
@@ -97,10 +102,10 @@ namespace AmeisenBotX.Core
             InitCombatClasses();
             InitBattlegroundEngines();
             InitJobProfiles();
+            InitQuestProfiles();
+            InitGrindingProfiles();
 
-            LoadCombatClass();
-            LoadBattlegroundEngine();
-            LoadJobProfile();
+            LoadProfiles();
         }
 
         public delegate void CombatClassCompilationStatus(bool succeeded, string heading, string message);
@@ -131,6 +136,8 @@ namespace AmeisenBotX.Core
 
         public Stopwatch ExecutionMsStopwatch { get; private set; }
 
+        public List<IGrindingProfile> GrindingProfiles { get; private set; }
+
         public bool IsRunning { get; private set; }
 
         public List<IJobProfile> JobProfiles { get; private set; }
@@ -138,6 +145,8 @@ namespace AmeisenBotX.Core
         public IntPtr MainWindowHandle { get; private set; }
 
         public bool NeedToSetupRconClient { get; set; }
+
+        public List<IQuestProfile> QuestProfiles { get; private set; }
 
         public AmeisenBotStateMachine StateMachine { get; set; }
 
@@ -164,19 +173,7 @@ namespace AmeisenBotX.Core
         public void ReloadConfig()
         {
             StateMachineTimer.Interval = Config.StateMachineTickMs;
-
-            if (Config.UseBuiltInCombatClass)
-            {
-                LoadDefaultCombatClass();
-            }
-            else
-            {
-                LoadCustomCombatClass();
-            }
-
-            LoadBattlegroundEngine();
-
-            LoadJobProfile();
+            LoadProfiles();
         }
 
         public void Resume()
@@ -199,6 +196,12 @@ namespace AmeisenBotX.Core
 
             WowInterface.BotCache.Load();
             SubscribeToWowEvents();
+
+            if (Config.SaveBotWindowPosition)
+            {
+                LoadPosition(Config.BotWindowRect, MainWindowHandle);
+            }
+
             IsRunning = true;
 
             AmeisenLogger.Instance.Log("AmeisenBot", "Setup done", LogLevel.Debug);
@@ -218,17 +221,14 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.DisposeHook();
             WowInterface.EventHookManager.Stop();
 
-            if (WowInterface.ObjectManager.Player?.Name?.Length > 0)
+            if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
             {
-                if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
-                {
-                    SaveWowWindowPosition();
-                }
+                SaveWowWindowPosition();
+            }
 
-                if (Config.SaveBotWindowPosition)
-                {
-                    SaveBotWindowPosition();
-                }
+            if (Config.SaveBotWindowPosition)
+            {
+                SaveBotWindowPosition();
             }
 
             WowInterface.BotCache.Save();
@@ -258,11 +258,6 @@ namespace AmeisenBotX.Core
             if (Config.SaveWowWindowPosition)
             {
                 LoadWowWindowPosition();
-            }
-
-            if (Config.SaveBotWindowPosition)
-            {
-                LoadBotWindowPosition();
             }
         }
 
@@ -355,6 +350,15 @@ namespace AmeisenBotX.Core
             };
         }
 
+        private void InitGrindingProfiles()
+        {
+            // Add your custom quest profiles here!
+            // ------------------------------------ >
+            GrindingProfiles = new List<IGrindingProfile>
+            {
+            };
+        }
+
         private void InitJobProfiles()
         {
             // Add your custom job profiles here!
@@ -366,38 +370,20 @@ namespace AmeisenBotX.Core
             };
         }
 
-        private void LoadBattlegroundEngine()
+        private void InitQuestProfiles()
         {
-            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
-            WowInterface.BattlegroundEngine = BattlegroundEngines
-                .FirstOrDefault(e => e.ToString().Equals(Config.BattlegroundEngine, StringComparison.OrdinalIgnoreCase));
+            // Add your custom quest profiles here!
+            // ------------------------------------ >
+            QuestProfiles = new List<IQuestProfile>
+            {
+                new DeathknightStartAreaQuestProfile(WowInterface)
+            };
         }
 
-        private void LoadBotWindowPosition()
+        private T LoadClassByName<T>(List<T> profiles, string profileName)
         {
-            if (AccountName.Length > 0)
-            {
-                LoadPosition(Config.BotWindowRect, MainWindowHandle);
-            }
-        }
-
-        private void LoadCombatClass()
-        {
-            if (Config.UseBuiltInCombatClass)
-            {
-                LoadDefaultCombatClass();
-            }
-            else
-            {
-                LoadCustomCombatClass();
-            }
-
-            // if a combatclass specified an ItemComparator
-            // use it instead of the default one
-            if (WowInterface.CombatClass?.ItemComparator != null)
-            {
-                WowInterface.CharacterManager.ItemComparator = WowInterface.CombatClass.ItemComparator;
-            }
+            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading {typeof(T).Name,-24} {profileName}", LogLevel.Verbose);
+            return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadCustomCombatClass()
@@ -433,22 +419,11 @@ namespace AmeisenBotX.Core
                 .FirstOrDefault(e => e.ToString().Equals(Config.BuiltInCombatClassName, StringComparison.OrdinalIgnoreCase));
         }
 
-        private void LoadJobProfile()
-        {
-            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in JobProfile: {Config.JobProfile}", LogLevel.Verbose);
-            WowInterface.JobEngine.JobProfile = JobProfiles
-                .FirstOrDefault(e => e.ToString().Equals(Config.BattlegroundEngine, StringComparison.OrdinalIgnoreCase));
-        }
-
         private void LoadPosition(Rect rect, IntPtr windowHandle)
         {
             try
             {
-                if (rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 }
-                    && rect.Top >= 0
-                    && rect.Left >= 0
-                    && rect.Right <= SystemParameters.VirtualScreenWidth
-                    && rect.Bottom <= SystemParameters.VirtualScreenHeight)
+                if (rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                 {
                     XMemory.SetWindowPosition(windowHandle, rect);
                     AmeisenLogger.Instance.Log("AmeisenBot", $"Loaded window position: {rect}", LogLevel.Verbose);
@@ -458,6 +433,30 @@ namespace AmeisenBotX.Core
             {
                 AmeisenLogger.Instance.Log("AmeisenBot", $"Failed to set window position:\n{e}", LogLevel.Error);
             }
+        }
+
+        private void LoadProfiles()
+        {
+            if (Config.UseBuiltInCombatClass)
+            {
+                WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
+            }
+            else
+            {
+                LoadCustomCombatClass();
+            }
+
+            // if a combatclass specified an ItemComparator
+            // use it instead of the default one
+            if (WowInterface.CombatClass?.ItemComparator != null)
+            {
+                WowInterface.CharacterManager.ItemComparator = WowInterface.CombatClass.ItemComparator;
+            }
+
+            WowInterface.BattlegroundEngine = LoadClassByName(BattlegroundEngines, Config.BattlegroundEngine);
+            WowInterface.GrindingEngine.Profile = LoadClassByName(GrindingProfiles, Config.GrindingProfile);
+            WowInterface.JobEngine.Profile = LoadClassByName(JobProfiles, Config.JobProfile);
+            WowInterface.QuestEngine.Profile = LoadClassByName(QuestProfiles, Config.QuestProfile);
         }
 
         private void LoadWowWindowPosition()
@@ -801,7 +800,6 @@ namespace AmeisenBotX.Core
 
         private void SetupWowInterface()
         {
-            WowInterface = new WowInterface();
             WowInterface.Globals = new AmeisenBotGlobals();
 
             WowInterface.OffsetList = new OffsetList335a();
@@ -821,6 +819,7 @@ namespace AmeisenBotX.Core
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
             WowInterface.QuestEngine = new QuestEngine(WowInterface);
+            WowInterface.GrindingEngine = new GrindingEngine(WowInterface);
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();

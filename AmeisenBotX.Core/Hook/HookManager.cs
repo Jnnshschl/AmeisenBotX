@@ -190,7 +190,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void CofirmBop()
         {
-            LuaDoString($"ConfirmBindOnUse();{(!WowInterface.ObjectManager.Player.IsDead ? "StaticPopup1Button1:Click()" : "")};StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\")");
+            LuaDoString($"ConfirmBindOnUse();{(!WowInterface.ObjectManager.Player.IsDead ? "StaticPopup1Button1:Click();" : "")}StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\")");
         }
 
         public void CofirmLootRoll()
@@ -225,6 +225,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void DisposeHook()
         {
+            if (!IsWoWHooked) return;
+
             AmeisenLogger.Instance.Log("HookManager", "Disposing EnsceneHook", LogLevel.Verbose);
 
             WowInterface.XMemory.SuspendMainThread();
@@ -772,14 +774,14 @@ namespace AmeisenBotX.Core.Hook
 
         public void SelectLfgRole(CombatClassRole combatClassRole)
         {
-            bool[] roleBools = new bool[3]
+            int[] roleBools = new int[3]
             {
-                combatClassRole == CombatClassRole.Tank,
-                combatClassRole == CombatClassRole.Heal,
-                combatClassRole == CombatClassRole.Dps
+                combatClassRole == CombatClassRole.Tank ? 1:0,
+                combatClassRole == CombatClassRole.Heal ? 1:0,
+                combatClassRole == CombatClassRole.Dps ? 1:0
             };
 
-            LuaDoString($"LFDRoleCheckPopupRoleButtonTank:SetChecked({roleBools[0]});LFDRoleCheckPopupRoleButtonHealer:SetChecked({roleBools[1]});LFDRoleCheckPopupRoleButtonDPS:SetChecked({roleBools[2]});LFDRoleCheckPopupAcceptButton:Click()");
+            LuaDoString($"SetLFGRoles(0, {roleBools[0]}, {roleBools[1]}, {roleBools[2]})");
         }
 
         public void SellAllItems()

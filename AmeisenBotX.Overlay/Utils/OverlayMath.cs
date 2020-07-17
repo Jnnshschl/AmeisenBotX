@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Windows;
+using System.Drawing;
 using Rect = AmeisenBotX.Memory.Win32.Rect;
 
 namespace AmeisenBotX.Overlay.Utils
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Overlay.Utils
                 Y = (int)(screenY + cam.Y * tmpY / cam.Z)
             };
 
-            return screenCoordinates.X > 0 && screenCoordinates.Y > 0; //  && screenCoordinates.X < windowWidth && screenCoordinates.Y < windowHeight
+            return screenCoordinates.X > 0 && screenCoordinates.Y > 0 && screenCoordinates.X < windowWidth && screenCoordinates.Y < windowHeight;
         }
     }
 }

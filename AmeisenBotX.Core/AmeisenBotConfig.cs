@@ -76,6 +76,8 @@ namespace AmeisenBotX.Core
 
         public double GhostResurrectThreshold { get; set; } = 24;
 
+        public string GrindingProfile { get; set; } = string.Empty;
+
         public double ItemRepairThreshold { get; set; } = 25;
 
         public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
@@ -117,6 +119,8 @@ namespace AmeisenBotX.Core
         public bool PermanentNameCache { get; set; } = true;
 
         public bool PermanentReactionCache { get; set; } = true;
+
+        public string QuestProfile { get; set; } = string.Empty;
 
         public string RconServerAddress { get; set; } = "https://localhost:47111";
 

@@ -444,7 +444,12 @@ namespace AmeisenBotX.Memory
         {
             try
             {
-                MainThreadHandle = OpenThread(threadAccess, false, (uint)GetMainThread().Id);
+                ProcessThread processThread = GetMainThread();
+
+                if (processThread != null)
+                {
+                    MainThreadHandle = OpenThread(threadAccess, false, (uint)processThread.Id);
+                }
             }
             catch { }
 
