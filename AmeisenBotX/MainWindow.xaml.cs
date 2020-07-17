@@ -24,7 +24,7 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        public readonly string DataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
+        public readonly string DataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
 
         private readonly Brush darkForegroundBrush;
         private readonly Brush textAccentBrush;

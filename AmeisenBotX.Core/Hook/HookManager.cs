@@ -781,7 +781,7 @@ namespace AmeisenBotX.Core.Hook
                 combatClassRole == CombatClassRole.Dps ? 1:0
             };
 
-            LuaDoString($"SetLFGRoles(0, {roleBools[0]}, {roleBools[1]}, {roleBools[2]})");
+            LuaDoString($"SetLFGRoles(0, {roleBools[0]}, {roleBools[1]}, {roleBools[2]});LFDRoleCheckPopupAcceptButton:Click()");
         }
 
         public void SellAllItems()
