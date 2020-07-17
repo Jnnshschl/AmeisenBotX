@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 {
                     computeNewRoute = true;
                     LastTargetPosition = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                    LastBehindTargetPosition = BotMath.CalculatePositionBehind(target.Position, target.Rotation, 2f);
+                    LastBehindTargetPosition = BotMath.CalculatePositionBehind(target.Position, target.Rotation, 3f);
                     targetDistanceChanged = true;
                 }
 
