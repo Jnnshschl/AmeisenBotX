@@ -11,11 +11,16 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
 
         public JobType JobType => JobType.Mining;
 
-        public List<Vector3> Mailboxes { get; private set; } = new List<Vector3>()
+        public List<Vector3> MailboxNodes { get; private set; } = new List<Vector3>()
         {
-           new Vector3(-9465, -69, 56),
-           new Vector3(-9249, -2144, 64)
+           new Vector3(-9456, 48, 56),
+           //new Vector3(-9249, -2144, 64)
         };
+
+        //public List<MailBox> MailBoxes { get; } = new List<MailBox>()
+        //{
+        //    MailBox.MailboxGoldShire
+        //};
 
         public List<OreNodes> OreTypes { get; } = new List<OreNodes>()
         {
@@ -24,9 +29,6 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
 
         public List<Vector3> Path { get; } = new List<Vector3>()
         {
-            new Vector3(-9144, 377, 91),
-            new Vector3(-9149, 371, 91),
-            new Vector3(-9154, 364, 90),
             new Vector3(-9159, 357, 89),
             new Vector3(-9163, 350, 88),
             new Vector3(-9167, 343, 86),
@@ -37,7 +39,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
             new Vector3(-9170, 304, 80),
             new Vector3(-9169, 296, 79),
             new Vector3(-9169, 288, 78),
-           	new Vector3(-9169, 280, 77),
+            new Vector3(-9169, 280, 77),
             new Vector3(-9168, 272, 77),
             new Vector3(-9168, 264, 76),
             new Vector3(-9167, 256, 77),
@@ -305,9 +307,9 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
             new Vector3(-9636, -3, 45),
             new Vector3(-9629, -7, 47),
             new Vector3(-9622, -10, 50),
-            new Vector3(-9615, -12, 54),
-            new Vector3(-9610, -16, 58),
-            new Vector3(-9606, -23, 58),
+            new Vector3(-9621, -11, 50),
+            new Vector3(-9610, -12, 58),
+            new Vector3(-9606, -16, 59),
             new Vector3(-9601, -30, 59),
             new Vector3(-9598, -37, 60),
             new Vector3(-9595, -44, 59),
@@ -495,5 +497,10 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
             new Vector3(-9235, -627, 62),
             new Vector3(-9242, -631, 63),
         };
+
+        public override string ToString()
+        {
+            return $"[{JobType}] (Copper) Elwynn Forest (Kamel)";
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -23,7 +24,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     SetMapAndPosition = true;
                     StateMachine.LastDiedMap = WowInterface.ObjectManager.MapId;
 
-                    if (StateMachine.IsDungeonMap(StateMachine.LastDiedMap))
+                    if (StateMachine.LastDiedMap.IsDungeonMap())
                     {
                         // when we died in a dungeon, we need to return to its portal
                         StateMachine.LastDiedPosition = WowInterface.DungeonEngine.DeathEntrancePosition;
@@ -41,11 +42,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
             {
-                StateMachine.SetState((int)BotState.Ghost);
+                StateMachine.SetState(BotState.Ghost);
             }
             else
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 

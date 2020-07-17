@@ -164,8 +164,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         return true;
                     }
 
-                    List<string> targetBuffs = WowInterface.HookManager.GetAuras(WowLuaUnit.Target);
-
                     if ((target.HealthPercentage < 98 && target.HealthPercentage > 80
                             && !WowInterface.ObjectManager.Target.HasBuffByName(weakenedSoulSpell)
                             && !WowInterface.ObjectManager.Target.HasBuffByName(powerWordShieldSpell)

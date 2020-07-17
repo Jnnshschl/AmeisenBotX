@@ -563,6 +563,80 @@ namespace AmeisenBotX.Test
             Assert.AreEqual(1, treeResult0);
             Assert.AreEqual(2, treeResult1);
         }
+
+        [TestMethod]
+        public void WaterfallTreeTest()
+        {
+            int treeResult0 = 0;
+            int treeResult1 = 0;
+            int treeResult2 = 0;
+
+            TestBlackboard testBlackboard = new TestBlackboard() { };
+
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            (
+                new Waterfall<TestBlackboard>
+                (
+                    new Leaf<TestBlackboard>((b) => { ++treeResult2; return BehaviorTreeStatus.Success; }),
+                    (
+                        (blackboard) => treeResult0 == 0,
+                        new Leaf<TestBlackboard>
+                        (
+                            (blackboard) =>
+                            {
+                                ++treeResult0;
+                                return BehaviorTreeStatus.Success;
+                            }
+                        )
+                    ),
+                    (
+                        (blackboard) => treeResult0 == 1,
+                        new Leaf<TestBlackboard>
+                        (
+                            (blackboard) =>
+                            {
+                                ++treeResult0;
+                                return BehaviorTreeStatus.Success;
+                            }
+                        )
+                    ),
+                    (
+                        (blackboard) => treeResult0 == 2,
+                        new Leaf<TestBlackboard>
+                        (
+                            (blackboard) =>
+                            {
+                                ++treeResult1;
+                                return BehaviorTreeStatus.Success;
+                            }
+                        )
+                    )
+                ),
+                testBlackboard
+            );
+
+            tree.Tick();
+
+            Assert.AreEqual(1, treeResult0);
+            Assert.AreEqual(0, treeResult1);
+            Assert.AreEqual(0, treeResult2);
+
+            tree.Tick();
+            tree.Tick();
+
+            Assert.AreEqual(2, treeResult0);
+            Assert.AreEqual(1, treeResult1);
+            Assert.AreEqual(0, treeResult2);
+
+            ++treeResult0;
+
+            tree.Tick();
+            tree.Tick();
+
+            Assert.AreEqual(3, treeResult0);
+            Assert.AreEqual(1, treeResult1);
+            Assert.AreEqual(2, treeResult2);
+        }
     }
 
     public class TestBlackboard : IBlackboard

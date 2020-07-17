@@ -1,4 +1,6 @@
-﻿namespace AmeisenBotX.Core.Statemachine.States
+﻿using AmeisenBotX.Core.Common;
+
+namespace AmeisenBotX.Core.Statemachine.States
 {
     public class StateDungeon : BasicState
     {
@@ -15,9 +17,9 @@
 
         public override void Execute()
         {
-            if (!StateMachine.IsDungeonMap(WowInterface.ObjectManager.MapId))
+            if (!WowInterface.ObjectManager.MapId.IsDungeonMap())
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -32,9 +34,9 @@
             WowInterface.DungeonEngine.Exit();
         }
 
-        private void StateMachine_OnStateOverride(int botState)
+        private void StateMachine_OnStateOverride(BotState botState)
         {
-            if (botState == (int)BotState.Dead)
+            if (botState == BotState.Dead)
             {
                 WowInterface.DungeonEngine.OnDeath();
             }

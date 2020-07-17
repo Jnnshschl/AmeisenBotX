@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (UnitLootQueue.Count == 0)
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
             else
             {

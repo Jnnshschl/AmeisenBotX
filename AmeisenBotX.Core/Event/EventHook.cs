@@ -41,43 +41,56 @@ namespace AmeisenBotX.Core.Event
 
         private JsonSerializerSettings JsonSerializerSettings { get; }
 
+        private Queue<string> PendingLuaToExecute { get; set; }
+
         private WowInterface WowInterface { get; }
 
         public void Pull()
         {
-            if (!IsActive) { return; }
+            if (!IsActive || !WowInterface.HookManager.IsWoWHooked)
+            {
+                return;
+            }
 
             HandleSubEventQueue();
             HandleUnsubEventQueue();
 
+            // execute the pending lua stuff
+            if (PendingLuaToExecute.Count > 0
+                && WowInterface.HookManager.LuaDoString(PendingLuaToExecute.Peek()))
+            {
+                PendingLuaToExecute.Dequeue();
+            }
+
             try
             {
                 // Unminified lua code can be found im my github repo "WowLuaStuff"
-                string eventJson = WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}='['for a,b in pairs({EventTableName})do {{v:0}}={{v:0}}..'{{'for c,d in pairs(b)do if type(d)==\"table\"then {{v:0}}={{v:0}}..'\"args\": ['for e,f in pairs(d)do {{v:0}}={{v:0}}..'\"'..f..'\"'if e<=table.getn(d)then {{v:0}}={{v:0}}..','end end;{{v:0}}={{v:0}}..']}}'if a<table.getn({EventTableName})then {{v:0}}={{v:0}}..','end else if type(d)==\"string\"then {{v:0}}={{v:0}}..'\"event\": \"'..d..'\",'else {{v:0}}={{v:0}}..'\"time\": \"'..d..'\",'end end end end;{{v:0}}={{v:0}}..']'{EventTableName}={{}}"));
-
-                List<WowEvent> finalEvents = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson, JsonSerializerSettings);
-
-                if (finalEvents != null && finalEvents.Count > 0)
+                if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}='['for a,b in pairs({EventTableName})do {{v:0}}={{v:0}}..'{{'for c,d in pairs(b)do if type(d)==\"table\"then {{v:0}}={{v:0}}..'\"args\": ['for e,f in pairs(d)do {{v:0}}={{v:0}}..'\"'..f..'\"'if e<=table.getn(d)then {{v:0}}={{v:0}}..','end end;{{v:0}}={{v:0}}..']}}'if a<table.getn({EventTableName})then {{v:0}}={{v:0}}..','end else if type(d)==\"string\"then {{v:0}}={{v:0}}..'\"event\": \"'..d..'\",'else {{v:0}}={{v:0}}..'\"time\": \"'..d..'\",'end end end end;{{v:0}}={{v:0}}..']'{EventTableName}={{}}"), out string eventJson))
                 {
-                    for (int i = 0; i < finalEvents.Count; ++i)
+                    List<WowEvent> finalEvents = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson, JsonSerializerSettings);
+
+                    if (finalEvents != null && finalEvents.Count > 0)
                     {
-                        WowEvent rawEvent = finalEvents[i];
-
-                        try
+                        for (int i = 0; i < finalEvents.Count; ++i)
                         {
-                            if (EventDictionary.ContainsKey(rawEvent.Name))
-                            {
-                                AmeisenLogger.Instance.Log("WoWEvents", $"[{rawEvent.Timestamp}] {rawEvent.Name} fired: {JsonConvert.SerializeObject(rawEvent.Arguments)}", LogLevel.Verbose);
+                            WowEvent rawEvent = finalEvents[i];
 
-                                for (int e = 0; e < EventDictionary[rawEvent.Name].Count; ++e)
+                            try
+                            {
+                                if (EventDictionary.ContainsKey(rawEvent.Name))
                                 {
-                                    EventDictionary[rawEvent.Name][e](rawEvent.Timestamp, rawEvent.Arguments);
+                                    AmeisenLogger.Instance.Log("WoWEvents", $"[{rawEvent.Timestamp}] {rawEvent.Name} fired: {JsonConvert.SerializeObject(rawEvent.Arguments)}", LogLevel.Verbose);
+
+                                    for (int e = 0; e < EventDictionary[rawEvent.Name].Count; ++e)
+                                    {
+                                        EventDictionary[rawEvent.Name][e](rawEvent.Timestamp, rawEvent.Arguments);
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.Name}:\n{e}", LogLevel.Error);
+                            catch (Exception e)
+                            {
+                                AmeisenLogger.Instance.Log("EventHook", $"Failed to invoke {rawEvent.Name}:\n{e}", LogLevel.Error);
+                            }
                         }
                     }
                 }
@@ -134,12 +147,12 @@ namespace AmeisenBotX.Core.Event
 
         private void HandleSubEventQueue()
         {
+            StringBuilder sb = new StringBuilder();
+
             try
             {
                 if (IsActive && SubscribeQueue.Count > 0)
                 {
-                    StringBuilder sb = new StringBuilder();
-
                     while (SubscribeQueue.Count > 0)
                     {
                         (string, WowEventAction) queueElement = SubscribeQueue.Dequeue();
@@ -155,12 +168,12 @@ namespace AmeisenBotX.Core.Event
                         }
                     }
 
-                    WowInterface.HookManager.LuaDoString(sb.ToString());
+                    PendingLuaToExecute.Enqueue(sb.ToString());
                 }
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("EventHook", $"Failed subscribe to event:\n{e}", LogLevel.Error);
+                AmeisenLogger.Instance.Log("EventHook", $"Failed subscribe to events:\nEvent Subscribtion LUA:{sb}\n{e}", LogLevel.Error);
             }
         }
 
@@ -178,7 +191,7 @@ namespace AmeisenBotX.Core.Event
 
                         if (EventDictionary[queueElement.Item1].Count == 0)
                         {
-                            WowInterface.HookManager.LuaDoString($"{EventFrameName}:UnregisterEvent(\"{queueElement.Item1}\");");
+                            PendingLuaToExecute.Enqueue($"{EventFrameName}:UnregisterEvent(\"{queueElement.Item1}\");");
                         }
                     }
                 }
@@ -194,6 +207,7 @@ namespace AmeisenBotX.Core.Event
             EventDictionary = new Dictionary<string, List<WowEventAction>>();
             SubscribeQueue = new Queue<(string, WowEventAction)>();
             UnsubscribeQueue = new Queue<(string, WowEventAction)>();
+            PendingLuaToExecute = new Queue<string>();
 
             EventFrameName = BotUtils.FastRandomStringOnlyLetters();
             EventHandlerName = BotUtils.FastRandomStringOnlyLetters();
@@ -213,7 +227,7 @@ namespace AmeisenBotX.Core.Event
             luaStuff.Append($"if {EventFrameName}:GetScript(\"OnEvent\") == nil then ");
             luaStuff.Append($"{EventFrameName}:SetScript(\"OnEvent\", {EventHandlerName}) end");
 
-            WowInterface.HookManager.LuaDoString(luaStuff.ToString());
+            PendingLuaToExecute.Enqueue(luaStuff.ToString());
         }
     }
 }

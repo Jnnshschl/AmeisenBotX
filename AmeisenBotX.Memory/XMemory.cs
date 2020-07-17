@@ -88,22 +88,6 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Bitmap GetScreenshot()
-        {
-            Rect rc = new Rect();
-            GetWindowRect(Process.MainWindowHandle, ref rc);
-
-            Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
-
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
-            }
-
-            return bmp;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
             Rect rect = new Rect();
@@ -177,7 +161,7 @@ namespace AmeisenBotX.Memory
 
         public ProcessThread GetMainThread()
         {
-            if (Process.MainWindowHandle == null) { return null; }
+            if (Process?.MainWindowHandle == null) { return null; }
 
             int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
 
@@ -190,6 +174,22 @@ namespace AmeisenBotX.Memory
             }
 
             return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Bitmap GetScreenshot()
+        {
+            Rect rc = new Rect();
+            GetWindowRect(Process.MainWindowHandle, ref rc);
+
+            Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
+            }
+
+            return bmp;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -369,6 +369,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWowWindowOwner(IntPtr owner)
         {
             Win32Imports.SetWindowLong(Process.MainWindowHandle, -8, owner);
@@ -389,7 +390,7 @@ namespace AmeisenBotX.Memory
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
 
-            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            if (CreateProcess(null, $"{processCmd} -windowed -d3d9", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 CloseHandle(processInformation.hProcess);
                 CloseHandle(processInformation.hThread);
@@ -443,7 +444,12 @@ namespace AmeisenBotX.Memory
         {
             try
             {
-                MainThreadHandle = OpenThread(threadAccess, false, (uint)GetMainThread().Id);
+                ProcessThread processThread = GetMainThread();
+
+                if (processThread != null)
+                {
+                    MainThreadHandle = OpenThread(threadAccess, false, (uint)processThread.Id);
+                }
             }
             catch { }
 

@@ -1,10 +1,8 @@
 ﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Views;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -99,7 +97,7 @@ namespace AmeisenBotX
                     buttonEquipment.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
                     buttonInventory.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
                     buttonSpells.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkAccent1"]);
-                    
+
                     foreach (Spell spell in AmeisenBot.WowInterface.CharacterManager.SpellBook.Spells.GroupBy(e => e.Name).Select(e => e.First()))
                     {
                         equipmentWrapPanel.Children.Add(new SpellDisplay(spell));

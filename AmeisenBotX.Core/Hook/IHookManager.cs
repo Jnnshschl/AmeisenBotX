@@ -11,9 +11,9 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
-        bool IsWoWHooked { get; }
+        ulong HookCallCount { get; }
 
-        ulong PendingCallCount { get; }
+        bool IsWoWHooked { get; }
 
         void AcceptBattlegroundInvite();
 
@@ -24,6 +24,12 @@ namespace AmeisenBotX.Core.Hook
         void AcceptResurrect();
 
         void AcceptSummon();
+
+        void AutoAcceptQuests();
+
+        void CancelSummon();
+
+        int CastAndGetSpellCooldown(string spellName, bool castOnSelf = false);
 
         void CastSpell(string name, bool castOnSelf = false);
 
@@ -39,31 +45,35 @@ namespace AmeisenBotX.Core.Hook
 
         void CofirmBop();
 
+        void CofirmLootRoll();
+
         void CofirmReadyCheck(bool isReady);
 
         void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId);
+
+        void DeclinePartyInvite();
+
+        void DeclineResurrect();
+
+        void Dismount();
 
         void DisposeHook();
 
         void EnableClickToMove();
 
-        string ExecuteLuaAndRead((string, string) commandVariableTuple);
+        bool ExecuteLuaAndRead((string, string) commandVariableTuple, out string result);
 
-        string ExecuteLuaAndRead(string command, string variable);
+        bool ExecuteLuaAndRead(string command, string variable, out string result);
 
         void FacePosition(WowPlayer player, Vector3 positionToFace);
 
-        List<string> GetAuras(WowLuaUnit luaunit);
-
-        List<string> GetBuffs(WowLuaUnit luaunit);
-
         List<int> GetCompletedQuests();
-
-        List<string> GetDebuffs(WowLuaUnit luaunit);
 
         string GetEquipmentItems();
 
         int GetFreeBagSlotCount();
+
+        int GetGossipOptionCount();
 
         string GetInventoryItems();
 
@@ -73,13 +83,15 @@ namespace AmeisenBotX.Core.Hook
 
         string GetItemStats(string itemLink);
 
-        string GetLocalizedText(string variable);
+        bool GetLocalizedText(string variable, out string result);
 
         string GetLootRollItemLink(int rollId);
 
         string GetMoney();
 
         string GetMounts();
+
+        void GetQuestReward(int id);
 
         Dictionary<RuneType, int> GetRunesReady();
 
@@ -130,7 +142,9 @@ namespace AmeisenBotX.Core.Hook
 
         void LootEveryThing();
 
-        void LuaDoString(string command);
+        bool LuaDoString(string command);
+
+        void Mount(int index);
 
         void OverrideWorldCheckOff();
 
@@ -151,12 +165,12 @@ namespace AmeisenBotX.Core.Hook
         void RollOnItem(int rollId, RollType rollType);
 
         void SelectLfgRole(CombatClassRole combatClassRole);
-        
+
         void SellAllItems();
 
-        void SellItemsByQuality(ItemQuality itemQuality);
-
         void SellItemsByName(string itemName);
+
+        void SellItemsByQuality(ItemQuality itemQuality);
 
         void SendChatMessage(string message);
 

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Logging;
 using System;
 using System.Text;
 
@@ -21,26 +22,35 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 WowInterface.HookManager.SetupEndsceneHook();
             }
+
+            if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
+            {
+                StateMachine.SetState(BotState.Idle);
+                WowInterface.HookManager.OverrideWorldCheckOff();
+                return;
+            }
         }
 
         public override void Execute()
         {
+            WowInterface.HookManager.OverrideWorldCheckOn();
+
             if (LoginAttemptEvent.Run())
             {
-                WowInterface.HookManager.OverrideWorldCheckOn();
-
                 if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.UTF8, out string gameState))
                 {
+                    AmeisenLogger.Instance.Log("Login", $"Gamestate is: {gameState}");
+
                     switch (gameState.ToUpper())
                     {
                         case "LOGIN":
-                            WowInterface.HookManager.LuaDoString($"if(AccountLoginUI and AccountLoginUI:IsVisible()) then DefaultServerLogin('{Config.Username}', '{Config.Password}');elseif (RealmList and RealmList:IsVisible()) then for i = 1, select('#', GetRealmCategories()), 1 do local numRealms = GetNumRealms(i);for j = 1, numRealms, 1 do local name, numCharacters = GetRealmInfo(i, j);if (name ~= nil and name == '{Config.Realm}') then ChangeRealm(i,j); RealmList:Hide();end end end end");
+                            WowInterface.HookManager.LuaDoString($"if AccountLoginUI and AccountLoginUI:IsVisible()then DefaultServerLogin('{Config.Username}','{Config.Password}')elseif RealmList and RealmList:IsVisible()then for a=1,select('#',GetRealmCategories()),1 do local b=GetNumRealms(a)for c=1,b,1 do local d,e=GetRealmInfo(a,c)if d~=nil and d=='{Config.Realm}'then ChangeRealm(a,c)RealmList:Hide()end end end end");
                             ++LoginCounter;
                             break;
 
                         case "CHARSELECT":
-                            WowInterface.HookManager.LuaDoString($"if(CharacterSelectUI and CharacterSelectUI:IsVisible()) then CharacterSelect_SelectCharacter({Config.CharacterSlot});EnterWorld();end");
-                            StateMachine.SetState((int)BotState.Idle);
+                            AmeisenLogger.Instance.Log("Login", $"Selecting character slot: {Config.CharacterSlot}");
+                            WowInterface.HookManager.LuaDoString($"if CharacterSelectUI and CharacterSelectUI:IsVisible()then CharacterSelect_SelectCharacter({Config.CharacterSlot})EnterWorld();elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()then CharacterCreate_Back()end");
                             break;
 
                         default:
@@ -48,8 +58,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
 
-                //WowInterface.HookManager.LuaDoString($"if(AccountLoginUI and AccountLoginUI:IsVisible()) then DefaultServerLogin('{Config.Username}', '{Config.Password}');elseif (RealmList and RealmList:IsVisible()) then for i = 1, select('#', GetRealmCategories()), 1 do local numRealms = GetNumRealms(i);for j = 1, numRealms, 1 do local name, numCharacters = GetRealmInfo(i, j);if (name ~= nil and name == '{Config.Realm}') then ChangeRealm(i,j); RealmList:Hide();end end end elseif(CharacterSelectUI and CharacterSelectUI:IsVisible()) then CharacterSelect_SelectCharacter({Config.CharacterSlot});EnterWorld();elseif(CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then CharacterCreate_Back();end;");
-                WowInterface.HookManager.OverrideWorldCheckOff();
+                if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
+                {
+                    StateMachine.SetState(BotState.Idle);
+                    WowInterface.HookManager.OverrideWorldCheckOff();
+                    return;
+                }
+
+                // WowInterface.HookManager.LuaDoString($"if(AccountLoginUI and AccountLoginUI:IsVisible()) then DefaultServerLogin('{Config.Username}', '{Config.Password}');elseif (RealmList and RealmList:IsVisible()) then for i = 1, select('#', GetRealmCategories()), 1 do local numRealms = GetNumRealms(i);for j = 1, numRealms, 1 do local name, numCharacters = GetRealmInfo(i, j);if (name ~= nil and name == '{Config.Realm}') then ChangeRealm(i,j); RealmList:Hide();end end end elseif(CharacterSelectUI and CharacterSelectUI:IsVisible()) then CharacterSelect_SelectCharacter({Config.CharacterSlot});EnterWorld();elseif(CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()) then CharacterCreate_Back();end;");
 
                 if (LoginCounter > 4)
                 {

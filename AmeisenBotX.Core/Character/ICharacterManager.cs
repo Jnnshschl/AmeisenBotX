@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -17,6 +18,8 @@ namespace AmeisenBotX.Core.Character
         IWowItemComparator ItemComparator { get; set; }
 
         int Money { get; }
+
+        List<WowMount> Mounts { get; }
 
         List<string> Skills { get; }
 

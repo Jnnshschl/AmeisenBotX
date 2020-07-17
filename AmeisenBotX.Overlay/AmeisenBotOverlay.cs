@@ -36,7 +36,7 @@ namespace AmeisenBotX.Overlay
 
         private List<(SolidBrush, (Point, Point))> RectanglesToRender { get; }
 
-        public void AddLine(int x1, int y1, int x2, int y2, System.Windows.Media.Color color)
+        public void AddLine(int x1, int y1, int x2, int y2, System.Drawing.Color color)
         {
             (SolidBrush, (Point, Point)) rectangle = (Gfx.CreateSolidBrush(color.R, color.G, color.B, color.A), (new Point(x1, y1), new Point(x2, y2)));
 
@@ -46,7 +46,7 @@ namespace AmeisenBotX.Overlay
             }
         }
 
-        public void AddRectangle(int x, int y, int w, int h, System.Windows.Media.Color color)
+        public void AddRectangle(int x, int y, int w, int h, System.Drawing.Color color)
         {
             (SolidBrush, (Point, Point)) line = (Gfx.CreateSolidBrush(color.R, color.G, color.B, color.A), (new Point(x, y), new Point(x + w, y + h)));
 

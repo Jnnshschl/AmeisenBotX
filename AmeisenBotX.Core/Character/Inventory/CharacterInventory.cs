@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Character.Inventory
             Items = new List<IWowItem>();
         }
 
+        public int FreeBagSlots { get; private set; }
+
         public List<IWowItem> Items
         {
             get
@@ -40,6 +42,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
+            FreeBagSlots = WowInterface.HookManager.GetFreeBagSlotCount();
             string resultJson = WowInterface.HookManager.GetInventoryItems();
 
             try

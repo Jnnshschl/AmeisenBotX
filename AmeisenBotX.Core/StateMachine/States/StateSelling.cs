@@ -1,9 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using System;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -14,22 +11,23 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        private bool IsAtNpc { get; set; }
-
-        private DateTime SellActionGo { get; set; }
-
         public override void Enter()
         {
-            IsAtNpc = false;
         }
 
         public override void Execute()
         {
-            if (WowInterface.HookManager.GetFreeBagSlotCount() > Config.BagSlotsToGoSell
-               || !WowInterface.CharacterManager.Inventory.Items.Any(e => e.Price > 0))
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots > Config.BagSlotsToGoSell
+               || !WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
+                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
+                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
+                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
+                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
+                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
+               .Any(e => e.Price > 0))
             {
                 WowInterface.CharacterManager.Inventory.Update();
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -42,60 +40,48 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
-                if (!IsAtNpc)
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
+
+                if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
+                    WowInterface.HookManager.UnitOnRightClick(selectedUnit);
 
-                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    if (selectedUnit.IsGossip)
                     {
-                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                        SellActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
-                        IsAtNpc = true;
-                    }
-                }
-                else if (DateTime.Now > SellActionGo)
-                {
-                    WowInterface.HookManager.RepairAllItems();
-
-                    foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
-                    {
-                        IWowItem itemToSell = item;
-
-                        if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-                            || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
-                            || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
-                            || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
-                            || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
-                            || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
-                        {
-                            continue;
-                        }
-
-                        if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                        {
-                            // equip item and sell the other after
-                            itemToSell = itemToReplace;
-                            WowInterface.HookManager.ReplaceItem(null, item);
-                        }
-
-                        if (itemToSell != null
-                            && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
-                        {
-                            WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
-                            WowInterface.HookManager.CofirmBop();
-                        }
+                        WowInterface.HookManager.UnitSelectGossipOption(1);
                     }
                 }
             }
             else
             {
                 WowInterface.CharacterManager.Inventory.Update();
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 
         public override void Exit()
         {
+        }
+
+        internal bool IsVendorNpcNear()
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .Any(e => e.GetType() != typeof(WowPlayer)
+                       && e.IsVendor
+                       && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.MerchantNpcSearchRadius);
+        }
+
+        internal bool NeedToSell()
+        {
+            return IsVendorNpcNear()
+                && WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
+                && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
+                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
+                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
+                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
+                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
+                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
+                   .Any(e => e.Price > 0);
         }
     }
 }

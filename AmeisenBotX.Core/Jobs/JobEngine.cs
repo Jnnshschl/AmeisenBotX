@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Jobs.Profiles;
-using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
@@ -16,32 +15,43 @@ namespace AmeisenBotX.Core.Jobs
 {
     public class JobEngine
     {
-        public JobEngine(WowInterface wowInterface)
+        public JobEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
             AmeisenLogger.Instance.Log("JobEngine", $"Initializing", LogLevel.Verbose);
 
             WowInterface = wowInterface;
+            Config = config;
+
             MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
-            JobProfile = new CopperElwynnForestProfile();
+            MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
         }
 
-        public IJobProfile JobProfile { get; set; }
+        public AmeisenBotConfig Config { get; set; }
+
+        public IJobProfile Profile { get; set; }
 
         private int CurrentNodeCounter { get; set; }
 
-        private bool OreIsInRange { get; set; }
+        private bool MailBoxIsInRange { get; set; }
+
+        private TimegatedEvent MailSentEvent { get; }
 
         private TimegatedEvent MiningEvent { get; }
+
+        private bool OreIsInRange { get; set; }
 
         private WowInterface WowInterface { get; }
 
         public void Execute()
         {
-            switch (JobProfile.JobType)
+            if (Profile != null)
             {
-                case JobType.Mining:
-                    ExecuteMining((IMiningProfile)JobProfile);
-                    break;
+                switch (Profile.JobType)
+                {
+                    case JobType.Mining:
+                        ExecuteMining((IMiningProfile)Profile);
+                        break;
+                }
             }
         }
 
@@ -52,11 +62,61 @@ namespace AmeisenBotX.Core.Jobs
 
         private void ExecuteMining(IMiningProfile miningProfile)
         {
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0)
+            {
+                //List<WowGameobject> Objectlist = WowInterface.ObjectManager.WowObjects
+                //.OfType<WowGameobject>() // only WowGameobjects
+                //.Where(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 15)
+                //.ToList();
+
+                List<WowGameobject> MailBoxNode = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>() // only WowGameobjects
+                .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId) // make sure the displayid is a MailBox
+                        && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 15m to me
+                .ToList(); // convert to list
+
+                if (MailBoxNode.Count > 0)
+                {
+                    WowGameobject nearNode = MailBoxNode
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position)) // order by distance to me
+                    .First(); // get the closest node to me
+
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
+
+                    MailBoxIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(nearNode.Position) <= 4;
+
+                    if (MailBoxIsInRange)
+                    {
+                        WowInterface.HookManager.StopClickToMoveIfActive();
+                        WowInterface.MovementEngine.Reset();
+
+                        if (MailSentEvent.Run())
+                        {
+                            WowInterface.HookManager.WowObjectOnRightClick(nearNode);
+
+                            return;
+                        }
+                        return;
+                    }
+                    else
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
+                        return;
+                    }
+                }
+                else
+                {
+                    Vector3 currentNode = miningProfile.MailboxNodes[0];
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
+                    return;
+                }
+            }
+
             List<WowGameobject> oreNodes = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(OreNodes), x.DisplayId) // make sure the displayid is a ore node
-                         && miningProfile.OreTypes.Contains((OreNodes)x.DisplayId) // onlynodes in profile
-                         && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 100m to me
+                        && miningProfile.OreTypes.Contains((OreNodes)x.DisplayId) // onlynodes in profile
+                        && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 15m to me
                 .ToList(); // convert to list
 
             if (oreNodes.Count > 0)

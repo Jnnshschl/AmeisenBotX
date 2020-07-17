@@ -288,6 +288,11 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
         private bool StolenPalomino { get; set; }
 
+        public override string ToString()
+        {
+            return $"[55-59] Deathknight Start Area (Jannis)";
+        }
+
         private bool CheckEyeCastingState(WowInterface wowInterface, int id, Vector3 positionToCast, double distance)
         {
             if (wowInterface.ObjectManager.Pet == null || positionToCast.GetDistance(wowInterface.ObjectManager.Pet.Position) > distance)

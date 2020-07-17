@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Dungeon.Objects;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
@@ -20,5 +21,7 @@ namespace AmeisenBotX.Core.Dungeon
         void Exit();
 
         void OnDeath();
+
+        IDungeonProfile TryGetProfileByMapId(MapId mapId);
     }
 }

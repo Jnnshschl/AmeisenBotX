@@ -9,6 +9,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Overlay;
 using AmeisenBotX.Overlay.Utils;
+using AmeisenBotX.StateConfig;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        public readonly string BotDataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
+        public readonly string DataPath = $"{AppDomain.CurrentDomain.BaseDirectory}data\\";
 
         private readonly Brush darkForegroundBrush;
         private readonly Brush textAccentBrush;
@@ -65,6 +66,8 @@ namespace AmeisenBotX
 
         #endregion ClassBrushes
 
+        private Dictionary<BotState, Window> StateConfigWindows;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -83,8 +86,10 @@ namespace AmeisenBotX
 
         public string ConfigPath { get; private set; }
 
-        public bool IsAutoPositionSetup { get; private set; }
         public WindowInteropHelper InteropHelper { get; private set; }
+
+        public bool IsAutoPositionSetup { get; private set; }
+
         public double M11 { get; private set; }
 
         public double M22 { get; private set; }
@@ -138,7 +143,7 @@ namespace AmeisenBotX
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            ConfigEditorWindow configWindow = new ConfigEditorWindow(BotDataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            ConfigEditorWindow configWindow = new ConfigEditorWindow(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
             configWindow.ShowDialog();
 
             if (configWindow.SaveConfig)
@@ -172,6 +177,22 @@ namespace AmeisenBotX
                 AmeisenBot.Resume();
                 buttonStartPause.Content = "||";
                 buttonStartPause.Foreground = darkForegroundBrush;
+            }
+        }
+
+        private void ButtonStateConfig_Click(object sender, RoutedEventArgs e)
+        {
+            if (StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem))
+            {
+                Window selectedWindow = StateConfigWindows[(BotState)comboboxStateOverride.SelectedItem];
+                selectedWindow.ShowDialog();
+
+                if (((IStateConfigWindow)selectedWindow).ShouldSave)
+                {
+                    AmeisenBot.Config = ((IStateConfigWindow)selectedWindow).Config;
+                    AmeisenBot.ReloadConfig();
+                    SaveConfig();
+                }
             }
         }
 
@@ -210,12 +231,13 @@ namespace AmeisenBotX
             if (AmeisenBot != null)
             {
                 AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+                buttonStateConfig.IsEnabled = StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem);
             }
         }
 
         private AmeisenBotConfig LoadConfig()
         {
-            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(BotDataPath);
+            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(DataPath);
             loadConfigWindow.ShowDialog();
 
             if (loadConfigWindow.ConfigToLoad.Length > 0)
@@ -241,14 +263,12 @@ namespace AmeisenBotX
             return null;
         }
 
-        private void OnObjectUpdateComplete(List<WowObject> wowObjects)
+        private void MainWindow_OnWoWStarted()
         {
-            Dispatcher.InvokeAsync(() =>
+            if (Config.AutoPositionWow)
             {
-                if (Config.AutoPositionWow && !IsAutoPositionSetup)
+                Dispatcher.Invoke(() =>
                 {
-                    IsAutoPositionSetup = true;
-
                     AmeisenBot.WowInterface.XMemory.SetupAutoPosition
                     (
                         InteropHelper.EnsureHandle(),
@@ -257,8 +277,16 @@ namespace AmeisenBotX
                         (int)Math.Floor(wowRect.ActualWidth * M11),
                         (int)Math.Floor(wowRect.ActualHeight * M22)
                     );
-                }
+                });
 
+                IsAutoPositionSetup = true;
+            }
+        }
+
+        private void OnObjectUpdateComplete(List<WowObject> wowObjects)
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
                 // Update the main view
                 // -------------------- >
                 WowPlayer player = AmeisenBot.WowInterface.ObjectManager.Player;
@@ -315,10 +343,9 @@ namespace AmeisenBotX
 
                 // Overlay drawing
                 // --------------- >
-                Overlay ??= new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
-
                 if (DrawOverlay)
                 {
+                    Overlay ??= new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
                     OverlayRenderCurrentPath();
 
                     Overlay?.Draw();
@@ -336,7 +363,7 @@ namespace AmeisenBotX
         {
             Dispatcher.InvokeAsync(() =>
             {
-                labelCurrentState.Content = $"{(BotState)AmeisenBot.StateMachine.CurrentState.Key}";
+                labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}";
             });
         }
 
@@ -350,13 +377,13 @@ namespace AmeisenBotX
                     Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
                     Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
 
-                    Color lineColor = Colors.LightCyan;
-                    Color startDot = Colors.Red;
-                    Color endDot = i == 0 ? Colors.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? Colors.Orange : Colors.Cyan;
+                    System.Drawing.Color lineColor = System.Drawing.Color.White;
+                    System.Drawing.Color startDot = System.Drawing.Color.Cyan;
+                    System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
                     Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
-                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out Point startPoint)
-                    && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out Point endPoint))
+                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out System.Drawing.Point startPoint)
+                        && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out System.Drawing.Point endPoint))
                     {
                         Overlay.AddLine((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y, lineColor);
                         Overlay.AddRectangle((int)startPoint.X - 4, (int)startPoint.Y - 4, 7, 7, startDot);
@@ -440,8 +467,8 @@ namespace AmeisenBotX
 
             // HookCall label
             // -------------- >
-            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.PendingCallCount.ToString().PadLeft(2);
-            if (AmeisenBot.WowInterface.HookManager.PendingCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
+            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString().PadLeft(2);
+            if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
                 labelHookCallCount.Foreground = currentTickTimeGoodBrush;
             }
@@ -457,16 +484,21 @@ namespace AmeisenBotX
             labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString().PadLeft(3);
         }
 
-        private void Window_Activated(object sender, EventArgs e)
-        {
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             AmeisenBot?.Stop();
             Overlay?.Exit();
             InfoWindow?.Close();
             MapWindow?.Close();
+
+            if (StateConfigWindows != null)
+            {
+                foreach (Window window in StateConfigWindows.Values)
+                {
+                    window.Close();
+                }
+            }
+
             SaveConfig();
         }
 
@@ -481,6 +513,7 @@ namespace AmeisenBotX
             M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
             comboboxStateOverride.Items.Add(BotState.Idle);
+            comboboxStateOverride.Items.Add(BotState.Grinding);
             comboboxStateOverride.Items.Add(BotState.Job);
             comboboxStateOverride.Items.Add(BotState.Questing);
 
@@ -495,13 +528,20 @@ namespace AmeisenBotX
 
             // Init the bot
             // ------------ >
-            string playername = Path.GetFileName(Path.GetDirectoryName(ConfigPath));
-            AmeisenBot = new AmeisenBot(BotDataPath, playername, Config, InteropHelper.EnsureHandle());
+            AmeisenBot = new AmeisenBot(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
+            AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += MainWindow_OnWoWStarted;
 
             AmeisenBot.Start();
+
+            StateConfigWindows = new Dictionary<BotState, Window>()
+            {
+                { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config)},
+                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config)},
+                { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config)},
+            };
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

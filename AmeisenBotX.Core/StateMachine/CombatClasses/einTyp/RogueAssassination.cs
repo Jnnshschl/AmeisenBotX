@@ -13,10 +13,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
     public class RogueAssassination : ICombatClass
     {
-        private readonly string[] standingEmotes = { "/bored" };
-
         private readonly RogueAssassinSpells spells;
-
+        private readonly string[] standingEmotes = { "/bored" };
         private bool computeNewRoute = false;
 
         private double distanceToBehindTarget = 0;
@@ -27,14 +25,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool hasTargetMoved = false;
 
+        bool isAttackingFromBehind = false;
+
         private bool isSneaky = false;
 
         private bool standing = false;
 
         private bool wasInStealth = false;
-
-        bool isAttackingFromBehind = false;
-
         private WowInterface WowInterface;
 
         public RogueAssassination(WowInterface wowInterface)
@@ -62,8 +59,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         public IWowItemComparator ItemComparator => new AssassinationItemComparator();
 
         public List<string> PriorityTargets { get; set; }
-
-        public bool TargetInLineOfSight { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Dps;
 
@@ -101,6 +96,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 { 3, new Talent(3, 3, 2) }
             }
         };
+
+        public bool TargetInLineOfSight { get; set; }
 
         public string Version => "1.0";
 
@@ -268,7 +265,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (computeNewRoute)
             {
-                if(!this.isAttackingFromBehind && isSneaky && distanceToBehindTarget > 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                if (!this.isAttackingFromBehind && isSneaky && distanceToBehindTarget > 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastBehindTargetPosition);
                 }
@@ -280,7 +277,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastTargetPosition, LastTargetRotation);
                 }
             }
-
         }
 
         private bool SearchNewTarget(ref WowUnit target, bool grinding)

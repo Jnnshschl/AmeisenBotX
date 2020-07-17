@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
-using System;
+﻿using AmeisenBotX.Logging;
 using System.Text;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -12,36 +11,38 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
+            AmeisenLogger.Instance.Log("LoadingScreen", "Entered loading screen");
         }
 
         public override void Execute()
         {
-            if (WowInterface.XMemory.Process == null || WowInterface.WowProcess.HasExited)
+            if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
             {
-                StateMachine.SetState((int)BotState.None);
+                AmeisenLogger.Instance.Log("LoadingScreen", "WowProcess exited");
+                StateMachine.SetState(BotState.None);
                 return;
             }
 
             if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string gameState)
-                && gameState.Contains("login"))
+                && gameState.Contains("login") || gameState.Contains("charselect"))
             {
-                StateMachine.SetState((int)BotState.Login);
-                BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr(0x1B));
+                StateMachine.SetState(BotState.Login);
                 return;
             }
 
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
+
             if (WowInterface.ObjectManager.IsWorldLoaded)
             {
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
         }
 
         public override void Exit()
         {
-            WowInterface.MovementEngine.Reset();
-            WowInterface.HookManager.StopClickToMoveIfActive();
+            AmeisenLogger.Instance.Log("LoadingScreen", "Exited loading screen");
+            WowInterface.MovementEngine.StopMovement();
         }
     }
 }

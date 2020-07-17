@@ -69,6 +69,8 @@ namespace AmeisenBotX.Core.Data
 
         List<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
 
+        List<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance);
+
         T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 
         WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);

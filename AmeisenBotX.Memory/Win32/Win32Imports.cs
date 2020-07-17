@@ -153,9 +153,6 @@ namespace AmeisenBotX.Memory.Win32
             out ProcessInformation lpProcessInformation
         );
 
-        [DllImport("dwmapi", SetLastError = true)]
-        public static extern void DwmExtendFrameIntoClientArea(IntPtr windowHandle, ref Margins margins);
-
         [DllImport("user32", SetLastError = true)]
         public static extern IntPtr GetForegroundWindow();
 
@@ -167,9 +164,6 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("user32", SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
-
-        [DllImport("msvcrt", EntryPoint = "memset", SetLastError = false)]
-        public static extern IntPtr MemSet(IntPtr dest, int c, int count);
 
         [DllImport("user32", SetLastError = true)]
         public static extern bool MoveWindow(IntPtr windowHandle, int X, int Y, int nWidth, int nHeight, bool bRepaint);

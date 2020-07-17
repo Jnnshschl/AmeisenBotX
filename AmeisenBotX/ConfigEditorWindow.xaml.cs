@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Views;
 using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -36,6 +37,8 @@ namespace AmeisenBotX
         public AmeisenBot AmeisenBot { get; private set; }
 
         public bool Cancel { get; set; }
+
+        public bool ChangedSomething { get; set; }
 
         public AmeisenBotConfig Config { get; private set; }
 
@@ -79,21 +82,40 @@ namespace AmeisenBotX
             {
                 ConfigName = textboxConfigName.Text.Trim();
 
+                Config.AntiAfkMs = int.Parse(textboxAntiAfk.Text);
+                Config.AutoAcceptQuests = checkboxAutoAcceptQuests.IsChecked.GetValueOrDefault(false);
+                Config.AutoChangeRealmlist = checkboxAutoChangeRealmlist.IsChecked.GetValueOrDefault(false);
                 Config.AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false);
+                Config.AutoDisableRender = checkboxAutoDisableRendering.IsChecked.GetValueOrDefault(false);
                 Config.AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
+                Config.AutojoinBg = checkboxAutoJoinBg.IsChecked.GetValueOrDefault(false);
+                Config.AutojoinLfg = checkboxAutoJoinLfg.IsChecked.GetValueOrDefault(false);
                 Config.AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false);
                 Config.AutoPositionWow = checkboxAutoPositionWow.IsChecked.GetValueOrDefault(false);
+                Config.AutoRepair = checkboxAutoRepair.IsChecked.GetValueOrDefault(false);
                 Config.AutostartWow = checkboxAutoStartWow.IsChecked.GetValueOrDefault(false);
+                Config.AutoTalkToNearQuestgivers = checkboxAutoTalkToQuestgivers.IsChecked.GetValueOrDefault(false);
+                Config.BagSlotsToGoSell = (int)Math.Round(sliderMinFreeBagSlots.Value);
                 Config.BattlegroundEngine = comboboxBattlegroundEngine.SelectedItem != null ? comboboxBattlegroundEngine.SelectedItem.ToString() : string.Empty;
                 Config.BattlegroundUsePartyMode = checkboxBattlegroundUsePartyMode.IsChecked.GetValueOrDefault(false);
                 Config.BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty;
                 Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text);
                 Config.CustomCombatClassFile = textboxCombatClassFile.Text;
+                Config.DrinkUntilPercent = sliderDrinkUntil.Value;
                 Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
+                Config.EatUntilPercent = sliderEatUntil.Value;
+                Config.EnabledRconServer = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
+                Config.EventPullMs = int.Parse(textboxEventPull.Text);
                 Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
                 Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
+                Config.FollowPositionDynamic = checkboxDynamicPosition.IsChecked.GetValueOrDefault(false);
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
                 Config.Friends = textboxFriends.Text;
+                Config.ItemRepairThreshold = sliderRepair.Value;
+                Config.ItemSellBlacklist = textboxItemSellBlacklist.Text.Split(',');
+                Config.JobEngineMailHeader = textboxMailHeader.Text;
+                Config.JobEngineMailReceiver = textboxMailReceiver.Text;
+                Config.JobEngineMailText = textboxMailText.Text;
                 Config.LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false);
                 Config.LootUnitsRadius = Math.Round(sliderLootRadius.Value);
                 Config.MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value);
@@ -107,10 +129,21 @@ namespace AmeisenBotX
                 Config.PathToWowExe = textboxWowPath.Text;
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
+                Config.RconServerAddress = textboxRconAddress.Text;
+                Config.RconServerGuid = textboxRconGUID.Text;
+                Config.RconServerImage = textboxRconImage.Text;
+                Config.Realm = textboxRealm.Text;
+                Config.Realmlist = textboxRealmlist.Text;
                 Config.ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false);
                 Config.SaveBotWindowPosition = checkboxSaveBotWindowPosition.IsChecked.GetValueOrDefault(false);
                 Config.SaveWowWindowPosition = checkboxSaveWowWindowPosition.IsChecked.GetValueOrDefault(false);
+                Config.SellBlueItems = checkboxSellBlueItems.IsChecked.GetValueOrDefault(false);
+                Config.SellGrayItems = checkboxSellGrayItems.IsChecked.GetValueOrDefault(false);
+                Config.SellGreenItems = checkboxSellGreenItems.IsChecked.GetValueOrDefault(false);
+                Config.SellPurpleItems = checkboxSellPurpleItems.IsChecked.GetValueOrDefault(false);
+                Config.SellWhiteItems = checkboxSellWhiteItems.IsChecked.GetValueOrDefault(false);
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
+                Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text);
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
                 Config.Username = textboxUsername.Text;
 
@@ -121,14 +154,19 @@ namespace AmeisenBotX
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
-            ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
-            confirmWindow.ShowDialog();
-
-            if (confirmWindow.OkayPressed)
+            if (ChangedSomething)
             {
-                Cancel = true;
-                Close();
+                ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
+                confirmWindow.ShowDialog();
+
+                if (!confirmWindow.OkayPressed)
+                {
+                    return;
+                }
             }
+
+            Cancel = true;
+            Close();
         }
 
         private void ButtonOpenCombatClassFile_Click(object sender, RoutedEventArgs e)
@@ -141,6 +179,22 @@ namespace AmeisenBotX
             if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
                 textboxCombatClassFile.Text = openFileDialog.FileName;
+                ChangedSomething = true;
+            }
+        }
+
+        private void ButtonOpenImage_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "PNG|*.png|JPEG|*.jpg;"
+            };
+
+            if (openFileDialog.ShowDialog().GetValueOrDefault(false))
+            {
+                string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
+                textboxRconImage.Text = $"data:image/{fileExtension};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
+                ChangedSomething = true;
             }
         }
 
@@ -154,6 +208,7 @@ namespace AmeisenBotX
             if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
                 textboxWowPath.Text = openFileDialog.FileName;
+                ChangedSomething = true;
             }
         }
 
@@ -163,6 +218,7 @@ namespace AmeisenBotX
             {
                 textboxWowPath.IsEnabled = true;
                 buttonOpenWowExe.IsEnabled = true;
+                ChangedSomething = true;
             }
         }
 
@@ -173,6 +229,7 @@ namespace AmeisenBotX
                 textboxWowPath.IsEnabled = false;
                 textboxWowPath.Text = string.Empty;
                 buttonOpenWowExe.IsEnabled = false;
+                ChangedSomething = true;
             }
         }
 
@@ -183,6 +240,7 @@ namespace AmeisenBotX
                 buttonOpenCombatClassFile.Visibility = Visibility.Hidden;
                 textboxCombatClassFile.Visibility = Visibility.Hidden;
                 comboboxBuiltInCombatClass.Visibility = Visibility.Visible;
+                ChangedSomething = true;
             }
         }
 
@@ -193,6 +251,7 @@ namespace AmeisenBotX
                 buttonOpenCombatClassFile.Visibility = Visibility.Visible;
                 textboxCombatClassFile.Visibility = Visibility.Visible;
                 comboboxBuiltInCombatClass.Visibility = Visibility.Hidden;
+                ChangedSomething = true;
             }
         }
 
@@ -201,6 +260,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 textboxFollowSpecificCharacterName.IsEnabled = true;
+                ChangedSomething = true;
             }
         }
 
@@ -210,6 +270,7 @@ namespace AmeisenBotX
             {
                 textboxFollowSpecificCharacterName.IsEnabled = false;
                 textboxFollowSpecificCharacterName.Text = string.Empty;
+                ChangedSomething = true;
             }
         }
 
@@ -218,6 +279,7 @@ namespace AmeisenBotX
             if (textboxFriends != null)
             {
                 textboxFriends.IsEnabled = true;
+                ChangedSomething = true;
             }
         }
 
@@ -226,6 +288,7 @@ namespace AmeisenBotX
             if (textboxFriends != null)
             {
                 textboxFriends.IsEnabled = false;
+                ChangedSomething = true;
             }
         }
 
@@ -236,6 +299,7 @@ namespace AmeisenBotX
                 if (comboboxBattlegroundEngine.SelectedItem == null || comboboxBattlegroundEngine.SelectedItem.ToString() == "None")
                 {
                     labelBattlegroundEngineDescription.Content = "...";
+                    ChangedSomething = true;
                 }
                 else
                 {
@@ -244,6 +308,7 @@ namespace AmeisenBotX
                     if (battlegroundEngine != null)
                     {
                         labelBattlegroundEngineDescription.Content = battlegroundEngine.Description;
+                        ChangedSomething = true;
                     }
                 }
             }
@@ -251,40 +316,96 @@ namespace AmeisenBotX
 
         private void LoadConfigToUi()
         {
-            checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
-            checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
-            checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
-            textboxFriends.Text = Config.Friends;
+            checkboxAutoAcceptQuests.IsChecked = Config.AutoAcceptQuests;
+            checkboxAutoChangeRealmlist.IsChecked = Config.AutoChangeRealmlist;
             checkboxAutocloseWow.IsChecked = Config.AutocloseWow;
+            checkboxAutoDisableRendering.IsChecked = Config.AutoDisableRender;
+            checkboxAutoJoinBg.IsChecked = Config.AutojoinBg;
+            checkboxAutoJoinLfg.IsChecked = Config.AutojoinLfg;
             checkboxAutoLogin.IsChecked = Config.AutoLogin;
             checkboxAutoPositionWow.IsChecked = Config.AutoPositionWow;
+            checkboxAutoRepair.IsChecked = Config.AutoRepair;
             checkboxAutoStartWow.IsChecked = Config.AutostartWow;
+            checkboxAutoTalkToQuestgivers.IsChecked = Config.AutoTalkToNearQuestgivers;
             checkboxAvoidAoe.IsChecked = Config.AutoDodgeAoeSpells;
+            checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
             checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
+            checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
+            checkboxDynamicPosition.IsChecked = Config.FollowPositionDynamic;
+            checkboxEnableRcon.IsChecked = Config.EnabledRconServer;
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
             checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
             checkboxLooting.IsChecked = Config.LootUnits;
+            checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
             checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
             checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
             checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
             checkboxSaveBotWindowPosition.IsChecked = Config.SaveBotWindowPosition;
             checkboxSaveWowWindowPosition.IsChecked = Config.SaveWowWindowPosition;
+            checkboxSellBlueItems.IsChecked = Config.SellBlueItems;
+            checkboxSellGrayItems.IsChecked = Config.SellGrayItems;
+            checkboxSellGreenItems.IsChecked = Config.SellGreenItems;
+            checkboxSellPurpleItems.IsChecked = Config.SellPurpleItems;
+            checkboxSellWhiteItems.IsChecked = Config.SellWhiteItems;
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
             comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
+            sliderDrinkUntil.Value = Config.DrinkUntilPercent;
+            sliderEatUntil.Value = Config.EatUntilPercent;
             sliderLootRadius.Value = Math.Round(Config.LootUnitsRadius);
             sliderMaxFollowDistance.Value = Config.MaxFollowDistance;
             sliderMaxFps.Value = Config.MaxFps;
             sliderMaxFpsCombat.Value = Config.MaxFpsCombat;
             sliderMinFollowDistance.Value = Config.MinFollowDistance;
+            sliderMinFreeBagSlots.Value = Config.BagSlotsToGoSell;
+            sliderRepair.Value = Config.ItemRepairThreshold;
+            textboxAntiAfk.Text = Config.AntiAfkMs.ToString();
             textboxCharacterSlot.Text = Config.CharacterSlot.ToString();
             textboxCombatClassFile.Text = Config.CustomCombatClassFile;
+            textboxEventPull.Text = Config.EventPullMs.ToString();
             textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
+            textboxFriends.Text = Config.Friends;
+            textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist);
+            textboxMailHeader.Text = Config.JobEngineMailHeader;
+            textboxMailReceiver.Text = Config.JobEngineMailReceiver;
+            textboxMailText.Text = Config.JobEngineMailText;
             textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
             textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
             textboxPassword.Password = Config.Password;
+            textboxRconAddress.Text = Config.RconServerAddress;
+            textboxRconGUID.Text = Config.RconServerGuid;
+            textboxRconImage.Text = Config.RconServerImage;
+            textboxRealm.Text = Config.Realm;
+            textboxRealmlist.Text = Config.Realmlist;
+            textboxStatemachineTick.Text = Config.StateMachineTickMs.ToString();
             textboxUsername.Text = Config.Username;
             textboxWowPath.Text = Config.PathToWowExe;
+
+            ChangedSomething = false;
+        }
+
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void SliderDrinkUntil_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelDrinkUntil.Content = $"Drink Until: {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderEatUntil_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelEatUntil.Content = $"Eat Until: {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
+            }
         }
 
         private void SliderLootRadius_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -292,6 +413,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelLootRadius.Content = $"Loot Radius: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
             }
         }
 
@@ -300,6 +422,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFollowDistance.Content = $"Max Follow Distance: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
             }
         }
 
@@ -308,6 +431,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFps.Content = $"Max FPS: {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
             }
         }
 
@@ -316,6 +440,7 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFpsCombat.Content = $"Max FPS Combat: {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
             }
         }
 
@@ -324,6 +449,25 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMinFollowDistance.Content = $"Min Follow Distance: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderMinFreeBagSlots_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMinFreeBagSlots.Content = $"Min Free Bag Slots: {(int)Math.Round(e.NewValue)}";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderRepair_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelRepairThreshold.Content = $"Repair: {Math.Round(e.NewValue)}%";
+                ChangedSomething = true;
             }
         }
 

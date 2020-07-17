@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Logging;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -14,43 +14,42 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public event Action OnWoWStarted;
 
-        private DateTime WowStart { get; set; }
-
         public override void Enter()
         {
+            AmeisenLogger.Instance.Log("StartWow", "Setting TOS and EULA to 1 in config");
             CheckTosAndEula();
 
-            if (File.Exists(Config.PathToWowExe))
+            if (Config.AutoChangeRealmlist)
             {
-                if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
-                {
-                    WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
-
-                    WowInterface.WowProcess.WaitForInputIdle();
-                    Task.Delay(1000).Wait();
-                    WowInterface.XMemory.Attach(WowInterface.WowProcess);
-
-                    WowStart = DateTime.Now;
-                    OnWoWStarted?.Invoke();
-                }
+                AmeisenLogger.Instance.Log("StartWow", "Changing Realmlist");
+                ChangeRealmlist();
             }
         }
 
         public override void Execute()
         {
-            if (DateTime.Now - WowStart > TimeSpan.FromSeconds(8) && WowInterface.WowProcess.HasExited)
+            if (!StateMachine.ShouldExit && File.Exists(Config.PathToWowExe))
             {
-                StateMachine.SetState((int)BotState.None);
-                return;
-            }
+                if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
+                {
+                    AmeisenLogger.Instance.Log("StartWow", "Starting WoW Process");
+                    WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
 
-            if (Config.AutoLogin)
-            {
-                StateMachine.SetState((int)BotState.Login);
-            }
-            else
-            {
-                StateMachine.SetState((int)BotState.Idle);
+                    AmeisenLogger.Instance.Log("StartWow", "Waiting for input idle");
+                    WowInterface.WowProcess.WaitForInputIdle();
+                    return;
+                }
+
+                if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited)
+                {
+                    AmeisenLogger.Instance.Log("StartWow", "Attaching XMemory");
+                    WowInterface.XMemory.Attach(WowInterface.WowProcess);
+
+                    OnWoWStarted?.Invoke();
+
+                    StateMachine.SetState(BotState.Login);
+                    return;
+                }
             }
         }
 
@@ -58,13 +57,50 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
+        private void ChangeRealmlist()
+        {
+            try
+            {
+                string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+                if (File.Exists(configWtfPath))
+                {
+                    File.SetAttributes(configWtfPath, FileAttributes.Normal);
+                    List<string> content = File.ReadAllLines(configWtfPath).ToList();
+
+                    bool found = false;
+                    for (int i = 0; i < content.Count; i++)
+                    {
+                        if (content[i].ToUpper().Contains("SET REALMLIST"))
+                        {
+                            content[i] = $"SET REALMLIST {Config.Realmlist}";
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        content.Add($"SET REALMLIST {Config.Realmlist}");
+                    }
+
+                    File.WriteAllLines(configWtfPath, content);
+                    File.SetAttributes(configWtfPath, FileAttributes.ReadOnly);
+                }
+            }
+            catch
+            {
+                AmeisenLogger.Instance.Log("StartWow", "Cannot write realmlist to config.wtf");
+            }
+        }
+
         private void CheckTosAndEula()
         {
             try
             {
-                string configWtfPath = System.IO.Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+                string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
                 if (File.Exists(configWtfPath))
                 {
+                    File.SetAttributes(configWtfPath, FileAttributes.Normal);
                     string content = File.ReadAllText(configWtfPath).ToUpper();
 
                     if (content.Contains("SET READEULA"))
@@ -86,11 +122,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
 
                     File.WriteAllText(configWtfPath, content);
+                    File.SetAttributes(configWtfPath, FileAttributes.ReadOnly);
                 }
             }
             catch
             {
-                AmeisenLogger.Instance.Log("StartWow", "Cannot write to config.wtf, maybe its write protected");
+                AmeisenLogger.Instance.Log("StartWow", "Cannot write to config.wtf");
             }
         }
     }

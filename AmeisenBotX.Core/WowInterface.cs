@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
+using AmeisenBotX.Core.Grinding;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
@@ -41,6 +42,8 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotGlobals Globals { get; set; }
 
+        public GrindingEngine GrindingEngine { get; set; }
+
         public IHookManager HookManager { get; set; }
 
         public JobEngine JobEngine { get; set; }
@@ -57,12 +60,12 @@ namespace AmeisenBotX.Core
 
         public QuestEngine QuestEngine { get; set; }
 
+        public AmeisenBotRconClient RconClient { get; set; }
+
         public RelaxEngine RelaxEngine { get; set; }
 
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
-
-        public AmeisenBotRconClient RconClient { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
-using System;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -11,21 +10,16 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        private bool IsAtNpc { get; set; }
-
-        private DateTime RepairActionGo { get; set; }
-
         public override void Enter()
         {
-            IsAtNpc = false;
         }
 
         public override void Execute()
         {
-            if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability <= Config.ItemRepairThreshold))
+            if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold))
             {
                 WowInterface.CharacterManager.Equipment.Update();
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
                 return;
             }
 
@@ -38,27 +32,22 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (selectedUnit != null && !selectedUnit.IsDead)
             {
-                if (!IsAtNpc)
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                    if (WowInterface.MovementEngine.IsAtTargetPosition)
-                    {
-                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                        RepairActionGo = DateTime.Now + TimeSpan.FromSeconds(1);
-                        IsAtNpc = true;
-                    }
-                }
-                else if (DateTime.Now > RepairActionGo)
+                if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
-                    WowInterface.HookManager.RepairAllItems();
-                    WowInterface.CharacterManager.Equipment.Update();
+                    WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+
+                    if (selectedUnit.IsGossip)
+                    {
+                        WowInterface.HookManager.UnitSelectGossipOption(1);
+                    }
                 }
             }
             else
             {
                 WowInterface.CharacterManager.Equipment.Update();
-                StateMachine.SetState((int)BotState.Idle);
+                StateMachine.SetState(BotState.Idle);
             }
         }
 
