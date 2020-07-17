@@ -16,6 +16,7 @@
         BubblingWater = 9451,
         ConjuredGlacierWater = 22018,
         FilteredDraenicWater = 28399,
-        ConjuredMountainSpringWater = 30703
+        ConjuredMountainSpringWater = 30703,
+        PungentSealWhey = 33444,
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Core.Data.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,21 +7,12 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class AuraManager
     {
-        public AuraManager(Dictionary<string, CastFunction> buffsToKeepActive, Dictionary<string, CastFunction> debuffsToKeepActive, TimeSpan minUpdateTime, GetBuffsFunction getBuffsFunction, GetDebuffsFunction getDebuffsFunction, DispellBuffsFunction dispellBuffsFunction, DispellDebuffsFunction dispellDebuffsFunction)
+        public AuraManager(TimeSpan minUpdateTime, GetAurasFunction getAurasFunction)
         {
-            BuffsToKeepActive = buffsToKeepActive;
-            DebuffsToKeepActive = debuffsToKeepActive;
+            BuffsToKeepActive = new Dictionary<string, CastFunction>();
+            DebuffsToKeepActive = new Dictionary<string, CastFunction>();
             MinUpdateTime = minUpdateTime;
-            GetBuffs = getBuffsFunction;
-            GetDebuffs = getDebuffsFunction;
-            DispellBuffs = dispellBuffsFunction;
-            DispellDebuffs = dispellDebuffsFunction;
-        }
-
-        public AuraManager()
-        {
-            Buffs = new List<string>();
-            Debuffs = new List<string>();
+            GetAuras = getAurasFunction;
         }
 
         public delegate bool CastFunction();
@@ -29,15 +21,15 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public delegate bool DispellDebuffsFunction();
 
-        public delegate List<string> GetBuffsFunction();
+        public delegate List<WowAura> GetAurasFunction();
 
-        public delegate List<string> GetDebuffsFunction();
+        public List<WowAura> Auras { get; private set; }
 
-        public List<string> Buffs { get; private set; }
+        public List<WowAura> Buffs => Auras.Where(e => !e.IsHarmful).ToList();
 
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
 
-        public List<string> Debuffs { get; private set; }
+        public List<WowAura> Debuffs => Auras.Where(e => e.IsHarmful).ToList();
 
         public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 
@@ -45,9 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public DispellDebuffsFunction DispellDebuffs { get; set; }
 
-        public GetBuffsFunction GetBuffs { get; set; }
-
-        public GetDebuffsFunction GetDebuffs { get; set; }
+        public GetAurasFunction GetAuras { get; set; }
 
         public DateTime LastBuffUpdate { get; private set; }
 
@@ -58,21 +48,23 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             if (DateTime.Now - LastBuffUpdate > MinUpdateTime
                 || forceUpdate)
             {
-                Buffs = GetBuffs();
-                Debuffs = GetDebuffs();
+                Auras = GetAuras();
                 LastBuffUpdate = DateTime.Now;
+            }
+
+            if (Auras == null || Auras.Count == 0)
+            {
+                return false;
             }
 
             if (BuffsToKeepActive?.Count > 0 && Buffs != null)
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
                 {
-                    if (!Buffs.Any(e => e.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase)))
+                    if (!Buffs.Any(e => e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
+                        && keyValuePair.Value())
                     {
-                        if (keyValuePair.Value())
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -86,12 +78,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in DebuffsToKeepActive)
                 {
-                    if (!Debuffs.Any(e => e.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase)))
+                    if (!Debuffs.Any(e => e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
+                        && keyValuePair.Value())
                     {
-                        if (keyValuePair.Value())
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }

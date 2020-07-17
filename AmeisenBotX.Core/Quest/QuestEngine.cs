@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Profiles;
-using AmeisenBotX.Core.Quest.Profiles.StartAreas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,27 +19,20 @@ namespace AmeisenBotX.Core.Quest
 
         public List<int> CompletedQuests { get; private set; }
 
-        public IQuestProfile QuestProfile { get; private set; }
+        public IQuestProfile Profile { get; set; }
 
         public bool UpdatedCompletedQuests { get; set; }
+
+        private bool NeedToSetup { get; set; }
 
         private TimegatedEvent QueryCompletedQuestsEvent { get; }
 
         private WowInterface WowInterface { get; }
 
-        private bool NeedToSetup { get; set; }
-
         public void Execute()
         {
-            if (NeedToSetup)
+            if (Profile == null)
             {
-                WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
-                NeedToSetup = false;
-            }
-
-            if (QuestProfile == null)
-            {
-                LoadProfile(new DeathknightStartAreaQuestProfile(WowInterface));
                 return;
             }
 
@@ -54,9 +46,9 @@ namespace AmeisenBotX.Core.Quest
                 return;
             }
 
-            if (QuestProfile.Quests.Count > 0)
+            if (Profile.Quests.Count > 0)
             {
-                List<BotQuest> quests = QuestProfile.Quests.Peek();
+                List<BotQuest> quests = Profile.Quests.Peek();
                 List<BotQuest> selectedQuests = quests.Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(x => x.Id == e.Id)).ToList();
 
                 if (selectedQuests != null && selectedQuests.Count > 0)
@@ -100,7 +92,7 @@ namespace AmeisenBotX.Core.Quest
                 }
                 else
                 {
-                    CompletedQuests.AddRange(QuestProfile.Quests.Dequeue().Select(e => e.Id));
+                    CompletedQuests.AddRange(Profile.Quests.Dequeue().Select(e => e.Id));
                     return;
                 }
             }
@@ -109,9 +101,13 @@ namespace AmeisenBotX.Core.Quest
             CompletedQuests = CompletedQuests.Distinct().ToList();
         }
 
-        public void LoadProfile(IQuestProfile questProfile)
+        public void Start()
         {
-            QuestProfile = questProfile;
+            if (NeedToSetup)
+            {
+                WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
+                NeedToSetup = false;
+            }
         }
 
         private void OnGetQuestsCompleted(long timestamp, List<string> args)

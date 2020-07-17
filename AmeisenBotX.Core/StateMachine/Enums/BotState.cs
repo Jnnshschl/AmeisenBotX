@@ -20,6 +20,7 @@
         Battleground,
         Job,
         Dungeon,
-        Questing
+        Questing,
+        Grinding
     }
 }

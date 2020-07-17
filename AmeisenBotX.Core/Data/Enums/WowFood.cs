@@ -26,6 +26,7 @@
         HomemadeCherryPie = 8950,
         RoastedQuail = 8952,
         ConjuredCroissant = 22019,
-        SmokedTalbukVenison = 27854
+        ConjuredCinnamonRoll = 22895,
+        SmokedTalbukVenison = 27854,
     }
 }

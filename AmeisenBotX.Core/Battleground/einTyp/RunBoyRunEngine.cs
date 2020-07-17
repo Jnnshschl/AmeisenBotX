@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -108,8 +109,10 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                     if(enemyFlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
-                        WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, 
+                            BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float) WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
+                        if (isInCombatReach(enemyFlagCarrier.Position))
+                            WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
                         if (isEnemyClose())
                         {
                             WowInterface.Globals.ForceCombat = true;
@@ -125,10 +128,10 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit teamFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(TeamFlagCarrierGuid);
                     if (teamFlagCarrier != null)
                     {
-                        if(WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
+                        if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotMath.CalculatePositionBehind(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 1f));
                         else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotUtils.MoveAhead(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 2f));
                         else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
                             WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
                         if (isEnemyClose())
@@ -139,11 +142,13 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     }
                     else
                     {
+                        // run to the enemy
                         WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                         if (enemyFlagCarrier != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
-                            if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
+                                BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
+                            if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal && isInCombatReach(enemyFlagCarrier.Position))
                                 WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
                             if (isEnemyClose())
                             {
@@ -164,9 +169,9 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 if (teamFlagCarrier != null)
                 {
                     if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotMath.CalculatePositionBehind(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 1f));
                     else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position, teamFlagCarrier.Rotation);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotUtils.MoveAhead(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 2f));
                     else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
                     if (isEnemyClose())
@@ -217,8 +222,9 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                     if (enemyFlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position, enemyFlagCarrier.Rotation);
-                        if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal)
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
+                            BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
+                        if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal && isInCombatReach(enemyFlagCarrier.Position))
                             WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
                         if (isEnemyClose())
                         {

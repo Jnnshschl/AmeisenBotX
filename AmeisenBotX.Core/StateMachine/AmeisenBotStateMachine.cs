@@ -39,6 +39,7 @@ namespace AmeisenBotX.Core.Statemachine
                 { BotState.Eating, new StateEating(this, config, WowInterface) },
                 { BotState.Following, new StateFollowing(this, config, WowInterface) },
                 { BotState.Ghost, new StateGhost(this, config, WowInterface) },
+                { BotState.Grinding, new StateGrinding(this, config, WowInterface) },
                 { BotState.Idle, new StateIdle(this, config, WowInterface) },
                 { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
                 { BotState.Job, new StateJob(this, config, WowInterface) },
@@ -108,7 +109,7 @@ namespace AmeisenBotX.Core.Statemachine
                 // Handle Wow crash
                 // ---------------- >
                 if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
-                    && SetState((int)BotState.None))
+                    && SetState(BotState.None))
                 {
                     AmeisenLogger.Instance.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
 

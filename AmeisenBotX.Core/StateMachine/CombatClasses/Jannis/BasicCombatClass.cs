@@ -55,37 +55,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             MyAuraManager = new AuraManager
             (
-                null,
-                null,
-                TimeSpan.FromSeconds(1),
-                () => { if (WowInterface.ObjectManager.Player != null) { return WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList(); } else { return null; } },
-                () => { if (WowInterface.ObjectManager.Player != null) { return WowInterface.ObjectManager.Player.Auras.Select(e => e.Name).ToList(); } else { return null; } },
-                null,
-                DispellDebuffsFunction
+                TimeSpan.Zero,
+                () => WowInterface.ObjectManager.Player?.Auras
             );
 
             TargetAuraManager = new AuraManager
             (
-                null,
-                null,
-                TimeSpan.FromSeconds(1),
-                () => { if (WowInterface.ObjectManager.Target != null) { return WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList(); } else { return null; } },
-                () => { if (WowInterface.ObjectManager.Target != null) { return WowInterface.ObjectManager.Target.Auras.Select(e => e.Name).ToList(); } else { return null; } },
-                DispellBuffsFunction,
-                null
+                TimeSpan.Zero,
+                () => WowInterface.ObjectManager.Target?.Auras
             );
 
             GroupAuraManager = new GroupAuraManager(WowInterface);
 
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
-            ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(0));
             NearInterruptUnitsEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
             UpdatePriorityUnits = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
-
-        public TimegatedEvent ActionEvent { get; set; }
 
         public abstract string Author { get; }
 
@@ -108,6 +95,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public GroupAuraManager GroupAuraManager { get; private set; }
 
         public abstract bool HandlesMovement { get; }
+
+        public double HealingItemHealthThreshold { get; set; } = 30.0;
+
+        public double HealingItemManaThreshold { get; set; } = 30.0;
 
         public abstract bool IsMelee { get; }
 
@@ -145,13 +136,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract bool WalkBehindEnemy { get; }
 
-        public WowInterface WowInterface { get; internal set; }
+        protected WowInterface WowInterface { get; }
 
         private AmeisenBotStateMachine StateMachine { get; }
 
         public void Execute()
         {
-            if (!ActionEvent.Run() || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (WowInterface.ObjectManager.Player.IsCasting) { return; }
 
             // Update Priority Units
             // --------------------------- >
@@ -194,7 +185,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // Autoattacks
             // --------------------------- >
 
-            if (UseAutoAttacks && (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target)))
+            if (UseAutoAttacks
+                && !WowInterface.ObjectManager.Player.IsAutoAttacking
+                && AutoAttackEvent.Run()
+                && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
@@ -221,31 +215,37 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // Race abilities, items, etc.
             // --------------------------- >
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 30)
+            int[] useableHealingItems = new int[]
             {
-                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(
-                    e => e.Id == 5512
-                    || e.Id == 5511
-                    || e.Id == 5510
-                    || e.Id == 5509);
+                // potions
+                118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 33447,
+                // healthstones
+                5509, 5510, 5511, 5512, 9421, 19013,
+            };
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < HealingItemHealthThreshold)
+            {
+                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
                 if (healthstone != null)
                 {
                     WowInterface.HookManager.UseItemByName(healthstone.Name);
                 }
+            }
 
-                IWowItem healthPotion = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(
-                    e => e.Id == 118
-                    || e.Id == 929
-                    || e.Id == 1710
-                    || e.Id == 2938
-                    || e.Id == 3928
-                    || e.Id == 5509
-                    || e.Id == 13446);
+            int[] useableManaItems = new int[]
+            {
+                // potions
+                2245, 3385, 3827, 6149, 13443, 13444, 33448,
+            };
 
-                if (healthPotion != null)
+            if (WowInterface.ObjectManager.Player.ManaPercentage < HealingItemManaThreshold)
+            {
+                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+
+                if (healthstone != null)
                 {
-                    WowInterface.HookManager.UseItemByName(healthPotion.Name);
+                    WowInterface.HookManager.UseItemByName(healthstone.Name);
                 }
             }
 
@@ -511,7 +511,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private bool CastSpell(string spellName, bool castOnSelf)
         {
             bool result = false;
-            double cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
+            int cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
 
             if (cooldown == 0)
             {
@@ -521,7 +521,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"", LogLevel.Verbose);
-            CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
+            CooldownManager.SetSpellCooldown(spellName, cooldown);
             return result;
         }
 
@@ -568,15 +568,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool GetValidTarget(ulong guid, out WowUnit target)
         {
-            if (guid == 0)
-            {
-                target = WowInterface.ObjectManager.Player;
-            }
-            else
-            {
-                target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
-            }
-
+            target = guid == 0 ? WowInterface.ObjectManager.Player : WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
             return target != null;
         }
 

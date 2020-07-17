@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
+using AmeisenBotX.Core.Grinding;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Movement;
@@ -40,6 +41,8 @@ namespace AmeisenBotX.Core
         public EventHook EventHookManager { get; set; }
 
         public AmeisenBotGlobals Globals { get; set; }
+
+        public GrindingEngine GrindingEngine { get; set; }
 
         public IHookManager HookManager { get; set; }
 
