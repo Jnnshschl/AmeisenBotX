@@ -105,14 +105,15 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return GetNearEnemies<WowUnit>(position, distance)
-                  .Where(e => e != null
-                    && e.Guid != PlayerGuid
-                    && !e.IsDead
-                    && !e.IsNotAttackable
-                    && (PartymemberGuids.Contains(e.TargetGuid)
-                        || PartyPetGuids.Contains(e.TargetGuid))
-                    && e.Position.GetDistance(position) < distance)
-                  .ToList();
+                    .ToList()
+                    .Where(e => e != null
+                      && e.Guid != PlayerGuid
+                      && !e.IsDead
+                      && !e.IsNotAttackable
+                      && (PartymemberGuids.Contains(e.TargetGuid)
+                          || PartyPetGuids.Contains(e.TargetGuid))
+                      && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
@@ -126,6 +127,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects
+                    .ToList()
                     .OfType<T>()
                     .Where(e => e != null
                              && e.Guid != PlayerGuid
@@ -142,6 +144,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects
+                    .ToList()
                     .OfType<T>()
                     .Where(e => e != null
                              && e.Guid != PlayerGuid

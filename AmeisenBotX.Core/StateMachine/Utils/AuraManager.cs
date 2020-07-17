@@ -25,11 +25,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public List<WowAura> Auras { get; private set; }
 
-        public List<WowAura> Buffs => Auras.Where(e => !e.IsHarmful).ToList();
+        public List<WowAura> Buffs => Auras;
 
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
 
-        public List<WowAura> Debuffs => Auras.Where(e => e.IsHarmful).ToList();
+        public List<WowAura> Debuffs => Auras;
 
         public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 

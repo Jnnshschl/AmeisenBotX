@@ -236,7 +236,7 @@ namespace AmeisenBotX.Core
             if (Config.AutocloseWow)
             {
                 AmeisenLogger.Instance.Log("AmeisenBot", "Killing WoW process", LogLevel.Debug);
-                if (!WowInterface.XMemory.Process.HasExited)
+                if (WowInterface.XMemory.Process != null && !WowInterface.XMemory.Process.HasExited)
                 {
                     WowInterface.XMemory.Process.Kill();
                 }

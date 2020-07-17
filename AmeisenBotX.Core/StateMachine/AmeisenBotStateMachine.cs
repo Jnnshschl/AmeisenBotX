@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Statemachine
                 AntiAfkEvent.Run();
 
                 if (CurrentState.Key != BotState.Login
-                  && WowInterface.ObjectManager != null)
+                    && WowInterface.ObjectManager != null)
                 {
                     if (!WowInterface.ObjectManager.RefreshIsWorldLoaded())
                     {
