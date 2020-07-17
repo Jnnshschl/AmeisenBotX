@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(Bloodlust))
+                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 40 && CustomCastSpell(Bloodlust))
                         {
                             return;
                         }
@@ -236,27 +236,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 43 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
+                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(healingWaveSpell))
+                        if (WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(healingWaveSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 85 && CustomCastSpell(lesserHealingWaveSpell))
+                        if (WowInterface.ObjectManager.Target.HealthPercentage < 75 && CustomCastSpell(lesserHealingWaveSpell))
                         {
                             return;
                         }
 
-                        //if (!WowInterface.ObjectManager.Target.HasBuffByName("Water Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
-                        //{
-                        //    return;
-                        //}
+                        if (earthShieldEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Earth Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
+                        {
+                            return;
+                        }
 
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 95 && CustomCastSpell(riptideSpell))
+                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 92 && CustomCastSpell(riptideSpell))
                         {
                             return;
                         }

@@ -36,6 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             //Resto Shaman
+            earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
             revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
             manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
             totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
@@ -95,6 +96,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
         //Resto Shaman
+        public TimegatedEvent earthShieldEvent { get; private set; }
         public TimegatedEvent revivePlayerEvent { get; private set; }
 
         public TimegatedEvent riptideSpellEvent { get; private set; }
