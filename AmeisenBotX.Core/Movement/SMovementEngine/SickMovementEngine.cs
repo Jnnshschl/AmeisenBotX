@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             new Selector<MovementBlackboard>
                             (
                                 "IsDirectMovingState",
-                                (b) => IsDirectMovingState() && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < 8.0,
+                                (b) => IsDirectMovingState(),
                                 new Leaf<MovementBlackboard>((b) =>
                                 {
                                     if (Nodes.Count > 0)

@@ -29,7 +29,7 @@
         ConjuredCinnamonRoll = 22895,
         SmokedTalbukVenison = 27854,
         SourGoatCheese = 33443,
-        HoneySpicedLichen = 33452,
+        // HoneySpicedLichen = 33452,
         SaltedVenison = 33454,
     }
 }
