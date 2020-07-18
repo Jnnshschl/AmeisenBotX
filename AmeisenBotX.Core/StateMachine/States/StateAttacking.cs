@@ -26,6 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             WowInterface.MovementEngine.Reset();
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
+            WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat});");
         }
 
         public override void Execute()
@@ -87,6 +88,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // set our normal maxfps
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFps);
+            WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfpsbk\", {Config.MaxFps});");
         }
 
         private double GetMeeleRange()
