@@ -73,8 +73,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
                                     ShouldBeMoving = true;
 
-                                    Vector3 tPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
-                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, tPos, TargetRotation);
+                                    //Vector3 tPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, TargetPosition, TargetRotation);
 
                                     return WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold
                                            ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;

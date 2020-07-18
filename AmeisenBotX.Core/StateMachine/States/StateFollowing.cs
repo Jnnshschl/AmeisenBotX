@@ -185,9 +185,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
             }
 
-            if (!Config.FollowPositionDynamic
-                && ((distance < 4.0 && Math.Abs(zDiff) < 1.0) // we are close to the target and on the same z level
-                || (distance < 32.0 && zDiff < 0.0 && InLos))) // target is below us and in line of sight, just run down
+            if (zDiff < -4.0 && InLos) // target is below us and in line of sight, just run down
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
             }
