@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             WowInterface.CharacterManager.UpdateAll();
-            WowInterface.HookManager.SetMaxFps((byte)Config.MaxFps);
+            WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
             WowInterface.HookManager.EnableClickToMove();
         }
 
