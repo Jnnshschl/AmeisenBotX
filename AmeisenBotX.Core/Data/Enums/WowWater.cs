@@ -18,5 +18,6 @@
         FilteredDraenicWater = 28399,
         ConjuredMountainSpringWater = 30703,
         PungentSealWhey = 33444,
+        HoneymintTea = 33445,
     }
 }

@@ -820,6 +820,7 @@ namespace AmeisenBotX.Core.Hook
         public void SetMaxFps(byte maxFps)
         {
             WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, maxFps);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFpsBk, maxFps);
         }
 
         public void SetRenderState(bool renderingEnabled)

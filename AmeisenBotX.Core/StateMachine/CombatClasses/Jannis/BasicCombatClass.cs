@@ -218,9 +218,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             int[] useableHealingItems = new int[]
             {
                 // potions
-                118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 33447,
+                118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
                 // healthstones
-                5509, 5510, 5511, 5512, 9421, 19013,
+                5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889,
             };
 
             if (WowInterface.ObjectManager.Player.HealthPercentage < HealingItemHealthThreshold)

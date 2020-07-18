@@ -144,13 +144,30 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
 
-            if (WowInterface.CharacterManager.Mounts.Count > 0 && PlayerToFollow != null && PlayerToFollow.IsMounted && !WowInterface.ObjectManager.Player.IsMounted)
+            if (Config.UseMountsInParty
+                && WowInterface.CharacterManager.Mounts.Count > 0
+                && PlayerToFollow != null
+                && PlayerToFollow.IsMounted && !WowInterface.ObjectManager.Player.IsMounted)
             {
                 if (CastMountEvent.Run())
                 {
-                    WowMount mount = WowInterface.CharacterManager.Mounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
-                    WowInterface.MovementEngine.StopMovement();
-                    WowInterface.HookManager.Mount(mount.Index);
+                    List<WowMount> filteredMounts;
+
+                    if (Config.UseOnlySpecificMounts)
+                    {
+                        filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name)).ToList();
+                    }
+                    else
+                    {
+                        filteredMounts = WowInterface.CharacterManager.Mounts;
+                    }
+
+                    if (filteredMounts != null && filteredMounts.Count >= 0)
+                    {
+                        WowMount mount = filteredMounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
+                        WowInterface.MovementEngine.StopMovement();
+                        WowInterface.HookManager.Mount(mount.Index);
+                    }
                 }
 
                 return;

@@ -470,6 +470,72 @@
                     </Grid>
                 </Border>
             </TabItem>
+            <TabItem x:Name="tabitemMounts" Header="Mounts" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Label x:Name="labelFollowing1" Content="Mounting" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                            </Label.BorderBrush>
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxUseMounts" Content="Use Mounts" HorizontalAlignment="Left" Margin="4,34,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181" Checked="CheckboxOnlyFriendsMode_Checked" Unchecked="CheckboxOnlyFriendsMode_Unchecked">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <TextBox x:Name="textboxMounts" HorizontalAlignment="Left" Height="58" Margin="5,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="12" Style="{DynamicResource TextBoxStyleDark}" IsEnabled="False">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label Content="name1,name2,name3" HorizontalAlignment="Left" Margin="5,152,0,0" VerticalAlignment="Top" Padding="0" FontSize="9" FontStyle="Italic">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxUseMountsInParty" Content="Use Mounts in Party" HorizontalAlignment="Left" Margin="4,54,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181" Checked="CheckboxOnlyFriendsMode_Checked" Unchecked="CheckboxOnlyFriendsMode_Unchecked">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <CheckBox x:Name="checkboxOnlySpecificMounts" Content="Only Use Specific Mounts" HorizontalAlignment="Left" Margin="3,74,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181" Checked="CheckboxOnlySpecificMounts_Checked" Unchecked="CheckboxOnlySpecificMounts_Unchecked">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                    </Grid>
+                </Border>
+            </TabItem>
             <TabItem x:Name="tabitemSelling" Header="Selling" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
@@ -1049,7 +1115,7 @@
                         </Label>
                     </Grid>
                 </Border>
-            </TabItem>
+            </TabItem>            
         </TabControl>
     </Grid>
 </Window>

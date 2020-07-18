@@ -50,6 +50,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr CvarMaxFps { get; }
 
+        IntPtr CvarMaxFpsBk { get; }
+
         IntPtr EndSceneOffset { get; }
 
         IntPtr EndSceneOffsetDevice { get; }

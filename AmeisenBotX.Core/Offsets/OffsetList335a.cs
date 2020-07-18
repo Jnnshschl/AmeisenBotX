@@ -50,6 +50,8 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr CvarMaxFps { get; } = new IntPtr(0xC5DF7C);
 
+        public IntPtr CvarMaxFpsBk { get; } = new IntPtr(0xC5DF7C);
+
         public IntPtr EndSceneOffset { get; } = new IntPtr(0xA8); // maybe use 0xAC, clear function, leads to many crashes
 
         public IntPtr EndSceneOffsetDevice { get; } = new IntPtr(0x397C);

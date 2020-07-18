@@ -112,7 +112,7 @@ namespace AmeisenBotX
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
                 Config.Friends = textboxFriends.Text;
                 Config.ItemRepairThreshold = sliderRepair.Value;
-                Config.ItemSellBlacklist = textboxItemSellBlacklist.Text.Split(',');
+                Config.ItemSellBlacklist = textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries);
                 Config.JobEngineMailHeader = textboxMailHeader.Text;
                 Config.JobEngineMailReceiver = textboxMailReceiver.Text;
                 Config.JobEngineMailText = textboxMailText.Text;
@@ -122,6 +122,7 @@ namespace AmeisenBotX
                 Config.MaxFps = (int)Math.Round(sliderMaxFps.Value);
                 Config.MaxFpsCombat = (int)Math.Round(sliderMaxFpsCombat.Value);
                 Config.MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value);
+                Config.Mounts = textboxMounts.Text;
                 Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text);
                 Config.NavmeshServerIp = textboxNavmeshServerIp.Text;
                 Config.OnlyFriendsMode = checkboxOnlyFriendsMode.IsChecked.GetValueOrDefault(false);
@@ -145,6 +146,9 @@ namespace AmeisenBotX
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
                 Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text);
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
+                Config.UseMounts = checkboxUseMounts.IsChecked.GetValueOrDefault(false);
+                Config.UseMountsInParty = checkboxUseMountsInParty.IsChecked.GetValueOrDefault(false);
+                Config.UseOnlySpecificMounts = checkboxOnlySpecificMounts.IsChecked.GetValueOrDefault(false);
                 Config.Username = textboxUsername.Text;
 
                 SaveConfig = true;
@@ -338,6 +342,7 @@ namespace AmeisenBotX
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
             checkboxLooting.IsChecked = Config.LootUnits;
             checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
+            checkboxOnlySpecificMounts.IsChecked = Config.UseOnlySpecificMounts;
             checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
             checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
             checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
@@ -348,6 +353,8 @@ namespace AmeisenBotX
             checkboxSellGreenItems.IsChecked = Config.SellGreenItems;
             checkboxSellPurpleItems.IsChecked = Config.SellPurpleItems;
             checkboxSellWhiteItems.IsChecked = Config.SellWhiteItems;
+            checkboxUseMounts.IsChecked = Config.UseMounts;
+            checkboxUseMountsInParty.IsChecked = Config.UseMountsInParty;
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
             comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
             sliderDrinkUntil.Value = Config.DrinkUntilPercent;
@@ -369,6 +376,7 @@ namespace AmeisenBotX
             textboxMailHeader.Text = Config.JobEngineMailHeader;
             textboxMailReceiver.Text = Config.JobEngineMailReceiver;
             textboxMailText.Text = Config.JobEngineMailText;
+            textboxMounts.Text = Config.Mounts;
             textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
             textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
             textboxPassword.Password = Config.Password;
@@ -638,6 +646,22 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void CheckboxOnlySpecificMounts_Checked(object sender, RoutedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                checkboxOnlySpecificMounts.IsEnabled = true;
+            }
+        }
+
+        private void CheckboxOnlySpecificMounts_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                checkboxOnlySpecificMounts.IsEnabled = false;
+            }
         }
     }
 }

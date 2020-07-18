@@ -22,6 +22,14 @@ namespace AmeisenBotX.Core
 
         public bool AutojoinLfg { get; set; } = true;
 
+        public bool UseMounts { get; set; } = true;
+
+        public bool UseMountsInParty { get; set; } = true;
+
+        public bool UseOnlySpecificMounts { get; set; } = false;
+
+        public string Mounts { get; set; } = string.Empty;
+
         public bool AutoLogin { get; set; } = true;
 
         public bool Autopilot { get; set; } = false;

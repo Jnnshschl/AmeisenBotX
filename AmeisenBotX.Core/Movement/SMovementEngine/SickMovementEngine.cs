@@ -105,27 +105,46 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         }),
                                         new Leaf<MovementBlackboard>("Move", (b) =>
                                         {
-                                            if (MountCheck.Run()
-                                                && wowInterface.CharacterManager.Mounts.Count > 0
-                                                && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 50.0
-                                                && !WowInterface.ObjectManager.Player.IsMounted
-                                                && wowInterface.HookManager.IsOutdoors())
+                                            if (config.UseMounts)
                                             {
-                                                WowMount mount = wowInterface.CharacterManager.Mounts[new Random().Next(0, wowInterface.CharacterManager.Mounts.Count)];
-                                                wowInterface.HookManager.Mount(mount.Index);
-                                                IsCastingMount = true;
-                                                return BehaviorTreeStatus.Ongoing;
-                                            }
-
-                                            if (IsCastingMount)
-                                            {
-                                                if (wowInterface.ObjectManager.Player.IsCasting)
+                                                if (MountCheck.Run()
+                                                    && wowInterface.CharacterManager.Mounts.Count > 0
+                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 50.0
+                                                    && !WowInterface.ObjectManager.Player.IsMounted
+                                                    && wowInterface.HookManager.IsOutdoors())
                                                 {
+                                                    List<WowMount> filteredMounts;
+
+                                                    if (config.UseOnlySpecificMounts)
+                                                    {
+                                                        filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name)).ToList();
+                                                    }
+                                                    else
+                                                    {
+                                                        filteredMounts = WowInterface.CharacterManager.Mounts;
+                                                    }
+
+                                                    if (filteredMounts != null && filteredMounts.Count >= 0)
+                                                    {
+                                                        WowMount mount = filteredMounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
+                                                        WowInterface.MovementEngine.StopMovement();
+                                                        WowInterface.HookManager.Mount(mount.Index);
+                                                    }
+
+                                                    IsCastingMount = true;
                                                     return BehaviorTreeStatus.Ongoing;
                                                 }
-                                                else
+
+                                                if (IsCastingMount)
                                                 {
-                                                    IsCastingMount = false;
+                                                    if (wowInterface.ObjectManager.Player.IsCasting)
+                                                    {
+                                                        return BehaviorTreeStatus.Ongoing;
+                                                    }
+                                                    else
+                                                    {
+                                                        IsCastingMount = false;
+                                                    }
                                                 }
                                             }
 

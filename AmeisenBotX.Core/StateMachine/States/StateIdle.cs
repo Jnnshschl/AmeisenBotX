@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do i need to follow someone
-            if (!Config.Autopilot && IsUnitToFollowThere(out _))
+            if ((!Config.Autopilot || WowInterface.ObjectManager.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
             {
                 StateMachine.SetState(BotState.Following);
                 return;
@@ -212,7 +212,14 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(possibleQuestgiver.Position) > 4.0)
+                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(possibleQuestgiver.Position);
+
+                if (distance > 32.0)
+                {
+                    return;
+                }
+
+                if (distance > 4.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
                     return;

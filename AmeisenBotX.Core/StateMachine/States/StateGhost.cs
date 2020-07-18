@@ -201,7 +201,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (blackboard.NearPortals?.Count > 0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position, 4f));
             }
         }
 
