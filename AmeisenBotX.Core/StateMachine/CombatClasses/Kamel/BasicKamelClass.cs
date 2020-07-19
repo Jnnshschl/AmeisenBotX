@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
             revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
             manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
-            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
 
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));

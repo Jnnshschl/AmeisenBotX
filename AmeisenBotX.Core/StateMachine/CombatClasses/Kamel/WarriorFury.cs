@@ -49,6 +49,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string intimidatingShoutSpell = "Intimidating Shout";
         private const string recklessnessSpell = "Recklessness";
         private const string bloodrageSpell = "Bloodrage";
+        private const string battleShoutSpell = "Battle Shout";
 
         Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
@@ -82,6 +83,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(heroicFurySpell, DateTime.Now);
             spellCoolDown.Add(berserkerRageSpell, DateTime.Now);
             spellCoolDown.Add(deathWishSpell, DateTime.Now);
+            spellCoolDown.Add(battleShoutSpell, DateTime.Now);
         }
 
         public override string Author => "Lukas";
@@ -195,7 +197,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
                     }
-
+                    //hamstring
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
@@ -229,7 +231,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (WowInterface.ObjectManager.Player.HasBuffByName("Victory Rush") && CustomCastSpell(victoryRushSpell))
                     {
                         return;
-                    }
+                    } 
 
                     if (RendEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
                     {
@@ -237,6 +239,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     }
 
                     if (HeroicStrikeEvent.Run() && CustomCastSpell(heroicStrikeSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
                     {
                         return;
                     }

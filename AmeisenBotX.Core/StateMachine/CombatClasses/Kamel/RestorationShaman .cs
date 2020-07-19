@@ -196,18 +196,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             WowInterface.HookManager.StopClickToMoveIfActive();
                             WowInterface.MovementEngine.Reset();
                         }
-                        if (hasTotemItems)
+                        if (totemcastEvent.Run() && hasTotemItems)
                         {
                             if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell)) 
                             {
-                                return;
+                                return;//Use Boolflag combat = true / out of Combat = false
                             }
                             if (totemcastEvent.Run() 
                                 && WowInterface.ObjectManager.Player.ManaPercentage >= 50
                                 && !WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem"))
+                                && !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
+                                && !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
+                                && !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem"))
                             {
                                 if (CustomCastSpell(CalloftheElementsSpell))
                                 {
@@ -236,10 +236,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
-                        {
-                            return;
-                        }
+                        //if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
+                        //{
+                        //    return;
+                        //}
 
                         if (WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(healingWaveSpell))
                         {
