@@ -137,11 +137,6 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Rectangle Margin="0,27,0,0" Height="1" VerticalAlignment="Top">
-            <Rectangle.Fill>
-                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
-            </Rectangle.Fill>
-        </Rectangle>
         <Label x:Name="labelCurrentHealth" Content="0/0" HorizontalAlignment="Left" Margin="8,33,0,0" VerticalAlignment="Top" FontFamily="Unispace" FontSize="11" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="12">
             <Label.Effect>
                 <DropShadowEffect BlurRadius="2" ShadowDepth="0" Direction="0" />
@@ -181,7 +176,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonStartPause" Content="||" Margin="144,0,0,0" BorderThickness="1,0,0,0" Padding="0,0,0,3" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28" Height="27" VerticalAlignment="Top">
+        <Button x:Name="buttonStartPause" Content="||" Margin="119,0,0,0" BorderThickness="1,0,0,0" Padding="0,0,0,3" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonStartPause_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28" Height="28" VerticalAlignment="Top">
             <Button.BorderBrush>
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Button.BorderBrush>
@@ -239,12 +234,12 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonToggleAutopilot" Content="🤖" Margin="172,0,0,0" BorderThickness="1,0,0,0" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleAutopilot_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28">
+        <Button x:Name="buttonToggleAutopilot" Content="🤖" Margin="146,0,0,0" BorderThickness="1,0,0,0" Height="27" VerticalAlignment="Top" FontFamily="Verdana" FontSize="14" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleAutopilot_Click" FontWeight="Bold" SnapsToDevicePixels="True" HorizontalAlignment="Left" Width="28">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
-        <Button x:Name="buttonToggleOverlay" Content="📍" Margin="201,0,0,0" BorderThickness="0,0,1,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleOverlay_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Left" Width="28">
+        <Button x:Name="buttonToggleOverlay" Content="📍" Margin="172,0,0,0" BorderThickness="1,0,0,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleOverlay_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Left" Width="28">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
@@ -272,6 +267,16 @@
         <Rectangle x:Name="wowRect" Margin="201,28,0.333,51.333" />
         <ComboBox x:Name="comboboxStateOverride" Text="None" Margin="6,198,0,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="156" Style="{DynamicResource ComboBoxStyleDark}" FontFamily="Bahnschrift Light" SelectionChanged="ComboboxStateOverride_SelectionChanged" />
         <Button x:Name="buttonStateConfig" Content="⚙️" Margin="167,198,0,0" Click="ButtonStateConfig_Click" BorderThickness="1" Padding="1" Height="24" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" IsEnabled="False" HorizontalAlignment="Left" Width="28">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Rectangle Margin="0,27,0,0" Height="1" VerticalAlignment="Top">
+            <Rectangle.Fill>
+                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+            </Rectangle.Fill>
+        </Rectangle>
+        <Button x:Name="buttonNotification" Content="💡" Margin="201,0,0,0" BorderThickness="0,0,1,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Left" Width="28" Click="ButtonNotification_Click">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

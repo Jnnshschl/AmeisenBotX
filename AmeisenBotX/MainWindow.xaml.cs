@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.States;
@@ -15,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -27,6 +29,7 @@ namespace AmeisenBotX
         public readonly string DataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
 
         private readonly Brush darkForegroundBrush;
+        private readonly Brush darkBackgroundBrush;
         private readonly Brush textAccentBrush;
 
         #region ClassBrushes
@@ -75,9 +78,11 @@ namespace AmeisenBotX
             Config = LoadConfig();
 
             darkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
+            darkBackgroundBrush = new SolidColorBrush((Color)FindResource("DarkBackground"));
             textAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
 
             LabelUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            NotificationEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             RenderState = true;
         }
@@ -105,6 +110,8 @@ namespace AmeisenBotX
         private InfoWindow InfoWindow { get; set; }
 
         private TimegatedEvent LabelUpdateEvent { get; }
+
+        private TimegatedEvent NotificationEvent { get; }
 
         private MapWindow MapWindow { get; set; }
 
@@ -283,10 +290,58 @@ namespace AmeisenBotX
             }
         }
 
+        private SolidColorBrush NoticifactionColor { get; set; }
+
+        private bool NotificationBlinkState { get; set; }
+
+        private long NotificationLastTimestamp { get; set; }
+
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
+                // Notification Symbol
+                // ------------------- >
+                if (NotificationEvent.Run())
+                {
+                    if (!PendingNotification)
+                    {
+                        WowChatMessage message = AmeisenBot.WowInterface.ChatManager.ChatMessages
+                            .Where(e => e.Timestamp > NotificationLastTimestamp)
+                            .FirstOrDefault(e => e.Type == ChatMessageType.WHISPER);
+
+                        if (message != null)
+                        {
+                            PendingNotification = true;
+                            NotificationLastTimestamp = message.Timestamp;
+
+                            if (message.Flags.Contains("GM", StringComparison.OrdinalIgnoreCase))
+                            {
+                                NoticifactionColor = new SolidColorBrush(Colors.Cyan);
+                            }
+                            else
+                            {
+                                NoticifactionColor = new SolidColorBrush(Colors.Magenta);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (NotificationBlinkState)
+                        {
+                            buttonNotification.Foreground = darkBackgroundBrush;
+                            buttonNotification.Background = NoticifactionColor;
+                        }
+                        else
+                        {
+                            buttonNotification.Foreground = new SolidColorBrush(Colors.White);
+                            buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
+                        }
+
+                        NotificationBlinkState = !NotificationBlinkState;
+                    }
+                }
+
                 // Update the main view
                 // -------------------- >
                 WowPlayer player = AmeisenBot.WowInterface.ObjectManager.Player;
@@ -547,6 +602,17 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private bool PendingNotification { get; set; }
+
+        private void ButtonNotification_Click(object sender, RoutedEventArgs e)
+        {
+            PendingNotification = false;
+            NotificationBlinkState = false;
+
+            buttonNotification.Foreground = new SolidColorBrush(Colors.White);
+            buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
         }
     }
 }
