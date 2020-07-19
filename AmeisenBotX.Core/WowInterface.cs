@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Cache;
 using AmeisenBotX.Core.Data.CombatLog;
@@ -33,6 +34,8 @@ namespace AmeisenBotX.Core
         public ICharacterManager CharacterManager { get; set; }
 
         public ICombatClass CombatClass { get; set; }
+
+        public ChatManager ChatManager { get; set; }
 
         public CombatLogParser CombatLogParser { get; set; }
 

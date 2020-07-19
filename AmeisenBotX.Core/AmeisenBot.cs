@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Cache;
@@ -40,6 +41,7 @@ using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.RconClient.Messages;
 using Microsoft.CSharp;
+using Newtonsoft.Json;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -808,6 +810,7 @@ namespace AmeisenBotX.Core
             WowInterface.BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, AccountName, "cache.bin"));
             WowInterface.BotPersonality = new BotPersonality(Path.Combine(BotDataPath, AccountName, "personality.bin"));
 
+            WowInterface.ChatManager = new ChatManager();
             WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
 
             WowInterface.ObjectManager = new ObjectManager(WowInterface);
@@ -898,8 +901,36 @@ namespace AmeisenBotX.Core
             // -------------- >
             WowInterface.EventHookManager.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
+            // Chat Events
+            // ----------- > 
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_ADDON", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.ADDON, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_CHANNEL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.CHANNEL, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_FILTERED", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.FILTERED, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.GUILD, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.GUILD_ACHIEVEMENT, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_IGNORED", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.IGNORED, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_PARTY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_SAY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_WHISPER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_YELL, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_OFFICER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.OFFICER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.PARTY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.PARTY_LEADER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_BOSS_EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_BOSS_WHISPER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_LEADER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_WARNING, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.SAY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SYSTEM", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.SYSTEM, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.TEXT_EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.WHISPER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.YELL, t, a));
+
             // Misc Events
-            // ----------- >
+            // ----------- >            
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }
