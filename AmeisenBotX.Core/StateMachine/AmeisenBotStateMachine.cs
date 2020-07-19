@@ -265,7 +265,7 @@ namespace AmeisenBotX.Core.Statemachine
         internal bool IsAnyPartymemberInCombat()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
-                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.PartyCombatRange)
+                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.SupportRange)
                        .Any(r => r.IsInCombat);
         }
     }

@@ -467,6 +467,17 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
+                        <CheckBox x:Name="checkboxOnlySupportMaster" Content="Only Support Master" HorizontalAlignment="Left" Margin="4,284,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
                     </Grid>
                 </Border>
             </TabItem>

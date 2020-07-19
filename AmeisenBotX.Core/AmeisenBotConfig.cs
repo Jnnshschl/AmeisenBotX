@@ -34,8 +34,6 @@ namespace AmeisenBotX.Core
 
         public bool AutostartWow { get; set; } = true;
 
-        public bool OnlySupportMaster { get; set; } = false;
-
         public bool AutoTalkToNearQuestgivers { get; set; } = true;
 
         public int BagSlotsToGoSell { get; set; } = 4;
@@ -116,7 +114,9 @@ namespace AmeisenBotX.Core
 
         public bool OnlyFriendsMode { get; set; } = false;
 
-        public double PartyCombatRange { get; set; } = 64.0;
+        public bool OnlySupportMaster { get; set; } = false;
+
+        public double SupportRange { get; set; } = 64.0;
 
         public string Password { get; set; } = string.Empty;
 
