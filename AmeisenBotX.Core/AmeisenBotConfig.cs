@@ -34,6 +34,8 @@ namespace AmeisenBotX.Core
 
         public bool AutostartWow { get; set; } = true;
 
+        public bool OnlySupportMaster { get; set; } = false;
+
         public bool AutoTalkToNearQuestgivers { get; set; } = true;
 
         public int BagSlotsToGoSell { get; set; } = 4;

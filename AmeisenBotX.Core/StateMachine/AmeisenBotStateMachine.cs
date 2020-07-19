@@ -186,7 +186,7 @@ namespace AmeisenBotX.Core.Statemachine
                                 if (!WowInterface.Globals.IgnoreCombat
                                     && (WowInterface.ObjectManager.Player.IsInCombat
                                         || WowInterface.Globals.ForceCombat
-                                        || IsAnyPartymemberInCombat()))
+                                        || (Config.OnlySupportMaster && IsAnyPartymemberInCombat())))
                                 {
                                     if (SetState(BotState.Attacking, true))
                                     {

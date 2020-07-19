@@ -126,6 +126,7 @@ namespace AmeisenBotX
                 Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text);
                 Config.NavmeshServerIp = textboxNavmeshServerIp.Text;
                 Config.OnlyFriendsMode = checkboxOnlyFriendsMode.IsChecked.GetValueOrDefault(false);
+                Config.OnlySupportMaster = checkboxOnlySupportMaster.IsChecked.GetValueOrDefault(false);
                 Config.Password = textboxPassword.Password;
                 Config.PathToWowExe = textboxWowPath.Text;
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
@@ -359,6 +360,7 @@ namespace AmeisenBotX
             checkboxLooting.IsChecked = Config.LootUnits;
             checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
             checkboxOnlySpecificMounts.IsChecked = Config.UseOnlySpecificMounts;
+            checkboxOnlySupportMaster.IsChecked = Config.OnlySupportMaster;
             checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
             checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
             checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
