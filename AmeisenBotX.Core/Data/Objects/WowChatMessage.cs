@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public override string ToString()
         {
-            return $"[{Type}]{(Channel.Length > 0 ? $"[{Channel}]" : "")}{(Flags.Length > 0 ? $"[{Flags}]" : "")}{(Language.Length > 0 ? $"[{Language}]" : "")} {Author}: {Message}";
+            return $"[{Type}]{(Channel.Length > 0 ? $"[{Channel}]" : "[]")}{(Flags.Length > 0 ? $"[{Flags}]" : "")}{(Language.Length > 0 ? $"[{Language}]" : "[]")} {Author}: {Message}";
         }
     }
 }

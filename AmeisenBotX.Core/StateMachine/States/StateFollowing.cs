@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateFollowing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(60000));
+            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(20000));
             CastMountEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
         }
 
@@ -142,8 +142,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
-
             if (Config.UseMountsInParty
                 && WowInterface.CharacterManager.Mounts.Count > 0
                 && PlayerToFollow != null
@@ -172,6 +170,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 return;
             }
+
+            double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
 
             if (LosCheckEvent.Run())
             {

@@ -107,9 +107,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         {
                                             if (config.UseMounts)
                                             {
-                                                if (MountCheck.Run()
+                                                if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
+                                                    && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
+                                                    && MountCheck.Run()
                                                     && wowInterface.CharacterManager.Mounts.Count > 0
-                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 50.0
+                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 20.0
                                                     && !WowInterface.ObjectManager.Player.IsMounted
                                                     && wowInterface.HookManager.IsOutdoors())
                                                 {
@@ -126,7 +128,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
                                                     if (filteredMounts != null && filteredMounts.Count >= 0)
                                                     {
-                                                        WowMount mount = filteredMounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
+                                                        WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
                                                         WowInterface.MovementEngine.StopMovement();
                                                         WowInterface.HookManager.Mount(mount.Index);
                                                     }

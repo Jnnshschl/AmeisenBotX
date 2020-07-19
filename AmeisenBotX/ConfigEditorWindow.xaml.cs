@@ -126,6 +126,7 @@ namespace AmeisenBotX
                 Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text);
                 Config.NavmeshServerIp = textboxNavmeshServerIp.Text;
                 Config.OnlyFriendsMode = checkboxOnlyFriendsMode.IsChecked.GetValueOrDefault(false);
+                Config.OnlySupportMaster = checkboxOnlySupportMaster.IsChecked.GetValueOrDefault(false);
                 Config.Password = textboxPassword.Password;
                 Config.PathToWowExe = textboxWowPath.Text;
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
@@ -296,6 +297,22 @@ namespace AmeisenBotX
             }
         }
 
+        private void CheckboxOnlySpecificMounts_Checked(object sender, RoutedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                textboxMounts.IsEnabled = true;
+            }
+        }
+
+        private void CheckboxOnlySpecificMounts_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                textboxMounts.IsEnabled = false;
+            }
+        }
+
         private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (WindowLoaded)
@@ -343,6 +360,7 @@ namespace AmeisenBotX
             checkboxLooting.IsChecked = Config.LootUnits;
             checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
             checkboxOnlySpecificMounts.IsChecked = Config.UseOnlySpecificMounts;
+            checkboxOnlySupportMaster.IsChecked = Config.OnlySupportMaster;
             checkboxPermanentNameCache.IsChecked = Config.PermanentNameCache;
             checkboxPermanentReactionCache.IsChecked = Config.PermanentReactionCache;
             checkboxReleaseSpirit.IsChecked = Config.ReleaseSpirit;
@@ -646,22 +664,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void CheckboxOnlySpecificMounts_Checked(object sender, RoutedEventArgs e)
-        {
-            if (WindowLoaded)
-            {
-                textboxMounts.IsEnabled = true;
-            }
-        }
-
-        private void CheckboxOnlySpecificMounts_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (WindowLoaded)
-            {
-                textboxMounts.IsEnabled = false;
-            }
         }
     }
 }

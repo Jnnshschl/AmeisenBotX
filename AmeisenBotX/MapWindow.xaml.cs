@@ -29,6 +29,7 @@ namespace AmeisenBotX
 
             MeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"));
             EnemyBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFF5D6C"));
+            DeadBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFACACAC"));
             FriendBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF8CBA51"));
             NeutralBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFE277"));
             DefaultEntityBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFB4F2E1"));
@@ -43,7 +44,10 @@ namespace AmeisenBotX
             BlacklistNodePen = new Pen((Color)new ColorConverter().ConvertFromString("#FFFF0000"), 1);
 
             TextBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"));
-            TextFont = new Font("Bahnschrift Light", 6, System.Drawing.FontStyle.Regular);
+            TextFont = new Font("Bahnschrift Light", 7, System.Drawing.FontStyle.Regular);
+
+            SubTextBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#DCDCDC"));
+            SubTextFont = new Font("Bahnschrift Light", 6, System.Drawing.FontStyle.Regular);
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += (List<WowObject> wowObjects) => { NeedToUpdateMap = true; };
 
@@ -55,6 +59,8 @@ namespace AmeisenBotX
         private Brush BlacklistNodeBrush { get; set; }
 
         private Pen BlacklistNodePen { get; set; }
+
+        private Brush DeadBrush { get; set; }
 
         private Brush DefaultEntityBrush { get; set; }
 
@@ -78,6 +84,10 @@ namespace AmeisenBotX
 
         private Pen PathNodePen { get; set; }
 
+        private Brush SubTextBrush { get; set; }
+
+        private Font SubTextFont { get; set; }
+
         private Brush TextBrush { get; set; }
 
         private Font TextFont { get; set; }
@@ -100,7 +110,7 @@ namespace AmeisenBotX
             {
                 List<WowUnit> wowUnits = AmeisenBot.WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().ToList();
 
-                double scale = Math.Min(Math.Max(0.75, Math.Max(mapCanvasBackground.ActualWidth, mapCanvasBackground.ActualHeight) * 0.0048), 4.0);
+                double scale = Math.Min(Math.Max(0.75, Math.Max(mapCanvasBackground.ActualWidth, mapCanvasBackground.ActualHeight) * 0.0048), 2.0);
                 Vector3 playerPosition = AmeisenBot.WowInterface.ObjectManager.Player.Position;
                 double playerRotation = AmeisenBot.WowInterface.ObjectManager.Player.Rotation;
 
@@ -168,15 +178,15 @@ namespace AmeisenBotX
 
                     if (unit.GetType() == typeof(WowPlayer))
                     {
-                        RenderUnit(positionOnMap.X, positionOnMap.Y, unit.Name, selectedBrush, TextBrush, TextFont, graphics, 5);
+                        RenderUnit(positionOnMap.X, positionOnMap.Y, unit.Name, $"<{unit.Level} {unit.Race} {unit.Class}>", selectedBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics, 5);
                     }
                     else
                     {
-                        RenderUnit(positionOnMap.X, positionOnMap.Y, string.Empty, selectedBrush, TextBrush, TextFont, graphics);
+                        RenderUnit(positionOnMap.X, positionOnMap.Y, string.Empty, string.Empty, selectedBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics);
                     }
                 }
 
-                RenderUnit(halfWidth, halfHeight, AmeisenBot.WowInterface.ObjectManager.Player.Name, MeBrush, TextBrush, TextFont, graphics, 5);
+                RenderUnit(halfWidth, halfHeight, AmeisenBot.WowInterface.ObjectManager.Player.Name, "<Me>", MeBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics, 5);
             }
 
             using MemoryStream memory = new MemoryStream();
@@ -241,7 +251,7 @@ namespace AmeisenBotX
             graphics.DrawLine(linePen, x1, y1, x2, y2);
         }
 
-        private void RenderUnit(int width, int height, string name, Brush dotBrush, Brush textBrush, Font textFont, Graphics graphics, int size = 3)
+        private void RenderUnit(int width, int height, string name, string subtext, Brush dotBrush, Brush textBrush, Font textFont, Font subtextFont, Brush subTextBrush, Graphics graphics, int size = 3)
         {
             int offsetStart = (int)Math.Floor(size / 2.0);
             graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
@@ -249,7 +259,10 @@ namespace AmeisenBotX
             if (!string.IsNullOrEmpty(name))
             {
                 float nameWidth = graphics.MeasureString(name, textFont).Width;
-                graphics.DrawString(name, textFont, textBrush, width - (nameWidth / 2F), height + 8);
+                graphics.DrawString(name, textFont, textBrush, width - (nameWidth / 2F), height + 12);
+
+                float subtextWidth = graphics.MeasureString(subtext, subtextFont).Width;
+                graphics.DrawString(subtext, subtextFont, subTextBrush, width - (subtextWidth / 2F), height + 24);
             }
         }
 

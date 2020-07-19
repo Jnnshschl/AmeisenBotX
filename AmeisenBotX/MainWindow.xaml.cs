@@ -28,8 +28,8 @@ namespace AmeisenBotX
     {
         public readonly string DataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
 
-        private readonly Brush darkForegroundBrush;
         private readonly Brush darkBackgroundBrush;
+        private readonly Brush darkForegroundBrush;
         private readonly Brush textAccentBrush;
 
         #region ClassBrushes
@@ -111,11 +111,19 @@ namespace AmeisenBotX
 
         private TimegatedEvent LabelUpdateEvent { get; }
 
-        private TimegatedEvent NotificationEvent { get; }
-
         private MapWindow MapWindow { get; set; }
 
         private bool NeedToClearOverlay { get; set; }
+
+        private SolidColorBrush NoticifactionColor { get; set; }
+
+        private bool NotificationBlinkState { get; set; }
+
+        private TimegatedEvent NotificationEvent { get; }
+
+        private long NotificationLastTimestamp { get; set; }
+
+        private bool PendingNotification { get; set; }
 
         /// <summary>
         /// Used to resize the wow window when autoposition is enabled
@@ -164,6 +172,15 @@ namespace AmeisenBotX
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void ButtonNotification_Click(object sender, RoutedEventArgs e)
+        {
+            PendingNotification = false;
+            NotificationBlinkState = false;
+
+            buttonNotification.Foreground = new SolidColorBrush(Colors.White);
+            buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
         }
 
         private void ButtonSettings_Click(object sender, RoutedEventArgs e)
@@ -289,12 +306,6 @@ namespace AmeisenBotX
                 IsAutoPositionSetup = true;
             }
         }
-
-        private SolidColorBrush NoticifactionColor { get; set; }
-
-        private bool NotificationBlinkState { get; set; }
-
-        private long NotificationLastTimestamp { get; set; }
 
         private void OnObjectUpdateComplete(List<WowObject> wowObjects)
         {
@@ -602,17 +613,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private bool PendingNotification { get; set; }
-
-        private void ButtonNotification_Click(object sender, RoutedEventArgs e)
-        {
-            PendingNotification = false;
-            NotificationBlinkState = false;
-
-            buttonNotification.Foreground = new SolidColorBrush(Colors.White);
-            buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
         }
     }
 }

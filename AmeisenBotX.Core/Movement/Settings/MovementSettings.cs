@@ -16,7 +16,7 @@
 
         public float MaxSteering { get; set; } = 1.0f;
 
-        public float MaxVelocity { get; set; } = 4f;
+        public float MaxVelocity { get; set; } = 8f;
 
         public double MinDistanceMovedJumpUnstuck { get; set; } = 0.0;
 

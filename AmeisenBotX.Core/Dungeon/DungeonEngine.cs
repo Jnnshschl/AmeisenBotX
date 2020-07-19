@@ -174,7 +174,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool AreAllPlayersPresent(double distance)
         {
-            return WowInterface.ObjectManager.Partymembers.Count == 0 
+            return WowInterface.ObjectManager.Partymembers.Count == 0
                 || WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, distance)
                    .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count - 1;
         }
