@@ -1115,7 +1115,7 @@
                         </Label>
                     </Grid>
                 </Border>
-            </TabItem>            
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

@@ -296,6 +296,22 @@ namespace AmeisenBotX
             }
         }
 
+        private void CheckboxOnlySpecificMounts_Checked(object sender, RoutedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                textboxMounts.IsEnabled = true;
+            }
+        }
+
+        private void CheckboxOnlySpecificMounts_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (WindowLoaded)
+            {
+                textboxMounts.IsEnabled = false;
+            }
+        }
+
         private void ComboboxBattlegroundEngine_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (WindowLoaded)
@@ -646,22 +662,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void CheckboxOnlySpecificMounts_Checked(object sender, RoutedEventArgs e)
-        {
-            if (WindowLoaded)
-            {
-                textboxMounts.IsEnabled = true;
-            }
-        }
-
-        private void CheckboxOnlySpecificMounts_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (WindowLoaded)
-            {
-                textboxMounts.IsEnabled = false;
-            }
         }
     }
 }

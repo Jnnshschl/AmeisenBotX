@@ -22,6 +22,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             WowInterface = wowInterface;
 
             ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
 
             JBgBlackboard = new CtfBlackboard(UpdateBattlegroundInfo);
 
@@ -156,6 +157,11 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         private Selector<CtfBlackboard> KillEnemyFlagCarrierSelector { get; }
 
         private WowInterface WowInterface { get; }
+
+        private TimegatedEvent LosCheckEvent { get; }
+
+        private bool InLos { get; set; }
+
 
         public void Execute()
         {
@@ -417,7 +423,29 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > minDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, position);
+                double zDiff = position.Z - WowInterface.ObjectManager.Player.Position.Z;
+
+                if (LosCheckEvent.Run())
+                {
+                    if (WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, position, 2f))
+                    {
+                        InLos = true;
+                    }
+                    else
+                    {
+                        InLos = false;
+                    }
+                }
+
+                if (zDiff < -4.0 && InLos) // target is below us and in line of sight, just run down
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, position);
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, position);
+                }
+
                 return BehaviorTreeStatus.Ongoing;
             }
             else

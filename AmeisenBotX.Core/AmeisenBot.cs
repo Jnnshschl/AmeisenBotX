@@ -41,7 +41,6 @@ using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.RconClient.Messages;
 using Microsoft.CSharp;
-using Newtonsoft.Json;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -54,7 +53,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Timers;
-using System.Windows;
 using Timer = System.Timers.Timer;
 
 namespace AmeisenBotX.Core
@@ -810,7 +808,7 @@ namespace AmeisenBotX.Core
             WowInterface.BotCache = new InMemoryBotCache(Path.Combine(BotDataPath, AccountName, "cache.bin"));
             WowInterface.BotPersonality = new BotPersonality(Path.Combine(BotDataPath, AccountName, "personality.bin"));
 
-            WowInterface.ChatManager = new ChatManager();
+            WowInterface.ChatManager = new ChatManager(Config, Path.Combine(BotDataPath, AccountName));
             WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
 
             WowInterface.ObjectManager = new ObjectManager(WowInterface);
@@ -902,7 +900,7 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
             // Chat Events
-            // ----------- > 
+            // ----------- >
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_ADDON", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.ADDON, t, a));
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_CHANNEL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.CHANNEL, t, a));
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.EMOTE, t, a));
@@ -930,7 +928,7 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.YELL, t, a));
 
             // Misc Events
-            // ----------- >            
+            // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }

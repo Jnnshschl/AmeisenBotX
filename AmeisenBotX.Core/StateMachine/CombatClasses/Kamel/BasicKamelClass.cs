@@ -49,6 +49,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public abstract string Displayname { get; }
 
+        //Resto Shaman
+        public TimegatedEvent earthShieldEvent { get; private set; }
+
         public TimegatedEvent ExecuteEvent { get; private set; }
 
         //Mount check
@@ -70,8 +73,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public TimegatedEvent RendEvent { get; private set; }
 
-        //Resto Shaman
-        public TimegatedEvent earthShieldEvent { get; private set; }
         public TimegatedEvent revivePlayerEvent { get; private set; }
 
         public TimegatedEvent riptideSpellEvent { get; private set; }

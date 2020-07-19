@@ -22,14 +22,6 @@ namespace AmeisenBotX.Core
 
         public bool AutojoinLfg { get; set; } = true;
 
-        public bool UseMounts { get; set; } = true;
-
-        public bool UseMountsInParty { get; set; } = true;
-
-        public bool UseOnlySpecificMounts { get; set; } = false;
-
-        public string Mounts { get; set; } = string.Empty;
-
         public bool AutoLogin { get; set; } = true;
 
         public bool Autopilot { get; set; } = false;
@@ -55,6 +47,8 @@ namespace AmeisenBotX.Core
         public string BuiltInCombatClassName { get; set; } = string.Empty;
 
         public int CharacterSlot { get; set; } = 0;
+
+        public bool ChatProtocols { get; set; } = false;
 
         public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
 
@@ -112,6 +106,8 @@ namespace AmeisenBotX.Core
 
         public int MinFollowDistance { get; set; } = 6;
 
+        public string Mounts { get; set; } = string.Empty;
+
         public int NameshServerPort { get; set; } = 47110;
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
@@ -165,6 +161,12 @@ namespace AmeisenBotX.Core
         public double StateMachineTickMs { get; set; } = 50;
 
         public bool UseBuiltInCombatClass { get; set; } = true;
+
+        public bool UseMounts { get; set; } = true;
+
+        public bool UseMountsInParty { get; set; } = true;
+
+        public bool UseOnlySpecificMounts { get; set; } = false;
 
         public string Username { get; set; } = string.Empty;
 

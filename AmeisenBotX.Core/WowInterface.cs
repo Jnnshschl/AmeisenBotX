@@ -33,9 +33,9 @@ namespace AmeisenBotX.Core
 
         public ICharacterManager CharacterManager { get; set; }
 
-        public ICombatClass CombatClass { get; set; }
-
         public ChatManager ChatManager { get; set; }
+
+        public ICombatClass CombatClass { get; set; }
 
         public CombatLogParser CombatLogParser { get; set; }
 

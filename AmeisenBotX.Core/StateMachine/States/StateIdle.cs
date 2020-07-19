@@ -221,24 +221,25 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > 4.0)
                 {
+                    QuestgiverGossipOpen = false;
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
                     return;
                 }
                 else
                 {
-                    if (!QuestgiverGossipOpen)
+                    if (QuestgiverRightClickEvent.Run())
                     {
-                        if (QuestgiverRightClickEvent.Run())
+                        if (!QuestgiverGossipOpen)
                         {
                             WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
                         }
-                    }
-                    else
-                    {
-                        if (possibleQuestgiver.IsQuestgiver)
+                        else
                         {
-                            // complete/accept quests
-                            WowInterface.HookManager.AutoAcceptQuests();
+                            if (possibleQuestgiver.IsQuestgiver)
+                            {
+                                // complete/accept quests
+                                WowInterface.HookManager.AutoAcceptQuests();
+                            }
                         }
                     }
                 }
