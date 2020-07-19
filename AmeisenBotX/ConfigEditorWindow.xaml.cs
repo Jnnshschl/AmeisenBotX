@@ -652,7 +652,7 @@ namespace AmeisenBotX
         {
             if (WindowLoaded)
             {
-                checkboxOnlySpecificMounts.IsEnabled = true;
+                textboxMounts.IsEnabled = true;
             }
         }
 
@@ -660,7 +660,7 @@ namespace AmeisenBotX
         {
             if (WindowLoaded)
             {
-                checkboxOnlySpecificMounts.IsEnabled = false;
+                textboxMounts.IsEnabled = false;
             }
         }
     }
