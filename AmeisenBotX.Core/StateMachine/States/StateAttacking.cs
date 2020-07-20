@@ -35,6 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Execute()
         {
             if (!WowInterface.ObjectManager.Player.IsInCombat
+                && !StateMachine.IsAnyPartymemberInCombat()
                 && !WowInterface.Globals.ForceCombat
                 && StateMachine.SetState(BotState.Idle))
             {
