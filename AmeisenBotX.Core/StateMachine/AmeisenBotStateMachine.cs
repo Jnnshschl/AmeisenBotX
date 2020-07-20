@@ -187,7 +187,7 @@ namespace AmeisenBotX.Core.Statemachine
                                     && (!Config.IgnoreCombatWhileMounted || !WowInterface.ObjectManager.Player.IsMounted)
                                     && (WowInterface.ObjectManager.Player.IsInCombat
                                         || WowInterface.Globals.ForceCombat
-                                        || (!Config.OnlySupportMaster && IsAnyPartymemberInCombat())))
+                                        || IsAnyPartymemberInCombat()))
                                 {
                                     if (SetState(BotState.Attacking, true))
                                     {
@@ -265,9 +265,16 @@ namespace AmeisenBotX.Core.Statemachine
 
         internal bool IsAnyPartymemberInCombat()
         {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
-                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.SupportRange)
-                       .Any(r => r.IsInCombat);
+            if (!Config.OnlySupportMaster)
+            {
+                return WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
+                           .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.SupportRange)
+                           .Any(r => r.IsInCombat);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
