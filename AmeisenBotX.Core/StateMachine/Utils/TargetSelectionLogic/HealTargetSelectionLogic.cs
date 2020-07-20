@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
             if (NeedToHealSomeone(out possibleTargets))
             {
-                // select the one with lowest hp
+                // order by lowest hp
                 possibleTargets = possibleTargets.OrderBy(e => e.HealthPercentage).ToList();
                 return true;
             }
@@ -40,10 +40,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         private bool NeedToHealSomeone(out List<WowUnit> playersThatNeedHealing)
         {
-            List<WowPlayer> groupPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead
-                && e.Health > 1
-                && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
-                && (!GroupOnly || WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid))).ToList();
+            List<WowPlayer> groupPlayers = WowInterface.ObjectManager.WowObjects
+                .OfType<WowPlayer>()
+                .Where(e => !e.IsDead
+                       && e.Health > 1
+                       && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly
+                       && (!GroupOnly || WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) || WowInterface.ObjectManager.PartyPetGuids.Contains(e.Guid)))
+                .ToList();
 
             groupPlayers.Add(WowInterface.ObjectManager.Player);
 

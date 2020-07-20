@@ -11,6 +11,7 @@ using AmeisenBotX.Memory;
 using AmeisenBotX.Overlay;
 using AmeisenBotX.Overlay.Utils;
 using AmeisenBotX.StateConfig;
+using AmeisenBotX.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -28,47 +29,11 @@ namespace AmeisenBotX
     {
         public readonly string DataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
 
+        private readonly Brush currentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
+        private readonly Brush currentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
         private readonly Brush darkBackgroundBrush;
         private readonly Brush darkForegroundBrush;
         private readonly Brush textAccentBrush;
-
-        #region ClassBrushes
-
-        private readonly Brush currentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
-        private readonly Brush currentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
-
-        private readonly Brush dkPrimaryBrush = new SolidColorBrush(Color.FromRgb(196, 30, 59));
-        private readonly Brush dkSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 209, 255));
-
-        private readonly Brush druidPrimaryBrush = new SolidColorBrush(Color.FromRgb(255, 125, 10));
-        private readonly Brush druidSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush hunterPrimaryBrush = new SolidColorBrush(Color.FromRgb(171, 212, 115));
-        private readonly Brush hunterSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush magePrimaryBrush = new SolidColorBrush(Color.FromRgb(105, 204, 240));
-        private readonly Brush mageSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush paladinPrimaryBrush = new SolidColorBrush(Color.FromRgb(245, 140, 186));
-        private readonly Brush paladinSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush priestPrimaryBrush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-        private readonly Brush priestSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush roguePrimaryBrush = new SolidColorBrush(Color.FromRgb(255, 245, 105));
-        private readonly Brush rogueSecondaryBrush = new SolidColorBrush(Color.FromRgb(255, 255, 0));
-
-        private readonly Brush shamanPrimaryBrush = new SolidColorBrush(Color.FromRgb(0, 112, 222));
-        private readonly Brush shamanSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush warlockPrimaryBrush = new SolidColorBrush(Color.FromRgb(148, 130, 201));
-        private readonly Brush warlockSecondaryBrush = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-        private readonly Brush warriorPrimaryBrush = new SolidColorBrush(Color.FromRgb(199, 156, 110));
-        private readonly Brush warriorSecondaryBrush = new SolidColorBrush(Color.FromRgb(255, 0, 0));
-
-        #endregion ClassBrushes
-
         private Dictionary<BotState, Window> StateConfigWindows;
 
         public MainWindow()
@@ -104,6 +69,8 @@ namespace AmeisenBotX
         public bool RenderState { get; set; }
 
         private AmeisenBot AmeisenBot { get; set; }
+
+        private DevToolsWindow DevToolsWindow { get; set; }
 
         private bool DrawOverlay { get; set; }
 
@@ -169,6 +136,12 @@ namespace AmeisenBotX
             }
         }
 
+        private void ButtonDevTools_Click(object sender, RoutedEventArgs e)
+        {
+            DevToolsWindow ??= new DevToolsWindow(AmeisenBot);
+            DevToolsWindow.Show();
+        }
+
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             Close();
@@ -181,11 +154,6 @@ namespace AmeisenBotX
 
             buttonNotification.Foreground = new SolidColorBrush(Colors.White);
             buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
-        }
-
-        private void ButtonSettings_Click(object sender, RoutedEventArgs e)
-        {
-            new SettingsWindow(Config).ShowDialog();
         }
 
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
@@ -360,43 +328,43 @@ namespace AmeisenBotX
                 switch (player.Class)
                 {
                     case WowClass.Deathknight:
-                        UpdateBotInfo(player.MaxRuneenergy, player.Runeenergy, dkPrimaryBrush, dkSecondaryBrush);
+                        UpdateBotInfo(player.MaxRuneenergy, player.Runeenergy, WowColors.dkPrimaryBrush, WowColors.dkSecondaryBrush);
                         break;
 
                     case WowClass.Druid:
-                        UpdateBotInfo(player.MaxMana, player.Mana, druidPrimaryBrush, druidSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.druidPrimaryBrush, WowColors.druidSecondaryBrush);
                         break;
 
                     case WowClass.Hunter:
-                        UpdateBotInfo(player.MaxMana, player.Mana, hunterPrimaryBrush, hunterSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.hunterPrimaryBrush, WowColors.hunterSecondaryBrush);
                         break;
 
                     case WowClass.Mage:
-                        UpdateBotInfo(player.MaxMana, player.Mana, magePrimaryBrush, mageSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.magePrimaryBrush, WowColors.mageSecondaryBrush);
                         break;
 
                     case WowClass.Paladin:
-                        UpdateBotInfo(player.MaxMana, player.Mana, paladinPrimaryBrush, paladinSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.paladinPrimaryBrush, WowColors.paladinSecondaryBrush);
                         break;
 
                     case WowClass.Priest:
-                        UpdateBotInfo(player.MaxMana, player.Mana, priestPrimaryBrush, priestSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.priestPrimaryBrush, WowColors.priestSecondaryBrush);
                         break;
 
                     case WowClass.Rogue:
-                        UpdateBotInfo(player.MaxEnergy, player.Energy, roguePrimaryBrush, rogueSecondaryBrush);
+                        UpdateBotInfo(player.MaxEnergy, player.Energy, WowColors.roguePrimaryBrush, WowColors.rogueSecondaryBrush);
                         break;
 
                     case WowClass.Shaman:
-                        UpdateBotInfo(player.MaxMana, player.Mana, shamanPrimaryBrush, shamanSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.shamanPrimaryBrush, WowColors.shamanSecondaryBrush);
                         break;
 
                     case WowClass.Warlock:
-                        UpdateBotInfo(player.MaxMana, player.Mana, warlockPrimaryBrush, warlockSecondaryBrush);
+                        UpdateBotInfo(player.MaxMana, player.Mana, WowColors.warlockPrimaryBrush, WowColors.warlockSecondaryBrush);
                         break;
 
                     case WowClass.Warrior:
-                        UpdateBotInfo(player.MaxRage, player.Rage, warriorPrimaryBrush, warriorSecondaryBrush);
+                        UpdateBotInfo(player.MaxRage, player.Rage, WowColors.warriorPrimaryBrush, WowColors.warriorSecondaryBrush);
                         break;
                 }
 
@@ -556,6 +524,7 @@ namespace AmeisenBotX
             Overlay?.Exit();
             InfoWindow?.Close();
             MapWindow?.Close();
+            DevToolsWindow?.Close();
 
             if (StateConfigWindows != null)
             {

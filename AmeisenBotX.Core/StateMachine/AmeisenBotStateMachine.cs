@@ -174,16 +174,17 @@ namespace AmeisenBotX.Core.Statemachine
                             if (CurrentState.Key != BotState.Dead
                                 && CurrentState.Key != BotState.Ghost)
                             {
-                                if (Config.AutoDodgeAoeSpells
-                                    && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
-                                    && SetState(BotState.InsideAoeDamage, true))
-                                {
-                                    OnStateOverride(CurrentState.Key);
-                                    return;
-                                }
+                                // if (Config.AutoDodgeAoeSpells
+                                //     && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
+                                //     && SetState(BotState.InsideAoeDamage, true))
+                                // {
+                                //     OnStateOverride(CurrentState.Key);
+                                //     return;
+                                // }
 
                                 // TODO: handle combat bug, sometimes when combat ends, the player stays in combat for no reason
                                 if (!WowInterface.Globals.IgnoreCombat
+                                    && (!Config.IgnoreCombatWhileMounted || !WowInterface.ObjectManager.Player.IsMounted)
                                     && (WowInterface.ObjectManager.Player.IsInCombat
                                         || WowInterface.Globals.ForceCombat
                                         || (Config.OnlySupportMaster && IsAnyPartymemberInCombat())))

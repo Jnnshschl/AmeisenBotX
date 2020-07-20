@@ -16,6 +16,8 @@ namespace AmeisenBotX.Core
 
         public bool AutoDisableRender { get; set; } = false;
 
+        public bool AutoDismount { get; set; } = true;
+
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
         public bool AutojoinBg { get; set; } = true;
@@ -62,7 +64,7 @@ namespace AmeisenBotX.Core
 
         public bool EnabledRconServer { get; set; } = false;
 
-        public double EventPullMs { get; set; } = 1000;
+        public double EventPullMs { get; set; } = 500;
 
         public bool FollowGroupLeader { get; set; } = false;
 
@@ -80,6 +82,8 @@ namespace AmeisenBotX.Core
 
         public string GrindingProfile { get; set; } = string.Empty;
 
+        public bool IgnoreCombatWhileMounted { get; set; } = true;
+
         public double ItemRepairThreshold { get; set; } = 25;
 
         public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
@@ -96,11 +100,33 @@ namespace AmeisenBotX.Core
 
         public double LootUnitsRadius { get; set; } = 20.0;
 
+        public bool MapRenderCurrentPath { get; set; } = true;
+
+        public bool MapRenderDungeonNodes { get; set; } = false;
+
+        public bool MapRenderHerbs { get; set; } = true;
+
+        public bool MapRenderMe { get; set; } = true;
+
+        public bool MapRenderOres { get; set; } = true;
+
+        public bool MapRenderPlayerExtra { get; set; } = false;
+
+        public bool MapRenderPlayerNames { get; set; } = true;
+
+        public bool MapRenderPlayers { get; set; } = true;
+
+        public bool MapRenderUnitExtra { get; set; } = false;
+
+        public bool MapRenderUnitNames { get; set; } = false;
+
+        public bool MapRenderUnits { get; set; } = true;
+
         public int MaxFollowDistance { get; set; } = 100;
 
-        public int MaxFps { get; set; } = 20;
+        public int MaxFps { get; set; } = 60;
 
-        public int MaxFpsCombat { get; set; } = 30;
+        public int MaxFpsCombat { get; set; } = 60;
 
         public double MerchantNpcSearchRadius { get; set; } = 50;
 
@@ -115,8 +141,6 @@ namespace AmeisenBotX.Core
         public bool OnlyFriendsMode { get; set; } = false;
 
         public bool OnlySupportMaster { get; set; } = false;
-
-        public double SupportRange { get; set; } = 64.0;
 
         public string Password { get; set; } = string.Empty;
 
@@ -160,7 +184,9 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public double StateMachineTickMs { get; set; } = 50;
+        public double StateMachineTickMs { get; set; } = 10;
+
+        public double SupportRange { get; set; } = 64.0;
 
         public bool UseBuiltInCombatClass { get; set; } = true;
 

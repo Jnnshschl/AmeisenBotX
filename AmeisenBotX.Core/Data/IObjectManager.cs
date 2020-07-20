@@ -33,6 +33,10 @@ namespace AmeisenBotX.Core.Data
 
         List<WowUnit> Partymembers { get; }
 
+        List<ulong> PartyPetGuids { get; }
+
+        List<WowUnit> PartyPets { get; }
+
         WowUnit Pet { get; }
 
         ulong PetGuid { get; }

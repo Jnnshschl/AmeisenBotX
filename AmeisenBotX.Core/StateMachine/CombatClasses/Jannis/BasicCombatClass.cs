@@ -14,6 +14,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
@@ -212,8 +213,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            // Race abilities, items, etc.
-            // --------------------------- >
+            // Useable items, potions, etc.
+            // ---------------------------- >
 
             int[] useableHealingItems = new int[]
             {
@@ -248,6 +249,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     WowInterface.HookManager.UseItemByName(healthstone.Name);
                 }
             }
+
+            // Race abilities
+            // -------------- >
 
             if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
                 && WowInterface.ObjectManager.Player.HealthPercentage < 50
@@ -308,8 +312,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
-                    CastSpell(spellName, isTargetMyself);
-                    return true;
+                    return CastSpell(spellName, isTargetMyself);
                 }
             }
 
@@ -329,12 +332,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return false;
                 }
 
+                Dictionary<RuneType, int> runes = WowInterface.HookManager.GetRunesReady();
+
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsRuneenergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Runeenergy)
-                    && (!needsBloodrune || (WowInterface.HookManager.IsRuneReady(0) || WowInterface.HookManager.IsRuneReady(1)))
-                    && (!needsFrostrune || (WowInterface.HookManager.IsRuneReady(2) || WowInterface.HookManager.IsRuneReady(3)))
-                    && (!needsUnholyrune || (WowInterface.HookManager.IsRuneReady(4) || WowInterface.HookManager.IsRuneReady(5)))
+                    && (!needsBloodrune || (runes[RuneType.Blood] > 0 || runes[RuneType.Death] > 0))
+                    && (!needsFrostrune || (runes[RuneType.Frost] > 0 || runes[RuneType.Death] > 0))
+                    && (!needsUnholyrune || (runes[RuneType.Unholy] > 0 || runes[RuneType.Death] > 0))
                     && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
@@ -348,8 +353,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
-                    CastSpell(spellName, isTargetMyself);
-                    return true;
+                    return CastSpell(spellName, isTargetMyself);
                 }
             }
 
@@ -386,8 +390,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
-                    CastSpell(spellName, isTargetMyself);
-                    return true;
+                    return CastSpell(spellName, isTargetMyself);
                 }
             }
 
@@ -423,6 +426,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
                     && (target == null || IsInRange(Spells[spellName], target)))
                 {
+                    if (!WowInterface.ObjectManager.Player.HasBuffByName(requiredStance)
+                        && Spells[requiredStance] != null
+                        && !CooldownManager.IsSpellOnCooldown(requiredStance))
+                    {
+                        CastSpell(requiredStance, true);
+                    }
+
                     HandleTargetSelection(guid, forceTargetSwitch, isTargetMyself);
 
                     if (Spells[spellName].CastTime > 0)
@@ -434,13 +444,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
-                    if (!WowInterface.ObjectManager.Player.HasBuffByName(requiredStance))
-                    {
-                        CastSpell(requiredStance, true);
-                    }
-
-                    CastSpell(spellName, isTargetMyself);
-                    return true;
+                    return CastSpell(spellName, isTargetMyself);
                 }
             }
 
@@ -510,19 +514,38 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool CastSpell(string spellName, bool castOnSelf)
         {
-            bool result = false;
-            int cooldown = WowInterface.HookManager.GetSpellCooldown(spellName);
-
-            if (cooldown == 0)
+            // spits out stuff like this "1;300" (1 or 0 wether the cast was successful or not);(the cooldown in ms)
+            if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
             {
-                AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
-                cooldown = WowInterface.HookManager.CastAndGetSpellCooldown(spellName, castOnSelf);
-                result = true;
+                if (result.Length < 3) return false;
+
+                string[] parts = result.Split(";", StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length < 2) return false;
+
+                // replace comma with dot in the cooldown
+                if (parts[1].Contains(',')) parts[1] = parts[1].Replace(',', '.');
+
+                if (int.TryParse(parts[0], out int castSuccessful)
+                    && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))
+                {
+                    cooldown = Math.Max(Math.Round(cooldown), 0);
+                    CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
+
+                    if (castSuccessful == 1)
+                    {
+                        AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+                        return true;
+                    }
+                    else
+                    {
+                        AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"", LogLevel.Verbose);
+                        return false;
+                    }
+                }
             }
 
-            AmeisenLogger.Instance.Log("CombatClass", $"[{Displayname}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"", LogLevel.Verbose);
-            CooldownManager.SetSpellCooldown(spellName, cooldown);
-            return result;
+            return false;
         }
 
         private void CheckFacing(WowUnit target)

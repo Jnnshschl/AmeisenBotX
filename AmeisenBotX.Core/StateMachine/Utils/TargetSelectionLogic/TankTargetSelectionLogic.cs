@@ -34,7 +34,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 && WowInterface.ObjectManager.TargetGuid != 0
                 && !WowInterface.ObjectManager.Target.IsDead && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
                 && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly;
+                && (WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly
+                    || WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer));
 
             if (keepCurrentTarget)
             {
@@ -44,20 +45,21 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // get all enemies targeting our group
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
-                .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100)
+                .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => e.IsInCombat);
 
             if (enemies.Count() > 0)
             {
-                // filter out enemies already attacking me
+                // filter out enemies already attacking me (keep players for pvp)
                 IEnumerable<WowUnit> enemiesNotTargetingMe = enemies
-                    .Where(e => e.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
+                    .Where(e => e.GetType() == typeof(WowPlayer) || e.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
 
                 if (enemiesNotTargetingMe.Count() > 0)
                 {
                     IEnumerable<WowUnit> targetUnits = enemiesNotTargetingMe
                         .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
-                        .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+                        .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
+                        .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
                     if (targetUnits != null && targetUnits.Count() > 0)
                     {
@@ -71,7 +73,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     // target the unit with the most health, likely to be the boss
                     IEnumerable<WowUnit> targetUnits = enemies
                         .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
-                        .OrderBy(e => e.Health);
+                        .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
+                        .ThenBy(e => e.Health);
 
                     if (targetUnits != null && targetUnits.Count() > 0)
                     {
@@ -83,6 +86,19 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
                 possibleTargets = enemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther).ToList();
                 return true;
+            }
+            else
+            {
+                // get near players and attack them
+                enemies = WowInterface.ObjectManager
+                    .GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 100.0)
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+
+                if (enemies.Count() > 0)
+                {
+                    possibleTargets = enemies.ToList();
+                    return true;
+                }
             }
 
             possibleTargets = null;

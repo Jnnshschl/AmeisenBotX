@@ -53,7 +53,10 @@ namespace AmeisenBotX.Core.Common
         {
             if (TcpClient == null)
             {
-                TcpClient = new TcpClient();
+                TcpClient = new TcpClient()
+                {
+                    NoDelay = true
+                };
             }
             else if (!TcpClient.Connected)
             {
@@ -66,7 +69,10 @@ namespace AmeisenBotX.Core.Common
                 }
                 catch (ObjectDisposedException)
                 {
-                    TcpClient = new TcpClient();
+                    TcpClient = new TcpClient()
+                    {
+                        NoDelay = true
+                    };
                 }
                 catch
                 {

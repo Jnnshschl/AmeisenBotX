@@ -9,9 +9,8 @@ namespace AmeisenBotX.Core.Character.Comparators
         public BasicArmorComparator(List<ArmorType> armorTypeBlacklist = null, List<WeaponType> weaponTypeBlacklist = null) : base(armorTypeBlacklist, weaponTypeBlacklist)
         {
             GearscoreFactory = new GearscoreFactory(new Dictionary<string, double>() {
-                { "ITEM_MOD_STAMINA_SHORT", 3 },
-                { "ITEM_MOD_STRENGHT_SHORT", 2 },
-                { "RESISTANCE0_NAME", 1 },
+                { "ITEM_MOD_STAMINA_SHORT", 2.0 },
+                { "RESISTANCE0_NAME", 2.5 },
             });
         }
     }

@@ -25,15 +25,19 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
-            WowInterface.XMemory.Write(WowInterface.OffsetList.CvarMaxFps, Config.MaxFpsCombat);
-            WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFpsCombat});SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat})");
+
+            if (Config.MaxFps != Config.MaxFpsCombat)
+            {
+                WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFpsCombat});SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat})");
+            }
         }
 
         public override void Execute()
         {
             if (!WowInterface.ObjectManager.Player.IsInCombat
-                && !StateMachine.IsAnyPartymemberInCombat()
+                && (Config.OnlySupportMaster || !StateMachine.IsAnyPartymemberInCombat())
                 && !WowInterface.Globals.ForceCombat
+                && (!Config.IgnoreCombatWhileMounted || WowInterface.ObjectManager.Player.IsMounted)
                 && StateMachine.SetState(BotState.Idle))
             {
                 return;
@@ -86,8 +90,11 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             WowInterface.MovementEngine.Reset();
 
-            // set our normal maxfps
-            WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+            if (Config.MaxFps != Config.MaxFpsCombat)
+            {
+                // set our normal maxfps
+                WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+            }
         }
 
         private double GetMeeleRange()

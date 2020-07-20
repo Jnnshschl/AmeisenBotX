@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="InfoWindow" Height="480" Width="500" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="/icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Unloaded="Window_Unloaded" IsVisibleChanged="Window_IsVisibleChanged">
+        Title="InfoWindow" Height="316" Width="400" MinHeight="316" MinWidth="400" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="/icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Unloaded="Window_Unloaded" IsVisibleChanged="Window_IsVisibleChanged">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -18,7 +18,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBackgroundAlt}" />
             </Rectangle.Fill>
         </Rectangle>
-        <Image x:Name="mapCanvas" Margin="0,28,0.333,0.333" />
+        <Image x:Name="mapCanvas" Margin="1,29,-1,-1" />
         <Button x:Name="buttonExit" Margin="0,0,0.333,0" Click="ButtonExit_Click" BorderThickness="1,0,0,0" Padding="1,1,1,3" HorizontalAlignment="Right" Width="28" Height="27" VerticalAlignment="Top" FontFamily="Verdana" Content="❌" Style="{DynamicResource ButtonStyleDark}" FontSize="16">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -40,5 +40,157 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
+        <Slider x:Name="sliderZoom" HorizontalAlignment="Left" Margin="180,4,0,0" VerticalAlignment="Top" Width="180" Maximum="5" Minimum="0.75" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderZoom_ValueChanged" FontFamily="Bahnschrift Light" />
+        <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,32,0,4">
+            <Grid>
+                <Grid.Background>
+                    <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                </Grid.Background>
+                <Grid x:Name="gridSidemenu" Margin="0,0,14,0" Width="146">
+                    <CheckBox x:Name="checkboxRenderPlayers" Content="Render Players" HorizontalAlignment="Left" Margin="3,4,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderPlayers_Checked" Unchecked="CheckboxRenderPlayers_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderPlayerNames" Content="Names" HorizontalAlignment="Left" Margin="19,24,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="127" VerticalContentAlignment="Bottom" Checked="CheckboxRenderPlayerNames_Checked" Unchecked="CheckboxRenderPlayerNames_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderPlayerInfo" Content="Info" HorizontalAlignment="Left" Margin="19,44,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="127" VerticalContentAlignment="Bottom" Checked="CheckboxRenderPlayerInfo_Checked" Unchecked="CheckboxRenderPlayerInfo_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderUnitNames" Content="Names" HorizontalAlignment="Left" Margin="19,92,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="127" VerticalContentAlignment="Bottom" Checked="CheckboxRenderUnitNames_Checked" Unchecked="CheckboxRenderUnitNames_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderUnits" Content="Render Units" HorizontalAlignment="Left" Margin="3,72,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderUnits_Checked" Unchecked="CheckboxRenderUnits_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderUnitInfo" Content="Info" HorizontalAlignment="Left" Margin="19,112,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="127" VerticalContentAlignment="Bottom" Checked="CheckboxRenderUnitInfo_Checked" Unchecked="CheckboxRenderUnitInfo_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderHerbs" Content="Herbs" HorizontalAlignment="Left" Margin="3,160,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderHerbs_Checked" Unchecked="CheckboxRenderHerbs_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderOres" Content="Ores" HorizontalAlignment="Left" Margin="3,140,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderOres_Checked" Unchecked="CheckboxRenderOres_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderMe" Content="Me" HorizontalAlignment="Left" Margin="3,188,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderMe_Checked" Unchecked="CheckboxRenderMe_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderCurrentPath" Content="Current Path" HorizontalAlignment="Left" Margin="3,208,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderCurrentPath_Checked" Unchecked="CheckboxRenderCurrentPath_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                    <CheckBox x:Name="checkboxRenderDungeonPath" Content="Dungeon Path" HorizontalAlignment="Left" Margin="3,228,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="143" VerticalContentAlignment="Bottom" Checked="CheckboxRenderDungeonPath_Checked" Unchecked="CheckboxRenderDungeonPath_Unchecked">
+                        <CheckBox.Foreground>
+                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                        </CheckBox.Foreground>
+                        <CheckBox.BorderBrush>
+                            <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                        </CheckBox.BorderBrush>
+                        <CheckBox.Background>
+                            <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                        </CheckBox.Background>
+                    </CheckBox>
+                </Grid>
+                <Button x:Name="buttonSidebar" Content="||" BorderThickness="0,1,1,1" Padding="1,1,2,5" HorizontalAlignment="Right" Width="14" Height="278" VerticalAlignment="Stretch" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="10" Click="ButtonSidebar_Click">
+                    <Button.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                    </Button.BorderBrush>
+                    <Button.Foreground>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Button.Foreground>
+                    <Button.Background>
+                        <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                    </Button.Background>
+                </Button>
+                <Rectangle HorizontalAlignment="Stretch" Height="1" Margin="0,277,0,0" VerticalAlignment="Top">
+                    <Rectangle.Stroke>
+                        <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                    </Rectangle.Stroke>
+                </Rectangle>
+                <Rectangle Height="1" Margin="0,0,0,0" VerticalAlignment="Top">
+                    <Rectangle.Stroke>
+                        <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                    </Rectangle.Stroke>
+                </Rectangle>
+            </Grid>
+        </WrapPanel>
     </Grid>
 </Window>

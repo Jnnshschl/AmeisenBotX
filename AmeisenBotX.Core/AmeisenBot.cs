@@ -393,7 +393,7 @@ namespace AmeisenBotX.Core
                 || !File.Exists(Config.CustomCombatClassFile))
             {
                 AmeisenLogger.Instance.Log("AmeisenBot", "Loading default CombatClass", LogLevel.Warning);
-                LoadDefaultCombatClass();
+                WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
             }
             else
             {
@@ -407,16 +407,9 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.Instance.Log("AmeisenBot", $"Compiling custom CombatClass failed:\n{e}", LogLevel.Warning);
                     OnCombatClassCompilationStatusChanged?.Invoke(false, e.GetType().Name, e.ToString());
-                    LoadDefaultCombatClass();
+                    WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
                 }
             }
-        }
-
-        private void LoadDefaultCombatClass()
-        {
-            AmeisenLogger.Instance.Log("AmeisenBot", $"Loading built in CombatClass: {Config.BuiltInCombatClassName}", LogLevel.Verbose);
-            WowInterface.CombatClass = CombatClasses
-                .FirstOrDefault(e => e.ToString().Equals(Config.BuiltInCombatClassName, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadPosition(Rect rect, IntPtr windowHandle)
@@ -544,7 +537,7 @@ namespace AmeisenBotX.Core
 
                 if (item.Name == "0" || item.ItemLink == "0")
                 {
-                    // get the item id ad try again
+                    // get the item id and try again
                     itemJson = WowInterface.HookManager.GetItemJsonByNameOrLink(
                         itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                         .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);

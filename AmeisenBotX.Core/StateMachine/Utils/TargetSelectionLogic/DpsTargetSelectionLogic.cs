@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
         }
 
-        public bool SelectTarget(out List<WowUnit> targetToSelect)
+        public bool SelectTarget(out List<WowUnit> possibleTargets)
         {
             if (WowInterface.ObjectManager.TargetGuid != 0
                 && (WowInterface.ObjectManager.Target.IsDead
@@ -40,15 +40,16 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
                 if (nearPriorityEnemies != null && nearPriorityEnemies.Count() > 0)
                 {
-                    targetToSelect = nearPriorityEnemies.ToList();
+                    possibleTargets = nearPriorityEnemies.ToList();
                     return true;
                 }
             }
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
-                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100)
+                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.IsInCombat)
-                .OrderByDescending(e => e.IsFleeing)
+                .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
+                .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
                 .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
             // get enemies targeting my partymembers
@@ -59,25 +60,24 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             // be friendly there but is attackable
             if (enemies.Count() > 0)
             {
-                targetToSelect = new List<WowUnit>() { enemies.FirstOrDefault() };
+                possibleTargets = new List<WowUnit>() { enemies.FirstOrDefault() };
 
-                if (targetToSelect != null)
+                if (possibleTargets != null)
                 {
                     return true;
                 }
             }
 
             // get enemies tagged by me or no one, or players
-            enemies = nearEnemies
-                .Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
+            enemies = nearEnemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
 
             if (enemies.Count() > 0)
             {
-                targetToSelect = enemies.ToList();
+                possibleTargets = enemies.ToList();
                 return true;
             }
 
-            targetToSelect = null;
+            possibleTargets = null;
             return false;
         }
     }

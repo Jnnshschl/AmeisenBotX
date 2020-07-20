@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -59,10 +61,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => (SwitchStance(defensiveStanceSpell) && CastSpellIfPossible(shieldBashSpell, x.Guid, true)) },
+                { 0, (x) => (CastSpellIfPossibleWarrior(shieldBashSpell, defensiveStanceSpell, x.Guid, true)) },
                 { 1, (x) => CastSpellIfPossible(concussionBlowSpell, x.Guid, true) }
             };
+
+            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
+
+        private TimegatedEvent HeroicStrikeEvent { get; }
 
         public override string Author => "Jannis";
 
@@ -72,7 +78,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "FCFS based CombatClass for the Protection Warrior spec.";
+        public override string Description => "Leveling ready CombatClass for the Protection Warrior spec. For Dungeons and Questing";
 
         public override string Displayname => "Warrior Protection";
 
@@ -82,11 +88,30 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES, WeaponType.MISCELLANEOUS, WeaponType.STAVES, WeaponType.POLEARMS, WeaponType.THROWN, WeaponType.WANDS, WeaponType.DAGGERS });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new List<ArmorType>()
+        {
+             ArmorType.IDOLS,
+             ArmorType.LIBRAMS,
+             ArmorType.SIGILS,
+             ArmorType.TOTEMS,
+             ArmorType.CLOTH,
+             ArmorType.LEATHER
+        }, new List<WeaponType>()
+        {
+            WeaponType.TWOHANDED_SWORDS,
+            WeaponType.TWOHANDED_MACES,
+            WeaponType.TWOHANDED_AXES,
+            WeaponType.MISCELLANEOUS,
+            WeaponType.STAVES,
+            WeaponType.POLEARMS,
+            WeaponType.THROWN,
+            WeaponType.WANDS,
+            WeaponType.DAGGERS
+        });
 
         public override CombatClassRole Role => CombatClassRole.Tank;
 
-        public override string Version => "1.0";
+        public override string Version => "1.1";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -153,37 +178,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count;
 
-                    if (nearEnemies > 2
+                    if ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
                         && CastSpellIfPossibleWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid)
+                    if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                        && (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10).Count() > 3
+                            && CastSpellIfPossible(challengingShoutSpell, 0, true))
+                        || CastSpellIfPossibleWarrior(tauntSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid))
                     {
-                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10).Count() > 3 && CastSpellIfPossible(challengingShoutSpell, 0, true))
-                            || CastSpellIfPossibleWarrior(tauntSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 25)
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 25
+                        && CastSpellIfPossibleWarrior(retaliationSpell, battleStanceSpell, 0))
                     {
-                        if (CastSpellIfPossibleWarrior(retaliationSpell, battleStanceSpell, 0))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40)
-                    {
-                        if (CastSpellIfPossible(lastStandSpell, 0)
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                        && (CastSpellIfPossible(lastStandSpell, 0)
                             || CastSpellIfPossibleWarrior(shieldWallSpell, defensiveStanceSpell, 0)
-                            || CastSpellIfPossibleWarrior(shieldBlockSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
-                        {
-                            return;
-                        }
+                            || CastSpellIfPossibleWarrior(shieldBlockSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                    {
+                        return;
                     }
 
                     if (WowInterface.ObjectManager.Target.IsCasting
@@ -193,20 +213,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage > 50)
+                    if (WowInterface.ObjectManager.Player.HealthPercentage > 50
+                        && CastSpellIfPossible(bloodrageSpell, 0))
                     {
-                        if (CastSpellIfPossible(bloodrageSpell, 0))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
                     if (CastSpellIfPossible(berserkerRageSpell, 0, true)
                         || CastSpellIfPossible(shieldSlamSpell, WowInterface.ObjectManager.Target.Guid, true)
                         || CastSpellIfPossible(mockingBlowSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (nearEnemies > 2 && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        || ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
+                            && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(devastateSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || CastSpellIfPossibleWarrior(revengeSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        || CastSpellIfPossibleWarrior(revengeSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || (WowInterface.ObjectManager.Player.Rage > 40
+                            && HeroicStrikeEvent.Run()
+                            && CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.Target.Guid, true)))
                     {
                         return;
                     }
@@ -220,23 +242,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
-        }
-
-        private bool SwitchStance(string stanceName)
-        {
-            if (WowInterface.ObjectManager.Player.HasBuffByName(stanceName))
-            {
-                return true;
-            }
-            else
-            {
-                if (CastSpellIfPossible(stanceName, WowInterface.ObjectManager.PlayerGuid))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
