@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
 
-                if (Config.ReleaseSpirit)
+                if (Config.ReleaseSpirit || WowInterface.ObjectManager.MapId.IsBattlegroundMap())
                 {
                     WowInterface.HookManager.ReleaseSpirit();
                 }
