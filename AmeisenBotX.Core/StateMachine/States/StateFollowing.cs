@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    WowPlayer player = SkipIfOutOfRangewowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow));
+                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow));
 
                     if (player != null)
                     {
