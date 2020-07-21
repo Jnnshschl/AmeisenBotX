@@ -21,6 +21,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             RepairCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
             QuestgiverCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
             QuestgiverRightClickEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
+            RefreshCharacterEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public bool FirstStart { get; set; }
@@ -41,6 +42,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent RepairCheckEvent { get; }
 
+        private TimegatedEvent RefreshCharacterEvent { get; }
+
         public override void Enter()
         {
             if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
@@ -56,11 +59,15 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnGossipShow);
                 WowInterface.EventHookManager.Subscribe("GOSSIP_CLOSED", OnGossipClosed);
+
+                WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+                WowInterface.HookManager.EnableClickToMove();
             }
 
-            WowInterface.CharacterManager.UpdateAll();
-            WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-            WowInterface.HookManager.EnableClickToMove();
+            if (RefreshCharacterEvent.Run())
+            {
+                WowInterface.CharacterManager.UpdateAll();
+            }
         }
 
         public override void Execute()
