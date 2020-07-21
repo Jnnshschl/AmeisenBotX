@@ -71,6 +71,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(whirlwindSpell, DateTime.Now);
             spellCoolDown.Add(disarmSpell, DateTime.Now);
             spellCoolDown.Add(rendSpell, DateTime.Now);
+            spellCoolDown.Add(hamstringSpell, DateTime.Now);
             spellCoolDown.Add(victoryRushSpell, DateTime.Now);
             spellCoolDown.Add(chargeSpell, DateTime.Now);
             //Buffs||Defensive||Enrage
@@ -179,7 +180,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
+                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) && !WowInterface.ObjectManager.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
                     }
@@ -197,7 +198,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
                     }
-                    //hamstring
+
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
@@ -243,7 +244,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
+                    if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
                     {
                         return;
                     }
@@ -275,8 +276,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 80)
-                .Where(e => e.IsInCombat) // To Do e.IsTaggedByMe
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 40)
+                .Where(e => e.IsInCombat && !e.IsNotAttackable) // To Do e.IsTaggedByMe
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault();
 
