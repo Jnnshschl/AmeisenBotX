@@ -87,6 +87,118 @@
                     </Grid>
                 </Border>
             </TabItem>
+            <TabItem x:Name="tabitemLua" Header="LUA" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <TextBox x:Name="textboxLuaCode" HorizontalAlignment="Right" Margin="0,35,10,0" TextWrapping="Wrap" Width="640" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}" Height="126" VerticalAlignment="Top">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Label x:Name="labelUsername_Copy" Content="LUA to Execute:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="10,10,0,0" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxLuaResult" IsReadOnly="True" HorizontalAlignment="Center" Margin="0,180,0,10" TextWrapping="Wrap" Width="640" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Button x:Name="buttonLuaExecute" Content="ExecuteLuaAndRead" Margin="490,10,0,0" BorderThickness="1,1,1,1" Padding="1" HorizontalAlignment="Left" Width="160" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="11" Click="ButtonLuaExecute_Click">
+                            <Button.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </Button.Background>
+                            <Button.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Button.Foreground>
+                        </Button>
+                        <Button x:Name="buttonLuaExecute_Copy" Content="LuaDoString" Margin="325,10,0,0" BorderThickness="1,1,1,1" Padding="1" HorizontalAlignment="Left" Width="160" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="11" Click="ButtonLuaExecute_Copy_Click">
+                            <Button.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </Button.Background>
+                            <Button.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Button.Foreground>
+                        </Button>
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem x:Name="tabitemEvent" Header="Events" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Label x:Name="labelUsername_Copy1" Content="Event Name:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="10,10,0,0" Width="80" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <TextBox x:Name="textboxEventResult" IsReadOnly="True" HorizontalAlignment="Center" Margin="0,39,0,10" TextWrapping="Wrap" Width="640" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Button x:Name="buttonEventUnsubscribe" Content="Unsubscribe" Margin="450,10,0,0" BorderThickness="1,1,1,1" Padding="1" HorizontalAlignment="Left" Width="120" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="11" Click="ButtonEventUnsubscribe_Click">
+                            <Button.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </Button.Background>
+                            <Button.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Button.Foreground>
+                        </Button>
+                        <Button x:Name="buttonEventSubscribe" Content="Subscribe" Margin="325,10,0,0" BorderThickness="1,1,1,1" Padding="1" HorizontalAlignment="Left" Width="120" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="11" Click="ButtonEventSubscribe_Click">
+                            <Button.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </Button.Background>
+                            <Button.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Button.Foreground>
+                        </Button>
+                        <TextBox x:Name="textboxEventName" HorizontalAlignment="Left" Height="18" Margin="95,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="225" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" TabIndex="0" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <Button x:Name="buttonEventClear" Content="Clear" Margin="575,10,0,0" BorderThickness="1,1,1,1" Padding="1" HorizontalAlignment="Left" Width="75" Height="20" VerticalAlignment="Top" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontSize="11" Click="ButtonEventClear_Click">
+                            <Button.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </Button.Background>
+                            <Button.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Button.Foreground>
+                        </Button>
+                    </Grid>
+                </Border>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>
