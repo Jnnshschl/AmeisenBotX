@@ -46,7 +46,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 new Selector<GhostBlackboard>
                 (
                     (b) => WowInterface.ObjectManager.MapId.IsBattlegroundMap(),
-                    new Leaf<GhostBlackboard>((b) => BehaviorTreeStatus.Ongoing),
+                    new Leaf<GhostBlackboard>((b) =>
+                    {
+                        WowInterface.MovementEngine.StopMovement();
+                        return BehaviorTreeStatus.Ongoing;
+                    }),
                     new Selector<GhostBlackboard>
                     (
                         (b) => StateMachine.LastDiedMap.IsDungeonMap(),

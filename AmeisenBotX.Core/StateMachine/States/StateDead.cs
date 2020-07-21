@@ -13,6 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
+            WowInterface.MovementEngine.StopMovement();
         }
 
         public override void Execute()

@@ -70,16 +70,16 @@ namespace AmeisenBotX.Core.Jobs
                 //.ToList();
 
                 List<WowGameobject> MailBoxNode = WowInterface.ObjectManager.WowObjects
-                .OfType<WowGameobject>() // only WowGameobjects
-                .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId) // make sure the displayid is a MailBox
-                        && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 15m to me
-                .ToList(); // convert to list
+                    .OfType<WowGameobject>() // only WowGameobjects
+                    .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId) // make sure the displayid is a MailBox
+                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 15m to me
+                    .ToList(); // convert to list
 
                 if (MailBoxNode.Count > 0)
                 {
                     WowGameobject nearNode = MailBoxNode
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position)) // order by distance to me
-                    .First(); // get the closest node to me
+                        .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position)) // order by distance to me
+                        .First(); // get the closest node to me
 
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
 
@@ -93,9 +93,10 @@ namespace AmeisenBotX.Core.Jobs
                         if (MailSentEvent.Run())
                         {
                             WowInterface.HookManager.WowObjectOnRightClick(nearNode);
-
-                            return;
+                            WowInterface.HookManager.LuaDoString("MailFrameTab2:Click();for b = 0, 4 do for s = 0, 22 do l = GetContainerItemLink(b, s) if l and l:find('Copper Ore')then UseContainerItem(b, s) end end end");
+                            WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
                         }
+
                         return;
                     }
                     else
