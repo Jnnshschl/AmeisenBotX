@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +86,46 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void ButtonLuaExecute_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.HookManager.LuaDoString(textboxLuaCode.Text);
+        }
+
+        private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
+        {
+            if (AmeisenBot.WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
+            {
+                textboxLuaResult.Text = result;
+            }
+            else
+            {
+                textboxLuaResult.Text = "Failed to execute LUA...";
+            }
+        }
+
+        private void ButtonEventSubscribe_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.EventHookManager.Subscribe(textboxEventName.Text, OnWowEventFired);
+        }
+
+        private void OnWowEventFired(long timestamp, List<string> args)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                textboxEventResult.Text += $"{timestamp} - {JsonConvert.SerializeObject(args)}\n";
+            });
+        }
+
+        private void ButtonEventUnsubscribe_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.EventHookManager.Unsubscribe(textboxEventName.Text, OnWowEventFired);
+        }
+
+        private void ButtonEventClear_Click(object sender, RoutedEventArgs e)
+        {
+            textboxEventResult.Text = string.Empty;
         }
     }
 }
