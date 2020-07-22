@@ -128,6 +128,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr RaidLeader { get; }
 
+        IntPtr RenderFlags { get; }
+
         IntPtr Runes { get; }
 
         IntPtr RuneType { get; }

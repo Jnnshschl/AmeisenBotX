@@ -46,7 +46,37 @@
             </Rectangle.Fill>
         </Rectangle>
         <TabControl x:Name="tabcontrolMain" Margin="10,33,10,10" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0" SelectionChanged="TabcontrolMain_SelectionChanged">
-            <TabItem x:Name="tabitemCacheNames" Header="Cache - Names" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCachePoi" Header="POI" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <ListView x:Name="listviewCachePoi" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem x:Name="tabitemCacheOre" Header="Ore" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <ListView x:Name="listviewCacheOre" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem x:Name="tabitemCacheHerb" Header="Herb" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <ListView x:Name="listviewCacheHerb" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem x:Name="tabitemCacheNames" Header="Names" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -57,7 +87,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheReactions" Header="Cache - Reactions" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheReactions" Header="Reactions" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -67,7 +97,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheSpellnames" Header="Cache - Spellnames" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheSpellnames" Header="Spellnames" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />

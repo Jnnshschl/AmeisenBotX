@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
+    [Serializable]
     public class WowGameobject : WowObject
     {
         public WowGameobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)

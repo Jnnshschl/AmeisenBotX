@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,11 +26,6 @@ namespace AmeisenBotX.Core.Grinding
 
         public void Execute()
         {
-            if (Profile == null)
-            {
-                return;
-            }
-
             if (GrindingSpot == null)
             {
                 GrindingSpot = SelectNextGrindingSpot();
@@ -83,6 +79,17 @@ namespace AmeisenBotX.Core.Grinding
 
         private GrindingSpot SelectNextGrindingSpot()
         {
+            if (Profile == null)
+            {
+                Vector3 pos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, 100f);
+
+                return new GrindingSpot()
+                {
+                    Position = pos != default ? pos : WowInterface.ObjectManager.Player.Position,
+                    Radius = 100.0
+                };
+            }
+
             if (Profile.RandomizeSpots)
             {
                 Random rnd = new Random();

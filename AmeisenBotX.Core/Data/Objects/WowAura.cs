@@ -1,8 +1,10 @@
 ﻿using AmeisenBotX.Core.Data.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
+using System;
 
 namespace AmeisenBotX.Core.Data.Objects
 {
+    [Serializable]
     public class WowAura
     {
         public WowAura(RawWowAura rawWowAura, string name)

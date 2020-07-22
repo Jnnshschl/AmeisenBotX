@@ -1,4 +1,6 @@
-﻿using AmeisenBotX.Core.Data.CombatLog.Objects;
+﻿using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Objects;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
@@ -26,7 +28,13 @@ namespace AmeisenBotX.Core.Data.Cache
 
         public string FilePath { get; }
 
+        public Dictionary<(MapId, HerbNodes), List<Vector3>> HerbNodes { get; private set; }
+
         public Dictionary<ulong, string> NameCache { get; private set; }
+
+        public Dictionary<(MapId, OreNodes), List<Vector3>> OreNodes { get; private set; }
+
+        public Dictionary<(MapId, PoiType), List<Vector3>> PointsOfInterest { get; private set; }
 
         public Dictionary<(int, int), WowUnitReaction> ReactionCache { get; private set; }
 
@@ -48,11 +56,47 @@ namespace AmeisenBotX.Core.Data.Cache
             }
         }
 
+        public void CacheHerb(MapId mapId, HerbNodes displayId, Vector3 position)
+        {
+            if (!HerbNodes.ContainsKey((mapId, displayId)))
+            {
+                HerbNodes.Add((mapId, displayId), new List<Vector3>() { position });
+            }
+            else if (!HerbNodes[(mapId, displayId)].Any(e => e == position))
+            {
+                HerbNodes[(mapId, displayId)].Add(position);
+            }
+        }
+
         public void CacheName(ulong guid, string name)
         {
             if (!NameCache.ContainsKey(guid))
             {
                 NameCache.Add(guid, name);
+            }
+        }
+
+        public void CacheOre(MapId mapId, OreNodes displayId, Vector3 position)
+        {
+            if (!OreNodes.ContainsKey((mapId, displayId)))
+            {
+                OreNodes.Add((mapId, displayId), new List<Vector3>() { position });
+            }
+            else if (!OreNodes[(mapId, displayId)].Any(e => e == position))
+            {
+                OreNodes[(mapId, displayId)].Add(position);
+            }
+        }
+
+        public void CachePoi(MapId mapId, PoiType poiType, Vector3 position)
+        {
+            if (!PointsOfInterest.ContainsKey((mapId, poiType)))
+            {
+                PointsOfInterest.Add((mapId, poiType), new List<Vector3>() { position });
+            }
+            else if (!PointsOfInterest[(mapId, poiType)].Any(e => e == position))
+            {
+                PointsOfInterest[(mapId, poiType)].Add(position);
             }
         }
 
@@ -79,6 +123,9 @@ namespace AmeisenBotX.Core.Data.Cache
             SpellNameCache = new Dictionary<int, string>();
             CombatLogEntries = new List<BasicCombatLogEntry>();
             BlacklistNodes = new Dictionary<int, List<Vector3>>();
+            PointsOfInterest = new Dictionary<(MapId, PoiType), List<Vector3>>();
+            OreNodes = new Dictionary<(MapId, OreNodes), List<Vector3>>();
+            HerbNodes = new Dictionary<(MapId, HerbNodes), List<Vector3>>();
         }
 
         public void Load()
@@ -105,6 +152,9 @@ namespace AmeisenBotX.Core.Data.Cache
                         SpellNameCache = loadedCache.SpellNameCache ?? new Dictionary<int, string>();
                         CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
                         BlacklistNodes = loadedCache.BlacklistNodes ?? new Dictionary<int, List<Vector3>>();
+                        PointsOfInterest = loadedCache.PointsOfInterest ?? new Dictionary<(MapId, PoiType), List<Vector3>>();
+                        OreNodes = loadedCache.OreNodes ?? new Dictionary<(MapId, OreNodes), List<Vector3>>();
+                        HerbNodes = loadedCache.HerbNodes ?? new Dictionary<(MapId, HerbNodes), List<Vector3>>();
                     }
                     else
                     {
@@ -138,6 +188,18 @@ namespace AmeisenBotX.Core.Data.Cache
             if (BlacklistNodes.ContainsKey(mapId))
             {
                 nodes = BlacklistNodes[mapId].Where(e => e.GetDistance(position) < maxRadius).ToList();
+                return true;
+            }
+
+            nodes = new List<Vector3>();
+            return false;
+        }
+
+        public bool TryGetPointsOfInterest(MapId mapId, PoiType poiType, Vector3 position, double maxRadius, out List<Vector3> nodes)
+        {
+            if (PointsOfInterest.ContainsKey((mapId, poiType)))
+            {
+                nodes = PointsOfInterest[(mapId, poiType)].Where(e => e.GetDistance(position) < maxRadius).ToList();
                 return true;
             }
 

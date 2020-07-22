@@ -40,9 +40,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent QuestgiverRightClickEvent { get; }
 
-        private TimegatedEvent RepairCheckEvent { get; }
-
         private TimegatedEvent RefreshCharacterEvent { get; }
+
+        private TimegatedEvent RepairCheckEvent { get; }
 
         public override void Enter()
         {
@@ -74,6 +74,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             // do we need to loot stuff
             if (LootCheckEvent.Run()
+                && WowInterface.CharacterManager.Inventory.FreeBagSlots > 0
                 && StateMachine.GetNearLootableUnits().Count() > 0)
             {
                 StateMachine.SetState(BotState.Looting);
@@ -145,6 +146,12 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // do buffing etc...
             WowInterface.CombatClass?.OutOfCombatExecute();
+
+            if (StateMachine.StateOverride != BotState.Idle
+                && StateMachine.StateOverride != BotState.None)
+            {
+                StateMachine.SetState(StateMachine.StateOverride);
+            }
         }
 
         public override void Exit()

@@ -37,18 +37,31 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     AmeisenLogger.Instance.Log("StartWow", "Waiting for input idle");
                     WowInterface.WowProcess.WaitForInputIdle();
-                    return;
                 }
 
                 if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited)
                 {
-                    AmeisenLogger.Instance.Log("StartWow", "Attaching XMemory");
-                    WowInterface.XMemory.Attach(WowInterface.WowProcess);
+                    AmeisenLogger.Instance.Log("StartWow", $"Attaching XMemory to {WowInterface.WowProcess.ProcessName}:{WowInterface.WowProcess.Id}");
 
-                    OnWoWStarted?.Invoke();
+                    try
+                    {
+                        if (WowInterface.XMemory.Attach(WowInterface.WowProcess))
+                        {
+                            try
+                            {
+                                OnWoWStarted?.Invoke();
+                            }
+                            catch (Exception ex) { AmeisenLogger.Instance.Log("StartWow", $"Error at OnWoWStarted:\n{ex}"); }
 
-                    StateMachine.SetState(BotState.Login);
-                    return;
+                            AmeisenLogger.Instance.Log("StartWow", $"Switching to login state...");
+                            StateMachine.SetState(BotState.Login);
+                        }
+                        else
+                        {
+                            AmeisenLogger.Instance.Log("StartWow", $"Attaching XMemory failed...");
+                        }
+                    }
+                    catch (Exception e) { AmeisenLogger.Instance.Log("StartWow", $"Attaching XMemory failed:\n{e}"); }
                 }
             }
         }

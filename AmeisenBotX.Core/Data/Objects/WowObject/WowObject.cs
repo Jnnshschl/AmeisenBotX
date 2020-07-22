@@ -5,6 +5,7 @@ using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
+    [Serializable]
     public class WowObject
     {
         // W.I.P

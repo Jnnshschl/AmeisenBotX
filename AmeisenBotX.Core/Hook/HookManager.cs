@@ -62,6 +62,8 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsWoWHooked => WowInterface.XMemory.Read(EndsceneAddress, out byte c) && c == 0xE9;
 
+        public int OldRenderFlags { get; private set; }
+
         public byte[] OriginalEndsceneBytes { get; private set; }
 
         public bool OverrideWorldCheck { get; private set; }
@@ -825,6 +827,11 @@ namespace AmeisenBotX.Core.Hook
 
         public void SetRenderState(bool renderingEnabled)
         {
+            if (renderingEnabled)
+            {
+                LuaDoString("WorldFrame:Show();UIParent:Show()");
+            }
+
             WowInterface.XMemory.SuspendMainThread();
 
             if (renderingEnabled)
@@ -832,15 +839,29 @@ namespace AmeisenBotX.Core.Hook
                 EnableFunction(WowInterface.OffsetList.FunctionWorldRender);
                 EnableFunction(WowInterface.OffsetList.FunctionWorldRenderWorld);
                 EnableFunction(WowInterface.OffsetList.FunctionWorldFrame);
+
+                WowInterface.XMemory.Write(WowInterface.OffsetList.RenderFlags, OldRenderFlags);
             }
             else
             {
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.RenderFlags, out int renderFlags))
+                {
+                    OldRenderFlags = renderFlags;
+                }
+
                 DisableFunction(WowInterface.OffsetList.FunctionWorldRender);
                 DisableFunction(WowInterface.OffsetList.FunctionWorldRenderWorld);
                 DisableFunction(WowInterface.OffsetList.FunctionWorldFrame);
+
+                WowInterface.XMemory.Write(WowInterface.OffsetList.RenderFlags, 0);
             }
 
             WowInterface.XMemory.ResumeMainThread();
+
+            if (!renderingEnabled)
+            {
+                LuaDoString("WorldFrame:Hide();UIParent:Hide()");
+            }
         }
 
         public bool SetupEndsceneHook()

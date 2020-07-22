@@ -128,6 +128,8 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr RaidLeader { get; } = new IntPtr(0xBD1990);
 
+        public IntPtr RenderFlags { get; } = new IntPtr(0xCD774C);
+
         public IntPtr Runes { get; } = new IntPtr(0xC24388);
 
         public IntPtr RuneType { get; } = new IntPtr(0xC24304);

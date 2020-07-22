@@ -199,12 +199,12 @@ namespace AmeisenBotX.Core.Statemachine
                         }
                     }
 
-                    if (CurrentState.Key == BotState.Idle
-                        && CurrentState.Key != StateOverride
-                        && StateOverride != BotState.None)
-                    {
-                        SetState(StateOverride);
-                    }
+                    // if (CurrentState.Key == BotState.Idle
+                    //     && CurrentState.Key != StateOverride
+                    //     && StateOverride != BotState.None)
+                    // {
+                    //     SetState(StateOverride);
+                    // }
 
                     // auto disable rendering when not in focus
                     if (Config.AutoDisableRender && RenderSwitchEvent.Run())

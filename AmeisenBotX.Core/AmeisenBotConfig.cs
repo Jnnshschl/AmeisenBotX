@@ -48,6 +48,8 @@ namespace AmeisenBotX.Core
 
         public string BuiltInCombatClassName { get; set; } = string.Empty;
 
+        public bool CachePointsOfInterest { get; set; } = true;
+
         public int CharacterSlot { get; set; } = 0;
 
         public bool ChatProtocols { get; set; } = false;

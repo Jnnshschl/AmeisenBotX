@@ -1,4 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -16,12 +18,14 @@ namespace AmeisenBotX.Core.Data
         private List<ulong> partymemberGuids;
         private List<WowObject> wowObjects;
 
-        public ObjectManager(WowInterface wowInterface)
+        public ObjectManager(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
+            Config = config;
 
             wowObjects = new List<WowObject>();
             PartymemberGuids = new List<ulong>();
+            PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
@@ -80,7 +84,11 @@ namespace AmeisenBotX.Core.Data
 
         public string ZoneSubName { get; private set; }
 
+        private AmeisenBotConfig Config { get; }
+
         private IntPtr CurrentObjectManager { get; set; }
+
+        private TimegatedEvent PoiCacheEvent { get; }
 
         private WowInterface WowInterface { get; }
 
@@ -316,7 +324,44 @@ namespace AmeisenBotX.Core.Data
                 PartyPetGuids = PartyPets.Select(e => e.Guid).ToList();
             }
 
+            if (Config.CachePointsOfInterest && PoiCacheEvent.Run())
+            {
+                CachePois();
+            }
+
             OnObjectUpdateComplete?.Invoke(WowObjects);
+        }
+
+        private void CachePois()
+        {
+            IEnumerable<WowObject> wowObjects = WowObjects.ToList();
+            IEnumerable<WowGameobject> wowGameobjects = wowObjects.OfType<WowGameobject>();
+            IEnumerable<WowUnit> wowUnits = wowObjects.OfType<WowUnit>();
+
+            foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(OreNodes), e.DisplayId)))
+            {
+                WowInterface.BotCache.CacheOre(MapId, (OreNodes)gameobject.DisplayId, gameobject.Position);
+            }
+
+            foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(HerbNodes), e.DisplayId)))
+            {
+                WowInterface.BotCache.CacheHerb(MapId, (HerbNodes)gameobject.DisplayId, gameobject.Position);
+            }
+
+            foreach (WowGameobject gameobject in wowGameobjects.Where(e => e.GameobjectType == WowGameobjectType.Mailbox))
+            {
+                WowInterface.BotCache.CachePoi(MapId, PoiType.Mailbox, gameobject.Position);
+            }
+
+            foreach (WowUnit unit in wowUnits.Where(e => e.IsVendor))
+            {
+                WowInterface.BotCache.CachePoi(MapId, PoiType.Vendor, unit.Position);
+            }
+
+            foreach (WowUnit unit in wowUnits.Where(e => e.IsRepairVendor))
+            {
+                WowInterface.BotCache.CachePoi(MapId, PoiType.Repair, unit.Position);
+            }
         }
 
         private ulong ReadLeaderGuid()

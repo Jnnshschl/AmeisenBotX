@@ -1,8 +1,10 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowUnit
     {

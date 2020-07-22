@@ -1,6 +1,9 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,9 +24,41 @@ namespace AmeisenBotX
 
         public AmeisenBot AmeisenBot { get; private set; }
 
+        private void ButtonEventClear_Click(object sender, RoutedEventArgs e)
+        {
+            textboxEventResult.Text = string.Empty;
+        }
+
+        private void ButtonEventSubscribe_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.EventHookManager.Subscribe(textboxEventName.Text, OnWowEventFired);
+        }
+
+        private void ButtonEventUnsubscribe_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.EventHookManager.Unsubscribe(textboxEventName.Text, OnWowEventFired);
+        }
+
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             Hide();
+        }
+
+        private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
+        {
+            if (AmeisenBot.WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
+            {
+                textboxLuaResult.Text = result;
+            }
+            else
+            {
+                textboxLuaResult.Text = "Failed to execute LUA...";
+            }
+        }
+
+        private void ButtonLuaExecute_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.WowInterface.HookManager.LuaDoString(textboxLuaCode.Text);
         }
 
         private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
@@ -31,9 +66,44 @@ namespace AmeisenBotX
             RefreshActiveData();
         }
 
+        private void OnWowEventFired(long timestamp, List<string> args)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                textboxEventResult.Text += $"{timestamp} - {JsonConvert.SerializeObject(args)}\n";
+            });
+        }
+
         private void RefreshActiveData()
         {
             if (tabcontrolMain.SelectedIndex == 0)
+            {
+                listviewCachePoi.Items.Clear();
+
+                foreach (KeyValuePair<(MapId, PoiType), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.PointsOfInterest.OrderBy(e => e.Key.Item2).ThenBy(e => e.Key.Item1))
+                {
+                    listviewCachePoi.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
+                }
+            }
+            if (tabcontrolMain.SelectedIndex == 1)
+            {
+                listviewCacheOre.Items.Clear();
+
+                foreach (KeyValuePair<(MapId, OreNodes), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.OreNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                {
+                    listviewCacheOre.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
+                }
+            }
+            else if(tabcontrolMain.SelectedIndex == 2)
+            {
+                listviewCacheHerb.Items.Clear();
+
+                foreach (KeyValuePair<(MapId, HerbNodes), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.HerbNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                {
+                    listviewCacheHerb.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
+                }
+            }
+            else if (tabcontrolMain.SelectedIndex == 3)
             {
                 listviewCacheNames.Items.Clear();
 
@@ -42,7 +112,7 @@ namespace AmeisenBotX
                     listviewCacheNames.Items.Add(x);
                 }
             }
-            else if (tabcontrolMain.SelectedIndex == 1)
+            else if (tabcontrolMain.SelectedIndex == 4)
             {
                 listviewCacheReactions.Items.Clear();
 
@@ -51,7 +121,7 @@ namespace AmeisenBotX
                     listviewCacheReactions.Items.Add(x);
                 }
             }
-            else if (tabcontrolMain.SelectedIndex == 2)
+            else if (tabcontrolMain.SelectedIndex == 5)
             {
                 listviewCacheSpellnames.Items.Clear();
 
@@ -60,7 +130,7 @@ namespace AmeisenBotX
                     listviewCacheSpellnames.Items.Add(x);
                 }
             }
-            else if (tabcontrolMain.SelectedIndex == 3)
+            else if (tabcontrolMain.SelectedIndex == 6)
             {
                 listviewNearWowObjects.Items.Clear();
 
@@ -86,46 +156,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void ButtonLuaExecute_Copy_Click(object sender, RoutedEventArgs e)
-        {
-            AmeisenBot.WowInterface.HookManager.LuaDoString(textboxLuaCode.Text);
-        }
-
-        private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
-        {
-            if (AmeisenBot.WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
-            {
-                textboxLuaResult.Text = result;
-            }
-            else
-            {
-                textboxLuaResult.Text = "Failed to execute LUA...";
-            }
-        }
-
-        private void ButtonEventSubscribe_Click(object sender, RoutedEventArgs e)
-        {
-            AmeisenBot.WowInterface.EventHookManager.Subscribe(textboxEventName.Text, OnWowEventFired);
-        }
-
-        private void OnWowEventFired(long timestamp, List<string> args)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                textboxEventResult.Text += $"{timestamp} - {JsonConvert.SerializeObject(args)}\n";
-            });
-        }
-
-        private void ButtonEventUnsubscribe_Click(object sender, RoutedEventArgs e)
-        {
-            AmeisenBot.WowInterface.EventHookManager.Unsubscribe(textboxEventName.Text, OnWowEventFired);
-        }
-
-        private void ButtonEventClear_Click(object sender, RoutedEventArgs e)
-        {
-            textboxEventResult.Text = string.Empty;
         }
     }
 }
