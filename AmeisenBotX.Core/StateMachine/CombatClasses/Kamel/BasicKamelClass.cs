@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             //FuryWarrior
             TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(3));
+            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             RendEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
             ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 

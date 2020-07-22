@@ -254,15 +254,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             {
                 return;
             }
-            //else if (!WowInterface.ObjectManager.Target.HasBuffByName("Water Shiel") && CustomCastSpell(LightningShieldSpell))
-            //{
-            //
-            //}
         }
 
         private void StartHeal()
         {
-            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 99 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
+            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 98 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
 
             if (partyMemberToHeal.Count > 0)
             {
@@ -330,17 +326,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         //    return;
                         //}
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(healingWaveSpell))
+                        if (WowInterface.ObjectManager.Target.HealthPercentage <= 50 && CustomCastSpell(healingWaveSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 75 && CustomCastSpell(lesserHealingWaveSpell))
+                        if (WowInterface.ObjectManager.Target.HealthPercentage <= 75 && CustomCastSpell(lesserHealingWaveSpell))
                         {
                             return;
                         }
 
-                        if (earthShieldEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Earth Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
+                        if (earthShieldEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Earth Shield") && !WowInterface.ObjectManager.Target.HasBuffByName("Water Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
                         {
                             return;
                         }

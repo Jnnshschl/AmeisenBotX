@@ -281,8 +281,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault();
 
-                //WowUnit nearTargetPartymember = WowInterface.ObjectManager.Partymembers.Where(e => e.IsInCombat).FirstOrDefault();
-                //OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).
                 if (nearTarget != null)
                 {
                     WowInterface.HookManager.TargetGuid(nearTarget.Guid);
@@ -292,10 +290,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
                 }
-                //else if (nearTargetPartymember != null) 
-                //{
-                //    WowInterface.HookManager.TargetGuid(nearTargetPartymember.Guid);
-                //}
             }
         }
         private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
