@@ -15,6 +15,8 @@ namespace AmeisenBotX.Core.Chat
             ChatMessages = new List<WowChatMessage>();
         }
 
+        public event Action<WowChatMessage> OnNewChatMessage;
+
         public List<WowChatMessage> ChatMessages { get; }
 
         public string ProtocolName(string type) => $"{DataPath}\\\\chatprotocols\\\\chat-{type}-{DateTime.Now:dd-M-yyyy}.txt";
@@ -69,6 +71,8 @@ namespace AmeisenBotX.Core.Chat
                 }
                 catch { }
             }
+
+            OnNewChatMessage?.Invoke(chatMessage);
 
             return true;
         }
