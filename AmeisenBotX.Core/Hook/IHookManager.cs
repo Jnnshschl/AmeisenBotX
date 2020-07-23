@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core.Hook
 
         Dictionary<RuneType, int> GetRunesReady();
 
-        List<string> GetSkills();
+        Dictionary<string, (int, int)> GetSkills();
 
         /// <summary>
         /// Get the spells cooldown left in milliseconds

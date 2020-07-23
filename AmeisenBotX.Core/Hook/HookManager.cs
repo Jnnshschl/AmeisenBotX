@@ -452,18 +452,32 @@ namespace AmeisenBotX.Core.Hook
             return runes;
         }
 
-        public List<string> GetSkills()
+        public Dictionary<string, (int, int)> GetSkills()
         {
+            Dictionary<string, (int, int)> parsedSkills = new Dictionary<string, (int, int)>();
+
             try
             {
-                if (ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\"; \"end end end"), out string result))
+                if (ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"), out string result))
                 {
-                    return new List<string>(result.Split(';')).Select(s => s.Trim()).ToList();
+                    List<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim()).ToList();
+
+                    foreach (string x in skills)
+                    {
+                        string[] splittedParts = x.Split(":");
+                        string[] maxSkill = splittedParts[1].Split("/");
+
+                        if (int.TryParse(maxSkill[0], out int currentSkillLevel)
+                            && int.TryParse(maxSkill[1], out int maxSkillLevel))
+                        {
+                            parsedSkills.Add(splittedParts[0], (currentSkillLevel, maxSkillLevel));
+                        }
+                    }
                 }
             }
             catch { }
 
-            return new List<string>();
+            return parsedSkills;
         }
 
         public int GetSpellCooldown(string spellName)

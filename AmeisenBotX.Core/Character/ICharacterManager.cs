@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Character
 
         List<WowMount> Mounts { get; }
 
-        List<string> Skills { get; }
+        Dictionary<string, (int, int)> Skills { get; }
 
         SpellBook SpellBook { get; }
 

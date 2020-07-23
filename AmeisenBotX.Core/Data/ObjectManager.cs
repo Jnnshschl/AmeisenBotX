@@ -605,6 +605,22 @@ namespace AmeisenBotX.Core.Data
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
                 player.Name = ReadPlayerName(player.Guid);
 
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, 0xA30), out uint swimFlags))
+                {
+                    player.IsSwimming = (swimFlags & 0x200000) != 0;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, 0xD8), out IntPtr flyFlagsPointer)
+                    && WowInterface.XMemory.Read(IntPtr.Add(flyFlagsPointer, 0x44), out uint flyFlags))
+                {
+                    player.IsFlying = (flyFlags & 0x2000000) != 0;
+                }
+
+                if (WowInterface.XMemory.Read(new IntPtr(0xBd0BA0), out int breathTimer))
+                {
+                    player.IsUnderwater = breathTimer > 0;
+                }
+
                 if (player.Guid == PlayerGuid)
                 {
                     if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))

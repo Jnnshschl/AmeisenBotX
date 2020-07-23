@@ -19,5 +19,7 @@ namespace AmeisenBotX.Core.Movement
         void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, double minDistanceToMove = 1.5);
 
         void StopMovement();
+
+        bool HasCompletePathToPosition(Vector3 position, double maxDistance);
     }
 }

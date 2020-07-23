@@ -5,5 +5,7 @@
         public bool ForceCombat { get; set; } = false;
 
         public bool IgnoreCombat { get; set; } = false;
+
+        public bool IgnoreMountDistance { get; set; } = false;
     }
 }

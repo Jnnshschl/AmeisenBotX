@@ -29,6 +29,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            if (WowInterface.ObjectManager.Player.IsCasting)
+            {
+                return;
+            }
+
             // add nearby Units to the loot List
             if (Config.LootUnits)
             {
