@@ -159,17 +159,6 @@ namespace AmeisenBotX.Core.Jobs
                 return;
             }
 
-<<<<<<< HEAD
-            List<WowGameobject> oreNodes = WowInterface.ObjectManager.WowObjects
-                .OfType<WowGameobject>() // only WowGameobjects
-                .Where(x => Enum.IsDefined(typeof(OreNodes), x.DisplayId) // make sure the displayid is a ore node
-                        && miningProfile.OreTypes.Contains((OreNodes)x.DisplayId) // onlynodes in profile
-                        && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 40) // only nodes that are closer than 40m to me
-                .ToList(); // convert to list
-=======
-            int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
->>>>>>> d558893406e80f0fe35c472fffb6bf388939cc27
-
             WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => !NodeBlacklist.Contains(e.Guid)
