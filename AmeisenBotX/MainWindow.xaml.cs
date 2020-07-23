@@ -550,6 +550,7 @@ namespace AmeisenBotX
             M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
             comboboxStateOverride.Items.Add(BotState.Idle);
+            comboboxStateOverride.Items.Add(BotState.Attacking);
             comboboxStateOverride.Items.Add(BotState.Grinding);
             comboboxStateOverride.Items.Add(BotState.Job);
             comboboxStateOverride.Items.Add(BotState.Questing);

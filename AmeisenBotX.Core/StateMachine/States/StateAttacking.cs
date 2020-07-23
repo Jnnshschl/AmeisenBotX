@@ -82,9 +82,17 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.CombatClass.Execute();
                 }
 
-                if (WowInterface.Globals.ForceCombat && WowInterface.ObjectManager.TargetGuid == 0)
+                if (WowInterface.ObjectManager.TargetGuid == 0)
                 {
-                    WowInterface.Globals.ForceCombat = false;
+                    if (WowInterface.Globals.ForceCombat)
+                    {
+                        WowInterface.Globals.ForceCombat = false;
+                    }
+
+                    if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowPlayer player))
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
+                    }
                 }
             }
         }
