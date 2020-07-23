@@ -159,6 +159,8 @@ namespace AmeisenBotX.Core.Jobs
                 return;
             }
 
+            int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
+
             WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => !NodeBlacklist.Contains(e.Guid)
