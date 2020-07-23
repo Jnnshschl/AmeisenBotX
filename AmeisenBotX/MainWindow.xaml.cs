@@ -90,6 +90,8 @@ namespace AmeisenBotX
 
         private long NotificationLastTimestamp { get; set; }
 
+        private int OldRenderFlags { get; set; }
+
         private bool PendingNotification { get; set; }
 
         /// <summary>

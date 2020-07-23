@@ -15,13 +15,15 @@ namespace AmeisenBotX.Core.Chat
             ChatMessages = new List<WowChatMessage>();
         }
 
+        public event Action<WowChatMessage> OnNewChatMessage;
+
         public List<WowChatMessage> ChatMessages { get; }
 
-        public string ProtocolName(string type) => $"{DataPath}\\\\chatprotocols\\\\chat-{type}-{DateTime.Now:dd-M-yyyy}.txt";
+        private AmeisenBotConfig Config { get; }
 
         private string DataPath { get; }
 
-        private AmeisenBotConfig Config { get; }
+        public string ProtocolName(string type) => $"{DataPath}\\\\chatprotocols\\\\chat-{type}-{DateTime.Now:dd-M-yyyy}.txt";
 
         public bool TryParseMessage(ChatMessageType type, long timestamp, List<string> args)
         {
@@ -69,6 +71,8 @@ namespace AmeisenBotX.Core.Chat
                 }
                 catch { }
             }
+
+            OnNewChatMessage?.Invoke(chatMessage);
 
             return true;
         }

@@ -26,8 +26,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public bool FirstStart { get; set; }
 
-        public bool QuestgiverGossipOpen { get; set; }
-
         public int QuestgiverGossipOptionCount { get; set; }
 
         private TimegatedEvent BagSlotCheckEvent { get; }
@@ -40,9 +38,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent QuestgiverRightClickEvent { get; }
 
-        private TimegatedEvent RepairCheckEvent { get; }
-
         private TimegatedEvent RefreshCharacterEvent { get; }
+
+        private TimegatedEvent RepairCheckEvent { get; }
 
         public override void Enter()
         {
@@ -57,9 +55,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.EventHookManager.Start();
                 }
 
-                WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnGossipShow);
-                WowInterface.EventHookManager.Subscribe("GOSSIP_CLOSED", OnGossipClosed);
-
                 WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
                 WowInterface.HookManager.EnableClickToMove();
             }
@@ -72,8 +67,14 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            if (WowInterface.ObjectManager.Player.IsCasting)
+            {
+                return;
+            }
+
             // do we need to loot stuff
             if (LootCheckEvent.Run()
+                && WowInterface.CharacterManager.Inventory.FreeBagSlots > 0
                 && StateMachine.GetNearLootableUnits().Count() > 0)
             {
                 StateMachine.SetState(BotState.Looting);
@@ -105,13 +106,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            // do i need to follow someone
-            if ((!Config.Autopilot || WowInterface.ObjectManager.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
-            {
-                StateMachine.SetState(BotState.Following);
-                return;
-            }
-
             // do we need to repair our equipment
             if (Config.AutoRepair
                 && RepairCheckEvent.Run()
@@ -136,15 +130,32 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
-                && QuestgiverCheckEvent.Run()
                 && IsUnitToFollowThere(out WowPlayer unitToFollow, true)
                 && unitToFollow.TargetGuid != 0)
             {
-                HandleAutoQuestMode(unitToFollow);
+                if (QuestgiverCheckEvent.Run())
+                {
+                    HandleAutoQuestMode(unitToFollow);
+                }
+
+                return;
+            }
+
+            // do i need to follow someone
+            if ((!Config.Autopilot || WowInterface.ObjectManager.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
+            {
+                StateMachine.SetState(BotState.Following);
+                return;
             }
 
             // do buffing etc...
             WowInterface.CombatClass?.OutOfCombatExecute();
+
+            if (StateMachine.StateOverride != BotState.Idle
+                && StateMachine.StateOverride != BotState.None)
+            {
+                StateMachine.SetState(StateMachine.StateOverride);
+            }
         }
 
         public override void Exit()
@@ -228,7 +239,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > 4.0)
                 {
-                    QuestgiverGossipOpen = false;
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
                     return;
                 }
@@ -236,33 +246,15 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     if (QuestgiverRightClickEvent.Run())
                     {
-                        if (!QuestgiverGossipOpen)
+                        if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, possibleQuestgiver.Position))
                         {
-                            WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
+                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, possibleQuestgiver.Position);
                         }
-                        else
-                        {
-                            if (possibleQuestgiver.IsQuestgiver)
-                            {
-                                // complete/accept quests
-                                WowInterface.HookManager.AutoAcceptQuests();
-                            }
-                        }
+
+                        WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
                     }
                 }
             }
-        }
-
-        private void OnGossipClosed(long timestamp, List<string> args)
-        {
-            QuestgiverGossipOpen = false;
-            QuestgiverGossipOptionCount = 0;
-        }
-
-        private void OnGossipShow(long timestamp, List<string> args)
-        {
-            QuestgiverGossipOpen = true;
-            QuestgiverGossipOptionCount = WowInterface.HookManager.GetGossipOptionCount();
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)

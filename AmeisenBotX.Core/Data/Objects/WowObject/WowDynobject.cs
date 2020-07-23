@@ -4,6 +4,7 @@ using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
+    [Serializable]
     public class WowDynobject : WowObject
     {
         public WowDynobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)

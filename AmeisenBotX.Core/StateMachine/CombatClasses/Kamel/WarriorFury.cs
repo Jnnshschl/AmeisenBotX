@@ -229,7 +229,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HasBuffByName("Victory Rush") && CustomCastSpell(victoryRushSpell))
+                    if (VictoryRushEvent.Run() && CustomCastSpell(victoryRushSpell))
                     {
                         return;
                     } 

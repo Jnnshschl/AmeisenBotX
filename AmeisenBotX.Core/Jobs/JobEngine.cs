@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Jobs.Enums;
@@ -22,8 +23,11 @@ namespace AmeisenBotX.Core.Jobs
             WowInterface = wowInterface;
             Config = config;
 
-            MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
-            MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
+            MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            BlacklistEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(3));
+
+            NodeBlacklist = new List<ulong>();
         }
 
         public AmeisenBotConfig Config { get; set; }
@@ -32,15 +36,23 @@ namespace AmeisenBotX.Core.Jobs
 
         private int CurrentNodeCounter { get; set; }
 
-        private bool MailBoxIsInRange { get; set; }
+        private int SellActionsNeeded { get; set; }
+
+        private int NodeTryCounter { get; set; }
 
         private TimegatedEvent MailSentEvent { get; }
 
         private TimegatedEvent MiningEvent { get; }
 
-        private bool OreIsInRange { get; set; }
+        private TimegatedEvent BlacklistEvent { get; }
 
         private WowInterface WowInterface { get; }
+
+        private bool CheckForPathRecovering { get; set; }
+
+        public List<ulong> NodeBlacklist { get; set; }
+
+        public bool GeneratedPathToNode { get; set; }
 
         public void Execute()
         {
@@ -55,6 +67,13 @@ namespace AmeisenBotX.Core.Jobs
             }
         }
 
+        public void Enter()
+        {
+            AmeisenLogger.Instance.Log("JobEngine", $"Entering JobEngine", LogLevel.Verbose);
+            CheckForPathRecovering = true;
+            GeneratedPathToNode = false;
+        }
+
         public void Reset()
         {
             AmeisenLogger.Instance.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
@@ -62,89 +81,170 @@ namespace AmeisenBotX.Core.Jobs
 
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots == 0)
+            if (WowInterface.ObjectManager.Player.IsCasting)
             {
-                //List<WowGameobject> Objectlist = WowInterface.ObjectManager.WowObjects
-                //.OfType<WowGameobject>() // only WowGameobjects
-                //.Where(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 15)
-                //.ToList();
+                return;
+            }
 
-                List<WowGameobject> MailBoxNode = WowInterface.ObjectManager.WowObjects
-                    .OfType<WowGameobject>() // only WowGameobjects
-                    .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId) // make sure the displayid is a MailBox
-                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 15m to me
-                    .ToList(); // convert to list
+            if (CheckForPathRecovering)
+            {
+                Vector3 closestNode = miningProfile.Path.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
+                CurrentNodeCounter = miningProfile.Path.IndexOf(closestNode) + 1;
+                CheckForPathRecovering = false;
+                NodeTryCounter = 0;
+            }
 
-                if (MailBoxNode.Count > 0)
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots < 3 && SellActionsNeeded == 0)
+            {
+                SellActionsNeeded = (int)Math.Ceiling((double)WowInterface.CharacterManager.Inventory.Items.Count / 12.0); // 12 items per mail
+                CheckForPathRecovering = true;
+            }
+
+            if (SellActionsNeeded > 0)
+            {
+                WowGameobject mailboxNode = WowInterface.ObjectManager.WowObjects
+                    .OfType<WowGameobject>()
+                    .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
+                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15)
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
+
+                if (mailboxNode != null)
                 {
-                    WowGameobject nearNode = MailBoxNode
-                        .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position)) // order by distance to me
-                        .First(); // get the closest node to me
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, mailboxNode.Position);
 
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
-
-                    MailBoxIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(nearNode.Position) <= 4;
-
-                    if (MailBoxIsInRange)
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(mailboxNode.Position) <= 4)
                     {
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-                        WowInterface.MovementEngine.Reset();
+                        WowInterface.MovementEngine.StopMovement();
 
                         if (MailSentEvent.Run())
                         {
-                            WowInterface.HookManager.WowObjectOnRightClick(nearNode);
-                            WowInterface.HookManager.LuaDoString("MailFrameTab2:Click();for b = 0, 4 do for s = 0, 22 do l = GetContainerItemLink(b, s) if l and l:find('Copper Ore')then UseContainerItem(b, s) end end end");
-                            WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
-                        }
+                            WowInterface.HookManager.WowObjectOnRightClick(mailboxNode);
+                            WowInterface.HookManager.LuaDoString("MailFrameTab2:Click();");
 
-                        return;
+                            int usedItems = 0;
+                            foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items)
+                            {
+                                if (Config.ItemSellBlacklist.Contains(item.Name) || item.Name.Contains("Pickaxe", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    continue;
+                                }
+
+                                WowInterface.HookManager.UseItemByBagAndSlot(item.BagId, item.BagSlot);
+                                ++usedItems;
+                            }
+
+                            if (usedItems > 0)
+                            {
+                                WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
+                                --SellActionsNeeded;
+                            }
+                            else
+                            {
+                                SellActionsNeeded = 0;
+                            }
+                        }
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
-                        return;
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, mailboxNode.Position);
                     }
                 }
                 else
                 {
-                    Vector3 currentNode = miningProfile.MailboxNodes[0];
+                    Vector3 currentNode = miningProfile.MailboxNodes.OrderBy(x => x.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
-                    return;
                 }
+
+                return;
             }
 
+<<<<<<< HEAD
             List<WowGameobject> oreNodes = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(OreNodes), x.DisplayId) // make sure the displayid is a ore node
                         && miningProfile.OreTypes.Contains((OreNodes)x.DisplayId) // onlynodes in profile
-                        && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15) // only nodes that are closer than 15m to me
+                        && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 40) // only nodes that are closer than 40m to me
                 .ToList(); // convert to list
+=======
+            int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
+>>>>>>> d558893406e80f0fe35c472fffb6bf388939cc27
 
-            if (oreNodes.Count > 0)
+            WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => !NodeBlacklist.Contains(e.Guid)
+                         && Enum.IsDefined(typeof(OreNodes), e.DisplayId)
+                         && miningProfile.OreTypes.Contains((OreNodes)e.DisplayId)
+                         && (((OreNodes)e.DisplayId) == OreNodes.Copper
+                         || (((OreNodes)e.DisplayId) == OreNodes.Tin && miningSkill >= 65)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Silver && miningSkill >= 75)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Iron && miningSkill >= 125)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Gold && miningSkill >= 155)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Mithril && miningSkill >= 175)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Truesilver && miningSkill >= 230)
+                         || (((OreNodes)e.DisplayId) == OreNodes.DarkIron && miningSkill >= 230)
+                         || (((OreNodes)e.DisplayId) == OreNodes.SmallThorium && miningSkill >= 245)
+                         || (((OreNodes)e.DisplayId) == OreNodes.RichThorium && miningSkill >= 275)
+                         || (((OreNodes)e.DisplayId) == OreNodes.ObsidianChunk && miningSkill >= 305)
+                         || (((OreNodes)e.DisplayId) == OreNodes.FelIron && miningSkill >= 300)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Adamantite && miningSkill >= 325)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Cobalt && miningSkill >= 350)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Khorium && miningSkill >= 375)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Saronite && miningSkill >= 400)
+                         || (((OreNodes)e.DisplayId) == OreNodes.Titanium && miningSkill >= 450))
+                         && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50.0)
+                .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .FirstOrDefault();
+
+            if (nearestNode != null)
             {
-                WowGameobject nearNode = oreNodes
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position)) // order by distance to me
-                    .First(); // get the closest node to me
-                OreIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(nearNode.Position) <= 4;
-
-                if (OreIsInRange)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(nearestNode.Position) < 3)
                 {
-                    WowInterface.HookManager.StopClickToMoveIfActive();
-                    WowInterface.MovementEngine.Reset();
+                    if (WowInterface.ObjectManager.Player.IsMounted)
+                    {
+                        WowInterface.HookManager.Dismount();
+                        return;
+                    }
+
+                    WowInterface.MovementEngine.StopMovement();
 
                     if (MiningEvent.Run()) // limit the executions
                     {
-                        WowInterface.HookManager.WowObjectOnRightClick(nearNode);
-                        WowInterface.HookManager.LootEveryThing();
+                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
+                            && lootOpen > 0)
+                        {
+                            WowInterface.HookManager.LootEveryThing();
+                        }
+                        else
+                        {
+                            WowInterface.HookManager.WowObjectOnRightClick(nearestNode);
+                        }
                     }
+
+                    CheckForPathRecovering = true;
+                    NodeTryCounter = 0;
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearNode.Position);
+                    if (GeneratedPathToNode && BlacklistEvent.Run() && !WowInterface.MovementEngine.HasCompletePathToPosition(nearestNode.Position, 4.0))
+                    {
+                        if (NodeTryCounter > 2)
+                        {
+                            NodeBlacklist.Add(nearestNode.Guid);
+                            NodeTryCounter = 0;
+                        }
+
+                        ++NodeTryCounter;
+                    }
+
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestNode.Position);
+                    GeneratedPathToNode = true;
                 }
             }
             else
             {
+                GeneratedPathToNode = false;
+
                 Vector3 currentNode = miningProfile.Path[CurrentNodeCounter];
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
 

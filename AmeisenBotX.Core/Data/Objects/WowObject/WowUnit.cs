@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
+    [Serializable]
     public class WowUnit : WowObject
     {
         public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)

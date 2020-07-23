@@ -154,14 +154,13 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private TimegatedEvent ActionEvent { get; }
 
-        private Selector<CtfBlackboard> KillEnemyFlagCarrierSelector { get; }
+        private bool InLos { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private Selector<CtfBlackboard> KillEnemyFlagCarrierSelector { get; }
 
         private TimegatedEvent LosCheckEvent { get; }
 
-        private bool InLos { get; set; }
-
+        private WowInterface WowInterface { get; }
 
         public void Execute()
         {

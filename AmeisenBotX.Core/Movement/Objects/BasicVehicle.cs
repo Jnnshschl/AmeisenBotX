@@ -16,6 +16,8 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
 
+        public bool IsOnWaterSurface { get; set; }
+
         public Vector3 Velocity { get; private set; }
 
         private WowInterface WowInterface { get; }
@@ -132,6 +134,11 @@ namespace AmeisenBotX.Core.Movement.Objects
             for (int i = 0; i < forces.Count; ++i)
             {
                 Velocity += forces[i];
+            }
+
+            if (IsOnWaterSurface && Velocity.Z > 0f)
+            {
+                Velocity = new Vector3(Velocity.X, Velocity.Y, 0f);
             }
 
             Velocity.Limit(WowInterface.MovementSettings.MaxVelocity);

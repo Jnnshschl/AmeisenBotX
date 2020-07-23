@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Character
             SpellBook = new SpellBook(WowInterface);
             TalentManager = new TalentManager(WowInterface);
             ItemComparator = new ItemLevelComparator();
-            Skills = new List<string>();
+            Skills = new Dictionary<string, (int, int)>();
         }
 
         public CharacterEquipment Equipment { get; }
@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Character
 
         public List<WowMount> Mounts { get; private set; }
 
-        public List<string> Skills { get; private set; }
+        public Dictionary<string, (int, int)> Skills { get; private set; }
 
         public SpellBook SpellBook { get; }
 
@@ -84,15 +84,15 @@ namespace AmeisenBotX.Core.Character
         {
             return item.ArmorType switch
             {
-                ArmorType.PLATE => Skills.Any(e => e.Contains("Plate Mail") || e.Contains("Plattenpanzer")),
-                ArmorType.MAIL => Skills.Any(e => e.Contains("Mail") || e.Contains("Panzer")),
-                ArmorType.LEATHER => Skills.Any(e => e.Contains("Leather") || e.Contains("Leder")),
-                ArmorType.CLOTH => Skills.Any(e => e.Contains("Cloth") || e.Contains("Stoff")),
-                ArmorType.TOTEMS => Skills.Any(e => e.Contains("Totem") || e.Contains("Totem")),
-                ArmorType.LIBRAMS => Skills.Any(e => e.Contains("Libram") || e.Contains("Buchband")),
-                ArmorType.IDOLS => Skills.Any(e => e.Contains("Idol") || e.Contains("Götzen")),
-                ArmorType.SIGILS => Skills.Any(e => e.Contains("Sigil") || e.Contains("Siegel")),
-                ArmorType.SHIELDS => Skills.Any(e => e.Contains("Shield") || e.Contains("Schild")),
+                ArmorType.PLATE => Skills.Any(e => e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.MAIL => Skills.Any(e => e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.LEATHER => Skills.Any(e => e.Key.Equals("Leather", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Leder", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.CLOTH => Skills.Any(e => e.Key.Equals("Cloth", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stoff", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.TOTEMS => Skills.Any(e => e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.LIBRAMS => Skills.Any(e => e.Key.Equals("Libram", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Buchband", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.IDOLS => Skills.Any(e => e.Key.Equals("Idol", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Götzen", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.SIGILS => Skills.Any(e => e.Key.Equals("Sigil", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Siegel", StringComparison.OrdinalIgnoreCase)),
+                ArmorType.SHIELDS => Skills.Any(e => e.Key.Equals("Shield", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Schild", StringComparison.OrdinalIgnoreCase)),
                 ArmorType.MISCELLANEOUS => true,
                 _ => false,
             };
@@ -102,21 +102,21 @@ namespace AmeisenBotX.Core.Character
         {
             return item.WeaponType switch
             {
-                WeaponType.BOWS => Skills.Any(e => e.Contains("Bows") || e.Contains("Bogen")),
-                WeaponType.CROSSBOWS => Skills.Any(e => e.Contains("Crossbows") || e.Contains("Armbrüste")),
-                WeaponType.GUNS => Skills.Any(e => e.Contains("Guns") || e.Contains("Schusswaffen")),
-                WeaponType.WANDS => Skills.Any(e => e.Contains("Wands") || e.Contains("Zauberstäbe")),
-                WeaponType.THROWN => Skills.Any(e => e.Contains("Thrown") || e.Contains("Wurfwaffe")),
-                WeaponType.ONEHANDED_AXES => Skills.Any(e => e.Contains("One-Handed Axes") || e.Contains("Einhandäxte")),
-                WeaponType.TWOHANDED_AXES => Skills.Any(e => e.Contains("Two-Handed Axes") || e.Contains("Zweihandäxte")),
-                WeaponType.ONEHANDED_MACES => Skills.Any(e => e.Contains("One-Handed Maces") || e.Contains("Einhandstreitkolben")),
-                WeaponType.TWOHANDED_MACES => Skills.Any(e => e.Contains("Two-Handed Maces") || e.Contains("Zweihandstreitkolben")),
-                WeaponType.ONEHANDED_SWORDS => Skills.Any(e => e.Contains("One-Handed Swords") || e.Contains("Einhandschwerter")),
-                WeaponType.TWOHANDED_SWORDS => Skills.Any(e => e.Contains("Two-Handed Swords") || e.Contains("Zweihandschwerter")),
-                WeaponType.DAGGERS => Skills.Any(e => e.Contains("Daggers") || e.Contains("Dolche")),
-                WeaponType.FIST_WEAPONS => Skills.Any(e => e.Contains("Fist Weapons") || e.Contains("Faustwaffen")),
-                WeaponType.POLEARMS => Skills.Any(e => e.Contains("Polearms") || e.Contains("Stangenwaffen")),
-                WeaponType.STAVES => Skills.Any(e => e.Contains("Staves") || e.Contains("Stäbe")),
+                WeaponType.BOWS => Skills.Any(e => e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.CROSSBOWS => Skills.Any(e => e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Armbrüste", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.GUNS => Skills.Any(e => e.Key.Equals("Guns", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Schusswaffen", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.WANDS => Skills.Any(e => e.Key.Equals("Wands", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zauberstäbe", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.THROWN => Skills.Any(e => e.Key.Equals("Thrown", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Wurfwaffe", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.ONEHANDED_AXES => Skills.Any(e => e.Key.Equals("One-Handed Axes", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandäxte", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.TWOHANDED_AXES => Skills.Any(e => e.Key.Equals("Two-Handed Axes", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandäxte", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.ONEHANDED_MACES => Skills.Any(e => e.Key.Equals("One-Handed Maces", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandstreitkolben", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.TWOHANDED_MACES => Skills.Any(e => e.Key.Equals("Two-Handed Maces", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandstreitkolben", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.ONEHANDED_SWORDS => Skills.Any(e => e.Key.Equals("One-Handed Swords", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandschwerter", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.TWOHANDED_SWORDS => Skills.Any(e => e.Key.Equals("Two-Handed Swords", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandschwerter", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.DAGGERS => Skills.Any(e => e.Key.Equals("Daggers", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Dolche", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.FIST_WEAPONS => Skills.Any(e => e.Key.Equals("Fist Weapons", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Faustwaffen", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.POLEARMS => Skills.Any(e => e.Key.Equals("Polearms", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stangenwaffen", StringComparison.OrdinalIgnoreCase)),
+                WeaponType.STAVES => Skills.Any(e => e.Key.Equals("Staves", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stäbe", StringComparison.OrdinalIgnoreCase)),
                 WeaponType.FISHING_POLES => true,
                 WeaponType.MISCELLANEOUS => true,
                 _ => false,

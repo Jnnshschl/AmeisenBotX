@@ -19,6 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             //FuryWarrior
             TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            VictoryRushEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
             RendEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
             ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
@@ -26,7 +27,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
             revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
             manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
-            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
@@ -49,34 +50,30 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public abstract string Displayname { get; }
 
-        //Resto Shaman
-        public TimegatedEvent earthShieldEvent { get; private set; }
-
         public TimegatedEvent ExecuteEvent { get; private set; }
 
         //Mount check
         public TimegatedEvent getonthemount { get; private set; }
 
         public abstract bool HandlesMovement { get; }
-
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
-
         public abstract bool IsMelee { get; }
 
+        public List<string> PriorityTargets { get; set; }
+
         public abstract IWowItemComparator ItemComparator { get; set; }
+
+        //Resto Shaman
+        public TimegatedEvent earthShieldEvent { get; private set; }
 
         public TimegatedEvent manaTideTotemEvent { get; private set; }
 
         public TimegatedEvent naturesswiftEvent { get; private set; }
 
-        public List<string> PriorityTargets { get; set; }
-
-        public TimegatedEvent RendEvent { get; private set; }
-
         public TimegatedEvent revivePlayerEvent { get; private set; }
 
         public TimegatedEvent riptideSpellEvent { get; private set; }
-
+        public TimegatedEvent totemcastEvent { get; private set; }
+        //-----
         public abstract CombatClassRole Role { get; }
 
         public abstract TalentTree Talents { get; }
@@ -86,8 +83,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         //FuryWarrior
         public TimegatedEvent TargetSelectEvent { get; private set; }
 
-        public TimegatedEvent totemcastEvent { get; private set; }
+        public TimegatedEvent RendEvent { get; private set; }
 
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
+
+        public TimegatedEvent VictoryRushEvent { get; private set; }
+        //-----
         public TimegatedEvent UpdatePriorityUnits { get; set; }
 
         public abstract bool UseAutoAttacks { get; }

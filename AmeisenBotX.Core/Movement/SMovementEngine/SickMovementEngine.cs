@@ -63,18 +63,27 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             new Selector<MovementBlackboard>
                             (
                                 "IsDirectMovingState",
-                                (b) => IsDirectMovingState(),
+                                (b) => IsDirectMovingState() || WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying,
                                 new Leaf<MovementBlackboard>((b) =>
                                 {
-                                    if (Nodes.Count > 0)
-                                    {
-                                        Nodes.Clear();
-                                    }
+                                    Vector3 targetPos = Nodes.Count > 1 ? Nodes.Peek() : TargetPosition;
 
                                     ShouldBeMoving = true;
 
-                                    //Vector3 tPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
-                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, TargetPosition, TargetRotation);
+                                    Vector3 positionToGoTo;
+
+                                    if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
+                                    {
+                                        PlayerVehicle.IsOnWaterSurface = WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsUnderwater;
+
+                                        positionToGoTo = targetPos;
+                                    }
+                                    else
+                                    {
+                                        positionToGoTo = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, targetPos);
+                                    }
+
+                                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, positionToGoTo, TargetRotation);
 
                                     return WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold
                                            ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
@@ -107,34 +116,36 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                         {
                                             if (config.UseMounts)
                                             {
-                                                if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
+                                                if (MountCheck.Run() || IsCastingMount)
+                                                {
+                                                    if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                                                     && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
-                                                    && MountCheck.Run()
                                                     && wowInterface.CharacterManager.Mounts.Count > 0
-                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 20.0
+                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 24.0)
                                                     && !WowInterface.ObjectManager.Player.IsMounted
                                                     && wowInterface.HookManager.IsOutdoors())
-                                                {
-                                                    List<WowMount> filteredMounts;
-
-                                                    if (config.UseOnlySpecificMounts)
                                                     {
-                                                        filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name)).ToList();
-                                                    }
-                                                    else
-                                                    {
-                                                        filteredMounts = WowInterface.CharacterManager.Mounts;
-                                                    }
+                                                        List<WowMount> filteredMounts;
 
-                                                    if (filteredMounts != null && filteredMounts.Count >= 0)
-                                                    {
-                                                        WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
-                                                        WowInterface.MovementEngine.StopMovement();
-                                                        WowInterface.HookManager.Mount(mount.Index);
-                                                    }
+                                                        if (config.UseOnlySpecificMounts)
+                                                        {
+                                                            filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name)).ToList();
+                                                        }
+                                                        else
+                                                        {
+                                                            filteredMounts = WowInterface.CharacterManager.Mounts;
+                                                        }
 
-                                                    IsCastingMount = true;
-                                                    return BehaviorTreeStatus.Ongoing;
+                                                        if (filteredMounts != null && filteredMounts.Count >= 0)
+                                                        {
+                                                            WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
+                                                            WowInterface.MovementEngine.StopMovement();
+                                                            IsCastingMount = true;
+                                                            WowInterface.HookManager.Mount(mount.Index);
+                                                        }
+
+                                                        return BehaviorTreeStatus.Ongoing;
+                                                    }
                                                 }
 
                                                 if (IsCastingMount)
@@ -211,6 +222,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public Vector3 UnstuckTargetPosition { get; private set; }
 
+        public bool MountInProgress { get; private set; }
+
         private TimegatedEvent JumpCheckEvent { get; }
 
         private Timer MovementWatchdog { get; }
@@ -241,6 +254,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
                 BehaviorTree.Tick();
             }
+        }
+
+        public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
+        {
+            return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance(position) < maxDistance);
         }
 
         public void Reset()

@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowDynobject
     {

@@ -1,4 +1,6 @@
-﻿using AmeisenBotX.Core.Data.CombatLog.Objects;
+﻿using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Objects;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
@@ -11,7 +13,13 @@ namespace AmeisenBotX.Core.Data.Cache
 
         List<BasicCombatLogEntry> CombatLogEntries { get; }
 
+        Dictionary<(MapId, HerbNodes), List<Vector3>> HerbNodes { get; }
+
         Dictionary<ulong, string> NameCache { get; }
+
+        Dictionary<(MapId, OreNodes), List<Vector3>> OreNodes { get; }
+
+        Dictionary<(MapId, PoiType), List<Vector3>> PointsOfInterest { get; }
 
         Dictionary<(int, int), WowUnitReaction> ReactionCache { get; }
 
@@ -19,7 +27,13 @@ namespace AmeisenBotX.Core.Data.Cache
 
         void CacheBlacklistPosition(int mapId, Vector3 node);
 
+        void CacheHerb(MapId mapId, HerbNodes displayId, Vector3 position);
+
         void CacheName(ulong guid, string name);
+
+        void CacheOre(MapId mapId, OreNodes displayId, Vector3 position);
+
+        void CachePoi(MapId mapId, PoiType poiType, Vector3 position);
 
         void CacheReaction(int a, int b, WowUnitReaction reaction);
 
@@ -32,6 +46,8 @@ namespace AmeisenBotX.Core.Data.Cache
         void Save();
 
         bool TryGetBlacklistPosition(int mapId, Vector3 position, double maxRadius, out List<Vector3> nodes);
+
+        bool TryGetPointsOfInterest(MapId mapId, PoiType poiType, Vector3 position, double maxRadius, out List<Vector3> nodes);
 
         bool TryGetReaction(int a, int b, out WowUnitReaction reaction);
 

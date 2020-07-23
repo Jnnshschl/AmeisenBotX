@@ -3,13 +3,17 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace AmeisenBotX.Core.Common
 {
     public abstract class CustomTcpClient
     {
+        private int connectionTimerBusy;
+
         public CustomTcpClient(string ip, int port, int watchdogPollMs = 1000)
         {
             Init(IPAddress.Parse(ip), port, watchdogPollMs);
@@ -51,37 +55,50 @@ namespace AmeisenBotX.Core.Common
 
         private async void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
         {
-            if (TcpClient == null)
+            // only start one timer tick at a time
+            if (Interlocked.CompareExchange(ref connectionTimerBusy, 1, 0) == 1)
             {
-                TcpClient = new TcpClient()
-                {
-                    NoDelay = true
-                };
+                return;
             }
-            else if (!TcpClient.Connected)
-            {
-                try
-                {
-                    await TcpClient.ConnectAsync(Ip, Port);
 
-                    Reader = new StreamReader(TcpClient.GetStream(), Encoding.ASCII);
-                    Writer = new StreamWriter(TcpClient.GetStream(), Encoding.ASCII);
-                }
-                catch (ObjectDisposedException)
+            try
+            {
+                if (TcpClient == null)
                 {
                     TcpClient = new TcpClient()
                     {
                         NoDelay = true
                     };
                 }
-                catch
+                else if (!TcpClient.Connected)
                 {
-                    // server is maybe not running or whatever
+                    try
+                    {
+                        await TcpClient.ConnectAsync(Ip, Port);
+
+                        Reader = new StreamReader(TcpClient.GetStream(), Encoding.ASCII);
+                        Writer = new StreamWriter(TcpClient.GetStream(), Encoding.ASCII);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        TcpClient = new TcpClient()
+                        {
+                            NoDelay = true
+                        };
+                    }
+                    catch
+                    {
+                        // server is maybe not running or whatever
+                    }
+                }
+                else if (TcpClient.Client != null)
+                {
+                    IsConnected = TcpClient.Connected;
                 }
             }
-            else if (TcpClient.Client != null)
+            finally
             {
-                IsConnected = TcpClient.Connected;
+                connectionTimerBusy = 0;
             }
         }
 

@@ -21,6 +21,7 @@ using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering;
+using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Movement.SMovementEngine;
@@ -365,7 +366,8 @@ namespace AmeisenBotX.Core
             JobProfiles = new List<IJobProfile>
             {
                 new CopperElwynnForestProfile(),
-                new CopperTinSilverWestfallProfile()
+                new CopperTinSilverWestfallProfile(),
+                new ElwynnRedridgeMining(),
             };
         }
 
@@ -803,7 +805,7 @@ namespace AmeisenBotX.Core
             WowInterface.ChatManager = new ChatManager(Config, Path.Combine(BotDataPath, AccountName));
             WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
 
-            WowInterface.ObjectManager = new ObjectManager(WowInterface);
+            WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
             WowInterface.HookManager = new HookManager(WowInterface);
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);

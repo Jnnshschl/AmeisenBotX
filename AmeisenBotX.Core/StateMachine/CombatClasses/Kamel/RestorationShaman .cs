@@ -83,16 +83,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(ManaSpringTotemSpell, DateTime.Now);
             spellCoolDown.Add(ManaTideTotemSpell, DateTime.Now);
             spellCoolDown.Add(CalloftheElementsSpell, DateTime.Now);
-
-            //if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
-            //     WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
-            //     WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
-            //     WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)) ||
-            //     (WowInterface.CharacterManager.Equipment.Items.ContainsKey(EquipmentSlot.INVSLOT_RANGED) &&
-            //     WowInterface.CharacterManager.Equipment.Items[EquipmentSlot.INVSLOT_RANGED] != null))
-            //{
-            hasTotemItems = true;
-            //}
         }
 
         public override string Author => "Lukas";
@@ -254,6 +244,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             {
                 return;
             }
+        }  
+        
+        private void totemItemCheck()
+        {
+            if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
+             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
+             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
+             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)) ||
+             (WowInterface.CharacterManager.Equipment.Items.ContainsKey(EquipmentSlot.INVSLOT_RANGED) &&
+             WowInterface.CharacterManager.Equipment.Items[EquipmentSlot.INVSLOT_RANGED] != null))
+            {
+                hasTotemItems = true;
+            }
         }
 
         private void StartHeal()
@@ -281,18 +284,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             WowInterface.HookManager.StopClickToMoveIfActive();
                             WowInterface.MovementEngine.Reset();
                         }
+
+                        totemItemCheck();
                         if (totemcastEvent.Run() && hasTotemItems)
                         {
                             if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
                             {
-                                return;//Use Boolflag combat = true / out of Combat = false
+                                return;
                             }
                             if (totemcastEvent.Run()
                                 && WowInterface.ObjectManager.Player.ManaPercentage >= 50
-                                && !WowInterface.ObjectManager.Player.HasBuffByName("Mana Spring")
-                                && !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
-                                && !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                && !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem"))
+                                && (!WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
+                                || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
+                                || !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem")))
                             {
                                 if (CustomCastSpell(CalloftheElementsSpell))
                                 {
@@ -321,10 +325,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        //if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 60 && CustomCastSpell(chainHealSpell))
-                        //{
-                        //    return;
-                        //}
+                        if (partyMemberToHeal.Count >= 4 && WowInterface.ObjectManager.Target.HealthPercentage >= 70 && CustomCastSpell(chainHealSpell))
+                        {
+                            return;
+                        }
 
                         if (WowInterface.ObjectManager.Target.HealthPercentage <= 50 && CustomCastSpell(healingWaveSpell))
                         {
