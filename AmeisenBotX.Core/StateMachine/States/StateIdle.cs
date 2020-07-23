@@ -131,14 +131,14 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
                 && IsUnitToFollowThere(out WowPlayer unitToFollow, true)
+                && unitToFollow != null
                 && unitToFollow.TargetGuid != 0)
             {
-                if (QuestgiverCheckEvent.Run())
+                if (QuestgiverCheckEvent.Run()
+                    && HandleAutoQuestMode(unitToFollow))
                 {
-                    HandleAutoQuestMode(unitToFollow);
+                    return; 
                 }
-
-                return;
             }
 
             // do i need to follow someone
@@ -224,7 +224,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        private void HandleAutoQuestMode(WowPlayer wowPlayer)
+        private bool HandleAutoQuestMode(WowPlayer wowPlayer)
         {
             WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
 
@@ -234,13 +234,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > 32.0)
                 {
-                    return;
+                    return false;
                 }
 
                 if (distance > 4.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
-                    return;
+                    return true;
                 }
                 else
                 {
@@ -252,9 +252,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
 
                         WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
