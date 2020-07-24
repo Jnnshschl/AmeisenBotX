@@ -22,7 +22,7 @@
 
         public double MinUnstuckDistance { get; set; } = 8.0;
 
-        public double SeperationDistance { get; set; } = 4.0;
+        public double SeperationDistance { get; set; } = 2.0;
 
         public int StuckCounterUnstuck { get; set; } = 3;
 

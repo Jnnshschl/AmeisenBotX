@@ -162,7 +162,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (filteredMounts != null && filteredMounts.Count >= 0)
                     {
-                        WowMount mount = filteredMounts[new Random().Next(0, WowInterface.CharacterManager.Mounts.Count)];
+                        WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
                         WowInterface.MovementEngine.StopMovement();
                         WowInterface.HookManager.Mount(mount.Index);
                     }

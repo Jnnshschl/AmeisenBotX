@@ -20,6 +20,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             CurrentlyEating = string.Empty;
             CurrentlyDrinking = string.Empty;
+            WowInterface.MovementEngine.StopMovement();
         }
 
         public override void Execute()

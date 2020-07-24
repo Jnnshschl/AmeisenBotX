@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 new Selector<MovementBlackboard>
                 (
                     "DoINeedToMove",
-                    (b) => WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) > MinDistanceToMove,
+                    (b) => WowInterface.ObjectManager.Player.Position.GetDistance2D(TargetPosition) > MinDistanceToMove,
                     new Selector<MovementBlackboard>
                     (
                         "NeedToUnstuck",
@@ -80,12 +80,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                     }
                                     else
                                     {
-                                        positionToGoTo = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, targetPos);
+                                        positionToGoTo = targetPos;  // WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
                                     }
 
                                     PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, positionToGoTo, TargetRotation);
 
-                                    return WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold
+                                    return WowInterface.ObjectManager.Player.Position.GetDistance2D(TargetPosition) < WowInterface.MovementSettings.WaypointCheckThreshold
                                            ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
                                 }),
                                 new Selector<MovementBlackboard>
@@ -180,7 +180,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public MovementBlackboard Blackboard { get; }
 
-        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
+        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
 
         public bool IsCastingMount { get; set; }
 
@@ -258,7 +258,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
         {
-            return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance(position) < maxDistance);
+            return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
         }
 
         public void Reset()
@@ -296,7 +296,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             return Path == null
                 || Path.Count == 0
                 || PathDecayEvent.Run()
-                || TargetPositionLastPathfinding.GetDistance(TargetPosition) > 1.0;
+                || TargetPositionLastPathfinding.GetDistance2D(TargetPosition) > 1.0;
         }
 
         private BehaviorTreeStatus DoUnstuck()
@@ -312,8 +312,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
             else
             {
-                if (StuckPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 0.0
-                    && StuckPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
+                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 0.0
+                    && StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
                 {
                     PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction.Moving, UnstuckTargetPosition);
                     WowInterface.CharacterManager.Jump();
@@ -372,7 +372,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 // if we already need to jump, dont check it again
                 if (!JumpOnNextMove)
                 {
-                    MovedDistance = LastPlayerPosition.GetDistance(WowInterface.ObjectManager.Player.Position);
+                    MovedDistance = LastPlayerPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position);
                     LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
 
                     if (MovedDistance > WowInterface.MovementSettings.MinDistanceMovedJumpUnstuck
