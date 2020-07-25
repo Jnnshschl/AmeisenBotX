@@ -12,6 +12,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(100));
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(1000));
+            RandomPosEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
         }
 
         public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
@@ -92,12 +93,20 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowPlayer player))
                     {
-                        Vector3 rndPos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, player.Position, Config.MinFollowDistance * 0.5f);
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, rndPos);
+                        if (RandomPosEvent.Run())
+                        {
+                            Offset = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, player.Position, Config.MinFollowDistance * 0.3f);
+                        }
+
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position + Offset);
                     }
                 }
             }
         }
+
+        public Vector3 Offset { get; set; }
+
+        private TimegatedEvent RandomPosEvent { get; }
 
         public override void Exit()
         {

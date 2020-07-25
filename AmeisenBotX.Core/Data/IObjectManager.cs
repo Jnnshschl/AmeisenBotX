@@ -63,9 +63,9 @@ namespace AmeisenBotX.Core.Data
 
         WowUnit GetClosestWowUnitByDisplayId(List<int> displayIds, bool onlyQuestgiver = true);
 
-        List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
-
         List<WowUnit> GetEnemiesInCombatWithUs(Vector3 position, double distance);
+
+        List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
 
         List<WowDynobject> GetNearAoeSpells();
 

@@ -108,24 +108,6 @@ namespace AmeisenBotX.Core.Data
                 .FirstOrDefault();
         }
 
-        public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
-        {
-            lock (queryLock)
-            {
-                return GetNearEnemies<WowUnit>(position, distance)
-                    .ToList()
-                    .Where(e => e != null
-                      && e.Guid != PlayerGuid
-                      && !e.IsDead
-                      && !e.IsNotAttackable
-                      && e.IsInCombat
-                      && (PartymemberGuids.Contains(e.TargetGuid)
-                          || PartyPetGuids.Contains(e.TargetGuid))
-                      && e.Position.GetDistance(position) < distance)
-                    .ToList();
-            }
-        }
-
         public List<WowUnit> GetEnemiesInCombatWithUs(Vector3 position, double distance)
         {
             lock (queryLock)
@@ -141,6 +123,24 @@ namespace AmeisenBotX.Core.Data
                           || PartyPetGuids.Contains(e.TargetGuid)
                           || e.TargetGuid == PlayerGuid
                           || e.IsTaggedByMe)
+                      && e.Position.GetDistance(position) < distance)
+                    .ToList();
+            }
+        }
+
+        public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
+        {
+            lock (queryLock)
+            {
+                return GetNearEnemies<WowUnit>(position, distance)
+                    .ToList()
+                    .Where(e => e != null
+                      && e.Guid != PlayerGuid
+                      && !e.IsDead
+                      && !e.IsNotAttackable
+                      && e.IsInCombat
+                      && (PartymemberGuids.Contains(e.TargetGuid)
+                          || PartyPetGuids.Contains(e.TargetGuid))
                       && e.Position.GetDistance(position) < distance)
                     .ToList();
             }

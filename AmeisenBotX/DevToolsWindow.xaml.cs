@@ -94,7 +94,7 @@ namespace AmeisenBotX
                     listviewCacheOre.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
                 }
             }
-            else if(tabcontrolMain.SelectedIndex == 2)
+            else if (tabcontrolMain.SelectedIndex == 2)
             {
                 listviewCacheHerb.Items.Clear();
 

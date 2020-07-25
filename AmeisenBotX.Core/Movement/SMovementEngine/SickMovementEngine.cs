@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                 (b) => IsDirectMovingState() || WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying,
                                 new Leaf<MovementBlackboard>((b) =>
                                 {
-                                    if (Nodes.TryPeek(out Vector3 checkNodePos) 
+                                    if (Nodes.TryPeek(out Vector3 checkNodePos)
                                         && checkNodePos.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold))
                                     {
                                         Nodes.TryDequeue(out _);
@@ -212,6 +212,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public TimegatedEvent MountCheck { get; }
 
+        public bool MountInProgress { get; private set; }
+
         public double MovedDistance { get; private set; }
 
         public MovementAction MovementAction { get; private set; }
@@ -241,8 +243,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public float TargetRotation { get; private set; }
 
         public Vector3 UnstuckTargetPosition { get; private set; }
-
-        public bool MountInProgress { get; private set; }
 
         private TimegatedEvent JumpCheckEvent { get; }
 

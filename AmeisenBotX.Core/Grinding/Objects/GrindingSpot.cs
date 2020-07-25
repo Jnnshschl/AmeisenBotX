@@ -16,12 +16,12 @@ namespace AmeisenBotX.Core.Grinding.Objects
             MaxLevel = maxLevel;
         }
 
-        public Vector3 Position { get; set; }
-
-        public double Radius { get; set; }
+        public int MaxLevel { get; set; }
 
         public int MinLevel { get; set; }
 
-        public int MaxLevel { get; set; }
+        public Vector3 Position { get; set; }
+
+        public double Radius { get; set; }
     }
 }
