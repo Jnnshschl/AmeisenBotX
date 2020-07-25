@@ -118,6 +118,7 @@ namespace AmeisenBotX.Core.Data
                       && e.Guid != PlayerGuid
                       && !e.IsDead
                       && !e.IsNotAttackable
+                      && e.IsInCombat
                       && (PartymemberGuids.Contains(e.TargetGuid)
                           || PartyPetGuids.Contains(e.TargetGuid))
                       && e.Position.GetDistance(position) < distance)
@@ -135,9 +136,11 @@ namespace AmeisenBotX.Core.Data
                       && e.Guid != PlayerGuid
                       && !e.IsDead
                       && !e.IsNotAttackable
+                      && e.IsInCombat
                       && (PartymemberGuids.Contains(e.TargetGuid)
                           || PartyPetGuids.Contains(e.TargetGuid)
-                          || e.TargetGuid == PlayerGuid)
+                          || e.TargetGuid == PlayerGuid
+                          || e.IsTaggedByMe)
                       && e.Position.GetDistance(position) < distance)
                     .ToList();
             }

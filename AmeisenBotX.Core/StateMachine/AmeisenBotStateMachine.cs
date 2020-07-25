@@ -184,10 +184,11 @@ namespace AmeisenBotX.Core.Statemachine
 
                                 // TODO: handle combat bug, sometimes when combat ends, the player stays in combat for no reason
                                 if (!WowInterface.Globals.IgnoreCombat
-                                    && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
-                                    && (WowInterface.ObjectManager.Player.IsInCombat
-                                        || WowInterface.Globals.ForceCombat
-                                        || IsAnyPartymemberInCombat()))
+                                    && WowInterface.Globals.ForceCombat
+                                    || (!(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
+                                        && ((WowInterface.ObjectManager.Player.IsInCombat
+                                        || IsAnyPartymemberInCombat())
+                                        && WowInterface.ObjectManager.GetEnemiesInCombatWithUs(WowInterface.ObjectManager.Player.Position, 100.0).Count > 0)))
                                 {
                                     if (SetState(BotState.Attacking, true))
                                     {
