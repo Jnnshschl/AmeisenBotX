@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Grinding
         public GrindingSpot GrindingSpot { get; private set; }
 
         public IGrindingProfile Profile { get; set; }
-
+        public Vector3 TargetPosition { get; private set; }
         private int CurrentSpotIndex { get; set; }
 
         private WowInterface WowInterface { get; }
@@ -58,12 +58,25 @@ namespace AmeisenBotX.Core.Grinding
                 else
                 {
                     GrindingSpot = SelectNextGrindingSpot();
+                    TargetPosition = default;
                     return;
                 }
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, GrindingSpot.Position);
+                if (TargetPosition == default)
+                {
+                    TargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, (float)GrindingSpot.Radius * 0.4f);
+                }
+
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < GrindingSpot.Radius * 0.2)
+                {
+                    TargetPosition = default;
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, TargetPosition);
+                }
             }
         }
 

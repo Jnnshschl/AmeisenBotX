@@ -92,7 +92,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowPlayer player))
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
+                        Vector3 rndPos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, player.Position, Config.MinFollowDistance * 0.5f);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, rndPos);
                     }
                 }
             }
