@@ -20,6 +20,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const int deadPartymembersCheckTime = 4;
         private const string desperatePrayerSpell = "Desperate Prayer";
         private const string flashHealSpell = "Flash Heal";
+        private const string healSpell = "Heal";
         private const string greaterHealSpell = "Greater Heal";
         private const string hymnOfHopeSpell = "Hymn of Hope";
         private const string innerFireSpell = "Inner Fire";
@@ -31,6 +32,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string renewSpell = "Renew";
         private const string resurrectionSpell = "Resurrection";
         private const string weakenedSoulSpell = "Weakened Soul";
+        private const string smiteSpell = "Smite";
+        private const string shadowWordPainSpell = "Shadow Word: Pain";
 #pragma warning restore IDE0051
 
         public PriestDiscipline(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
@@ -46,6 +49,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, flashHealSpell },
+                { 400, flashHealSpell },
                 { 3000, penanceSpell },
                 { 5000, greaterHealSpell },
             };
@@ -118,7 +122,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (!NeedToHealSomeone())
             {
-                return;
+                if (WowInterface.ObjectManager.Player.ManaPercentage > 40)
+                {
+                    List<WowUnit> nearEnemies = WowInterface.ObjectManager.GetEnemiesInCombatWithUs(WowInterface.ObjectManager.Player.Position, 40.0)
+                        .OrderBy(e => e.HealthPercentage)
+                        .ToList();
+
+                    if (nearEnemies.Count > 0)
+                    {
+                        if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
+                            && CastSpellIfPossible(shadowWordPainSpell, nearEnemies.First().Guid, true))
+                        {
+                            return;
+                        }
+
+                        if (CastSpellIfPossible(smiteSpell, nearEnemies.First().Guid, true))
+                        {
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -130,60 +153,56 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+                if (unitsToHeal.Count == 0)
+                {
+                    return false;
+                }
 
                 if (unitsToHeal.Count > 3
-                    && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
+                 && CastSpellIfPossible(prayerOfHealingSpell, unitsToHeal.First().Guid, true))
                 {
                     return true;
                 }
 
-                WowUnit target = WowInterface.ObjectManager.Target;
-                if (target != null)
+                if (WowInterface.ObjectManager.Target.Guid != WowInterface.ObjectManager.PlayerGuid
+                    && WowInterface.ObjectManager.Target.HealthPercentage < 70
+                    && WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    && CastSpellIfPossible(bindingHealSpell, unitsToHeal.First().Guid, true))
                 {
-                    WowInterface.ObjectManager.UpdateObject(target);
+                    return true;
+                }
 
-                    if (target.Guid != WowInterface.ObjectManager.PlayerGuid
-                        && target.HealthPercentage < 70
-                        && WowInterface.ObjectManager.Player.HealthPercentage < 70
-                        && CastSpellIfPossible(bindingHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 50
+                    && CastSpellIfPossible(hymnOfHopeSpell, 0))
+                {
+                    return true;
+                }
+
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 20
+                    && CastSpellIfPossible(desperatePrayerSpell, 0))
+                {
+                    return true;
+                }
+
+                if ((WowInterface.ObjectManager.Target.HealthPercentage < 98 && WowInterface.ObjectManager.Target.HealthPercentage > 80
+                        && !WowInterface.ObjectManager.Target.HasBuffByName(weakenedSoulSpell)
+                        && !WowInterface.ObjectManager.Target.HasBuffByName(powerWordShieldSpell)
+                        && CastSpellIfPossible(powerWordShieldSpell, unitsToHeal.First().Guid, true))
+                    || (WowInterface.ObjectManager.Target.HealthPercentage < 90 && WowInterface.ObjectManager.Target.HealthPercentage > 80
+                        && !WowInterface.ObjectManager.Target.HasBuffByName(renewSpell)
+                        && CastSpellIfPossible(renewSpell, unitsToHeal.First().Guid, true)))
+                {
+                    return true;
+                }
+
+                double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
+                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                {
+                    if (CastSpellIfPossible(keyValuePair.Value, unitsToHeal.First().Guid, true))
                     {
                         return true;
-                    }
-
-                    if (WowInterface.ObjectManager.Player.ManaPercentage < 50
-                        && CastSpellIfPossible(hymnOfHopeSpell, 0))
-                    {
-                        return true;
-                    }
-
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 20
-                        && CastSpellIfPossible(desperatePrayerSpell, 0))
-                    {
-                        return true;
-                    }
-
-                    if ((target.HealthPercentage < 98 && target.HealthPercentage > 80
-                            && !WowInterface.ObjectManager.Target.HasBuffByName(weakenedSoulSpell)
-                            && !WowInterface.ObjectManager.Target.HasBuffByName(powerWordShieldSpell)
-                            && CastSpellIfPossible(powerWordShieldSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (target.HealthPercentage < 90 && target.HealthPercentage > 80
-                            && !WowInterface.ObjectManager.Target.HasBuffByName(renewSpell)
-                            && CastSpellIfPossible(renewSpell, WowInterface.ObjectManager.TargetGuid, true)))
-                    {
-                        return true;
-                    }
-
-                    double healthDifference = target.MaxHealth - target.Health;
-                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                    {
-                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
-                        {
-                            return true;
-                        }
                     }
                 }
             }

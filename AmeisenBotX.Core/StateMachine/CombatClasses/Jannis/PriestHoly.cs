@@ -19,6 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string bindingHealSpell = "Binding Heal";
         private const int deadPartymembersCheckTime = 4;
         private const string flashHealSpell = "Flash Heal";
+        private const string healSpell = "Heal";
         private const string greaterHealSpell = "Greater Heal";
         private const string guardianSpiritSpell = "Guardian Spirit";
         private const string hymnOfHopeSpell = "Hymn of Hope";
@@ -28,6 +29,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const string prayerOfMendingSpell = "Prayer of Mending";
         private const string renewSpell = "Renew";
         private const string resurrectionSpell = "Resurrection";
+        private const string smiteSpell = "Smite";
+        private const string shadowWordPainSpell = "Shadow Word: Pain";
 #pragma warning restore IDE0051
 
         public PriestHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
@@ -42,7 +45,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, flashHealSpell },
+                { 0, healSpell },
+                { 300, flashHealSpell },
                 { 5000, greaterHealSpell },
             };
 
@@ -116,7 +120,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (!NeedToHealSomeone())
             {
-                return;
+                if (WowInterface.ObjectManager.Player.ManaPercentage > 40)
+                {
+                    List<WowUnit> nearEnemies = WowInterface.ObjectManager.GetEnemiesInCombatWithUs(WowInterface.ObjectManager.Player.Position, 40.0)
+                        .OrderBy(e => e.HealthPercentage)
+                        .ToList();
+
+                    if (nearEnemies.Count > 0)
+                    {
+                        if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
+                            && CastSpellIfPossible(shadowWordPainSpell, nearEnemies.First().Guid, true))
+                        {
+                            return;
+                        }
+
+                        if (CastSpellIfPossible(smiteSpell, nearEnemies.First().Guid, true))
+                        {
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -124,8 +147,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+                if (unitsToHeal.Count == 0)
+                {
+                    return false;
+                }
 
                 if (unitsToHeal.Count > 3
                     && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -133,38 +158,33 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return true;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.ObjectManager.Target.HealthPercentage < 25
+                    && CastSpellIfPossible(guardianSpiritSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
-                    WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Target);
+                    return true;
+                }
 
-                    if (WowInterface.ObjectManager.Target.HealthPercentage < 25
-                        && CastSpellIfPossible(guardianSpiritSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Target.HealthPercentage < 70
+                    && WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    && CastSpellIfPossible(bindingHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return true;
+                }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 50
+                    && CastSpellIfPossible(hymnOfHopeSpell, 0))
+                {
+                    return true;
+                }
+
+                double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
+                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+
+                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                {
+                    if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return true;
-                    }
-
-                    if (WowInterface.ObjectManager.Target.HealthPercentage < 70
-                        && WowInterface.ObjectManager.Player.HealthPercentage < 70
-                        && CastSpellIfPossible(bindingHealSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    {
-                        return true;
-                    }
-
-                    if (WowInterface.ObjectManager.Player.ManaPercentage < 50
-                        && CastSpellIfPossible(hymnOfHopeSpell, 0))
-                    {
-                        return true;
-                    }
-
-                    double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
-                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                    {
-                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
-                        {
-                            return true;
-                        }
                     }
                 }
             }

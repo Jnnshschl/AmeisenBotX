@@ -66,9 +66,16 @@ namespace AmeisenBotX.Core.Grinding
             }
             else
             {
+                if (WowInterface.ObjectManager.Partymembers.Count > 0
+                    && WowInterface.ObjectManager.Partymembers.Any(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 30.0))
+                {
+                    WowInterface.MovementEngine.StopMovement();
+                    return;
+                }
+
                 if (TargetPosition == default)
                 {
-                    TargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, (float)GrindingSpot.Radius * 0.4f);
+                    TargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, GrindingSpot.Position, (float)GrindingSpot.Radius * 0.2f);
                 }
 
                 if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 4.0)

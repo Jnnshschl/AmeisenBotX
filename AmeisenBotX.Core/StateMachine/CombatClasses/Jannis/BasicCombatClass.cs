@@ -260,10 +260,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (WowInterface.ObjectManager.TargetGuid != 0)
-            {
-                ExecuteCC();
-            }
+            ExecuteCC();
         }
 
         public abstract void ExecuteCC();
