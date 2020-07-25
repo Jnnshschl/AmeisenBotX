@@ -572,14 +572,14 @@ namespace AmeisenBotX
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
             AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += MainWindow_OnWoWStarted;
 
-            AmeisenBot.Start();
-
             StateConfigWindows = new Dictionary<BotState, Window>()
             {
                 { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config)},
                 { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config)},
                 { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config)},
             };
+
+            AmeisenBot.Start();
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

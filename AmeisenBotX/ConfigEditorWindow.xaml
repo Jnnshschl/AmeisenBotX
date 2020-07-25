@@ -363,7 +363,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        <Slider x:Name="sliderMinFollowDistance" HorizontalAlignment="Left" Margin="4,146,0,0" VerticalAlignment="Top" Width="179" Maximum="200" Minimum="3" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Slider x:Name="sliderMinFollowDistance" HorizontalAlignment="Left" Margin="4,146,0,0" VerticalAlignment="Top" Width="179" Maximum="24" Minimum="3" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMinFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
                         <Label x:Name="labelMinFollowDistance" Content="Min Follow Distance: " HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,121,0,0" Padding="0,5,5,5" Width="179">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />

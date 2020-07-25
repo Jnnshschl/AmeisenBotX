@@ -35,34 +35,35 @@ namespace AmeisenBotX.Core.Grinding
             double distanceToSpot = GrindingSpot.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
             List<WowUnit> nearUnits = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
+                .Where(e => e.Level >= GrindingSpot.MinLevel && e.Level <= GrindingSpot.MaxLevel)
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .ToList();
 
-            if (nearUnits != null && nearUnits.Count > 0)
+            if (distanceToSpot < GrindingSpot.Radius)
             {
-                WowUnit nearestUnit = nearUnits.First();
-
-                if (nearestUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20.0)
+                if (nearUnits != null && nearUnits.Count > 0)
                 {
-                    WowInterface.HookManager.TargetGuid(nearestUnit.Guid);
-                    WowInterface.Globals.ForceCombat = true;
+                    WowUnit nearestUnit = nearUnits.First();
+
+                    if (nearestUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20.0)
+                    {
+                        WowInterface.HookManager.TargetGuid(nearestUnit.Guid);
+                        WowInterface.Globals.ForceCombat = true;
+                    }
+                    else
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestUnit.Position);
+                    }
                 }
                 else
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestUnit.Position);
-                }
-            }
-            else
-            {
-                if (distanceToSpot < 8.0)
                 {
                     GrindingSpot = SelectNextGrindingSpot();
                     return;
                 }
-                else
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, GrindingSpot.Position);
-                }
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, GrindingSpot.Position);
             }
         }
 
@@ -90,21 +91,23 @@ namespace AmeisenBotX.Core.Grinding
                 };
             }
 
+            List<GrindingSpot> spots = Profile.Spots.Where(e => WowInterface.ObjectManager.Player.Level >= e.MinLevel && WowInterface.ObjectManager.Player.Level <= e.MaxLevel).ToList();
+
             if (Profile.RandomizeSpots)
             {
                 Random rnd = new Random();
-                return Profile.Spots[rnd.Next(0, Profile.Spots.Count)];
+                return spots[rnd.Next(0, spots.Count)];
             }
             else
             {
                 ++CurrentSpotIndex;
 
-                if (CurrentSpotIndex >= Profile.Spots.Count)
+                if (CurrentSpotIndex >= spots.Count)
                 {
                     CurrentSpotIndex = 0;
                 }
 
-                return Profile.Spots[CurrentSpotIndex];
+                return spots[CurrentSpotIndex];
             }
         }
     }

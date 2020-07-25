@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveToPosition);
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveToPosition, PathRequestFlags.ChaikinCurve);
         }
 
         public Vector3 GetRandomPoint(int mapId)

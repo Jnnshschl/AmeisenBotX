@@ -17,6 +17,7 @@ using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Grinding;
 using AmeisenBotX.Core.Grinding.Profiles;
+using AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Jobs.Profiles;
@@ -356,6 +357,7 @@ namespace AmeisenBotX.Core
             // ------------------------------------ >
             GrindingProfiles = new List<IGrindingProfile>
             {
+                new UltimateGrinding1To80(),
             };
         }
 

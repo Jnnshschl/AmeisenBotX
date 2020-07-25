@@ -82,13 +82,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
-                Random rnd = new Random();
-                Offset = new Vector3
-                (
-                    ((float)rnd.NextDouble() * Config.MinFollowDistance) + 1f,
-                    ((float)rnd.NextDouble() * Config.MinFollowDistance) + 1f,
-                    0
-                );
+                Vector3 rndPos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance * 0.2f);
+                Offset = PlayerToFollow.Position - rndPos;
             }
         }
 
