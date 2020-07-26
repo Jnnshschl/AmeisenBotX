@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Linq;
@@ -17,6 +18,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            WowInterface.CharacterManager.Inventory.Update();
+
             if (WowInterface.CharacterManager.Inventory.FreeBagSlots > Config.BagSlotsToGoSell
                || !WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
                        && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
@@ -26,7 +29,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                            || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
                .Any(e => e.Price > 0))
             {
-                WowInterface.CharacterManager.Inventory.Update();
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
@@ -45,6 +47,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
                     WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+
+                    if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
+                    {
+                        WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
+                    }
 
                     if (selectedUnit.IsGossip)
                     {

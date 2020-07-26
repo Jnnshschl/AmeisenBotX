@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private const int deadPartymembersCheckTime = 4;
         private const string desperatePrayerSpell = "Desperate Prayer";
         private const string flashHealSpell = "Flash Heal";
-        private const string healSpell = "Heal";
+        private const string healSpell = "Lesser Heal";
         private const string greaterHealSpell = "Greater Heal";
         private const string hymnOfHopeSpell = "Hymn of Hope";
         private const string innerFireSpell = "Inner Fire";

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Linq;
 
@@ -16,9 +17,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            WowInterface.CharacterManager.Equipment.Update();
             if (!WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold))
             {
-                WowInterface.CharacterManager.Equipment.Update();
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
@@ -37,6 +38,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.MovementEngine.IsAtTargetPosition)
                 {
                     WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+
+                    if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
+                    {
+                        WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
+                    }
 
                     if (selectedUnit.IsGossip)
                     {

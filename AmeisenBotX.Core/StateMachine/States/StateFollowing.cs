@@ -7,6 +7,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -82,8 +83,17 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
-                Vector3 rndPos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance * 0.2f);
-                Offset = PlayerToFollow.Position - rndPos;
+                // Vector3 rndPos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance * 0.2f);
+                // Offset = PlayerToFollow.Position - rndPos;
+
+                Random rnd = new Random();
+
+                Offset = new Vector3
+                {
+                    X = (float)rnd.Next(0, Config.MinFollowDistance / 2),
+                    Y = (float)rnd.Next(0, Config.MinFollowDistance / 2),
+                    Z = 0f
+                };
             }
         }
 
