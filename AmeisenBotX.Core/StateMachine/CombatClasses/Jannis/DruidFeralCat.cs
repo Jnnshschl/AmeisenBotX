@@ -11,27 +11,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DruidFeralCat : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string barkskinSpell = "Barkskin";
-        private const string berserkSpell = "Berserk";
-        private const string catFormSpell = "Cat Form";
-        private const string dashSpell = "Dash";
-        private const string faerieFireSpell = "Faerie Fire (Feral)";
-        private const string feralChargeSpell = "Feral Charge - Cat";
-        private const string ferociousBiteSpell = "Ferocious Bite";
-        private const string innervateSpell = "Innervate";
-        private const string mangleSpell = "Mangle (Cat)";
-        private const string markOfTheWildSpell = "Mark of the Wild";
-        private const string rakeSpell = "Rake";
-        private const string ripSpell = "Rip";
-        private const string savageRoarSpell = "Savage Roar";
-        private const string shredSpell = "Shred";
-        private const string survivalInstinctsSpell = "Survival Instincts";
-        private const string tigersFurySpell = "Tiger's Fury";
-#pragma warning restore IDE0051
-
         public DruidFeralCat(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -45,7 +24,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { ripSpell, () => WowInterface.ObjectManager.Player.ComboPoints == 5 && CastSpellIfPossibleRogue(ripSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5) },
                 { rakeSpell, () => CastSpellIfPossible(rakeSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { mangleSpell, () => CastSpellIfPossible(mangleSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { mangleCatSpell, () => CastSpellIfPossible(mangleCatSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
@@ -55,8 +34,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
-
-        public override bool WalkBehindEnemy => false;
 
         public override string Author => "Jannis";
 
@@ -75,8 +52,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicAgilityComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -118,6 +93,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => true;
+
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
@@ -127,8 +106,30 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             double distanceToTarget = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
 
-            if (distanceToTarget > 16
+            if (distanceToTarget > 9.0
+                && CastSpellIfPossible(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
+            {
+                return;
+            }
+
+            if (distanceToTarget > 8.0
                 && CastSpellIfPossible(dashSpell, 0))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
+            {
+                return;
+            }
+
+            if (CastSpellIfPossible(berserkSpell, 0))
+            {
+                return;
+            }
+
+            if (NeedToHealMySelf())
             {
                 return;
             }
@@ -152,10 +153,29 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override void OutOfCombatExecute()
         {
             if (GroupAuraManager.Tick()
-                || MyAuraManager.Tick())
+                || MyAuraManager.Tick()
+                || NeedToHealMySelf())
             {
                 return;
             }
+        }
+
+        private bool NeedToHealMySelf()
+        {
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                && !WowInterface.ObjectManager.Player.HasBuffByName(rejuvenationSpell)
+                && CastSpellIfPossible(rejuvenationSpell, 0, true))
+            {
+                return true;
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                && CastSpellIfPossible(healingTouchSpell, 0, true))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

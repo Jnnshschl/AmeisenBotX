@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Core.Statemachine.Utils;
@@ -22,6 +23,349 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public abstract class BasicCombatClass : ICombatClass
     {
+        protected const int deadPartymembersCheckTime = 4;
+        protected const int eclipseCheckTime = 1;
+        protected const int fearAttemptDelay = 5;
+        protected const int petstatusCheckTime = 2;
+
+        #region Deathknight
+
+        protected const string antiMagicShellSpell = "Anti-Magic Shell";
+        protected const string armyOfTheDeadSpell = "Army of the Dead";
+        protected const string bloodBoilSpell = "Blood Boil";
+        protected const string bloodPlagueSpell = "Blood Plague";
+        protected const string bloodPresenceSpell = "Blood Presence";
+        protected const string bloodStrikeSpell = "Blood Strike";
+        protected const string chainsOfIceSpell = "Chains of Ice";
+        protected const string darkCommandSpell = "Dark Command";
+        protected const string deathAndDecaySpell = "Death and Decay";
+        protected const string deathCoilSpell = "Death Coil";
+        protected const string deathGripSpell = "Death Grip";
+        protected const string deathStrike = "Death Strike";
+        protected const string empowerRuneWeapon = "Empower Rune Weapon";
+        protected const string frostFeverSpell = "Frost Fever";
+        protected const string frostPresenceSpell = "Frost Presence";
+        protected const string heartStrikeSpell = "Heart Strike";
+        protected const string hornOfWinterSpell = "Horn of Winter";
+        protected const string iceboundFortitudeSpell = "Icebound Fortitude";
+        protected const string icyTouchSpell = "Icy Touch";
+        protected const string mindFreezeSpell = "Mind Freeze";
+        protected const string obliterateSpell = "Obliterate";
+        protected const string plagueStrikeSpell = "Plague Strike";
+        protected const string runeStrikeSpell = "Rune Strike";
+        protected const string runeTapSpell = "Rune Tap";
+        protected const string scourgeStrikeSpell = "Scourge Strike";
+        protected const string strangulateSpell = "Strangulate";
+        protected const string summonGargoyleSpell = "Summon Gargoyle";
+        protected const string unbreakableArmorSpell = "Unbreakable Armor";
+        protected const string unholyPresenceSpell = "Unholy Presence";
+        protected const string vampiricBloodSpell = "Vampiric Blood";
+
+        #endregion Deathknight
+
+        #region Druid
+
+        protected const string barkskinSpell = "Barkskin";
+        protected const string bashSpell = "Bash";
+        protected const string berserkSpell = "Berserk";
+        protected const string catFormSpell = "Cat Form";
+        protected const string challengingRoarSpell = "Challenging Roar";
+        protected const string dashSpell = "Dash";
+        protected const string direBearFormSpell = "Dire Bear Form";
+        protected const string eclipseLunarSpell = "Eclipse (Lunar)";
+        protected const string eclipseSolarSpell = "Eclipse (Solar)";
+        protected const string enrageSpell = "Enrage";
+        protected const string entanglingRootsSpell = "Entangling Roots";
+        protected const string faerieFireFeralSpell = "Faerie Fire (Feral)";
+        protected const string faerieFireSpell = "Faerie Fire";
+        protected const string feralChargeBearSpell = "Feral Charge - Bear";
+        protected const string feralChargeCatSpell = "Feral Charge - Cat";
+        protected const string ferociousBiteSpell = "Ferocious Bite";
+        protected const string forceOfNatureSpell = "Force of Nature";
+        protected const string frenziedRegenerationSpell = "Frenzied Regeneration";
+        protected const string growlSpell = "Growl";
+        protected const string healingTouchSpell = "Healing Touch";
+        protected const string hurricaneSpell = "Hurricane";
+        protected const string innervateSpell = "Innervate";
+        protected const string insectSwarmSpell = "Insect Swarm";
+        protected const string lacerateSpell = "Lacerate";
+        protected const string lifebloomSpell = "Lifebloom";
+        protected const string mangleBearSpell = "Mangle (Bear)";
+        protected const string mangleCatSpell = "Mangle (Cat)";
+        protected const string markOfTheWildSpell = "Mark of the Wild";
+        protected const string moonfireSpell = "Moonfire";
+        protected const string moonkinFormSpell = "Moonkin Form";
+        protected const string naturesGraspSpell = "Nature's Grasp";
+        protected const string naturesSwiftnessSpell = "Nature's Swiftness";
+        protected const string nourishSpell = "Nourish";
+        protected const string rakeSpell = "Rake";
+        protected const string regrowthSpell = "Regrowth";
+        protected const string rejuvenationSpell = "Rejuvenation";
+        protected const string reviveSpell = "Revive";
+        protected const string ripSpell = "Rip";
+        protected const string savageRoarSpell = "Savage Roar";
+        protected const string shredSpell = "Shred";
+        protected const string starfallSpell = "Starfall";
+        protected const string starfireSpell = "Starfire";
+        protected const string survivalInstinctsSpell = "Survival Instincts";
+        protected const string swiftmendSpell = "Swiftmend";
+        protected const string swipeSpell = "Swipe (Bear)";
+        protected const string thornsSpell = "Thorns";
+        protected const string tigersFurySpell = "Tiger's Fury";
+        protected const string tranquilitySpell = "Tranquility";
+        protected const string treeOfLifeSpell = "Tree of Life";
+        protected const string wildGrowthSpell = "Wild Growth";
+        protected const string wrathSpell = "Wrath";
+
+        #endregion Druid
+
+        #region Hunter
+
+        protected const string aimedShotSpell = "Aimed Shot";
+        protected const string arcaneShotSpell = "Arcane Shot";
+        protected const string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
+        protected const string beastialWrathSpell = "Beastial Wrath";
+        protected const string blackArrowSpell = "Black Arrow";
+        protected const string callPetSpell = "Call Pet";
+        protected const string chimeraShotSpell = "Chimera Shot";
+        protected const string concussiveShotSpell = "Concussive Shot";
+        protected const string deterrenceSpell = "Deterrence";
+        protected const string disengageSpell = "Disengage";
+        protected const string explosiveShotSpell = "Explosive Shot";
+        protected const string feignDeathSpell = "Feign Death";
+        protected const string frostTrapSpell = "Frost Trap";
+        protected const string huntersMarkSpell = "Hunter's Mark";
+        protected const string intimidationSpell = "Intimidation";
+        protected const string killCommandSpell = "Kill Command";
+        protected const string killShotSpell = "Kill Shot";
+        protected const string mendPetSpell = "Mend Pet";
+        protected const string mongooseBiteSpell = "Mongoose Bite";
+        protected const string multiShotSpell = "Multi-Shot";
+        protected const string rapidFireSpell = "Rapid Fire";
+        protected const string raptorStrikeSpell = "Raptor Strike";
+        protected const string revivePetSpell = "Revive Pet";
+        protected const string scatterShotSpell = "Scatter Shot";
+        protected const string serpentStingSpell = "Serpent Sting";
+        protected const string silencingShotSpell = "Silencing Shot";
+        protected const string steadyShotSpell = "Steady Shot";
+        protected const string wingClipSpell = "Wing Clip";
+        protected const string wyvernStingSpell = "Wyvern Sting";
+
+        #endregion Hunter
+
+        #region Mage
+
+        protected const string arcaneBarrageSpell = "Arcane Barrage";
+        protected const string arcaneBlastSpell = "Arcane Blast";
+        protected const string arcaneIntellectSpell = "Arcane Intellect";
+        protected const string arcaneMissilesSpell = "Arcane Missiles";
+        protected const string counterspellSpell = "Counterspell";
+        protected const string evocationSpell = "Evocation";
+        protected const string fireballSpell = "Fireball";
+        protected const string hotstreakSpell = "Hot Streak";
+        protected const string iceBlockSpell = "Ice Block";
+        protected const string icyVeinsSpell = "Icy Veins";
+        protected const string livingBombSpell = "Living Bomb";
+        protected const string mageArmorSpell = "Mage Armor";
+        protected const string manaShieldSpell = "Mana Shield";
+        protected const string mirrorImageSpell = "Mirror Image";
+        protected const string missileBarrageSpell = "Missile Barrage";
+        protected const string moltenArmorSpell = "Molten Armor";
+        protected const string pyroblastSpell = "Pyroblast";
+        protected const string scorchSpell = "Scorch";
+        protected const string spellStealSpell = "Spellsteal";
+
+        #endregion Mage
+
+        #region Paladin
+
+        protected const string avengersShieldSpell = "Avenger\'s Shield";
+        protected const string avengingWrathSpell = "Avenging Wrath";
+        protected const string blessingOfKingsSpell = "Blessing of Kings";
+        protected const string blessingOfMightSpell = "Blessing of Might";
+        protected const string blessingOfWisdomSpell = "Blessing of Wisdom";
+        protected const string consecrationSpell = "Consecration";
+        protected const string crusaderStrikeSpell = "Crusader Strike";
+        protected const string devotionAuraSpell = "Devotion Aura";
+        protected const string divineFavorSpell = "Divine Favor";
+        protected const string divineIlluminationSpell = "Divine Illumination";
+        protected const string divinePleaSpell = "Divine Plea";
+        protected const string divineStormSpell = "Divine Storm";
+        protected const string exorcismSpell = "Exorcism";
+        protected const string flashOfLightSpell = "Flash of Light";
+        protected const string hammerOfJusticeSpell = "Hammer of Justice";
+        protected const string hammerOfTheRighteousSpell = "Hammer of the Righteous";
+        protected const string hammerOfWrathSpell = "Hammer of Wrath";
+        protected const string holyLightSpell = "Holy Light";
+        protected const string holyShieldSpell = "Holy Shield";
+        protected const string holyShockSpell = "Holy Shock";
+        protected const string holyWrathSpell = "Holy Wrath";
+        protected const string judgementOfLightSpell = "Judgement of Light";
+        protected const string layOnHandsSpell = "Lay on Hands";
+        protected const string retributionAuraSpell = "Retribution Aura";
+        protected const string righteousFurySpell = "Righteous Fury";
+        protected const string sealOfVengeanceSpell = "Seal of Vengeance";
+        protected const string shieldOfTheRighteousnessSpell = "Shield of the Righteousness";
+
+        #endregion Paladin
+
+        #region Priest
+
+        protected const string bindingHealSpell = "Binding Heal";
+        protected const string desperatePrayerSpell = "Desperate Prayer";
+        protected const string devouringPlagueSpell = "Devouring Plague";
+        protected const string flashHealSpell = "Flash Heal";
+        protected const string greaterHealSpell = "Greater Heal";
+        protected const string guardianSpiritSpell = "Guardian Spirit";
+        protected const string healSpell = "Lesser Heal";
+        protected const string hymnOfHopeSpell = "Hymn of Hope";
+        protected const string innerFireSpell = "Inner Fire";
+        protected const string mindBlastSpell = "Mind Blast";
+        protected const string mindFlaySpell = "Mind Flay";
+        protected const string penanceSpell = "Penance";
+        protected const string powerWordFortitudeSpell = "Power Word: Fortitude";
+        protected const string powerWordShieldSpell = "Power Word: Shield";
+        protected const string prayerOfHealingSpell = "Prayer of Healing";
+        protected const string prayerOfMendingSpell = "Prayer of Mending";
+        protected const string renewSpell = "Renew";
+        protected const string resurrectionSpell = "Resurrection";
+        protected const string shadowfiendSpell = "Shadowfiend";
+        protected const string shadowformSpell = "Shadowform";
+        protected const string shadowWordPainSpell = "Shadow Word: Pain";
+        protected const string smiteSpell = "Smite";
+        protected const string vampiricEmbraceSpell = "Vampiric Embrace";
+        protected const string vampiricTouchSpell = "Vampiric Touch";
+        protected const string weakenedSoulSpell = "Weakened Soul";
+
+        #endregion Priest
+
+        #region Rogue
+
+        protected const string cloakOfShadowsSpell = "Cloak of Shadows";
+        protected const string coldBloodSpell = "Cold Blood";
+        protected const string eviscerateSpell = "Eviscerate";
+        protected const string hungerForBloodSpell = "Hunger for Blood";
+        protected const string kickSpell = "Kick";
+        protected const string mutilateSpell = "Mutilate";
+        protected const string sliceAndDiceSpell = "Slice and Dice";
+        protected const string sprintSpell = "Sprint";
+        protected const string stealthSpell = "Stealth";
+
+        #endregion Rogue
+
+        #region Shaman
+
+        protected const string ancestralSpiritSpell = "Ancestral Spirit";
+        protected const string chainHealSpell = "Chain Heal";
+        protected const string chainLightningSpell = "Chain Lightning";
+        protected const string earthlivingBuff = "Earthliving ";
+        protected const string earthlivingWeaponSpell = "Earthliving Weapon";
+        protected const string earthShieldSpell = "Earth Shield";
+        protected const string earthShockSpell = "Earth Shock";
+        protected const string elementalMasterySpell = "Elemental Mastery";
+        protected const string feralSpiritSpell = "Feral Spirit";
+        protected const string flameShockSpell = "Flame Shock";
+        protected const string flametongueBuff = "Flametongue ";
+        protected const string flametongueWeaponSpell = "Flametongue Weapon";
+        protected const string flametoungueBuff = "Flametongue ";
+        protected const string flametoungueWeaponSpell = "Flametongue Weapon";
+        protected const string healingWaveSpell = "Healing Wave";
+        protected const string heroismSpell = "Heroism";
+        protected const string hexSpell = "Hex";
+        protected const string lavaBurstSpell = "Lava Burst";
+        protected const string lavaLashSpell = "Lava Lash";
+        protected const string lesserHealingWaveSpell = "Lesser Healing Wave";
+        protected const string lightningBoltSpell = "Lightning Bolt";
+        protected const string lightningShieldSpell = "Lightning Shield";
+        protected const string maelstromWeaponSpell = "Mealstrom Weapon";
+        protected const string riptideSpell = "Riptide";
+        protected const string shamanisticRageSpell = "Shamanistic Rage";
+        protected const string stormstrikeSpell = "Stormstrike";
+        protected const string thunderstormSpell = "Thunderstorm";
+        protected const string tidalForceSpell = "Tidal Force";
+        protected const string waterShieldSpell = "Water Shield";
+        protected const string windfuryBuff = "Windfury";
+        protected const string windfuryWeaponSpell = "Windfury Weapon";
+        protected const string windShearSpell = "Wind Shear";
+
+        #endregion Shaman
+
+        #region Warlock
+
+        protected const string chaosBoltSpell = "Chaos Bolt";
+        protected const string conflagrateSpell = "Conflagrate";
+        protected const string corruptionSpell = "Corruption";
+        protected const string curseOfAgonySpell = "Curse of Agony";
+        protected const string curseOftheElementsSpell = "Curse of the Elements";
+        protected const string decimationSpell = "Decimation";
+        protected const string demonArmorSpell = "Demon Armor";
+        protected const string demonicEmpowermentSpell = "Demonic Empowerment";
+        protected const string demonSkinSpell = "Demon Skin";
+        protected const string drainLifeSpell = "Drain Life";
+        protected const string drainSoulSpell = "Drain Soul";
+        protected const string fearSpell = "Fear";
+        protected const string felArmorSpell = "Fel Armor";
+        protected const string hauntSpell = "Haunt";
+        protected const string howlOfTerrorSpell = "Howl of Terror";
+        protected const string immolateSpell = "Immolate";
+        protected const string immolationAuraSpell = "Immolation Aura";
+        protected const string incinerateSpell = "Incinerate";
+        protected const string lifeTapSpell = "Life Tap";
+        protected const string metamorphosisSpell = "Metamorphosis";
+        protected const string moltenCoreSpell = "Molten Core";
+        protected const string shadowBoltSpell = "Shadow Bolt";
+        protected const string shadowMasterySpell = "Shadow Mastery";
+        protected const string soulfireSpell = "Soul Fire";
+        protected const string summonFelguardSpell = "Summon Felguard";
+        protected const string summonFelhunterSpell = "Summon Felhunter";
+        protected const string summonImpSpell = "Summon Imp";
+        protected const string unstableAfflictionSpell = "Unstable Affliction";
+
+        #endregion Warlock
+
+        #region Warrior
+
+        protected const string battleStanceSpell = "Battle Stance";
+        protected const string berserkerRageSpell = "Berserker Rage";
+        protected const string berserkerStanceSpell = "Berserker Stance";
+        protected const string bladestormSpell = "Bladestorm";
+        protected const string bloodrageSpell = "Bloodrage";
+        protected const string bloodthirstSpell = "Bloodthirst";
+        protected const string challengingShoutSpell = "Challenging Shout";
+        protected const string chargeSpell = "Charge";
+        protected const string cleaveSpell = "Cleave";
+        protected const string commandingShoutSpell = "Commanding Shout";
+        protected const string concussionBlowSpell = "Concussion Blow";
+        protected const string defensiveStanceSpell = "Defensive Stance";
+        protected const string demoralizingShoutSpell = "Demoralizing Shout";
+        protected const string devastateSpell = "Devastate";
+        protected const string disarmSpell = "Disarm";
+        protected const string executeSpell = "Execute";
+        protected const string hamstringSpell = "Hamstring";
+        protected const string heroicStrikeSpell = "Heroic Strike";
+        protected const string heroicThrowSpell = "Heroic Throw";
+        protected const string interceptSpell = "Intercept";
+        protected const string intimidatingShoutSpell = "Intimidating Shout";
+        protected const string lastStandSpell = "Last Stand";
+        protected const string mockingBlowSpell = "Mocking Blow";
+        protected const string mortalStrikeSpell = "Mortal Strike";
+        protected const string overpowerSpell = "Overpower";
+        protected const string rendSpell = "Rend";
+        protected const string retaliationSpell = "Retaliation";
+        protected const string revengeSpell = "Revenge";
+        protected const string shieldBashSpell = "Shield Bash";
+        protected const string shieldBlockSpell = "Shield Block";
+        protected const string shieldSlamSpell = "Shield Slam";
+        protected const string shieldWallSpell = "Shield Wall";
+        protected const string shockwaveSpell = "Shockwave";
+        protected const string spellReflectionSpell = "Spell Reflection";
+        protected const string tauntSpell = "Taunt";
+        protected const string thunderClapSpell = "Thunder Clap";
+        protected const string victoryRushSpell = "Victory Rush";
+        protected const string whirlwindSpell = "Whirlwind";
+
+        #endregion Warrior
+
         protected BasicCombatClass(WowInterface wowInterface, AmeisenBotStateMachine stateMachine)
         {
             WowInterface = wowInterface;
@@ -253,9 +597,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // Race abilities
             // -------------- >
 
+            if (WowInterface.ObjectManager.Player.Race == WowRace.Human
+                && (WowInterface.ObjectManager.Player.IsDazed
+                    || WowInterface.ObjectManager.Player.IsFleeing
+                    || WowInterface.ObjectManager.Player.IsInfluenced
+                    || WowInterface.ObjectManager.Player.IsPossessed)
+                && CastSpellIfPossible("Every Man for Himself", 0))
+            {
+                return;
+            }
+
             if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
                 && WowInterface.ObjectManager.Player.HealthPercentage < 50
                 && CastSpellIfPossible("Stoneform", 0))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.Race == WowRace.Draenei
+                && WowInterface.ObjectManager.Player.HealthPercentage < 50
+                && CastSpellIfPossible("Gift of the Naaru", 0))
             {
                 return;
             }
@@ -291,7 +652,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
-                if (!isTargetMyself && !TargetInLineOfSight)
+                if (!isTargetMyself && WowInterface.ObjectManager.TargetGuid != 0 && !TargetInLineOfSight)
                 {
                     return false;
                 }
@@ -358,6 +719,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
+        }
+
+        protected bool CastSpellIfPossibleDkArea(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
+        {
+            if (CastSpellIfPossibleDk(spellName, guid, needsRuneenergy, needsBloodrune, needsFrostrune, needsUnholyrune, forceTargetSwitch))
+            {
+                WowUnit unit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
+                Vector3 pos = unit != null ? unit.Position : WowInterface.ObjectManager.Player.Position;
+                WowInterface.HookManager.ClickOnTerrain(pos);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         protected bool CastSpellIfPossibleRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
@@ -484,10 +861,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && !CooldownManager.IsSpellOnCooldown(SpellName)
                 && Spells[SpellName].Costs < WowInterface.ObjectManager.Player.Mana)
             {
-                IEnumerable<WowPlayer> players = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
-                List<WowPlayer> groupPlayers = players.Where(e => e.IsDead && e.Health == 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid)).ToList();
+                IEnumerable<WowPlayer> groupPlayers = WowInterface.ObjectManager.Partymembers
+                    .OfType<WowPlayer>()
+                    .Where(e => e.IsDead && e.Health == 0);
 
-                if (groupPlayers.Count > 0)
+                if (groupPlayers.Count() > 0)
                 {
                     WowPlayer player = groupPlayers.FirstOrDefault(e => !RessurrectionTargets.ContainsKey(e.Name) || RessurrectionTargets[e.Name] < DateTime.Now);
 

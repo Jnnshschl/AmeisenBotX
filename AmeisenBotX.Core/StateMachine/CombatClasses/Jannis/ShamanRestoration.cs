@@ -13,22 +13,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class ShamanRestoration : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string ancestralSpiritSpell = "Ancestral Spirit";
-        private const string chainHealSpell = "Chain Heal";
-        private const int deadPartymembersCheckTime = 4;
-        private const string earthlivingBuff = "Earthliving ";
-        private const string earthlivingWeaponSpell = "Earthliving Weapon";
-        private const string earthShieldSpell = "Earth Shield";
-        private const string healingWaveSpell = "Healing Wave";
-        private const string naturesSwiftnessSpell = "Nature's Swiftness";
-        private const string riptideSpell = "Riptide";
-        private const string tidalForceSpell = "Tidal Force";
-        private const string waterShieldSpell = "Water Shield";
-#pragma warning restore IDE0051
-
         public ShamanRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
@@ -59,19 +43,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override bool UseAutoAttacks => false;
-
-        public override bool WalkBehindEnemy => false;
-
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
-
-        public override string Version => "1.0";
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -108,9 +82,35 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => false;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
+
         public override void ExecuteCC()
         {
             if (NeedToHealSomeone())
+            {
+                return;
+            }
+        }
+
+        public override void OutOfCombatExecute()
+        {
+            if (MyAuraManager.Tick()
+                || NeedToHealSomeone()
+                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers(ancestralSpiritSpell)))
+            {
+                return;
+            }
+
+            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
                 return;
             }
@@ -158,22 +158,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
-        }
-
-        public override void OutOfCombatExecute()
-        {
-            if (MyAuraManager.Tick()
-                || NeedToHealSomeone()
-                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(ancestralSpiritSpell)))
-            {
-                return;
-            }
-
-            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
-            {
-                return;
-            }
         }
     }
 }

@@ -11,26 +11,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PaladinRetribution : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string avengingWrathSpell = "Avenging Wrath";
-        private const string blessingOfMightSpell = "Blessing of Might";
-        private const string consecrationSpell = "Consecration";
-        private const string crusaderStrikeSpell = "Crusader Strike";
-        private const string divinePleaSpell = "Divine Plea";
-        private const string divineStormSpell = "Divine Storm";
-        private const string exorcismSpell = "Exorcism";
-        private const string hammerOfJusticeSpell = "Hammer of Justice";
-        private const string hammerOfWrathSpell = "Hammer of Wrath";
-        private const string holyLightSpell = "Holy Light";
-        private const string holyWrathSpell = "Holy Wrath";
-        private const string judgementOfLightSpell = "Judgement of Light";
-        private const string layOnHandsSpell = "Lay on Hands";
-        private const string retributionAuraSpell = "Retribution Aura";
-        private const string sealOfVengeanceSpell = "Seal of Vengeance";
-#pragma warning restore IDE0051
-
         public PaladinRetribution(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -62,7 +42,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => true;
 
-        public override bool WalkBehindEnemy => false;
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_AXES, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_SWORDS });
+
+        public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -103,13 +85,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_AXES, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_SWORDS });
-
-        public override CombatClassRole Role => CombatClassRole.Dps;
+        public override bool UseAutoAttacks => true;
 
         public override string Version => "1.0";
 
-        public override bool UseAutoAttacks => true;
+        public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {

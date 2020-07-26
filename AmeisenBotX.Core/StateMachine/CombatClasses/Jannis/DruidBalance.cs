@@ -14,30 +14,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DruidBalance : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string barkskinSpell = "Barkskin";
-        private const int eclipseCheckTime = 1;
-        private const string eclipseLunarSpell = "Eclipse (Lunar)";
-        private const string eclipseSolarSpell = "Eclipse (Solar)";
-        private const string faerieFireSpell = "Faerie Fire";
-        private const string forceOfNatureSpell = "Force of Nature";
-        private const string innervateSpell = "Innervate";
-        private const string insectSwarmSpell = "Insect Swarm";
-        private const string markOfTheWildSpell = "Mark of the Wild";
-        private const string moonfireSpell = "Moonfire";
-        private const string moonkinFormSpell = "Moonkin Form";
-        private const string starfallSpell = "Starfall";
-        private const string starfireSpell = "Starfire";
-        private const string wrathSpell = "Wrath";
-#pragma warning restore IDE0051
-
         public DruidBalance(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell,0, true) },
+                { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, 0, true) },
+                { thornsSpell, () => CastSpellIfPossible(thornsSpell, 0, true) },
                 { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true) }
             };
 
@@ -82,8 +64,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public bool SolarEclipse { get; set; }
 
-        public override string Version => "1.0";
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
             Tree1 = new Dictionary<int, Talent>()
@@ -125,13 +105,34 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => false;
 
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {
-            if ((DateTime.Now - LastEclipseCheck > TimeSpan.FromSeconds(eclipseCheckTime)
-                    && CheckForEclipseProcs())
-                || (WowInterface.ObjectManager.Player.ManaPercentage < 30
+            CheckForEclipseProcs();
+
+            if (CastSpellIfPossible(naturesGraspSpell, 0))
+            {
+                return;
+            }
+
+            double distance = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+
+            if (distance < 12.0
+                && WowInterface.ObjectManager.Target.HasBuffByName(entanglingRootsSpell)
+                && CastSpellIfPossibleDk(entanglingRootsSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+            {
+                return;
+            }
+
+            if (NeedToHealMySelf())
+            {
+                return;
+            }
+
+            if ((WowInterface.ObjectManager.Player.ManaPercentage < 30
                     && CastSpellIfPossible(innervateSpell, 0))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 70
                     && CastSpellIfPossible(barkskinSpell, 0, true))
@@ -154,7 +155,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override void OutOfCombatExecute()
         {
             if (GroupAuraManager.Tick()
-                || MyAuraManager.Tick())
+                || MyAuraManager.Tick()
+                || NeedToHealMySelf())
             {
                 return;
             }
@@ -174,6 +176,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             LastEclipseCheck = DateTime.Now;
+            return false;
+        }
+
+        private bool NeedToHealMySelf()
+        {
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                && !WowInterface.ObjectManager.Player.HasBuffByName(rejuvenationSpell)
+                && CastSpellIfPossible(rejuvenationSpell, 0, true))
+            {
+                return true;
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                && CastSpellIfPossible(healingTouchSpell, 0, true))
+            {
+                return true;
+            }
+
             return false;
         }
     }

@@ -25,6 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             if (WowInterface.ObjectManager.Target != null
                 && WowInterface.ObjectManager.TargetGuid != 0
                 && (WowInterface.ObjectManager.Target.IsDead
+                || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly
                 || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
             {
                 WowInterface.HookManager.ClearTarget();

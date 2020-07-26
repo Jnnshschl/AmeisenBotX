@@ -41,6 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         private bool NeedToHealSomeone(out List<WowUnit> playersThatNeedHealing)
         {
             List<WowPlayer> groupPlayers = WowInterface.ObjectManager.WowObjects
+                .ToList()
                 .OfType<WowPlayer>()
                 .Where(e => !e.IsDead
                        && e.Health > 1

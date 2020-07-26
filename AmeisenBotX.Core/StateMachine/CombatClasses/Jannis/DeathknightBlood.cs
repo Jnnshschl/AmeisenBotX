@@ -1,8 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
+using System;
 using System.Collections.Generic;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
@@ -11,30 +14,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DeathknightBlood : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string armyOfTheDeadSpell = "Army of the Dead";
-        private const string bloodPlagueSpell = "Blood Plague";
-        private const string bloodBoilSpell = "Blood Boil";
-        private const string vampiricBloodSpell = "Vampiric Blood";
-        private const string deathAndDecaySpell = "Death and Decay";
-        private const string heartStrikeSpell = "Heart Strike";
-        private const string deathCoilSpell = "Death Coil";
-        private const string frostFeverSpell = "Frost Fever";
-        private const string bloodPresenceSpell = "Blood Presence";
-        private const string hornOfWinterSpell = "Horn of Winter";
-        private const string iceboundFortitudeSpell = "Icebound Fortitude";
-        private const string icyTouchSpell = "Icy Touch";
-        private const string mindFreezeSpell = "Mind Freeze";
-        private const string deathStrike = "Death Strike";
-        private const string plagueStrikeSpell = "Plague Strike";
-        private const string runeStrikeSpell = "Rune Strike";
-        private const string strangulateSpell = "Strangulate";
-        private const string runeTapSpell = "Rune Tap";
-        private const string unbreakableArmorSpell = "Unbreakable Armor";
-#pragma warning restore IDE0051
-
         public DeathknightBlood(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -54,9 +33,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossibleDk(mindFreezeSpell, x.Guid, true) },
                 { 1, (x) => CastSpellIfPossibleDk(strangulateSpell, x.Guid, false, true) }
             };
-        }
 
-        public override bool UseAutoAttacks => true;
+            BloodBoilEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+        }
 
         public override string Author => "Jannis";
 
@@ -64,9 +43,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "FCFS based CombatClass for the Frost Deathknight spec.";
+        public override string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
-        public override string Displayname => "Deathknight Frost";
+        public override string Displayname => "Deathknight Blood";
 
         public override bool HandlesMovement => false;
 
@@ -75,8 +54,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -115,7 +92,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
+
+        private TimegatedEvent BloodBoilEvent { get; }
 
         public override void ExecuteCC()
         {
@@ -124,22 +107,44 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
             }
 
-            int nearEnemies = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 12.0).Count;
+            if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 6.0
+                && CastSpellIfPossibleDk(deathGripSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+            {
+                return;
+            }
+
+            if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
+                && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
+                && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+            {
+                return;
+            }
+
+            if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
+            {
+                return;
+            }
+
+            int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 12.0).Count;
 
             if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
                     && CastSpellIfPossibleDk(runeTapSpell, 0, false, false, true))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true))
+                    && (CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true) || CastSpellIfPossibleDk(antiMagicShellSpell, 0, true)))
                 || (WowInterface.ObjectManager.Player.HealthPercentage < 50
                     && CastSpellIfPossibleDk(vampiricBloodSpell, 0, false, false, true))
                 || (nearEnemies > 2
-                    && CastSpellIfPossibleDk(bloodBoilSpell, 0) || CastSpellIfPossibleDk(deathAndDecaySpell, 0))
+                    && (CastSpellIfPossibleDkArea(deathAndDecaySpell, 0) || (BloodBoilEvent.Run() && CastSpellIfPossibleDk(bloodBoilSpell, 0))))
                 || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
                 || CastSpellIfPossibleDk(deathStrike, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
                 || CastSpellIfPossibleDk(heartStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true)
-                || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
-                || (WowInterface.ObjectManager.Player.Runeenergy > 60
-                    && CastSpellIfPossibleDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
+                || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }

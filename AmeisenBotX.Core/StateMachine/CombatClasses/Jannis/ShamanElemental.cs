@@ -14,28 +14,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class ShamanElemental : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string ancestralSpiritSpell = "Ancestral Spirit";
-        private const string chainLightningSpell = "Chain Lightning";
-        private const int deadPartymembersCheckTime = 4;
-        private const string elementalMasterySpell = "Elemental Mastery";
-        private const string flameShockSpell = "Flame Shock";
-        private const string flametongueBuff = "Flametongue ";
-        private const string flametongueWeaponSpell = "Flametongue Weapon";
-        private const string healingWaveSpell = "Healing Wave";
-        private const string heroismSpell = "Heroism";
-        private const string hexSpell = "Hex";
-        private const string lavaBurstSpell = "Lava Burst";
-        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
-        private const string lightningBoltSpell = "Lightning Bolt";
-        private const string lightningShieldSpell = "Lightning Shield";
-        private const string thunderstormSpell = "Thunderstorm";
-        private const string waterShieldSpell = "Water Shield";
-        private const string windShearSpell = "Wind Shear";
-#pragma warning restore IDE0051
-
         public ShamanElemental(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -73,12 +51,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
-
-        private bool HexedTarget { get; set; }
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -118,7 +90,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => false;
 
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
+
+        private bool HexedTarget { get; set; }
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void ExecuteCC()
         {

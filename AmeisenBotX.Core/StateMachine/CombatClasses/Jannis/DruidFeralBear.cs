@@ -13,31 +13,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DruidFeralBear : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string barkskinSpell = "Barkskin";
-        private const string bashSpell = "Bash";
-        private const string berserkSpell = "Berserk";
-        private const string challengingRoarSpell = "Challenging Roar";
-        private const string direBearFormSpell = "Dire Bear Form";
-        private const string enrageSpell = "Enrage";
-        private const string faerieFireSpell = "Faerie Fire (Feral)";
-        private const string feralChargeSpell = "Feral Charge - Bear";
-        private const string frenziedRegenerationSpell = "Frenzied Regeneration";
-        private const string growlSpell = "Growl";
-        private const string healingTouchSpell = "Healing Touch";
-        private const string innervateSpell = "Innervate";
-        private const string lacerateSpell = "Lacerate";
-        private const string mangleSpell = "Mangle (Bear)";
-        private const string markOfTheWildSpell = "Mark of the Wild";
-        private const string rejuvenationSpell = "Rejuvenation";
-        private const string survivalInstinctsSpell = "Survival Instincts";
-        private const string swipeSpell = "Swipe (Bear)";
-#pragma warning restore IDE0051
-
-        public override bool WalkBehindEnemy => false;
-
         public DruidFeralBear(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -48,8 +23,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { faerieFireSpell, () => CastSpellIfPossible(faerieFireSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { mangleSpell, () => CastSpellIfPossible(mangleSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                // { faerieFireSpell, () => CastSpellIfPossible(faerieFireSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { mangleBearSpell, () => CastSpellIfPossible(mangleBearSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
@@ -77,10 +52,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicArmorComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Tank;
-
-        public override string Version => "1.0";
-
-        private bool InHealCombo { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -122,11 +93,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
         public override void ExecuteCC()
         {
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+            }
+
+            double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+
+            if (distanceToTarget > 9.0
+                && CastSpellIfPossible(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
+            {
+                return;
             }
 
             if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
@@ -135,49 +126,59 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
+            if (CastSpellIfPossible(berserkSpell, 0))
+            {
+                return;
+            }
+
+            if (NeedToHealMySelf())
+            {
+                return;
+            }
+
             int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count();
 
-            if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(barkskinSpell, 0, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 50
-                    && WowInterface.ObjectManager.Player.RagePercentage > 50
-                    && CastSpellIfPossible(frenziedRegenerationSpell, 0, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage > 80
-                    && WowInterface.ObjectManager.Player.RagePercentage < 10
+            if ((WowInterface.ObjectManager.Player.HealthPercentage > 80
                     && CastSpellIfPossible(enrageSpell, 0, true))
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    && CastSpellIfPossible(barkskinSpell, 0, true))
+                || (WowInterface.ObjectManager.Player.HealthPercentage < 75
+                    && CastSpellIfPossible(frenziedRegenerationSpell, 0, true))
                 || (nearEnemies > 2 && CastSpellIfPossible(challengingRoarSpell, 0, true))
-                || CastSpellIfPossible(feralChargeSpell, WowInterface.ObjectManager.TargetGuid, true)
                 || CastSpellIfPossible(lacerateSpell, WowInterface.ObjectManager.TargetGuid, true)
-                || (nearEnemies > 2 && CastSpellIfPossible(swipeSpell, 0, true)))
+                || (nearEnemies > 2 && CastSpellIfPossible(swipeSpell, 0, true))
+                || CastSpellIfPossible(mangleBearSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
-                return;
-            }
-
-            if (InHealCombo
-                && WowInterface.ObjectManager.Player.HealthPercentage < 25
-                && CastSpellIfPossible(rejuvenationSpell, 0, true))
-            {
-                InHealCombo = false;
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 25
-                && CastSpellIfPossible(healingTouchSpell, 0, true))
-            {
-                InHealCombo = WowInterface.ObjectManager.Player.ManaPercentage > 15;
                 return;
             }
         }
 
-        public override bool UseAutoAttacks => true;
-
         public override void OutOfCombatExecute()
         {
             if (GroupAuraManager.Tick()
-                || MyAuraManager.Tick())
+                || MyAuraManager.Tick()
+                || NeedToHealMySelf())
             {
                 return;
             }
+        }
+
+        private bool NeedToHealMySelf()
+        {
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                && !WowInterface.ObjectManager.Player.HasBuffByName(rejuvenationSpell)
+                && CastSpellIfPossible(rejuvenationSpell, 0, true))
+            {
+                return true;
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                && CastSpellIfPossible(healingTouchSpell, 0, true))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

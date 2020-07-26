@@ -13,29 +13,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PriestDiscipline : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string bindingHealSpell = "Binding Heal";
-        private const int deadPartymembersCheckTime = 4;
-        private const string desperatePrayerSpell = "Desperate Prayer";
-        private const string flashHealSpell = "Flash Heal";
-        private const string healSpell = "Lesser Heal";
-        private const string greaterHealSpell = "Greater Heal";
-        private const string hymnOfHopeSpell = "Hymn of Hope";
-        private const string innerFireSpell = "Inner Fire";
-        private const string penanceSpell = "Penance";
-        private const string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private const string powerWordShieldSpell = "Power Word: Shield";
-        private const string prayerOfHealingSpell = "Prayer of Healing";
-        private const string prayerOfMendingSpell = "Prayer of Mending";
-        private const string renewSpell = "Renew";
-        private const string resurrectionSpell = "Resurrection";
-        private const string weakenedSoulSpell = "Weakened Soul";
-        private const string smiteSpell = "Smite";
-        private const string shadowWordPainSpell = "Shadow Word: Pain";
-#pragma warning restore IDE0051
-
         public PriestDiscipline(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
@@ -75,12 +52,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
-        public override string Version => "1.0";
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
             Tree1 = new Dictionary<int, Talent>()
@@ -118,6 +89,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             Tree3 = new Dictionary<int, Talent>(),
         };
 
+        public override bool UseAutoAttacks => false;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
+
         public override void ExecuteCC()
         {
             if (!NeedToHealSomeone())
@@ -145,9 +126,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        public override bool WalkBehindEnemy => false;
-
-        public override bool UseAutoAttacks => false;
+        public override void OutOfCombatExecute()
+        {
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick()
+                || NeedToHealSomeone()
+                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
+                && HandleDeadPartymembers(resurrectionSpell)))
+            {
+                return;
+            }
+        }
 
         private bool NeedToHealSomeone()
         {
@@ -208,18 +197,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
-        }
-
-        public override void OutOfCombatExecute()
-        {
-            if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick()
-                || NeedToHealSomeone()
-                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(resurrectionSpell)))
-            {
-                return;
-            }
         }
     }
 }

@@ -16,20 +16,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PaladinHoly : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string blessingOfWisdomSpell = "Blessing of Wisdom";
-        private const string devotionAuraSpell = "Devotion Aura";
-        private const string divineFavorSpell = "Divine Favor";
-        private const string divineIlluminationSpell = "Divine Illumination";
-        private const string divinePleaSpell = "Divine Plea";
-        private const string flashOfLightSpell = "Flash of Light";
-        private const string holyLightSpell = "Holy Light";
-        private const string holyShockSpell = "Holy Shock";
-        private const string layOnHandsSpell = "Lay on Hands";
-#pragma warning restore IDE0051
-
         public PaladinHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
@@ -70,14 +56,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
-        public override string Version => "1.0";
-
-        private TimegatedEvent FaceEvent { get; set; }
-
-        private DateTime LastHealAction { get; set; }
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
             Tree1 = new Dictionary<int, Talent>()
@@ -113,6 +91,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 7, new Talent(3, 7, 5) },
             },
         };
+
+        public override bool UseAutoAttacks => false;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private TimegatedEvent FaceEvent { get; set; }
+
+        private DateTime LastHealAction { get; set; }
+
+        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void ExecuteCC()
         {
@@ -155,10 +145,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
         }
-
-        public override bool UseAutoAttacks => false;
-
-        public override bool WalkBehindEnemy => false;
 
         public override void OutOfCombatExecute()
         {

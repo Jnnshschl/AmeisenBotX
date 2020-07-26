@@ -314,6 +314,7 @@ namespace AmeisenBotX.Core
             // ------------------------------------ >
             CombatClasses = new List<ICombatClass>
             {
+                new Statemachine.CombatClasses.Jannis.DeathknightBlood(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.DeathknightFrost(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.DeathknightUnholy(WowInterface, StateMachine),
                 new Statemachine.CombatClasses.Jannis.DruidBalance(WowInterface, StateMachine),

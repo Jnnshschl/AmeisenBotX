@@ -13,25 +13,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class MageArcane : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string arcaneBarrageSpell = "Arcane Barrage";
-        private const string arcaneBlastSpell = "Arcane Blast";
-        private const string arcaneIntellectSpell = "Arcane Intellect";
-        private const string arcaneMissilesSpell = "Arcane Missiles";
-        private const string counterspellSpell = "Counterspell";
-        private const string evocationSpell = "Evocation";
-        private const string fireballSpell = "Fireball";
-        private const string iceBlockSpell = "Ice Block";
-        private const string icyVeinsSpell = "Icy Veins";
-        private const string mageArmorSpell = "Mage Armor";
-        private const string manaShieldSpell = "Mana Shield";
-        private const string mirrorImageSpell = "Mirror Image";
-        private const string missileBarrageSpell = "Missile Barrage";
-        private const string spellStealSpell = "Spellsteal";
-#pragma warning restore IDE0051
-
         public MageArcane(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -70,10 +51,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public DateTime LastSpellstealCheck { get; private set; }
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
-
-        public override bool WalkBehindEnemy => false;
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -114,6 +91,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => false;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
         public override void ExecuteCC()
         {
             if (WowInterface.ObjectManager.Target != null)
@@ -132,8 +115,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             }
         }
-
-        public override bool UseAutoAttacks => false;
 
         public override void OutOfCombatExecute()
         {

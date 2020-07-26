@@ -11,24 +11,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PriestShadow : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const int deadPartymembersCheckTime = 4;
-        private const string devouringPlagueSpell = "Devouring Plague";
-        private const string flashHealSpell = "Flash Heal";
-        private const string hymnOfHopeSpell = "Hymn of Hope";
-        private const string mindBlastSpell = "Mind Blast";
-        private const string mindFlaySpell = "Mind Flay";
-        private const string powerWordFortitudeSpell = "Power Word: Fortitude";
-        private const string resurrectionSpell = "Resurrection";
-        private const string shadowfiendSpell = "Shadowfiend";
-        private const string shadowformSpell = "Shadowform";
-        private const string shadowWordPainSpell = "Shadow Word: Pain";
-        private const string vampiricEmbraceSpell = "Vampiric Embrace";
-        private const string vampiricTouchSpell = "Vampiric Touch";
-#pragma warning restore IDE0051
-
         public PriestShadow(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -66,10 +48,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -110,7 +88,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => false;
 
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void ExecuteCC()
         {

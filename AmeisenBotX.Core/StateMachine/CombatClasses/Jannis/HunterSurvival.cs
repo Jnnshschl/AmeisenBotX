@@ -15,39 +15,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class HunterSurvival : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string aimedShotSpell = "Aimed Shot";
-        private const string arcaneShotSpell = "Arcane Shot";
-        private const string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
-        private const string blackArrowSpell = "Black Arrow";
-        private const string callPetSpell = "Call Pet";
-        private const string concussiveShotSpell = "Concussive Shot";
-        private const string deterrenceSpell = "Deterrence";
-        private const string disengageSpell = "Disengage";
-        private const string explosiveShotSpell = "Explosive Shot";
-        private const string feignDeathSpell = "Feign Death";
-        private const string frostTrapSpell = "Frost Trap";
-        private const string huntersMarkSpell = "Hunter's Mark";
-        private const string killCommandSpell = "Kill Command";
-        private const string killShotSpell = "Kill Shot";
-        private const string mendPetSpell = "Mend Pet";
-        private const string mongooseBiteSpell = "Mongoose Bite";
-        private const string multiShotSpell = "Multi-Shot";
-        private const string rapidFireSpell = "Rapid Fire";
-        private const string raptorStrikeSpell = "Raptor Strike";
-        private const string revivePetSpell = "Revive Pet";
-        private const string serpentStingSpell = "Serpent Sting";
-        private const string steadyShotSpell = "Steady Shot";
-        private const string wingClipSpell = "Wing Clip";
-        private const string wyvernStingSpell = "Wyvern Sting";
-#pragma warning restore IDE0051
-
         public HunterSurvival(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            PetManager = new PetManager(
-                WowInterface,
+            PetManager = new PetManager(WowInterface,
                 TimeSpan.FromSeconds(15),
                 () => CastSpellIfPossible(mendPetSpell, 0, true),
                 () => CastSpellIfPossible(callPetSpell, 0),
@@ -71,8 +41,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
         }
 
-        public override bool WalkBehindEnemy => false;
-
         public override string Author => "Jannis";
 
         public override WowClass Class => WowClass.Hunter;
@@ -90,14 +58,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
-
-        private bool ReadyToDisengage { get; set; } = false;
-
-        private bool SlowTargetWhenPossible { get; set; } = false;
-
-        private PetManager PetManager { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -135,6 +95,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         };
 
         public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private PetManager PetManager { get; set; }
+
+        private bool ReadyToDisengage { get; set; } = false;
+
+        private bool SlowTargetWhenPossible { get; set; } = false;
 
         public override void ExecuteCC()
         {

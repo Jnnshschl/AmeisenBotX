@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -13,27 +14,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DruidRestoration : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const int deadPartymembersCheckTime = 4;
-        private const string healingTouchSpell = "Healing Touch";
-        private const string innervateSpell = "Innervate";
-        private const string lifebloomSpell = "Lifebloom";
-        private const string markOfTheWildSpell = "Mark of the Wild";
-        private const string naturesSwiftnessSpell = "Nature's Swiftness";
-        private const string nourishSpell = "Nourish";
-        private const string regrowthSpell = "Regrowth";
-        private const string rejuvenationSpell = "Rejuvenation";
-        private const string reviveSpell = "Revive";
-        private const string swiftmendSpell = "Swiftmend";
-        private const string tranquilitySpell = "Tranquility";
-        private const string treeOfLifeSpell = "Tree of Life";
-        private const string wildGrowthSpell = "Wild Growth";
-#pragma warning restore IDE0051
-
-        public override bool WalkBehindEnemy => false;
-
         public DruidRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             UseDefaultTargetSelection = false;
@@ -44,14 +24,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
-            SpellUsageHealDict = new Dictionary<int, string>()
-            {
-                { 0, nourishSpell },
-                { 3000, regrowthSpell },
-                { 5000, healingTouchSpell },
-            };
-
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+
+            SwiftmendEvent = new TimegatedEvent(TimeSpan.FromSeconds(15));
         }
 
         public override string Author => "Jannis";
@@ -71,12 +46,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
-
-        public override string Version => "1.0";
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
-        private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -117,6 +86,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => false;
 
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private TimegatedEvent SwiftmendEvent { get; }
+
         public override void ExecuteCC()
         {
             if (WowInterface.ObjectManager.Player.ManaPercentage < 30
@@ -131,65 +106,81 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        private bool NeedToHealSomeone()
-        {
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
-            {
-                WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-
-                if (unitsToHeal.Count > 3
-                    && CastSpellIfPossible(tranquilitySpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return true;
-                }
-
-                WowUnit target = WowInterface.ObjectManager.Target;
-                if (target != null)
-                {
-                    WowInterface.ObjectManager.UpdateObject(target);
-                    if ((target.HealthPercentage < 15
-                            && CastSpellIfPossible(naturesSwiftnessSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (target.HealthPercentage < 90
-                            && !WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
-                            && CastSpellIfPossible(rejuvenationSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (target.HealthPercentage < 85
-                            && !WowInterface.ObjectManager.Target.HasBuffByName(wildGrowthSpell)
-                            && CastSpellIfPossible(wildGrowthSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (target.HealthPercentage < 70
-                            && (WowInterface.ObjectManager.Target.HasBuffByName(regrowthSpell)
-                                || WowInterface.ObjectManager.Target.HasBuffByName(rejuvenationSpell)
-                            && CastSpellIfPossible(swiftmendSpell, WowInterface.ObjectManager.TargetGuid, true))))
-                    {
-                        return true;
-                    }
-
-                    double healthDifference = target.MaxHealth - target.Health;
-                    List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                    foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                    {
-                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
         public override void OutOfCombatExecute()
         {
             if (GroupAuraManager.Tick()
                 || MyAuraManager.Tick()
                 || NeedToHealSomeone()
-                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                    && HandleDeadPartymembers(reviveSpell)))
+                || HandleDeadPartymembers(reviveSpell))
             {
                 return;
             }
+        }
+
+        private bool NeedToHealSomeone()
+        {
+            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal)
+                && unitsToHeal.Count > 0)
+            {
+                if (unitsToHeal.Count > 3
+                    && CastSpellIfPossible(tranquilitySpell, 0, true))
+                {
+                    return true;
+                }
+
+                WowUnit target = unitsToHeal.First();
+
+                if (target.HealthPercentage < 15
+                    && CastSpellIfPossible(naturesSwiftnessSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 55
+                    && !target.HasBuffByName(regrowthSpell)
+                    && CastSpellIfPossible(regrowthSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 70
+                    && (target.HasBuffByName(regrowthSpell) || target.HasBuffByName(rejuvenationSpell))
+                    && SwiftmendEvent.Ready
+                    && CastSpellIfPossible(swiftmendSpell, target.Guid, true)
+                    && SwiftmendEvent.Run())
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 85
+                        && !target.HasBuffByName(wildGrowthSpell)
+                        && CastSpellIfPossible(wildGrowthSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 90
+                        && !target.HasBuffByName(rejuvenationSpell)
+                        && CastSpellIfPossible(rejuvenationSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 65
+                    && (target.HasBuffByName(regrowthSpell) || target.HasBuffByName(rejuvenationSpell) || target.HasBuffByName(wildGrowthSpell))
+                    && CastSpellIfPossible(nourishSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 85
+                        && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

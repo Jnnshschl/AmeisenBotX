@@ -14,32 +14,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class ShamanEnhancement : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const int deadPartymembersCheckTime = 4;
-        private const string ancestralSpiritSpell = "Ancestral Spirit";
-        private const string earthShockSpell = "Earth Shock";
-        private const string feralSpiritSpell = "Feral Spirit";
-        private const string flameShockSpell = "Flame Shock";
-        private const string flametoungueBuff = "Flametongue ";
-        private const string flametoungueWeaponSpell = "Flametongue Weapon";
-        private const string healingWaveSpell = "Healing Wave";
-        private const string heroismSpell = "Heroism";
-        private const string hexSpell = "Hex";
-        private const string lavaLashSpell = "Lava Lash";
-        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
-        private const string lightningBoltSpell = "Lightning Bolt";
-        private const string lightningShieldSpell = "Lightning Shield";
-        private const string maelstromWeaponSpell = "Mealstrom Weapon";
-        private const string shamanisticRageSpell = "Shamanistic Rage";
-        private const string stormstrikeSpell = "Stormstrike";
-        private const string waterShieldSpell = "Water Shield";
-        private const string windfuryBuff = "Windfury";
-        private const string windfuryWeaponSpell = "Windfury Weapon";
-        private const string windShearSpell = "Wind Shear";
-#pragma warning restore IDE0051
-
         public ShamanEnhancement(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -60,8 +34,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
         }
 
-        public override bool WalkBehindEnemy => false;
-
         public override string Author => "Jannis";
 
         public override WowClass Class => WowClass.Shaman;
@@ -79,12 +51,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
-
-        private bool HexedTarget { get; set; }
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -123,6 +89,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         };
 
         public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private bool HexedTarget { get; set; }
+
+        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void ExecuteCC()
         {

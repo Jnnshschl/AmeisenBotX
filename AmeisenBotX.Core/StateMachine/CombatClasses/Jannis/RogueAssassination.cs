@@ -11,20 +11,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class RogueAssassination : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string cloakOfShadowsSpell = "Cloak of Shadows";
-        private const string coldBloodSpell = "Cold Blood";
-        private const string eviscerateSpell = "Eviscerate";
-        private const string hungerForBloodSpell = "Hunger for Blood";
-        private const string kickSpell = "Kick";
-        private const string mutilateSpell = "Mutilate";
-        private const string sliceAndDiceSpell = "Slice and Dice";
-        private const string sprintSpell = "Sprint";
-        private const string stealthSpell = "Stealth";
-#pragma warning restore IDE0051
-
         public RogueAssassination(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -41,8 +27,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override bool WalkBehindEnemy => true;
-
         public override WowClass Class => WowClass.Rogue;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
@@ -58,8 +42,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicAgilityComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -97,6 +79,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         };
 
         public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => true;
 
         public override void ExecuteCC()
         {

@@ -11,27 +11,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PaladinProtection : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string avengersShieldSpell = "Avenger\'s Shield";
-        private const string blessingOfKingsSpell = "Blessing of Kings";
-        private const string consecrationSpell = "Consecration";
-        private const string devotionAuraSpell = "Devotion Aura";
-        private const string divinePleaSpell = "Divine Plea";
-        private const string flashOfLightSpell = "Flash of Light";
-        private const string hammerOfJusticeSpell = "Hammer of Justice";
-        private const string hammerOfTheRighteousSpell = "Hammer of the Righteous";
-        private const string hammerOfWrathSpell = "Hammer of Wrath";
-        private const string holyLightSpell = "Holy Light";
-        private const string holyShieldSpell = "Holy Shield";
-        private const string judgementOfLightSpell = "Judgement of Light";
-        private const string layOnHandsSpell = "Lay on Hands";
-        private const string righteousFurySpell = "Righteous Fury";
-        private const string sealOfVengeanceSpell = "Seal of Vengeance";
-        private const string shieldOfTheRighteousnessSpell = "Shield of the Righteousness";
-#pragma warning restore IDE0051
-
         public PaladinProtection(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -50,8 +29,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfKingsSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
 
-        public override bool WalkBehindEnemy => false;
-
         public override string Author => "Jannis";
 
         public override WowClass Class => WowClass.Paladin;
@@ -69,8 +46,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Tank;
-
-        public override string Version => "1.0";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -110,6 +85,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         };
 
         public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {

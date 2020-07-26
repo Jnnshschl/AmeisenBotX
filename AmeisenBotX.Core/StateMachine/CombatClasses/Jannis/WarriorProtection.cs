@@ -15,38 +15,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class WarriorProtection : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string battleStanceSpell = "Battle Stance";
-        private const string berserkerRageSpell = "Berserker Rage";
-        private const string bloodrageSpell = "Bloodrage";
-        private const string challengingShoutSpell = "Challenging Shout";
-        private const string chargeSpell = "Charge";
-        private const string commandingShoutSpell = "Commanding Shout";
-        private const string concussionBlowSpell = "Concussion Blow";
-        private const string defensiveStanceSpell = "Defensive Stance";
-        private const string demoralizingShoutSpell = "Demoralizing Shout";
-        private const string devastateSpell = "Devastate";
-        private const string disarmSpell = "Disarm";
-        private const string executeSpell = "Execute";
-        private const string heroicStrikeSpell = "Heroic Strike";
-        private const string heroicThrowSpell = "Heroic Throw";
-        private const string lastStandSpell = "Last Stand";
-        private const string mockingBlowSpell = "Mocking Blow";
-        private const string retaliationSpell = "Retaliation";
-        private const string revengeSpell = "Revenge";
-        private const string shieldBashSpell = "Shield Bash";
-        private const string shieldBlockSpell = "Shield Block";
-        private const string shieldSlamSpell = "Shield Slam";
-        private const string shieldWallSpell = "Shield Wall";
-        private const string shockwaveSpell = "Shockwave";
-        private const string spellReflectionSpell = "Spell Reflection";
-        private const string tauntSpell = "Taunt";
-        private const string thunderClapSpell = "Thunder Clap";
-        private const string victoryRushSpell = "Victory Rush";
-#pragma warning restore IDE0051
-
         public WarriorProtection(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -68,11 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
 
-        private TimegatedEvent HeroicStrikeEvent { get; }
-
         public override string Author => "Jannis";
-
-        public override bool WalkBehindEnemy => false;
 
         public override WowClass Class => WowClass.Warrior;
 
@@ -85,8 +49,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => true;
-
-        public override bool UseAutoAttacks => true;
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new List<ArmorType>()
         {
@@ -110,8 +72,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         });
 
         public override CombatClassRole Role => CombatClassRole.Tank;
-
-        public override string Version => "1.1";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -152,6 +112,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 27, new Talent(3, 27, 1) },
             },
         };
+
+        public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.1";
+
+        public override bool WalkBehindEnemy => false;
+
+        private TimegatedEvent HeroicStrikeEvent { get; }
 
         public override void ExecuteCC()
         {

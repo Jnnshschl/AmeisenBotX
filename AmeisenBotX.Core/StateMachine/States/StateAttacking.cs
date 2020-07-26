@@ -17,11 +17,15 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
 
+        public Vector3 Offset { get; set; }
+
         public bool TargetInLos { get; private set; }
 
         private TimegatedEvent FacingCheck { get; set; }
 
         private TimegatedEvent<bool> LineOfSightCheck { get; set; }
+
+        private TimegatedEvent RandomPosEvent { get; }
 
         public override void Enter()
         {
@@ -65,7 +69,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                             if (WowInterface.CombatClass != null)
                             {
-                                WowInterface.CombatClass.TargetInLineOfSight = TargetInLos;
+                                WowInterface.CombatClass.TargetInLineOfSight = WowInterface.ObjectManager.TargetGuid == 0 || TargetInLos;
                             }
                         }
                     }
@@ -104,10 +108,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public Vector3 Offset { get; set; }
-
-        private TimegatedEvent RandomPosEvent { get; }
-
         public override void Exit()
         {
             WowInterface.MovementEngine.Reset();
@@ -143,7 +143,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (distance > DistanceToKeep || !TargetInLos)
             {
-                Vector3 positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), (float)GetMeeleRange() / 2.0f * -1f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                Vector3 positionToGoTo = WowInterface.CombatClass != null && WowInterface.CombatClass.WalkBehindEnemy ? BotMath.CalculatePositionBehind(target.Position, target.Rotation)
+                    : BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), (float)GetMeeleRange() / 2.0f * -1f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
                 WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }

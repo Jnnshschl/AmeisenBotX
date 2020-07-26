@@ -11,26 +11,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DeathknightFrost : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string armyOfTheDeadSpell = "Army of the Dead";
-        private const string bloodPlagueSpell = "Blood Plague";
-        private const string bloodStrikeSpell = "Blood Strike";
-        private const string deathCoilSpell = "Death Coil";
-        private const string frostFeverSpell = "Frost Fever";
-        private const string frostPresenceSpell = "Frost Presence";
-        private const string hornOfWinterSpell = "Horn of Winter";
-        private const string iceboundFortitudeSpell = "Icebound Fortitude";
-        private const string icyTouchSpell = "Icy Touch";
-        private const string mindFreezeSpell = "Mind Freeze";
-        private const string obliterateSpell = "Obliterate";
-        private const string plagueStrikeSpell = "Plague Strike";
-        private const string runeStrikeSpell = "Rune Strike";
-        private const string strangulateSpell = "Strangulate";
-        private const string unbreakableArmorSpell = "Unbreakable Armor";
-#pragma warning restore IDE0051
-
         public DeathknightFrost(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -52,8 +32,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             };
         }
 
-        public override bool UseAutoAttacks => true;
-
         public override string Author => "Jannis";
 
         public override WowClass Class => WowClass.Deathknight;
@@ -71,8 +49,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override IWowItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -113,6 +89,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
+        public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
@@ -120,6 +100,30 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+            }
+
+            if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+               && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+            {
+                return;
+            }
+
+            if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
+                && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
+                && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
+                && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+            {
+                return;
+            }
+
+            if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
+            {
+                return;
             }
 
             if ((WowInterface.ObjectManager.Player.HealthPercentage < 60

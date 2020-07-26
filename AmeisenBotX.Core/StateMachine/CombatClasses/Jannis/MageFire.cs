@@ -12,24 +12,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class MageFire : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string arcaneIntellectSpell = "Arcane Intellect";
-        private const string counterspellSpell = "Counterspell";
-        private const string evocationSpell = "Evocation";
-        private const string fireballSpell = "Fireball";
-        private const string hotstreakSpell = "Hot Streak";
-        private const string iceBlockSpell = "Ice Block";
-        private const string livingBombSpell = "Living Bomb";
-        private const string manaShieldSpell = "Mana Shield";
-        private const string mirrorImageSpell = "Mirror Image";
-        private const string moltenArmorSpell = "Molten Armor";
-        private const string pyroblastSpell = "Pyroblast";
-        private const string scorchSpell = "Scorch";
-        private const string spellStealSpell = "Spellsteal";
-#pragma warning restore IDE0051
-
         public MageFire(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -73,8 +55,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
-        public override string Version => "1.0";
-
         public override TalentTree Talents { get; } = new TalentTree()
         {
             Tree1 = new Dictionary<int, Talent>()
@@ -111,6 +91,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         };
 
         public override bool UseAutoAttacks => false;
+
+        public override string Version => "1.0";
 
         public override bool WalkBehindEnemy => false;
 

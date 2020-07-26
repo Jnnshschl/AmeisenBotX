@@ -14,32 +14,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class WarlockDestruction : BasicCombatClass
     {
-        // author: Jannis Höschele
-
-#pragma warning disable IDE0051
-        private const string chaosBoltSpell = "Chaos Bolt";
-        private const string conflagrateSpell = "Conflagrate";
-        private const string corruptionSpell = "Corruption";
-        private const string curseOftheElementsSpell = "Curse of the Elements";
-        private const string deathCoilSpell = "Death Coil";
-        private const string demonArmorSpell = "Demon Armor";
-        private const string demonSkinSpell = "Demon Skin";
-        private const string drainLifeSpell = "Drain Life";
-        private const string drainSoulSpell = "Drain Soul";
-        private const int fearAttemptDelay = 5;
-        private const string fearSpell = "Fear";
-        private const string felArmorSpell = "Fel Armor";
-        private const string howlOfTerrorSpell = "Howl of Terror";
-        private const string immolateSpell = "Immolate";
-        private const string incinerateSpell = "Incinerate";
-        private const string lifeTapSpell = "Life Tap";
-        private const string summonImpSpell = "Summon Imp";
-#pragma warning restore IDE0051
-
         public WarlockDestruction(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            PetManager = new PetManager(
-                WowInterface,
+            PetManager = new PetManager(WowInterface,
                 TimeSpan.FromSeconds(1),
                 null,
                 () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell) && CastSpellIfPossible(summonImpSpell, 0),
@@ -71,19 +48,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override bool WalkBehindEnemy => false;
-
-        public override bool UseAutoAttacks => false;
-
         public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS });
 
         public PetManager PetManager { get; private set; }
 
         public override CombatClassRole Role => CombatClassRole.Dps;
-
-        public override string Version => "1.0";
-
-        private DateTime LastFearAttempt { get; set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -121,6 +90,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 26, new Talent(3, 26, 1) },
             },
         };
+
+        public override bool UseAutoAttacks => false;
+
+        public override string Version => "1.0";
+
+        public override bool WalkBehindEnemy => false;
+
+        private DateTime LastFearAttempt { get; set; }
 
         public override void ExecuteCC()
         {
