@@ -15,19 +15,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             //Basic
             AutoAttackEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-
-            //FuryWarrior
             TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            VictoryRushEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
-            RendEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
-            ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-
-            //Resto Shaman
-            earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
-            revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
-            manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
-            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
@@ -39,20 +27,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         //Basic
         public TimegatedEvent AutoAttackEvent { get; private set; }
+        public TimegatedEvent TargetSelectEvent { get; private set; }
 
         public abstract WowClass Class { get; }
 
         public abstract Dictionary<string, dynamic> Configureables { get; set; }
 
-        public CooldownManager CooldownManager { get; private set; }
-
         public abstract string Description { get; }
 
         public abstract string Displayname { get; }
 
-        public TimegatedEvent ExecuteEvent { get; private set; }
-
-        //Mount check
         public TimegatedEvent getonthemount { get; private set; }
 
         public abstract bool HandlesMovement { get; }
@@ -61,39 +45,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public List<string> PriorityTargets { get; set; }
 
         public abstract IWowItemComparator ItemComparator { get; set; }
-
-        //Resto Shaman
-        public TimegatedEvent earthShieldEvent { get; private set; }
-
-        public TimegatedEvent manaTideTotemEvent { get; private set; }
-
-        public TimegatedEvent naturesswiftEvent { get; private set; }
-
-        public TimegatedEvent revivePlayerEvent { get; private set; }
-
-        public TimegatedEvent riptideSpellEvent { get; private set; }
-        public TimegatedEvent totemcastEvent { get; private set; }
-        //-----
         public abstract CombatClassRole Role { get; }
 
         public abstract TalentTree Talents { get; }
 
         public bool TargetInLineOfSight { get; set; }
 
-        //FuryWarrior
-        public TimegatedEvent TargetSelectEvent { get; private set; }
-
-        public TimegatedEvent RendEvent { get; private set; }
-
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
-
-        public TimegatedEvent VictoryRushEvent { get; private set; }
-        //-----
-        public TimegatedEvent UpdatePriorityUnits { get; set; }
-
         public abstract bool UseAutoAttacks { get; }
-
-        public bool UseDefaultTargetSelection { get; protected set; } = true;
 
         public abstract string Version { get; }
 

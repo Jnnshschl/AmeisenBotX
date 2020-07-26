@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Jobs
                             int usedItems = 0;
                             foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items)
                             {
-                                if (Config.ItemSellBlacklist.Contains(item.Name) || item.Name.Contains("Pickaxe", StringComparison.OrdinalIgnoreCase))
+                                if (Config.ItemSellBlacklist.Contains(item.Name) || item.Name.Contains("Mining Pick", StringComparison.OrdinalIgnoreCase))
                                 {
                                     continue;
                                 }

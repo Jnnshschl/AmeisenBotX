@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -18,6 +19,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         //Race (Troll)
         private const string BerserkingSpell = "Berserking";
 
+        //Race (Draenei)
+        private const string giftOfTheNaaruSpell = "Gift of the Naaru";
+
+        //Spells
+        private const string healingWaveSpell = "Healing Wave";
+        private const string windShearSpell = "Wind Shear";
+        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
         private const string Bloodlust = "Bloodlust";
         private const string CalloftheElementsSpell = "Call of the Elements";
         private const string chainHealSpell = "Chain Heal";
@@ -25,31 +33,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string earthlivingWeaponSpell = "Earthliving Weapon";
         private const string earthShieldSpell = "Earth Shield";
 
-        //Race (Draenei)
-        private const string giftOfTheNaaruSpell = "Gift of the Naaru";
-
-        //Spells / Heal
-        private const string healingWaveSpell = "Healing Wave";
-
-        private const string lesserHealingWaveSpell = "Lesser Healing Wave";
-
         //Spells / DMG
         private const string LightningBoltSpell = "Lightning Bolt";
-
-        private const string LightningShieldSpell = "Lightning Shield";
-        private const string ManaSpringTotemSpell = "Mana Spring Totem";
-        private const string ManaTideTotemSpell = "Mana Tide Totem";
+        private const string flameShockSpell = "Flame Shock";
+        private const string earthShockSpell = "Earth Shock";
 
         //CD|Buffs
         private const string naturesswiftSpell = "Nature's Swiftness";
-
+        private const string heroismSpell = "Heroism";
         private const string riptideSpell = "Riptide";
-        private const string StrengthofEarthTotemSpell = "Strength of Earth Totem";
         private const string tidalForceSpell = "Tidal Force";
         private const string watershieldSpell = "Water shield";
+        private const string LightningShieldSpell = "Lightning Shield";
 
         //Totem
         private const string WindfuryTotemSpell = "Windfury Totem";
+        private const string ManaTideTotemSpell = "Mana Tide Totem";
+        private const string StrengthofEarthTotemSpell = "Strength of Earth Totem";
+        private const string ManaSpringTotemSpell = "Mana Spring Totem";
 
         private bool hasTotemItems = false;
         private Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
@@ -57,8 +58,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public RestorationShaman(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
+
+            //Race
+            spellCoolDown.Add(giftOfTheNaaruSpell, DateTime.Now);
+
             //Spells / DMG
             spellCoolDown.Add(LightningBoltSpell, DateTime.Now);
+            spellCoolDown.Add(flameShockSpell, DateTime.Now);
+            spellCoolDown.Add(earthShockSpell, DateTime.Now);
+
             //Spells
             spellCoolDown.Add(healingWaveSpell, DateTime.Now);
             spellCoolDown.Add(lesserHealingWaveSpell, DateTime.Now);
@@ -69,20 +77,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(chainHealSpell, DateTime.Now);
             spellCoolDown.Add(earthlivingBuff, DateTime.Now);
             spellCoolDown.Add(earthlivingWeaponSpell, DateTime.Now);
-            //Race
-            spellCoolDown.Add(giftOfTheNaaruSpell, DateTime.Now);
+            spellCoolDown.Add(windShearSpell, DateTime.Now);
+
             //CD|Buffs
             spellCoolDown.Add(naturesswiftSpell, DateTime.Now);
+            spellCoolDown.Add(heroismSpell, DateTime.Now);
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
             spellCoolDown.Add(Bloodlust, DateTime.Now);
             spellCoolDown.Add(tidalForceSpell, DateTime.Now);
             spellCoolDown.Add(earthShieldSpell, DateTime.Now);
+
             //Totem
             spellCoolDown.Add(WindfuryTotemSpell, DateTime.Now);
             spellCoolDown.Add(StrengthofEarthTotemSpell, DateTime.Now);
             spellCoolDown.Add(ManaSpringTotemSpell, DateTime.Now);
             spellCoolDown.Add(ManaTideTotemSpell, DateTime.Now);
             spellCoolDown.Add(CalloftheElementsSpell, DateTime.Now);
+
+            //Time event
+            earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
+            revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
+            manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
+            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
 
         public override string Author => "Lukas";
@@ -91,17 +107,30 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "Basic Resto Shaman";
+        public override string Description => "Resto Shaman";
 
         public override string Displayname => "Shaman Restoration";
 
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => false;
+        public bool UseSpellOnlyInCombat { get; private set; }
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Heal;
+
+        //Time event
+        public TimegatedEvent earthShieldEvent { get; private set; }
+
+        public TimegatedEvent manaTideTotemEvent { get; private set; }
+
+        public TimegatedEvent naturesswiftEvent { get; private set; }
+
+        public TimegatedEvent revivePlayerEvent { get; private set; }
+
+        public TimegatedEvent riptideSpellEvent { get; private set; }
+        public TimegatedEvent totemcastEvent { get; private set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -142,12 +171,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override bool UseAutoAttacks => false;
 
-        public override string Version => "2.0";
+        public override string Version => "2.1";
 
         public override bool WalkBehindEnemy => false;
 
         public override void ExecuteCC()
         {
+            UseSpellOnlyInCombat = true;
             Shield();
             StartHeal();
         }
@@ -165,6 +195,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             {
                 return;
             }
+            UseSpellOnlyInCombat = false;
             Shield();
             StartHeal();
         }
@@ -244,8 +275,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             {
                 return;
             }
-        }  
-        
+        }
+
         private void totemItemCheck()
         {
             if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
@@ -261,13 +292,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private void StartHeal()
         {
-            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 98 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
+            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
 
             if (partyMemberToHeal.Count > 0)
             {
                 if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.FirstOrDefault().Guid)
                 {
                     WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                }
+
+                if (WowInterface.ObjectManager.Target.HealthPercentage >= 94)
+                {
+                    WowInterface.HookManager.LuaDoString("SpellStopCasting()");
+                    return;
                 }
 
                 targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
@@ -285,47 +322,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             WowInterface.MovementEngine.Reset();
                         }
 
-                        totemItemCheck();
-                        if (totemcastEvent.Run() && hasTotemItems)
-                        {
-                            if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
-                            {
-                                return;
-                            }
-                            if (totemcastEvent.Run()
-                                && WowInterface.ObjectManager.Player.ManaPercentage >= 50
-                                && (!WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Strength of Earth")
-                                || !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem")))
-                            {
-                                if (CustomCastSpell(CalloftheElementsSpell))
-                                {
-                                    return;
-                                }
-                            }
-                        }
-
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 20 && CustomCastSpell(naturesswiftSpell) && CustomCastSpell(healingWaveSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 40 && CustomCastSpell(tidalForceSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 20 && CustomCastSpell(naturesswiftSpell) && CustomCastSpell(healingWaveSpell))
                         {
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 40 && CustomCastSpell(Bloodlust))
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 40 && CustomCastSpell(tidalForceSpell))
                         {
                             return;
                         }
+
+                        //if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 40 && CustomCastSpell(Bloodlust))
+                        //{
+                        //    return;
+                        //}
                         //Race Draenei
                         if (WowInterface.ObjectManager.Player.Race == WowRace.Draenei && WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(giftOfTheNaaruSpell))
-                        {
-                            return;
-                        }
-
-                        if (partyMemberToHeal.Count >= 4 && WowInterface.ObjectManager.Target.HealthPercentage >= 70 && CustomCastSpell(chainHealSpell))
                         {
                             return;
                         }
@@ -335,12 +352,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
+                        if (partyMemberToHeal.Count >= 4 && WowInterface.ObjectManager.Target.HealthPercentage >= 70 && CustomCastSpell(chainHealSpell))
+                        {
+                            return;
+                        }
+
                         if (WowInterface.ObjectManager.Target.HealthPercentage <= 75 && CustomCastSpell(lesserHealingWaveSpell))
                         {
                             return;
                         }
 
-                        if (earthShieldEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Earth Shield") && !WowInterface.ObjectManager.Target.HasBuffByName("Water Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
+                        if (UseSpellOnlyInCombat && earthShieldEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Earth Shield") && !WowInterface.ObjectManager.Target.HasBuffByName("Water Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
                         {
                             return;
                         }
@@ -354,8 +376,64 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
             else
             {
+                totemItemCheck();
+
+                if (totemcastEvent.Run() && hasTotemItems)
+                {
+                    if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Player.ManaPercentage >= 50
+                        && !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
+                        && !WowInterface.ObjectManager.Player.HasBuffByName("Stoneskin")
+                        && !WowInterface.ObjectManager.Player.HasBuffByName("Flametongue Totem")
+                        && CustomCastSpell(CalloftheElementsSpell))
+                    {
+                        return;
+                    }
+                }
+
+                if (TargetSelectEvent.Run())
+                {
+                    WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 30)
+                    .Where(e => e.IsInCombat && !e.IsNotAttackable)//&& e.IsCasting 
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
+
+                    if (nearTarget != null)
+                    {
+                        WowInterface.HookManager.TargetGuid(nearTarget.Guid);
+
+                        if (!TargetInLineOfSight)
+                        {
+                            return;
+                        }
+                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        {
+                            WowInterface.HookManager.StopClickToMoveIfActive();
+                            WowInterface.MovementEngine.Reset();
+                        }
+                        if (UseSpellOnlyInCombat && CustomCastSpell(windShearSpell))
+                        {
+                            return;
+                        } 
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 90 && CustomCastSpell(flameShockSpell))
+                        {
+                            return;
+                        }
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 90 && CustomCastSpell(earthShockSpell))
+                        {
+                            return;
+                        }
+                    }
+                }
+                //target gui id is bigger than null
+                //{
                 //WowInterface.HookManager.ClearTarget();
                 //return;
+                //}
                 //Attacken
             }
         }

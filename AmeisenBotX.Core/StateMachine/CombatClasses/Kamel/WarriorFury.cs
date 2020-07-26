@@ -85,6 +85,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(berserkerRageSpell, DateTime.Now);
             spellCoolDown.Add(deathWishSpell, DateTime.Now);
             spellCoolDown.Add(battleShoutSpell, DateTime.Now);
+
+            //Time event
+            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            VictoryRushEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
+            RendEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
+            ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public override string Author => "Lukas";
@@ -110,6 +116,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override string Version => "2.0";
+
+        //Time event
+        public TimegatedEvent RendEvent { get; private set; }
+
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
+
+        public TimegatedEvent VictoryRushEvent { get; private set; }
+
+        public TimegatedEvent ExecuteEvent { get; private set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
         {
@@ -180,6 +195,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
+                    if (WowInterface.ObjectManager.Target.IsCasting && CustomCastSpell(pummelSpell))
+                    {
+                        return;
+                    }
+
                     if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) && !WowInterface.ObjectManager.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
@@ -190,13 +210,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && IsSpellReady(enragedregenerationSpell) && IsSpellReady(bloodrageSpell))
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(bloodrageSpell) && CustomCastSpell(enragedregenerationSpell))
                     {
-                        WowInterface.HookManager.CastSpell(bloodrageSpell);
-                        if (CustomCastSpell(enragedregenerationSpell))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
@@ -222,8 +238,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (CustomCastSpell(whirlwindSpell))
                     {
                         return;
-                    }   
-                    
+                    }
+
                     if (CustomCastSpell(bloodthirstSpell))
                     {
                         return;
@@ -232,7 +248,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (VictoryRushEvent.Run() && CustomCastSpell(victoryRushSpell))
                     {
                         return;
-                    } 
+                    }
 
                     if (RendEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
                     {
@@ -277,7 +293,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             if (TargetSelectEvent.Run())
             {
                 WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 40)
-                .Where(e => e.IsInCombat && !e.IsNotAttackable) // To Do e.IsTaggedByMe
+                .Where(e => e.IsInCombat && !e.IsNotAttackable)
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault();
 
