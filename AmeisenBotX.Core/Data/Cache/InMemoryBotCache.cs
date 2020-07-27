@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -24,7 +25,7 @@ namespace AmeisenBotX.Core.Data.Cache
 
         public Dictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
 
-        public List<BasicCombatLogEntry> CombatLogEntries { get; private set; }
+        public Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> CombatLogEntries { get; private set; }
 
         public string FilePath { get; }
 
@@ -121,7 +122,7 @@ namespace AmeisenBotX.Core.Data.Cache
             NameCache = new Dictionary<ulong, string>();
             ReactionCache = new Dictionary<(int, int), WowUnitReaction>();
             SpellNameCache = new Dictionary<int, string>();
-            CombatLogEntries = new List<BasicCombatLogEntry>();
+            CombatLogEntries = new Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>>();
             BlacklistNodes = new Dictionary<int, List<Vector3>>();
             PointsOfInterest = new Dictionary<(MapId, PoiType), List<Vector3>>();
             OreNodes = new Dictionary<(MapId, OreNodes), List<Vector3>>();
@@ -150,7 +151,7 @@ namespace AmeisenBotX.Core.Data.Cache
                         NameCache = loadedCache.NameCache ?? new Dictionary<ulong, string>();
                         ReactionCache = loadedCache.ReactionCache ?? new Dictionary<(int, int), WowUnitReaction>();
                         SpellNameCache = loadedCache.SpellNameCache ?? new Dictionary<int, string>();
-                        CombatLogEntries = loadedCache.CombatLogEntries ?? new List<BasicCombatLogEntry>();
+                        CombatLogEntries = loadedCache.CombatLogEntries ?? new Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>>();
                         BlacklistNodes = loadedCache.BlacklistNodes ?? new Dictionary<int, List<Vector3>>();
                         PointsOfInterest = loadedCache.PointsOfInterest ?? new Dictionary<(MapId, PoiType), List<Vector3>>();
                         OreNodes = loadedCache.OreNodes ?? new Dictionary<(MapId, OreNodes), List<Vector3>>();

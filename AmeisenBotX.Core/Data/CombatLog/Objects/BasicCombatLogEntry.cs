@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace AmeisenBotX.Core.Data.CombatLog.Objects
 {
@@ -9,25 +10,21 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
     {
         public List<string> Args { get; set; }
 
-        public int DestinationFlags { get; set; }
-
         public string DestinationGuid { get; set; }
 
         public string DestinationName { get; set; }
 
-        public int DestinationRaidFlags { get; set; }
-
         public int Flags { get; set; }
 
-        public string Guid { get; set; }
+        public string SourceGuid { get; set; }
 
-        public string Name { get; set; }
-
-        public int RaidFlags { get; set; }
+        public string SourceName { get; set; }
 
         public CombatLogEntrySubtype Subtype { get; set; }
 
-        public string Timestamp { get; set; }
+        public int TargetFlags { get; set; }
+
+        public DateTime Timestamp { get; set; }
 
         public CombatLogEntryType Type { get; set; }
 
@@ -35,14 +32,26 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
         {
             basicCombatLogEntry = new BasicCombatLogEntry();
 
-            if (eventArgs.Count < 11)
+            if (eventArgs.Count < 8)
             {
                 return false;
             }
 
-            basicCombatLogEntry.Timestamp = eventArgs[0];
+            basicCombatLogEntry.Args = eventArgs;
 
-            string[] splitted = eventArgs[1].Split(new char[] { '_' }, 2);
+            if (double.TryParse(eventArgs[0].Replace(".", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out double millis))
+            {
+                basicCombatLogEntry.Timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)millis).LocalDateTime;
+            }
+            else
+            {
+                return false;
+            }
+
+            string[] splitted = eventArgs[1]
+                .Replace("SPELL_BUILDING", "SPELLBUILDING")
+                .Replace("SPELL_PERIODIC", "SPELLPERIODIC")
+                .Split(new char[] { '_' }, 2);
 
             if (splitted.Length < 2)
             {
@@ -60,10 +69,10 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
                 return false;
             }
 
-            basicCombatLogEntry.Guid = eventArgs[3];
-            basicCombatLogEntry.Name = eventArgs[4];
+            basicCombatLogEntry.SourceGuid = eventArgs[2];
+            basicCombatLogEntry.SourceName = eventArgs[3];
 
-            if (int.TryParse(eventArgs[5], out int flags))
+            if (int.TryParse(eventArgs[4], out int flags))
             {
                 basicCombatLogEntry.Flags = flags;
             }
@@ -72,30 +81,12 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
                 return false;
             }
 
-            if (int.TryParse(eventArgs[6], out int raidFlags))
-            {
-                basicCombatLogEntry.RaidFlags = raidFlags;
-            }
-            else
-            {
-                return false;
-            }
+            basicCombatLogEntry.DestinationGuid = eventArgs[5];
+            basicCombatLogEntry.DestinationName = eventArgs[6];
 
-            basicCombatLogEntry.DestinationGuid = eventArgs[7];
-            basicCombatLogEntry.DestinationName = eventArgs[8];
-
-            if (int.TryParse(eventArgs[9], out int dflags))
+            if (int.TryParse(eventArgs[7], out int targetFlags))
             {
-                basicCombatLogEntry.DestinationFlags = dflags;
-            }
-            else
-            {
-                return false;
-            }
-
-            if (int.TryParse(eventArgs[10], out int draidFlags))
-            {
-                basicCombatLogEntry.DestinationRaidFlags = draidFlags;
+                basicCombatLogEntry.TargetFlags = targetFlags;
             }
             else
             {
@@ -103,6 +94,11 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
             }
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            return $"{Type}_{Subtype} {SourceName} -> {DestinationName}";
         }
     }
 }

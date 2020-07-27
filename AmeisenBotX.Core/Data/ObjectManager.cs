@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.Data
 
         public List<WowObject> WowObjects
         {
-            get { lock (queryLock) { return wowObjects; } }
+            get { lock (queryLock) { return wowObjects.ToList(); } }
             set { lock (queryLock) { wowObjects = value; } }
         }
 
@@ -113,7 +113,6 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return GetNearEnemies<WowUnit>(position, distance)
-                    .ToList()
                     .Where(e => e != null
                       && e.Guid != PlayerGuid
                       && !e.IsDead
@@ -133,7 +132,6 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return GetNearEnemies<WowUnit>(position, distance)
-                    .ToList()
                     .Where(e => e != null
                       && e.Guid != PlayerGuid
                       && !e.IsDead
@@ -156,7 +154,6 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects
-                    .ToList()
                     .OfType<T>()
                     .Where(e => e != null
                              && e.Guid != PlayerGuid
@@ -173,7 +170,6 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects
-                    .ToList()
                     .OfType<T>()
                     .Where(e => e != null
                              && e.Guid != PlayerGuid
@@ -289,8 +285,6 @@ namespace AmeisenBotX.Core.Data
 
                 GameState = UpdateGlobalVarString(WowInterface.OffsetList.GameState);
 
-                wowObjects.Clear();
-
                 // get the current objectmanager
                 // better not cache it until we switched map
                 WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
@@ -300,6 +294,8 @@ namespace AmeisenBotX.Core.Data
                 // read the first object
                 WowInterface.XMemory.Read(IntPtr.Add(CurrentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
                 WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out int activeObjectType);
+
+                List<WowObject> newObjects = new List<WowObject>();
 
                 while (IsWorldLoaded && activeObjectType <= 7 && activeObjectType > 0)
                 {
@@ -318,18 +314,14 @@ namespace AmeisenBotX.Core.Data
 
                     if (obj != null)
                     {
-                        wowObjects.Add(obj);
-
-                        // set the global unit properties if a guid matches it
-                        if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
-                        if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
-                        if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
-                        if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
+                        newObjects.Add(obj);
                     }
 
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out activeObjectType);
                 }
+
+                WowObjects = newObjects;
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();
@@ -626,18 +618,20 @@ namespace AmeisenBotX.Core.Data
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
                 player.Name = ReadPlayerName(player.Guid);
 
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, 0xA30), out uint swimFlags))
+                player.Auras = WowInterface.HookManager.GetUnitAuras(player);
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitSwimFlags.ToInt32()), out uint swimFlags))
                 {
                     player.IsSwimming = (swimFlags & 0x200000) != 0;
                 }
 
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, 0xD8), out IntPtr flyFlagsPointer)
-                    && WowInterface.XMemory.Read(IntPtr.Add(flyFlagsPointer, 0x44), out uint flyFlags))
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitFlyFlagsPointer.ToInt32()), out IntPtr flyFlagsPointer)
+                    && WowInterface.XMemory.Read(IntPtr.Add(flyFlagsPointer, WowInterface.OffsetList.WowUnitFlyFlags.ToInt32()), out uint flyFlags))
                 {
                     player.IsFlying = (flyFlags & 0x2000000) != 0;
                 }
 
-                if (WowInterface.XMemory.Read(new IntPtr(0xBd0BA0), out int breathTimer))
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.BreathTimer, out int breathTimer))
                 {
                     player.IsUnderwater = breathTimer > 0;
                 }
@@ -652,7 +646,6 @@ namespace AmeisenBotX.Core.Data
                     Player = player;
                 }
 
-                player.Auras = WowInterface.HookManager.GetUnitAuras(player);
                 return player;
             }
 
@@ -683,6 +676,12 @@ namespace AmeisenBotX.Core.Data
                 unit.Name = ReadUnitName(activeObject, unit.Guid);
 
                 unit.Auras = WowInterface.HookManager.GetUnitAuras(unit);
+
+                if (unit.Guid == TargetGuid) { Target = unit; }
+                if (unit.Guid == PetGuid) { Pet = unit; }
+                if (unit.Guid == LastTargetGuid) { LastTarget = unit; }
+                if (unit.Guid == PartyleaderGuid) { Partyleader = unit; }
+
                 return unit;
             }
 

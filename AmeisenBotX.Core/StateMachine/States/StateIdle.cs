@@ -109,20 +109,18 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do we need to repair our equipment
             if (Config.AutoRepair
                 && RepairCheckEvent.Run()
-                && IsRepairNpcNear())
+                && StateMachine.GetState<StateRepairing>().NeedToRepair()
+                && StateMachine.GetState<StateRepairing>().IsRepairNpcNear(out _))
             {
-                WowInterface.CharacterManager.Equipment.Update();
-                if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability) * 100.0 <= Config.ItemRepairThreshold))
-                {
-                    StateMachine.SetState(BotState.Repairing);
-                    return;
-                }
+                StateMachine.SetState(BotState.Repairing);
+                return;
             }
 
             // do we need to sell stuff
             if (Config.AutoSell
                 && BagSlotCheckEvent.Run()
-                && StateMachine.GetState<StateSelling>().NeedToSell())
+                && StateMachine.GetState<StateSelling>().NeedToSell()
+                && StateMachine.GetState<StateSelling>().IsVendorNpcNear(out _))
             {
                 StateMachine.SetState(BotState.Selling);
                 return;
@@ -137,7 +135,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (QuestgiverCheckEvent.Run()
                     && HandleAutoQuestMode(unitToFollow))
                 {
-                    return; 
+                    return;
                 }
             }
 
@@ -205,14 +203,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             return playerToFollow != null;
-        }
-
-        internal bool IsRepairNpcNear()
-        {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer)
-                       && e.IsRepairVendor
-                       && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
         }
 
         private void CheckForBattlegroundInvites()

@@ -681,6 +681,11 @@ namespace AmeisenBotX.Core.Hook
             LuaDoString(BotUtils.ObfuscateLua("{v:0}=GetNumLootItems()for a={v:0},1,-1 do LootSlot(a)ConfirmLootSlot(a)end").Item1);
         }
 
+        public void LootOnlyMoneyAndQuestItems()
+        {
+            LuaDoString("for a=GetNumLootItems(),1,-1 do slotType=GetLootSlotType(a)_,_,_,_,b,c=GetLootSlotInfo(a)if not locked and(c or b==LOOT_SLOT_MONEY or b==LOOT_SLOT_CURRENCY)then LootSlot(a)end end");
+        }
+
         public bool LuaDoString(string command)
         {
             AmeisenLogger.Instance.Log("HookManager", $"LuaDoString: {command}", LogLevel.Verbose);

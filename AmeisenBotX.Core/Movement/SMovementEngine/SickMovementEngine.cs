@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -133,7 +134,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                                                     && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
                                                     && wowInterface.CharacterManager.Mounts.Count > 0
-                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 24.0)
+                                                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
                                                     && !WowInterface.ObjectManager.Player.IsMounted
                                                     && wowInterface.HookManager.IsOutdoors())
                                                     {
@@ -203,6 +204,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
 
         public bool IsCastingMount { get; set; }
+
+        public bool IsPathIncomplete { get; private set; }
 
         public bool JumpOnNextMove { get; private set; }
 
@@ -299,6 +302,16 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, double minDistanceToMove = 1.5)
         {
+            if (movementAction == MovementAction
+                && positionToGoTo == TargetPosition
+                && targetRotation == TargetRotation
+                && minDistanceToMove == MinDistanceToMove)
+            {
+                return;
+            }
+
+            AmeisenLogger.Instance.Log("Movement", $"SetMovementAction: {movementAction} to {positionToGoTo} ({targetRotation}, {minDistanceToMove})");
+
             MovementAction = movementAction;
             TargetPosition = positionToGoTo;
             TargetRotation = targetRotation;
@@ -362,11 +375,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
                 Nodes = newPath;
 
+                IsPathIncomplete = Nodes.Last().GetDistance(TargetPosition) > 3.0;
                 TargetPositionLastPathfinding = TargetPosition;
                 return BehaviorTreeStatus.Success;
             }
             else
             {
+                IsPathIncomplete = true;
                 return BehaviorTreeStatus.Failed;
             }
         }

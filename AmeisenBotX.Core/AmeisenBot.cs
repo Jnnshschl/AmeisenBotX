@@ -41,6 +41,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient;
+using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
 using Microsoft.CSharp;
 using System;
@@ -94,9 +95,11 @@ namespace AmeisenBotX.Core
             RconClientTimer = new Timer(Config.RconTickMs);
             RconClientTimer.Elapsed += RconClientTimer_Elapsed;
 
+            RconScreenshotEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
+
             AmeisenLogger.Instance.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
 
-            if (Config.EnabledRconServer)
+            if (Config.RconEnabled)
             {
                 WowInterface.ObjectManager.OnObjectUpdateComplete += ObjectManager_OnObjectUpdateComplete;
             }
@@ -150,6 +153,8 @@ namespace AmeisenBotX.Core
 
         public List<IQuestProfile> QuestProfiles { get; private set; }
 
+        public TimegatedEvent RconScreenshotEvent { get; }
+
         public AmeisenBotStateMachine StateMachine { get; set; }
 
         public WowInterface WowInterface { get; set; }
@@ -188,9 +193,8 @@ namespace AmeisenBotX.Core
         public void Start()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Starting", LogLevel.Debug);
-            StateMachineTimer.Start();
 
-            if (Config.EnabledRconServer)
+            if (Config.RconEnabled)
             {
                 AmeisenLogger.Instance.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
                 RconClientTimer.Start();
@@ -204,6 +208,8 @@ namespace AmeisenBotX.Core
                 LoadPosition(Config.BotWindowRect, MainWindowHandle);
             }
 
+            StateMachineTimer.Start();
+            stateMachineTimerBusy = 0;
             IsRunning = true;
 
             AmeisenLogger.Instance.Log("AmeisenBot", "Setup done", LogLevel.Debug);
@@ -215,7 +221,7 @@ namespace AmeisenBotX.Core
             StateMachine.ShouldExit = true;
             RconClientTimer.Stop();
 
-            if (Config.EnabledRconServer)
+            if (Config.RconEnabled)
             {
                 RconClientTimer.Stop();
             }
@@ -354,8 +360,8 @@ namespace AmeisenBotX.Core
 
         private void InitGrindingProfiles()
         {
-            // Add your custom quest profiles here!
-            // ------------------------------------ >
+            // Add your custom grinding profiles here!
+            // --------------------------------------- >
             GrindingProfiles = new List<IGrindingProfile>
             {
                 new UltimateGrinding1To80(),
@@ -563,6 +569,12 @@ namespace AmeisenBotX.Core
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
+            if (Config.LootOnlyMoneyAndQuestitems)
+            {
+                WowInterface.HookManager.LootOnlyMoneyAndQuestItems();
+                return;
+            }
+
             WowInterface.HookManager.LootEveryThing();
         }
 
@@ -749,14 +761,29 @@ namespace AmeisenBotX.Core
                                 ZoneName = WowInterface.ObjectManager.ZoneName,
                             }).Wait();
 
-                            Bitmap bmp = WowInterface.XMemory.GetScreenshot();
-                            using (MemoryStream ms = new MemoryStream())
+                            if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
                             {
+                                Bitmap bmp = WowInterface.XMemory.GetScreenshot();
+
+                                using MemoryStream ms = new MemoryStream();
                                 bmp.Save(ms, ImageFormat.Png);
+
                                 WowInterface.RconClient.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}").Wait();
                             }
 
                             WowInterface.RconClient.PullPendingActions().Wait();
+
+                            if (WowInterface.RconClient.PendingActions?.Count > 0)
+                            {
+                                switch (WowInterface.RconClient.PendingActions.First())
+                                {
+                                    case ActionType.PauseResume:
+                                        if (IsRunning) Pause(); else Resume();
+                                        break;
+
+                                    default: break;
+                                }
+                            }
                         }
                     }
                     catch { }
@@ -927,7 +954,7 @@ namespace AmeisenBotX.Core
             // Misc Events
             // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+            WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT", WowInterface.CombatLogParser.Parse);
         }
     }
 }

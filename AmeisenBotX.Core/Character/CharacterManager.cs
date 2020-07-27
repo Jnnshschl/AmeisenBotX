@@ -172,8 +172,6 @@ namespace AmeisenBotX.Core.Character
         {
             if (pos == default) { return; }
 
-            AmeisenLogger.Instance.Log("Movement", $"MoveToPosition: {pos}", LogLevel.Verbose);
-
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);

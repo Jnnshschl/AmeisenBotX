@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -70,7 +72,7 @@ namespace AmeisenBotX
         {
             Dispatcher.Invoke(() =>
             {
-                textboxEventResult.Text += $"{timestamp} - {JsonConvert.SerializeObject(args)}\n";
+                textboxEventResult.AppendText($"{timestamp} - {JsonConvert.SerializeObject(args)}\n");
             });
         }
 
@@ -144,6 +146,30 @@ namespace AmeisenBotX
                 foreach ((WowObject, double) x in wowObjects.OrderBy(e => e.Item2))
                 {
                     listviewNearWowObjects.Items.Add(x);
+                }
+            }
+            else if (tabcontrolMain.SelectedIndex == 9)
+            {
+                listviewCombatlog.Items.Clear();
+
+                foreach (KeyValuePair<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> logitem in AmeisenBot.WowInterface.BotCache.CombatLogEntries.OrderByDescending(e => e.Value.Count))
+                {
+                    listviewCombatlog.Items.Add($"{logitem.Key}: {logitem.Value.Count} Entries");
+                }
+            }
+            else if (tabcontrolMain.SelectedIndex == 10)
+            {
+                listviewCombatlogKills.Items.Clear();
+
+                if (AmeisenBot.WowInterface.BotCache.CombatLogEntries.ContainsKey((CombatLogEntryType.PARTY, CombatLogEntrySubtype.KILL)))
+                {
+                    foreach (KeyValuePair<string, int> logitem in AmeisenBot.WowInterface.BotCache.CombatLogEntries[(CombatLogEntryType.PARTY, CombatLogEntrySubtype.KILL)]
+                        .GroupBy(x => x.DestinationName)
+                        .Select(x => new KeyValuePair<string, int>(x.Key, x.Count()))
+                        .OrderByDescending(x => x.Value))
+                    {
+                        listviewCombatlogKills.Items.Add($"{logitem.Key}: {logitem.Value}");
+                    }
                 }
             }
         }

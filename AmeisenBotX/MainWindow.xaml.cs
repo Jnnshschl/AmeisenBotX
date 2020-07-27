@@ -408,14 +408,16 @@ namespace AmeisenBotX
             if (AmeisenBot.WowInterface.MovementEngine.Path != null
             && AmeisenBot.WowInterface.MovementEngine.Path.Count > 0)
             {
-                for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count; ++i)
+                List<Vector3> currentNodes = AmeisenBot.WowInterface.MovementEngine.Path.ToList();
+
+                for (int i = 0; i < currentNodes.Count; ++i)
                 {
-                    Vector3 start = AmeisenBot.WowInterface.MovementEngine.Path[i];
-                    Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
+                    Vector3 start = currentNodes[i];
+                    Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : currentNodes[i - 1];
 
                     System.Drawing.Color lineColor = System.Drawing.Color.White;
                     System.Drawing.Color startDot = System.Drawing.Color.Cyan;
-                    System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == AmeisenBot.WowInterface.MovementEngine.Path.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
+                    System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == currentNodes.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
                     Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
                     if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out System.Drawing.Point startPoint)

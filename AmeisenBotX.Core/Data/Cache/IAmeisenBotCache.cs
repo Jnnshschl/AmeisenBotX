@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
@@ -11,7 +12,7 @@ namespace AmeisenBotX.Core.Data.Cache
     {
         Dictionary<int, List<Vector3>> BlacklistNodes { get; }
 
-        List<BasicCombatLogEntry> CombatLogEntries { get; }
+        Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> CombatLogEntries { get; }
 
         Dictionary<(MapId, HerbNodes), List<Vector3>> HerbNodes { get; }
 

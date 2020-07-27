@@ -230,8 +230,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 NearPortals = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
-                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal
-                             || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalNormal
+                             || e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
                     .ToList();
 
                 if (WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))

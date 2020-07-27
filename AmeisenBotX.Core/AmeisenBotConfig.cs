@@ -64,8 +64,6 @@ namespace AmeisenBotX.Core
 
         public double EatUntilPercent { get; set; } = 75;
 
-        public bool EnabledRconServer { get; set; } = false;
-
         public double EventPullMs { get; set; } = 500;
 
         public bool FollowGroupLeader { get; set; } = false;
@@ -153,6 +151,14 @@ namespace AmeisenBotX.Core
         public bool PermanentReactionCache { get; set; } = true;
 
         public string QuestProfile { get; set; } = string.Empty;
+
+        public bool RconEnabled { get; set; } = false;
+
+        public bool LootOnlyMoneyAndQuestitems { get; set; } = false;
+
+        public int RconScreenshotInterval { get; set; } = 5000;
+
+        public bool RconSendScreenshots { get; set; } = false;
 
         public string RconServerAddress { get; set; } = "https://localhost:47111";
 

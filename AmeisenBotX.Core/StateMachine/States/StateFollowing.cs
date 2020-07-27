@@ -113,7 +113,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                 // handle nearby portals, if our groupleader enters a portal, we follow
                 WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
-                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.DungeonPortalNormal || e.DisplayId == (int)GameobjectDisplayId.DungeonPortalHeroic)
+                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalNormal 
+                             || e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
                     .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 12.0);
 
                 if (nearestPortal != null)

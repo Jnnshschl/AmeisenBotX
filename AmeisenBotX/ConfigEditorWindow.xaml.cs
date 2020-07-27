@@ -104,23 +104,25 @@ namespace AmeisenBotX
                 Config.DrinkUntilPercent = sliderDrinkUntil.Value;
                 Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
                 Config.EatUntilPercent = sliderEatUntil.Value;
-                Config.EnabledRconServer = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
                 Config.EventPullMs = int.Parse(textboxEventPull.Text);
                 Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
                 Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
                 Config.FollowPositionDynamic = checkboxDynamicPosition.IsChecked.GetValueOrDefault(false);
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
                 Config.Friends = textboxFriends.Text;
+                Config.IgnoreCombatWhileMounted = checkboxIgnoreCombatMounted.IsChecked.GetValueOrDefault(false);
                 Config.ItemRepairThreshold = sliderRepair.Value;
                 Config.ItemSellBlacklist = textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries);
                 Config.JobEngineMailHeader = textboxMailHeader.Text;
                 Config.JobEngineMailReceiver = textboxMailReceiver.Text;
                 Config.JobEngineMailText = textboxMailText.Text;
+                Config.LootOnlyMoneyAndQuestitems = checkboxLootOnlyMoneyAndQuestitems.IsChecked.GetValueOrDefault(false);
                 Config.LootUnits = checkboxLooting.IsChecked.GetValueOrDefault(false);
                 Config.LootUnitsRadius = Math.Round(sliderLootRadius.Value);
                 Config.MaxFollowDistance = (int)Math.Round(sliderMaxFollowDistance.Value);
                 Config.MaxFps = (int)Math.Round(sliderMaxFps.Value);
                 Config.MaxFpsCombat = (int)Math.Round(sliderMaxFpsCombat.Value);
+                Config.MerchantNpcSearchRadius = sliderMerchantSearchRadius.Value;
                 Config.MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value);
                 Config.Mounts = textboxMounts.Text;
                 Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text);
@@ -131,9 +133,13 @@ namespace AmeisenBotX
                 Config.PathToWowExe = textboxWowPath.Text;
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
+                Config.RconEnabled = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
+                Config.RconScreenshotInterval = int.Parse(textboxRconScreenshotInterval.Text);
+                Config.RconSendScreenshots = checkboxEnableRconScreenshots.IsChecked.GetValueOrDefault(false);
                 Config.RconServerAddress = textboxRconAddress.Text;
                 Config.RconServerGuid = textboxRconGUID.Text;
                 Config.RconServerImage = textboxRconImage.Text;
+                Config.RconTickMs = int.Parse(textboxRconInterval.Text);
                 Config.Realm = textboxRealm.Text;
                 Config.Realmlist = textboxRealmlist.Text;
                 Config.ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false);
@@ -146,6 +152,7 @@ namespace AmeisenBotX
                 Config.SellWhiteItems = checkboxSellWhiteItems.IsChecked.GetValueOrDefault(false);
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
                 Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text);
+                Config.SupportRange = sliderAssistRange.Value;
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
                 Config.UseMounts = checkboxUseMounts.IsChecked.GetValueOrDefault(false);
                 Config.UseMountsInParty = checkboxUseMountsInParty.IsChecked.GetValueOrDefault(false);
@@ -353,11 +360,14 @@ namespace AmeisenBotX
             checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
             checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
             checkboxDynamicPosition.IsChecked = Config.FollowPositionDynamic;
-            checkboxEnableRcon.IsChecked = Config.EnabledRconServer;
+            checkboxEnableRcon.IsChecked = Config.RconEnabled;
+            checkboxEnableRconScreenshots.IsChecked = Config.RconSendScreenshots;
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
             checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
+            checkboxIgnoreCombatMounted.IsChecked = Config.IgnoreCombatWhileMounted;
             checkboxLooting.IsChecked = Config.LootUnits;
+            checkboxLootOnlyMoneyAndQuestitems.IsChecked = Config.LootOnlyMoneyAndQuestitems;
             checkboxOnlyFriendsMode.IsChecked = Config.OnlyFriendsMode;
             checkboxOnlySpecificMounts.IsChecked = Config.UseOnlySpecificMounts;
             checkboxOnlySupportMaster.IsChecked = Config.OnlySupportMaster;
@@ -375,12 +385,14 @@ namespace AmeisenBotX
             checkboxUseMountsInParty.IsChecked = Config.UseMountsInParty;
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
             comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
+            sliderAssistRange.Value = Config.SupportRange;
             sliderDrinkUntil.Value = Config.DrinkUntilPercent;
             sliderEatUntil.Value = Config.EatUntilPercent;
             sliderLootRadius.Value = Math.Round(Config.LootUnitsRadius);
             sliderMaxFollowDistance.Value = Config.MaxFollowDistance;
             sliderMaxFps.Value = Config.MaxFps;
             sliderMaxFpsCombat.Value = Config.MaxFpsCombat;
+            sliderMerchantSearchRadius.Value = Config.MerchantNpcSearchRadius;
             sliderMinFollowDistance.Value = Config.MinFollowDistance;
             sliderMinFreeBagSlots.Value = Config.BagSlotsToGoSell;
             sliderRepair.Value = Config.ItemRepairThreshold;
@@ -401,6 +413,8 @@ namespace AmeisenBotX
             textboxRconAddress.Text = Config.RconServerAddress;
             textboxRconGUID.Text = Config.RconServerGuid;
             textboxRconImage.Text = Config.RconServerImage;
+            textboxRconInterval.Text = Config.RconTickMs.ToString();
+            textboxRconScreenshotInterval.Text = Config.RconScreenshotInterval.ToString();
             textboxRealm.Text = Config.Realm;
             textboxRealmlist.Text = Config.Realmlist;
             textboxStatemachineTick.Text = Config.StateMachineTickMs.ToString();
@@ -414,6 +428,15 @@ namespace AmeisenBotX
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void SliderAssistRange_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelGroupAssistRange.Content = $"Assist Range (m): {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
+            }
         }
 
         private void SliderDrinkUntil_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -466,6 +489,15 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFpsCombat.Content = $"Max FPS Combat: {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderMerchantSearchRadius_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMerchantSearchRadius.Content = $"Search Radius (m): {Math.Round(e.NewValue)}";
                 ChangedSomething = true;
             }
         }

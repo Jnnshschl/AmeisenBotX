@@ -16,6 +16,8 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr BattlegroundStatus { get; } = new IntPtr(0xBEA4D0);
 
+        public IntPtr BreathTimer { get; } = new IntPtr(0xBD0BA0);
+
         public IntPtr CameraOffset { get; } = new IntPtr(0x7E20);
 
         public IntPtr CameraPointer { get; } = new IntPtr(0xB7436C);
@@ -100,7 +102,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr LootWindowOpen { get; } = new IntPtr(0xBFA8D8);
 
-        public IntPtr MapId { get; } = new IntPtr(0xAB63BC);
+        public IntPtr MapId { get; } = new IntPtr(0xADFBC4);
 
         public IntPtr NameBase { get; } = new IntPtr(0x1C);
 
@@ -146,6 +148,10 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr WowObjectType { get; } = new IntPtr(0x14);
 
+        public IntPtr WowUnitFlyFlags { get; } = new IntPtr(0x44);
+
+        public IntPtr WowUnitFlyFlagsPointer { get; } = new IntPtr(0xD8);
+
         public IntPtr WowUnitIsAutoAttacking { get; } = new IntPtr(0xA20);
 
         public IntPtr WowUnitName1 { get; } = new IntPtr(0x964);
@@ -155,6 +161,8 @@ namespace AmeisenBotX.Core.Offsets
         public IntPtr WowUnitPosition { get; } = new IntPtr(0x798);
 
         public IntPtr WowUnitRotation { get; } = new IntPtr(0x7A8);
+
+        public IntPtr WowUnitSwimFlags { get; } = new IntPtr(0xA30);
 
         public IntPtr ZoneId { get; } = new IntPtr(0xBD080C);
 

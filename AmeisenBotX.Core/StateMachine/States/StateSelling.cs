@@ -2,6 +2,8 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -10,7 +12,15 @@ namespace AmeisenBotX.Core.Statemachine.States
     {
         public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
+            Blacklist = new List<ulong>();
+            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
+
+        public List<ulong> Blacklist { get; }
+
+        private int BlacklistCounter { get; set; }
+
+        private TimegatedEvent InteractionEvent { get; }
 
         public override void Enter()
         {
@@ -20,48 +30,53 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             WowInterface.CharacterManager.Inventory.Update();
 
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots > Config.BagSlotsToGoSell
-               || !WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
-                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
-                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
-                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
-                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
-                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
-               .Any(e => e.Price > 0))
+            if (!NeedToSell())
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
-            WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
-                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Hostile
-                    && e.IsRepairVendor
-                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50);
-
-            if (selectedUnit != null && !selectedUnit.IsDead)
+            if (IsVendorNpcNear(out WowUnit selectedUnit))
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                if (WowInterface.MovementEngine.IsAtTargetPosition)
+                if (WowInterface.MovementEngine.IsPathIncomplete)
                 {
+                    ++BlacklistCounter;
+
+                    if (BlacklistCounter > 2)
+                    {
+                        WowInterface.MovementEngine.StopMovement();
+                        Blacklist.Add(selectedUnit.Guid);
+                        BlacklistCounter = 0;
+                        return;
+                    }
+                }
+
+                if (WowInterface.MovementEngine.IsAtTargetPosition && InteractionEvent.Run())
+                {
+                    if (WowInterface.ObjectManager.TargetGuid != selectedUnit.Guid)
+                    {
+                        WowInterface.HookManager.TargetGuid(selectedUnit.Guid);
+                    }
+
                     WowInterface.HookManager.UnitOnRightClick(selectedUnit);
 
                     if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
                     {
                         WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
+                        return;
                     }
 
                     if (selectedUnit.IsGossip)
                     {
                         WowInterface.HookManager.UnitSelectGossipOption(1);
+                        return;
                     }
                 }
             }
             else
             {
-                WowInterface.CharacterManager.Inventory.Update();
                 StateMachine.SetState(BotState.Idle);
             }
         }
@@ -70,18 +85,22 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        internal bool IsVendorNpcNear()
+        public bool IsVendorNpcNear(out WowUnit unit)
         {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                       .Any(e => e.GetType() != typeof(WowPlayer)
-                       && e.IsVendor
-                       && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.MerchantNpcSearchRadius);
+            unit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                       .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
+                              && !Blacklist.Contains(e.Guid)
+                              && !e.IsDead
+                              && e.IsVendor
+                              && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Hostile
+                              && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
+
+            return unit != null;
         }
 
         internal bool NeedToSell()
         {
-            return IsVendorNpcNear()
-                && WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
+            return WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
                 && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
                        && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
                            || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)

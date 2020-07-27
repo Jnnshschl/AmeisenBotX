@@ -16,6 +16,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr BattlegroundStatus { get; }
 
+        IntPtr BreathTimer { get; }
+
         IntPtr CameraOffset { get; }
 
         IntPtr CameraPointer { get; }
@@ -146,6 +148,10 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr WowObjectType { get; }
 
+        IntPtr WowUnitFlyFlags { get; }
+
+        IntPtr WowUnitFlyFlagsPointer { get; }
+
         IntPtr WowUnitIsAutoAttacking { get; }
 
         IntPtr WowUnitName1 { get; }
@@ -155,6 +161,8 @@ namespace AmeisenBotX.Core.Offsets
         IntPtr WowUnitPosition { get; }
 
         IntPtr WowUnitRotation { get; }
+
+        IntPtr WowUnitSwimFlags { get; }
 
         IntPtr ZoneId { get; }
 

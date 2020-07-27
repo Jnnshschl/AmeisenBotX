@@ -12,11 +12,7 @@ namespace AmeisenBotX.Core.Data.CombatLog
         public CombatLogParser(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-
-            CombatLogEntries = new Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>>();
         }
-
-        public Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> CombatLogEntries { get; }
 
         private WowInterface WowInterface { get; }
 
@@ -28,12 +24,12 @@ namespace AmeisenBotX.Core.Data.CombatLog
             {
                 (CombatLogEntryType, CombatLogEntrySubtype) key = (basicCombatLogEntry.Type, basicCombatLogEntry.Subtype);
 
-                if (CombatLogEntries.ContainsKey(key))
+                if (!WowInterface.BotCache.CombatLogEntries.ContainsKey(key))
                 {
-                    CombatLogEntries.Add(key, new List<BasicCombatLogEntry>());
+                    WowInterface.BotCache.CombatLogEntries.Add(key, new List<BasicCombatLogEntry>());
                 }
 
-                CombatLogEntries[key].Add(basicCombatLogEntry);
+                WowInterface.BotCache.CombatLogEntries[key].Add(basicCombatLogEntry);
             }
         }
     }
