@@ -292,6 +292,11 @@ namespace AmeisenBotX.Core.Movement.Objects
                 }
             }
 
+            if (objectDistances.Count == 0)
+            {
+                return Vector3.Zero;
+            }
+
             // get the biggest distance to normalize the fleeing forces
             float normalizingMultiplier = Convert.ToSingle(objectDistances.Max(e => e.Item2));
 

@@ -302,15 +302,15 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, double minDistanceToMove = 1.5)
         {
-            if (movementAction == MovementAction
-                && positionToGoTo == TargetPosition
-                && targetRotation == TargetRotation
-                && minDistanceToMove == MinDistanceToMove)
+            if (MovementAction == movementAction
+                && TargetPosition == positionToGoTo
+                && TargetRotation == targetRotation
+                && MinDistanceToMove == minDistanceToMove)
             {
                 return;
             }
 
-            AmeisenLogger.Instance.Log("Movement", $"SetMovementAction: {movementAction} to {positionToGoTo} ({targetRotation}, {minDistanceToMove})");
+            PathfindingFailed = false;
 
             MovementAction = movementAction;
             TargetPosition = positionToGoTo;
@@ -362,6 +362,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
         {
+            if (PathfindingFailed)
+            {
+                return BehaviorTreeStatus.Failed;
+            }
+
             List<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
             if (path != null && path.Count > 0)
@@ -381,6 +386,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
             else
             {
+                PathfindingFailed = true;
                 IsPathIncomplete = true;
                 return BehaviorTreeStatus.Failed;
             }
@@ -426,6 +432,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 StuckCounter = 0;
             }
         }
+
+        private bool PathfindingFailed { get; set; }
 
         private void UpdateBlackboard()
         {
