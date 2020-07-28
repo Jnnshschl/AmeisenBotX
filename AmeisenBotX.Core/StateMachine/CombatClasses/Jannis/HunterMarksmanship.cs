@@ -109,84 +109,87 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
-
-            if (PetManager.Tick()) { return; }
-
-            WowUnit target = (WowUnit)WowInterface.ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == WowInterface.ObjectManager.TargetGuid);
-
-            if (target != null)
-            {
-                double distanceToTarget = target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
-
-                // make some distance
-                if (WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                 }
 
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 15
-                    && CastSpellIfPossible(feignDeathSpell, 0))
+                if (PetManager.Tick()) { return; }
+
+                WowUnit target = (WowUnit)WowInterface.ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == WowInterface.ObjectManager.TargetGuid);
+
+                if (target != null)
                 {
-                    return;
-                }
+                    double distanceToTarget = target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                if (distanceToTarget < 5.0)
-                {
-                    if (ReadyToDisengage
-                        && CastSpellIfPossible(disengageSpell, 0, true))
+                    // make some distance
+                    if (WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
                     {
-                        ReadyToDisengage = false;
-                        return;
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
                     }
 
-                    if (CastSpellIfPossible(frostTrapSpell, 0, true))
-                    {
-                        ReadyToDisengage = true;
-                        SlowTargetWhenPossible = true;
-                        return;
-                    }
-
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 30
-                        && CastSpellIfPossible(deterrenceSpell, 0, true))
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 15
+                        && CastSpellIfPossible(feignDeathSpell, 0))
                     {
                         return;
                     }
 
-                    if (CastSpellIfPossible(raptorStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(mongooseBiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if (distanceToTarget < 5.0)
                     {
-                        return;
-                    }
-                }
-                else
-                {
-                    if (SlowTargetWhenPossible
-                        && CastSpellIfPossible(disengageSpell, 0, true))
-                    {
-                        SlowTargetWhenPossible = false;
-                        return;
-                    }
+                        if (ReadyToDisengage
+                            && CastSpellIfPossible(disengageSpell, 0, true))
+                        {
+                            ReadyToDisengage = false;
+                            return;
+                        }
 
-                    if (target.HealthPercentage < 20
-                        && CastSpellIfPossible(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    {
-                        return;
+                        if (CastSpellIfPossible(frostTrapSpell, 0, true))
+                        {
+                            ReadyToDisengage = true;
+                            SlowTargetWhenPossible = true;
+                            return;
+                        }
+
+                        if (WowInterface.ObjectManager.Player.HealthPercentage < 30
+                            && CastSpellIfPossible(deterrenceSpell, 0, true))
+                        {
+                            return;
+                        }
+
+                        if (CastSpellIfPossible(raptorStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || CastSpellIfPossible(mongooseBiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        {
+                            return;
+                        }
                     }
-
-                    CastSpellIfPossible(killCommandSpell, WowInterface.ObjectManager.TargetGuid, true);
-                    CastSpellIfPossible(rapidFireSpell, WowInterface.ObjectManager.TargetGuid);
-
-                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || CastSpellIfPossible(chimeraShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(aimedShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    else
                     {
-                        return;
+                        if (SlowTargetWhenPossible
+                            && CastSpellIfPossible(disengageSpell, 0, true))
+                        {
+                            SlowTargetWhenPossible = false;
+                            return;
+                        }
+
+                        if (target.HealthPercentage < 20
+                            && CastSpellIfPossible(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        {
+                            return;
+                        }
+
+                        CastSpellIfPossible(killCommandSpell, WowInterface.ObjectManager.TargetGuid, true);
+                        CastSpellIfPossible(rapidFireSpell, WowInterface.ObjectManager.TargetGuid);
+
+                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            || CastSpellIfPossible(chimeraShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || CastSpellIfPossible(aimedShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || CastSpellIfPossible(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        {
+                            return;
+                        }
                     }
                 }
             }

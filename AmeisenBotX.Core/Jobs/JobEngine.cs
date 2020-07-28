@@ -32,27 +32,34 @@ namespace AmeisenBotX.Core.Jobs
 
         public AmeisenBotConfig Config { get; set; }
 
+        public bool GeneratedPathToNode { get; set; }
+
+        public List<ulong> NodeBlacklist { get; set; }
+
         public IJobProfile Profile { get; set; }
 
+        private TimegatedEvent BlacklistEvent { get; }
+
+        private bool CheckForPathRecovering { get; set; }
+
         private int CurrentNodeCounter { get; set; }
-
-        private int SellActionsNeeded { get; set; }
-
-        private int NodeTryCounter { get; set; }
 
         private TimegatedEvent MailSentEvent { get; }
 
         private TimegatedEvent MiningEvent { get; }
 
-        private TimegatedEvent BlacklistEvent { get; }
+        private int NodeTryCounter { get; set; }
+
+        private int SellActionsNeeded { get; set; }
 
         private WowInterface WowInterface { get; }
 
-        private bool CheckForPathRecovering { get; set; }
-
-        public List<ulong> NodeBlacklist { get; set; }
-
-        public bool GeneratedPathToNode { get; set; }
+        public void Enter()
+        {
+            AmeisenLogger.Instance.Log("JobEngine", $"Entering JobEngine", LogLevel.Verbose);
+            CheckForPathRecovering = true;
+            GeneratedPathToNode = false;
+        }
 
         public void Execute()
         {
@@ -65,13 +72,6 @@ namespace AmeisenBotX.Core.Jobs
                         break;
                 }
             }
-        }
-
-        public void Enter()
-        {
-            AmeisenLogger.Instance.Log("JobEngine", $"Entering JobEngine", LogLevel.Verbose);
-            CheckForPathRecovering = true;
-            GeneratedPathToNode = false;
         }
 
         public void Reset()

@@ -101,48 +101,51 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (PetManager.Tick()) { return; }
-
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 20
-                    && WowInterface.ObjectManager.Player.HealthPercentage > 60
-                    && CastSpellIfPossible(lifeTapSpell, 0)
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 80
-                    && CastSpellIfPossible(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 50
-                    && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
-                || CastSpellIfPossible(metamorphosisSpell, 0)
-                || (WowInterface.ObjectManager.Pet?.Health > 0 && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
+            if (SelectTarget(DpsTargetManager))
             {
-                return;
-            }
+                if (PetManager.Tick()) { return; }
 
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 20
+                        && WowInterface.ObjectManager.Player.HealthPercentage > 60
+                        && CastSpellIfPossible(lifeTapSpell, 0)
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 80
+                        && CastSpellIfPossible(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 50
+                        && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossible(metamorphosisSpell, 0)
+                    || (WowInterface.ObjectManager.Pet?.Health > 0 && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
                 {
-                    if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
-                        && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
-                            && CastSpellIfPossible(howlOfTerrorSpell, 0, true))
-                        || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
-                            && CastSpellIfPossible(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
+                    return;
+                }
+
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
                     {
-                        LastFearAttempt = DateTime.Now;
+                        if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
+                            && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
+                                && CastSpellIfPossible(howlOfTerrorSpell, 0, true))
+                            || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
+                                && CastSpellIfPossible(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
+                        {
+                            LastFearAttempt = DateTime.Now;
+                            return;
+                        }
+                    }
+
+                    if (!WowInterface.ObjectManager.Player.IsCasting
+                        && WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
+                        && WowInterface.ObjectManager.Target.HealthPercentage < 8
+                        && CastSpellIfPossible(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
                         return;
                     }
                 }
 
-                if (!WowInterface.ObjectManager.Player.IsCasting
-                    && WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                    && WowInterface.ObjectManager.Target.HealthPercentage < 8
-                    && CastSpellIfPossible(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
-            }
-
-            if (CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
             }
         }
 

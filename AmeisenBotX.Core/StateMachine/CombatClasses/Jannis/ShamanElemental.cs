@@ -100,37 +100,40 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 30
+            if (SelectTarget(DpsTargetManager))
+            {
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                 && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
                 && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                HexedTarget = true;
-                return;
-            }
+                {
+                    HexedTarget = true;
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
-                        && CastSpellIfPossible(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
-                        && WowInterface.ObjectManager.Target.HealthPercentage < 25
-                        && CastSpellIfPossible(heroismSpell, 0))
-                    || CastSpellIfPossible(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(elementalMasterySpell, 0))
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                    && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
                 {
                     return;
                 }
 
-                if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Target != null)
                 {
-                    return;
+                    if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
+                            && CastSpellIfPossible(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
+                            && WowInterface.ObjectManager.Target.HealthPercentage < 25
+                            && CastSpellIfPossible(heroismSpell, 0))
+                        || CastSpellIfPossible(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(elementalMasterySpell, 0))
+                    {
+                        return;
+                    }
+
+                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }

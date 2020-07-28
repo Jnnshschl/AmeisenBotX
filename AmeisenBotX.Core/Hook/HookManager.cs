@@ -1002,7 +1002,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void StopClickToMoveIfActive()
         {
-            if (IsClickToMoveActive())
+            if (WowInterface.ObjectManager.Player != null && IsClickToMoveActive())
             {
                 AmeisenLogger.Instance.Log("Movement", "Stopping ClickToMove", LogLevel.Verbose);
                 CallObjectFunction(WowInterface.ObjectManager.Player.BaseAddress, WowInterface.OffsetList.FunctionPlayerClickToMoveStop);

@@ -98,37 +98,40 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
-
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
-
-                if (distanceToTarget > 3)
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
                 {
-                    if (CastSpellIfPossible(chargeSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || CastSpellIfPossible(interceptSpell, WowInterface.ObjectManager.Target.Guid, true))
-                    {
-                        return;
-                    }
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
                 }
-                else
-                {
-                    if ((WowInterface.ObjectManager.Target.HealthPercentage < 20 || WowInterface.ObjectManager.Target.HasBuffByName("Sudden Death"))
-                       && CastSpellIfPossible(executeSpell, WowInterface.ObjectManager.Target.Guid, true))
-                    {
-                        return;
-                    }
 
-                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && CastSpellIfPossible(bladestormSpell, 0, true))
-                        || CastSpellIfPossible(overpowerSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(mortalStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+
+                    if (distanceToTarget > 3)
                     {
-                        return;
+                        if (CastSpellIfPossible(chargeSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || CastSpellIfPossible(interceptSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if ((WowInterface.ObjectManager.Target.HealthPercentage < 20 || WowInterface.ObjectManager.Target.HasBuffByName("Sudden Death"))
+                           && CastSpellIfPossible(executeSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && CastSpellIfPossible(bladestormSpell, 0, true))
+                            || CastSpellIfPossible(overpowerSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || CastSpellIfPossible(mortalStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        {
+                            return;
+                        }
                     }
                 }
             }

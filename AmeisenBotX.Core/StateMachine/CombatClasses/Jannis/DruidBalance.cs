@@ -113,42 +113,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             CheckForEclipseProcs();
 
-            if (CastSpellIfPossible(naturesGraspSpell, 0))
+            if (SelectTarget(DpsTargetManager))
             {
-                return;
-            }
+                if (CastSpellIfPossible(naturesGraspSpell, 0))
+                {
+                    return;
+                }
 
-            double distance = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distance = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-            if (distance < 12.0
-                && WowInterface.ObjectManager.Target.HasBuffByName(entanglingRootsSpell)
-                && CastSpellIfPossibleDk(entanglingRootsSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
-            {
-                return;
-            }
+                if (distance < 12.0
+                    && WowInterface.ObjectManager.Target.HasBuffByName(entanglingRootsSpell)
+                    && CastSpellIfPossibleDk(entanglingRootsSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                {
+                    return;
+                }
 
-            if (NeedToHealMySelf())
-            {
-                return;
-            }
+                if (NeedToHealMySelf())
+                {
+                    return;
+                }
 
-            if ((WowInterface.ObjectManager.Player.ManaPercentage < 30
-                    && CastSpellIfPossible(innervateSpell, 0))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(barkskinSpell, 0, true))
-                || (LunarEclipse
-                    && CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
-                || (SolarEclipse
-                    && CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
-                || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                    && CastSpellIfPossible(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
-            {
-                return;
-            }
+                if ((WowInterface.ObjectManager.Player.ManaPercentage < 30
+                        && CastSpellIfPossible(innervateSpell, 0))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                        && CastSpellIfPossible(barkskinSpell, 0, true))
+                    || (LunarEclipse
+                        && CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (SolarEclipse
+                        && CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
+                        && CastSpellIfPossible(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                {
+                    return;
+                }
 
-            if (CastSpellIfPossible(forceOfNatureSpell, 0, true))
-            {
-                WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
+                if (CastSpellIfPossible(forceOfNatureSpell, 0, true))
+                {
+                    WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
+                }
             }
         }
 

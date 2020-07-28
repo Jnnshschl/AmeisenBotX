@@ -1,13 +1,10 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -18,8 +15,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         public PaladinHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            UseDefaultTargetSelection = false;
-
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { blessingOfWisdomSpell, () => CastSpellIfPossible(blessingOfWisdomSpell, WowInterface.ObjectManager.PlayerGuid, true) },
@@ -29,11 +24,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, flashOfLightSpell },
+                { 300, holyLightSpell },
                 { 2000, holyShockSpell },
-                { 4000, holyLightSpell }
             };
-
-            FaceEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
         }
@@ -52,7 +45,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicComparator
+        (
+            null,
+            new List<WeaponType>() { WeaponType.TWOHANDED_AXES, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_SWORDS },
+            new Dictionary<string, double>()
+            {
+                { "ITEM_MOD_CRIT_RATING_SHORT", 0.88 },
+                { "ITEM_MOD_INTELLECT_SHORT", 0.2 },
+                { "ITEM_MOD_SPELL_POWER_SHORT", 0.68 },
+                { "ITEM_MOD_HASTE_RATING_SHORT", 0.71},
+            }
+        );
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
@@ -98,50 +102,33 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
-        private TimegatedEvent FaceEvent { get; set; }
-
-        private DateTime LastHealAction { get; set; }
-
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void ExecuteCC()
         {
-            // after 1 seconds of no healing and no freidns around us we are going to attack stuff
-            if (!NeedToHealSomeone()
-                && DateTime.Now - LastHealAction > TimeSpan.FromSeconds(1)
-                && WowInterface.ObjectManager.GetNearPartymembers(WowInterface.ObjectManager.Player.Position, 48).Count <= 1)
+            if ((WowInterface.ObjectManager.PartymemberGuids.Count > 0 || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+                && NeedToHealSomeone())
             {
-                // basic auto attack defending
-                if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
-                {
-                    List<WowUnit> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Where(e => e.IsInCombat).ToList();
+                return;
+            }
 
-                    if (nearEnemies.Count > 0)
-                    {
-                        WowUnit target = nearEnemies.FirstOrDefault();
-                        if (target != null)
-                        {
-                            WowInterface.HookManager.TargetGuid(target.Guid);
-                            WowInterface.MovementEngine.Reset();
-                        }
-                    }
+            if ((WowInterface.ObjectManager.PartymemberGuids.Count == 0 || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
+            {
+                if (WowInterface.ObjectManager.Player.IsAutoAttacking
+                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                    return;
                 }
-                else
+
+                if (CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
+                    return;
+                }
 
-                    if (WowInterface.MovementEngine.IsAtTargetPosition)
-                    {
-                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
-                        {
-                            WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-                        }
-
-                        if (FaceEvent.Run())
-                        {
-                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target.Position);
-                        }
-                    }
+                if (CastSpellIfPossible(exorcismSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
                 }
             }
         }
@@ -158,15 +145,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.First();
-                WowInterface.HookManager.TargetGuid(targetUnit.Guid);
+                WowUnit targetUnit = unitsToHeal.Count > 1 ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
 
-                if (targetUnit.HealthPercentage < 12
+                if (targetUnit.HealthPercentage < 12.0
                     && CastSpellIfPossible(layOnHandsSpell, 0))
                 {
-                    LastHealAction = DateTime.Now;
+                    return true;
+                }
+
+                if (unitsToHeal.Count > 1
+                    && !unitsToHeal.Any(e => e.HasBuffByName(beaconOfLightSpell))
+                    && CastSpellIfPossible(beaconOfLightSpell, targetUnit.Guid, true))
+                {
                     return true;
                 }
 
@@ -182,14 +174,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                    && WowInterface.ObjectManager.Player.ManaPercentage > 20
                    && CastSpellIfPossible(divineIlluminationSpell, 0, true))
                 {
-                    LastHealAction = DateTime.Now;
                     return true;
                 }
 
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 60
                     && CastSpellIfPossible(divinePleaSpell, 0, true))
                 {
-                    LastHealAction = DateTime.Now;
                     return true;
                 }
 
@@ -204,7 +194,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
                 }
 
-                LastHealAction = DateTime.Now;
                 return true;
             }
 

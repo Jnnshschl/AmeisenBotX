@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { treeOfLifeSpell, () => CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Count > 0 && CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
                 { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
@@ -35,7 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
+        public override string Description => "FCFS based CombatClass for the Druid Restoration spec.";
 
         public override string Displayname => "Druid Restoration";
 
@@ -43,7 +44,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicComparator
+        (
+            new List<ArmorType>() { ArmorType.SHIELDS },
+            new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES },
+            new Dictionary<string, double>()
+            {
+                { "ITEM_MOD_CRIT_RATING_SHORT", 1.2 },
+                { "ITEM_MOD_INTELLECT_SHORT", 1.0 },
+                { "ITEM_MOD_SPELL_POWER_SHORT", 1.6 },
+                { "ITEM_MOD_HASTE_RATING_SHORT", 1.8 },
+                { "ITEM_MOD_SPIRIT_SHORT ", 1.4 },
+                { "ITEM_MOD_POWER_REGEN0_SHORT", 1.4 },
+            }
+        );
 
         public override CombatClassRole Role => CombatClassRole.Heal;
 
@@ -86,7 +100,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => false;
 
-        public override string Version => "1.0";
+        public override string Version => "1.1";
 
         public override bool WalkBehindEnemy => false;
 
@@ -94,15 +108,42 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                && CastSpellIfPossible(innervateSpell, WowInterface.ObjectManager.PlayerGuid, true))
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 30.0
+                && CastSpellIfPossible(innervateSpell, 0, true))
             {
                 return;
             }
 
-            if (!NeedToHealSomeone())
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
+                && CastSpellIfPossible(barkskinSpell, 0, true))
             {
                 return;
+            }
+
+            // when we're solo, we don't need to heal as much as we would do in a dungeon group
+            if ((WowInterface.ObjectManager.PartymemberGuids.Count > 0 || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+                && NeedToHealSomeone())
+            {
+                return;
+            }
+
+            if ((WowInterface.ObjectManager.PartymemberGuids.Count == 0 || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
+            {
+                if (!WowInterface.ObjectManager.Target.HasBuffByName(moonfireSpell)
+                    && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+
+                if (CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+
+                if (CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
             }
         }
 
@@ -119,10 +160,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal)
-                && unitsToHeal.Count > 0)
+            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                if (unitsToHeal.Count > 3
+                if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 2
                     && CastSpellIfPossible(tranquilitySpell, 0, true))
                 {
                     return true;
@@ -130,20 +170,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 WowUnit target = unitsToHeal.First();
 
-                if (target.HealthPercentage < 15
-                    && CastSpellIfPossible(naturesSwiftnessSpell, target.Guid, true))
+                if (target.HealthPercentage < 75.0
+                    && target.HealthPercentage > 50.0
+                    && unitsToHeal.Count(e => e.HealthPercentage < 75.0) > 2
+                    && CastSpellIfPossible(wildGrowthSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 55
-                    && !target.HasBuffByName(regrowthSpell)
-                    && CastSpellIfPossible(regrowthSpell, target.Guid, true))
+                if (target.HealthPercentage < 20.0
+                    && CastSpellIfPossible(naturesSwiftnessSpell, target.Guid, true)
+                    && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 70
+                if (target.HealthPercentage < 50.0
                     && (target.HasBuffByName(regrowthSpell) || target.HasBuffByName(rejuvenationSpell))
                     && SwiftmendEvent.Ready
                     && CastSpellIfPossible(swiftmendSpell, target.Guid, true)
@@ -152,29 +194,39 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return true;
                 }
 
-                if (target.HealthPercentage < 85
-                        && !target.HasBuffByName(wildGrowthSpell)
-                        && CastSpellIfPossible(wildGrowthSpell, target.Guid, true))
+                if (target.HealthPercentage < 95.0
+                    && target.HealthPercentage > 85.0
+                    && !target.HasBuffByName(rejuvenationSpell)
+                    && CastSpellIfPossible(rejuvenationSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 90
-                        && !target.HasBuffByName(rejuvenationSpell)
-                        && CastSpellIfPossible(rejuvenationSpell, target.Guid, true))
+                if (target.HealthPercentage < 98.0
+                    && target.HealthPercentage > 85.0
+                    && !target.HasBuffByName(lifebloomSpell)
+                    && CastSpellIfPossible(lifebloomSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 65
+                if (target.HealthPercentage < 85.0
+                    && target.HealthPercentage > 65.0
+                    && !target.HasBuffByName(regrowthSpell)
+                    && CastSpellIfPossible(regrowthSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 65.0
                     && (target.HasBuffByName(regrowthSpell) || target.HasBuffByName(rejuvenationSpell) || target.HasBuffByName(wildGrowthSpell))
                     && CastSpellIfPossible(nourishSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 85
-                        && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
+                if (target.HealthPercentage < 65.0
+                    && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
                 {
                     return true;
                 }

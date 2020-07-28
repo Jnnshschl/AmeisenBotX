@@ -6,12 +6,19 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public abstract class BasicComparator : IWowItemComparator
+    public class BasicComparator : IWowItemComparator
     {
         public BasicComparator(List<ArmorType> armorTypeBlacklist, List<WeaponType> weaponTypeBlacklist)
         {
             ArmorTypeBlacklist = armorTypeBlacklist;
             WeaponTypeBlacklist = weaponTypeBlacklist;
+        }
+
+        public BasicComparator(List<ArmorType> armorTypeBlacklist, List<WeaponType> weaponTypeBlacklist, Dictionary<string, double> statPriorities)
+        {
+            ArmorTypeBlacklist = armorTypeBlacklist;
+            WeaponTypeBlacklist = weaponTypeBlacklist;
+            GearscoreFactory = new GearscoreFactory(statPriorities);
         }
 
         protected GearscoreFactory GearscoreFactory { get; set; }

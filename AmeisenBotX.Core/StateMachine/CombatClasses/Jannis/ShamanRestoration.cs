@@ -15,8 +15,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         public ShamanRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            UseDefaultTargetSelection = false;
-
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, 0, true) }
@@ -98,6 +96,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
+
+            if (SelectTarget(DpsTargetManager))
+            {
+                if (WowInterface.ObjectManager.Target.HasBuffByName(flameShockSpell)
+                    && CastSpellIfPossible(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+
+                if (CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+            }
         }
 
         public override void OutOfCombatExecute()
@@ -118,7 +130,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
                 WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);

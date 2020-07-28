@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Target != null)
+            if (SelectTarget(TankTargetManager))
             {
                 if ((WowInterface.ObjectManager.Player.IsFleeing
                     || WowInterface.ObjectManager.Player.IsDazed

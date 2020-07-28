@@ -99,19 +99,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Target != null)
+            if (SelectTarget(DpsTargetManager))
             {
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 16
-                        && CastSpellIfPossible(iceBlockSpell, 0))
-                    || (WowInterface.ObjectManager.Player.ManaPercentage < 40
-                        && CastSpellIfPossible(evocationSpell, 0, true))
-                    || CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || (WowInterface.ObjectManager.Player.HasBuffByName(missileBarrageSpell) && CastSpellIfPossible(arcaneMissilesSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || CastSpellIfPossible(arcaneBarrageSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(arcaneBlastSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Target != null)
                 {
-                    return;
+                    if ((WowInterface.ObjectManager.Player.HealthPercentage < 16
+                            && CastSpellIfPossible(iceBlockSpell, 0))
+                        || (WowInterface.ObjectManager.Player.ManaPercentage < 40
+                            && CastSpellIfPossible(evocationSpell, 0, true))
+                        || CastSpellIfPossible(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || (WowInterface.ObjectManager.Player.HasBuffByName(missileBarrageSpell) && CastSpellIfPossible(arcaneMissilesSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || CastSpellIfPossible(arcaneBarrageSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(arcaneBlastSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }

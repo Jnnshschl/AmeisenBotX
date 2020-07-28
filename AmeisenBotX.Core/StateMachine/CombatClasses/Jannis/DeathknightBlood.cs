@@ -102,51 +102,54 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                    && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 6.0
-                && CastSpellIfPossibleDk(deathGripSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 6.0
+                    && CastSpellIfPossibleDk(deathGripSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                {
+                    return;
+                }
 
-            if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
-                && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
-                && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
-            {
-                return;
-            }
+                if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
+                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
+                    && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                {
+                    return;
+                }
 
-            if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
-            {
-                return;
-            }
+                if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
+                {
+                    return;
+                }
 
-            int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 12.0).Count;
+                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 12.0).Count;
 
-            if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossibleDk(runeTapSpell, 0, false, false, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && (CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true) || CastSpellIfPossibleDk(antiMagicShellSpell, 0, true)))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 50
-                    && CastSpellIfPossibleDk(vampiricBloodSpell, 0, false, false, true))
-                || (nearEnemies > 2
-                    && (CastSpellIfPossibleDkArea(deathAndDecaySpell, 0) || (BloodBoilEvent.Run() && CastSpellIfPossibleDk(bloodBoilSpell, 0))))
-                || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
-                || CastSpellIfPossibleDk(deathStrike, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
-                || CastSpellIfPossibleDk(heartStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true)
-                || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
+                        && CastSpellIfPossibleDk(runeTapSpell, 0, false, false, true))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                        && (CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true) || CastSpellIfPossibleDk(antiMagicShellSpell, 0, true)))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 50
+                        && CastSpellIfPossibleDk(vampiricBloodSpell, 0, false, false, true))
+                    || (nearEnemies > 2
+                        && (CastSpellIfPossibleDkArea(deathAndDecaySpell, 0) || (BloodBoilEvent.Run() && CastSpellIfPossibleDk(bloodBoilSpell, 0))))
+                    || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
+                    || CastSpellIfPossibleDk(deathStrike, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
+                    || CastSpellIfPossibleDk(heartStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true)
+                    || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
             }
         }
 

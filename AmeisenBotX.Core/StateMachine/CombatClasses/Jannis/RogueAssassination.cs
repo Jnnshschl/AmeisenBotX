@@ -86,30 +86,33 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
-                        && CastSpellIfPossibleRogue(sprintSpell, 0, true)))
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
+                        && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
                 {
                     return;
                 }
-            }
 
-            if (CastSpellIfPossibleRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
-                || CastSpellIfPossibleRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
+                            && CastSpellIfPossibleRogue(sprintSpell, 0, true)))
+                    {
+                        return;
+                    }
+                }
+
+                if (CastSpellIfPossibleRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
+                    || CastSpellIfPossibleRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
             }
         }
 

@@ -181,6 +181,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected const string avengersShieldSpell = "Avenger\'s Shield";
         protected const string avengingWrathSpell = "Avenging Wrath";
+        protected const string beaconOfLightSpell = "Beacon of Light";
         protected const string blessingOfKingsSpell = "Blessing of Kings";
         protected const string blessingOfMightSpell = "Blessing of Might";
         protected const string blessingOfWisdomSpell = "Blessing of Wisdom";
@@ -374,15 +375,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
-            ITargetSelectionLogic targetSelectionLogic = Role switch
-            {
-                CombatClassRole.Dps => targetSelectionLogic = new DpsTargetSelectionLogic(wowInterface),
-                CombatClassRole.Heal => targetSelectionLogic = new HealTargetSelectionLogic(wowInterface),
-                CombatClassRole.Tank => targetSelectionLogic = new TankTargetSelectionLogic(wowInterface),
-                _ => null,
-            };
-
-            TargetManager = new TargetManager(targetSelectionLogic, TimeSpan.FromMilliseconds(250));
+            DpsTargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));
+            TankTargetManager = new TargetManager(new TankTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));
+            HealTargetManager = new TargetManager(new HealTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));
 
             Spells = new Dictionary<string, Spell>();
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
@@ -437,6 +432,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract string Displayname { get; }
 
+        public TargetManager DpsTargetManager { get; private set; }
+
         public GroupAuraManager GroupAuraManager { get; private set; }
 
         public abstract bool HandlesMovement { get; }
@@ -444,6 +441,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public double HealingItemHealthThreshold { get; set; } = 30.0;
 
         public double HealingItemManaThreshold { get; set; } = 30.0;
+
+        public TargetManager HealTargetManager { get; private set; }
 
         public abstract bool IsMelee { get; }
 
@@ -453,7 +452,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 
-        public List<string> PriorityTargets { get => TargetManager.PriorityTargets; set => TargetManager.PriorityTargets = value; }
+        public List<string> PriorityTargets { get => DpsTargetManager.PriorityTargets; set => DpsTargetManager.PriorityTargets = value; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
@@ -463,13 +462,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract TalentTree Talents { get; }
 
+        public TargetManager TankTargetManager { get; private set; }
+
         public AuraManager TargetAuraManager { get; private set; }
 
         public bool TargetInLineOfSight { get; set; }
 
         public InterruptManager TargetInterruptManager { get; private set; }
-
-        public TargetManager TargetManager { get; private set; }
 
         public TimegatedEvent UpdatePriorityUnits { get; set; }
 
@@ -499,31 +498,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && WowInterface.DungeonEngine.Profile.PriorityUnits != null
                     && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
                 {
-                    TargetManager.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits.ToList();
-                }
-            }
-
-            // Target selection
-            // --------------------------- >
-
-            if (UseDefaultTargetSelection)
-            {
-                if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
-                {
-                    ulong guid = targetToTarget.First().Guid;
-
-                    if (WowInterface.ObjectManager.Player.TargetGuid != guid)
-                    {
-                        WowInterface.HookManager.TargetGuid(guid);
-                        WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
-                    }
-                }
-
-                if (WowInterface.ObjectManager.Target == null
-                    || WowInterface.ObjectManager.Target.IsDead
-                    || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
-                {
-                    return;
+                    DpsTargetManager.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits.ToList();
                 }
             }
 
@@ -888,6 +863,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             return false;
+        }
+
+        protected bool SelectTarget(TargetManager targetManager)
+        {
+            if (targetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+            {
+                ulong guid = targetToTarget.First().Guid;
+
+                if (WowInterface.ObjectManager.Player.TargetGuid != guid)
+                {
+                    WowInterface.HookManager.TargetGuid(guid);
+                    WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
+                }
+            }
+
+            return WowInterface.ObjectManager.Target != null
+                && !WowInterface.ObjectManager.Target.IsDead
+                && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target);
         }
 
         private bool CastSpell(string spellName, bool castOnSelf)

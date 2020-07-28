@@ -96,28 +96,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+            if (SelectTarget(DpsTargetManager))
+            {
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 30
                 && CastSpellIfPossible(hymnOfHopeSpell, 0))
-            {
-                return;
-            }
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
-                && CastSpellIfPossible(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 90
+                    && CastSpellIfPossible(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                && CastSpellIfPossible(flashHealSpell, WowInterface.ObjectManager.TargetGuid))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    && CastSpellIfPossible(flashHealSpell, WowInterface.ObjectManager.TargetGuid))
+                {
+                    return;
+                }
 
-            if (!WowInterface.ObjectManager.Player.IsCasting
-                && CastSpellIfPossible(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
+                if (!WowInterface.ObjectManager.Player.IsCasting
+                    && CastSpellIfPossible(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
             }
         }
 

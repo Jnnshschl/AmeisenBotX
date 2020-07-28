@@ -94,45 +94,48 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-               && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                   && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+                {
+                    return;
+                }
 
-            if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
-                && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
-                && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
-            {
-                return;
-            }
+                if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
+                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
+                    && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
-                && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
+                    && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                {
+                    return;
+                }
 
-            if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
-            {
-                return;
-            }
+                if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
+                {
+                    return;
+                }
 
-            if ((WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossibleDk(iceboundFortitudeSpell, WowInterface.ObjectManager.TargetGuid, true))
-                || CastSpellIfPossibleDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
-                || CastSpellIfPossibleDk(scourgeStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
-                || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
-                || CastSpellIfPossibleDk(summonGargoyleSpell, WowInterface.ObjectManager.TargetGuid, true)
-                || (WowInterface.ObjectManager.Player.Runeenergy > 60
-                    && CastSpellIfPossibleDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
-            {
-                return;
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 60
+                        && CastSpellIfPossibleDk(iceboundFortitudeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || CastSpellIfPossibleDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
+                    || CastSpellIfPossibleDk(scourgeStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
+                    || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || CastSpellIfPossibleDk(summonGargoyleSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || (WowInterface.ObjectManager.Player.Runeenergy > 60
+                        && CastSpellIfPossibleDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
+                {
+                    return;
+                }
             }
         }
 

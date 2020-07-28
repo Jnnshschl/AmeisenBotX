@@ -15,8 +15,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         public PriestHoly(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            UseDefaultTargetSelection = false;
-
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
@@ -26,7 +24,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             SpellUsageHealDict = new Dictionary<int, string>()
             {
                 { 0, healSpell },
-                { 300, flashHealSpell },
+                { 100, flashHealSpell },
                 { 5000, greaterHealSpell },
             };
 
@@ -98,27 +96,29 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!NeedToHealSomeone())
+            if ((WowInterface.ObjectManager.PartymemberGuids.Count > 0 || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+                && NeedToHealSomeone())
             {
-                if (WowInterface.ObjectManager.Player.ManaPercentage > 40)
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 20
+                && CastSpellIfPossible(hymnOfHopeSpell, 0))
+            {
+                return;
+            }
+
+            if ((WowInterface.ObjectManager.PartymemberGuids.Count == 0 || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
+            {
+                if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
+                    && CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
-                    List<WowUnit> nearEnemies = WowInterface.ObjectManager.GetEnemiesInCombatWithUs(WowInterface.ObjectManager.Player.Position, 40.0)
-                        .OrderBy(e => e.HealthPercentage)
-                        .ToList();
+                    return;
+                }
 
-                    if (nearEnemies.Count > 0)
-                    {
-                        if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
-                            && CastSpellIfPossible(shadowWordPainSpell, nearEnemies.First().Guid, true))
-                        {
-                            return;
-                        }
-
-                        if (CastSpellIfPossible(smiteSpell, nearEnemies.First().Guid, true))
-                        {
-                            return;
-                        }
-                    }
+                if (CastSpellIfPossible(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
                 }
             }
         }
@@ -137,44 +137,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
-                if (unitsToHeal.Count == 0)
-                {
-                    return false;
-                }
+                WowUnit target = unitsToHeal.First();
 
                 if (unitsToHeal.Count > 3
-                    && CastSpellIfPossible(prayerOfHealingSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    && target.HealthPercentage > 80.0
+                    && CastSpellIfPossible(prayerOfHealingSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (WowInterface.ObjectManager.Target.HealthPercentage < 25
-                    && CastSpellIfPossible(guardianSpiritSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (target.HealthPercentage < 25.0
+                    && CastSpellIfPossible(guardianSpiritSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (WowInterface.ObjectManager.Target.HealthPercentage < 70
-                    && WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(bindingHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (target.Guid != WowInterface.ObjectManager.PlayerGuid
+                    && target.HealthPercentage < 70.0
+                    && WowInterface.ObjectManager.Player.HealthPercentage < 70.0
+                    && CastSpellIfPossible(bindingHealSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 50
-                    && CastSpellIfPossible(hymnOfHopeSpell, 0))
+                if (target.HealthPercentage < 90.0
+                    && target.HealthPercentage > 75.0
+                    && !target.HasBuffByName(renewSpell)
+                    && CastSpellIfPossible(renewSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
-                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
+                double healthDifference = target.MaxHealth - target.Health;
+                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).OrderByDescending(e => e.Key).ToList();
 
-                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
+                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry)
                 {
-                    if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
+                    if (CastSpellIfPossible(keyValuePair.Value, target.Guid, true))
                     {
                         return true;
                     }

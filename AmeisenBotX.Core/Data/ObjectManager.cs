@@ -646,6 +646,11 @@ namespace AmeisenBotX.Core.Data
                     Player = player;
                 }
 
+                if (player.Guid == TargetGuid) { Target = player; }
+                if (player.Guid == PetGuid) { Pet = player; }
+                if (player.Guid == LastTargetGuid) { LastTarget = player; }
+                if (player.Guid == PartyleaderGuid) { Partyleader = player; }
+
                 return player;
             }
 

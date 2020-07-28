@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Character.Comparators
         {
             GearscoreFactory = new GearscoreFactory(new Dictionary<string, double>() {
                 { "ITEM_MOD_INTELLECT_SHORT", 2.5 },
-                { "ITEM_MOD_SPELL_POWER_SHORT", 25 },
+                { "ITEM_MOD_SPELL_POWER_SHORT", 2.5 },
                 { "RESISTANCE0_NAME", 2.0 },
                 { "ITEM_MOD_POWER_REGEN0_SHORT", 2.0 },
                 { "ITEM_MOD_HASTE_RATING_SHORT", 2.0 },

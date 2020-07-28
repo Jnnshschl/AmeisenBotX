@@ -93,39 +93,42 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossible(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossible(holyLightSpell, WowInterface.ObjectManager.PlayerGuid, true)))
-            {
-                return;
-            }
-
-            if ((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell)
-                    && CastSpellIfPossible(judgementOfLightSpell, 0))
-                || CastSpellIfPossible(avengingWrathSpell, 0, true)
-                || (WowInterface.ObjectManager.Player.ManaPercentage < 80
-                    && CastSpellIfPossible(divinePleaSpell, 0, true)))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Target != null)
-            {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
-                        && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || CastSpellIfPossible(crusaderStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(divineStormSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(exorcismSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(holyWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && CastSpellIfPossible(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                        && CastSpellIfPossible(holyLightSpell, WowInterface.ObjectManager.PlayerGuid, true)))
                 {
                     return;
+                }
+
+                if ((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell)
+                        && CastSpellIfPossible(judgementOfLightSpell, 0))
+                    || CastSpellIfPossible(avengingWrathSpell, 0, true)
+                    || (WowInterface.ObjectManager.Player.ManaPercentage < 80
+                        && CastSpellIfPossible(divinePleaSpell, 0, true)))
+                {
+                    return;
+                }
+
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
+                            && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || CastSpellIfPossible(crusaderStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(divineStormSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(exorcismSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(holyWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }

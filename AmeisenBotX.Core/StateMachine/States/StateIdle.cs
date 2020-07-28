@@ -63,6 +63,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 WowInterface.CharacterManager.UpdateAll();
             }
+
+            WowInterface.MovementEngine.StopMovement();
         }
 
         public override void Execute()

@@ -99,54 +99,57 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            double distanceToTarget = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+                double distanceToTarget = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
 
-            if (distanceToTarget > 9.0
-                && CastSpellIfPossible(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
-            {
-                return;
-            }
+                if (distanceToTarget > 9.0
+                    && CastSpellIfPossible(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
+                {
+                    return;
+                }
 
-            if (distanceToTarget > 8.0
-                && CastSpellIfPossible(dashSpell, 0))
-            {
-                return;
-            }
+                if (distanceToTarget > 8.0
+                    && CastSpellIfPossible(dashSpell, 0))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
-                && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
-            {
-                return;
-            }
-
-            if (CastSpellIfPossible(berserkSpell, 0))
-            {
-                return;
-            }
-
-            if (NeedToHealMySelf())
-            {
-                return;
-            }
-
-            if ((WowInterface.ObjectManager.Player.EnergyPercentage > 70
-                    && CastSpellIfPossible(berserkSpell, 0))
-                || (WowInterface.ObjectManager.Player.Energy < 30
-                    && CastSpellIfPossible(tigersFurySpell, 0))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(barkskinSpell, 0, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 35
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 40
                     && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
-                || (WowInterface.ObjectManager.Player.ComboPoints == 5
-                    && CastSpellIfPossibleRogue(ferociousBiteSpell, WowInterface.ObjectManager.Target.Guid, true, true, 5))
-                || CastSpellIfPossible(shredSpell, WowInterface.ObjectManager.Target.Guid, true))
-            {
-                return;
+                {
+                    return;
+                }
+
+                if (CastSpellIfPossible(berserkSpell, 0))
+                {
+                    return;
+                }
+
+                if (NeedToHealMySelf())
+                {
+                    return;
+                }
+
+                if ((WowInterface.ObjectManager.Player.EnergyPercentage > 70
+                        && CastSpellIfPossible(berserkSpell, 0))
+                    || (WowInterface.ObjectManager.Player.Energy < 30
+                        && CastSpellIfPossible(tigersFurySpell, 0))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                        && CastSpellIfPossible(barkskinSpell, 0, true))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 35
+                        && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
+                    || (WowInterface.ObjectManager.Player.ComboPoints == 5
+                        && CastSpellIfPossibleRogue(ferociousBiteSpell, WowInterface.ObjectManager.Target.Guid, true, true, 5))
+                    || CastSpellIfPossible(shredSpell, WowInterface.ObjectManager.Target.Guid, true))
+                {
+                    return;
+                }
             }
         }
 

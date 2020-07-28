@@ -19,22 +19,26 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.CastMovementRay).Count() > 0;
+            List<Vector3> nodes = BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.CastMovementRay);
+            return nodes != null ? nodes.Count() > 0 : default;
         }
 
         public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveToPosition, PathRequestFlags.ChaikinCurve);
+            List<Vector3> nodes = BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.MoveToPosition, PathRequestFlags.ChaikinCurve);
+            return nodes ?? new List<Vector3>();
         }
 
         public Vector3 GetRandomPoint(int mapId)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, Vector3.Zero, Vector3.Zero, 0f, MovementType.GetRandomPoint).FirstOrDefault();
+            List<Vector3> nodes = BuildAndSendPathRequest<List<Vector3>>(mapId, Vector3.Zero, Vector3.Zero, 0f, MovementType.GetRandomPoint);
+            return nodes != null ? nodes.FirstOrDefault() : default;
         }
 
         public Vector3 GetRandomPointAround(int mapId, Vector3 start, float maxRadius)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, Vector3.Zero, maxRadius, MovementType.GetRandomPointAround).FirstOrDefault();
+            List<Vector3> nodes = BuildAndSendPathRequest<List<Vector3>>(mapId, start, Vector3.Zero, maxRadius, MovementType.GetRandomPointAround);
+            return nodes != null ? nodes.FirstOrDefault() : default;
         }
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)

@@ -92,45 +92,48 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(TankTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 10
-                && CastSpellIfPossible(layOnHandsSpell, 0, true))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 20
-                && CastSpellIfPossible(flashOfLightSpell, 0, true))
-            {
-                return;
-            }
-            else if (WowInterface.ObjectManager.Player.HealthPercentage < 35
-                && CastSpellIfPossible(holyLightSpell, 0, true))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 25
-                && CastSpellIfPossible(divinePleaSpell, 0, true))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if (CastSpellIfPossible(avengersShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
-                    || (WowInterface.ObjectManager.Target.HealthPercentage < 20.0 && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true))
-                    || CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.Target.Guid, true)
-                    || CastSpellIfPossible(hammerOfTheRighteousSpell, WowInterface.ObjectManager.Target.Guid, true)
-                    || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)
-                    || CastSpellIfPossible(shieldOfTheRighteousnessSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true))
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 10
+                    && CastSpellIfPossible(layOnHandsSpell, 0, true))
                 {
                     return;
+                }
+
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 20
+                    && CastSpellIfPossible(flashOfLightSpell, 0, true))
+                {
+                    return;
+                }
+                else if (WowInterface.ObjectManager.Player.HealthPercentage < 35
+                    && CastSpellIfPossible(holyLightSpell, 0, true))
+                {
+                    return;
+                }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 25
+                    && CastSpellIfPossible(divinePleaSpell, 0, true))
+                {
+                    return;
+                }
+
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    if (CastSpellIfPossible(avengersShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || (WowInterface.ObjectManager.Target.HealthPercentage < 20.0 && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        || CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || CastSpellIfPossible(hammerOfTheRighteousSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || CastSpellIfPossible(shieldOfTheRighteousnessSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }

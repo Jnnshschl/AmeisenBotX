@@ -101,55 +101,58 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-            if (distanceToTarget > 9.0
-                && CastSpellIfPossible(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
-            {
-                return;
-            }
+                if (distanceToTarget > 9.0
+                    && CastSpellIfPossible(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
-                && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                    && CastSpellIfPossible(survivalInstinctsSpell, 0, true))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                && CastSpellIfPossible(growlSpell, 0, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                    && CastSpellIfPossible(growlSpell, 0, true))
+                {
+                    return;
+                }
 
-            if (CastSpellIfPossible(berserkSpell, 0))
-            {
-                return;
-            }
+                if (CastSpellIfPossible(berserkSpell, 0))
+                {
+                    return;
+                }
 
-            if (NeedToHealMySelf())
-            {
-                return;
-            }
+                if (NeedToHealMySelf())
+                {
+                    return;
+                }
 
-            int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count();
+                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count();
 
-            if ((WowInterface.ObjectManager.Player.HealthPercentage > 80
-                    && CastSpellIfPossible(enrageSpell, 0, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(barkskinSpell, 0, true))
-                || (WowInterface.ObjectManager.Player.HealthPercentage < 75
-                    && CastSpellIfPossible(frenziedRegenerationSpell, 0, true))
-                || (nearEnemies > 2 && CastSpellIfPossible(challengingRoarSpell, 0, true))
-                || CastSpellIfPossible(lacerateSpell, WowInterface.ObjectManager.TargetGuid, true)
-                || (nearEnemies > 2 && CastSpellIfPossible(swipeSpell, 0, true))
-                || CastSpellIfPossible(mangleBearSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
+                if ((WowInterface.ObjectManager.Player.HealthPercentage > 80
+                        && CastSpellIfPossible(enrageSpell, 0, true))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                        && CastSpellIfPossible(barkskinSpell, 0, true))
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75
+                        && CastSpellIfPossible(frenziedRegenerationSpell, 0, true))
+                    || (nearEnemies > 2 && CastSpellIfPossible(challengingRoarSpell, 0, true))
+                    || CastSpellIfPossible(lacerateSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || (nearEnemies > 2 && CastSpellIfPossible(swipeSpell, 0, true))
+                    || CastSpellIfPossible(mangleBearSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
             }
         }
 

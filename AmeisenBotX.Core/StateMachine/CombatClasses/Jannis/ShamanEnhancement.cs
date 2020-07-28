@@ -100,48 +100,51 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (SelectTarget(DpsTargetManager))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-            }
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                }
 
-            if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
-                || CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 30
-                && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
-                && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                HexedTarget = true;
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Target != null)
-            {
-                if ((WowInterface.ObjectManager.Target.MaxHealth > 10000000
-                        && WowInterface.ObjectManager.Target.HealthPercentage < 25
-                        && CastSpellIfPossible(heroismSpell, 0))
-                    || CastSpellIfPossible(stormstrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(lavaLashSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossible(earthShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
+                    || CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.HasBuffByName(maelstromWeaponSpell)
-                    && WowInterface.ObjectManager.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell)?.StackCount >= 5
-                    && CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 30
+                    && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
+                    && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    HexedTarget = true;
+                    return;
+                }
+
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                    && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
                 {
                     return;
+                }
+
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    if ((WowInterface.ObjectManager.Target.MaxHealth > 10000000
+                            && WowInterface.ObjectManager.Target.HealthPercentage < 25
+                            && CastSpellIfPossible(heroismSpell, 0))
+                        || CastSpellIfPossible(stormstrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(lavaLashSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || CastSpellIfPossible(earthShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.ObjectManager.Player.HasBuffByName(maelstromWeaponSpell)
+                        && WowInterface.ObjectManager.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell)?.StackCount >= 5
+                        && CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }
