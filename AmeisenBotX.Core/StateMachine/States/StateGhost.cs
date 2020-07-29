@@ -75,6 +75,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
+            WowInterface.MovementEngine.IsGhost = true;
             Blackboard = new GhostBlackboard(WowInterface);
         }
 
@@ -91,6 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Exit()
         {
+            WowInterface.MovementEngine.IsGhost = false;
             NeedToEnterPortal = false;
         }
 

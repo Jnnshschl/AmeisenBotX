@@ -34,6 +34,8 @@ namespace AmeisenBotX.Core
 
         public bool AutoSell { get; set; } = true;
 
+        public bool AutoSetUlowGfxSettings { get; set; } = true;
+
         public bool AutostartWow { get; set; } = true;
 
         public bool AutoTalkToNearQuestgivers { get; set; } = true;
@@ -96,6 +98,8 @@ namespace AmeisenBotX.Core
 
         public string JobProfile { get; set; } = string.Empty;
 
+        public bool LootOnlyMoneyAndQuestitems { get; set; } = false;
+
         public bool LootUnits { get; set; } = true;
 
         public double LootUnitsRadius { get; set; } = 20.0;
@@ -153,8 +157,6 @@ namespace AmeisenBotX.Core
         public string QuestProfile { get; set; } = string.Empty;
 
         public bool RconEnabled { get; set; } = false;
-
-        public bool LootOnlyMoneyAndQuestitems { get; set; } = false;
 
         public int RconScreenshotInterval { get; set; } = 5000;
 

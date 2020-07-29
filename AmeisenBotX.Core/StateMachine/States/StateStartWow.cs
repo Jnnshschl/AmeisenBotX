@@ -75,29 +75,39 @@ namespace AmeisenBotX.Core.Statemachine.States
             try
             {
                 string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
+
                 if (File.Exists(configWtfPath))
                 {
-                    File.SetAttributes(configWtfPath, FileAttributes.Normal);
+                    bool editedFile = false;
                     List<string> content = File.ReadAllLines(configWtfPath).ToList();
 
-                    bool found = false;
-                    for (int i = 0; i < content.Count; i++)
+                    if (!content.Any(e => e.Contains($"SET REALMLIST {Config.Realmlist}")))
                     {
-                        if (content[i].ToUpper().Contains("SET REALMLIST"))
+                        bool found = false;
+                        for (int i = 0; i < content.Count; ++i)
                         {
-                            content[i] = $"SET REALMLIST {Config.Realmlist}";
-                            found = true;
-                            break;
+                            if (content[i].ToUpper().Contains("SET REALMLIST"))
+                            {
+                                editedFile = true;
+                                content[i] = $"SET REALMLIST {Config.Realmlist}";
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            editedFile = true;
+                            content.Add($"SET REALMLIST {Config.Realmlist}");
                         }
                     }
 
-                    if (!found)
+                    if (editedFile)
                     {
-                        content.Add($"SET REALMLIST {Config.Realmlist}");
+                        File.SetAttributes(configWtfPath, FileAttributes.Normal);
+                        File.WriteAllLines(configWtfPath, content);
+                        File.SetAttributes(configWtfPath, FileAttributes.ReadOnly);
                     }
-
-                    File.WriteAllLines(configWtfPath, content);
-                    File.SetAttributes(configWtfPath, FileAttributes.ReadOnly);
                 }
             }
             catch
@@ -113,29 +123,54 @@ namespace AmeisenBotX.Core.Statemachine.States
                 string configWtfPath = Path.Combine(Directory.GetParent(Config.PathToWowExe).FullName, "wtf", "config.wtf");
                 if (File.Exists(configWtfPath))
                 {
-                    File.SetAttributes(configWtfPath, FileAttributes.Normal);
+                    bool editedFile = false;
                     string content = File.ReadAllText(configWtfPath).ToUpper();
 
-                    if (content.Contains("SET READEULA"))
+                    if (!content.Contains("SET READEULA \"0\""))
                     {
-                        content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
-                    }
-                    else
-                    {
-                        content += "\nSET READEULA \"1\"";
-                    }
-
-                    if (content.Contains("SET READTOS"))
-                    {
-                        content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
-                    }
-                    else
-                    {
-                        content += "\nSET READTOS \"1\"";
+                        editedFile = true;
+                        if (content.Contains("SET READEULA"))
+                        {
+                            content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
+                        }
+                        else
+                        {
+                            content += "\nSET READEULA \"1\"";
+                        }
                     }
 
-                    File.WriteAllText(configWtfPath, content);
-                    File.SetAttributes(configWtfPath, FileAttributes.ReadOnly);
+                    if (!content.Contains("SET READTOS \"0\""))
+                    {
+                        editedFile = true;
+                        if (content.Contains("SET READTOS"))
+                        {
+                            content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
+                        }
+                        else
+                        {
+                            content += "\nSET READTOS \"1\"";
+                        }
+                    }
+
+                    if (!content.Contains("SET MOVIE \"0\""))
+                    {
+                        editedFile = true;
+                        if (content.Contains("SET MOVIE"))
+                        {
+                            content = content.Replace("SET MOVIE \"0\"", "SET MOVIE \"1\"");
+                        }
+                        else
+                        {
+                            content += "\nSET MOVIE \"1\"";
+                        }
+                    }
+
+                    if (editedFile)
+                    {
+                        File.SetAttributes(configWtfPath, FileAttributes.Normal);
+                        File.WriteAllText(configWtfPath, content);
+                        File.SetAttributes(configWtfPath, FileAttributes.ReadOnly);
+                    }
                 }
             }
             catch

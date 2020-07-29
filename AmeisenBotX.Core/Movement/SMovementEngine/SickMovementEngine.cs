@@ -6,7 +6,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Logging;
+using AmeisenBotX.Core.Movement.SMovementEngine.Extra.Shortcuts;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,6 +22,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             WowInterface = wowInterface;
             Nodes = new ConcurrentQueue<Vector3>();
             PlayerVehicle = new BasicVehicle(wowInterface);
+
+            Shortcuts = new List<IShortcut>()
+            {
+                // new DeeprunTramShortcut(wowInterface)
+            };
 
             MovementWatchdog = new Timer(1000);
             MovementWatchdog.Elapsed += MovementWatchdog_Elapsed;
@@ -47,7 +52,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     new Selector<MovementBlackboard>
                     (
                         "NeedToUnstuck",
-                        (b) => ShouldBeMoving && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                        (b) => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
                         new Leaf<MovementBlackboard>
                         (
                             (b) => DoUnstuck()
@@ -65,7 +70,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             new Selector<MovementBlackboard>
                             (
                                 "IsDirectMovingState",
-                                (b) => IsDirectMovingState() || WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying,
+                                (b) => IsDirectMovingState() || WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || ForceDirectMove,
                                 new Leaf<MovementBlackboard>((b) =>
                                 {
                                     if (Nodes.TryPeek(out Vector3 checkNodePos)
@@ -133,6 +138,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                                 {
                                                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                                                     && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
+                                                    && !IsGhost
                                                     && wowInterface.CharacterManager.Mounts.Count > 0
                                                     && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
                                                     && !WowInterface.ObjectManager.Player.IsMounted
@@ -197,13 +203,19 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             );
         }
 
+        public IShortcut ActiveShortcut { get; set; }
+
         public AmeisenBotBehaviorTree<MovementBlackboard> BehaviorTree { get; }
 
         public MovementBlackboard Blackboard { get; }
 
+        public bool ForceDirectMove { get; private set; }
+
         public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
 
         public bool IsCastingMount { get; set; }
+
+        public bool IsGhost { get; set; }
 
         public bool IsPathIncomplete { get; private set; }
 
@@ -231,6 +243,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public BasicVehicle PlayerVehicle { get; }
 
+        public Vector3 ShortcutPosition { get; private set; }
+
         public bool ShouldBeMoving { get; private set; }
 
         public int StuckCounter { get; private set; }
@@ -250,6 +264,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         private TimegatedEvent JumpCheckEvent { get; }
 
         private Timer MovementWatchdog { get; }
+
+        private bool PathfindingFailed { get; set; }
+
+        private List<IShortcut> Shortcuts { get; }
 
         private WowInterface WowInterface { get; }
 
@@ -275,7 +293,29 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     }
                 }
 
+                if (ShortcutPosition == default)
+                {
+                    ShortcutPosition = TargetPosition;
+                }
+
+                if (ActiveShortcut != null && ActiveShortcut.UseShortcut(WowInterface.ObjectManager.Player.Position, ShortcutPosition, out Vector3 shortcutPosition, out bool shortcutUsePathfinding))
+                {
+                    TargetPosition = shortcutPosition;
+
+                    if (!shortcutUsePathfinding)
+                    {
+                        Nodes.Clear();
+                        MovementAction = MovementAction.DirectMove;
+                        ForceDirectMove = true;
+                    }
+                }
+                else
+                {
+                    ShortcutPosition = default;
+                }
+
                 BehaviorTree.Tick();
+                ForceDirectMove = false;
             }
         }
 
@@ -300,8 +340,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, double minDistanceToMove = 1.5)
+        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, double minDistanceToMove = 1.5, bool disableShortcuts = false)
         {
+            if (ActiveShortcut != null && (disableShortcuts || ActiveShortcut.Finished))
+            {
+                ActiveShortcut = null;
+            }
+
             if (MovementAction == movementAction
                 && TargetPosition == positionToGoTo
                 && TargetRotation == targetRotation
@@ -316,6 +361,18 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             TargetPosition = positionToGoTo;
             TargetRotation = targetRotation;
             MinDistanceToMove = minDistanceToMove;
+
+            double distanceToTargetPos = WowInterface.ObjectManager.Player.Position.GetDistance(positionToGoTo) * 2.0;
+
+            if (!disableShortcuts && Shortcuts.Any(e => distanceToTargetPos >= e.MinDistanceUntilWorth))
+            {
+                IShortcut useableShortcut = Shortcuts.FirstOrDefault(e => e.MapToUseOn == WowInterface.ObjectManager.MapId && e.IsUseable(WowInterface.ObjectManager.Player.Position, positionToGoTo));
+
+                if (useableShortcut != null)
+                {
+                    ActiveShortcut = useableShortcut;
+                }
+            }
         }
 
         public void StopMovement()
@@ -432,8 +489,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 StuckCounter = 0;
             }
         }
-
-        private bool PathfindingFailed { get; set; }
 
         private void UpdateBlackboard()
         {

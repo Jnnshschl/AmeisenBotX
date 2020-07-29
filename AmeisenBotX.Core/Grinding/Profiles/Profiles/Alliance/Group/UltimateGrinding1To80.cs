@@ -27,8 +27,8 @@ namespace AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group
             new GrindingSpot(new Vector3(-10569, 545, 31), 64.0, 19, 20),
             new GrindingSpot(new Vector3(-10549, 415, 36), 128.0, 21, 26),
             new GrindingSpot(new Vector3(-10556, 231, 30), 128.0, 21, 26),
-            new GrindingSpot(new Vector3(-11039, -228, 15), 76.0, 27, 30),
-            new GrindingSpot(new Vector3(-11074, -513, 32), 56.0, 27, 30),
+            new GrindingSpot(new Vector3(-11039, -228, 15), 76.0, 27, 80),
+            new GrindingSpot(new Vector3(-11074, -513, 32), 56.0, 27, 80),
         };
 
         public override string ToString()

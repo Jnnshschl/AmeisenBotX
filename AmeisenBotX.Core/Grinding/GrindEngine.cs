@@ -1,9 +1,12 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Cache.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine;
+using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +15,12 @@ namespace AmeisenBotX.Core.Grinding
 {
     public class GrindingEngine
     {
-        public GrindingEngine(WowInterface wowInterface)
+        public GrindingEngine(WowInterface wowInterface, AmeisenBotConfig config, AmeisenBotStateMachine stateMachine)
         {
             WowInterface = wowInterface;
+            Config = config;
+            StateMachine = stateMachine;
+
             Blacklist = new List<ulong>();
             TargetInLosEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
@@ -29,7 +35,13 @@ namespace AmeisenBotX.Core.Grinding
 
         private int BlacklistCounter { get; set; }
 
+        private AmeisenBotConfig Config { get; }
+
         private int CurrentSpotIndex { get; set; }
+
+        private DateTime LookingForEnemiesSince { get; set; }
+
+        private AmeisenBotStateMachine StateMachine { get; }
 
         private ulong TargetGuid { get; set; }
 
@@ -47,6 +59,14 @@ namespace AmeisenBotX.Core.Grinding
                 return;
             }
 
+            if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
+                && WowInterface.BotCache.PointsOfInterest.TryGetValue((WowInterface.ObjectManager.MapId, PoiType.Repair), out List<Vector3> repairNpcs)
+                && repairNpcs.Any(e => e.GetDistance(WowInterface.ObjectManager.Player.Position) < 4096.0))
+            {
+                GoToNpcAndRepair(repairNpcs);
+                return;
+            }
+
             double distanceToSpot = GrindingSpot.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
             List<WowUnit> nearUnits = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
@@ -61,6 +81,7 @@ namespace AmeisenBotX.Core.Grinding
             {
                 if (nearUnits != null && nearUnits.Count > 0)
                 {
+                    LookingForEnemiesSince = default;
                     WowUnit nearestUnit = nearUnits.FirstOrDefault(e => e.Guid == TargetGuid);
 
                     bool switchedTarget = false;
@@ -101,33 +122,28 @@ namespace AmeisenBotX.Core.Grinding
                 }
                 else
                 {
-                    GrindingSpot = SelectNextGrindingSpot();
-                    TargetPosition = default;
-                    return;
+                    if (DateTime.Now - LookingForEnemiesSince > TimeSpan.FromSeconds(30))
+                    {
+                        GrindingSpot = SelectNextGrindingSpot();
+                        TargetPosition = default;
+                        return;
+                    }
+                    else
+                    {
+                        MoveToRandomPositionOnSpot();
+                    }
                 }
             }
             else
             {
                 if (WowInterface.ObjectManager.Partymembers.Count > 0
-                    && WowInterface.ObjectManager.Partymembers.Any(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 30.0))
+                    && WowInterface.ObjectManager.Partymembers.Any(e => e.IsDead || e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 30.0))
                 {
                     WowInterface.MovementEngine.StopMovement();
                     return;
                 }
 
-                if (TargetPosition == default)
-                {
-                    TargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, GrindingSpot.Position, (float)GrindingSpot.Radius * 0.2f);
-                }
-
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 4.0)
-                {
-                    TargetPosition = default;
-                }
-                else
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, TargetPosition);
-                }
+                MoveToRandomPositionOnSpot();
             }
         }
 
@@ -140,6 +156,38 @@ namespace AmeisenBotX.Core.Grinding
         public void LoadProfile(IGrindingProfile questProfile)
         {
             Profile = questProfile;
+        }
+
+        private void GoToNpcAndRepair(List<Vector3> repairNpcs)
+        {
+            Vector3 repairNpc = repairNpcs.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
+
+            if (repairNpc.GetDistance(WowInterface.ObjectManager.Player.Position) > 4.0)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, repairNpc);
+            }
+            else
+            {
+                WowInterface.MovementEngine.StopMovement();
+                StateMachine.SetState(BotState.Repairing);
+            }
+        }
+
+        private void MoveToRandomPositionOnSpot()
+        {
+            if (TargetPosition == default)
+            {
+                TargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, GrindingSpot.Position, (float)GrindingSpot.Radius * 0.2f);
+            }
+
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 4.0)
+            {
+                TargetPosition = default;
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, TargetPosition);
+            }
         }
 
         private GrindingSpot SelectNextGrindingSpot()

@@ -619,7 +619,8 @@ namespace AmeisenBotX.Core.Hook
         {
             return WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveAction, out int ctmState)
                        && (ClickToMoveType)ctmState != ClickToMoveType.None
-                       && (ClickToMoveType)ctmState != ClickToMoveType.Stop;
+                       && (ClickToMoveType)ctmState != ClickToMoveType.Stop
+                       && (ClickToMoveType)ctmState != ClickToMoveType.Halted;
         }
 
         public bool IsGhost(WowLuaUnit luaUnit)

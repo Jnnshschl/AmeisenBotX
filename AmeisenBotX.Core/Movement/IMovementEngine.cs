@@ -8,6 +8,8 @@ namespace AmeisenBotX.Core.Movement
     {
         bool IsAtTargetPosition { get; }
 
+        bool IsGhost { get; set; }
+
         bool IsPathIncomplete { get; }
 
         MovementAction MovementAction { get; }
@@ -20,7 +22,7 @@ namespace AmeisenBotX.Core.Movement
 
         void Reset();
 
-        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, double minDistanceToMove = 1.5);
+        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, double minDistanceToMove = 1.5, bool disableShortcuts = false);
 
         void StopMovement();
     }

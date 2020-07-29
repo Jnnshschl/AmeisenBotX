@@ -57,6 +57,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
                 WowInterface.HookManager.EnableClickToMove();
+
+                if (Config.AutoSetUlowGfxSettings)
+                {
+                    SetUlowGfxSettings();
+                }
             }
 
             if (RefreshCharacterEvent.Run())
@@ -69,6 +74,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
+            // WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, new Vector3(-4918, -940, 501));
+            // return;
+
             if (WowInterface.ObjectManager.Player.IsCasting)
             {
                 return;
@@ -250,6 +258,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             return false;
+        }
+
+        private void SetUlowGfxSettings()
+        {
+            WowInterface.HookManager.LuaDoString("SetCVar(\"gxcolorbits\",16);SetCVar(\"gxdepthbits\",16);SetCVar(\"skycloudlod\",0);SetCVar(\"particledensity\",0.3);SetCVar(\"lod\",0);SetCVar(\"fullalpha\",0);SetCVar(\"doodadanim\",0);SetCVar(\"mapshadows\",0);SetCVar(\"loddist\",50);SetCVar(\"smallcull\",2);SetCVar(\"maxlights\",0);SetCVar(\"specular\",0);SetCVar(\"pixelshader\",0);SetCVar(\"detaildensity\",1);SetCVar(\"unitdrawdist\",20);SetCVar(\"waterlod\",0);SetCVar(\"basemip\",1);SetCVar(\"shadowlevel\",1);SetCVar(\"alphalevel\",1);SetCVar(\"anisotropic\",16);SetCVar(\"textureloddist\",80);SetCVar(\"light\",0);SetCVar(\"fog\",0);SetCVar(\"bitdepth\",16);SetCVar(\"showwater\",0);SetCVar(\"maxlod\",0);SetCVar(\"watermaxlod\",0);SetCVar(\"waterwaves\",0);SetCVar(\"waterspecular\",0);SetCVar(\"waterripples\",0);SetCVar(\"waterparticulates\",0);SetCVar(\"showshadow\",0);SetCVar(\"skyclouddensity\",0);SetCVar(\"skysunglare\",0);SetCVar(\"skyshow\",0);RestartGx();");
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)

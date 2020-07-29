@@ -7,7 +7,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -90,8 +89,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 Offset = new Vector3
                 {
-                    X = (float)rnd.Next(0, Config.MinFollowDistance / 2),
-                    Y = (float)rnd.Next(0, Config.MinFollowDistance / 2),
+                    X = ((float)rnd.NextDouble() * (float)(Config.MinFollowDistance * 2)) - (float)(Config.MinFollowDistance),
+                    Y = ((float)rnd.NextDouble() * (float)(Config.MinFollowDistance * 2)) - (float)(Config.MinFollowDistance),
                     Z = 0f
                 };
             }
@@ -113,7 +112,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 // handle nearby portals, if our groupleader enters a portal, we follow
                 WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
-                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalNormal 
+                    .Where(e => e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                              || e.DisplayId == (int)GameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
                     .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 12.0);
 

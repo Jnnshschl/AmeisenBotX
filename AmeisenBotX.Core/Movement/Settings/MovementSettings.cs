@@ -18,7 +18,7 @@
 
         public float MaxVelocity { get; set; } = 8f;
 
-        public double MinDistanceMovedJumpUnstuck { get; set; } = 0.0;
+        public double MinDistanceMovedJumpUnstuck { get; set; } = -1.0;
 
         public double MinUnstuckDistance { get; set; } = 8.0;
 

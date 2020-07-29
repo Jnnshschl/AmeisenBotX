@@ -218,16 +218,6 @@ namespace AmeisenBotX.Core
         public void Stop()
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Stopping", LogLevel.Debug);
-            StateMachine.ShouldExit = true;
-            RconClientTimer.Stop();
-
-            if (Config.RconEnabled)
-            {
-                RconClientTimer.Stop();
-            }
-
-            WowInterface.HookManager.DisposeHook();
-            WowInterface.EventHookManager.Stop();
 
             if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
             {
@@ -238,6 +228,17 @@ namespace AmeisenBotX.Core
             {
                 SaveBotWindowPosition();
             }
+
+            StateMachine.ShouldExit = true;
+            RconClientTimer.Stop();
+
+            if (Config.RconEnabled)
+            {
+                RconClientTimer.Stop();
+            }
+
+            WowInterface.EventHookManager.Stop();
+            WowInterface.HookManager.DisposeHook();
 
             WowInterface.BotCache.Save();
 
@@ -844,7 +845,7 @@ namespace AmeisenBotX.Core
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
             WowInterface.QuestEngine = new QuestEngine(WowInterface);
-            WowInterface.GrindingEngine = new GrindingEngine(WowInterface);
+            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();

@@ -50,6 +50,10 @@ namespace AmeisenBotX.Core.Jobs
 
         private int NodeTryCounter { get; set; }
 
+        private ulong SelectedGuid { get; set; }
+
+        private Vector3 SelectedPosition { get; set; }
+
         private int SellActionsNeeded { get; set; }
 
         private WowInterface WowInterface { get; }
@@ -159,37 +163,73 @@ namespace AmeisenBotX.Core.Jobs
                 return;
             }
 
-            int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
-
-            WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
-                .OfType<WowGameobject>()
-                .Where(e => !NodeBlacklist.Contains(e.Guid)
-                         && Enum.IsDefined(typeof(OreNodes), e.DisplayId)
-                         && miningProfile.OreTypes.Contains((OreNodes)e.DisplayId)
-                         && (((OreNodes)e.DisplayId) == OreNodes.Copper
-                         || (((OreNodes)e.DisplayId) == OreNodes.Tin && miningSkill >= 65)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Silver && miningSkill >= 75)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Iron && miningSkill >= 125)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Gold && miningSkill >= 155)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Mithril && miningSkill >= 175)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Truesilver && miningSkill >= 230)
-                         || (((OreNodes)e.DisplayId) == OreNodes.DarkIron && miningSkill >= 230)
-                         || (((OreNodes)e.DisplayId) == OreNodes.SmallThorium && miningSkill >= 245)
-                         || (((OreNodes)e.DisplayId) == OreNodes.RichThorium && miningSkill >= 275)
-                         || (((OreNodes)e.DisplayId) == OreNodes.ObsidianChunk && miningSkill >= 305)
-                         || (((OreNodes)e.DisplayId) == OreNodes.FelIron && miningSkill >= 300)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Adamantite && miningSkill >= 325)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Cobalt && miningSkill >= 350)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Khorium && miningSkill >= 375)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Saronite && miningSkill >= 400)
-                         || (((OreNodes)e.DisplayId) == OreNodes.Titanium && miningSkill >= 450))
-                         && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 50.0)
-                .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                .FirstOrDefault();
-
-            if (nearestNode != null)
+            if (SelectedPosition == default)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(nearestNode.Position) < 3)
+                // search for nodes
+                int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
+
+                WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
+                    .OfType<WowGameobject>()
+                    .Where(e => !NodeBlacklist.Contains(e.Guid)
+                             && Enum.IsDefined(typeof(OreNodes), e.DisplayId)
+                             && miningProfile.OreTypes.Contains((OreNodes)e.DisplayId)
+                             && (((OreNodes)e.DisplayId) == OreNodes.Copper
+                             || (((OreNodes)e.DisplayId) == OreNodes.Tin && miningSkill >= 65)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Silver && miningSkill >= 75)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Iron && miningSkill >= 125)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Gold && miningSkill >= 155)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Mithril && miningSkill >= 175)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Truesilver && miningSkill >= 230)
+                             || (((OreNodes)e.DisplayId) == OreNodes.DarkIron && miningSkill >= 230)
+                             || (((OreNodes)e.DisplayId) == OreNodes.SmallThorium && miningSkill >= 245)
+                             || (((OreNodes)e.DisplayId) == OreNodes.RichThorium && miningSkill >= 275)
+                             || (((OreNodes)e.DisplayId) == OreNodes.ObsidianChunk && miningSkill >= 305)
+                             || (((OreNodes)e.DisplayId) == OreNodes.FelIron && miningSkill >= 300)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Adamantite && miningSkill >= 325)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Cobalt && miningSkill >= 350)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Khorium && miningSkill >= 375)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Saronite && miningSkill >= 400)
+                             || (((OreNodes)e.DisplayId) == OreNodes.Titanium && miningSkill >= 450)))
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
+
+                if (nearestNode != null)
+                {
+                    // select node and try to find it
+                    SelectedPosition = nearestNode.Position;
+                    SelectedGuid = nearestNode.Guid;
+                }
+                else
+                {
+                    // if no node was found, follow the path
+                    GeneratedPathToNode = false;
+
+                    Vector3 currentNode = miningProfile.Path[CurrentNodeCounter];
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
+
+                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    {
+                        ++CurrentNodeCounter;
+
+                        if (CurrentNodeCounter >= miningProfile.Path.Count)
+                        {
+                            if (!miningProfile.IsCirclePath)
+                            {
+                                miningProfile.Path.Reverse();
+                            }
+
+                            CurrentNodeCounter = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // move to the node
+                double distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistance(SelectedPosition);
+                WowGameobject node = WowInterface.ObjectManager.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
+
+                if (distanceToNode < 3)
                 {
                     if (WowInterface.ObjectManager.Player.IsMounted)
                     {
@@ -208,50 +248,34 @@ namespace AmeisenBotX.Core.Jobs
                         }
                         else
                         {
-                            WowInterface.HookManager.WowObjectOnRightClick(nearestNode);
+                            WowInterface.HookManager.WowObjectOnRightClick(node);
                         }
                     }
 
                     CheckForPathRecovering = true;
                     NodeTryCounter = 0;
                 }
+                else if (distanceToNode < 20.0 && node == null)
+                {
+                    // if we are 20m or less near the node and its still not loaded, we can ignore it
+                    SelectedPosition = default;
+                    SelectedGuid = 0;
+                }
                 else
                 {
-                    if (GeneratedPathToNode && BlacklistEvent.Run() && !WowInterface.MovementEngine.HasCompletePathToPosition(nearestNode.Position, 4.0))
+                    if (GeneratedPathToNode && BlacklistEvent.Run() && !WowInterface.MovementEngine.HasCompletePathToPosition(node.Position, 4.0))
                     {
                         if (NodeTryCounter > 2)
                         {
-                            NodeBlacklist.Add(nearestNode.Guid);
+                            NodeBlacklist.Add(node.Guid);
                             NodeTryCounter = 0;
                         }
 
                         ++NodeTryCounter;
                     }
 
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestNode.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, node.Position);
                     GeneratedPathToNode = true;
-                }
-            }
-            else
-            {
-                GeneratedPathToNode = false;
-
-                Vector3 currentNode = miningProfile.Path[CurrentNodeCounter];
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
-
-                if (WowInterface.MovementEngine.IsAtTargetPosition)
-                {
-                    ++CurrentNodeCounter;
-
-                    if (CurrentNodeCounter >= miningProfile.Path.Count)
-                    {
-                        if (!miningProfile.IsCirclePath)
-                        {
-                            miningProfile.Path.Reverse();
-                        }
-
-                        CurrentNodeCounter = 0;
-                    }
                 }
             }
         }

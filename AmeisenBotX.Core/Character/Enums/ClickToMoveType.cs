@@ -15,6 +15,7 @@
         None = 0,
         Skin = 9,
         Stop = 3,
+        Halted = 13,
         WalkAndRotate = 19
     }
 }
