@@ -12,6 +12,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             LoginAttemptEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
 
+        private void SetUlowGfxSettings()
+        {
+            WowInterface.HookManager.LuaDoString("SetCVar(\"gxcolorbits\",\"16\");SetCVar(\"gxdepthbits\",\"16\");SetCVar(\"skycloudlod\",\"0\");SetCVar(\"particledensity\",\"0.3\");SetCVar(\"lod\",\"0\");SetCVar(\"mapshadows\",\"0\");SetCVar(\"maxlights\",\"0\");SetCVar(\"specular\",\"0\");SetCVar(\"waterlod\",\"0\");SetCVar(\"basemip\",\"1\");SetCVar(\"shadowlevel\",\"1\")");
+        }
+
         private TimegatedEvent LoginAttemptEvent { get; set; }
 
         private int LoginCounter { get; set; }
@@ -21,6 +26,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (!WowInterface.HookManager.IsWoWHooked)
             {
                 WowInterface.HookManager.SetupEndsceneHook();
+
+                if (Config.AutoSetUlowGfxSettings)
+                {
+                    SetUlowGfxSettings();
+                }
             }
 
             if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
