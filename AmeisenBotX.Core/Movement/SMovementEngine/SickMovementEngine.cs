@@ -139,7 +139,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                                                     && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
                                                     && !IsGhost
-                                                    && wowInterface.CharacterManager.Mounts.Count > 0
+                                                    && wowInterface.CharacterManager.Mounts?.Count > 0
                                                     && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
                                                     && !WowInterface.ObjectManager.Player.IsMounted
                                                     && wowInterface.HookManager.IsOutdoors())

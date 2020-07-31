@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             if (Config.UseMountsInParty
-                && WowInterface.CharacterManager.Mounts.Count > 0
+                && WowInterface.CharacterManager.Mounts?.Count > 0
                 && PlayerToFollow != null
                 && PlayerToFollow.IsMounted && !WowInterface.ObjectManager.Player.IsMounted)
             {
