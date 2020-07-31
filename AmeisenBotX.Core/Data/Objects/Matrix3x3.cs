@@ -40,19 +40,19 @@ namespace AmeisenBotX.Core.Data.Objects
         public static Vector3 operator *(Vector3 v, Matrix3x3 m)
         {
             return new Vector3(m.X1 * v.X + m.Y1 * v.Y + m.Z1 * v.Z,
-                                      m.X2 * v.X + m.Y2 * v.Y + m.Z2 * v.Z,
-                                      m.X3 * v.X + m.Y3 * v.Y + m.Z3 * v.Z);
+                               m.X2 * v.X + m.Y2 * v.Y + m.Z2 * v.Z,
+                               m.X3 * v.X + m.Y3 * v.Y + m.Z3 * v.Z);
         }
 
-        public float Det()
+        public float Dot()
         {
             return (X1 * Y2 * Z3) + (X2 * Y3 * Z1) + (X3 * Y1 * Z2)
-                       - (X3 * Y2 * Z1) - (X2 * Y1 * Z3) - (X1 * Y3 * Z2);
+                 - (X3 * Y2 * Z1) - (X2 * Y1 * Z3) - (X1 * Y3 * Z2);
         }
 
         public Matrix3x3 Inverse()
         {
-            float d = 1 / Det();
+            float d = 1 / Dot();
             return new Matrix3x3(d * (Y2 * Z3 - Y3 * Z2), d * (X3 * Z2 - X2 * Z3), d * (X2 * Y3 - X3 * Y2),
                                  d * (Y3 * Z1 - Y1 * Z3), d * (X1 * Z3 - X3 * Z1), d * (X3 * Y1 - X1 * Y3),
                                  d * (Y1 * Z2 - Y2 * Z1), d * (X2 * Z1 - X1 * Z2), d * (X1 * Y2 - X2 * Y1));

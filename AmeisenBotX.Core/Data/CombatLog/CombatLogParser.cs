@@ -23,13 +23,7 @@ namespace AmeisenBotX.Core.Data.CombatLog
             if (BasicCombatLogEntry.TryParse(args, out BasicCombatLogEntry basicCombatLogEntry))
             {
                 (CombatLogEntryType, CombatLogEntrySubtype) key = (basicCombatLogEntry.Type, basicCombatLogEntry.Subtype);
-
-                if (!WowInterface.BotCache.CombatLogEntries.ContainsKey(key))
-                {
-                    WowInterface.BotCache.CombatLogEntries.Add(key, new List<BasicCombatLogEntry>());
-                }
-
-                WowInterface.BotCache.CombatLogEntries[key].Add(basicCombatLogEntry);
+                WowInterface.BotCache.CacheCombatLogEntry(key, basicCombatLogEntry);
             }
         }
     }

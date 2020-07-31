@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.Structs
 {
@@ -88,9 +87,9 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
 
         public RawWowAura Aura40 { get; set; }
 
-        public List<RawWowAura> AsList()
+        public RawWowAura[] AsArray()
         {
-            return new List<RawWowAura>()
+            return new RawWowAura[]
             {
                 Aura1,
                 Aura2,

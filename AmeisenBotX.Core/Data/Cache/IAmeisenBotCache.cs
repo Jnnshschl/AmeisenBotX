@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.Data.Cache
 
         void CacheBlacklistPosition(int mapId, Vector3 node);
 
+        void CacheCombatLogEntry((CombatLogEntryType, CombatLogEntrySubtype) key, BasicCombatLogEntry entry);
+
         void CacheHerb(MapId mapId, HerbNodes displayId, Vector3 position);
 
         void CacheName(ulong guid, string name);

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -36,6 +37,7 @@ namespace AmeisenBotX.Core.Common
         private const uint WM_RBUTTONUP = 0x205;
 #pragma warning restore IDE0051
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string BigValueToString(double value)
         {
             if (value >= 100000000)
@@ -50,11 +52,13 @@ namespace AmeisenBotX.Core.Common
             return $"{value}";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ByteArrayToString(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", " ");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void HoldKey(IntPtr windowHandle, IntPtr key)
         {
             SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
@@ -122,11 +126,13 @@ namespace AmeisenBotX.Core.Common
             return Convert.ToBase64String(bytes);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string FastRandomStringOnlyLetters()
         {
             return new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string FastRandomString()
         {
             return Path.GetRandomFileName().Replace(".", string.Empty);
@@ -148,6 +154,7 @@ namespace AmeisenBotX.Core.Common
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string Capitalize(string input)
         {
             return input.First().ToString().ToUpper() + input.Substring(1);
@@ -173,32 +180,38 @@ namespace AmeisenBotX.Core.Common
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPositionInsideAoeSpell(Vector3 position, List<WowDynobject> wowDynobjects)
         {
             return wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 1);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValidUnit(WowUnit unit)
         {
             return unit != null
                 && !unit.IsNotAttackable;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, float offset)
         {
             return MoveAhead(targetPosition, BotMath.GetFacingAngle2D(origin, targetPosition), offset);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, float offset)
         {
             return BotMath.CalculatePositionAround(targetPosition, rotation, (float)0.0, offset);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RealeaseKey(IntPtr windowHandle, IntPtr key)
         {
             SendMessage(windowHandle, WM_KEYUP, key, new IntPtr(0));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SendKey(IntPtr windowHandle, IntPtr key, int minDelay = 20, int maxDelay = 40)
         {
             SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
@@ -206,6 +219,7 @@ namespace AmeisenBotX.Core.Common
             SendMessage(windowHandle, WM_KEYUP, key, new IntPtr(0));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SendKeyShift(IntPtr windowHandle, IntPtr key, bool shift)
         {
             if (shift)
@@ -221,21 +235,25 @@ namespace AmeisenBotX.Core.Common
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SendMouseMovement(IntPtr windowHandle, short x, short y)
         {
             SendMessage(windowHandle, WM_MOUSEMOVE, IntPtr.Zero, MakeLParam(x, y));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SendMouseMovementHoldLeft(IntPtr windowHandle, short x, short y)
         {
             SendMessage(windowHandle, WM_MOUSEMOVE, new IntPtr(WM_LBUTTONDOWN), MakeLParam(x, y));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SendMouseMovementHoldRight(IntPtr windowHandle, short x, short y)
         {
             SendMessage(windowHandle, WM_MOUSEMOVE, new IntPtr(WM_RBUTTONDOWN), MakeLParam(x, y));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static IntPtr MakeLParam(int p, int p2)
         {
             return new IntPtr((p2 << 16) | (p & 0xFFFF));

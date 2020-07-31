@@ -88,7 +88,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 if (ObjectManager.Player.TargetGuid != guid)
                 {
                     HookManager.TargetGuid(guid);
-                    ObjectManager.UpdateObject(ObjectManager.Player);
                 }
             }
 

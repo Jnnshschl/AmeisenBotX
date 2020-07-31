@@ -73,19 +73,15 @@ namespace AmeisenBotX.Core.Data
 
         List<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
 
-        List<WowPlayer> GetNearPartymembers(Vector3 position, double distance);
+        List<WowUnit> GetNearPartymembers(Vector3 position, double distance);
 
         List<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance);
 
         T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 
-        WowPlayer GetWowPlayerByName(string playername, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase);
+        T GetWowUnitByName<T>(string name, StringComparison stringComparison = StringComparison.Ordinal) where T : WowUnit;
 
         bool RefreshIsWorldLoaded();
-
-        void UpdateObject<T>(T wowObject) where T : WowObject;
-
-        void UpdateObject(WowObjectType wowObjectType, IntPtr baseAddress);
 
         void UpdateWowObjects();
     }

@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
 
         public ulong PartymemberGuid4 { get; set; }
 
-        public List<ulong> AsList()
+        public ulong[] AsArray()
         {
-            return new List<ulong>()
+            return new ulong[]
             {
                 PartymemberGuid1,
                 PartymemberGuid2,

@@ -874,7 +874,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Player.TargetGuid != guid)
                 {
                     WowInterface.HookManager.TargetGuid(guid);
-                    WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
                 }
             }
 

@@ -183,14 +183,16 @@ namespace AmeisenBotX.Core.Character
         {
             AmeisenLogger.Instance.Log("CharacterManager", $"Updating full character", LogLevel.Verbose);
 
-            Inventory.Update();
-            Equipment.Update();
-            SpellBook.Update();
-            TalentManager.Update();
-
-            UpdateSkills();
-            UpdateMoney();
-            UpdateMounts();
+            Parallel.Invoke
+            (
+                () => Inventory.Update(),
+                () => Equipment.Update(),
+                () => SpellBook.Update(),
+                () => TalentManager.Update(),
+                () => UpdateSkills(),
+                () => UpdateMoney(),
+                () => UpdateMounts()
+            );
         }
 
         public void UpdateCharacterGear()
@@ -200,6 +202,7 @@ namespace AmeisenBotX.Core.Character
             for (int i = 0; i < list.Count; ++i)
             {
                 EquipmentSlot slot = (EquipmentSlot)list[i];
+
                 if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Items.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
                 {
                     continue;

@@ -599,7 +599,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private int UpdateRage()
             {
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player.Type, WowInterface.ObjectManager.Player.BaseAddress);
                 Player = WowInterface.ObjectManager.Player;
                 return Player.Rage;
             }

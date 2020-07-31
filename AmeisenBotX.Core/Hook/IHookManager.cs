@@ -178,8 +178,6 @@ namespace AmeisenBotX.Core.Hook
 
         void SetFacing(WowUnit unit, float angle);
 
-        void SetMaxFps(byte maxFps);
-
         void SetRenderState(bool renderingEnabled);
 
         bool SetupEndsceneHook();

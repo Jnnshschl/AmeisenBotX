@@ -17,6 +17,15 @@ namespace AmeisenBotX.Core.Data.Cache
     [Serializable]
     public class InMemoryBotCache : IAmeisenBotCache
     {
+        private readonly object blacklistNodesLock = new object();
+        private readonly object combatLogLock = new object();
+        private readonly object herbLock = new object();
+        private readonly object nameLock = new object();
+        private readonly object oreLock = new object();
+        private readonly object poiLock = new object();
+        private readonly object rectionLock = new object();
+        private readonly object spellnameLock = new object();
+
         public InMemoryBotCache(string path)
         {
             FilePath = path;
@@ -43,77 +52,111 @@ namespace AmeisenBotX.Core.Data.Cache
 
         public void CacheBlacklistPosition(int mapId, Vector3 node)
         {
-            if (!TryGetBlacklistPosition(mapId, node, 8, out List<Vector3> nodes)
-                || !nodes.Any())
+            lock (blacklistNodesLock)
             {
-                if (!BlacklistNodes.ContainsKey(mapId))
+                if (!TryGetBlacklistPosition(mapId, node, 8, out List<Vector3> nodes)
+                    || !nodes.Any())
                 {
-                    BlacklistNodes.Add(mapId, new List<Vector3>() { node });
+                    if (!BlacklistNodes.ContainsKey(mapId))
+                    {
+                        BlacklistNodes.Add(mapId, new List<Vector3>() { node });
+                    }
+                    else if (!BlacklistNodes[mapId].Contains(node))
+                    {
+                        BlacklistNodes[mapId].Add(node);
+                    }
                 }
-                else if (!BlacklistNodes[mapId].Contains(node))
+            }
+        }
+
+        public void CacheCombatLogEntry((CombatLogEntryType, CombatLogEntrySubtype) key, BasicCombatLogEntry entry)
+        {
+            lock (combatLogLock)
+            {
+                if (!CombatLogEntries.ContainsKey(key))
                 {
-                    BlacklistNodes[mapId].Add(node);
+                    CombatLogEntries.Add(key, new List<BasicCombatLogEntry>());
                 }
+
+                CombatLogEntries[key].Add(entry);
             }
         }
 
         public void CacheHerb(MapId mapId, HerbNodes displayId, Vector3 position)
         {
-            if (!HerbNodes.ContainsKey((mapId, displayId)))
+            lock (herbLock)
             {
-                HerbNodes.Add((mapId, displayId), new List<Vector3>() { position });
-            }
-            else if (!HerbNodes[(mapId, displayId)].Any(e => e == position))
-            {
-                HerbNodes[(mapId, displayId)].Add(position);
+                if (!HerbNodes.ContainsKey((mapId, displayId)))
+                {
+                    HerbNodes.Add((mapId, displayId), new List<Vector3>() { position });
+                }
+                else if (!HerbNodes[(mapId, displayId)].Any(e => e == position))
+                {
+                    HerbNodes[(mapId, displayId)].Add(position);
+                }
             }
         }
 
         public void CacheName(ulong guid, string name)
         {
-            if (!NameCache.ContainsKey(guid))
+            lock (nameLock)
             {
-                NameCache.Add(guid, name);
+                if (!NameCache.ContainsKey(guid))
+                {
+                    NameCache.Add(guid, name);
+                }
             }
         }
 
         public void CacheOre(MapId mapId, OreNodes displayId, Vector3 position)
         {
-            if (!OreNodes.ContainsKey((mapId, displayId)))
+            lock (oreLock)
             {
-                OreNodes.Add((mapId, displayId), new List<Vector3>() { position });
-            }
-            else if (!OreNodes[(mapId, displayId)].Any(e => e == position))
-            {
-                OreNodes[(mapId, displayId)].Add(position);
+                if (!OreNodes.ContainsKey((mapId, displayId)))
+                {
+                    OreNodes.Add((mapId, displayId), new List<Vector3>() { position });
+                }
+                else if (!OreNodes[(mapId, displayId)].Any(e => e == position))
+                {
+                    OreNodes[(mapId, displayId)].Add(position);
+                }
             }
         }
 
         public void CachePoi(MapId mapId, PoiType poiType, Vector3 position)
         {
-            if (!PointsOfInterest.ContainsKey((mapId, poiType)))
+            lock (poiLock)
             {
-                PointsOfInterest.Add((mapId, poiType), new List<Vector3>() { position });
-            }
-            else if (!PointsOfInterest[(mapId, poiType)].Any(e => e == position))
-            {
-                PointsOfInterest[(mapId, poiType)].Add(position);
+                if (!PointsOfInterest.ContainsKey((mapId, poiType)))
+                {
+                    PointsOfInterest.Add((mapId, poiType), new List<Vector3>() { position });
+                }
+                else if (!PointsOfInterest[(mapId, poiType)].Any(e => e == position))
+                {
+                    PointsOfInterest[(mapId, poiType)].Add(position);
+                }
             }
         }
 
         public void CacheReaction(int a, int b, WowUnitReaction reaction)
         {
-            if (!ReactionCache.ContainsKey((a, b)))
+            lock (rectionLock)
             {
-                ReactionCache.Add((a, b), reaction);
+                if (!ReactionCache.ContainsKey((a, b)))
+                {
+                    ReactionCache.Add((a, b), reaction);
+                }
             }
         }
 
         public void CacheSpellName(int spellId, string name)
         {
-            if (!SpellNameCache.ContainsKey(spellId))
+            lock (spellnameLock)
             {
-                SpellNameCache.Add(spellId, name);
+                if (!SpellNameCache.ContainsKey(spellId))
+                {
+                    SpellNameCache.Add(spellId, name);
+                }
             }
         }
 

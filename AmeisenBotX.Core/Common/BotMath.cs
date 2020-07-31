@@ -1,9 +1,11 @@
-﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace AmeisenBotX.Core.Common
 {
-    public class BotMath
+    public static class BotMath
     {
         public static Vector3 CalculatePositionAround(Vector3 position, float rotation, float angle, float distance = 2.0f)
         {
@@ -16,6 +18,7 @@ namespace AmeisenBotX.Core.Common
             return new Vector3(x, y, position.Z);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
         {
             return CalculatePositionAround(position, rotation, (float)Math.PI, distanceToMove);
@@ -37,8 +40,9 @@ namespace AmeisenBotX.Core.Common
             return rotation;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle2D(Vector3 position, Vector3 targetPosition)
-                    => ClampAngles(Convert.ToSingle(Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X)));
+            => ClampAngles(Convert.ToSingle(Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X)));
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
         {
@@ -46,6 +50,19 @@ namespace AmeisenBotX.Core.Common
             float angleDiff = ClampAngles(facingAngle - rotation);
 
             return angleDiff < maxAngleDiff;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInRange(double a, double min, double max)
+        {
+            return a < min && a > max;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInRange(WowObject a, WowObject b, double maxDistance)
+        {
+            double distance = a.Position.GetDistance(b.Position);
+            return distance < maxDistance && distance > maxDistance;
         }
     }
 }

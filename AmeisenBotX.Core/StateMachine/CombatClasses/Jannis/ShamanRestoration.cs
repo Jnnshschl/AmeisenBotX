@@ -133,7 +133,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
-                WowInterface.ObjectManager.UpdateObject(WowInterface.ObjectManager.Player);
 
                 if (WowInterface.ObjectManager.Target != null)
                 {

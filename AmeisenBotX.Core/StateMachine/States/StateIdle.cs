@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
-                && IsUnitToFollowThere(out WowPlayer unitToFollow, true)
+                && IsUnitToFollowThere(out WowUnit unitToFollow, true)
                 && unitToFollow != null
                 && unitToFollow.TargetGuid != 0)
             {
@@ -165,49 +165,32 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        public bool IsUnitToFollowThere(out WowPlayer playerToFollow, bool ignoreRange = false)
+        public bool IsUnitToFollowThere(out WowUnit playerToFollow, bool ignoreRange = false)
         {
             playerToFollow = null;
 
-            // TODO: make this crap less redundant
-            // check the specific character
-            List<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
-            if (wowPlayers.Count > 0)
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+
+            if (wowPlayers.Count() > 0)
             {
-                if (Config.FollowSpecificCharacter)
+                WowUnit[] playersToTry =
                 {
-                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase));
+                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => p.Name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
+                    Config.FollowGroupLeader ? WowInterface.ObjectManager.Partyleader : null,
+                    Config.FollowGroupMembers ? WowInterface.ObjectManager.Partymembers.FirstOrDefault() : null
+                };
 
-                    if (!ignoreRange)
+                for (int i = 0; i < playersToTry.Length; ++i)
+                {
+                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
                     {
-                        playerToFollow = SkipIfOutOfRange(playerToFollow);
+                        playerToFollow = playersToTry[i];
+                        return true;
                     }
                 }
+            }           
 
-                // check the group/raid leader
-                if (playerToFollow == null && Config.FollowGroupLeader)
-                {
-                    playerToFollow = wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid);
-
-                    if (!ignoreRange)
-                    {
-                        playerToFollow = SkipIfOutOfRange(playerToFollow);
-                    }
-                }
-
-                // check the group members
-                if (playerToFollow == null && Config.FollowGroupMembers)
-                {
-                    playerToFollow = wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid));
-
-                    if (!ignoreRange)
-                    {
-                        playerToFollow = SkipIfOutOfRange(playerToFollow);
-                    }
-                }
-            }
-
-            return playerToFollow != null;
+            return false;
         }
 
         private void CheckForBattlegroundInvites()
@@ -219,7 +202,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        private bool HandleAutoQuestMode(WowPlayer wowPlayer)
+        private bool HandleAutoQuestMode(WowUnit wowPlayer)
         {
             WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
 
@@ -255,7 +238,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             return false;
         }
 
-        private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
+        private bool ShouldIFollowPlayer(WowUnit playerToFollow)
         {
             if (playerToFollow != null)
             {
@@ -268,18 +251,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 double distance = pos.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                if (UnitIsOutOfRange(distance))
+                if (!BotMath.IsInRange(distance, Config.MinFollowDistance, Config.MaxFollowDistance))
                 {
-                    playerToFollow = null;
+                    return false;
                 }
             }
 
-            return playerToFollow;
-        }
-
-        private bool UnitIsOutOfRange(double distance)
-        {
-            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
+            return true;
         }
     }
 }

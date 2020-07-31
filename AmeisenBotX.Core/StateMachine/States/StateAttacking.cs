@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.Globals.ForceCombat = false;
                     }
 
-                    if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowPlayer player))
+                    if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
                     {
                         if (RandomPosEvent.Run())
                         {

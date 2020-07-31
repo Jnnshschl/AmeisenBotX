@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
 
                     if (WowInterface.ObjectManager.Player.HasBuffByName(maelstromWeaponSpell)
-                        && WowInterface.ObjectManager.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell)?.StackCount >= 5
+                        && WowInterface.ObjectManager.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell).StackCount >= 5
                         && CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;

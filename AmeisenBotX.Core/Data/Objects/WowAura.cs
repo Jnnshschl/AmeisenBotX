@@ -5,7 +5,7 @@ using System;
 namespace AmeisenBotX.Core.Data.Objects
 {
     [Serializable]
-    public class WowAura
+    public struct WowAura
     {
         public WowAura(RawWowAura rawWowAura, string name)
         {
