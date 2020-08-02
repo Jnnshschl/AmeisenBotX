@@ -253,15 +253,11 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
                 {
-                    return false;
+                    return true;
                 }
+            }
 
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
     }
 }
