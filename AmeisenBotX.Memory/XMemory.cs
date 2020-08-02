@@ -18,6 +18,8 @@ namespace AmeisenBotX.Memory
         private ulong rpmCalls;
         private ulong wpmCalls;
 
+        private readonly object allocLock = new object();
+
         public XMemory()
         {
             MemoryAllocations = new Dictionary<IntPtr, uint>();
@@ -110,15 +112,18 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllocateMemory(uint size, out IntPtr address)
         {
-            address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
-            if (address != IntPtr.Zero)
+            lock (allocLock)
             {
-                MemoryAllocations.Add(address, size);
-                return true;
-            }
+                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
+                if (address != IntPtr.Zero)
+                {
+                    MemoryAllocations.Add(address, size);
+                    return true;
+                }
 
-            address = IntPtr.Zero;
-            return false;
+                address = IntPtr.Zero;
+                return false;
+            }
         }
 
         public bool Attach(Process wowProcess)
@@ -143,14 +148,17 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool FreeMemory(IntPtr address)
         {
-            if (MemoryAllocations.ContainsKey(address)
-                && VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release))
+            lock (allocLock)
             {
-                MemoryAllocations.Remove(address);
-                return true;
-            }
+                if (MemoryAllocations.ContainsKey(address)
+                    && VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release))
+                {
+                    MemoryAllocations.Remove(address);
+                    return true;
+                }
 
-            return false;
+                return false;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

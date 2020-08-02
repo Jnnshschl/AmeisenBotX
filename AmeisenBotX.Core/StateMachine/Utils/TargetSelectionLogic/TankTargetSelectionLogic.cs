@@ -48,7 +48,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             // get all enemies targeting our group
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
                 .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100.0)
-                .Where(e => e.IsInCombat && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King"));
+                .Where(e => e.IsInCombat 
+                    && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
+                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && e.HasBuffById(47346))); // Novos fix
 
             if (enemies.Count() > 0)
             {

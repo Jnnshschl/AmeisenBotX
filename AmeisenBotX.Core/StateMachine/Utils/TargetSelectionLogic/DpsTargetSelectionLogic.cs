@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
                 .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
-                .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.IsInCombat)
+                .Where(e => BotUtils.IsValidUnit(e)
+                    && !e.IsDead
+                    && e.IsInCombat
+                    && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
+                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
                 .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
                 .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));

@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
                 {
-                    if (!Buffs.Any(e => e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
+                    if (!Buffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
                         && keyValuePair.Value())
                     {
                         return true;
@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (KeyValuePair<string, CastFunction> keyValuePair in DebuffsToKeepActive)
                 {
-                    if (!Debuffs.Any(e => e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
+                    if (!Debuffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
                         && keyValuePair.Value())
                     {
                         return true;

@@ -209,6 +209,26 @@ namespace AmeisenBotX.Core.Data
             return false;
         }
 
+        public void ProcessObject((IntPtr, WowObjectType) x)
+        {
+            WowObject obj = x.Item2 switch
+            {
+                WowObjectType.Container => ReadWowContainer(x.Item1, x.Item2),
+                WowObjectType.Corpse => ReadWowCorpse(x.Item1, x.Item2),
+                WowObjectType.Item => ReadWowItem(x.Item1, x.Item2),
+                WowObjectType.Dynobject => ReadWowDynobject(x.Item1, x.Item2),
+                WowObjectType.Gameobject => ReadWowGameobject(x.Item1, x.Item2),
+                WowObjectType.Player => ReadWowPlayer(x.Item1, x.Item2),
+                WowObjectType.Unit => ReadWowUnit(x.Item1, x.Item2),
+                _ => ReadWowObject(x.Item1, x.Item2),
+            };
+
+            if (obj != null)
+            {
+                wowObjects.Add(obj);
+            }
+        }
+
         public void UpdateWowObjects()
         {
             IsWorldLoaded = UpdateGlobalVar<int>(WowInterface.OffsetList.IsWorldLoaded) == 1;
@@ -274,44 +294,18 @@ namespace AmeisenBotX.Core.Data
             {
                 wowObjects.Clear();
 
-                Parallel.ForEach(objectPointers, x =>
-                {
-                    WowObject obj = x.Item2 switch
-                    {
-                        WowObjectType.Container => ReadWowContainer(x.Item1, x.Item2),
-                        WowObjectType.Corpse => ReadWowCorpse(x.Item1, x.Item2),
-                        WowObjectType.Item => ReadWowItem(x.Item1, x.Item2),
-                        WowObjectType.Dynobject => ReadWowDynobject(x.Item1, x.Item2),
-                        WowObjectType.Gameobject => ReadWowGameobject(x.Item1, x.Item2),
-                        WowObjectType.Player => ReadWowPlayer(x.Item1, x.Item2),
-                        WowObjectType.Unit => ReadWowUnit(x.Item1, x.Item2),
-                        _ => ReadWowObject(x.Item1, x.Item2),
-                    };
-
-                    if (obj != null)
-                    {
-                        wowObjects.Add(obj);
-                    }
-                });
+                Parallel.ForEach(objectPointers, ProcessObject);
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();
 
                 if (PartyleaderGuid > 0)
                 {
-                    Parallel.Invoke
-                    (
-                        () =>
-                        {
-                            partymemberGuids = ReadPartymemberGuids();
-                            partymembers = wowObjects.OfType<WowUnit>().Where(e => e.Guid == PlayerGuid || PartymemberGuids.Contains(e.Guid)).ToList();
-                        },
-                        () =>
-                        {
-                            partypets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
-                            partypetGuids = partypets.Select(e => e.Guid).ToList();
-                        }
-                    );
+                    partymemberGuids = ReadPartymemberGuids();
+                    partymembers = wowObjects.OfType<WowUnit>().Where(e => e.Guid == PlayerGuid || PartymemberGuids.Contains(e.Guid)).ToList();
+
+                    partypets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
+                    partypetGuids = partypets.Select(e => e.Guid).ToList();
                 }
             }
 
@@ -587,84 +581,64 @@ namespace AmeisenBotX.Core.Data
                 // first read the descriptor, then lookup the Name by GUID
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
 
-                Parallel.Invoke
-                (
-                () => player.Name = ReadPlayerName(player.Guid),
-                () => player.Auras = WowInterface.HookManager.GetUnitAuras(player),
-                () =>
-                {
-                    if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position))
-                    {
-                        player.Position = position;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation))
-                    {
-                        player.Rotation = rotation;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
-                    {
-                        player.IsAutoAttacking = isAutoAttacking == 1;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int castingId))
-                    {
-                        player.CurrentlyCastingSpellId = castingId;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int channelingId))
-                    {
-                        player.CurrentlyChannelingSpellId = channelingId;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitSwimFlags.ToInt32()), out uint swimFlags))
-                    {
-                        player.IsSwimming = (swimFlags & 0x200000) != 0;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitFlyFlagsPointer.ToInt32()), out IntPtr flyFlagsPointer)
-                    && WowInterface.XMemory.Read(IntPtr.Add(flyFlagsPointer, WowInterface.OffsetList.WowUnitFlyFlags.ToInt32()), out uint flyFlags))
-                    {
-                        player.IsFlying = (flyFlags & 0x2000000) != 0;
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(WowInterface.OffsetList.BreathTimer, out int breathTimer))
-                    {
-                        player.IsUnderwater = breathTimer > 0;
-                    }
-                },
-                () =>
-                {
-                    if (player.Guid == PlayerGuid)
-                    {
-                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
-                        {
-                            player.ComboPoints = comboPoints;
-                        }
+                player.Name = ReadPlayerName(player.Guid);
+                player.Auras = WowInterface.HookManager.GetUnitAuras(player);
 
-                        Player = player;
+                if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position))
+                {
+                    player.Position = position;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation))
+                {
+                    player.Rotation = rotation;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
+                {
+                    player.IsAutoAttacking = isAutoAttacking == 1;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int castingId))
+                {
+                    player.CurrentlyCastingSpellId = castingId;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int channelingId))
+                {
+                    player.CurrentlyChannelingSpellId = channelingId;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitSwimFlags.ToInt32()), out uint swimFlags))
+                {
+                    player.IsSwimming = (swimFlags & 0x200000) != 0;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitFlyFlagsPointer.ToInt32()), out IntPtr flyFlagsPointer)
+                && WowInterface.XMemory.Read(IntPtr.Add(flyFlagsPointer, WowInterface.OffsetList.WowUnitFlyFlags.ToInt32()), out uint flyFlags))
+                {
+                    player.IsFlying = (flyFlags & 0x2000000) != 0;
+                }
+
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.BreathTimer, out int breathTimer))
+                {
+                    player.IsUnderwater = breathTimer > 0;
+                }
+
+                if (player.Guid == PlayerGuid)
+                {
+                    if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
+                    {
+                        player.ComboPoints = comboPoints;
                     }
-                },
-                () => { if (player.Guid == TargetGuid) { Target = player; } },
-                () => { if (player.Guid == PetGuid) { Pet = player; } },
-                () => { if (player.Guid == LastTargetGuid) { LastTarget = player; } },
-                () => { if (player.Guid == PartyleaderGuid) { Partyleader = player; } }
-                );
+
+                    Player = player;
+                }
+
+                if (player.Guid == TargetGuid) { Target = player; }
+                if (player.Guid == PetGuid) { Pet = player; }
+                if (player.Guid == LastTargetGuid) { LastTarget = player; }
+                if (player.Guid == PartyleaderGuid) { Partyleader = player; }
 
                 return player;
             }
@@ -684,50 +658,38 @@ namespace AmeisenBotX.Core.Data
                 // First read the descriptor, then lookup the Name by GUID
                 unit.UpdateRawWowUnit(WowInterface.XMemory);
 
-                Parallel.Invoke
-                (
-                    () => unit.Name = ReadUnitName(activeObject, unit.Guid),
-                    () => unit.Auras = WowInterface.HookManager.GetUnitAuras(unit),
-                    () =>
-                    {
-                        if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position))
-                        {
-                            unit.Position = position;
-                        }
-                    },
-                    () =>
-                    {
-                        if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation))
-                        {
-                            unit.Rotation = rotation;
-                        }
-                    },
-                    () =>
-                    {
-                        if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
-                        {
-                            unit.IsAutoAttacking = isAutoAttacking == 1;
-                        }
-                    },
-                    () =>
-                    {
-                        if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int castingId))
-                        {
-                            unit.CurrentlyCastingSpellId = castingId;
-                        }
-                    },
-                    () =>
-                    {
-                        if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int channelingId))
-                        {
-                            unit.CurrentlyChannelingSpellId = channelingId;
-                        }
-                    },
-                    () => { if (unit.Guid == TargetGuid) { Target = unit; } },
-                    () => { if (unit.Guid == PetGuid) { Pet = unit; } },
-                    () => { if (unit.Guid == LastTargetGuid) { LastTarget = unit; } },
-                    () => { if (unit.Guid == PartyleaderGuid) { Partyleader = unit; } }
-                );
+                unit.Name = ReadUnitName(activeObject, unit.Guid);
+                unit.Auras = WowInterface.HookManager.GetUnitAuras(unit);
+
+                if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitPosition.ToInt32()), out Vector3 position))
+                {
+                    unit.Position = position;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitRotation.ToInt32()), out float rotation))
+                {
+                    unit.Rotation = rotation;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.WowUnitIsAutoAttacking.ToInt32()), out int isAutoAttacking))
+                {
+                    unit.IsAutoAttacking = isAutoAttacking == 1;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyCastingSpellId.ToInt32()), out int castingId))
+                {
+                    unit.CurrentlyCastingSpellId = castingId;
+                }
+
+                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, WowInterface.OffsetList.CurrentlyChannelingSpellId.ToInt32()), out int channelingId))
+                {
+                    unit.CurrentlyChannelingSpellId = channelingId;
+                }
+
+                if (unit.Guid == TargetGuid) { Target = unit; }
+                if (unit.Guid == PetGuid) { Pet = unit; }
+                if (unit.Guid == LastTargetGuid) { LastTarget = unit; }
+                if (unit.Guid == PartyleaderGuid) { Partyleader = unit; }
 
                 return unit;
             }

@@ -1285,7 +1285,7 @@ namespace AmeisenBotX.Core.Hook
                 return false;
             }
 
-            List<byte> returnBytes = new List<byte>(128);
+            List<byte> returnBytes = readReturnBytes ? new List<byte>() : null;
 
             lock (hookLock)
             {
@@ -1366,7 +1366,7 @@ namespace AmeisenBotX.Core.Hook
             }
 
             ++hookCalls;
-            bytes = returnBytes.ToArray();
+            bytes = readReturnBytes ? returnBytes.ToArray() : null;
             return true;
         }
 

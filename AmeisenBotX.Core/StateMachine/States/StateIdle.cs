@@ -251,7 +251,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 double distance = pos.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                if (!BotMath.IsInRange(distance, Config.MinFollowDistance, Config.MaxFollowDistance))
+                if (BotMath.IsInRange(distance, Config.MinFollowDistance, Config.MaxFollowDistance))
                 {
                     return false;
                 }
