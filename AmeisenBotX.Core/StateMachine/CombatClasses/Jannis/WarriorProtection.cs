@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Version => "1.1";
 
-        public override bool WalkBehindEnemy => false;
+        public override bool WalkBehindEnemy => true;
 
         private TimegatedEvent HeroicStrikeEvent { get; }
 

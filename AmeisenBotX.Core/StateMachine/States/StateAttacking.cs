@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -141,10 +142,42 @@ namespace AmeisenBotX.Core.Statemachine.States
             // if we are close enough, stop movement and start attacking
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
 
-            if (distance > DistanceToKeep || !TargetInLos)
+            bool needToRotate = false;
+            Vector3 meanGroupPosition = new Vector3();
+
+            if (WowInterface.CombatClass.Role == CombatClassRole.Dps && WowInterface.CombatClass.WalkBehindEnemy)
             {
-                Vector3 positionToGoTo = WowInterface.CombatClass != null && WowInterface.CombatClass.WalkBehindEnemy ? BotMath.CalculatePositionBehind(target.Position, target.Rotation)
-                    : BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), (float)GetMeeleRange() / 2.0f * -1f); // WowInterface.CombatClass.IsMelee ? BotMath.CalculatePositionBehind(target.Position, target.Rotation, 4) :
+                for (int i = 0; i < WowInterface.ObjectManager.Partymembers.Count; ++i)
+                {
+                    if (WowInterface.ObjectManager.Partymembers[i].Guid != WowInterface.ObjectManager.PlayerGuid)
+                    {
+                        meanGroupPosition += WowInterface.ObjectManager.Partymembers[i].Position;
+                    }
+                }
+
+                needToRotate = BotMath.IsFacing(target.Position, target.Rotation, meanGroupPosition);
+            }
+
+            if (distance > DistanceToKeep || !TargetInLos || needToRotate)
+            {
+                Vector3 positionToGoTo = Vector3.Zero;
+
+                if (WowInterface.CombatClass != null && WowInterface.CombatClass.Role != CombatClassRole.Heal && WowInterface.CombatClass.WalkBehindEnemy)
+                {
+                    if (WowInterface.CombatClass.Role == CombatClassRole.Dps)
+                    {
+                        positionToGoTo = BotMath.CalculatePositionBehind(target.Position, target.Rotation);
+                    }
+                    else
+                    {
+                        positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle2D(target.Position, meanGroupPosition));
+                    }
+                }
+                else
+                {
+                    positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), (float)GetMeeleRange() / 2.0f * -1f);
+                }
+
                 WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                 return true;
             }

@@ -247,7 +247,7 @@ namespace AmeisenBotX.Memory
         {
             int size = sizeof(T);
 
-            fixed (byte* pBuffer = new byte[size])
+            fixed (byte* pBuffer = stackalloc byte[size])
             {
                 if (RpmGateWay(address, pBuffer, size))
                 {
@@ -281,7 +281,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
         {
-            fixed (byte* pBuffer = new byte[lenght])
+            fixed (byte* pBuffer = stackalloc byte[lenght])
             {
                 if (RpmGateWay(address, pBuffer, lenght))
                 {
@@ -307,7 +307,7 @@ namespace AmeisenBotX.Memory
         {
             int size = sizeof(T);
 
-            fixed (byte* pBuffer = new byte[size])
+            fixed (byte* pBuffer = stackalloc byte[size])
             {
                 if (RpmGateWay(address, pBuffer, size))
                 {
