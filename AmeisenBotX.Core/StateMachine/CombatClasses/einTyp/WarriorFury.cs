@@ -365,7 +365,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                 if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                 {
-                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                    WowInterface.HookManager.StartAutoAttack();
                 }
 
                 Player = WowInterface.ObjectManager.Player;
@@ -503,7 +503,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                                 }
                                 else if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                                 {
-                                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                                    WowInterface.HookManager.StartAutoAttack();
                                 }
                             }
                         }

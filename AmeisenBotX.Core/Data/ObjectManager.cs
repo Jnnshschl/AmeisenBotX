@@ -4,9 +4,11 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -16,7 +18,6 @@ namespace AmeisenBotX.Core.Data
 {
     public class ObjectManager : IObjectManager
     {
-        private readonly List<(IntPtr, WowObjectType)> objectPointers;
         private readonly object queryLock = new object();
         private readonly ConcurrentBag<WowObject> wowObjects;
 
@@ -35,8 +36,6 @@ namespace AmeisenBotX.Core.Data
             wowObjects = new ConcurrentBag<WowObject>();
             partymembers = new List<WowUnit>();
             partypets = new List<WowUnit>();
-
-            objectPointers = new List<(IntPtr, WowObjectType)>();
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
@@ -235,63 +234,51 @@ namespace AmeisenBotX.Core.Data
 
             if (!IsWorldLoaded) { return; }
 
-            // update our global stuff
-            Parallel.Invoke
-            (
-                () => PlayerGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.PlayerGuid),
-                () => TargetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.TargetGuid),
-                () => LastTargetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.LastTargetGuid),
-                () => PetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.PetGuid),
-                () => PlayerBase = UpdateGlobalVar<IntPtr>(WowInterface.OffsetList.PlayerBase),
-                () => MapId = UpdateGlobalVar<MapId>(WowInterface.OffsetList.MapId),
-                () => ZoneId = UpdateGlobalVar<int>(WowInterface.OffsetList.ZoneId),
-                () => GameState = UpdateGlobalVarString(WowInterface.OffsetList.GameState),
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(WowInterface.OffsetList.CameraPointer, out IntPtr cameraPointer)
-                    && WowInterface.XMemory.Read(IntPtr.Add(cameraPointer, WowInterface.OffsetList.CameraOffset.ToInt32()), out cameraPointer))
-                    {
-                        Camera = UpdateGlobalVar<CameraInfo>(cameraPointer);
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneText, out IntPtr zoneNamePointer))
-                    {
-                        ZoneName = UpdateGlobalVarString(zoneNamePointer);
-                    }
-                },
-                () =>
-                {
-                    if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer))
-                    {
-                        ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
-                    }
-                },
-                () =>
-                {
-                    WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
-                    WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
-                    CurrentObjectManager = currentObjectManager;
-                }
-            );
-
-            // read the first object
-            WowInterface.XMemory.Read(IntPtr.Add(CurrentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
-            WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out int activeObjectType);
-
-            objectPointers.Clear();
-
-            while (Enum.IsDefined(typeof(WowObjectType), activeObjectType))
-            {
-                objectPointers.Add((activeObjectBaseAddress, (WowObjectType)activeObjectType));
-
-                WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
-                WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out activeObjectType);
-            }
-
             lock (queryLock)
             {
+                PlayerGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.PlayerGuid);
+                TargetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.TargetGuid);
+                LastTargetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.LastTargetGuid);
+                PetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.PetGuid);
+                PlayerBase = UpdateGlobalVar<IntPtr>(WowInterface.OffsetList.PlayerBase);
+                MapId = UpdateGlobalVar<MapId>(WowInterface.OffsetList.MapId);
+                ZoneId = UpdateGlobalVar<int>(WowInterface.OffsetList.ZoneId);
+                GameState = UpdateGlobalVarString(WowInterface.OffsetList.GameState);
+
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.CameraPointer, out IntPtr cameraPointer)
+                    && WowInterface.XMemory.Read(IntPtr.Add(cameraPointer, WowInterface.OffsetList.CameraOffset.ToInt32()), out cameraPointer))
+                {
+                    Camera = UpdateGlobalVar<CameraInfo>(cameraPointer);
+                }
+
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneText, out IntPtr zoneNamePointer))
+                {
+                    ZoneName = UpdateGlobalVarString(zoneNamePointer);
+                }
+
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer))
+                {
+                    ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
+                }
+
+                WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
+                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
+                CurrentObjectManager = currentObjectManager;
+
+                // read the first object
+                WowInterface.XMemory.Read(IntPtr.Add(CurrentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
+                WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out int activeObjectType);
+
+                List<(IntPtr, WowObjectType)> objectPointers = new List<(IntPtr, WowObjectType)>();
+
+                while (Enum.IsDefined(typeof(WowObjectType), activeObjectType))
+                {
+                    objectPointers.Add((activeObjectBaseAddress, (WowObjectType)activeObjectType));
+
+                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
+                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.WowObjectType.ToInt32()), out activeObjectType);
+                }
+
                 wowObjects.Clear();
 
                 Parallel.ForEach(objectPointers, ProcessObject);

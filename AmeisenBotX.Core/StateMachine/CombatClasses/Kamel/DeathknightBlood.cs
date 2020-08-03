@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 // make sure we're auto attacking
                 if (!ObjectManager.Player.IsAutoAttacking)
                 {
-                    HookManager.StartAutoAttack(ObjectManager.Target);
+                    HookManager.StartAutoAttack();
                 }
 
                 HandleAttacking(target);
