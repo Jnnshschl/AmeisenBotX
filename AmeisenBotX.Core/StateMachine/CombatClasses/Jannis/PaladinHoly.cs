@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Player.IsAutoAttacking
                     && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
                 {
-                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                    WowInterface.HookManager.StartAutoAttack();
                     return;
                 }
 

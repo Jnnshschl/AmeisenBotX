@@ -165,9 +165,6 @@ namespace AmeisenBotX.Memory.Win32
         [DllImport("user32", SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
 
-        [DllImport("user32", SetLastError = true)]
-        public static extern bool MoveWindow(IntPtr windowHandle, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-
         [DllImport("ntdll", SetLastError = true)]
         public static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, void* buffer, int size, out IntPtr numberOfBytesRead);
 
@@ -190,25 +187,13 @@ namespace AmeisenBotX.Memory.Win32
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32", SetLastError = true)]
-        public static extern bool SetLayeredWindowAttributes(IntPtr windowHandle, uint colorKey, uint alpha, uint flags);
-
-        [DllImport("user32", SetLastError = true)]
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
         [DllImport("user32", SetLastError = true)]
         public static extern int SetWindowLong(IntPtr windowHandle, int index, int newLong);
 
         [DllImport("user32", SetLastError = true)]
-        public static extern int SetWindowLong(IntPtr windowHandle, int nIndex, uint dwNewLong);
-
-        [DllImport("user32", SetLastError = true)]
-        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
-
-        [DllImport("user32", SetLastError = true)]
         public static extern IntPtr SetWindowPos(IntPtr windowHandle, IntPtr windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
-
-        [DllImport("user32", SetLastError = true)]
-        public static extern bool ShowWindow(IntPtr windowHandle, int nCmdShow);
 
         [DllImport("kernel32", SetLastError = true)]
         public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtection memoryProtection);

@@ -182,7 +182,7 @@ namespace AmeisenBotX.Core.Hook
 
         bool SetupEndsceneHook();
 
-        void StartAutoAttack(WowUnit wowUnit);
+        void StartAutoAttack();
 
         void StopClickToMoveIfActive();
 
