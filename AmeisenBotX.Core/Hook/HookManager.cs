@@ -12,6 +12,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -1372,25 +1373,25 @@ namespace AmeisenBotX.Core.Hook
 
         private List<WowAura> ReadAuraTable<T>(IntPtr buffBase, int auraCount) where T : unmanaged, IRawWowAuraTable
         {
-            WowAura[] buffs = new WowAura[auraCount];
+            List<WowAura> buffs = new List<WowAura>();
 
             if (WowInterface.XMemory.Read(buffBase, out T auraTable))
             {
                 RawWowAura[] rawAuras = auraTable.AsArray();
 
-                Parallel.For(0, auraCount, x =>
+                foreach(RawWowAura x in rawAuras)
                 {
-                    if (rawAuras[x].SpellId > 0)
+                    if (x.SpellId > 0)
                     {
-                        if (!WowInterface.BotCache.TryGetSpellName(rawAuras[x].SpellId, out string name))
+                        if (!WowInterface.BotCache.TryGetSpellName(x.SpellId, out string name))
                         {
-                            name = GetSpellNameById(rawAuras[x].SpellId);
-                            WowInterface.BotCache.CacheSpellName(rawAuras[x].SpellId, name);
+                            name = GetSpellNameById(x.SpellId);
+                            WowInterface.BotCache.CacheSpellName(x.SpellId, name);
                         }
 
-                        buffs[x] = new WowAura(rawAuras[x], name.Length > 0 ? name : "unk");
+                        buffs.Add(new WowAura(x, name.Length > 0 ? name : "unk"));
                     }
-                });
+                }
             }
 
             return buffs.Distinct().ToList();
