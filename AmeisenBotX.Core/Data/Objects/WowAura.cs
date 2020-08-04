@@ -1,16 +1,16 @@
 ﻿using AmeisenBotX.Core.Data.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
-using System;
 
 namespace AmeisenBotX.Core.Data.Objects
 {
-    [Serializable]
-    public struct WowAura
+    public class WowAura
     {
-        public WowAura(RawWowAura rawWowAura, string name)
+        private string name = string.Empty;
+
+        public WowAura(WowInterface wowInterface, RawWowAura rawWowAura)
         {
+            WowInterface = wowInterface;
             RawWowAura = rawWowAura;
-            Name = name;
         }
 
         public ulong CreatorGuid => RawWowAura.Creator;
@@ -29,7 +29,20 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public byte Level => RawWowAura.Level;
 
-        public string Name { get; private set; }
+        public string Name
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(name) && !WowInterface.BotCache.TryGetSpellName(SpellId, out name))
+                {
+                    name = WowInterface.HookManager.GetSpellNameById(SpellId);
+                    WowInterface.BotCache.CacheSpellName(SpellId, name);
+                }
+
+                return name;
+            }
+            set { name = value; }
+        }
 
         public int SpellId => RawWowAura.SpellId;
 
@@ -37,7 +50,9 @@ namespace AmeisenBotX.Core.Data.Objects
 
         private RawWowAura RawWowAura { get; set; }
 
+        private WowInterface WowInterface { get; }
+
         public override string ToString()
-            => $"{Name} ({SpellId}) (lvl. {Level}) x{StackCount} [CG: {CreatorGuid}], Harmful: {IsHarmful}, Passive: {IsPassive}";
+            => $"{SpellId} (lvl. {Level}) x{StackCount} [CG: {CreatorGuid}], Harmful: {IsHarmful}, Passive: {IsPassive}";
     }
 }

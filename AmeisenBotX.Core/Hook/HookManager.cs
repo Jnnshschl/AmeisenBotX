@@ -10,15 +10,12 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook
 {
@@ -549,7 +546,7 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"), out string result) ? result : string.Empty;
         }
 
-        public List<WowAura> GetUnitAuras(WowUnit wowUnit)
+        public WowAura[] GetUnitAuras(WowUnit wowUnit)
         {
             if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraCount1), out int auraCount1))
             {
@@ -1359,30 +1356,14 @@ namespace AmeisenBotX.Core.Hook
             return true;
         }
 
-        private List<WowAura> ReadAuraTable<T>(IntPtr buffBase, int auraCount) where T : unmanaged, IRawWowAuraTable
+        private WowAura[] ReadAuraTable<T>(IntPtr buffBase, int auraCount) where T : unmanaged, IRawWowAuraTable
         {
-            List<WowAura> buffs = new List<WowAura>();
-
             if (WowInterface.XMemory.Read(buffBase, out T auraTable))
             {
-                RawWowAura[] rawAuras = auraTable.AsArray();
-
-                foreach(RawWowAura x in rawAuras)
-                {
-                    if (x.SpellId > 0)
-                    {
-                        if (!WowInterface.BotCache.TryGetSpellName(x.SpellId, out string name))
-                        {
-                            name = GetSpellNameById(x.SpellId);
-                            WowInterface.BotCache.CacheSpellName(x.SpellId, name);
-                        }
-
-                        buffs.Add(new WowAura(x, name.Length > 0 ? name : "unk"));
-                    }
-                }
+                return auraTable.AsAuraArray(WowInterface)[..auraCount];
             }
 
-            return buffs.Distinct().ToList();
+            return null;
         }
 
         private void SaveOriginalFunctionByte(IntPtr address)

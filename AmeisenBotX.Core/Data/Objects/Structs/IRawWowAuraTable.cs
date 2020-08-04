@@ -5,5 +5,7 @@
         int MaxBuffs { get; }
 
         RawWowAura[] AsArray();
+
+        WowAura[] AsAuraArray(WowInterface wowInterface);
     }
 }

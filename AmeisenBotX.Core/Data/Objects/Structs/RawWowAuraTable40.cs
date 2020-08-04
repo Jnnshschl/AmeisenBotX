@@ -133,5 +133,52 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
                 Aura40,
             };
         }
+
+        public WowAura[] AsAuraArray(WowInterface wowInterface)
+        {
+            return new WowAura[]
+            {
+                new WowAura(wowInterface, Aura1),
+                new WowAura(wowInterface, Aura2),
+                new WowAura(wowInterface, Aura3),
+                new WowAura(wowInterface, Aura4),
+                new WowAura(wowInterface, Aura5),
+                new WowAura(wowInterface, Aura6),
+                new WowAura(wowInterface, Aura7),
+                new WowAura(wowInterface, Aura8),
+                new WowAura(wowInterface, Aura9),
+                new WowAura(wowInterface, Aura10),
+                new WowAura(wowInterface, Aura11),
+                new WowAura(wowInterface, Aura12),
+                new WowAura(wowInterface, Aura13),
+                new WowAura(wowInterface, Aura14),
+                new WowAura(wowInterface, Aura15),
+                new WowAura(wowInterface, Aura16),
+                new WowAura(wowInterface, Aura17),
+                new WowAura(wowInterface, Aura18),
+                new WowAura(wowInterface, Aura19),
+                new WowAura(wowInterface, Aura20),
+                new WowAura(wowInterface, Aura21),
+                new WowAura(wowInterface, Aura22),
+                new WowAura(wowInterface, Aura23),
+                new WowAura(wowInterface, Aura24),
+                new WowAura(wowInterface, Aura25),
+                new WowAura(wowInterface, Aura26),
+                new WowAura(wowInterface, Aura27),
+                new WowAura(wowInterface, Aura28),
+                new WowAura(wowInterface, Aura29),
+                new WowAura(wowInterface, Aura30),
+                new WowAura(wowInterface, Aura31),
+                new WowAura(wowInterface, Aura32),
+                new WowAura(wowInterface, Aura33),
+                new WowAura(wowInterface, Aura34),
+                new WowAura(wowInterface, Aura35),
+                new WowAura(wowInterface, Aura36),
+                new WowAura(wowInterface, Aura37),
+                new WowAura(wowInterface, Aura38),
+                new WowAura(wowInterface, Aura39),
+                new WowAura(wowInterface, Aura40),
+            };
+        }
     }
 }

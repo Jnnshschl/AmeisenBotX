@@ -104,11 +104,13 @@ namespace AmeisenBotX.Core.Hook
         /// <returns>ms cooldown left</returns>
         int GetSpellCooldown(string spellName);
 
+        string GetSpellNameById(int spellId);
+
         string GetSpells();
 
         string GetTalents();
 
-        List<WowAura> GetUnitAuras(WowUnit wowUnit);
+        WowAura[] GetUnitAuras(WowUnit wowUnit);
 
         (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
 
@@ -141,6 +143,8 @@ namespace AmeisenBotX.Core.Hook
         void LeaveBattleground();
 
         void LootEveryThing();
+
+        void LootOnlyMoneyAndQuestItems();
 
         bool LuaDoString(string command);
 
@@ -203,6 +207,5 @@ namespace AmeisenBotX.Core.Hook
         void UseItemByName(string itemName);
 
         void WowObjectOnRightClick(WowObject gObject);
-        void LootOnlyMoneyAndQuestItems();
     }
 }

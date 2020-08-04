@@ -21,15 +21,15 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public delegate bool DispellDebuffsFunction();
 
-        public delegate List<WowAura> GetAurasFunction();
+        public delegate WowAura[] GetAurasFunction();
 
-        public List<WowAura> Auras { get; private set; }
+        public WowAura[] Auras { get; private set; }
 
-        public List<WowAura> Buffs => Auras;
+        public WowAura[] Buffs => Auras;
 
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
 
-        public List<WowAura> Debuffs => Auras;
+        public WowAura[] Debuffs => Auras;
 
         public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 
@@ -52,43 +52,49 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                 LastBuffUpdate = DateTime.Now;
             }
 
-            if (Auras == null || Auras.Count == 0)
+            if (Auras == null || Auras.Length == 0)
             {
                 return false;
             }
 
-            if (BuffsToKeepActive?.Count > 0 && Buffs != null)
+            if (Buffs != null)
             {
-                foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
+                if (BuffsToKeepActive?.Count > 0)
                 {
-                    if (!Buffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
-                        && keyValuePair.Value())
+                    foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
                     {
-                        return true;
+                        if (!Buffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
+                            && keyValuePair.Value())
+                        {
+                            return true;
+                        }
                     }
+                }
+
+                if (Buffs.Length > 0 && DispellBuffs != null)
+                {
+                    DispellBuffs();
                 }
             }
 
-            if (Buffs?.Count > 0 && DispellBuffs != null)
+            if (Debuffs != null)
             {
-                DispellBuffs();
-            }
-
-            if (DebuffsToKeepActive?.Count > 0 && Debuffs != null)
-            {
-                foreach (KeyValuePair<string, CastFunction> keyValuePair in DebuffsToKeepActive)
+                if (DebuffsToKeepActive?.Count > 0)
                 {
-                    if (!Debuffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
-                        && keyValuePair.Value())
+                    foreach (KeyValuePair<string, CastFunction> keyValuePair in DebuffsToKeepActive)
                     {
-                        return true;
+                        if (!Debuffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
+                            && keyValuePair.Value())
+                        {
+                            return true;
+                        }
                     }
                 }
-            }
 
-            if (Debuffs?.Count > 0 && DispellDebuffs != null)
-            {
-                // DispellDebuffs();
+                if (Debuffs.Length > 0 && DispellDebuffs != null)
+                {
+                    // DispellDebuffs();
+                }
             }
 
             return false;
