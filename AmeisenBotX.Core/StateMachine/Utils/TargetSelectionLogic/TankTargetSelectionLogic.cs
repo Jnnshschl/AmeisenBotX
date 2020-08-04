@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -48,9 +49,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             // get all enemies targeting our group
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
                 .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100.0)
-                .Where(e => e.IsInCombat 
+                .Where(e => e.IsInCombat
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
-                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e=>e.SpellId == 47346) && e.Name.Contains("Novos The"))); // Novos fix
+                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase))); // Novos fix
 
             if (enemies.Count() > 0)
             {

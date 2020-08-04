@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Hook
 
         string GetTalents();
 
-        WowAura[] GetUnitAuras(WowUnit wowUnit);
+        List<WowAura> GetUnitAuras(WowUnit wowUnit);
 
         (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
 
