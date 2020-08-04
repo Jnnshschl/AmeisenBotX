@@ -82,10 +82,10 @@ namespace AmeisenBotX.Core.Event
                         {
                             AmeisenLogger.Instance.Log("WoWEvents", $"[{x.Timestamp}] {x.Name} fired: {JsonConvert.SerializeObject(x.Arguments)}", LogLevel.Verbose);
 
-                            Parallel.ForEach(EventDictionary[x.Name], eventCallback =>
+                            for (int i = 0; i < EventDictionary[x.Name].Count; ++i)
                             {
-                                eventCallback(x.Timestamp, x.Arguments);
-                            });
+                                EventDictionary[x.Name][i](x.Timestamp, x.Arguments);
+                            }
                         }
                     });
                 }
@@ -138,10 +138,10 @@ namespace AmeisenBotX.Core.Event
 
         private void HandleSubEventQueue()
         {
-            StringBuilder sb = new StringBuilder();
-
             if (IsActive && SubscribeQueue.Count > 0)
             {
+                StringBuilder sb = new StringBuilder();
+
                 while (SubscribeQueue.Count > 0)
                 {
                     (string, WowEventAction) queueElement = SubscribeQueue.Dequeue();
@@ -163,10 +163,10 @@ namespace AmeisenBotX.Core.Event
 
         private void HandleUnsubEventQueue()
         {
-            StringBuilder sb = new StringBuilder();
-
             if (IsActive && UnsubscribeQueue.Count > 0)
             {
+                StringBuilder sb = new StringBuilder();
+
                 while (SubscribeQueue.Count > 0)
                 {
                     (string, WowEventAction) queueElement = UnsubscribeQueue.Dequeue();

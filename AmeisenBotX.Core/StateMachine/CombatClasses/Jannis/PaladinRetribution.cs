@@ -95,11 +95,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (SelectTarget(DpsTargetManager))
             {
-                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run() && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
-                {
-                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-                }
-
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
                         && CastSpellIfPossible(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 60

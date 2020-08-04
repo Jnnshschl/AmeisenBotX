@@ -111,11 +111,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (SelectTarget(DpsTargetManager))
             {
-                if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
-                {
-                    WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
-                }
-
                 if (PetManager.Tick()) { return; }
 
                 WowUnit target = (WowUnit)WowInterface.ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == WowInterface.ObjectManager.TargetGuid);

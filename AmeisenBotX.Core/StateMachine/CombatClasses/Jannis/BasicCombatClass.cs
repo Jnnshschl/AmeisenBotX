@@ -510,7 +510,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && AutoAttackEvent.Run()
                 && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                WowInterface.HookManager.StartAutoAttack();
             }
 
             // Interrupting

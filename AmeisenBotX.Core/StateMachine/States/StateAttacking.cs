@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                     {
-                        WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                        WowInterface.HookManager.StartAutoAttack();
                     }
                 }
                 else

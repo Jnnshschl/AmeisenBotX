@@ -402,7 +402,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                 if (!WowInterface.ObjectManager.Player.IsAutoAttacking && !IsInStealth())
                 {
-                    WowInterface.HookManager.StartAutoAttack(target);
+                    WowInterface.HookManager.StartAutoAttack();
                 }
 
                 Player = WowInterface.ObjectManager.Player;

@@ -370,7 +370,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
             {
-                WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                WowInterface.HookManager.StartAutoAttack();
             }
         }
 

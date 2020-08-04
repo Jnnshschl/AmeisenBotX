@@ -187,7 +187,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 {
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.HookManager.StartAutoAttack(WowInterface.ObjectManager.Target);
+                        WowInterface.HookManager.StartAutoAttack();
                     }
 
                     if (CustomCastSpell(deathWishSpell))
