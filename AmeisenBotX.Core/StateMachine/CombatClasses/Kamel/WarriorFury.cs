@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
-        public override string Description => "Warrior Fury 2.0";
+        public override string Description => "Warrior Fury";
 
         public override string Displayname => "Warrior Fury Final";
 
@@ -210,9 +210,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(bloodrageSpell) && CustomCastSpell(enragedregenerationSpell))
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(bloodrageSpell))
                     {
-                        return;
+                        if (CustomCastSpell(enragedregenerationSpell)) 
+                        {
+                            return;
+                        }
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
@@ -255,12 +258,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (HeroicStrikeEvent.Run() && CustomCastSpell(heroicStrikeSpell))
+                    if (HeroicStrikeEvent.Run() && WowInterface.ObjectManager.Player.Rage >= 60 && CustomCastSpell(heroicStrikeSpell))
                     {
                         return;
                     }
 
                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
+                    {
+                        return;
+                    }
+                    
+                    if (CustomCastSpell(berserkerRageSpell))
                     {
                         return;
                     }
@@ -293,7 +301,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             if (TargetSelectEvent.Run())
             {
                 WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 40)
-                .Where(e => e.IsInCombat && !e.IsNotAttackable)
+                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault();
 

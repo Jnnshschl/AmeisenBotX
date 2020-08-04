@@ -95,10 +95,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(CalloftheElementsSpell, DateTime.Now);
 
             //Time event
-            earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
+            earthShieldEvent = new TimegatedEvent(TimeSpan.FromSeconds(7));
             revivePlayerEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
             manaTideTotemEvent = new TimegatedEvent(TimeSpan.FromSeconds(12));
-            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            totemcastEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
         }
 
         public override string Author => "Lukas";
@@ -301,7 +301,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 }
 
-                if (WowInterface.ObjectManager.Target.HealthPercentage >= 94)
+                if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.Target.HealthPercentage >= 90)
                 {
                     WowInterface.HookManager.LuaDoString("SpellStopCasting()");
                     return;
@@ -322,7 +322,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             WowInterface.MovementEngine.Reset();
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
                         {
                             return;
                         }
@@ -352,12 +352,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 4 && WowInterface.ObjectManager.Target.HealthPercentage >= 70 && CustomCastSpell(chainHealSpell))
+                        if (WowInterface.ObjectManager.Target.HealthPercentage <= 75 && CustomCastSpell(lesserHealingWaveSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage <= 75 && CustomCastSpell(lesserHealingWaveSpell))
+                        if (partyMemberToHeal.Count >= 4 && WowInterface.ObjectManager.Target.HealthPercentage >= 80 && CustomCastSpell(chainHealSpell))
                         {
                             return;
                         }
@@ -367,7 +367,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 92 && CustomCastSpell(riptideSpell))
+                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Riptide") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(riptideSpell))
+                        {
+                            return;
+                        }
+                    }
+
+                    totemItemCheck();
+
+                    if (totemcastEvent.Run() && hasTotemItems)
+                    {
+                        if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
                         {
                             return;
                         }
@@ -380,11 +390,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                 if (totemcastEvent.Run() && hasTotemItems)
                 {
-                    if (WowInterface.ObjectManager.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
-                    {
-                        return;
-                    }
-
                     if (WowInterface.ObjectManager.Player.ManaPercentage >= 50
                         && !WowInterface.ObjectManager.Player.HasBuffByName("Windfury Totem")
                         && !WowInterface.ObjectManager.Player.HasBuffByName("Stoneskin")
@@ -398,7 +403,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 if (TargetSelectEvent.Run())
                 {
                     WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 30)
-                    .Where(e => e.IsInCombat && !e.IsNotAttackable)//&& e.IsCasting 
+                    .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))//&& e.IsCasting 
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
 
@@ -415,18 +420,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             WowInterface.HookManager.StopClickToMoveIfActive();
                             WowInterface.MovementEngine.Reset();
                         }
-                        if (UseSpellOnlyInCombat && CustomCastSpell(windShearSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.IsCasting && CustomCastSpell(windShearSpell))
                         {
                             return;
                         } 
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 90 && CustomCastSpell(flameShockSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 80 && CustomCastSpell(flameShockSpell))
                         {
                             return;
                         }
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 90 && CustomCastSpell(earthShockSpell))
-                        {
-                            return;
-                        }
+                        //if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 90 && CustomCastSpell(earthShockSpell))
+                        //{
+                        //    return;
+                        //}
                     }
                 }
                 //target gui id is bigger than null
