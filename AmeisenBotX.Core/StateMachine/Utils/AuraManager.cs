@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +8,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class AuraManager
     {
-        public AuraManager(TimeSpan minUpdateTime, GetAurasFunction getAurasFunction)
+        public AuraManager(GetAurasFunction getAurasFunction)
         {
             BuffsToKeepActive = new Dictionary<string, CastFunction>();
             DebuffsToKeepActive = new Dictionary<string, CastFunction>();
-            MinUpdateTime = minUpdateTime;
             GetAuras = getAurasFunction;
         }
 
@@ -21,15 +21,15 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public delegate bool DispellDebuffsFunction();
 
-        public delegate List<WowAura> GetAurasFunction();
+        public delegate WowAura[] GetAurasFunction();
 
-        public List<WowAura> Auras { get; private set; }
+        public WowAura[] Auras { get; private set; }
 
-        public List<WowAura> Buffs => Auras;
+        public WowAura[] Buffs => Auras;
 
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
 
-        public List<WowAura> Debuffs => Auras;
+        public WowAura[] Debuffs => Auras;
 
         public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 
@@ -39,20 +39,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public GetAurasFunction GetAuras { get; set; }
 
-        public DateTime LastBuffUpdate { get; private set; }
-
-        public TimeSpan MinUpdateTime { get; private set; }
-
-        public bool Tick(bool forceUpdate = false)
+        public bool Tick()
         {
-            if (DateTime.Now - LastBuffUpdate > MinUpdateTime
-                || forceUpdate)
-            {
-                Auras = GetAuras();
-                LastBuffUpdate = DateTime.Now;
-            }
+            Auras = GetAuras();
 
-            if (Auras == null || Auras.Count == 0)
+            if (Auras == null || Auras.Length == 0)
             {
                 return false;
             }
@@ -71,7 +62,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     }
                 }
 
-                if (Buffs.Count > 0 && DispellBuffs != null)
+                if (Buffs.Length > 0 && DispellBuffs != null)
                 {
                     DispellBuffs();
                 }
@@ -91,7 +82,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     }
                 }
 
-                if (Debuffs.Count > 0 && DispellDebuffs != null)
+                if (Debuffs.Length > 0 && DispellDebuffs != null)
                 {
                     // DispellDebuffs();
                 }

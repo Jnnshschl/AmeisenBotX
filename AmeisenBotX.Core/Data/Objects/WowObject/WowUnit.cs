@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Memory;
 using System;
@@ -13,9 +14,12 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     {
         public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
         {
+            Auras = new WowAura[40];
         }
 
-        public List<WowAura> Auras { get; set; }
+        public WowAura[] Auras { get; set; }
+
+        public int AuraCount { get; set; }
 
         public WowClass Class => Enum.IsDefined(typeof(WowClass), (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF)) ? (WowClass)((RawWowUnit.Bytes0 >> 8) & 0xFF) : WowClass.Unknown;
 

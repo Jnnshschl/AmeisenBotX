@@ -546,27 +546,26 @@ namespace AmeisenBotX.Core.Hook
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"), out string result) ? result : string.Empty;
         }
 
-        public List<WowAura> GetUnitAuras(WowUnit wowUnit)
+        public void GetUnitAuras<T>(ref T wowUnit) where T : WowUnit
         {
             if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraCount1), out int auraCount1))
             {
                 if (auraCount1 == -1)
                 {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraCount2), out int auraCount2))
+                    if (WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraCount2), out int auraCount2)
+                        && auraCount2 > 0
+                        && WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraTable2), out IntPtr auraTable))
                     {
-                        if (auraCount2 > 0 && WowInterface.XMemory.Read(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraTable2), out IntPtr auraTable))
-                        {
-                            return ReadAuraTable(auraTable, auraCount2);
-                        }
+                        wowUnit.AuraCount = auraCount2;
+                        ReadAuraTable(auraTable, auraCount2, ref wowUnit);
                     }
                 }
                 else
                 {
-                    return ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraTable1), auraCount1);
+                    wowUnit.AuraCount = auraCount1;
+                    ReadAuraTable(IntPtr.Add(wowUnit.BaseAddress, (int)WowInterface.OffsetList.AuraTable1), auraCount1, ref wowUnit);
                 }
             }
-
-            return null;
         }
 
         /// <summary>
@@ -1356,19 +1355,12 @@ namespace AmeisenBotX.Core.Hook
             return true;
         }
 
-        private List<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
+        private void ReadAuraTable<T>(IntPtr buffBase, int auraCount, ref T wowUnit) where T : WowUnit
         {
-            List<WowAura> wowAuras = new List<WowAura>();
-
             for (int i = 0; i < auraCount; ++i)
             {
-                if (auraCount > 0 && WowInterface.XMemory.Read(buffBase + (0x18 * i), out RawWowAura wowAura))
-                {
-                    wowAuras.Add(new WowAura(WowInterface, wowAura));
-                }
+                WowInterface.XMemory.Read(buffBase + (0x18 * i), out wowUnit.Auras[i]);
             }
-
-            return wowAuras;
         }
 
         private void SaveOriginalFunctionByte(IntPtr address)

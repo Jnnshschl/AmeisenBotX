@@ -17,8 +17,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         public DruidRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            UseDefaultTargetSelection = false;
-
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Count > 0 && CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },

@@ -25,6 +25,12 @@ namespace AmeisenBotX.Core
 {
     public class WowInterface
     {
+        private static WowInterface i;
+
+        public static WowInterface I => i ??= new WowInterface();
+
+        private WowInterface() { }
+
         public IBattlegroundEngine BattlegroundEngine { get; set; }
 
         public IAmeisenBotCache BotCache { get; set; }

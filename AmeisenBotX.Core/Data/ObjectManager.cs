@@ -567,7 +567,9 @@ namespace AmeisenBotX.Core.Data
                 player.UpdateRawWowPlayer(WowInterface.XMemory);
 
                 player.Name = ReadPlayerName(player.Guid);
-                player.Auras = WowInterface.HookManager.GetUnitAuras(player);
+
+                Array.Clear(player.Auras, 0, player.Auras.Length);
+                WowInterface.HookManager.GetUnitAuras(ref player);
 
                 if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitPosition), out Vector3 position))
                 {
@@ -644,7 +646,9 @@ namespace AmeisenBotX.Core.Data
                 unit.UpdateRawWowUnit(WowInterface.XMemory);
 
                 unit.Name = ReadUnitName(activeObject, unit.Guid);
-                unit.Auras = WowInterface.HookManager.GetUnitAuras(unit);
+
+                Array.Clear(unit.Auras, 0, unit.Auras.Length);
+                WowInterface.HookManager.GetUnitAuras(ref unit);
 
                 if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitPosition), out Vector3 position))
                 {

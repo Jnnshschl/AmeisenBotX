@@ -393,17 +393,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
             };
 
-            MyAuraManager = new AuraManager
-            (
-                TimeSpan.Zero,
-                () => WowInterface.ObjectManager.Player?.Auras
-            );
-
-            TargetAuraManager = new AuraManager
-            (
-                TimeSpan.Zero,
-                () => WowInterface.ObjectManager.Target?.Auras
-            );
+            MyAuraManager = new AuraManager(() => WowInterface.ObjectManager.Player?.Auras);
+            TargetAuraManager = new AuraManager(() => WowInterface.ObjectManager.Target?.Auras);
 
             GroupAuraManager = new GroupAuraManager(WowInterface);
 
@@ -473,8 +464,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public TimegatedEvent UpdatePriorityUnits { get; set; }
 
         public abstract bool UseAutoAttacks { get; }
-
-        public bool UseDefaultTargetSelection { get; protected set; } = true;
 
         public abstract string Version { get; }
 
@@ -583,14 +572,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
-                && WowInterface.ObjectManager.Player.HealthPercentage < 50
+                && WowInterface.ObjectManager.Player.HealthPercentage < 50.0
                 && CastSpellIfPossible("Stoneform", 0))
             {
                 return;
             }
 
             if (WowInterface.ObjectManager.Player.Race == WowRace.Draenei
-                && WowInterface.ObjectManager.Player.HealthPercentage < 50
+                && WowInterface.ObjectManager.Player.HealthPercentage < 50.0
                 && CastSpellIfPossible("Gift of the Naaru", 0))
             {
                 return;
@@ -642,9 +631,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (Spells[spellName].CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-
+                        WowInterface.MovementEngine.StopMovement();
                         CheckFacing(target);
                     }
 
@@ -683,9 +670,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (Spells[spellName].CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-
+                        WowInterface.MovementEngine.StopMovement();
                         CheckFacing(target);
                     }
 
@@ -736,9 +721,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (Spells[spellName].CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-
+                        WowInterface.MovementEngine.StopMovement();
                         CheckFacing(target);
                     }
 
@@ -790,9 +773,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (Spells[spellName].CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-
+                        WowInterface.MovementEngine.StopMovement();
                         CheckFacing(target);
                     }
 
@@ -922,7 +903,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
             float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
-            float maxAngle = (float)(Math.PI * 2);
+            float maxAngle = (float)(Math.PI * 2.0);
 
             if (angleDiff < 0)
             {

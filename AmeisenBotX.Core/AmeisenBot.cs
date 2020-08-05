@@ -83,7 +83,8 @@ namespace AmeisenBotX.Core
             AmeisenLogger.Instance.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.Instance.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
-            WowInterface = new WowInterface();
+            // TODO: refactor this
+            WowInterface = WowInterface.I;
             SetupWowInterface();
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);

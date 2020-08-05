@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -110,7 +111,7 @@ namespace AmeisenBotX.Core.Hook
 
         string GetTalents();
 
-        List<WowAura> GetUnitAuras(WowUnit wowUnit);
+        public void GetUnitAuras<T>(ref T wowUnit) where T : WowUnit;
 
         (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
 
