@@ -90,8 +90,6 @@ namespace AmeisenBotX
 
         private long NotificationLastTimestamp { get; set; }
 
-        private int OldRenderFlags { get; set; }
-
         private bool PendingNotification { get; set; }
 
         /// <summary>
@@ -443,7 +441,7 @@ namespace AmeisenBotX
 
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
-            // Generic lab-els
+            // Generic labels
             // ------------- >
             labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
 
@@ -482,17 +480,19 @@ namespace AmeisenBotX
         {
             // Object count label
             // ------------------ >
-            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.WowObjects.Count.ToString().PadLeft(4);
+            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.ObjectCount.ToString().PadLeft(4);
 
             // Tick time label
             // --------------- >
             double executionMs = AmeisenBot.CurrentExecutionMs;
+
             if (double.IsNaN(executionMs) || double.IsInfinity(executionMs))
             {
                 executionMs = 0;
             }
 
             labelCurrentTickTime.Content = executionMs.ToString().PadLeft(4);
+
             if (executionMs <= Config.StateMachineTickMs)
             {
                 labelCurrentTickTime.Foreground = currentTickTimeGoodBrush;
@@ -506,6 +506,7 @@ namespace AmeisenBotX
             // HookCall label
             // -------------- >
             labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString().PadLeft(2);
+
             if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
                 labelHookCallCount.Foreground = currentTickTimeGoodBrush;

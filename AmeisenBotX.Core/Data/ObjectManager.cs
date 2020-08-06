@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Data
     public class ObjectManager : IObjectManager
     {
         private readonly object queryLock = new object();
-        private readonly ConcurrentBag<WowObject> wowObjects;
+        private readonly WowObject[] wowObjects;
 
         private List<ulong> partymemberGuids;
         private List<WowUnit> partymembers;
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Data
 
             partymemberGuids = new List<ulong>();
             partypetGuids = new List<ulong>();
-            wowObjects = new ConcurrentBag<WowObject>();
+            wowObjects = new WowObject[4096];
             partymembers = new List<WowUnit>();
             partypets = new List<WowUnit>();
 
@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Data
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
+
+        public int ObjectCount { get; set; }
 
         public CameraInfo Camera { get; private set; }
 
@@ -194,7 +196,7 @@ namespace AmeisenBotX.Core.Data
             return WowObjects.OfType<T>().FirstOrDefault(e => e.Name.Equals(name, stringComparison));
         }
 
-        public void ProcessObject((IntPtr, WowObjectType) x)
+        public void ProcessObject(int id, (IntPtr, WowObjectType) x)
         {
             WowObject obj = x.Item2 switch
             {
@@ -210,7 +212,7 @@ namespace AmeisenBotX.Core.Data
 
             if (obj != null)
             {
-                wowObjects.Add(obj);
+                wowObjects[id] = obj;
             }
         }
 
@@ -269,7 +271,7 @@ namespace AmeisenBotX.Core.Data
 
                 List<(IntPtr, WowObjectType)> objectPointers = new List<(IntPtr, WowObjectType)>();
 
-                while (Enum.IsDefined(typeof(WowObjectType), activeObjectType))
+                while (activeObjectType > 0 && activeObjectType < 8)
                 {
                     objectPointers.Add((activeObjectBaseAddress, (WowObjectType)activeObjectType));
 
@@ -277,9 +279,10 @@ namespace AmeisenBotX.Core.Data
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.WowObjectType), out activeObjectType);
                 }
 
-                wowObjects.Clear();
+                ObjectCount = objectPointers.Count;
 
-                Parallel.ForEach(objectPointers, ProcessObject);
+                Array.Clear(wowObjects, 0, wowObjects.Length);
+                Parallel.For(0, objectPointers.Count, (x, y) => ProcessObject(x, objectPointers[x]));
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();

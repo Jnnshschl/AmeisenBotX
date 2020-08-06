@@ -56,7 +56,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Timers;
-using Timer = System.Timers.Timer;
+using Timer = System.Threading.Timer;
 
 namespace AmeisenBotX.Core
 {
@@ -89,12 +89,6 @@ namespace AmeisenBotX.Core
 
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
-
-            StateMachineTimer = new Timer(Config.StateMachineTickMs);
-            StateMachineTimer.Elapsed += StateMachineTimerTick;
-
-            RconClientTimer = new Timer(Config.RconTickMs);
-            RconClientTimer.Elapsed += RconClientTimer_Elapsed;
 
             RconScreenshotEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
 
@@ -166,9 +160,9 @@ namespace AmeisenBotX.Core
 
         private TimegatedEvent EquipmentUpdateEvent { get; set; }
 
-        private Timer RconClientTimer { get; }
+        private Timer RconClientTimer { get; set; }
 
-        private Timer StateMachineTimer { get; }
+        private Timer StateMachineTimer { get; set; }
 
         private bool TalentUpdateRunning { get; set; }
 
@@ -180,7 +174,7 @@ namespace AmeisenBotX.Core
 
         public void ReloadConfig()
         {
-            StateMachineTimer.Interval = Config.StateMachineTickMs;
+            StateMachineTimer = new Timer(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
             LoadProfiles();
         }
 
@@ -198,7 +192,7 @@ namespace AmeisenBotX.Core
             if (Config.RconEnabled)
             {
                 AmeisenLogger.Instance.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
-                RconClientTimer.Start();
+                RconClientTimer = new Timer(RconClientTimerTick, null, 0, (int)Config.RconTickMs);
             }
 
             WowInterface.BotCache.Load();
@@ -209,7 +203,7 @@ namespace AmeisenBotX.Core
                 LoadPosition(Config.BotWindowRect, MainWindowHandle);
             }
 
-            StateMachineTimer.Start();
+            StateMachineTimer = new Timer(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
             stateMachineTimerBusy = 0;
             IsRunning = true;
 
@@ -231,11 +225,11 @@ namespace AmeisenBotX.Core
             }
 
             StateMachine.ShouldExit = true;
-            RconClientTimer.Stop();
+            StateMachineTimer.Dispose();
 
             if (Config.RconEnabled)
             {
-                RconClientTimer.Stop();
+                RconClientTimer.Dispose();
             }
 
             WowInterface.EventHookManager.Stop();
@@ -705,7 +699,7 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.LuaDoString("AcceptTrade();");
         }
 
-        private void RconClientTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void RconClientTimerTick(object state)
         {
             // only start one timer tick at a time
             if (Interlocked.CompareExchange(ref rconTimerBusy, 1, 0) == 1)
@@ -854,7 +848,7 @@ namespace AmeisenBotX.Core
             WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
         }
 
-        private void StateMachineTimerTick(object sender, ElapsedEventArgs e)
+        private void StateMachineTimerTick(object state)
         {
             // only start one timer tick at a time
             if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1
