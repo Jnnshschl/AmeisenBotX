@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowPlayer
     {
@@ -130,6 +129,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public int GlyphsEnabled;
         public int PetSpellPower;
 
-        public const int EndOffset = 4712;
+        public static readonly int EndOffset = 4712;
     }
 }

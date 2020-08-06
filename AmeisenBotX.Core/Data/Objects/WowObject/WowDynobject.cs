@@ -17,8 +17,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int SpellId { get; set; }
 
-        private RawWowDynobject RawWowDynobject { get; set; }
-
         public override string ToString()
         {
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
@@ -28,11 +26,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             UpdateRawWowObject();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject rawWowDynobject))
+            unsafe
             {
-                Caster = rawWowDynobject.Caster;
-                Radius = rawWowDynobject.Radius;
-                SpellId = rawWowDynobject.SpellId;
+                fixed (RawWowDynobject* objPtr = stackalloc RawWowDynobject[1])
+                {
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
+                    {
+                        Caster = objPtr[0].Caster;
+                        Radius = objPtr[0].Radius;
+                        SpellId = objPtr[0].SpellId;
+                    }
+                }
             }
 
             return this;

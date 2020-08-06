@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowCorpse
     {
@@ -18,6 +17,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public int DynamicFlags;
         public int WowCorpsePad;
 
-        public const int EndOffset = 120;
+        public static readonly int EndOffset = 120;
     }
 }

@@ -1357,6 +1357,11 @@ namespace AmeisenBotX.Core.Hook
 
         private void ReadAuraTable<T>(IntPtr buffBase, int auraCount, ref T wowUnit) where T : WowUnit
         {
+            if (auraCount > 40)
+            {
+                return;
+            }
+
             for (int i = 0; i < auraCount; ++i)
             {
                 WowInterface.XMemory.Read(buffBase + (0x18 * i), out wowUnit.Auras[i]);

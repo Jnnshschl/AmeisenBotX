@@ -22,9 +22,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             UpdateRawWowObject();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer rawWowContainer))
+            unsafe
             {
-                SlotCount = rawWowContainer.SlotCount;
+                fixed (RawWowContainer* objPtr = stackalloc RawWowContainer[1])
+                {
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
+                    {
+                        SlotCount = objPtr[0].SlotCount;
+                    }
+                }
             }
 
             return this;

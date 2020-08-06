@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowContainer
     {
@@ -11,6 +10,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public fixed byte WowContainerPad[4];
         public fixed long Slots[36];
 
-        public const int EndOffset = 296;
+        public static readonly int EndOffset = 296;
     }
 }

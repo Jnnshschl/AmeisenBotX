@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -27,7 +28,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Xp { get; set; }
 
-        public double XpPercentage => ReturnPercentage(Xp, NextLevelXp);
+        public double XpPercentage { get; set; }
 
         public List<VisibleItemEnchantment> GetItemEnchantments { get; set; }
 
@@ -60,62 +61,70 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             UpdateRawWowUnit();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer rawWowPlayer))
+            unsafe
             {
-                Xp = rawWowPlayer.Xp;
-                NextLevelXp = rawWowPlayer.NextLevelXp;
-
-                GetQuestlogEntries = new List<QuestlogEntry>()
+                fixed (RawWowPlayer* objPtr = stackalloc RawWowPlayer[1])
                 {
-                    rawWowPlayer.QuestlogEntry1,
-                    rawWowPlayer.QuestlogEntry2,
-                    rawWowPlayer.QuestlogEntry3,
-                    rawWowPlayer.QuestlogEntry4,
-                    rawWowPlayer.QuestlogEntry5,
-                    rawWowPlayer.QuestlogEntry6,
-                    rawWowPlayer.QuestlogEntry7,
-                    rawWowPlayer.QuestlogEntry8,
-                    rawWowPlayer.QuestlogEntry9,
-                    rawWowPlayer.QuestlogEntry10,
-                    rawWowPlayer.QuestlogEntry11,
-                    rawWowPlayer.QuestlogEntry12,
-                    rawWowPlayer.QuestlogEntry13,
-                    rawWowPlayer.QuestlogEntry14,
-                    rawWowPlayer.QuestlogEntry15,
-                    rawWowPlayer.QuestlogEntry16,
-                    rawWowPlayer.QuestlogEntry17,
-                    rawWowPlayer.QuestlogEntry18,
-                    rawWowPlayer.QuestlogEntry19,
-                    rawWowPlayer.QuestlogEntry20,
-                    rawWowPlayer.QuestlogEntry21,
-                    rawWowPlayer.QuestlogEntry22,
-                    rawWowPlayer.QuestlogEntry23,
-                    rawWowPlayer.QuestlogEntry24,
-                    rawWowPlayer.QuestlogEntry25,
-                };
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset + RawWowPlayer.EndOffset, objPtr))
+                    {
+                        Xp = objPtr[0].Xp;
+                        NextLevelXp = objPtr[0].NextLevelXp;
 
-                GetItemEnchantments = new List<VisibleItemEnchantment>()
-                {
-                    rawWowPlayer.VisibleItemEnchantment1,
-                    rawWowPlayer.VisibleItemEnchantment2,
-                    rawWowPlayer.VisibleItemEnchantment3,
-                    rawWowPlayer.VisibleItemEnchantment4,
-                    rawWowPlayer.VisibleItemEnchantment5,
-                    rawWowPlayer.VisibleItemEnchantment6,
-                    rawWowPlayer.VisibleItemEnchantment7,
-                    rawWowPlayer.VisibleItemEnchantment8,
-                    rawWowPlayer.VisibleItemEnchantment9,
-                    rawWowPlayer.VisibleItemEnchantment10,
-                    rawWowPlayer.VisibleItemEnchantment11,
-                    rawWowPlayer.VisibleItemEnchantment12,
-                    rawWowPlayer.VisibleItemEnchantment13,
-                    rawWowPlayer.VisibleItemEnchantment14,
-                    rawWowPlayer.VisibleItemEnchantment15,
-                    rawWowPlayer.VisibleItemEnchantment16,
-                    rawWowPlayer.VisibleItemEnchantment17,
-                    rawWowPlayer.VisibleItemEnchantment18,
-                    rawWowPlayer.VisibleItemEnchantment19,
-                };
+                        XpPercentage = BotMath.Percentage(Xp, NextLevelXp);
+
+                        GetQuestlogEntries = new List<QuestlogEntry>()
+                        {
+                            objPtr[0].QuestlogEntry1,
+                            objPtr[0].QuestlogEntry2,
+                            objPtr[0].QuestlogEntry3,
+                            objPtr[0].QuestlogEntry4,
+                            objPtr[0].QuestlogEntry5,
+                            objPtr[0].QuestlogEntry6,
+                            objPtr[0].QuestlogEntry7,
+                            objPtr[0].QuestlogEntry8,
+                            objPtr[0].QuestlogEntry9,
+                            objPtr[0].QuestlogEntry10,
+                            objPtr[0].QuestlogEntry11,
+                            objPtr[0].QuestlogEntry12,
+                            objPtr[0].QuestlogEntry13,
+                            objPtr[0].QuestlogEntry14,
+                            objPtr[0].QuestlogEntry15,
+                            objPtr[0].QuestlogEntry16,
+                            objPtr[0].QuestlogEntry17,
+                            objPtr[0].QuestlogEntry18,
+                            objPtr[0].QuestlogEntry19,
+                            objPtr[0].QuestlogEntry20,
+                            objPtr[0].QuestlogEntry21,
+                            objPtr[0].QuestlogEntry22,
+                            objPtr[0].QuestlogEntry23,
+                            objPtr[0].QuestlogEntry24,
+                            objPtr[0].QuestlogEntry25,
+                        };
+
+                        GetItemEnchantments = new List<VisibleItemEnchantment>()
+                        {
+                            objPtr[0].VisibleItemEnchantment1,
+                            objPtr[0].VisibleItemEnchantment2,
+                            objPtr[0].VisibleItemEnchantment3,
+                            objPtr[0].VisibleItemEnchantment4,
+                            objPtr[0].VisibleItemEnchantment5,
+                            objPtr[0].VisibleItemEnchantment6,
+                            objPtr[0].VisibleItemEnchantment7,
+                            objPtr[0].VisibleItemEnchantment8,
+                            objPtr[0].VisibleItemEnchantment9,
+                            objPtr[0].VisibleItemEnchantment10,
+                            objPtr[0].VisibleItemEnchantment11,
+                            objPtr[0].VisibleItemEnchantment12,
+                            objPtr[0].VisibleItemEnchantment13,
+                            objPtr[0].VisibleItemEnchantment14,
+                            objPtr[0].VisibleItemEnchantment15,
+                            objPtr[0].VisibleItemEnchantment16,
+                            objPtr[0].VisibleItemEnchantment17,
+                            objPtr[0].VisibleItemEnchantment18,
+                            objPtr[0].VisibleItemEnchantment19,
+                        };
+                    }
+                }
             }
 
             if (WowInterface.I.XMemory.Read(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitSwimFlags), out uint swimFlags))

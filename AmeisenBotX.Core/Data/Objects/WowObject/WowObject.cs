@@ -17,17 +17,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public IntPtr DescriptorAddress { get; set; }
 
-        public int EntryId => RawWowObject.EntryId;
+        public int EntryId { get; set; }
 
-        public ulong Guid => RawWowObject.Guid;
+        public ulong Guid { get; set; }
 
         public Vector3 Position { get; set; }
 
-        public float Scale => RawWowObject.Scale;
+        public float Scale { get; set; }
 
         public WowObjectType Type { get; private set; }
-
-        private RawWowObject RawWowObject { get; set; }
 
         public override string ToString()
         {
@@ -36,9 +34,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public WowObject UpdateRawWowObject()
         {
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, out RawWowObject rawWowObject))
+            unsafe
             {
-                RawWowObject = rawWowObject;
+                fixed (RawWowObject* objPtr = stackalloc RawWowObject[1])
+                {
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, objPtr))
+                    {
+                        EntryId = objPtr[0].EntryId;
+                        Guid = objPtr[0].Guid;
+                        Scale = objPtr[0].Scale;
+                    }
+                }
             }
 
             return this;

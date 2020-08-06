@@ -12,21 +12,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
-        public byte Bytes0 => RawWowGameobject.GameobjectBytes0;
+        public byte Bytes0 { get; set; }
 
-        public int DisplayId => RawWowGameobject.DisplayId;
+        public int DisplayId { get; set; }
 
-        public BitVector32 DynamicFlags { get; set; }
+        public int Faction { get; set; }
 
-        public int Faction => RawWowGameobject.Faction;
+        public BitVector32 Flags { get; set; }
 
-        public BitVector32 Flags => new BitVector32(RawWowGameobject.Flags);
+        public WowGameobjectType GameobjectType { get; set; }
 
-        public WowGameobjectType GameobjectType => (WowGameobjectType)RawWowGameobject.GameobjectBytes1;
-
-        public int Level => RawWowGameobject.Level;
-
-        private RawWowGameobject RawWowGameobject { get; set; }
+        public int Level { get; set; }
 
         public override string ToString()
         {
@@ -37,9 +33,20 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             UpdateRawWowObject();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject rawWowGameobject))
+            unsafe
             {
-                RawWowGameobject = rawWowGameobject;
+                fixed (RawWowGameobject* objPtr = stackalloc RawWowGameobject[1])
+                {
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
+                    {
+                        GameobjectType = (WowGameobjectType)objPtr[0].GameobjectBytes1;
+                        Bytes0 = objPtr[0].GameobjectBytes0;
+                        DisplayId = objPtr[0].DisplayId;
+                        Faction = objPtr[0].Faction;
+                        Flags = new BitVector32(objPtr[0].Flags);
+                        Level = objPtr[0].Level;
+                    }
+                }
             }
 
             return this;

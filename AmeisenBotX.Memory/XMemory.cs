@@ -279,6 +279,17 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ReadStruct<T>(IntPtr address, T* value) where T : unmanaged
+        {
+            if (RpmGateWay(address, value, sizeof(T)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadStruct<T>(IntPtr address, out T value) where T : unmanaged
         {
             int size = sizeof(T);

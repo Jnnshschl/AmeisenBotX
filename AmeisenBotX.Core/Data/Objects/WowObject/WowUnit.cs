@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -33,7 +34,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Energy { get; set; }
 
-        public double EnergyPercentage => ReturnPercentage(Energy, MaxEnergy);
+        public double EnergyPercentage { get; set; }
 
         public int FactionTemplate { get; set; }
 
@@ -41,7 +42,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Health { get; set; }
 
-        public double HealthPercentage => ReturnPercentage(Health, MaxHealth);
+        public double HealthPercentage { get; set; }
 
         public bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlags.Auctioneer];
 
@@ -157,7 +158,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Mana { get; set; }
 
-        public double ManaPercentage => ReturnPercentage(Mana, MaxMana);
+        public double ManaPercentage { get; set; }
 
         public int MaxEnergy { get; set; }
 
@@ -179,13 +180,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int Rage { get; set; }
 
-        public double RagePercentage => ReturnPercentage(Rage, MaxRage);
+        public double RagePercentage { get; set; }
 
         public float Rotation { get; set; }
 
         public int Runeenergy { get; set; }
 
-        public double RuneenergyPercentage => ReturnPercentage(Runeenergy, MaxRuneenergy);
+        public double RuneenergyPercentage { get; set; }
 
         public ulong SummonedByGuid { get; set; }
 
@@ -218,32 +219,44 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             UpdateRawWowObject();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit rawWowUnit))
+            unsafe
             {
-                Class = (WowClass)((rawWowUnit.Bytes0 >> 8) & 0xFF);
-                CombatReach= rawWowUnit.CombatReach;
-                DisplayId= rawWowUnit.DisplayId;
-                Energy = rawWowUnit.Power4;
-                FactionTemplate= rawWowUnit.FactionTemplate;
-                Gender = (WowGender)((rawWowUnit.Bytes0 >> 16) & 0xFF);
-                Health = rawWowUnit.Health;
-                Level = rawWowUnit.Level;
-                Mana = rawWowUnit.Power1;
-                MaxEnergy = rawWowUnit.MaxPower4;
-                MaxHealth = rawWowUnit.MaxHealth;
-                MaxMana = rawWowUnit.MaxPower1;
-                MaxRage = rawWowUnit.MaxPower2 / 10;
-                MaxRuneenergy = rawWowUnit.MaxPower7 / 10;
-                NpcFlags = rawWowUnit.NpcFlags;
-                PowerType = (WowPowertype)((rawWowUnit.Bytes0 >> 24) & 0xFF);
-                Race = (WowRace)((rawWowUnit.Bytes0 >> 0) & 0xFF);
-                Rage = rawWowUnit.Power2 / 10;
-                Runeenergy = rawWowUnit.Power7 / 10;
-                SummonedByGuid = rawWowUnit.SummonedBy;
-                TargetGuid = rawWowUnit.Target;
-                UnitFlags = rawWowUnit.Flags1;
-                UnitFlags2 = rawWowUnit.Flags2;
-                UnitFlagsDynamic = rawWowUnit.DynamicFlags;
+                fixed (RawWowUnit* objPtr = stackalloc RawWowUnit[1])
+                {
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
+                    {
+                        Class = (WowClass)((objPtr[0].Bytes0 >> 8) & 0xFF);
+                        CombatReach = objPtr[0].CombatReach;
+                        DisplayId = objPtr[0].DisplayId;
+                        Energy = objPtr[0].Power4;
+                        FactionTemplate = objPtr[0].FactionTemplate;
+                        Gender = (WowGender)((objPtr[0].Bytes0 >> 16) & 0xFF);
+                        Health = objPtr[0].Health;
+                        Level = objPtr[0].Level;
+                        Mana = objPtr[0].Power1;
+                        MaxEnergy = objPtr[0].MaxPower4;
+                        MaxHealth = objPtr[0].MaxHealth;
+                        MaxMana = objPtr[0].MaxPower1;
+                        MaxRage = objPtr[0].MaxPower2 / 10;
+                        MaxRuneenergy = objPtr[0].MaxPower7 / 10;
+                        NpcFlags = objPtr[0].NpcFlags;
+                        PowerType = (WowPowertype)((objPtr[0].Bytes0 >> 24) & 0xFF);
+                        Race = (WowRace)((objPtr[0].Bytes0 >> 0) & 0xFF);
+                        Rage = objPtr[0].Power2 / 10;
+                        Runeenergy = objPtr[0].Power7 / 10;
+                        SummonedByGuid = objPtr[0].SummonedBy;
+                        TargetGuid = objPtr[0].Target;
+                        UnitFlags = objPtr[0].Flags1;
+                        UnitFlags2 = objPtr[0].Flags2;
+                        UnitFlagsDynamic = objPtr[0].DynamicFlags;
+
+                        EnergyPercentage = BotMath.Percentage(Energy, MaxEnergy);
+                        HealthPercentage = BotMath.Percentage(Health, MaxHealth);
+                        ManaPercentage = BotMath.Percentage(Mana, MaxMana);
+                        RagePercentage = BotMath.Percentage(Rage, MaxRage);
+                        RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
+                    }
+                }
             }
 
             if (WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitPosition), out Vector3 position))
@@ -272,18 +285,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             }
 
             return this;
-        }
-
-        internal double ReturnPercentage(int value, int max)
-        {
-            if (value == 0 || max == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return value / (double)max * 100.0;
-            }
-        }
+        }        
     }
 }

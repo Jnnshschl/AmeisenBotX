@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowUnit
     {
@@ -98,6 +97,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public float HoverHeight;
         public int WowUnitPadding;
 
-        public const int EndOffset = 568;
+        public static readonly int EndOffset = 568;
     }
 }

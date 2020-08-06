@@ -140,6 +140,7 @@ namespace AmeisenBotX
 
                 foreach (WowObject x in AmeisenBot.WowInterface.ObjectManager.WowObjects)
                 {
+                    if (x == null) break;
                     wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.WowInterface.ObjectManager.Player.Position), 2)));
                 }
 

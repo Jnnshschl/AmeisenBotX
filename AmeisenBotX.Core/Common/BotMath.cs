@@ -24,6 +24,20 @@ namespace AmeisenBotX.Core.Common
             return CalculatePositionAround(position, rotation, (float)Math.PI, distanceToMove);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Percentage(int value, int max)
+        {
+            if (value == 0 || max == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return value / (double)max * 100.0;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampAngles(float rotation)
         {
             float rMax = (float)Math.PI * 2.0f;

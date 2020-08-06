@@ -13,21 +13,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
-        public int Count => RawWowItem.StackCount;
+        public int Count { get; set; }
 
-        public ulong Owner => RawWowItem.Owner;
-
-        private RawWowItem RawWowItem { get; set; }
+        public ulong Owner { get; set; }
 
         public List<string> GetEnchantmentStrings()
         {
             List<string> enchantments = new List<string>();
 
-            List<ItemEnchantment> itemEnchants = GetItemEnchantments();
-
-            for (int i = 0; i < itemEnchants.Count; ++i)
+            for (int i = 0; i < ItemEnchantments.Count; ++i)
             {
-                if (WowEnchantmentHelper.TryLookupEnchantment(itemEnchants[i].Id, out string text))
+                if (WowEnchantmentHelper.TryLookupEnchantment(ItemEnchantments[i].Id, out string text))
                 {
                     enchantments.Add(text);
                 }
@@ -36,24 +32,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return enchantments;
         }
 
-        public List<ItemEnchantment> GetItemEnchantments()
-        {
-            return new List<ItemEnchantment>()
-            {
-                RawWowItem.Enchantment1,
-                RawWowItem.Enchantment2,
-                RawWowItem.Enchantment3,
-                RawWowItem.Enchantment4,
-                RawWowItem.Enchantment5,
-                RawWowItem.Enchantment6,
-                RawWowItem.Enchantment7,
-                RawWowItem.Enchantment8,
-                RawWowItem.Enchantment9,
-                RawWowItem.Enchantment10,
-                RawWowItem.Enchantment11,
-                RawWowItem.Enchantment12,
-            };
-        }
+        public List<ItemEnchantment> ItemEnchantments { get; set; }
 
         public override string ToString()
         {
@@ -64,9 +43,32 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             UpdateRawWowObject();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem rawWowItem))
+            unsafe
             {
-                RawWowItem = rawWowItem;
+                fixed (RawWowItem* objPtr = stackalloc RawWowItem[1])
+                {
+                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
+                    {
+                        Count = objPtr[0].StackCount;
+                        Owner = objPtr[0].Owner;
+
+                        ItemEnchantments = new List<ItemEnchantment>()
+                        {
+                            objPtr[0].Enchantment1,
+                            objPtr[0].Enchantment2,
+                            objPtr[0].Enchantment3,
+                            objPtr[0].Enchantment4,
+                            objPtr[0].Enchantment5,
+                            objPtr[0].Enchantment6,
+                            objPtr[0].Enchantment7,
+                            objPtr[0].Enchantment8,
+                            objPtr[0].Enchantment9,
+                            objPtr[0].Enchantment10,
+                            objPtr[0].Enchantment11,
+                            objPtr[0].Enchantment12,
+                        };
+                    }
+                }
             }
 
             return this;

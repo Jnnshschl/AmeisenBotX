@@ -55,9 +55,7 @@ namespace AmeisenBotX.Core.Character.Inventory
                 {
                     WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
-                    List<ItemEnchantment> enchantments = item.GetItemEnchantments();
-
-                    if (item != null && enchantments.Any(e => e.Id == enchantmentId))
+                    if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
                     {
                         return true;
                     }

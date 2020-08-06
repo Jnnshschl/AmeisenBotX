@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowGameobject
     {
@@ -19,6 +18,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
         public byte GameobjectBytes2;
         public byte GameobjectBytes3;
 
-        public const int EndOffset = 48;
+        public static readonly int EndOffset = 48;
     }
 }
