@@ -6,7 +6,6 @@ using System.Collections.Specialized;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
-    [Serializable]
     public class WowGameobject : WowObject
     {
         public WowGameobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
@@ -31,21 +30,14 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public override string ToString()
         {
-            if (Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId))
-            {
-                return $"GameObject: [{EntryId}] ({((GameobjectDisplayId)DisplayId)}:{DisplayId})";
-            }
-            else
-            {
-                return $"GameObject: [{EntryId}] ({DisplayId})";
-            }
+            return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId) ? ((GameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString())}:{DisplayId})";
         }
 
-        public WowGameobject UpdateRawWowGameobject(XMemory xMemory)
+        public WowGameobject UpdateRawWowGameobject()
         {
-            UpdateRawWowObject(xMemory);
+            UpdateRawWowObject();
 
-            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject rawWowGameobject))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject rawWowGameobject))
             {
                 RawWowGameobject = rawWowGameobject;
             }

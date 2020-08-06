@@ -11,26 +11,26 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
-        public int DisplayId => RawWowCorpse.DisplayId;
+        public int DisplayId { get; set; }
 
-        public ulong Owner => RawWowCorpse.Owner;
+        public ulong Owner { get; set; }
 
-        public ulong Party => RawWowCorpse.Party;
-
-        private RawWowCorpse RawWowCorpse { get; set; }
+        public ulong Party { get; set; }
 
         public override string ToString()
         {
             return $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
         }
 
-        public WowCorpse UpdateRawWowCorpse(XMemory xMemory)
+        public WowCorpse UpdateRawWowCorpse()
         {
-            UpdateRawWowObject(xMemory);
+            UpdateRawWowObject();
 
-            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse rawWowCorpse))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse rawWowCorpse))
             {
-                RawWowCorpse = rawWowCorpse;
+                DisplayId = rawWowCorpse.DisplayId;
+                Owner = rawWowCorpse.Owner;
+                Party = rawWowCorpse.Party;
             }
 
             return this;

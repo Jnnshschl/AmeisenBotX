@@ -7,7 +7,6 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
-    [Serializable]
     public class WowItem : WowObject
     {
         public WowItem(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
@@ -61,11 +60,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public WowItem UpdateRawWowItem(XMemory xMemory)
+        public WowItem UpdateRawWowItem()
         {
-            UpdateRawWowObject(xMemory);
+            UpdateRawWowObject();
 
-            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem rawWowItem))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem rawWowItem))
             {
                 RawWowItem = rawWowItem;
             }

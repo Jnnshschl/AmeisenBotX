@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
                                 new MoveToObjectQuestObjective(wowInterface, 8115, 4.0),
-                                new UseObjectQuestObjective(wowInterface, 8115, () => wowInterface.ObjectManager.Player.GetQuestlogEntries().FirstOrDefault(e => e.Id == 12848).Finished == 1)
+                                new UseObjectQuestObjective(wowInterface, 8115, () => wowInterface.ObjectManager.Player.GetQuestlogEntries.FirstOrDefault(e => e.Id == 12848).Finished == 1)
                             })
                         }
                     )
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
                                 new MoveToPositionQuestObjective(wowInterface, new Vector3(2088, -5744, 100), 60.0),
-                                new KillUnitQuestObjective(wowInterface, new Dictionary<int, int> { { 0, 25506 }, { 1, 25509 }, { 2, 25555 }, { 3, 25558 }, { 4, 10311 }, { 5, 24573 }, { 6, 25504 } }, () => wowInterface.ObjectManager.Player.GetQuestlogEntries().FirstOrDefault(e => e.Id == 12678).Finished == 1)
+                                new KillUnitQuestObjective(wowInterface, new Dictionary<int, int> { { 0, 25506 }, { 1, 25509 }, { 2, 25555 }, { 3, 25558 }, { 4, 10311 }, { 5, 24573 }, { 6, 25504 } }, () => wowInterface.ObjectManager.Player.GetQuestlogEntries.FirstOrDefault(e => e.Id == 12678).Finished == 1)
                             })
                         }
                     ),
@@ -236,7 +236,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                                 new UseUnitQuestObjective(wowInterface, 25571, false, () => wowInterface.ObjectManager.PetGuid > 0),
                                 new MoveToPositionQuestObjective(wowInterface, new Vector3(2353, -5704, 153), 48.0),
                                 new MoveToUnitQuestObjective(wowInterface, 16416, 16.0),
-                                new CastPetSpellQuestObjective(wowInterface, 52264, () => wowInterface.ObjectManager.Player.GetQuestlogEntries().FirstOrDefault(e => e.Id == 12680).Finished == 1)
+                                new CastPetSpellQuestObjective(wowInterface, 52264, () => wowInterface.ObjectManager.Player.GetQuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
                             }),
                             new BotActionQuestObjective(() => wowInterface.Globals.IgnoreCombat = false)
                         }
@@ -267,7 +267,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             {
                                 new MoveToPositionQuestObjective(wowInterface, new Vector3(2340, -5687, 154), 40.0),
                                 new WaitUntilQuestObjective(() => wowInterface.ObjectManager.Player.HealthPercentage > 50.0),
-                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, false, () => wowInterface.ObjectManager.Player.GetQuestlogEntries().FirstOrDefault(e => e.Id == 12733).Finished == 1)
+                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, false, () => wowInterface.ObjectManager.Player.GetQuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
                             })
                         }
                     ),

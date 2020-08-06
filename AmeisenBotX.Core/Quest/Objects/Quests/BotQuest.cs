@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public int GossipId { get; set; }
 
-        public bool HasQuest => WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(e => e.Id == Id);
+        public bool HasQuest => WowInterface.ObjectManager.Player.GetQuestlogEntries.Any(e => e.Id == Id);
 
         public int Id { get; set; }
 
@@ -131,7 +131,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else if (ActionEvent.Run())
                     {
                         // TODO: get best reward
-                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.GetQuestlogEntries().FindIndex(e => e.Id == Id) + 1, 1, GossipId);
+                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.GetQuestlogEntries.FindIndex(e => e.Id == Id) + 1, 1, GossipId);
                     }
 
                     ActionToggle = !ActionToggle;

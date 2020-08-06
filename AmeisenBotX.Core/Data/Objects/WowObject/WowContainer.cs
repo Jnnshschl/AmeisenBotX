@@ -11,22 +11,20 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
-        public int SlotCount => RawWowContainer.SlotCount;
-
-        private RawWowContainer RawWowContainer { get; set; }
+        public int SlotCount { get; set; }
 
         public override string ToString()
         {
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public WowContainer UpdateRawWowContainer(XMemory xMemory)
+        public WowContainer UpdateRawWowContainer()
         {
-            UpdateRawWowObject(xMemory);
+            UpdateRawWowObject();
 
-            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer rawWowContainer))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer rawWowContainer))
             {
-                RawWowContainer = rawWowContainer;
+                SlotCount = rawWowContainer.SlotCount;
             }
 
             return this;

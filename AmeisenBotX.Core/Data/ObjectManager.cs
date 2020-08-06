@@ -463,7 +463,7 @@ namespace AmeisenBotX.Core.Data
                     Position = position
                 };
 
-                return container.UpdateRawWowContainer(WowInterface.XMemory);
+                return container.UpdateRawWowContainer();
             }
 
             return null;
@@ -480,7 +480,7 @@ namespace AmeisenBotX.Core.Data
                     Position = position
                 };
 
-                return corpse.UpdateRawWowCorpse(WowInterface.XMemory);
+                return corpse.UpdateRawWowCorpse();
             }
 
             return null;
@@ -497,7 +497,7 @@ namespace AmeisenBotX.Core.Data
                     Position = position
                 };
 
-                return dynobject.UpdateRawWowDynobject(WowInterface.XMemory);
+                return dynobject.UpdateRawWowDynobject();
             }
 
             return null;
@@ -514,7 +514,7 @@ namespace AmeisenBotX.Core.Data
                     Position = position
                 };
 
-                return gameobject.UpdateRawWowGameobject(WowInterface.XMemory);
+                return gameobject.UpdateRawWowGameobject();
             }
 
             return null;
@@ -531,7 +531,7 @@ namespace AmeisenBotX.Core.Data
                     Position = position
                 };
 
-                return item.UpdateRawWowItem(WowInterface.XMemory);
+                return item.UpdateRawWowItem();
             }
 
             return null;
@@ -548,7 +548,7 @@ namespace AmeisenBotX.Core.Data
                     Position = position
                 };
 
-                return obj.UpdateRawWowObject(WowInterface.XMemory);
+                return obj.UpdateRawWowObject();
             }
 
             return null;
@@ -564,53 +564,12 @@ namespace AmeisenBotX.Core.Data
                 };
 
                 // first read the descriptor, then lookup the Name by GUID
-                player.UpdateRawWowPlayer(WowInterface.XMemory);
+                player.UpdateRawWowPlayer();
 
                 player.Name = ReadPlayerName(player.Guid);
 
                 Array.Clear(player.Auras, 0, player.Auras.Length);
                 WowInterface.HookManager.GetUnitAuras(ref player);
-
-                if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitPosition), out Vector3 position))
-                {
-                    player.Position = position;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitRotation), out float rotation))
-                {
-                    player.Rotation = rotation;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitIsAutoAttacking), out int isAutoAttacking))
-                {
-                    player.IsAutoAttacking = isAutoAttacking == 1;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.CurrentlyCastingSpellId), out int castingId))
-                {
-                    player.CurrentlyCastingSpellId = castingId;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.CurrentlyChannelingSpellId), out int channelingId))
-                {
-                    player.CurrentlyChannelingSpellId = channelingId;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitSwimFlags), out uint swimFlags))
-                {
-                    player.IsSwimming = (swimFlags & 0x200000) != 0;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitFlyFlagsPointer), out IntPtr flyFlagsPointer)
-                && WowInterface.XMemory.Read(IntPtr.Add(flyFlagsPointer, (int)WowInterface.OffsetList.WowUnitFlyFlags), out uint flyFlags))
-                {
-                    player.IsFlying = (flyFlags & 0x2000000) != 0;
-                }
-
-                if (WowInterface.XMemory.Read(WowInterface.OffsetList.BreathTimer, out int breathTimer))
-                {
-                    player.IsUnderwater = breathTimer > 0;
-                }
 
                 if (player.Guid == PlayerGuid)
                 {
@@ -643,37 +602,12 @@ namespace AmeisenBotX.Core.Data
                 };
 
                 // First read the descriptor, then lookup the Name by GUID
-                unit.UpdateRawWowUnit(WowInterface.XMemory);
+                unit.UpdateRawWowUnit();
 
                 unit.Name = ReadUnitName(activeObject, unit.Guid);
 
                 Array.Clear(unit.Auras, 0, unit.Auras.Length);
                 WowInterface.HookManager.GetUnitAuras(ref unit);
-
-                if (WowInterface.XMemory.ReadStruct(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitPosition), out Vector3 position))
-                {
-                    unit.Position = position;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitRotation), out float rotation))
-                {
-                    unit.Rotation = rotation;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.WowUnitIsAutoAttacking), out int isAutoAttacking))
-                {
-                    unit.IsAutoAttacking = isAutoAttacking == 1;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.CurrentlyCastingSpellId), out int castingId))
-                {
-                    unit.CurrentlyCastingSpellId = castingId;
-                }
-
-                if (WowInterface.XMemory.Read(IntPtr.Add(activeObject, (int)WowInterface.OffsetList.CurrentlyChannelingSpellId), out int channelingId))
-                {
-                    unit.CurrentlyChannelingSpellId = channelingId;
-                }
 
                 if (unit.Guid == TargetGuid) { Target = unit; }
                 if (unit.Guid == PetGuid) { Pet = unit; }

@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Quest
             if (Profile.Quests.Count > 0)
             {
                 List<BotQuest> quests = Profile.Quests.Peek();
-                List<BotQuest> selectedQuests = quests.Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.GetQuestlogEntries().Any(x => x.Id == e.Id)).ToList();
+                List<BotQuest> selectedQuests = quests.Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.GetQuestlogEntries.Any(x => x.Id == e.Id)).ToList();
 
                 if (selectedQuests != null && selectedQuests.Count > 0)
                 {

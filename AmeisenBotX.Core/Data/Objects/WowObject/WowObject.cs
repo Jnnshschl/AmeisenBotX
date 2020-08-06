@@ -5,11 +5,8 @@ using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
-    [Serializable]
     public class WowObject
     {
-        // W.I.P
-        // This is going to reduce the ReadProcessMemory calls a lot
         public WowObject(IntPtr baseAddress, WowObjectType type)
         {
             BaseAddress = baseAddress;
@@ -37,9 +34,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"Object: {Guid}";
         }
 
-        public WowObject UpdateRawWowObject(XMemory xMemory)
+        public WowObject UpdateRawWowObject()
         {
-            if (xMemory.ReadStruct(DescriptorAddress, out RawWowObject rawWowObject))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, out RawWowObject rawWowObject))
             {
                 RawWowObject = rawWowObject;
             }

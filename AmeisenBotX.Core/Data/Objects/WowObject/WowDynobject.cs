@@ -11,11 +11,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
         }
 
-        public ulong Caster => RawWowDynobject.Caster;
+        public ulong Caster { get; set; }
 
-        public float Radius => RawWowDynobject.Radius;
+        public float Radius { get; set; }
 
-        public int SpellId => RawWowDynobject.SpellId;
+        public int SpellId { get; set; }
 
         private RawWowDynobject RawWowDynobject { get; set; }
 
@@ -24,13 +24,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public WowDynobject UpdateRawWowDynobject(XMemory xMemory)
+        public WowDynobject UpdateRawWowDynobject()
         {
-            UpdateRawWowObject(xMemory);
+            UpdateRawWowObject();
 
-            if (xMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject rawWowDynobject))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject rawWowDynobject))
             {
-                RawWowDynobject = rawWowDynobject;
+                Caster = rawWowDynobject.Caster;
+                Radius = rawWowDynobject.Radius;
+                SpellId = rawWowDynobject.SpellId;
             }
 
             return this;
