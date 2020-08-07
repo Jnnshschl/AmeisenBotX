@@ -27,13 +27,14 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        public readonly string DataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
+        private readonly string dataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
 
         private readonly Brush currentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
         private readonly Brush currentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
         private readonly Brush darkBackgroundBrush;
         private readonly Brush darkForegroundBrush;
         private readonly Brush textAccentBrush;
+
         private Dictionary<BotState, Window> StateConfigWindows;
 
         public MainWindow()
@@ -125,7 +126,7 @@ namespace AmeisenBotX
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            ConfigEditorWindow configWindow = new ConfigEditorWindow(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            ConfigEditorWindow configWindow = new ConfigEditorWindow(dataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
             configWindow.ShowDialog();
 
             if (configWindow.SaveConfig)
@@ -229,7 +230,7 @@ namespace AmeisenBotX
 
         private AmeisenBotConfig LoadConfig()
         {
-            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(DataPath);
+            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(dataPath);
             loadConfigWindow.ShowDialog();
 
             if (loadConfigWindow.ConfigToLoad.Length > 0)
@@ -569,7 +570,7 @@ namespace AmeisenBotX
 
             // Init the bot
             // ------------ >
-            AmeisenBot = new AmeisenBot(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
+            AmeisenBot = new AmeisenBot(dataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;

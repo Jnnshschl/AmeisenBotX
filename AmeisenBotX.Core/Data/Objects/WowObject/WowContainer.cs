@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
-using AmeisenBotX.Memory;
 using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
@@ -7,7 +6,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     [Serializable]
     public class WowContainer : WowObject
     {
-        public WowContainer(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        public WowContainer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
 
@@ -18,22 +17,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public WowContainer UpdateRawWowContainer()
+        public unsafe override void Update()
         {
-            UpdateRawWowObject();
+            base.Update();
 
-            unsafe
+            fixed (RawWowContainer* objPtr = stackalloc RawWowContainer[1])
             {
-                fixed (RawWowContainer* objPtr = stackalloc RawWowContainer[1])
+                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
                 {
-                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                    {
-                        SlotCount = objPtr[0].SlotCount;
-                    }
+                    SlotCount = objPtr[0].SlotCount;
                 }
             }
-
-            return this;
         }
     }
 }

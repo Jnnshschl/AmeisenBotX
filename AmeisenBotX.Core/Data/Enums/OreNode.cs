@@ -9,19 +9,16 @@
         FelIron = 6799,
         Gold = 311,
         Incendicite = 384,
-        Indurium = 384,
         Iron = 312,
         Khorium = 6800,
         LesserBloodstone = 48,
         Mithril = 313,
         Nethercite = 6650,
-        ObsidianChunk = 6650,
         RichThorium = 3952,
         Saronite = 7804,
         Silver = 314,
         SmallThorium = 3951,
         Tin = 315,
         Titanium = 6798,
-        Truesilver = 314
     }
 }

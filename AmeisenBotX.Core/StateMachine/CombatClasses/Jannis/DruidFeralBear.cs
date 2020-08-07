@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count();
+                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count;
 
                 if ((WowInterface.ObjectManager.Player.HealthPercentage > 80
                         && CastSpellIfPossible(enrageSpell, 0, true))

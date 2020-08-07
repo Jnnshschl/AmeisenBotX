@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
-using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 
@@ -9,11 +8,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowItem : WowObject
     {
-        public WowItem(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        public WowItem(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
 
         public int Count { get; set; }
+
+        public List<ItemEnchantment> ItemEnchantments { get; private set; }
 
         public ulong Owner { get; set; }
 
@@ -32,27 +33,23 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return enchantments;
         }
 
-        public List<ItemEnchantment> ItemEnchantments { get; set; }
-
         public override string ToString()
         {
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public WowItem UpdateRawWowItem()
+        public unsafe override void Update()
         {
-            UpdateRawWowObject();
+            base.Update();
 
-            unsafe
+            fixed (RawWowItem* objPtr = stackalloc RawWowItem[1])
             {
-                fixed (RawWowItem* objPtr = stackalloc RawWowItem[1])
+                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
                 {
-                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                    {
-                        Count = objPtr[0].StackCount;
-                        Owner = objPtr[0].Owner;
+                    Count = objPtr[0].StackCount;
+                    Owner = objPtr[0].Owner;
 
-                        ItemEnchantments = new List<ItemEnchantment>()
+                    ItemEnchantments = new List<ItemEnchantment>()
                         {
                             objPtr[0].Enchantment1,
                             objPtr[0].Enchantment2,
@@ -67,11 +64,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
                             objPtr[0].Enchantment11,
                             objPtr[0].Enchantment12,
                         };
-                    }
                 }
             }
-
-            return this;
         }
     }
 }

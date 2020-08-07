@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
         {
             List<Vector3> nodes = BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, 0f, MovementType.CastMovementRay);
-            return nodes != null ? nodes.Count() > 0 : default;
+            return nodes != null ? nodes.Any() : default;
         }
 
         public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Logging;
+using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,7 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
                 {
                     AmeisenLogger.Instance.Log("StartWow", "Starting WoW Process");
-                    WowInterface.WowProcess = WowInterface.XMemory.StartProcessNoActivate(Config.PathToWowExe);
+                    WowInterface.WowProcess = XMemory.StartProcessNoActivate(Config.PathToWowExe);
 
                     AmeisenLogger.Instance.Log("StartWow", "Waiting for input idle");
                     WowInterface.WowProcess.WaitForInputIdle();
@@ -81,12 +82,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                     bool editedFile = false;
                     List<string> content = File.ReadAllLines(configWtfPath).ToList();
 
-                    if (!content.Any(e => e.Contains($"SET REALMLIST {Config.Realmlist}")))
+                    if (!content.Any(e => e.Contains($"SET REALMLIST {Config.Realmlist}", StringComparison.OrdinalIgnoreCase)))
                     {
                         bool found = false;
                         for (int i = 0; i < content.Count; ++i)
                         {
-                            if (content[i].ToUpper().Contains("SET REALMLIST"))
+                            if (content[i].Contains("SET REALMLIST", StringComparison.OrdinalIgnoreCase))
                             {
                                 editedFile = true;
                                 content[i] = $"SET REALMLIST {Config.Realmlist}";
@@ -124,14 +125,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (File.Exists(configWtfPath))
                 {
                     bool editedFile = false;
-                    string content = File.ReadAllText(configWtfPath).ToUpper();
+                    string content = File.ReadAllText(configWtfPath);
 
-                    if (!content.Contains("SET READEULA \"0\""))
+                    if (!content.Contains("SET READEULA \"0\"", StringComparison.OrdinalIgnoreCase))
                     {
                         editedFile = true;
-                        if (content.Contains("SET READEULA"))
+                        if (content.Contains("SET READEULA", StringComparison.OrdinalIgnoreCase))
                         {
-                            content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"");
+                            content = content.Replace("SET READEULA \"0\"", "SET READEULA \"1\"", StringComparison.OrdinalIgnoreCase);
                         }
                         else
                         {
@@ -139,12 +140,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
                     }
 
-                    if (!content.Contains("SET READTOS \"0\""))
+                    if (!content.Contains("SET READTOS \"0\"", StringComparison.OrdinalIgnoreCase))
                     {
                         editedFile = true;
-                        if (content.Contains("SET READTOS"))
+                        if (content.Contains("SET READTOS", StringComparison.OrdinalIgnoreCase))
                         {
-                            content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"");
+                            content = content.Replace("SET READTOS \"0\"", "SET READTOS \"1\"", StringComparison.OrdinalIgnoreCase);
                         }
                         else
                         {
@@ -152,12 +153,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
                     }
 
-                    if (!content.Contains("SET MOVIE \"0\""))
+                    if (!content.Contains("SET MOVIE \"0\"", StringComparison.OrdinalIgnoreCase))
                     {
                         editedFile = true;
-                        if (content.Contains("SET MOVIE"))
+                        if (content.Contains("SET MOVIE", StringComparison.OrdinalIgnoreCase))
                         {
-                            content = content.Replace("SET MOVIE \"0\"", "SET MOVIE \"1\"");
+                            content = content.Replace("SET MOVIE \"0\"", "SET MOVIE \"1\"", StringComparison.OrdinalIgnoreCase);
                         }
                         else
                         {

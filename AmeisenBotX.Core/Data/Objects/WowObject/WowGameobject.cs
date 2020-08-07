@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Specialized;
 
@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowGameobject : WowObject
     {
-        public WowGameobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        public WowGameobject(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
 
@@ -29,27 +29,24 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId) ? ((GameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString())}:{DisplayId})";
         }
 
-        public WowGameobject UpdateRawWowGameobject()
+        public unsafe override void Update()
         {
-            UpdateRawWowObject();
+            base.Update();
 
-            unsafe
+            fixed (RawWowGameobject* objPtr = stackalloc RawWowGameobject[1])
             {
-                fixed (RawWowGameobject* objPtr = stackalloc RawWowGameobject[1])
+                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr)
+                    && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowGameobjectPosition), out Vector3 position))
                 {
-                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                    {
-                        GameobjectType = (WowGameobjectType)objPtr[0].GameobjectBytes1;
-                        Bytes0 = objPtr[0].GameobjectBytes0;
-                        DisplayId = objPtr[0].DisplayId;
-                        Faction = objPtr[0].Faction;
-                        Flags = new BitVector32(objPtr[0].Flags);
-                        Level = objPtr[0].Level;
-                    }
+                    GameobjectType = (WowGameobjectType)objPtr[0].GameobjectBytes1;
+                    Bytes0 = objPtr[0].GameobjectBytes0;
+                    DisplayId = objPtr[0].DisplayId;
+                    Faction = objPtr[0].Faction;
+                    Flags = new BitVector32(objPtr[0].Flags);
+                    Level = objPtr[0].Level;
+                    Position = position;
                 }
             }
-
-            return this;
         }
     }
 }

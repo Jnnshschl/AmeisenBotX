@@ -821,7 +821,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     .OfType<WowPlayer>()
                     .Where(e => e.IsDead && e.Health == 0);
 
-                if (groupPlayers.Count() > 0)
+                if (groupPlayers.Any())
                 {
                     WowPlayer player = groupPlayers.FirstOrDefault(e => !RessurrectionTargets.ContainsKey(e.Name) || RessurrectionTargets[e.Name] < DateTime.Now);
 

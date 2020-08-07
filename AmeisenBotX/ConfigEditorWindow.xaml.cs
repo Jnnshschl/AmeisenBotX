@@ -15,8 +15,8 @@ namespace AmeisenBotX
 {
     public partial class ConfigEditorWindow : Window
     {
-        public SolidColorBrush errorBorderBrush;
-        public SolidColorBrush normalBorderBrush;
+        private readonly SolidColorBrush errorBorderBrush;
+        private readonly SolidColorBrush normalBorderBrush;
 
         public ConfigEditorWindow(string dataDir, AmeisenBot ameisenBot, AmeisenBotConfig initialConfig = null, string initialConfigName = "")
         {

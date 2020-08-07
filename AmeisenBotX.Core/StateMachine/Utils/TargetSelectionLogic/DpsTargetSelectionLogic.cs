@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
-                if (nearPriorityEnemies != null && nearPriorityEnemies.Count() > 0)
+                if (nearPriorityEnemies != null && nearPriorityEnemies.Any())
                 {
                     possibleTargets = nearPriorityEnemies.ToList();
                     return true;
@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
-            if (enemies.Count() > 0)
+            if (enemies.Any())
             {
                 possibleTargets = new List<WowUnit>() { enemies.FirstOrDefault() };
 
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             // get enemies tagged by me or no one, or players
             enemies = nearEnemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
 
-            if (enemies.Count() > 0)
+            if (enemies.Any())
             {
                 possibleTargets = enemies.ToList();
                 return true;

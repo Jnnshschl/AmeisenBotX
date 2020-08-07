@@ -1,16 +1,16 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Memory;
 using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowObject
     {
-        public WowObject(IntPtr baseAddress, WowObjectType type)
+        public WowObject(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress)
         {
             BaseAddress = baseAddress;
             Type = type;
+            DescriptorAddress = descriptorAddress;
         }
 
         public IntPtr BaseAddress { get; private set; }
@@ -32,22 +32,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"Object: {Guid}";
         }
 
-        public WowObject UpdateRawWowObject()
+        public unsafe virtual void Update()
         {
-            unsafe
+            fixed (RawWowObject* objPtr = stackalloc RawWowObject[1])
             {
-                fixed (RawWowObject* objPtr = stackalloc RawWowObject[1])
+                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, objPtr))
                 {
-                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, objPtr))
-                    {
-                        EntryId = objPtr[0].EntryId;
-                        Guid = objPtr[0].Guid;
-                        Scale = objPtr[0].Scale;
-                    }
+                    EntryId = objPtr[0].EntryId;
+                    Guid = objPtr[0].Guid;
+                    Scale = objPtr[0].Scale;
                 }
             }
-
-            return this;
         }
     }
 }

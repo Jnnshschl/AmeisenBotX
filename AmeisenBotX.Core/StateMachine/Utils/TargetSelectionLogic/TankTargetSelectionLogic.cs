@@ -53,20 +53,20 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase))); // Novos fix
 
-            if (enemies.Count() > 0)
+            if (enemies.Any()
             {
                 // filter out enemies already attacking me (keep players for pvp)
                 IEnumerable<WowUnit> enemiesNotTargetingMe = enemies
                     .Where(e => e.GetType() == typeof(WowPlayer) || e.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
 
-                if (enemiesNotTargetingMe.Count() > 0)
+                if (enemiesNotTargetingMe.Any()
                 {
                     IEnumerable<WowUnit> targetUnits = enemiesNotTargetingMe
                         .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
                         .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
                         .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
-                    if (targetUnits != null && targetUnits.Count() > 0)
+                    if (targetUnits != null && targetUnits.Any())
                     {
                         // target closest enemy
                         possibleTargets = targetUnits.ToList();
@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                         .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
                         .ThenByDescending(e => e.Health);
 
-                    if (targetUnits != null && targetUnits.Count() > 0)
+                    if (targetUnits != null && targetUnits.Any())
                     {
                         // target closest enemy
                         possibleTargets = targetUnits.ToList();
@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     .GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 100.0)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
-                if (enemies.Count() > 0)
+                if (enemies.Any())
                 {
                     possibleTargets = enemies.ToList();
                     return true;

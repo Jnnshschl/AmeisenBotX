@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr WowObjectDescriptor { get; } = new IntPtr(0x8);
 
-        public IntPtr WowObjectPosition { get; } = new IntPtr(0xE8);
+        public IntPtr WowDynobjectPosition { get; } = new IntPtr(0xE8);
 
         public IntPtr WowObjectType { get; } = new IntPtr(0x14);
 

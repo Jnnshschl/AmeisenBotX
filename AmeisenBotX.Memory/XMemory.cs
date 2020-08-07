@@ -15,10 +15,9 @@ namespace AmeisenBotX.Memory
 {
     public unsafe class XMemory
     {
+        private readonly object allocLock = new object();
         private ulong rpmCalls;
         private ulong wpmCalls;
-
-        private readonly object allocLock = new object();
 
         public XMemory()
         {
@@ -162,7 +161,7 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IntPtr GetForegroundWindow()
+        public static IntPtr GetForegroundWindow()
         {
             return Win32Imports.GetForegroundWindow();
         }
@@ -216,6 +215,17 @@ namespace AmeisenBotX.Memory
                 Write(address, data);
                 MemoryProtect(address, size, oldMemoryProtection, out _);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Read<T>(IntPtr address, T* value) where T : unmanaged
+        {
+            if (RpmGateWay(address, value, sizeof(T)))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -327,7 +337,7 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetForegroundWindow(IntPtr windowHandle)
+        public static void SetForegroundWindow(IntPtr windowHandle)
         {
             Win32Imports.SetForegroundWindow(windowHandle);
         }
@@ -343,7 +353,7 @@ namespace AmeisenBotX.Memory
             ResizeParentWindow(offsetX, offsetY, width, height);
         }
 
-        public Process StartProcessNoActivate(string processCmd)
+        public static Process StartProcessNoActivate(string processCmd)
         {
             StartupInfo startupInfo = new StartupInfo
             {

@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -210,7 +211,7 @@ namespace AmeisenBotX.Core.Statemachine
                     // auto disable rendering when not in focus
                     if (Config.AutoDisableRender && RenderSwitchEvent.Run())
                     {
-                        IntPtr foregroundWindow = WowInterface.XMemory.GetForegroundWindow();
+                        IntPtr foregroundWindow = XMemory.GetForegroundWindow();
                         WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
                     }
                 }

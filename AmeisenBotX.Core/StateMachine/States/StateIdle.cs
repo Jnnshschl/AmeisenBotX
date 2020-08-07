@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             // do we need to loot stuff
             if (LootCheckEvent.Run()
                 && WowInterface.CharacterManager.Inventory.FreeBagSlots > 0
-                && StateMachine.GetNearLootableUnits().Count() > 0)
+                && StateMachine.GetNearLootableUnits().Any())
             {
                 StateMachine.SetState(BotState.Looting);
                 return;
@@ -171,7 +171,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
 
-            if (wowPlayers.Count() > 0)
+            if (wowPlayers.Any())
             {
                 WowUnit[] playersToTry =
                 {

@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
     [Serializable]
     public class WowDynobject : WowObject
     {
-        public WowDynobject(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        public WowDynobject(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
 
@@ -22,24 +22,21 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public WowDynobject UpdateRawWowDynobject()
+        public unsafe override void Update()
         {
-            UpdateRawWowObject();
+            base.Update();
 
-            unsafe
+            fixed (RawWowDynobject* objPtr = stackalloc RawWowDynobject[1])
             {
-                fixed (RawWowDynobject* objPtr = stackalloc RawWowDynobject[1])
+                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr)
+                    && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowDynobjectPosition), out Vector3 position))
                 {
-                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                    {
-                        Caster = objPtr[0].Caster;
-                        Radius = objPtr[0].Radius;
-                        SpellId = objPtr[0].SpellId;
-                    }
+                    Caster = objPtr[0].Caster;
+                    Radius = objPtr[0].Radius;
+                    SpellId = objPtr[0].SpellId;
+                    Position = position;
                 }
             }
-
-            return this;
         }
     }
 }

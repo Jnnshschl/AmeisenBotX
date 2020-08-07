@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr WowObjectDescriptor { get; }
 
-        IntPtr WowObjectPosition { get; }
+        IntPtr WowDynobjectPosition { get; }
 
         IntPtr WowObjectType { get; }
 

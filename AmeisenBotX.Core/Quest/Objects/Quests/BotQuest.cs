@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool ActionToggle { get; set; }
 
-        public bool Finished => (Objectives != null && Objectives.Count(e => !e.Finished) == 0) || Progress == 100.0;
+        public bool Finished => (Objectives != null && !Objectives.Any(e => !e.Finished)) || Progress == 100.0;
 
         public BotQuestGetPosition GetEndObject { get; set; }
 
@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public int GossipId { get; set; }
 
-        public bool HasQuest => WowInterface.ObjectManager.Player.GetQuestlogEntries.Any(e => e.Id == Id);
+        public bool HasQuest => WowInterface.ObjectManager.Player.QuestlogEntries.Any(e => e.Id == Id);
 
         public int Id { get; set; }
 
@@ -131,7 +131,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else if (ActionEvent.Run())
                     {
                         // TODO: get best reward
-                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.GetQuestlogEntries.FindIndex(e => e.Id == Id) + 1, 1, GossipId);
+                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.QuestlogEntries.FindIndex(e => e.Id == Id) + 1, 1, GossipId);
                     }
 
                     ActionToggle = !ActionToggle;

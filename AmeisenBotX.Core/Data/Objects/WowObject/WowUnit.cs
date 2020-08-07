@@ -3,24 +3,22 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Memory;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Text;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
     public class WowUnit : WowObject
     {
-        public WowUnit(IntPtr baseAddress, WowObjectType type) : base(baseAddress, type)
+        public int AuraCount = 0;
+
+        public WowAura[] Auras = new WowAura[40];
+
+        public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
-            Auras = new WowAura[40];
         }
-
-        public WowAura[] Auras { get; set; }
-
-        public int AuraCount { get; set; }
 
         public WowClass Class { get; set; }
 
@@ -215,49 +213,54 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             return $"Unit: [{Guid}] {Name} lvl. {Level}";
         }
 
-        public WowUnit UpdateRawWowUnit()
+        public unsafe override void Update()
         {
-            UpdateRawWowObject();
+            base.Update();
 
-            unsafe
+            fixed (RawWowUnit* objPtr = stackalloc RawWowUnit[1])
             {
-                fixed (RawWowUnit* objPtr = stackalloc RawWowUnit[1])
+                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
                 {
-                    if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                    {
-                        Class = (WowClass)((objPtr[0].Bytes0 >> 8) & 0xFF);
-                        CombatReach = objPtr[0].CombatReach;
-                        DisplayId = objPtr[0].DisplayId;
-                        Energy = objPtr[0].Power4;
-                        FactionTemplate = objPtr[0].FactionTemplate;
-                        Gender = (WowGender)((objPtr[0].Bytes0 >> 16) & 0xFF);
-                        Health = objPtr[0].Health;
-                        Level = objPtr[0].Level;
-                        Mana = objPtr[0].Power1;
-                        MaxEnergy = objPtr[0].MaxPower4;
-                        MaxHealth = objPtr[0].MaxHealth;
-                        MaxMana = objPtr[0].MaxPower1;
-                        MaxRage = objPtr[0].MaxPower2 / 10;
-                        MaxRuneenergy = objPtr[0].MaxPower7 / 10;
-                        NpcFlags = objPtr[0].NpcFlags;
-                        PowerType = (WowPowertype)((objPtr[0].Bytes0 >> 24) & 0xFF);
-                        Race = (WowRace)((objPtr[0].Bytes0 >> 0) & 0xFF);
-                        Rage = objPtr[0].Power2 / 10;
-                        Runeenergy = objPtr[0].Power7 / 10;
-                        SummonedByGuid = objPtr[0].SummonedBy;
-                        TargetGuid = objPtr[0].Target;
-                        UnitFlags = objPtr[0].Flags1;
-                        UnitFlags2 = objPtr[0].Flags2;
-                        UnitFlagsDynamic = objPtr[0].DynamicFlags;
+                    Class = (WowClass)((objPtr[0].Bytes0 >> 8) & 0xFF);
+                    CombatReach = objPtr[0].CombatReach;
+                    DisplayId = objPtr[0].DisplayId;
+                    Energy = objPtr[0].Power4;
+                    FactionTemplate = objPtr[0].FactionTemplate;
+                    Gender = (WowGender)((objPtr[0].Bytes0 >> 16) & 0xFF);
+                    Health = objPtr[0].Health;
+                    Level = objPtr[0].Level;
+                    Mana = objPtr[0].Power1;
+                    MaxEnergy = objPtr[0].MaxPower4;
+                    MaxHealth = objPtr[0].MaxHealth;
+                    MaxMana = objPtr[0].MaxPower1;
+                    MaxRage = objPtr[0].MaxPower2 / 10;
+                    MaxRuneenergy = objPtr[0].MaxPower7 / 10;
+                    NpcFlags = objPtr[0].NpcFlags;
+                    PowerType = (WowPowertype)((objPtr[0].Bytes0 >> 24) & 0xFF);
+                    Race = (WowRace)((objPtr[0].Bytes0 >> 0) & 0xFF);
+                    Rage = objPtr[0].Power2 / 10;
+                    Runeenergy = objPtr[0].Power7 / 10;
+                    SummonedByGuid = objPtr[0].SummonedBy;
+                    TargetGuid = objPtr[0].Target;
+                    UnitFlags = objPtr[0].Flags1;
+                    UnitFlags2 = objPtr[0].Flags2;
+                    UnitFlagsDynamic = objPtr[0].DynamicFlags;
 
-                        EnergyPercentage = BotMath.Percentage(Energy, MaxEnergy);
-                        HealthPercentage = BotMath.Percentage(Health, MaxHealth);
-                        ManaPercentage = BotMath.Percentage(Mana, MaxMana);
-                        RagePercentage = BotMath.Percentage(Rage, MaxRage);
-                        RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
-                    }
+                    EnergyPercentage = BotMath.Percentage(Energy, MaxEnergy);
+                    HealthPercentage = BotMath.Percentage(Health, MaxHealth);
+                    ManaPercentage = BotMath.Percentage(Mana, MaxMana);
+                    RagePercentage = BotMath.Percentage(Rage, MaxRage);
+                    RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
                 }
             }
+
+            if (Type == WowObjectType.Unit)
+            {
+                Name = ReadUnitName();
+            }
+
+            Array.Clear(Auras, 0, Auras.Length);
+            WowInterface.I.HookManager.GetUnitAuras(BaseAddress, ref Auras, out AuraCount);
 
             if (WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitPosition), out Vector3 position))
             {
@@ -283,8 +286,28 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
             {
                 CurrentlyChannelingSpellId = channelingId;
             }
+        }
 
-            return this;
-        }        
+        private string ReadUnitName()
+        {
+            if (WowInterface.I.BotCache.TryGetUnitName(Guid, out string cachedName))
+            {
+                return cachedName;
+            }
+
+            if (WowInterface.I.XMemory.Read(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitName1), out IntPtr objName)
+                && WowInterface.I.XMemory.Read(IntPtr.Add(objName, (int)WowInterface.I.OffsetList.WowUnitName2), out objName)
+                && WowInterface.I.XMemory.ReadString(objName, Encoding.UTF8, out string name))
+            {
+                if (name.Length > 0)
+                {
+                    WowInterface.I.BotCache.CacheName(Guid, name);
+                }
+
+                return name;
+            }
+
+            return "unknown";
+        }
     }
 }

@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Character.Talents
             List<(int, int, int)> talentsToSpend = new List<(int, int, int)>();
 
             // order the trees to skill the main tree first
-            foreach (KeyValuePair<int, Dictionary<int, Talent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count()))
+            foreach (KeyValuePair<int, Dictionary<int, Talent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count))
             {
                 if (CheckTalentTree(ref talentPoints, kv.Key, talentTrees[kv.Key], kv.Value, out List<(int, int, int)> newTalents))
                 {

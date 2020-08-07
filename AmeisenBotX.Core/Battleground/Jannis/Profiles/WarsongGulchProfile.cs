@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private bool AmINearOwnFlagCarrier(CtfBlackboard blackboard)
         {
-            return WowInterface.ObjectManager.GetNearEnemies<WowUnit>(blackboard.MyTeamFlagCarrier.Position, 48.0).Count(e => !e.IsDead) > 0;
+            return WowInterface.ObjectManager.GetNearEnemies<WowUnit>(blackboard.MyTeamFlagCarrier.Position, 48.0).Any(e => !e.IsDead);
         }
 
         private bool AmIOneOfTheClosestToOwnFlagCarrier(CtfBlackboard blackboard, int memberCount)

@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             PathRefreshEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
-            PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(4));
+            PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(10));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
             BehaviorTree = new AmeisenBotBehaviorTree<MovementBlackboard>
