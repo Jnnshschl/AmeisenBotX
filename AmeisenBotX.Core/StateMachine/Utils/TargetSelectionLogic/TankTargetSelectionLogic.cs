@@ -33,12 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            bool keepCurrentTarget = WowInterface.ObjectManager.Target != null
-                && WowInterface.ObjectManager.TargetGuid != 0
-                && !WowInterface.ObjectManager.Target.IsDead && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
-                && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                && (WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly
-                    || WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer));
+            bool keepCurrentTarget = WowInterface.ObjectManager.Target?.GetType() == typeof(WowPlayer);
 
             if (keepCurrentTarget)
             {
@@ -51,7 +46,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => e.IsInCombat
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
-                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase))); // Novos fix
+                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
+                .OrderByDescending(e => e.MaxHealth);
 
             if (enemies.Any())
             {

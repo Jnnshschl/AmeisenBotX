@@ -685,7 +685,7 @@ namespace AmeisenBotX.Core
 
         private void OnTalentPointsChange(long timestamp, List<string> args)
         {
-            if (WowInterface.CombatClass.Talents != null && !TalentUpdateRunning)
+            if (WowInterface.CombatClass != null && WowInterface.CombatClass.Talents != null && !TalentUpdateRunning)
             {
                 TalentUpdateRunning = true;
                 WowInterface.CharacterManager.TalentManager.Update();

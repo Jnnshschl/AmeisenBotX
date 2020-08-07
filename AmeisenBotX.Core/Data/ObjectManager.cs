@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Data
                     wowObjects[id].Update();
                 }
 
-                if (x.Item2 == WowObjectType.Unit || x.Item2 == WowObjectType.Player)
+                if (wowObjects[id] != null && (x.Item2 == WowObjectType.Unit || x.Item2 == WowObjectType.Player))
                 {
                     if (wowObjects[id].Guid == PlayerGuid)
                     {

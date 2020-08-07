@@ -59,6 +59,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
+            Name = string.Empty;
+
             fixed (RawWowPlayer* objPtr = stackalloc RawWowPlayer[1])
             {
                 if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset + RawWowPlayer.EndOffset, objPtr))
