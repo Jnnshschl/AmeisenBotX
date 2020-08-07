@@ -53,13 +53,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase))); // Novos fix
 
-            if (enemies.Any()
+            if (enemies.Any())
             {
                 // filter out enemies already attacking me (keep players for pvp)
                 IEnumerable<WowUnit> enemiesNotTargetingMe = enemies
                     .Where(e => e.GetType() == typeof(WowPlayer) || e.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
 
-                if (enemiesNotTargetingMe.Any()
+                if (enemiesNotTargetingMe.Any())
                 {
                     IEnumerable<WowUnit> targetUnits = enemiesNotTargetingMe
                         .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
