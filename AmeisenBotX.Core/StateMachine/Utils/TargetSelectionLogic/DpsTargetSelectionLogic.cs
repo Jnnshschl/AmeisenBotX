@@ -57,15 +57,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
                 .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
-            // get enemies targeting my partymembers
-            IEnumerable<WowUnit> enemies = nearEnemies
-                .Where(e => e.TargetGuid != 0 && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid));
-
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
-            if (enemies.Any())
+            if (nearEnemies.Any())
             {
-                possibleTargets = new List<WowUnit>() { enemies.FirstOrDefault() };
+                possibleTargets = new List<WowUnit>() { nearEnemies.FirstOrDefault() };
 
                 if (possibleTargets != null)
                 {
@@ -74,11 +70,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // get enemies tagged by me or no one, or players
-            enemies = nearEnemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
+            nearEnemies = nearEnemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
 
-            if (enemies.Any())
+            if (nearEnemies.Any())
             {
-                possibleTargets = enemies.ToList();
+                possibleTargets = nearEnemies.ToList();
                 return true;
             }
 

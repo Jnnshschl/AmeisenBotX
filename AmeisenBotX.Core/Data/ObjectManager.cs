@@ -291,6 +291,11 @@ namespace AmeisenBotX.Core.Data
                     ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
                 }
 
+                if (TargetGuid == 0) { Target = null; }
+                if (PetGuid == 0) { Pet = null; }
+                if (LastTargetGuid == 0) { LastTarget = null; }
+                if (PartyleaderGuid == 0) { Partyleader = null; }
+
                 WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
                 WowInterface.XMemory.Read(IntPtr.Add(clientConnection, (int)WowInterface.OffsetList.CurrentObjectManager), out IntPtr currentObjectManager);
                 CurrentObjectManager = currentObjectManager;

@@ -762,7 +762,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && (target == null || IsInRange(Spells[spellName], target)))
                 {
                     if (!WowInterface.ObjectManager.Player.HasBuffByName(requiredStance)
-                        && Spells[requiredStance] != null
+                        && Spells.ContainsKey(requiredStance)
                         && !CooldownManager.IsSpellOnCooldown(requiredStance))
                     {
                         CastSpell(requiredStance, true);
