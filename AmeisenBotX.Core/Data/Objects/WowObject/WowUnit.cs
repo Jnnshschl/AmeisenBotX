@@ -217,41 +217,40 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
-            fixed (RawWowUnit* objPtr = stackalloc RawWowUnit[1])
-            {
-                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                {
-                    Class = (WowClass)((objPtr[0].Bytes0 >> 8) & 0xFF);
-                    CombatReach = objPtr[0].CombatReach;
-                    DisplayId = objPtr[0].DisplayId;
-                    Energy = objPtr[0].Power4;
-                    FactionTemplate = objPtr[0].FactionTemplate;
-                    Gender = (WowGender)((objPtr[0].Bytes0 >> 16) & 0xFF);
-                    Health = objPtr[0].Health;
-                    Level = objPtr[0].Level;
-                    Mana = objPtr[0].Power1;
-                    MaxEnergy = objPtr[0].MaxPower4;
-                    MaxHealth = objPtr[0].MaxHealth;
-                    MaxMana = objPtr[0].MaxPower1;
-                    MaxRage = objPtr[0].MaxPower2 / 10;
-                    MaxRuneenergy = objPtr[0].MaxPower7 / 10;
-                    NpcFlags = objPtr[0].NpcFlags;
-                    PowerType = (WowPowertype)((objPtr[0].Bytes0 >> 24) & 0xFF);
-                    Race = (WowRace)((objPtr[0].Bytes0 >> 0) & 0xFF);
-                    Rage = objPtr[0].Power2 / 10;
-                    Runeenergy = objPtr[0].Power7 / 10;
-                    SummonedByGuid = objPtr[0].SummonedBy;
-                    TargetGuid = objPtr[0].Target;
-                    UnitFlags = objPtr[0].Flags1;
-                    UnitFlags2 = objPtr[0].Flags2;
-                    UnitFlagsDynamic = objPtr[0].DynamicFlags;
+            Name = string.Empty;
 
-                    EnergyPercentage = BotMath.Percentage(Energy, MaxEnergy);
-                    HealthPercentage = BotMath.Percentage(Health, MaxHealth);
-                    ManaPercentage = BotMath.Percentage(Mana, MaxMana);
-                    RagePercentage = BotMath.Percentage(Rage, MaxRage);
-                    RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
-                }
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
+            {
+                Class = (WowClass)((objPtr.Bytes0 >> 8) & 0xFF);
+                CombatReach = objPtr.CombatReach;
+                DisplayId = objPtr.DisplayId;
+                Energy = objPtr.Power4;
+                FactionTemplate = objPtr.FactionTemplate;
+                Gender = (WowGender)((objPtr.Bytes0 >> 16) & 0xFF);
+                Health = objPtr.Health;
+                Level = objPtr.Level;
+                Mana = objPtr.Power1;
+                MaxEnergy = objPtr.MaxPower4;
+                MaxHealth = objPtr.MaxHealth;
+                MaxMana = objPtr.MaxPower1;
+                MaxRage = objPtr.MaxPower2 / 10;
+                MaxRuneenergy = objPtr.MaxPower7 / 10;
+                NpcFlags = objPtr.NpcFlags;
+                PowerType = (WowPowertype)((objPtr.Bytes0 >> 24) & 0xFF);
+                Race = (WowRace)((objPtr.Bytes0 >> 0) & 0xFF);
+                Rage = objPtr.Power2 / 10;
+                Runeenergy = objPtr.Power7 / 10;
+                SummonedByGuid = objPtr.SummonedBy;
+                TargetGuid = objPtr.Target;
+                UnitFlags = objPtr.Flags1;
+                UnitFlags2 = objPtr.Flags2;
+                UnitFlagsDynamic = objPtr.DynamicFlags;
+
+                EnergyPercentage = BotMath.Percentage(Energy, MaxEnergy);
+                HealthPercentage = BotMath.Percentage(Health, MaxHealth);
+                ManaPercentage = BotMath.Percentage(Mana, MaxMana);
+                RagePercentage = BotMath.Percentage(Rage, MaxRage);
+                RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
             }
 
             if (Type == WowObjectType.Unit)

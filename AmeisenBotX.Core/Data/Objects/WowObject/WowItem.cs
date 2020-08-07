@@ -42,29 +42,26 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
-            fixed (RawWowItem* objPtr = stackalloc RawWowItem[1])
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem objPtr))
             {
-                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                {
-                    Count = objPtr[0].StackCount;
-                    Owner = objPtr[0].Owner;
+                Count = objPtr.StackCount;
+                Owner = objPtr.Owner;
 
-                    ItemEnchantments = new List<ItemEnchantment>()
-                        {
-                            objPtr[0].Enchantment1,
-                            objPtr[0].Enchantment2,
-                            objPtr[0].Enchantment3,
-                            objPtr[0].Enchantment4,
-                            objPtr[0].Enchantment5,
-                            objPtr[0].Enchantment6,
-                            objPtr[0].Enchantment7,
-                            objPtr[0].Enchantment8,
-                            objPtr[0].Enchantment9,
-                            objPtr[0].Enchantment10,
-                            objPtr[0].Enchantment11,
-                            objPtr[0].Enchantment12,
-                        };
-                }
+                ItemEnchantments = new List<ItemEnchantment>()
+                {
+                    objPtr.Enchantment1,
+                    objPtr.Enchantment2,
+                    objPtr.Enchantment3,
+                    objPtr.Enchantment4,
+                    objPtr.Enchantment5,
+                    objPtr.Enchantment6,
+                    objPtr.Enchantment7,
+                    objPtr.Enchantment8,
+                    objPtr.Enchantment9,
+                    objPtr.Enchantment10,
+                    objPtr.Enchantment11,
+                    objPtr.Enchantment12,
+                };
             }
         }
     }

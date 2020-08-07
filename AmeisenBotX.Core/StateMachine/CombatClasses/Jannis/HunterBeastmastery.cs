@@ -176,6 +176,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CastSpellIfPossible(beastialWrathSpell, WowInterface.ObjectManager.TargetGuid, true);
                         CastSpellIfPossible(rapidFireSpell, 0);
 
+                        if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count > 2
+                            && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        {
+                            return;
+                        }
+
                         if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                             || CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
                             || CastSpellIfPossible(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))

@@ -314,6 +314,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string lifeTapSpell = "Life Tap";
         protected const string metamorphosisSpell = "Metamorphosis";
         protected const string moltenCoreSpell = "Molten Core";
+        protected const string seedOfCorruptionSpell = "Seed of Corruption";
         protected const string shadowBoltSpell = "Shadow Bolt";
         protected const string shadowMasterySpell = "Shadow Mastery";
         protected const string soulfireSpell = "Soul Fire";

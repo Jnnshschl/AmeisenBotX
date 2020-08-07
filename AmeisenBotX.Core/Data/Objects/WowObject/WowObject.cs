@@ -34,14 +34,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public unsafe virtual void Update()
         {
-            fixed (RawWowObject* objPtr = stackalloc RawWowObject[1])
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, out RawWowObject objPtr))
             {
-                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, objPtr))
-                {
-                    EntryId = objPtr[0].EntryId;
-                    Guid = objPtr[0].Guid;
-                    Scale = objPtr[0].Scale;
-                }
+                EntryId = objPtr.EntryId;
+                Guid = objPtr.Guid;
+                Scale = objPtr.Scale;
             }
         }
     }

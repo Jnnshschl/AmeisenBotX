@@ -33,19 +33,16 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
-            fixed (RawWowGameobject* objPtr = stackalloc RawWowGameobject[1])
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject objPtr)
+                && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowGameobjectPosition), out Vector3 position))
             {
-                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr)
-                    && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowGameobjectPosition), out Vector3 position))
-                {
-                    GameobjectType = (WowGameobjectType)objPtr[0].GameobjectBytes1;
-                    Bytes0 = objPtr[0].GameobjectBytes0;
-                    DisplayId = objPtr[0].DisplayId;
-                    Faction = objPtr[0].Faction;
-                    Flags = new BitVector32(objPtr[0].Flags);
-                    Level = objPtr[0].Level;
-                    Position = position;
-                }
+                GameobjectType = (WowGameobjectType)objPtr.GameobjectBytes1;
+                Bytes0 = objPtr.GameobjectBytes0;
+                DisplayId = objPtr.DisplayId;
+                Faction = objPtr.Faction;
+                Flags = new BitVector32(objPtr.Flags);
+                Level = objPtr.Level;
+                Position = position;
             }
         }
     }

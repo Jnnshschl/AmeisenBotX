@@ -26,16 +26,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
-            fixed (RawWowDynobject* objPtr = stackalloc RawWowDynobject[1])
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject objPtr)
+                && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowDynobjectPosition), out Vector3 position))
             {
-                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr)
-                    && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowDynobjectPosition), out Vector3 position))
-                {
-                    Caster = objPtr[0].Caster;
-                    Radius = objPtr[0].Radius;
-                    SpellId = objPtr[0].SpellId;
-                    Position = position;
-                }
+                Caster = objPtr.Caster;
+                Radius = objPtr.Radius;
+                SpellId = objPtr.SpellId;
+                Position = position;
             }
         }
     }

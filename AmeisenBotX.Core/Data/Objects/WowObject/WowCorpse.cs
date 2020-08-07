@@ -25,14 +25,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
-            fixed (RawWowCorpse* objPtr = stackalloc RawWowCorpse[1])
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse objPtr))
             {
-                if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, objPtr))
-                {
-                    DisplayId = objPtr[0].DisplayId;
-                    Owner = objPtr[0].Owner;
-                    Party = objPtr[0].Party;
-                }
+                DisplayId = objPtr.DisplayId;
+                Owner = objPtr.Owner;
+                Party = objPtr.Party;
             }
         }
     }

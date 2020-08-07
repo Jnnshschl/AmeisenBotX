@@ -147,6 +147,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
+            if (WowInterface.ObjectManager.Player.HasBuffByName("Food")
+                || WowInterface.ObjectManager.Player.HasBuffByName("Drink"))
+            {
+                return;
+            }
+
             if (GroupAuraManager.Tick()
                 || MyAuraManager.Tick()
                 || NeedToHealSomeone()

@@ -142,6 +142,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
                 }
 
+                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count > 2
+                    && !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell)
+                    && CastSpellIfPossible(seedOfCorruptionSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+
                 if (CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
