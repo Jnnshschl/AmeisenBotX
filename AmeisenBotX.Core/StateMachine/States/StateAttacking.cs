@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 // use the default MovementEngine to move if the CombatClass doesnt
                 if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
-                    if (WowInterface.ObjectManager.TargetGuid != 0)
+                    if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
                     {
                         if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
                             || WowInterface.ObjectManager.Target.IsDead
