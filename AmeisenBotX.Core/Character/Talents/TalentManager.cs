@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.Character.Talents
 
             Talent[] wantedTreeValues = wantedTree.Values.ToArray();
 
-            for (int i = 0; i< wantedTreeValues.Length; ++i)
+            for (int i = 0; i < wantedTreeValues.Length; ++i)
             {
                 if (talentPoints == 0) { break; }
 

@@ -6,6 +6,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Enums
     public enum PathRequestFlags
     {
         None = 0,
-        ChaikinCurve = 1 << 0,
+        ChaikinCurve = 1,
+        CatmullRomSpline = 2,
     }
 }

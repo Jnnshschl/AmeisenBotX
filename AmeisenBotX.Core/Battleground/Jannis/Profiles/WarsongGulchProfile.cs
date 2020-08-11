@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             );
         }
 
-        public interface IWsgDataset
+        private interface IWsgDataset
         {
             Vector3 EnemyBasePosition { get; }
 
@@ -150,8 +150,6 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         public Selector<CtfBlackboard> MainSelector { get; }
 
-        public IWsgDataset WsgDataset { get; set; }
-
         private TimegatedEvent ActionEvent { get; }
 
         private bool InLos { get; set; }
@@ -161,6 +159,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         private TimegatedEvent LosCheckEvent { get; }
 
         private WowInterface WowInterface { get; }
+
+        private IWsgDataset WsgDataset { get; set; }
 
         public void Execute()
         {
@@ -464,15 +464,15 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     if (WowInterface.ObjectManager.Player.IsAlliance())
                     {
                         string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
-                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0]);
-                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1]);
+                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0], CultureInfo.InvariantCulture);
+                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1], CultureInfo.InvariantCulture);
 
                         string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
-                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0]);
-                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1]);
+                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0], CultureInfo.InvariantCulture);
+                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1], CultureInfo.InvariantCulture);
 
-                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.allianceState) == 2;
-                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.hordeState) == 2;
+                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.allianceState, CultureInfo.InvariantCulture) == 2;
+                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.hordeState, CultureInfo.InvariantCulture) == 2;
 
                         JBgBlackboard.MyTeamFlagPos = new Vector3
                         (
@@ -494,15 +494,15 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     else
                     {
                         string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
-                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0]);
-                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1]);
+                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0], CultureInfo.InvariantCulture);
+                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1], CultureInfo.InvariantCulture);
 
                         string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
-                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0]);
-                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1]);
+                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0], CultureInfo.InvariantCulture);
+                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1], CultureInfo.InvariantCulture);
 
-                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.hordeState) == 2;
-                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.allianceState) == 2;
+                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.hordeState, CultureInfo.InvariantCulture) == 2;
+                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.allianceState, CultureInfo.InvariantCulture) == 2;
 
                         JBgBlackboard.MyTeamFlagPos = new Vector3
                         (
@@ -556,7 +556,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             return BehaviorTreeStatus.Ongoing;
         }
 
-        public class AllianceWsgDataset : IWsgDataset
+        private class AllianceWsgDataset : IWsgDataset
         {
             public Vector3 EnemyBasePosition { get; } = new Vector3(916, 1434, 346);
 
@@ -571,7 +571,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             public Vector3 OwnBasePositionMapCoords { get; } = new Vector3(49, 15, 0);
         }
 
-        public class HordeWsgDataset : IWsgDataset
+        private class HordeWsgDataset : IWsgDataset
         {
             public Vector3 EnemyBasePosition { get; } = new Vector3(1539, 1481, 352);
 

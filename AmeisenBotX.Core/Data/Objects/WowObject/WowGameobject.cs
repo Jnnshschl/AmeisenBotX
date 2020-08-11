@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Specialized;
+using System.Globalization;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject
 {
@@ -26,7 +27,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public override string ToString()
         {
-            return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId) ? ((GameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString())}:{DisplayId})";
+            return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId) ? ((GameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
         public unsafe override void Update()

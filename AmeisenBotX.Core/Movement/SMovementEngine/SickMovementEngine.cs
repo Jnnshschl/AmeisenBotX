@@ -36,10 +36,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 MovementWatchdog.Start();
             }
 
-            PathRefreshEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
-            PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(10));
+            PathDecayEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
             BehaviorTree = new AmeisenBotBehaviorTree<MovementBlackboard>
@@ -104,7 +103,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                 new Selector<MovementBlackboard>
                                 (
                                     "DoINeedToFindAPath",
-                                    (b) => DoINeedToFindAPath() && (Nodes == null || Nodes.Count == 0 || PathRefreshEvent.Run()),
+                                    (b) => DoINeedToFindAPath(),
                                     new Leaf<MovementBlackboard>
                                     (
                                         "FindPathToTargetPosition",
@@ -227,8 +226,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public TimegatedEvent MountCheck { get; }
 
-        public bool MountInProgress { get; private set; }
-
         public double MovedDistance { get; private set; }
 
         public MovementAction MovementAction { get; private set; }
@@ -238,8 +235,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public List<Vector3> Path => Nodes.ToList();
 
         public TimegatedEvent PathDecayEvent { get; private set; }
-
-        public TimegatedEvent PathRefreshEvent { get; }
 
         public BasicVehicle PlayerVehicle { get; }
 
@@ -282,12 +277,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 {
                     Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance);
 
-                    if (!WowInterface.HookManager.IsInLineOfSight
-                    (
-                        WowInterface.ObjectManager.Player.Position,
-                        pos,
-                        WowInterface.MovementSettings.JumpCheckHeight
-                    ))
+                    if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, pos, WowInterface.MovementSettings.JumpCheckHeight))
                     {
                         JumpOnNextMove = true;
                     }
@@ -383,8 +373,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private bool DoINeedToFindAPath()
         {
-            return Path == null
-                || Path.Count == 0
+            return Nodes == null
+                || Nodes.Count == 0
                 || PathDecayEvent.Run()
                 || TargetPositionLastPathfinding.GetDistance2D(TargetPosition) > 1.0;
         }

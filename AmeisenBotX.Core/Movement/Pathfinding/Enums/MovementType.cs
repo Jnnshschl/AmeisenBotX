@@ -2,10 +2,8 @@
 {
     public enum MovementType
     {
-        MoveToPosition,
+        FindPath,
         CastMovementRay,
-        MoveAlongSurface,
-        GetRandomPoint,
-        GetRandomPointAround,
+        MoveAlongSurface
     }
 }

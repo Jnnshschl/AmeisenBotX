@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Common
 {
-    public class BotUtils
+    public static class BotUtils
     {
 #pragma warning disable IDE0051
         private const uint MK_CONTROL = 0x8;
@@ -55,7 +56,7 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ByteArrayToString(byte[] bytes)
         {
-            return BitConverter.ToString(bytes).Replace("-", " ");
+            return BitConverter.ToString(bytes).Replace("-", " ", StringComparison.OrdinalIgnoreCase);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -66,6 +67,8 @@ namespace AmeisenBotX.Core.Common
 
         public static string CleanString(string input)
         {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+
             StringBuilder sb = new StringBuilder(input.Length);
 
             for (int i = 0; i < input.Length; ++i)
@@ -92,15 +95,17 @@ namespace AmeisenBotX.Core.Common
         /// <returns>(LUA string, return variable name)</returns>
         public static (string, string) ObfuscateLua(string input)
         {
+            if (string.IsNullOrWhiteSpace(input)) return (string.Empty, string.Empty);
+
             string returnValueName = "";
 
             for (int i = 0; ; ++i)
             {
                 string symbol = $"{{v:{i}}}";
-                if (input.Contains(symbol))
+                if (input.Contains(symbol, StringComparison.OrdinalIgnoreCase))
                 {
                     string newValueName = FastRandomStringOnlyLetters();
-                    input = input.Replace(symbol, newValueName);
+                    input = input.Replace(symbol, newValueName, StringComparison.OrdinalIgnoreCase);
 
                     if (i == 0)
                     {
@@ -135,7 +140,7 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string FastRandomString()
         {
-            return Path.GetRandomFileName().Replace(".", string.Empty);
+            return Path.GetRandomFileName().Replace(".", string.Empty, StringComparison.OrdinalIgnoreCase);
         }
 
         public static string GetColorByQuality(ItemQuality itemQuality)
@@ -157,24 +162,24 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string Capitalize(string input)
         {
-            return input.First().ToString().ToUpper() + input.Substring(1);
+            return string.IsNullOrWhiteSpace(input) ? string.Empty : input.First().ToString().ToUpper(CultureInfo.InvariantCulture) + input.Substring(1);
         }
 
         public static bool IsValidJson(string strInput)
         {
+            if (string.IsNullOrWhiteSpace(strInput)) return false;
+
             strInput = strInput.Trim();
-            if ((strInput.StartsWith("{") && strInput.EndsWith("}"))
-                || (strInput.StartsWith("[") && strInput.EndsWith("]")))
+
+            if ((strInput.StartsWith("{", StringComparison.OrdinalIgnoreCase) && strInput.EndsWith("}", StringComparison.OrdinalIgnoreCase))
+                || (strInput.StartsWith("[", StringComparison.OrdinalIgnoreCase) && strInput.EndsWith("]", StringComparison.OrdinalIgnoreCase)))
             {
                 try
                 {
                     JToken obj = JToken.Parse(strInput);
                     return true;
                 }
-                catch
-                {
-                    // ignored
-                }
+                catch { }
             }
 
             return false;

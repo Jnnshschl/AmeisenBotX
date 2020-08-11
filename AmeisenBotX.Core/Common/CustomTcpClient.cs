@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -17,11 +16,13 @@ namespace AmeisenBotX.Core.Common
         public CustomTcpClient(string ip, int port, int watchdogPollMs = 1000)
         {
             Init(IPAddress.Parse(ip), port, watchdogPollMs);
+            ConnectionFailedCounter = 100;
         }
 
         public CustomTcpClient(IPAddress ip, int port, int watchdogPollMs = 1000)
         {
             Init(ip, port, watchdogPollMs);
+            ConnectionFailedCounter = 100;
         }
 
         public IPAddress Ip { get; private set; }
@@ -38,6 +39,8 @@ namespace AmeisenBotX.Core.Common
 
         protected StreamWriter Writer { get; set; }
 
+        private int ConnectionFailedCounter { get; set; }
+
         public void Disconnect()
         {
             ConnectionWatchdog.Stop();
@@ -46,11 +49,11 @@ namespace AmeisenBotX.Core.Common
             TcpClient.Close();
         }
 
-        public async Task<string> SendRequest(string payload)
+        public async Task<string> SendString(int msgType, string payload)
         {
-            await Writer.WriteLineAsync($"{payload}&gt;");
-            await Writer.FlushAsync();
-            return Reader.ReadLineAsync().GetAwaiter().GetResult().Replace("&gt;", string.Empty);
+            Writer.WriteLineAsync($"{msgType}{payload}").Wait();
+            Writer.FlushAsync().Wait();
+            return Reader.ReadLineAsync().Result;
         }
 
         private async void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
@@ -65,36 +68,49 @@ namespace AmeisenBotX.Core.Common
             {
                 if (TcpClient == null)
                 {
-                    TcpClient = new TcpClient()
-                    {
-                        NoDelay = true
-                    };
-                }
-                else if (!TcpClient.Connected)
-                {
-                    try
-                    {
-                        await TcpClient.ConnectAsync(Ip, Port);
+                    TcpClient = new TcpClient() { NoDelay = true };
 
-                        Reader = new StreamReader(TcpClient.GetStream(), Encoding.ASCII);
-                        Writer = new StreamWriter(TcpClient.GetStream(), Encoding.ASCII);
-                    }
-                    catch (ObjectDisposedException)
+                    TcpClient.ConnectAsync(Ip, Port).Wait();
+
+                    if (TcpClient.Client.Connected)
                     {
-                        TcpClient = new TcpClient()
-                        {
-                            NoDelay = true
-                        };
-                    }
-                    catch
-                    {
-                        // server is maybe not running or whatever
+                        NetworkStream stream = TcpClient.GetStream();
+
+                        Reader = new StreamReader(stream, Encoding.ASCII);
+                        Writer = new StreamWriter(stream, Encoding.ASCII);
                     }
                 }
-                else if (TcpClient.Client != null)
+                else
                 {
-                    IsConnected = TcpClient.Connected;
+                    IsConnected = Reader != null && Writer != null && SendString(0, "1").Result?.Length > 0;
+
+                    if (!IsConnected)
+                    {
+                        ++ConnectionFailedCounter;
+                    }
+                    else
+                    {
+                        ConnectionFailedCounter = 0;
+                    }
+
+                    if (ConnectionFailedCounter > 3)
+                    {
+                        TcpClient.Close();
+                        TcpClient.Dispose();
+                        TcpClient = null;
+
+                        IsConnected = false;
+                    }
                 }
+            }
+            catch
+            {
+                // server is maybe not running or whatever
+                TcpClient.Close();
+                TcpClient.Dispose();
+                TcpClient = null;
+
+                IsConnected = false;
             }
             finally
             {

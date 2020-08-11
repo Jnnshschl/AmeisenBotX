@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Memory.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace AmeisenBotX.Core
@@ -56,7 +57,7 @@ namespace AmeisenBotX.Core
 
         public bool ChatProtocols { get; set; } = false;
 
-        public string[] CustomCombatClassDependencies { get; set; } = { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
+        public List<string> CustomCombatClassDependencies { get; set; } = new List<string>() { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
 
@@ -88,7 +89,7 @@ namespace AmeisenBotX.Core
 
         public double ItemRepairThreshold { get; set; } = 25;
 
-        public string[] ItemSellBlacklist { get; set; } = { "Hearthstone" };
+        public List<string> ItemSellBlacklist { get; set; } = new List<string> { "Hearthstone" };
 
         public string JobEngineMailHeader { get; set; } = string.Empty;
 

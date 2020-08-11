@@ -89,11 +89,23 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IntPtr GetForegroundWindow()
+        {
+            return Win32Imports.GetForegroundWindow();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
             Rect rect = new Rect();
             GetWindowRect(windowHandle, ref rect);
             return rect;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetForegroundWindow(IntPtr windowHandle)
+        {
+            Win32Imports.SetForegroundWindow(windowHandle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -105,6 +117,28 @@ namespace AmeisenBotX.Memory
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
                 SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+            }
+        }
+
+        public static Process StartProcessNoActivate(string processCmd)
+        {
+            StartupInfo startupInfo = new StartupInfo
+            {
+                cb = Marshal.SizeOf<StartupInfo>(),
+                dwFlags = STARTF_USESHOWWINDOW,
+                wShowWindow = SW_SHOWMINNOACTIVE
+            };
+
+            if (CreateProcess(null, $"{processCmd} -windowed -d3d9", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            {
+                CloseHandle(processInformation.hProcess);
+                CloseHandle(processInformation.hThread);
+
+                return Process.GetProcessById(processInformation.dwProcessId);
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -158,12 +192,6 @@ namespace AmeisenBotX.Memory
 
                 return false;
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr GetForegroundWindow()
-        {
-            return Win32Imports.GetForegroundWindow();
         }
 
         public ProcessThread GetMainThread()
@@ -336,12 +364,6 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetForegroundWindow(IntPtr windowHandle)
-        {
-            Win32Imports.SetForegroundWindow(windowHandle);
-        }
-
         public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
         {
             SetParent(Process.MainWindowHandle, mainWindowHandle);
@@ -351,28 +373,6 @@ namespace AmeisenBotX.Memory
             SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
             ResizeParentWindow(offsetX, offsetY, width, height);
-        }
-
-        public static Process StartProcessNoActivate(string processCmd)
-        {
-            StartupInfo startupInfo = new StartupInfo
-            {
-                cb = Marshal.SizeOf<StartupInfo>(),
-                dwFlags = STARTF_USESHOWWINDOW,
-                wShowWindow = SW_SHOWMINNOACTIVE
-            };
-
-            if (CreateProcess(null, $"{processCmd} -windowed -d3d9", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
-            {
-                CloseHandle(processInformation.hProcess);
-                CloseHandle(processInformation.hThread);
-
-                return Process.GetProcessById(processInformation.dwProcessId);
-            }
-            else
-            {
-                return null;
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

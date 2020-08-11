@@ -16,17 +16,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public int ComboPoints { get; set; }
 
-        public List<VisibleItemEnchantment> ItemEnchantments { get; private set; }
-
-        public List<QuestlogEntry> QuestlogEntries { get; private set; }
-
         public bool IsFlying { get; set; }
 
         public bool IsSwimming { get; set; }
 
         public bool IsUnderwater { get; set; }
 
+        public List<VisibleItemEnchantment> ItemEnchantments { get; private set; }
+
         public int NextLevelXp { get; set; }
+
+        public List<QuestlogEntry> QuestlogEntries { get; private set; }
 
         public int Xp { get; set; }
 

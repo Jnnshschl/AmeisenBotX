@@ -12,6 +12,6 @@ namespace AmeisenBotX.BehaviorTree.Objects
         {
         }
 
-        public List<Node<T>> Children { get; set; }
+        public List<Node<T>> Children { get; protected set; }
     }
 }

@@ -3,6 +3,8 @@ using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Views;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -82,7 +84,7 @@ namespace AmeisenBotX
             {
                 ConfigName = textboxConfigName.Text.Trim();
 
-                Config.AntiAfkMs = int.Parse(textboxAntiAfk.Text);
+                Config.AntiAfkMs = int.Parse(textboxAntiAfk.Text, CultureInfo.InvariantCulture);
                 Config.AutoAcceptQuests = checkboxAutoAcceptQuests.IsChecked.GetValueOrDefault(false);
                 Config.AutoChangeRealmlist = checkboxAutoChangeRealmlist.IsChecked.GetValueOrDefault(false);
                 Config.AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false);
@@ -99,12 +101,12 @@ namespace AmeisenBotX
                 Config.BattlegroundEngine = comboboxBattlegroundEngine.SelectedItem != null ? comboboxBattlegroundEngine.SelectedItem.ToString() : string.Empty;
                 Config.BattlegroundUsePartyMode = checkboxBattlegroundUsePartyMode.IsChecked.GetValueOrDefault(false);
                 Config.BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty;
-                Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text);
+                Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text, CultureInfo.InvariantCulture);
                 Config.CustomCombatClassFile = textboxCombatClassFile.Text;
                 Config.DrinkUntilPercent = sliderDrinkUntil.Value;
                 Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
                 Config.EatUntilPercent = sliderEatUntil.Value;
-                Config.EventPullMs = int.Parse(textboxEventPull.Text);
+                Config.EventPullMs = int.Parse(textboxEventPull.Text, CultureInfo.InvariantCulture);
                 Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
                 Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
                 Config.FollowPositionDynamic = checkboxDynamicPosition.IsChecked.GetValueOrDefault(false);
@@ -112,7 +114,7 @@ namespace AmeisenBotX
                 Config.Friends = textboxFriends.Text;
                 Config.IgnoreCombatWhileMounted = checkboxIgnoreCombatMounted.IsChecked.GetValueOrDefault(false);
                 Config.ItemRepairThreshold = sliderRepair.Value;
-                Config.ItemSellBlacklist = textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                Config.ItemSellBlacklist = new List<string>(textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries));
                 Config.JobEngineMailHeader = textboxMailHeader.Text;
                 Config.JobEngineMailReceiver = textboxMailReceiver.Text;
                 Config.JobEngineMailText = textboxMailText.Text;
@@ -125,7 +127,7 @@ namespace AmeisenBotX
                 Config.MerchantNpcSearchRadius = sliderMerchantSearchRadius.Value;
                 Config.MinFollowDistance = (int)Math.Round(sliderMinFollowDistance.Value);
                 Config.Mounts = textboxMounts.Text;
-                Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text);
+                Config.NameshServerPort = int.Parse(textboxNavmeshServerPort.Text, CultureInfo.InvariantCulture);
                 Config.NavmeshServerIp = textboxNavmeshServerIp.Text;
                 Config.OnlyFriendsMode = checkboxOnlyFriendsMode.IsChecked.GetValueOrDefault(false);
                 Config.OnlySupportMaster = checkboxOnlySupportMaster.IsChecked.GetValueOrDefault(false);
@@ -134,12 +136,12 @@ namespace AmeisenBotX
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
                 Config.RconEnabled = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
-                Config.RconScreenshotInterval = int.Parse(textboxRconScreenshotInterval.Text);
+                Config.RconScreenshotInterval = int.Parse(textboxRconScreenshotInterval.Text, CultureInfo.InvariantCulture);
                 Config.RconSendScreenshots = checkboxEnableRconScreenshots.IsChecked.GetValueOrDefault(false);
                 Config.RconServerAddress = textboxRconAddress.Text;
                 Config.RconServerGuid = textboxRconGUID.Text;
                 Config.RconServerImage = textboxRconImage.Text;
-                Config.RconTickMs = int.Parse(textboxRconInterval.Text);
+                Config.RconTickMs = int.Parse(textboxRconInterval.Text, CultureInfo.InvariantCulture);
                 Config.Realm = textboxRealm.Text;
                 Config.Realmlist = textboxRealmlist.Text;
                 Config.ReleaseSpirit = checkboxReleaseSpirit.IsChecked.GetValueOrDefault(false);
@@ -151,7 +153,7 @@ namespace AmeisenBotX
                 Config.SellPurpleItems = checkboxSellPurpleItems.IsChecked.GetValueOrDefault(false);
                 Config.SellWhiteItems = checkboxSellWhiteItems.IsChecked.GetValueOrDefault(false);
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
-                Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text);
+                Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text, CultureInfo.InvariantCulture);
                 Config.SupportRange = sliderAssistRange.Value;
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
                 Config.UseMounts = checkboxUseMounts.IsChecked.GetValueOrDefault(false);
@@ -204,8 +206,7 @@ namespace AmeisenBotX
 
             if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
-                string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
-                textboxRconImage.Text = $"data:image/{fileExtension};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
+                textboxRconImage.Text = $"data:image/{Path.GetExtension(openFileDialog.FileName).ToUpperInvariant()};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
                 ChangedSomething = true;
             }
         }
@@ -396,10 +397,10 @@ namespace AmeisenBotX
             sliderMinFollowDistance.Value = Config.MinFollowDistance;
             sliderMinFreeBagSlots.Value = Config.BagSlotsToGoSell;
             sliderRepair.Value = Config.ItemRepairThreshold;
-            textboxAntiAfk.Text = Config.AntiAfkMs.ToString();
-            textboxCharacterSlot.Text = Config.CharacterSlot.ToString();
+            textboxAntiAfk.Text = Config.AntiAfkMs.ToString(CultureInfo.InvariantCulture);
+            textboxCharacterSlot.Text = Config.CharacterSlot.ToString(CultureInfo.InvariantCulture);
             textboxCombatClassFile.Text = Config.CustomCombatClassFile;
-            textboxEventPull.Text = Config.EventPullMs.ToString();
+            textboxEventPull.Text = Config.EventPullMs.ToString(CultureInfo.InvariantCulture);
             textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
             textboxFriends.Text = Config.Friends;
             textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist);
@@ -408,16 +409,16 @@ namespace AmeisenBotX
             textboxMailText.Text = Config.JobEngineMailText;
             textboxMounts.Text = Config.Mounts;
             textboxNavmeshServerIp.Text = Config.NavmeshServerIp;
-            textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString();
+            textboxNavmeshServerPort.Text = Config.NameshServerPort.ToString(CultureInfo.InvariantCulture);
             textboxPassword.Password = Config.Password;
             textboxRconAddress.Text = Config.RconServerAddress;
             textboxRconGUID.Text = Config.RconServerGuid;
             textboxRconImage.Text = Config.RconServerImage;
-            textboxRconInterval.Text = Config.RconTickMs.ToString();
-            textboxRconScreenshotInterval.Text = Config.RconScreenshotInterval.ToString();
+            textboxRconInterval.Text = Config.RconTickMs.ToString(CultureInfo.InvariantCulture);
+            textboxRconScreenshotInterval.Text = Config.RconScreenshotInterval.ToString(CultureInfo.InvariantCulture);
             textboxRealm.Text = Config.Realm;
             textboxRealmlist.Text = Config.Realmlist;
-            textboxStatemachineTick.Text = Config.StateMachineTickMs.ToString();
+            textboxStatemachineTick.Text = Config.StateMachineTickMs.ToString(CultureInfo.InvariantCulture);
             textboxUsername.Text = Config.Username;
             textboxWowPath.Text = Config.PathToWowExe;
 

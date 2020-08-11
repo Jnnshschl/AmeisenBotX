@@ -15,6 +15,12 @@ namespace AmeisenBotX.RconClient
         {
             Endpoint = endpoint;
 
+            KeepaliveEnpoint = new Uri($"{Endpoint}/api/keepalive");
+            RegisterEnpoint = new Uri($"{Endpoint}/api/register");
+            DataEnpoint = new Uri($"{Endpoint}/api/data");
+            ImageEnpoint = new Uri($"{Endpoint}/api/image");
+            ActionEnpoint = new Uri($"{Endpoint}/api/action");
+
             if (!validateCertificate)
             {
                 HttpClientHandler handler = new HttpClientHandler
@@ -54,7 +60,17 @@ namespace AmeisenBotX.RconClient
 
         public RegisterMessage RegisterMessage { get; }
 
+        private Uri ActionEnpoint { get; }
+
+        private Uri DataEnpoint { get; }
+
         private HttpClient HttpClient { get; set; }
+
+        private Uri ImageEnpoint { get; }
+
+        private Uri KeepaliveEnpoint { get; }
+
+        private Uri RegisterEnpoint { get; }
 
         public void Dispose()
         {
@@ -63,13 +79,8 @@ namespace AmeisenBotX.RconClient
 
         public async Task<bool> KeepAlive()
         {
-            HttpResponseMessage dataResponse = await HttpClient.PostAsync
-            (
-                $"{Endpoint}/api/keepalive",
-                new StringContent(JsonConvert.SerializeObject(new KeepAliveMessage() { Guid = Guid }),
-                Encoding.UTF8,
-                "application/json")
-            );
+            using StringContent content = new StringContent(JsonConvert.SerializeObject(new KeepAliveMessage() { Guid = Guid }), Encoding.UTF8, "application/json");
+            HttpResponseMessage dataResponse = HttpClient.PostAsync(KeepaliveEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
             {
@@ -84,14 +95,11 @@ namespace AmeisenBotX.RconClient
 
         public async Task<bool> PullPendingActions()
         {
-            HttpResponseMessage dataResponse = await HttpClient.GetAsync
-            (
-                $"{Endpoint}/api/action/{Guid}"
-            );
+            HttpResponseMessage dataResponse = HttpClient.GetAsync(ActionEnpoint).Result;
 
             if (dataResponse.IsSuccessStatusCode)
             {
-                PendingActions = JsonConvert.DeserializeObject<List<ActionType>>(await dataResponse.Content.ReadAsStringAsync());
+                PendingActions = JsonConvert.DeserializeObject<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result);
                 return true;
             }
             else
@@ -103,13 +111,8 @@ namespace AmeisenBotX.RconClient
 
         public async Task<bool> Register()
         {
-            HttpResponseMessage registerResponse = await HttpClient.PostAsync
-            (
-                $"{Endpoint}/api/register",
-                new StringContent(JsonConvert.SerializeObject(RegisterMessage),
-                Encoding.UTF8,
-                "application/json")
-            );
+            using StringContent content = new StringContent(JsonConvert.SerializeObject(RegisterMessage), Encoding.UTF8, "application/json");
+            HttpResponseMessage registerResponse = HttpClient.PostAsync(RegisterEnpoint, content).Result;
 
             NeedToRegister = false;
 
@@ -125,15 +128,12 @@ namespace AmeisenBotX.RconClient
 
         public async Task<bool> SendData(DataMessage dataMessage)
         {
+            if (dataMessage == null) return false;
+
             dataMessage.Guid = Guid;
 
-            HttpResponseMessage dataResponse = await HttpClient.PostAsync
-            (
-                $"{Endpoint}/api/data",
-                new StringContent(JsonConvert.SerializeObject(dataMessage),
-                Encoding.UTF8,
-                "application/json")
-            );
+            using StringContent content = new StringContent(JsonConvert.SerializeObject(dataMessage), Encoding.UTF8, "application/json");
+            HttpResponseMessage dataResponse = HttpClient.PostAsync(DataEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
             {
@@ -148,13 +148,8 @@ namespace AmeisenBotX.RconClient
 
         public async Task<bool> SendImage(string image)
         {
-            HttpResponseMessage dataResponse = await HttpClient.PostAsync
-            (
-                $"{Endpoint}/api/image",
-                new StringContent(JsonConvert.SerializeObject(new ImageMessage() { Guid = Guid, Image = image }),
-                Encoding.UTF8,
-                "application/json")
-            );
+            using StringContent content = new StringContent(JsonConvert.SerializeObject(new ImageMessage() { Guid = Guid, Image = image }), Encoding.UTF8, "application/json");
+            HttpResponseMessage dataResponse = HttpClient.PostAsync(ImageEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
             {

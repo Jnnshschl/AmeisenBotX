@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -27,12 +28,11 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        private readonly string dataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
-
         private readonly Brush currentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
         private readonly Brush currentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
         private readonly Brush darkBackgroundBrush;
         private readonly Brush darkForegroundBrush;
+        private readonly string dataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
         private readonly Brush textAccentBrush;
 
         private Dictionary<BotState, Window> StateConfigWindows;
@@ -481,7 +481,7 @@ namespace AmeisenBotX
         {
             // Object count label
             // ------------------ >
-            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.ObjectCount.ToString().PadLeft(4);
+            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.ObjectCount.ToString(CultureInfo.InvariantCulture).PadLeft(4);
 
             // Tick time label
             // --------------- >
@@ -492,7 +492,7 @@ namespace AmeisenBotX
                 executionMs = 0;
             }
 
-            labelCurrentTickTime.Content = executionMs.ToString().PadLeft(4);
+            labelCurrentTickTime.Content = executionMs.ToString(CultureInfo.InvariantCulture).PadLeft(4);
 
             if (executionMs <= Config.StateMachineTickMs)
             {
@@ -506,7 +506,7 @@ namespace AmeisenBotX
 
             // HookCall label
             // -------------- >
-            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString().PadLeft(2);
+            labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
 
             if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
@@ -520,8 +520,8 @@ namespace AmeisenBotX
 
             // RPM/WPM labels
             // -------------- >
-            labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString().PadLeft(5);
-            labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString().PadLeft(3);
+            labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(5);
+            labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(3);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

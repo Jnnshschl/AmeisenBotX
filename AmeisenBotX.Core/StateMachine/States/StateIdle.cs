@@ -188,7 +188,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         return true;
                     }
                 }
-            }           
+            }
 
             return false;
         }

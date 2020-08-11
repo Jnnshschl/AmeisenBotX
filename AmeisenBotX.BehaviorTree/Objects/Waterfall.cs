@@ -19,7 +19,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
             ConditionNodePairs = conditionNodePairs.ToList();
         }
 
-        public List<(Func<T, bool> condition, Node<T> node)> ConditionNodePairs { get; set; }
+        public List<(Func<T, bool> condition, Node<T> node)> ConditionNodePairs { get; }
 
         public Node<T> FallbackNode { get; set; }
 

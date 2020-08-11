@@ -55,7 +55,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Timers;
 using Timer = System.Threading.Timer;
 
 namespace AmeisenBotX.Core
@@ -273,7 +272,7 @@ namespace AmeisenBotX.Core
                 GenerateExecutable = false
             };
 
-            for (int i = 0; i < Config.CustomCombatClassDependencies.Length; ++i)
+            for (int i = 0; i < Config.CustomCombatClassDependencies.Count; ++i)
             {
                 parameters.ReferencedAssemblies.Add(Config.CustomCombatClassDependencies[i]);
             }

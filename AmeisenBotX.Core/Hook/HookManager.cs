@@ -11,6 +11,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -26,6 +27,8 @@ namespace AmeisenBotX.Core.Hook
         private readonly object hookLock = new object();
 
         private ulong hookCalls;
+
+        private byte[] OriginalEndsceneBytes = null;
 
         public HookManager(WowInterface wowInterface)
         {
@@ -61,8 +64,6 @@ namespace AmeisenBotX.Core.Hook
         public bool IsWoWHooked => WowInterface.XMemory.Read(EndsceneAddress, out byte c) && c == 0xE9;
 
         public int OldRenderFlags { get; private set; }
-
-        public byte[] OriginalEndsceneBytes { get; private set; }
 
         public bool OverrideWorldCheck { get; private set; }
 
@@ -122,7 +123,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)});{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"), out string result))
             {
-                if (result.Contains('.'))
+                if (result.Contains('.', StringComparison.OrdinalIgnoreCase))
                 {
                     result = result.Split('.')[0];
                 }
@@ -178,6 +179,8 @@ namespace AmeisenBotX.Core.Hook
 
         public void ClickToMove(WowPlayer player, Vector3 position)
         {
+            if (player == null) return;
+
             if (WowInterface.XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
                 WowInterface.XMemory.Write(codeCaveVector3, position);
@@ -276,8 +279,8 @@ namespace AmeisenBotX.Core.Hook
         {
             AmeisenLogger.Instance.Log("HookManager", $"ExecuteLuaAndRead: command: \"{command}\" variable: \"{variable}\"", LogLevel.Verbose);
 
-            if (command.Length > 0
-                && variable.Length > 0)
+            if (!string.IsNullOrWhiteSpace(command)
+                && !string.IsNullOrWhiteSpace(variable))
             {
                 byte[] commandBytes = Encoding.UTF8.GetBytes(command);
                 byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
@@ -326,6 +329,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
         {
+            if (player == null) return;
             SetFacing(player, BotMath.GetFacingAngle2D(player.Position, positionToFace));
         }
 
@@ -396,7 +400,7 @@ namespace AmeisenBotX.Core.Hook
         {
             AmeisenLogger.Instance.Log("HookManager", $"GetLocalizedText: {variable}", LogLevel.Verbose);
 
-            if (variable.Length > 0)
+            if (!string.IsNullOrWhiteSpace(variable))
             {
                 byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
                 if (WowInterface.XMemory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAlloc))
@@ -511,7 +515,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"), out string result))
             {
-                if (result.Contains('.'))
+                if (result.Contains('.', StringComparison.OrdinalIgnoreCase))
                 {
                     result = result.Split('.')[0];
                 }
@@ -737,9 +741,10 @@ namespace AmeisenBotX.Core.Hook
         {
             AmeisenLogger.Instance.Log("HookManager", $"LuaDoString: {command}", LogLevel.Verbose);
 
-            if (command.Length > 0)
+            if (!string.IsNullOrWhiteSpace(command))
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(command);
+
                 if (WowInterface.XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
                 {
                     WowInterface.XMemory.WriteBytes(memAlloc, bytes);
@@ -814,6 +819,8 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ReplaceItem(IWowItem currentItem, IWowItem newItem)
         {
+            if (newItem == null) return;
+
             if (currentItem == null)
             {
                 LuaDoString($"EquipItemByName(\"{newItem.Name}\")");
@@ -897,7 +904,8 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetFacing(WowUnit unit, float angle)
         {
-            CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString().Replace(',', '.'), Environment.TickCount });
+            if (unit == null) return;
+            CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'), Environment.TickCount });
         }
 
         public void SetRenderState(bool renderingEnabled)
@@ -1130,6 +1138,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UnitOnRightClick(WowUnit wowUnit)
         {
+            if (wowUnit == null) return;
             CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
 
@@ -1160,11 +1169,8 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowObjectOnRightClick(WowObject wowObject)
         {
-            if (wowObject.GetType() == typeof(WowObject)
-                || wowObject.GetType() == typeof(WowGameobject))
-            {
-                CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
-            }
+            if (wowObject == null) return;
+            CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
         }
 
         private bool AllocateCodeCaves()

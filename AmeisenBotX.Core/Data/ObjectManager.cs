@@ -291,7 +291,6 @@ namespace AmeisenBotX.Core.Data
                     ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
                 }
 
-
                 if (TargetGuid == 0) { Target = null; }
                 if (PetGuid == 0) { Pet = null; }
                 if (LastTargetGuid == 0) { LastTarget = null; }

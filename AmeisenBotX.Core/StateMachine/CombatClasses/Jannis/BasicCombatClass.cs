@@ -796,7 +796,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null
-                        && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
+                        && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName, StringComparison.OrdinalIgnoreCase))
                         && CastSpellIfPossible(spellToCastEnchantment, 0, true))
                     {
                         return true;
@@ -876,7 +876,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (parts.Length < 2) return false;
 
                 // replace comma with dot in the cooldown
-                if (parts[1].Contains(',')) parts[1] = parts[1].Replace(',', '.');
+                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase)) parts[1] = parts[1].Replace(',', '.');
 
                 if (int.TryParse(parts[0], out int castSuccessful)
                     && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))

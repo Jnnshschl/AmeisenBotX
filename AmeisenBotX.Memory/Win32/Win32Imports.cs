@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
-    public unsafe class Win32Imports
+    public static unsafe class Win32Imports
     {
         public const int GWL_EXSTYLE = -0x14;
         public const int GWL_STYLE = -16;
@@ -84,12 +84,10 @@ namespace AmeisenBotX.Memory.Win32
             NoRedraw = 0x8,
             NoActivate = 0x10,
             DrawFrame = 0x20,
-            FrameChanged = 0x20,
             ShowWindow = 0x40,
             HideWindow = 0x80,
             NoCopyBits = 0x100,
             NoOwnerZOrder = 0x200,
-            NoReposition = 0x200,
             NoSendChanging = 0x400,
             Defererase = 0x2000,
             AsyncWindowPos = 0x4000

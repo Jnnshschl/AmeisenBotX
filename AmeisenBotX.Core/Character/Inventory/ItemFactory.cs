@@ -1,12 +1,13 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace AmeisenBotX.Core.Character.Inventory
 {
     public static class ItemFactory
     {
-        public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
+        private static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
         {
             Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
         };
@@ -18,7 +19,7 @@ namespace AmeisenBotX.Core.Character.Inventory
                 return null;
             }
 
-            return (basicItem.Type.ToUpper()) switch
+            return (basicItem.Type.ToUpper(CultureInfo.InvariantCulture)) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
                 "CONSUMABLE" => new WowConsumable(basicItem),
