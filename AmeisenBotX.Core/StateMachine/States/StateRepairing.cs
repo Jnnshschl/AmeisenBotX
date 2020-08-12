@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                if (WowInterface.MovementEngine.IsPathIncomplete)
+                if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
                 {
                     ++BlacklistCounter;
 

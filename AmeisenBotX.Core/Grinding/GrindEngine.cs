@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.States;
 using System;
@@ -107,7 +108,7 @@ namespace AmeisenBotX.Core.Grinding
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestUnit.Position);
 
-                        if (WowInterface.MovementEngine.IsPathIncomplete)
+                        if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
                         {
                             ++BlacklistCounter;
 

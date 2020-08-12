@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement
@@ -10,7 +11,7 @@ namespace AmeisenBotX.Core.Movement
 
         bool IsGhost { get; set; }
 
-        bool IsPathIncomplete { get; }
+        PathfindingStatus PathfindingStatus { get; }
 
         MovementAction MovementAction { get; }
 
@@ -22,7 +23,7 @@ namespace AmeisenBotX.Core.Movement
 
         void Reset();
 
-        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, double minDistanceToMove = 1.5, bool disableShortcuts = false);
+        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, bool disableShortcuts = false);
 
         void StopMovement();
     }
