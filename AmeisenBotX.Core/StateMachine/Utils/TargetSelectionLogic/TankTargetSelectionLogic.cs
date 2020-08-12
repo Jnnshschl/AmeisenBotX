@@ -33,12 +33,14 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            bool keepCurrentTarget = WowInterface.ObjectManager.Target?.GetType() == typeof(WowPlayer);
+            bool keepCurrentTarget = (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0) 
+                && (WowInterface.ObjectManager.Target?.GetType() == typeof(WowPlayer)
+                || WowInterface.ObjectManager.Target?.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
 
             if (keepCurrentTarget)
             {
-                possibleTargets = new List<WowUnit>() { WowInterface.ObjectManager.Target };
-                return true;
+                possibleTargets = null;
+                return false;
             }
 
             // get all enemies targeting our group
@@ -47,7 +49,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 .Where(e => e.IsInCombat
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
-                .OrderByDescending(e => e.MaxHealth);
+                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+
+            enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 100.0));
 
             if (enemies.Any())
             {
