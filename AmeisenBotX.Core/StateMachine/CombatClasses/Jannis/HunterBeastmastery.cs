@@ -25,7 +25,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { aspectOfTheDragonhawkSpell, () => CastSpellIfPossible(aspectOfTheDragonhawkSpell, 0, true) }
+                { aspectOfTheDragonhawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheDragonhawkSpell, 0, true) },
+                { aspectOfTheHawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheHawkSpell, 0, true) },
+                { aspectOfTheViperSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(aspectOfTheViperSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -118,7 +120,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
                     // make some distance
-                    if (WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
+                    if (WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
                     {
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
                     }

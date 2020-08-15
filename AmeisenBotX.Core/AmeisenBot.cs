@@ -577,7 +577,12 @@ namespace AmeisenBotX.Core
 
         private void OnMerchantShow(long timestamp, List<string> args)
         {
-            if (Config.AutoRepair)
+            if (WowInterface.ObjectManager.Target == null)
+            {
+                return;
+            }
+
+            if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
             {
                 WowInterface.HookManager.RepairAllItems();
             }

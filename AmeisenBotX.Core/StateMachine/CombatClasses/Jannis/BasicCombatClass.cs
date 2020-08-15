@@ -124,6 +124,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string aimedShotSpell = "Aimed Shot";
         protected const string arcaneShotSpell = "Arcane Shot";
         protected const string aspectOfTheDragonhawkSpell = "Aspect of the Dragonhawk";
+        protected const string aspectOfTheHawkSpell = "Aspect of the Hawk";
+        protected const string aspectOfTheViperSpell = "Aspect of the Viper";
         protected const string beastialWrathSpell = "Beastial Wrath";
         protected const string blackArrowSpell = "Black Arrow";
         protected const string callPetSpell = "Call Pet";
@@ -352,6 +354,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string mockingBlowSpell = "Mocking Blow";
         protected const string mortalStrikeSpell = "Mortal Strike";
         protected const string overpowerSpell = "Overpower";
+        protected const string pummelSpell = "Pummel";
+        protected const string recklessnessSpell = "Recklessness";
         protected const string rendSpell = "Rend";
         protected const string retaliationSpell = "Retaliation";
         protected const string revengeSpell = "Revenge";
@@ -360,6 +364,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string shieldSlamSpell = "Shield Slam";
         protected const string shieldWallSpell = "Shield Wall";
         protected const string shockwaveSpell = "Shockwave";
+        protected const string slamSpell = "Slam";
         protected const string spellReflectionSpell = "Spell Reflection";
         protected const string tauntSpell = "Taunt";
         protected const string thunderClapSpell = "Thunder Clap";

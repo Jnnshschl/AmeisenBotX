@@ -13,7 +13,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateRepairing(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             Blacklist = new List<ulong>();
-            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            EquipmentUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public List<ulong> Blacklist { get; }
@@ -22,13 +23,18 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent InteractionEvent { get; }
 
+        private TimegatedEvent EquipmentUpdateEvent { get; }
+
         public override void Enter()
         {
         }
 
         public override void Execute()
         {
-            WowInterface.CharacterManager.Equipment.Update();
+            if (EquipmentUpdateEvent.Run())
+            {
+                WowInterface.CharacterManager.Equipment.Update();
+            }
 
             if (!NeedToRepair())
             {

@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // order by type id, so that players have priority
             possibleTargets = healableUnits
-                .Where(e => e.HealthPercentage < 100.0)
+                .Where(e => e.Health < e.MaxHealth && !e.IsDead)
                 .OrderByDescending(e => e.Type)
                 .ThenBy(e => e.HealthPercentage);
 

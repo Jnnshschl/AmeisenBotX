@@ -44,27 +44,30 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
+            if (WowInterface.ObjectManager.IsWorldLoaded)
             {
-                FirstStart = false;
-                WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
-                StateMachine.PlayerName = playerName;
-
-                if (!WowInterface.EventHookManager.IsActive)
+                if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
                 {
-                    WowInterface.EventHookManager.Start();
+                    FirstStart = false;
+                    WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName);
+                    StateMachine.PlayerName = playerName;
+
+                    if (!WowInterface.EventHookManager.IsActive)
+                    {
+                        WowInterface.EventHookManager.Start();
+                    }
+
+                    WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+                    WowInterface.HookManager.EnableClickToMove();
                 }
 
-                WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                WowInterface.HookManager.EnableClickToMove();
-            }
+                if (RefreshCharacterEvent.Run())
+                {
+                    WowInterface.CharacterManager.UpdateAll();
+                }
 
-            if (RefreshCharacterEvent.Run())
-            {
-                WowInterface.CharacterManager.UpdateAll();
+                WowInterface.MovementEngine.StopMovement();
             }
-
-            WowInterface.MovementEngine.StopMovement();
         }
 
         public override void Execute()

@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         {
             base.Update();
 
-            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset + RawWowPlayer.EndOffset, out RawWowPlayer objPtr))
+            if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer objPtr))
             {
                 Xp = objPtr.Xp;
                 NextLevelXp = objPtr.NextLevelXp;

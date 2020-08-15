@@ -14,7 +14,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             Blacklist = new List<ulong>();
-            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            InventoryUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public List<ulong> Blacklist { get; }
@@ -23,13 +24,18 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent InteractionEvent { get; }
 
+        private TimegatedEvent InventoryUpdateEvent { get; }
+
         public override void Enter()
         {
         }
 
         public override void Execute()
         {
-            WowInterface.CharacterManager.Inventory.Update();
+            if (InventoryUpdateEvent.Run())
+            {
+                WowInterface.CharacterManager.Inventory.Update();
+            }
 
             if (!NeedToSell())
             {

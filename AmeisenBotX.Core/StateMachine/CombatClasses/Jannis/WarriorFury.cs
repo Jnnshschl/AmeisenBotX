@@ -19,8 +19,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { hamstringSpell, () => CastSpellIfPossible(hamstringSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { rendSpell, () => CastSpellIfPossible(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { hamstringSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && CastSpellIfPossible(hamstringSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { rendSpell, () => WowInterface.ObjectManager.Player.Rage > 75 && CastSpellIfPossible(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
@@ -99,26 +99,45 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                    if (distanceToTarget > 3)
+                    if (distanceToTarget > 5.0)
                     {
-                        if (CastSpellIfPossible(chargeSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || CastSpellIfPossible(interceptSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (CastSpellIfPossibleWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || CastSpellIfPossibleWarrior(interceptSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
                     }
                     else
                     {
-                        if ((WowInterface.ObjectManager.Target.HealthPercentage < 20)
-                           && CastSpellIfPossible(executeSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (CastSpellIfPossible(berserkerRageSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            && CastSpellIfPossible(bloodrageSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            && CastSpellIfPossible(recklessnessSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
 
-                        if (CastSpellIfPossible(bloodthirstSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || CastSpellIfPossible(whirlwindSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 5).Count() > 2 && CastSpellIfPossible(cleaveSpell, 0, true))
-                            || CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        if (WowInterface.ObjectManager.Target.IsCasting
+                           && CastSpellIfPossibleWarrior(pummelSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if ((WowInterface.ObjectManager.Target.HealthPercentage < 20)
+                           && CastSpellIfPossibleWarrior(executeSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if (WowInterface.ObjectManager.Player.HasBuffByName($"{slamSpell}!")
+                           && CastSpellIfPossibleWarrior(slamSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if (CastSpellIfPossibleWarrior(bloodthirstSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || CastSpellIfPossibleWarrior(whirlwindSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || (WowInterface.ObjectManager.Player.Rage > 60 && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 5).Count() > 2 && CastSpellIfPossibleWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                            || (WowInterface.ObjectManager.Player.Rage > 60 && CastSpellIfPossibleWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                         {
                             return;
                         }

@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
                 .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
-                .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+                .ThenBy(e => e.HealthPercentage);
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
