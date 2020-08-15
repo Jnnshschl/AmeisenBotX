@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public IWowItemComparator ItemComparator => null;
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Dps;
 
@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private void HandleAttacking(WowUnit target)
         {
-            if (TargetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+            if (TargetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
             {
                 ulong guid = targetToTarget.First().Guid;
 

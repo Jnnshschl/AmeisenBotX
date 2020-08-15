@@ -272,7 +272,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (HeroicStrikeEvent.Run() && WowInterface.ObjectManager.Player.Rage >= 40 && CustomCastSpell(heroicStrikeSpell))
+
                     {
                         return;
                     }

@@ -106,13 +106,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if ((WowInterface.ObjectManager.PartymemberGuids.Count > 0 || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+            if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
                 && NeedToHealSomeone())
             {
                 return;
             }
 
-            if ((WowInterface.ObjectManager.PartymemberGuids.Count == 0 || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
+            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Player.IsAutoAttacking
                     && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
@@ -145,9 +145,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.Count > 1 ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
+                WowUnit targetUnit = unitsToHeal.Any() ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
 
                 if (targetUnit.HealthPercentage < 12.0
                     && CastSpellIfPossible(layOnHandsSpell, 0))
@@ -155,8 +155,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return true;
                 }
 
-                if (unitsToHeal.Count > 1
-                    && !unitsToHeal.Any(e => e.HasBuffByName(beaconOfLightSpell))
+                if (unitsToHeal.Count(e => !e.HasBuffByName(beaconOfLightSpell)) > 1
                     && CastSpellIfPossible(beaconOfLightSpell, targetUnit.Guid, true))
                 {
                     return true;

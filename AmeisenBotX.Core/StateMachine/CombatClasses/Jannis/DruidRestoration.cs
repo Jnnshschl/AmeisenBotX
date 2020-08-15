@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Count > 0 && CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Any() && CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
                 { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
@@ -119,13 +119,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             // when we're solo, we don't need to heal as much as we would do in a dungeon group
-            if ((WowInterface.ObjectManager.PartymemberGuids.Count > 0 || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+            if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
                 && NeedToHealSomeone())
             {
                 return;
             }
 
-            if ((WowInterface.ObjectManager.PartymemberGuids.Count == 0 || !WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead)) && SelectTarget(DpsTargetManager))
+            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || !WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead)) && SelectTarget(DpsTargetManager))
             {
                 if (!WowInterface.ObjectManager.Target.HasBuffByName(moonfireSpell)
                     && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
                 if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 2
                     && CastSpellIfPossible(tranquilitySpell, 0, true))

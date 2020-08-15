@@ -276,7 +276,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void OnObjectUpdateComplete(List<WowObject> wowObjects)
+        private void OnObjectUpdateComplete(IEnumerable<WowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {

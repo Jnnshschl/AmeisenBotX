@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Character.Talents
                 }
             }
 
-            if (talentsToSpend.Count > 0)
+            if (talentsToSpend.Any())
             {
                 SpendTalents(talentsToSpend);
             }

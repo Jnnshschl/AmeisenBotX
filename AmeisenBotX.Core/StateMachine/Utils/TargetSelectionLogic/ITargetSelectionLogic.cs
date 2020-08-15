@@ -5,10 +5,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 {
     public interface ITargetSelectionLogic
     {
-        List<string> PriorityTargets { get; set; }
+        IEnumerable<string> PriorityTargets { get; set; }
 
         void Reset();
 
-        bool SelectTarget(out List<WowUnit> wowUnit);
+        bool SelectTarget(out IEnumerable<WowUnit> wowUnit);
     }
 }

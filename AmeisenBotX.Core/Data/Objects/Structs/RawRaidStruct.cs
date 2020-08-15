@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
 
         public IntPtr RaidPlayer9 { get; set; }
 
-        public List<IntPtr> GetPointers()
+        public IEnumerable<IntPtr> GetPointers()
         {
             return new List<IntPtr>()
             {

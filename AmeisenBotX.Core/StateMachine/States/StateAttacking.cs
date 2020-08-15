@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -42,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (((!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat())
-                    || WowInterface.ObjectManager.GetEnemiesInCombatWithUs(WowInterface.ObjectManager.Player.Position, 100.0).Count == 0)
+                    || !WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any())
                 && !WowInterface.Globals.ForceCombat
                 && StateMachine.SetState(BotState.Idle))
             {
@@ -147,11 +148,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (WowInterface.CombatClass.Role == CombatClassRole.Dps && WowInterface.CombatClass.WalkBehindEnemy)
             {
-                for (int i = 0; i < WowInterface.ObjectManager.Partymembers.Count; ++i)
+                for (int i = 0; i < WowInterface.ObjectManager.Partymembers.Count(); ++i)
                 {
-                    if (WowInterface.ObjectManager.Partymembers[i].Guid != WowInterface.ObjectManager.PlayerGuid)
+                    WowUnit unit = WowInterface.ObjectManager.Partymembers.ElementAt(i);
+
+                    if (unit.Guid != WowInterface.ObjectManager.PlayerGuid)
                     {
-                        meanGroupPosition += WowInterface.ObjectManager.Partymembers[i].Position;
+                        meanGroupPosition += unit.Position;
                     }
                 }
 

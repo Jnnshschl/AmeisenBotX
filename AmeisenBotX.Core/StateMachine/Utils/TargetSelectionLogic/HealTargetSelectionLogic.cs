@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             WowInterface = wowInterface;
         }
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -19,19 +19,18 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
         }
 
-        public bool SelectTarget(out List<WowUnit> possibleTargets)
+        public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            List<WowUnit> healableUnits = WowInterface.ObjectManager.Partymembers;
-            healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+            IEnumerable<WowUnit> healableUnits = WowInterface.ObjectManager.Partymembers;
+            healableUnits = healableUnits.Concat(WowInterface.ObjectManager.PartyPets);
 
             // order by type id, so that players have priority
             possibleTargets = healableUnits
                 .Where(e => e.HealthPercentage < 100.0)
                 .OrderByDescending(e => e.Type)
-                .ThenBy(e => e.HealthPercentage)
-                .ToList();
+                .ThenBy(e => e.HealthPercentage);
 
-            return possibleTargets.Count > 0;
+            return possibleTargets.Any();
         }
     }
 }

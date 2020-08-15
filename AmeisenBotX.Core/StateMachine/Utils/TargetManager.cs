@@ -17,17 +17,17 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             PriorityTargets = new List<string>();
         }
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         public ITargetSelectionLogic TargetSelectionLogic { get; }
 
         private TimegatedEvent TargetSwitchEvent { get; set; }
 
-        public bool GetUnitToTarget(out List<WowUnit> possibleTargets)
+        public bool GetUnitToTarget(out IEnumerable<WowUnit> possibleTargets)
         {
             TargetSelectionLogic.PriorityTargets = PriorityTargets;
 
-            if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out List<WowUnit> possibleTargetsFromLogic))
+            if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out IEnumerable<WowUnit> possibleTargetsFromLogic))
             {
                 possibleTargets = possibleTargetsFromLogic;
                 return true;

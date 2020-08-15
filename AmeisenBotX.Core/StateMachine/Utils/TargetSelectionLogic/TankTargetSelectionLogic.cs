@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             WowInterface = wowInterface;
         }
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
         }
 
-        public bool SelectTarget(out List<WowUnit> possibleTargets)
+        public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
             if (WowInterface.ObjectManager.Target != null
                 && WowInterface.ObjectManager.TargetGuid != 0
@@ -45,13 +45,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             // get all enemies targeting our group
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
-                .GetEnemiesTargetingPartymembers(WowInterface.ObjectManager.Player.Position, 100.0)
+                .GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => e.IsInCombat
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
-            enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 100.0));
+            enemies = enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 100.0));
 
             if (enemies.Any())
             {
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     if (targetUnits != null && targetUnits.Any())
                     {
                         // target closest enemy
-                        possibleTargets = targetUnits.ToList();
+                        possibleTargets = targetUnits;
                         return true;
                     }
                 }
@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     if (targetUnits != null && targetUnits.Any())
                     {
                         // target closest enemy
-                        possibleTargets = targetUnits.ToList();
+                        possibleTargets = targetUnits;
                         return true;
                     }
                 }
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
                 if (enemies.Any())
                 {
-                    possibleTargets = enemies.ToList();
+                    possibleTargets = enemies;
                     return true;
                 }
             }

@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
                 else
                 {
-                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count;
+                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count();
 
                     if ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
                         && CastSpellIfPossibleWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))

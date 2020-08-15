@@ -174,7 +174,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CastSpellIfPossible(killCommandSpell, WowInterface.ObjectManager.TargetGuid, true);
                         CastSpellIfPossible(rapidFireSpell, 0);
 
-                        if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count > 2
+                        if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count() > 2
                             && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;

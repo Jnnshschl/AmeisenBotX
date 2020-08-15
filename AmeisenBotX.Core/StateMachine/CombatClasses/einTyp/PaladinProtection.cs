@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public IWowItemComparator ItemComparator => new TankItemComparator();
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         public bool TargetInLineOfSight { get; set; }
 

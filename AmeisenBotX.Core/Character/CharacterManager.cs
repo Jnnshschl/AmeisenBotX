@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Character
 
         public bool HasFoodInBag()
         {
-            return Inventory.Items.Select(e => e.Id).Any(e => Enum.IsDefined(typeof(WowFood), e));
+            return Inventory.Items.Any(e => Enum.IsDefined(typeof(WowFood), e.Id));
         }
 
         public bool HasRefreshmentInBag()
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Character
 
         public bool IsAbleToUseArmor(WowArmor item)
         {
-            return item.ArmorType switch
+            return item != null && item.ArmorType switch
             {
                 ArmorType.PLATE => Skills.Any(e => e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
                 ArmorType.MAIL => Skills.Any(e => e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Character
 
         public bool IsAbleToUseWeapon(WowWeapon item)
         {
-            return item.WeaponType switch
+            return item != null && item.WeaponType switch
             {
                 WeaponType.BOWS => Skills.Any(e => e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
                 WeaponType.CROSSBOWS => Skills.Any(e => e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Armbrüste", StringComparison.OrdinalIgnoreCase)),
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Character
         {
             itemToReplace = null;
 
-            if (ItemComparator.IsBlacklistedItem(item))
+            if (item == null || ItemComparator.IsBlacklistedItem(item))
             {
                 return false;
             }
@@ -168,15 +168,15 @@ namespace AmeisenBotX.Core.Character
             Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE), 500, 1000));
         }
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 1.5f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
         {
             if (pos == default) { return; }
 
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, (int)ClickToMoveType.Move);
+            // WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, ClickToMoveType.Move);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
         }
 
         public void UpdateAll()
@@ -203,20 +203,20 @@ namespace AmeisenBotX.Core.Character
             {
                 EquipmentSlot slot = (EquipmentSlot)list[i];
 
-                if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Items.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON"))
+                if (slot == EquipmentSlot.INVSLOT_OFFHAND && Equipment.Items.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem) && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                List<IWowItem> itemsLikeEquipped = Inventory.Items.Where(e => e.EquipLocation.Length > 0 && SlotToEquipLocation((int)slot).Contains(e.EquipLocation)).OrderByDescending(e => e.ItemLevel).ToList();
+                IEnumerable<IWowItem> itemsLikeEquipped = Inventory.Items.Where(e => !string.IsNullOrWhiteSpace(e.EquipLocation) && SlotToEquipLocation((int)slot).Contains(e.EquipLocation, StringComparison.OrdinalIgnoreCase)).OrderByDescending(e => e.ItemLevel).ToList();
 
-                if (itemsLikeEquipped.Count > 0)
+                if (itemsLikeEquipped.Any())
                 {
                     if (Equipment.Items.TryGetValue(slot, out IWowItem equippedItem))
                     {
-                        for (int f = 0; f < itemsLikeEquipped.Count; ++f)
+                        for (int f = 0; f < itemsLikeEquipped.Count(); ++f)
                         {
-                            IWowItem item = itemsLikeEquipped[f];
+                            IWowItem item = itemsLikeEquipped.ElementAt(f);
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 AmeisenLogger.Instance.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
@@ -283,7 +283,7 @@ namespace AmeisenBotX.Core.Character
             return true;
         }
 
-        private string SlotToEquipLocation(int slot)
+        private static string SlotToEquipLocation(int slot)
         {
             return slot switch
             {

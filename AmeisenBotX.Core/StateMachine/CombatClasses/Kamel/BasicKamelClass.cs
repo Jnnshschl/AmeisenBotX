@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public abstract bool HandlesMovement { get; }
         public abstract bool IsMelee { get; }
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         public abstract IWowItemComparator ItemComparator { get; set; }
         public abstract CombatClassRole Role { get; }

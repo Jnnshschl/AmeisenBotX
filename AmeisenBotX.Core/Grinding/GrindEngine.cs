@@ -70,17 +70,16 @@ namespace AmeisenBotX.Core.Grinding
 
             double distanceToSpot = GrindingSpot.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-            List<WowUnit> nearUnits = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
+            IEnumerable<WowUnit> nearUnits = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
                 .Where(e => e.Level >= GrindingSpot.MinLevel
                          && e.Level <= GrindingSpot.MaxLevel
                          && !Blacklist.Contains(e.Guid)
                          && e.Position.GetDistance(GrindingSpot.Position) < GrindingSpot.Radius)
-                .OrderBy(e => e.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position))
-                .ToList();
+                .OrderBy(e => e.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position));
 
             if (distanceToSpot < GrindingSpot.Radius)
             {
-                if (nearUnits != null && nearUnits.Count > 0)
+                if (nearUnits != null && nearUnits.Any())
                 {
                     LookingForEnemiesSince = default;
                     WowUnit nearestUnit = nearUnits.FirstOrDefault(e => e.Guid == TargetGuid);
@@ -137,8 +136,7 @@ namespace AmeisenBotX.Core.Grinding
             }
             else
             {
-                if (WowInterface.ObjectManager.Partymembers.Count > 0
-                    && WowInterface.ObjectManager.Partymembers.Any(e => e.IsDead || e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 30.0))
+                if (WowInterface.ObjectManager.Partymembers.Any(e => e.IsDead || e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 30.0))
                 {
                     WowInterface.MovementEngine.StopMovement();
                     return;

@@ -118,7 +118,6 @@ namespace AmeisenBotX.Core.Statemachine
                     GetState<StateIdle>().FirstStart = true;
 
                     WowInterface.MovementEngine.Reset();
-                    WowInterface.ObjectManager.WowObjects.Clear();
                     WowInterface.EventHookManager.Stop();
 
                     return;
@@ -189,7 +188,7 @@ namespace AmeisenBotX.Core.Statemachine
                                     || (!(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
                                         && ((WowInterface.ObjectManager.Player.IsInCombat
                                         || IsAnyPartymemberInCombat())
-                                        && WowInterface.ObjectManager.GetEnemiesInCombatWithUs(WowInterface.ObjectManager.Player.Position, 100.0).Count > 0)))
+                                        && WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any())))
                                 {
                                     if (SetState(BotState.Attacking, true))
                                     {
