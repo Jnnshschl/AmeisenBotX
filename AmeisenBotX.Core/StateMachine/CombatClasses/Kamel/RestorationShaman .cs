@@ -407,7 +407,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
 
-                    if (nearTarget != null)
+                    //if (nearTarget != null )
+                    if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null && nearTarget != null)
                     {
                         WowInterface.HookManager.TargetGuid(nearTarget.Guid);
 
