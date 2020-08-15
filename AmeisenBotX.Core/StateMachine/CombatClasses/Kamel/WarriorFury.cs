@@ -10,6 +10,9 @@ using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
@@ -271,11 +274,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    List<WowUnit> unitsNearPlayer = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 5);
+                    IEnumerable<WowUnit> unitsNearPlayer = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 5);
 
                     if (unitsNearPlayer != null)
                     {
-                        if (unitsNearPlayer.Count >= 3 && WowInterface.ObjectManager.Player.Rage >= 50 && CustomCastSpell(cleaveSpell))
+                        if (unitsNearPlayer.Count() >= 3 && WowInterface.ObjectManager.Player.Rage >= 50 && CustomCastSpell(cleaveSpell))
                         {
                             return;
                         }

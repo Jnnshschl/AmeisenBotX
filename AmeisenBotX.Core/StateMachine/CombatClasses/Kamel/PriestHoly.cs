@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.StateMachine.CombatClasses.Kamel
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     internal class PriestHoly : BasicKamelClass
     {
