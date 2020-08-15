@@ -36,7 +36,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string heroicThrowSpell = "Heroic Throw";
         private const string interceptSpell = "Intercept";
         private const string rendSpell = "Rend";
-        private const string whirlwindSpell = "Whirlwind";
         private const string pummelSpell = "Pummel";
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
@@ -72,12 +71,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(executeSpell, DateTime.Now);
             spellCoolDown.Add(pummelSpell, DateTime.Now);
             spellCoolDown.Add(slamSpell, DateTime.Now);
-            spellCoolDown.Add(whirlwindSpell, DateTime.Now);
             spellCoolDown.Add(disarmSpell, DateTime.Now);
             spellCoolDown.Add(rendSpell, DateTime.Now);
             spellCoolDown.Add(hamstringSpell, DateTime.Now);
             spellCoolDown.Add(victoryRushSpell, DateTime.Now);
             spellCoolDown.Add(chargeSpell, DateTime.Now);
+            spellCoolDown.Add(cleaveSpell, DateTime.Now);
             //Buffs||Defensive||Enrage
             spellCoolDown.Add(intimidatingShoutSpell, DateTime.Now);
             spellCoolDown.Add(retaliationSpell, DateTime.Now);
@@ -183,7 +182,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private void StartAttack()
         {
-            if (WowInterface.ObjectManager.TargetGuid != 0)
+            if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
             {
                 if (WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
                 {
@@ -228,7 +227,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && WowInterface.ObjectManager.Target.HasBuffByName("Enrage") && CustomCastSpell(enragedregenerationSpell))
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && WowInterface.ObjectManager.Player.HasBuffByName("Enrage") && CustomCastSpell(enragedregenerationSpell))
                     {
                         return;
                     }
@@ -273,21 +272,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count();
 
-                    if (nearEnemies > 2)
                     {
-                        if (HeroicStrikeEvent.Run() && WowInterface.ObjectManager.Player.Rage >= 40 && CustomCastSpell(cleaveSpell))
-                        {
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if (HeroicStrikeEvent.Run() && WowInterface.ObjectManager.Player.Rage >= 40 && CustomCastSpell(heroicStrikeSpell))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))

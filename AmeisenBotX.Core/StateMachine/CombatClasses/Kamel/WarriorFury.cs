@@ -74,6 +74,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(hamstringSpell, DateTime.Now);
             spellCoolDown.Add(victoryRushSpell, DateTime.Now);
             spellCoolDown.Add(chargeSpell, DateTime.Now);
+            spellCoolDown.Add(cleaveSpell, DateTime.Now);
             //Buffs||Defensive||Enrage
             spellCoolDown.Add(intimidatingShoutSpell, DateTime.Now);
             spellCoolDown.Add(retaliationSpell, DateTime.Now);
@@ -190,6 +191,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         WowInterface.HookManager.StartAutoAttack();
                     }
 
+                    if (CustomCastSpell(bloodrageSpell))
+                    {
+                        return;
+                    }
+
+                    if (CustomCastSpell(berserkerRageSpell))
+                    {
+                        return;
+                    }
+
                     if (CustomCastSpell(deathWishSpell))
                     {
                         return;
@@ -210,9 +221,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(bloodrageSpell))
+                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && (WowInterface.ObjectManager.Player.HasBuffByName("Bloodrage") || WowInterface.ObjectManager.Player.HasBuffByName("Recklessness") || WowInterface.ObjectManager.Player.HasBuffByName("Berserker Rage")))
                     {
-                        if (CustomCastSpell(enragedregenerationSpell)) 
+                        if (CustomCastSpell(enragedregenerationSpell))
                         {
                             return;
                         }
@@ -263,12 +274,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
+                    IEnumerable<WowUnit> unitsNearPlayer = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 5);
+
+                    if (unitsNearPlayer != null)
                     {
-                        return;
+                        if (unitsNearPlayer.Count() >= 3 && WowInterface.ObjectManager.Player.Rage >= 50 && CustomCastSpell(cleaveSpell))
+                        {
+                            return;
+                        }
                     }
-                    
-                    if (CustomCastSpell(berserkerRageSpell))
+
+                    if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
                     {
                         return;
                     }
