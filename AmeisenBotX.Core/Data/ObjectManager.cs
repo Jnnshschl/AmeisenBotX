@@ -20,10 +20,10 @@ namespace AmeisenBotX.Core.Data
         private readonly object queryLock = new object();
 
         private readonly WowObject[] wowObjects;
-        private List<ulong> partymemberGuids;
-        private List<WowUnit> partymembers;
-        private List<ulong> partypetGuids;
-        private List<WowUnit> partypets;
+        private IEnumerable<ulong> partymemberGuids;
+        private IEnumerable<WowUnit> partymembers;
+        private IEnumerable<ulong> partypetGuids;
+        private IEnumerable<WowUnit> partypets;
 
         public ObjectManager(WowInterface wowInterface, AmeisenBotConfig config)
         {
@@ -60,13 +60,13 @@ namespace AmeisenBotX.Core.Data
 
         public ulong PartyleaderGuid { get; private set; }
 
-        public List<ulong> PartymemberGuids { get { lock (queryLock) { return partymemberGuids.ToList(); } } }
+        public IEnumerable<ulong> PartymemberGuids { get { lock (queryLock) { return partymemberGuids; } } }
 
-        public List<WowUnit> Partymembers { get { lock (queryLock) { return partymembers.ToList(); } } }
+        public IEnumerable<WowUnit> Partymembers { get { lock (queryLock) { return partymembers; } } }
 
-        public List<ulong> PartyPetGuids { get { lock (queryLock) { return partypetGuids.ToList(); } } }
+        public IEnumerable<ulong> PartyPetGuids { get { lock (queryLock) { return partypetGuids; } } }
 
-        public List<WowUnit> PartyPets { get { lock (queryLock) { return partypets.ToList(); } } }
+        public IEnumerable<WowUnit> PartyPets { get { lock (queryLock) { return partypets; } } }
 
         public WowUnit Pet { get; private set; }
 
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Data
 
         public ulong TargetGuid { get; private set; }
 
-        public List<WowObject> WowObjects { get { lock (queryLock) { return wowObjects[..ObjectCount].ToList(); } } }
+        public IEnumerable<WowObject> WowObjects { get { lock (queryLock) { return wowObjects[..ObjectCount]; } } }
 
         public int ZoneId { get; private set; }
 
@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Data
         private WowInterface WowInterface { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds)
+        public WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds)
         {
             return WowObjects.OfType<WowGameobject>()
                 .Where(e => displayIds.Contains(e.DisplayId))
@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowUnit GetClosestWowUnitByDisplayId(List<int> displayIds, bool onlyQuestgiver = true)
+        public WowUnit GetClosestWowUnitByDisplayId(IEnumerable<int> displayIds, bool onlyQuestgiver = true)
         {
             return WowObjects.OfType<WowUnit>()
                 .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId))
@@ -117,34 +117,32 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public List<WowUnit> GetEnemiesInCombatWithUs(Vector3 position, double distance)
+        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit
         {
-            return GetNearEnemies<WowUnit>(position, distance)
+            return GetNearEnemies<T>(position, distance)
                 .Where(e => e.IsInCombat
                   && (PartymemberGuids.Contains(e.TargetGuid)
                       || PartyPetGuids.Contains(e.TargetGuid)
                       || e.TargetGuid == PlayerGuid
-                      || e.IsTaggedByMe))
-                .ToList();
+                      || e.IsTaggedByMe));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance)
+        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
         {
-            return GetNearEnemies<WowUnit>(position, distance)
+            return GetNearEnemies<T>(position, distance)
                 .Where(e => e.IsInCombat
                   && (PartymemberGuids.Contains(e.TargetGuid)
-                      || PartyPetGuids.Contains(e.TargetGuid)))
-                .ToList();
+                      || PartyPetGuids.Contains(e.TargetGuid)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public List<WowDynobject> GetNearAoeSpells()
+        public IEnumerable<WowDynobject> GetNearAoeSpells()
         {
-            return WowObjects.OfType<WowDynobject>().ToList();
+            return WowObjects.OfType<WowDynobject>();
         }
 
-        public List<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             return WowObjects.OfType<T>()
                 .Where(e => e != null
@@ -152,11 +150,11 @@ namespace AmeisenBotX.Core.Data
                          && !e.IsDead
                          && !e.IsNotAttackable
                          && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                         && e.Position.GetDistance(position) < distance)
-                .ToList();
+                         && e.Position.GetDistance(position) < distance);
         }
 
-        public List<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
         {
             return WowObjects.OfType<T>()
                 .Where(e => e != null
@@ -164,26 +162,25 @@ namespace AmeisenBotX.Core.Data
                          && !e.IsDead
                          && !e.IsNotAttackable
                          && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
-                         && e.Position.GetDistance(position) < distance)
-                .ToList();
+                         && e.Position.GetDistance(position) < distance);
         }
 
-        public List<WowUnit> GetNearPartymembers(Vector3 position, double distance)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, double distance) where T : WowUnit
         {
-            return WowObjects.OfType<WowUnit>()
+            return WowObjects.OfType<T>()
                 .Where(e => e != null
                          && e.Guid != PlayerGuid
                          && !e.IsDead
                          && !e.IsNotAttackable
-                         && PartymemberGuids.Contains(e.Guid)
-                         && e.Position.GetDistance(position) < distance)
-                .ToList();
+                         && (PartymemberGuids.Contains(e.Guid) || PartyPetGuids.Contains(e.Guid))
+                         && e.Position.GetDistance(position) < distance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public List<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance)
+        public IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance)
         {
-            return WowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance).ToList();
+            return WowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -329,10 +326,10 @@ namespace AmeisenBotX.Core.Data
                 if (PartyleaderGuid > 0)
                 {
                     partymemberGuids = ReadPartymemberGuids();
-                    partymembers = wowObjects.OfType<WowUnit>().Where(e => e.Guid == PlayerGuid || PartymemberGuids.Contains(e.Guid)).ToList();
+                    partymembers = wowObjects.OfType<WowUnit>().Where(e => e.Guid == PlayerGuid || partymemberGuids.Contains(e.Guid));
 
-                    partypets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
-                    partypetGuids = partypets.Select(e => e.Guid).ToList();
+                    partypets = wowObjects.OfType<WowUnit>().Where(e => partymemberGuids.Contains(e.SummonedByGuid));
+                    partypetGuids = partypets.Select(e => e.Guid);
                 }
             }
 
@@ -346,9 +343,8 @@ namespace AmeisenBotX.Core.Data
 
         private void CachePois()
         {
-            IEnumerable<WowObject> wowObjects = WowObjects.ToList();
-            IEnumerable<WowGameobject> wowGameobjects = wowObjects.OfType<WowGameobject>();
-            IEnumerable<WowUnit> wowUnits = wowObjects.OfType<WowUnit>();
+            IEnumerable<WowGameobject> wowGameobjects = WowObjects.OfType<WowGameobject>();
+            IEnumerable<WowUnit> wowUnits = WowObjects.OfType<WowUnit>();
 
             foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(OreNodes), e.DisplayId)))
             {
@@ -392,7 +388,7 @@ namespace AmeisenBotX.Core.Data
             return 0;
         }
 
-        private List<ulong> ReadPartymemberGuids()
+        private IEnumerable<ulong> ReadPartymemberGuids()
         {
             List<ulong> partymemberGuids = new List<ulong>();
 
@@ -407,7 +403,7 @@ namespace AmeisenBotX.Core.Data
                 && raidLeader != 0
                 && WowInterface.XMemory.Read(WowInterface.OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
-                List<IntPtr> raidPointers = raidStruct.GetPointers();
+                IEnumerable<IntPtr> raidPointers = raidStruct.GetPointers();
                 ConcurrentBag<ulong> guids = new ConcurrentBag<ulong>();
 
                 Parallel.ForEach(raidPointers, x =>
@@ -418,10 +414,10 @@ namespace AmeisenBotX.Core.Data
                     }
                 });
 
-                partymemberGuids.AddRange(guids.ToList());
+                partymemberGuids.AddRange(guids);
             }
 
-            return partymemberGuids.Where(e => e != 0).Distinct().ToList();
+            return partymemberGuids.Where(e => e != 0).Distinct();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -7,6 +7,7 @@ using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
@@ -128,7 +129,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 12.0).Count;
+                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 12.0).Count();
 
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
                         && CastSpellIfPossibleDk(runeTapSpell, 0, false, false, true))

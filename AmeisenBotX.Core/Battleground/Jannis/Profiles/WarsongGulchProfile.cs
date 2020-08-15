@@ -266,8 +266,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 return false;
             }
 
-            int friends = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count;
-            int enemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count;
+            int friends = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count();
+            int enemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 18.0).Count();
 
             return enemies > 0 && friends >= enemies;
         }

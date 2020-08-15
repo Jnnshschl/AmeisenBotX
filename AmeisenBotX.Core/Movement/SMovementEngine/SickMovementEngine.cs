@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     new Selector<MovementBlackboard>
                     (
                         "NeedToUnstuck",
-                        (b) => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                        (b) => false, // ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
                         new Leaf<MovementBlackboard>((b) => DoUnstuck()),
                         new Selector<MovementBlackboard>
                         (
@@ -120,17 +120,17 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         {
             if (Config.UseMounts)
             {
-                if (MountCheck.Run() || IsCastingMount)
+                if ((MountCheck.Run() || IsCastingMount) && WowInterface.CharacterManager.Mounts != null)
                 {
                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
-                    && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
-                    && !IsGhost
-                    && WowInterface.CharacterManager.Mounts?.Count > 0
-                    && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
-                    && !WowInterface.ObjectManager.Player.IsMounted
-                    && WowInterface.HookManager.IsOutdoors())
+                        && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
+                        && !IsGhost
+                        && WowInterface.CharacterManager.Mounts.Any()
+                        && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
+                        && !WowInterface.ObjectManager.Player.IsMounted
+                        && WowInterface.HookManager.IsOutdoors())
                     {
-                        List<WowMount> filteredMounts;
+                        IEnumerable<WowMount> filteredMounts;
 
                         if (Config.UseOnlySpecificMounts)
                         {
@@ -141,9 +141,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             filteredMounts = WowInterface.CharacterManager.Mounts;
                         }
 
-                        if (filteredMounts != null && filteredMounts.Count >= 0)
+                        if (filteredMounts != null && filteredMounts.Any())
                         {
-                            WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
+                            WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                             WowInterface.MovementEngine.StopMovement();
                             IsCastingMount = true;
                             WowInterface.HookManager.Mount(mount.Index);

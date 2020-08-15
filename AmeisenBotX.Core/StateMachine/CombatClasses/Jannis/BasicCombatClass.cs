@@ -444,7 +444,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public TimegatedEvent NearInterruptUnitsEvent { get; set; }
 
-        public List<string> PriorityTargets { get => DpsTargetManager.PriorityTargets; set => DpsTargetManager.PriorityTargets = value; }
+        public IEnumerable<string> PriorityTargets { get => DpsTargetManager.PriorityTargets; set => DpsTargetManager.PriorityTargets = value; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
@@ -849,7 +849,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool SelectTarget(TargetManager targetManager)
         {
-            if (targetManager.GetUnitToTarget(out List<WowUnit> targetToTarget))
+            if (targetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
             {
                 ulong guid = targetToTarget.First().Guid;
 

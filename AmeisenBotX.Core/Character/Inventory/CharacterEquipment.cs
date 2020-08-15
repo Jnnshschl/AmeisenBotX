@@ -68,16 +68,22 @@ namespace AmeisenBotX.Core.Character.Inventory
         public void Update()
         {
             string resultJson = WowInterface.HookManager.GetEquipmentItems();
-            if (resultJson.Length > 1 && resultJson.Substring(resultJson.Length - 2, 2).Equals(",]"))
+
+            if (string.IsNullOrWhiteSpace(resultJson))
             {
-                resultJson.Remove(resultJson.Length - 2);
+                return;
+            }
+
+            if (resultJson.Length > 1 && resultJson.Substring(resultJson.Length - 2, 2).Equals(",]", StringComparison.OrdinalIgnoreCase))
+            {
+                resultJson = resultJson.Remove(resultJson.Length - 2);
             }
 
             try
             {
                 List<WowBasicItem> rawEquipment = ItemFactory.ParseItemList(resultJson);
 
-                if (rawEquipment != null && rawEquipment.Count > 0)
+                if (rawEquipment != null && rawEquipment.Any())
                 {
                     lock (queryLock)
                     {

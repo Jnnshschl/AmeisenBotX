@@ -99,13 +99,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if ((WowInterface.ObjectManager.PartymemberGuids.Count > 0 || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+            if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
                 && NeedToHealSomeone())
             {
                 return;
             }
 
-            if ((WowInterface.ObjectManager.PartymemberGuids.Count == 0 || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
+            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
                     && CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -144,12 +144,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
                 WowUnit target = unitsToHeal.First();
 
-                if (unitsToHeal.Count > 3
-                 && CastSpellIfPossible(prayerOfHealingSpell, target.Guid, true))
+                if (unitsToHeal.Count() > 3
+                    && CastSpellIfPossible(prayerOfHealingSpell, target.Guid, true))
                 {
                     return true;
                 }

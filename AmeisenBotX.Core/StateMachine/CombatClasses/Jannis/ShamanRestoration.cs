@@ -130,7 +130,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (HealTargetManager.GetUnitToTarget(out List<WowUnit> unitsToHeal))
+            if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
 
@@ -142,13 +142,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         return true;
                     }
 
-                    if (unitsToHeal.Count > 4
+                    if (unitsToHeal.Count() > 4
                         && CastSpellIfPossible(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return true;
                     }
 
-                    if (unitsToHeal.Count > 6
+                    if (unitsToHeal.Count() > 6
                         && (CastSpellIfPossible(naturesSwiftnessSpell, 0, true)
                         || CastSpellIfPossible(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {

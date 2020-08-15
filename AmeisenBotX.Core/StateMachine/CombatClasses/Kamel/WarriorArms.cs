@@ -273,7 +273,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count;
+                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count();
 
                     if (nearEnemies > 2)
                     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Data
 {
-    public delegate void ObjectUpdateComplete(List<WowObject> wowObjects);
+    public delegate void ObjectUpdateComplete(IEnumerable<WowObject> wowObjects);
 
     public interface IObjectManager
     {
@@ -29,13 +29,13 @@ namespace AmeisenBotX.Core.Data
 
         ulong PartyleaderGuid { get; }
 
-        List<ulong> PartymemberGuids { get; }
+        IEnumerable<ulong> PartymemberGuids { get; }
 
-        List<WowUnit> Partymembers { get; }
+        IEnumerable<WowUnit> Partymembers { get; }
 
-        List<ulong> PartyPetGuids { get; }
+        IEnumerable<ulong> PartyPetGuids { get; }
 
-        List<WowUnit> PartyPets { get; }
+        IEnumerable<WowUnit> PartyPets { get; }
 
         WowUnit Pet { get; }
 
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Data
 
         ulong TargetGuid { get; }
 
-        List<WowObject> WowObjects { get; }
+        IEnumerable<WowObject> WowObjects { get; }
 
         int ZoneId { get; }
 
@@ -61,23 +61,23 @@ namespace AmeisenBotX.Core.Data
 
         int ObjectCount { get; }
 
-        WowGameobject GetClosestWowGameobjectByDisplayId(List<int> displayIds);
+        WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds);
 
-        WowUnit GetClosestWowUnitByDisplayId(List<int> displayIds, bool onlyQuestgiver = true);
+        WowUnit GetClosestWowUnitByDisplayId(IEnumerable<int> displayIds, bool onlyQuestgiver = true);
 
-        List<WowUnit> GetEnemiesInCombatWithUs(Vector3 position, double distance);
+        IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit;
 
-        List<WowUnit> GetEnemiesTargetingPartymembers(Vector3 position, double distance);
+        IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit;
 
-        List<WowDynobject> GetNearAoeSpells();
+        IEnumerable<WowDynobject> GetNearAoeSpells();
 
-        List<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
 
-        List<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
 
-        List<WowUnit> GetNearPartymembers(Vector3 position, double distance);
+        IEnumerable<T> GetNearPartymembers<T>(Vector3 position, double distance) where T : WowUnit;
 
-        List<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance);
+        IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance);
 
         T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 

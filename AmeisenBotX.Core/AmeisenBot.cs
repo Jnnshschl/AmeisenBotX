@@ -169,6 +169,7 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.Instance.Log("AmeisenBot", "Pausing", LogLevel.Debug);
             IsRunning = false;
+            StateMachine.SetState(BotState.Idle);
         }
 
         public void ReloadConfig()
@@ -466,7 +467,7 @@ namespace AmeisenBotX.Core
             }
         }
 
-        private void ObjectManager_OnObjectUpdateComplete(List<WowObject> wowObjects)
+        private void ObjectManager_OnObjectUpdateComplete(IEnumerable<WowObject> wowObjects)
         {
             if (!NeedToSetupRconClient && WowInterface.ObjectManager.Player != null)
             {
@@ -769,7 +770,7 @@ namespace AmeisenBotX.Core
 
                             WowInterface.RconClient.PullPendingActions().Wait();
 
-                            if (WowInterface.RconClient.PendingActions?.Count > 0)
+                            if (WowInterface.RconClient.PendingActions.Any())
                             {
                                 switch (WowInterface.RconClient.PendingActions.First())
                                 {

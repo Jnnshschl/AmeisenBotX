@@ -58,7 +58,7 @@ namespace AmeisenBotX
             OreBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF6F4E37"));
             HerbBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF7BB661"));
 
-            AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += (List<WowObject> wowObjects) => { NeedToUpdateMap = true; };
+            AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += (IEnumerable<WowObject> wowObjects) => { NeedToUpdateMap = true; };
 
             InitializeComponent();
         }
@@ -326,7 +326,7 @@ namespace AmeisenBotX
             return bitmapImageMap;
         }
 
-        private Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
+        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
         {
             // X and Y swapped intentionally here !
             double relativeX = x + ((posA.Y - posB.Y) * scale);
@@ -422,17 +422,16 @@ namespace AmeisenBotX
 
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
         {
-            List<WowGameobject> herbNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
+            IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
-                .Where(e => Enum.IsDefined(typeof(HerbNodes), e.DisplayId))
-                .ToList();
+                .Where(e => Enum.IsDefined(typeof(HerbNodes), e.DisplayId));
 
-            for (int i = 0; i < herbNodes.Count; ++i)
+            for (int i = 0; i < herbNodes.Count(); ++i)
             {
-                WowGameobject gameobject = herbNodes[i];
+                WowGameobject gameobject = herbNodes.ElementAt(i);
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
-                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((HerbNodes)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
+                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((HerbNodes)gameobject.DisplayId).ToString(), HerbBrush, TextBrush, TextFont, graphics);
             }
         }
 

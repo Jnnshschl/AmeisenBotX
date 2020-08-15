@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             WowInterface = wowInterface;
         }
 
-        public List<string> PriorityTargets { get; set; }
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
         }
 
-        public bool SelectTarget(out List<WowUnit> possibleTargets)
+        public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
             if (WowInterface.ObjectManager.TargetGuid != 0
                 && (WowInterface.ObjectManager.Target.IsDead
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            if (PriorityTargets != null && PriorityTargets.Count > 0)
+            if (PriorityTargets != null && PriorityTargets.Any())
             {
                 IEnumerable<WowUnit> nearPriorityEnemies = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
                     .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             if (nearEnemies.Any())
             {
-                possibleTargets = nearEnemies.ToList();
+                possibleTargets = nearEnemies;
                 return true;
             }
 
