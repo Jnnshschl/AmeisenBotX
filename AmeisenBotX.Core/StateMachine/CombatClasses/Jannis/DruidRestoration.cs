@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObject;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
+using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -166,19 +167,24 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
+                AmeisenLogger.Instance.Log("DRUID", $"Need to heal {unitsToHeal.Count()} units");
+
                 if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 2
                     && CastSpellIfPossible(tranquilitySpell, 0, true))
                 {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {tranquilitySpell}");
                     return true;
                 }
 
                 WowUnit target = unitsToHeal.First();
+                AmeisenLogger.Instance.Log("DRUID", $"Healing {target}");
 
-                if (target.HealthPercentage < 75.0
-                    && target.HealthPercentage > 50.0
+                if (target.HealthPercentage < 90.0
+                    && target.HealthPercentage > 78.0
                     && unitsToHeal.Count(e => e.HealthPercentage < 75.0) > 2
                     && CastSpellIfPossible(wildGrowthSpell, target.Guid, true))
                 {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {wildGrowthSpell}");
                     return true;
                 }
 
@@ -186,6 +192,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && CastSpellIfPossible(naturesSwiftnessSpell, target.Guid, true)
                     && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
                 {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {naturesSwiftnessSpell} and {healingTouchSpell}");
                     return true;
                 }
 
@@ -195,43 +202,38 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && CastSpellIfPossible(swiftmendSpell, target.Guid, true)
                     && SwiftmendEvent.Run())
                 {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {swiftmendSpell}");
                     return true;
                 }
 
                 if (target.HealthPercentage < 95.0
-                    && target.HealthPercentage > 85.0
+                    && target.HealthPercentage > 80.0
                     && !target.HasBuffByName(rejuvenationSpell)
                     && CastSpellIfPossible(rejuvenationSpell, target.Guid, true))
                 {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {rejuvenationSpell}");
                     return true;
                 }
 
-                if (target.HealthPercentage < 98.0
-                    && target.HealthPercentage > 85.0
-                    && !target.HasBuffByName(lifebloomSpell)
-                    && CastSpellIfPossible(lifebloomSpell, target.Guid, true))
+                // if (target.HealthPercentage < 98.0
+                //     && target.HealthPercentage > 80.0
+                //     && !target.HasBuffByName(lifebloomSpell)
+                //     && CastSpellIfPossible(lifebloomSpell, target.Guid, true))
+                // {
+                //     return true;
+                // }
+
+                if (target.HealthPercentage < 85.0
+                    && CastSpellIfPossible(regrowthSpell, target.Guid, true))
                 {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {regrowthSpell}");
                     return true;
                 }
 
                 if (target.HealthPercentage < 85.0
-                    && target.HealthPercentage > 65.0
-                    && !target.HasBuffByName(regrowthSpell)
-                    && CastSpellIfPossible(regrowthSpell, target.Guid, true))
-                {
-                    return true;
-                }
-
-                if (target.HealthPercentage < 65.0
-                    && (target.HasBuffByName(regrowthSpell) || target.HasBuffByName(rejuvenationSpell) || target.HasBuffByName(wildGrowthSpell))
                     && CastSpellIfPossible(nourishSpell, target.Guid, true))
                 {
-                    return true;
-                }
-
-                if (target.HealthPercentage < 65.0
-                    && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
-                {
+                    AmeisenLogger.Instance.Log("DRUID", $"Casting {nourishSpell}");
                     return true;
                 }
             }

@@ -172,7 +172,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             playerToFollow = null;
 
-            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead);
 
             if (wowPlayers.Any())
             {

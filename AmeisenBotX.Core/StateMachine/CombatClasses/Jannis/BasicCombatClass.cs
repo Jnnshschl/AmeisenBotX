@@ -519,9 +519,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // Buffs, Debuffs
             // --------------------------- >
 
-            if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick()
-                || TargetAuraManager.Tick()
+            if (TargetAuraManager.Tick()
                 || TargetInterruptManager.Tick())
             {
                 return;
@@ -622,11 +620,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
-                if (!isTargetMyself && WowInterface.ObjectManager.TargetGuid != 0 && !TargetInLineOfSight)
-                {
-                    return false;
-                }
-
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsResource || Spells[spellName].Costs < currentResourceAmount)
@@ -655,11 +648,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (GetValidTarget(guid, out WowUnit target))
             {
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
-
-                if (!isTargetMyself && !TargetInLineOfSight)
-                {
-                    return false;
-                }
 
                 Dictionary<RuneType, int> runes = WowInterface.HookManager.GetRunesReady();
 
@@ -711,11 +699,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
 
-                if (!isTargetMyself && !TargetInLineOfSight)
-                {
-                    return false;
-                }
-
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsEnergy || Spells[spellName].Costs < WowInterface.ObjectManager.Player.Energy)
@@ -756,11 +739,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
 
                 bool isTargetMyself = target != null && target.Guid == WowInterface.ObjectManager.PlayerGuid;
-
-                if (!isTargetMyself && !TargetInLineOfSight)
-                {
-                    return false;
-                }
 
                 if (Spells[spellName] != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)

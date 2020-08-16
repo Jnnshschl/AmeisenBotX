@@ -24,12 +24,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                 (b) => Config.DungeonUsePartyMode,
                 new Selector<GhostBlackboard>
                 (
-                    (b) => IsUnitToFollowNear(out b.playerToFollowGuid),
-                    new Leaf<GhostBlackboard>(FollowNearestUnit),
+                    (b) => WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
+                    new Leaf<GhostBlackboard>(RunToDungeonProfileEntry),
                     new Selector<GhostBlackboard>
                     (
-                        (b) => WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
-                        new Leaf<GhostBlackboard>(RunToDungeonProfileEntry),
+                        (b) => IsUnitToFollowNear(out b.playerToFollowGuid),
+                        new Leaf<GhostBlackboard>(FollowNearestUnit),
                         new Leaf<GhostBlackboard>(RunToCorpsePositionAndSearchForPortals)
                     )
                 ),
@@ -75,12 +75,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            WowInterface.MovementEngine.IsGhost = true;
             Blackboard = new GhostBlackboard(WowInterface);
         }
 
         public override void Execute()
         {
+            WowInterface.MovementEngine.IsGhost = true;
+
             if (WowInterface.ObjectManager.Player.Health > 1)
             {
                 StateMachine.SetState(BotState.Idle);

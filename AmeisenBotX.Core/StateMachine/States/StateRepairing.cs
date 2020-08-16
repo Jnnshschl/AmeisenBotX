@@ -44,22 +44,24 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (IsRepairNpcNear(out WowUnit selectedUnit))
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
-
-                if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
+                if (!WowInterface.MovementEngine.IsAtTargetPosition)
                 {
-                    ++BlacklistCounter;
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                    if (BlacklistCounter > 2)
+                    if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
                     {
-                        WowInterface.MovementEngine.StopMovement();
-                        Blacklist.Add(selectedUnit.Guid);
-                        BlacklistCounter = 0;
-                        return;
+                        ++BlacklistCounter;
+
+                        if (BlacklistCounter > 2)
+                        {
+                            WowInterface.MovementEngine.StopMovement();
+                            Blacklist.Add(selectedUnit.Guid);
+                            BlacklistCounter = 0;
+                            return;
+                        }
                     }
                 }
-
-                if (WowInterface.MovementEngine.IsAtTargetPosition && InteractionEvent.Run())
+                else if (InteractionEvent.Run())
                 {
                     if (WowInterface.ObjectManager.TargetGuid != selectedUnit.Guid)
                     {
@@ -67,6 +69,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
 
                     WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                    WowInterface.MovementEngine.StopMovement();
 
                     if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
                     {
@@ -79,8 +82,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.UnitSelectGossipOption(1);
                         return;
                     }
-
-                    WowInterface.HookManager.RepairAllItems();
                 }
             }
             else

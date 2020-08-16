@@ -221,7 +221,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 double distance = pos.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                if (UnitIsOutOfRange(distance))
+                if (playerToFollow.IsDead || UnitIsOutOfRange(distance))
                 {
                     playerToFollow = null;
                 }

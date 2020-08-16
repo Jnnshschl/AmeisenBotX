@@ -22,13 +22,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
             IEnumerable<WowUnit> healableUnits = WowInterface.ObjectManager.Partymembers;
-            healableUnits = healableUnits.Concat(WowInterface.ObjectManager.PartyPets);
+            // healableUnits = healableUnits.Concat(WowInterface.ObjectManager.PartyPets);
 
             // order by type id, so that players have priority
             possibleTargets = healableUnits
                 .Where(e => e.Health < e.MaxHealth && !e.IsDead)
                 .OrderByDescending(e => e.Type)
-                .ThenBy(e => e.HealthPercentage);
+                .ThenByDescending(e => e.MaxHealth - e.Health);
 
             return possibleTargets.Any();
         }

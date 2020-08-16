@@ -11,6 +11,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Enter()
         {
             AmeisenLogger.Instance.Log("LoadingScreen", "Entered loading screen");
+            WowInterface.CombatClass.PriorityTargets = null;
         }
 
         public override void Execute()

@@ -1084,6 +1084,7 @@ namespace AmeisenBotX.Core.Hook
             };
 
             InjectAndExecute(asm, false, out _);
+            WowInterface.ObjectManager.UpdateWowObjects();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

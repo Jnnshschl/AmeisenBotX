@@ -55,6 +55,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Timer = System.Threading.Timer;
 
 namespace AmeisenBotX.Core
@@ -583,6 +584,8 @@ namespace AmeisenBotX.Core
                 return;
             }
 
+            Task.Delay(2000).Wait();
+
             if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
             {
                 WowInterface.HookManager.RepairAllItems();
@@ -616,6 +619,7 @@ namespace AmeisenBotX.Core
                     {
                         WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
                         WowInterface.HookManager.CofirmBop();
+                        Task.Delay(50).Wait();
                     }
                 }
             }

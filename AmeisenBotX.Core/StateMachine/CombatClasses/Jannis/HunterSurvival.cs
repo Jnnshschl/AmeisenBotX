@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { aspectOfTheDragonhawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheDragonhawkSpell, 0, true) },
-                { aspectOfTheHawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheHawkSpell, 0, true) },
+                { aspectOfTheHawkSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(aspectOfTheDragonhawkSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheHawkSpell, 0, true) },
                 { aspectOfTheViperSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(aspectOfTheViperSpell, 0, true) }
             };
 

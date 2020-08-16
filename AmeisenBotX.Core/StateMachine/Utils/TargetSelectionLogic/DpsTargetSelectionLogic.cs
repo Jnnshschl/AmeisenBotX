@@ -24,6 +24,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
+            if ((PriorityTargets == null || !PriorityTargets.Any()) && WowInterface.ObjectManager.MapId == MapId.UtgardeKeep)
+            {
+                PriorityTargets = new List<string>() { "Frost Tomb" };
+            }
+
             if (WowInterface.ObjectManager.TargetGuid != 0
                 && (WowInterface.ObjectManager.Target.IsDead
                     || WowInterface.ObjectManager.Target.IsNotAttackable
@@ -36,7 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             if (PriorityTargets != null && PriorityTargets.Any())
             {
                 IEnumerable<WowUnit> nearPriorityEnemies = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
+                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.Health > 0 && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
                 if (nearPriorityEnemies != null && nearPriorityEnemies.Any())
@@ -53,9 +58,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     && e.IsInCombat
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
-                .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
+                .OrderByDescending(e => e.Type) // make sure players are at the top (pvp)
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
-                .ThenBy(e => e.HealthPercentage);
+                .ThenByDescending(e => e.MaxHealth);
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
