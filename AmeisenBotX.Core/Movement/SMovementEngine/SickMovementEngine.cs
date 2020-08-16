@@ -18,8 +18,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 {
     public class SickMovementEngine : IMovementEngine
     {
-        private AmeisenBotConfig Config { get; }
-
         public SickMovementEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
@@ -99,21 +97,256 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             );
         }
 
-        private BehaviorTreeStatus HandleWaypointCheck(MovementBlackboard blackboard)
+        public IShortcut ActiveShortcut { get; set; }
+
+        public AmeisenBotBehaviorTree<MovementBlackboard> BehaviorTree { get; }
+
+        public MovementBlackboard Blackboard { get; }
+
+        public bool ForceDirectMove { get; private set; }
+
+        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
+
+        public bool IsCastingMount { get; set; }
+
+        public bool IsGhost { get; set; }
+
+        public bool JumpOnNextMove { get; private set; }
+
+        public Vector3 LastPlayerPosition { get; private set; }
+
+        public TimegatedEvent MountCheck { get; }
+
+        public double MovedDistance { get; private set; }
+
+        public MovementAction MovementAction { get; private set; }
+
+        public ConcurrentQueue<Vector3> Nodes { get; private set; }
+
+        public List<Vector3> Path => Nodes.ToList();
+
+        public Vector3 PathFinalNode { get; private set; }
+
+        public PathfindingStatus PathfindingStatus { get; private set; }
+
+        public BasicVehicle PlayerVehicle { get; }
+
+        public Vector3 ShortcutPosition { get; private set; }
+
+        public bool ShouldBeMoving { get; private set; }
+
+        public int StuckCounter { get; private set; }
+
+        public Vector3 StuckPosition { get; private set; }
+
+        public float StuckRotation { get; private set; }
+
+        public Vector3 TargetPosition { get; private set; }
+
+        public float TargetRotation { get; private set; }
+
+        public Vector3 UnstuckTargetPosition { get; private set; }
+
+        private AmeisenBotConfig Config { get; }
+
+        private TimegatedEvent JumpCheckEvent { get; }
+
+        private Timer MovementWatchdog { get; }
+
+        private TimegatedEvent PathfindingEvent { get; }
+
+        private List<IShortcut> Shortcuts { get; }
+
+        private WowInterface WowInterface { get; }
+
+        public void Execute()
         {
-            if (Nodes.TryDequeue(out _))
+            if (MovementAction != MovementAction.None)
             {
-                if (Nodes.Count == 0)
+                // check for obstacles in our way
+                if (WowInterface.MovementSettings.EnableTracelineJumpCheck
+                    && !JumpOnNextMove
+                    && JumpCheckEvent.Run())
                 {
-                    MovementAction = MovementAction.None;
+                    Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance);
+
+                    if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, pos, WowInterface.MovementSettings.JumpCheckHeight))
+                    {
+                        JumpOnNextMove = true;
+                    }
                 }
 
+                if (ShortcutPosition == default)
+                {
+                    ShortcutPosition = TargetPosition;
+                }
+
+                if (ActiveShortcut != null && ActiveShortcut.UseShortcut(WowInterface.ObjectManager.Player.Position, ShortcutPosition, out Vector3 shortcutPosition, out bool shortcutUsePathfinding))
+                {
+                    TargetPosition = shortcutPosition;
+
+                    if (!shortcutUsePathfinding)
+                    {
+                        Nodes.Clear();
+                        MovementAction = MovementAction.DirectMove;
+                        ForceDirectMove = true;
+                    }
+                }
+                else
+                {
+                    ShortcutPosition = default;
+                }
+
+                BehaviorTree.Tick();
+                ForceDirectMove = false;
+            }
+        }
+
+        public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
+        {
+            return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
+        }
+
+        public bool IsNearPosition(Vector3 position) => position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
+
+        public void Reset()
+        {
+            MovementAction = MovementAction.None;
+            TargetPosition = Vector3.Zero;
+            TargetRotation = 0f;
+
+            StuckCounter = 0;
+            StuckPosition = default;
+            ShouldBeMoving = false;
+
+            if (Nodes.Count > 0)
+            {
+                Nodes.Clear();
+            }
+        }
+
+        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false)
+        {
+            if (ActiveShortcut != null && (disableShortcuts || ActiveShortcut.Finished))
+            {
+                ActiveShortcut = null;
+            }
+
+            if (MovementAction == movementAction
+                && TargetPosition == positionToGoTo
+                && TargetRotation == targetRotation)
+            {
+                return;
+            }
+
+            MovementAction = movementAction;
+            TargetPosition = positionToGoTo;
+            TargetRotation = targetRotation;
+
+            double distanceToTargetPos = WowInterface.ObjectManager.Player.Position.GetDistance(positionToGoTo) * 2.0;
+
+            if (!disableShortcuts && Shortcuts.Any(e => distanceToTargetPos >= e.MinDistanceUntilWorth))
+            {
+                IShortcut useableShortcut = Shortcuts.FirstOrDefault(e => e.MapToUseOn == WowInterface.ObjectManager.MapId && e.IsUseable(WowInterface.ObjectManager.Player.Position, positionToGoTo));
+
+                if (useableShortcut != null)
+                {
+                    ActiveShortcut = useableShortcut;
+                }
+            }
+        }
+
+        public void StopMovement()
+        {
+            WowInterface.HookManager.StopClickToMoveIfActive();
+            Reset();
+        }
+
+        private bool DoINeedToFindAPath()
+        {
+            return PathfindingEvent.Ready
+                && (Nodes == null || Nodes.Count == 0                // we have no path
+                || PathFinalNode.GetDistance(TargetPosition) > 1.0); // target position changed
+        }
+
+        private BehaviorTreeStatus DoUnstuck()
+        {
+            if (StuckPosition == default)
+            {
+                StuckPosition = WowInterface.ObjectManager.Player.Position;
+                StuckRotation = WowInterface.ObjectManager.Player.Rotation;
+
+                Vector3 pos = BotMath.CalculatePositionBehind(WowInterface.ObjectManager.Player.Position, StuckRotation, WowInterface.MovementSettings.UnstuckDistance);
+                UnstuckTargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, pos, 4f);
+            }
+            else
+            {
+                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 0.0
+                    && StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
+                {
+                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction.Moving, UnstuckTargetPosition);
+                    WowInterface.CharacterManager.Jump();
+                }
+                else
+                {
+                    Reset();
+                    return BehaviorTreeStatus.Success;
+                }
+            }
+
+            return BehaviorTreeStatus.Ongoing;
+        }
+
+        private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
+        {
+            List<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+            PathfindingEvent.Run();
+
+            if (path != null && path.Count > 0)
+            {
+                Nodes.Clear();
+
+                for (int i = 0; i < path.Count; ++i)
+                {
+                    Nodes.Enqueue(path[i]);
+                }
+
+                PathFinalNode = Nodes.Last();
+                PathfindingStatus = PathFinalNode.GetDistance(TargetPosition) > 3.0 ? PathfindingStatus.PathIncomplete : PathfindingStatus.PathComplete;
                 return BehaviorTreeStatus.Success;
             }
             else
             {
+                PathfindingStatus = PathfindingStatus.Failed;
                 return BehaviorTreeStatus.Failed;
             }
+        }
+
+        private BehaviorTreeStatus HandleDirectMoving(MovementBlackboard blackboard)
+        {
+            if (Nodes.TryPeek(out Vector3 checkNodePos)
+                && IsNearPosition(checkNodePos))
+            {
+                Nodes.TryDequeue(out _);
+            }
+
+            Vector3 targetPos = Nodes.Count > 1 && Nodes.TryPeek(out Vector3 node) ? node : TargetPosition;
+            Vector3 positionToGoTo;
+
+            if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
+            {
+                PlayerVehicle.IsOnWaterSurface = WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsUnderwater;
+                positionToGoTo = targetPos;
+            }
+            else
+            {
+                positionToGoTo = targetPos;  // WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+            }
+
+            PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, positionToGoTo, TargetRotation);
+            ShouldBeMoving = true;
+
+            return IsNearPosition(TargetPosition) ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
         }
 
         private BehaviorTreeStatus HandleMovement(MovementBlackboard blackboard)
@@ -179,252 +412,19 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        private BehaviorTreeStatus HandleDirectMoving(MovementBlackboard blackboard)
+        private BehaviorTreeStatus HandleWaypointCheck(MovementBlackboard blackboard)
         {
-            if (Nodes.TryPeek(out Vector3 checkNodePos)
-                && IsNearPosition(checkNodePos))
+            if (Nodes.TryDequeue(out _))
             {
-                Nodes.TryDequeue(out _);
-            }
-
-            Vector3 targetPos = Nodes.Count > 1 && Nodes.TryPeek(out Vector3 node) ? node : TargetPosition;
-            Vector3 positionToGoTo;
-
-            if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
-            {
-                PlayerVehicle.IsOnWaterSurface = WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsUnderwater;
-                positionToGoTo = targetPos;
-            }
-            else
-            {
-                positionToGoTo = targetPos;  // WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
-            }
-
-            PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, positionToGoTo, TargetRotation);
-            ShouldBeMoving = true;
-
-            return IsNearPosition(TargetPosition) ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
-        }
-
-        public IShortcut ActiveShortcut { get; set; }
-
-        public AmeisenBotBehaviorTree<MovementBlackboard> BehaviorTree { get; }
-
-        public MovementBlackboard Blackboard { get; }
-
-        public bool ForceDirectMove { get; private set; }
-
-        public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
-
-        public bool IsNearPosition(Vector3 position) => position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
-
-        public bool IsCastingMount { get; set; }
-
-        public bool IsGhost { get; set; }
-
-        public bool JumpOnNextMove { get; private set; }
-
-        public Vector3 LastPlayerPosition { get; private set; }
-
-        public TimegatedEvent MountCheck { get; }
-
-        public double MovedDistance { get; private set; }
-
-        public MovementAction MovementAction { get; private set; }
-
-        public ConcurrentQueue<Vector3> Nodes { get; private set; }
-
-        public List<Vector3> Path => Nodes.ToList();
-
-        public BasicVehicle PlayerVehicle { get; }
-
-        public Vector3 ShortcutPosition { get; private set; }
-
-        public bool ShouldBeMoving { get; private set; }
-
-        public int StuckCounter { get; private set; }
-
-        public Vector3 StuckPosition { get; private set; }
-
-        public float StuckRotation { get; private set; }
-
-        public Vector3 TargetPosition { get; private set; }
-
-        public Vector3 PathFinalNode { get; private set; }
-
-        public float TargetRotation { get; private set; }
-
-        public Vector3 UnstuckTargetPosition { get; private set; }
-
-        public PathfindingStatus PathfindingStatus { get; private set; }
-
-        private TimegatedEvent JumpCheckEvent { get; }
-
-        private TimegatedEvent PathfindingEvent { get; }
-
-        private Timer MovementWatchdog { get; }
-
-        private List<IShortcut> Shortcuts { get; }
-
-        private WowInterface WowInterface { get; }
-
-        public void Execute()
-        {
-            if (MovementAction != MovementAction.None)
-            {
-                // check for obstacles in our way
-                if (WowInterface.MovementSettings.EnableTracelineJumpCheck
-                    && !JumpOnNextMove
-                    && JumpCheckEvent.Run())
+                if (Nodes.Count == 0)
                 {
-                    Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance);
-
-                    if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, pos, WowInterface.MovementSettings.JumpCheckHeight))
-                    {
-                        JumpOnNextMove = true;
-                    }
+                    MovementAction = MovementAction.None;
                 }
 
-                if (ShortcutPosition == default)
-                {
-                    ShortcutPosition = TargetPosition;
-                }
-
-                if (ActiveShortcut != null && ActiveShortcut.UseShortcut(WowInterface.ObjectManager.Player.Position, ShortcutPosition, out Vector3 shortcutPosition, out bool shortcutUsePathfinding))
-                {
-                    TargetPosition = shortcutPosition;
-
-                    if (!shortcutUsePathfinding)
-                    {
-                        Nodes.Clear();
-                        MovementAction = MovementAction.DirectMove;
-                        ForceDirectMove = true;
-                    }
-                }
-                else
-                {
-                    ShortcutPosition = default;
-                }
-
-                BehaviorTree.Tick();
-                ForceDirectMove = false;
-            }
-        }
-
-        public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
-        {
-            return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
-        }
-
-        public void Reset()
-        {
-            MovementAction = MovementAction.None;
-            TargetPosition = Vector3.Zero;
-            TargetRotation = 0f;
-
-            StuckCounter = 0;
-            StuckPosition = default;
-            ShouldBeMoving = false;
-
-            if (Nodes.Count > 0)
-            {
-                Nodes.Clear();
-            }
-        }
-
-        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false)
-        {
-            if (ActiveShortcut != null && (disableShortcuts || ActiveShortcut.Finished))
-            {
-                ActiveShortcut = null;
-            }
-
-            if (MovementAction == movementAction
-                && TargetPosition == positionToGoTo
-                && TargetRotation == targetRotation)
-            {
-                return;
-            }
-
-            MovementAction = movementAction;
-            TargetPosition = positionToGoTo;
-            TargetRotation = targetRotation;
-
-            double distanceToTargetPos = WowInterface.ObjectManager.Player.Position.GetDistance(positionToGoTo) * 2.0;
-
-            if (!disableShortcuts && Shortcuts.Any(e => distanceToTargetPos >= e.MinDistanceUntilWorth))
-            {
-                IShortcut useableShortcut = Shortcuts.FirstOrDefault(e => e.MapToUseOn == WowInterface.ObjectManager.MapId && e.IsUseable(WowInterface.ObjectManager.Player.Position, positionToGoTo));
-
-                if (useableShortcut != null)
-                {
-                    ActiveShortcut = useableShortcut;
-                }
-            }
-        }
-
-        public void StopMovement()
-        {
-            WowInterface.HookManager.StopClickToMoveIfActive();
-            Reset();
-        }
-
-        private bool DoINeedToFindAPath()
-        {
-            return PathfindingEvent.Ready
-                && (Nodes == null || Nodes.Count == 0                // we have no path
-                || PathFinalNode.GetDistance(TargetPosition) > 1.0); // target position changed 
-        }
-
-        private BehaviorTreeStatus DoUnstuck()
-        {
-            if (StuckPosition == default)
-            {
-                StuckPosition = WowInterface.ObjectManager.Player.Position;
-                StuckRotation = WowInterface.ObjectManager.Player.Rotation;
-
-                Vector3 pos = BotMath.CalculatePositionBehind(WowInterface.ObjectManager.Player.Position, StuckRotation, WowInterface.MovementSettings.UnstuckDistance);
-                UnstuckTargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, pos, 4f);
-            }
-            else
-            {
-                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 0.0
-                    && StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
-                {
-                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction.Moving, UnstuckTargetPosition);
-                    WowInterface.CharacterManager.Jump();
-                }
-                else
-                {
-                    Reset();
-                    return BehaviorTreeStatus.Success;
-                }
-            }
-
-            return BehaviorTreeStatus.Ongoing;
-        }
-
-        private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
-        {
-            List<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
-            PathfindingEvent.Run();
-
-            if (path != null && path.Count > 0)
-            {
-                Nodes.Clear();
-
-                for (int i = 0; i < path.Count; ++i)
-                {
-                    Nodes.Enqueue(path[i]);
-                }
-
-                PathFinalNode = Nodes.Last();
-                PathfindingStatus = PathFinalNode.GetDistance(TargetPosition) > 3.0 ? PathfindingStatus.PathIncomplete : PathfindingStatus.PathComplete;
                 return BehaviorTreeStatus.Success;
             }
             else
             {
-                PathfindingStatus = PathfindingStatus.Failed;
                 return BehaviorTreeStatus.Failed;
             }
         }

@@ -107,6 +107,24 @@ namespace AmeisenBotX
 
         private Font TextFont { get; set; }
 
+        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
+        {
+            // X and Y swapped intentionally here !
+            double relativeX = x + ((posA.Y - posB.Y) * scale);
+            double relativeY = y + ((posA.X - posB.X) * scale);
+
+            double originX = relativeX - x;
+            double originY = relativeY - y;
+
+            double rSin = Math.Sin(rotation);
+            double cSin = Math.Cos(rotation);
+
+            double newX = originX * cSin - originY * rSin;
+            double newY = originX * rSin + originY * cSin;
+
+            return new Point((int)(newX + x), (int)(newY + y));
+        }
+
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             MapTimer.Stop();
@@ -324,24 +342,6 @@ namespace AmeisenBotX
             bitmapImageMap.EndInit();
 
             return bitmapImageMap;
-        }
-
-        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
-        {
-            // X and Y swapped intentionally here !
-            double relativeX = x + ((posA.Y - posB.Y) * scale);
-            double relativeY = y + ((posA.X - posB.X) * scale);
-
-            double originX = relativeX - x;
-            double originY = relativeY - y;
-
-            double rSin = Math.Sin(rotation);
-            double cSin = Math.Cos(rotation);
-
-            double newX = originX * cSin - originY * rSin;
-            double newY = originX * rSin + originY * cSin;
-
-            return new Point((int)(newX + x), (int)(newY + y));
         }
 
         private void MapTimer_Elapsed(object sender, ElapsedEventArgs e)

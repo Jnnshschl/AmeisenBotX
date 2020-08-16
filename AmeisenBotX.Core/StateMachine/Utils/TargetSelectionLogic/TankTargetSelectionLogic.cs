@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            bool keepCurrentTarget = (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0) 
+            bool keepCurrentTarget = (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0)
                 && (WowInterface.ObjectManager.Target?.GetType() == typeof(WowPlayer)
                 || WowInterface.ObjectManager.Target?.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
 

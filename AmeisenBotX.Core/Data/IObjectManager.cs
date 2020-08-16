@@ -25,6 +25,8 @@ namespace AmeisenBotX.Core.Data
 
         MapId MapId { get; }
 
+        int ObjectCount { get; }
+
         WowUnit Partyleader { get; }
 
         ulong PartyleaderGuid { get; }
@@ -58,8 +60,6 @@ namespace AmeisenBotX.Core.Data
         string ZoneName { get; }
 
         string ZoneSubName { get; }
-
-        int ObjectCount { get; }
 
         WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds);
 

@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObject;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;

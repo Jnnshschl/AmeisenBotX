@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs
 {

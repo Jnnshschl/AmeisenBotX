@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if ((!WowInterface.ObjectManager.PartymemberGuids.Any()|| WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
+            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
                     && CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true))

@@ -25,19 +25,6 @@ namespace AmeisenBotX.Core.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Percentage(int value, int max)
-        {
-            if (value == 0 || max == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return value / (double)max * 100.0;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampAngles(float rotation)
         {
             float rMax = (float)Math.PI * 2.0f;
@@ -77,6 +64,19 @@ namespace AmeisenBotX.Core.Common
         {
             double distance = a.Position.GetDistance(b.Position);
             return distance < maxDistance && distance > maxDistance;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Percentage(int value, int max)
+        {
+            if (value == 0 || max == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return value / (double)max * 100.0;
+            }
         }
     }
 }

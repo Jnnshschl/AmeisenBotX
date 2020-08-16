@@ -21,9 +21,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private int BlacklistCounter { get; set; }
 
-        private TimegatedEvent InteractionEvent { get; }
-
         private TimegatedEvent EquipmentUpdateEvent { get; }
+
+        private TimegatedEvent InteractionEvent { get; }
 
         public override void Enter()
         {
