@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Data.Enums
 {
-    public enum OreNodes : int
+    public enum OreNode : int
     {
         Adamantite = 6798,
         Cobalt = 7881,

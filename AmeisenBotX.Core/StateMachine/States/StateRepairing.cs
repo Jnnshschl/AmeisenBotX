@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System;
@@ -21,9 +21,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private int BlacklistCounter { get; set; }
 
-        private TimegatedEvent InteractionEvent { get; }
-
         private TimegatedEvent EquipmentUpdateEvent { get; }
+
+        private TimegatedEvent InteractionEvent { get; }
 
         public override void Enter()
         {
@@ -44,22 +44,24 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (IsRepairNpcNear(out WowUnit selectedUnit))
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
-
-                if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
+                if (!WowInterface.MovementEngine.IsAtTargetPosition)
                 {
-                    ++BlacklistCounter;
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
-                    if (BlacklistCounter > 2)
+                    if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
                     {
-                        WowInterface.MovementEngine.StopMovement();
-                        Blacklist.Add(selectedUnit.Guid);
-                        BlacklistCounter = 0;
-                        return;
+                        ++BlacklistCounter;
+
+                        if (BlacklistCounter > 2)
+                        {
+                            WowInterface.MovementEngine.StopMovement();
+                            Blacklist.Add(selectedUnit.Guid);
+                            BlacklistCounter = 0;
+                            return;
+                        }
                     }
                 }
-
-                if (WowInterface.MovementEngine.IsAtTargetPosition && InteractionEvent.Run())
+                else if (InteractionEvent.Run())
                 {
                     if (WowInterface.ObjectManager.TargetGuid != selectedUnit.Guid)
                     {
@@ -67,6 +69,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
 
                     WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                    WowInterface.MovementEngine.StopMovement();
 
                     if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
                     {
@@ -79,8 +82,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.UnitSelectGossipOption(1);
                         return;
                     }
-
-                    WowInterface.HookManager.RepairAllItems();
                 }
             }
             else
@@ -89,7 +90,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
         }
 

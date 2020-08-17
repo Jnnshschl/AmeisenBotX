@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
@@ -501,7 +501,7 @@ namespace AmeisenBotX
             else
             {
                 labelCurrentTickTime.Foreground = currentTickTimeBadBrush;
-                AmeisenLogger.Instance.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
+                AmeisenLogger.I.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
             // HookCall label
@@ -515,7 +515,7 @@ namespace AmeisenBotX
             else
             {
                 labelHookCallCount.Foreground = currentTickTimeBadBrush;
-                AmeisenLogger.Instance.Log("MainWindow", "High HookCall count, maybe increase your FPS", LogLevel.Warning);
+                AmeisenLogger.I.Log("MainWindow", "High HookCall count, maybe increase your FPS", LogLevel.Warning);
             }
 
             // RPM/WPM labels

@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Warrior;
+        public override WowClass WowClass => WowClass.Warrior;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -144,6 +144,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
                 else
                 {
+                    if (WowInterface.ObjectManager.Player.Rage > 40
+                        && HeroicStrikeEvent.Run()
+                        && CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    {
+                        // do not return, hehe xd
+                    }
+
                     int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count();
 
                     if ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
@@ -153,20 +160,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
 
                     if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                        && (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10).Count() > 3
+                        && (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
                             && CastSpellIfPossible(challengingShoutSpell, 0, true))
                         || CastSpellIfPossibleWarrior(tauntSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 25
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 25.0
                         && CastSpellIfPossibleWarrior(retaliationSpell, battleStanceSpell, 0))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40.0
                         && (CastSpellIfPossible(lastStandSpell, 0)
                             || CastSpellIfPossibleWarrior(shieldWallSpell, defensiveStanceSpell, 0)
                             || CastSpellIfPossibleWarrior(shieldBlockSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true)))
@@ -176,12 +183,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     if (WowInterface.ObjectManager.Target.IsCasting
                         && (CastSpellIfPossibleWarrior(shieldBashSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid)
-                            || CastSpellIfPossible(spellReflectionSpell, 0)))
+                            || CastSpellIfPossibleWarrior(spellReflectionSpell, defensiveStanceSpell, 0)))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage > 50
+                    if (WowInterface.ObjectManager.Player.HealthPercentage > 50.0
                         && CastSpellIfPossible(bloodrageSpell, 0))
                     {
                         return;
@@ -193,10 +200,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         || ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
                             && CastSpellIfPossible(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
                         || CastSpellIfPossible(devastateSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || CastSpellIfPossibleWarrior(revengeSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (WowInterface.ObjectManager.Player.Rage > 40
-                            && HeroicStrikeEvent.Run()
-                            && CastSpellIfPossible(heroicStrikeSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                        || CastSpellIfPossibleWarrior(revengeSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         return;
                     }

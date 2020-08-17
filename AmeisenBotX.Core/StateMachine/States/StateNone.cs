@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (Config.AutostartWow)
             {
-                AmeisenLogger.Instance.Log("StateNone", "Need to start WoW");
+                AmeisenLogger.I.Log("StateNone", "Need to start WoW");
                 StateMachine.SetState(BotState.StartWow);
             }
         }
@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        public override void Exit()
+        public override void Leave()
         {
         }
     }

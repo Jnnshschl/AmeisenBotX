@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using System;
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { corruptionSpell, () => CastSpellIfPossible(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { corruptionSpell, () => !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell) && CastSpellIfPossible(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
                 { curseOfAgonySpell, () => CastSpellIfPossible(curseOfAgonySpell, WowInterface.ObjectManager.TargetGuid, true) },
                 { unstableAfflictionSpell, () => CastSpellIfPossible(unstableAfflictionSpell, WowInterface.ObjectManager.TargetGuid, true) },
                 { hauntSpell, () => CastSpellIfPossible(hauntSpell, WowInterface.ObjectManager.TargetGuid, true) }
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Warlock;
+        public override WowClass WowClass => WowClass.Warlock;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -129,9 +129,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         }
                     }
 
-                    if (!WowInterface.ObjectManager.Player.IsCasting
-                        && WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                        && WowInterface.ObjectManager.Target.HealthPercentage < 8
+                    if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
+                        && WowInterface.ObjectManager.Target.HealthPercentage < 25.0
                         && CastSpellIfPossible(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;

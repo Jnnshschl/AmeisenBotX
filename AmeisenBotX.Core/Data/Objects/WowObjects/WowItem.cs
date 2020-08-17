@@ -1,10 +1,10 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs;
 using System;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowItem : WowObject
     {

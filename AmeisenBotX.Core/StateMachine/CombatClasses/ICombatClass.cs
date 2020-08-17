@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
     {
         string Author { get; }
 
-        WowClass Class { get; }
+        WowClass WowClass { get; }
 
         Dictionary<string, dynamic> Configureables { get; set; }
 

@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowPlayer : WowUnit
     {
@@ -44,10 +44,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
         public bool IsHorde()
         {
             return Race == WowRace.Undead
-                       || Race == WowRace.Orc
-                       || Race == WowRace.Bloodelf
-                       || Race == WowRace.Tauren
-                       || Race == WowRace.Troll;
+                        || Race == WowRace.Orc
+                        || Race == WowRace.Bloodelf
+                        || Race == WowRace.Tauren
+                        || Race == WowRace.Troll;
         }
 
         public override string ToString()
@@ -69,56 +69,56 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
                 Name = ReadPlayerName();
 
                 QuestlogEntries = new List<QuestlogEntry>()
-                    {
-                        objPtr.QuestlogEntry1,
-                        objPtr.QuestlogEntry2,
-                        objPtr.QuestlogEntry3,
-                        objPtr.QuestlogEntry4,
-                        objPtr.QuestlogEntry5,
-                        objPtr.QuestlogEntry6,
-                        objPtr.QuestlogEntry7,
-                        objPtr.QuestlogEntry8,
-                        objPtr.QuestlogEntry9,
-                        objPtr.QuestlogEntry10,
-                        objPtr.QuestlogEntry11,
-                        objPtr.QuestlogEntry12,
-                        objPtr.QuestlogEntry13,
-                        objPtr.QuestlogEntry14,
-                        objPtr.QuestlogEntry15,
-                        objPtr.QuestlogEntry16,
-                        objPtr.QuestlogEntry17,
-                        objPtr.QuestlogEntry18,
-                        objPtr.QuestlogEntry19,
-                        objPtr.QuestlogEntry20,
-                        objPtr.QuestlogEntry21,
-                        objPtr.QuestlogEntry22,
-                        objPtr.QuestlogEntry23,
-                        objPtr.QuestlogEntry24,
-                        objPtr.QuestlogEntry25,
-                    };
+                {
+                    objPtr.QuestlogEntry1,
+                    objPtr.QuestlogEntry2,
+                    objPtr.QuestlogEntry3,
+                    objPtr.QuestlogEntry4,
+                    objPtr.QuestlogEntry5,
+                    objPtr.QuestlogEntry6,
+                    objPtr.QuestlogEntry7,
+                    objPtr.QuestlogEntry8,
+                    objPtr.QuestlogEntry9,
+                    objPtr.QuestlogEntry10,
+                    objPtr.QuestlogEntry11,
+                    objPtr.QuestlogEntry12,
+                    objPtr.QuestlogEntry13,
+                    objPtr.QuestlogEntry14,
+                    objPtr.QuestlogEntry15,
+                    objPtr.QuestlogEntry16,
+                    objPtr.QuestlogEntry17,
+                    objPtr.QuestlogEntry18,
+                    objPtr.QuestlogEntry19,
+                    objPtr.QuestlogEntry20,
+                    objPtr.QuestlogEntry21,
+                    objPtr.QuestlogEntry22,
+                    objPtr.QuestlogEntry23,
+                    objPtr.QuestlogEntry24,
+                    objPtr.QuestlogEntry25,
+                };
 
                 ItemEnchantments = new List<VisibleItemEnchantment>()
-                    {
-                        objPtr.VisibleItemEnchantment1,
-                        objPtr.VisibleItemEnchantment2,
-                        objPtr.VisibleItemEnchantment3,
-                        objPtr.VisibleItemEnchantment4,
-                        objPtr.VisibleItemEnchantment5,
-                        objPtr.VisibleItemEnchantment6,
-                        objPtr.VisibleItemEnchantment7,
-                        objPtr.VisibleItemEnchantment8,
-                        objPtr.VisibleItemEnchantment9,
-                        objPtr.VisibleItemEnchantment10,
-                        objPtr.VisibleItemEnchantment11,
-                        objPtr.VisibleItemEnchantment12,
-                        objPtr.VisibleItemEnchantment13,
-                        objPtr.VisibleItemEnchantment14,
-                        objPtr.VisibleItemEnchantment15,
-                        objPtr.VisibleItemEnchantment16,
-                        objPtr.VisibleItemEnchantment17,
-                        objPtr.VisibleItemEnchantment18,
-                        objPtr.VisibleItemEnchantment19,
-                    };
+                {
+                    objPtr.VisibleItemEnchantment1,
+                    objPtr.VisibleItemEnchantment2,
+                    objPtr.VisibleItemEnchantment3,
+                    objPtr.VisibleItemEnchantment4,
+                    objPtr.VisibleItemEnchantment5,
+                    objPtr.VisibleItemEnchantment6,
+                    objPtr.VisibleItemEnchantment7,
+                    objPtr.VisibleItemEnchantment8,
+                    objPtr.VisibleItemEnchantment9,
+                    objPtr.VisibleItemEnchantment10,
+                    objPtr.VisibleItemEnchantment11,
+                    objPtr.VisibleItemEnchantment12,
+                    objPtr.VisibleItemEnchantment13,
+                    objPtr.VisibleItemEnchantment14,
+                    objPtr.VisibleItemEnchantment15,
+                    objPtr.VisibleItemEnchantment16,
+                    objPtr.VisibleItemEnchantment17,
+                    objPtr.VisibleItemEnchantment18,
+                    objPtr.VisibleItemEnchantment19,
+                };
             }
 
             if (WowInterface.I.XMemory.Read(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitSwimFlags), out uint swimFlags))

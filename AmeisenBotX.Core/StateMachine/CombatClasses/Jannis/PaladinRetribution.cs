@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Paladin;
+        public override WowClass WowClass => WowClass.Paladin;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -95,18 +95,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (SelectTarget(DpsTargetManager))
             {
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
+                if ((WowInterface.ObjectManager.Player.HealthPercentage < 20.0
                         && CastSpellIfPossible(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 60
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 60.0
                         && CastSpellIfPossible(holyLightSpell, WowInterface.ObjectManager.PlayerGuid, true)))
                 {
                     return;
                 }
 
-                if ((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell)
-                        && CastSpellIfPossible(judgementOfLightSpell, 0))
+                if (((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell))
+                        && CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || CastSpellIfPossible(avengingWrathSpell, 0, true)
-                    || (WowInterface.ObjectManager.Player.ManaPercentage < 80
+                    || (WowInterface.ObjectManager.Player.ManaPercentage < 80.0
                         && CastSpellIfPossible(divinePleaSpell, 0, true)))
                 {
                     return;
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (WowInterface.ObjectManager.Target != null)
                 {
-                    if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
+                    if ((WowInterface.ObjectManager.Player.HealthPercentage < 20.0
                             && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || CastSpellIfPossible(crusaderStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
                         || CastSpellIfPossible(divineStormSpell, WowInterface.ObjectManager.TargetGuid, true)

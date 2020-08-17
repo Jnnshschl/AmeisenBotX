@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
@@ -14,11 +14,11 @@ namespace AmeisenBotX.Core.Data.Cache
 
         Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> CombatLogEntries { get; }
 
-        Dictionary<(MapId, HerbNodes), List<Vector3>> HerbNodes { get; }
+        Dictionary<(MapId, HerbNode), List<Vector3>> HerbNodes { get; }
 
         Dictionary<ulong, string> NameCache { get; }
 
-        Dictionary<(MapId, OreNodes), List<Vector3>> OreNodes { get; }
+        Dictionary<(MapId, OreNode), List<Vector3>> OreNodes { get; }
 
         Dictionary<(MapId, PoiType), List<Vector3>> PointsOfInterest { get; }
 
@@ -30,11 +30,11 @@ namespace AmeisenBotX.Core.Data.Cache
 
         void CacheCombatLogEntry((CombatLogEntryType, CombatLogEntrySubtype) key, BasicCombatLogEntry entry);
 
-        void CacheHerb(MapId mapId, HerbNodes displayId, Vector3 position);
+        void CacheHerb(MapId mapId, HerbNode displayId, Vector3 position);
 
         void CacheName(ulong guid, string name);
 
-        void CacheOre(MapId mapId, OreNodes displayId, Vector3 position);
+        void CacheOre(MapId mapId, OreNode displayId, Vector3 position);
 
         void CachePoi(MapId mapId, PoiType poiType, Vector3 position);
 

@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -38,11 +38,11 @@ namespace AmeisenBotX.Core.Data.Cache
 
         public string FilePath { get; }
 
-        public Dictionary<(MapId, HerbNodes), List<Vector3>> HerbNodes { get; private set; }
+        public Dictionary<(MapId, HerbNode), List<Vector3>> HerbNodes { get; private set; }
 
         public Dictionary<ulong, string> NameCache { get; private set; }
 
-        public Dictionary<(MapId, OreNodes), List<Vector3>> OreNodes { get; private set; }
+        public Dictionary<(MapId, OreNode), List<Vector3>> OreNodes { get; private set; }
 
         public Dictionary<(MapId, PoiType), List<Vector3>> PointsOfInterest { get; private set; }
 
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Data.Cache
             }
         }
 
-        public void CacheHerb(MapId mapId, HerbNodes displayId, Vector3 position)
+        public void CacheHerb(MapId mapId, HerbNode displayId, Vector3 position)
         {
             lock (herbLock)
             {
@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Data.Cache
             }
         }
 
-        public void CacheOre(MapId mapId, OreNodes displayId, Vector3 position)
+        public void CacheOre(MapId mapId, OreNode displayId, Vector3 position)
         {
             lock (oreLock)
             {
@@ -168,8 +168,8 @@ namespace AmeisenBotX.Core.Data.Cache
             CombatLogEntries = new Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>>();
             BlacklistNodes = new Dictionary<int, List<Vector3>>();
             PointsOfInterest = new Dictionary<(MapId, PoiType), List<Vector3>>();
-            OreNodes = new Dictionary<(MapId, OreNodes), List<Vector3>>();
-            HerbNodes = new Dictionary<(MapId, HerbNodes), List<Vector3>>();
+            OreNodes = new Dictionary<(MapId, OreNode), List<Vector3>>();
+            HerbNodes = new Dictionary<(MapId, HerbNode), List<Vector3>>();
         }
 
         public void Load()
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Data.Cache
 
             if (File.Exists(FilePath))
             {
-                AmeisenLogger.Instance.Log("Cache", "Loading Cache", LogLevel.Debug);
+                AmeisenLogger.I.Log("Cache", "Loading Cache", LogLevel.Debug);
                 using Stream stream = File.Open(FilePath, FileMode.Open);
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
 
@@ -197,8 +197,8 @@ namespace AmeisenBotX.Core.Data.Cache
                         CombatLogEntries = loadedCache.CombatLogEntries ?? new Dictionary<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>>();
                         BlacklistNodes = loadedCache.BlacklistNodes ?? new Dictionary<int, List<Vector3>>();
                         PointsOfInterest = loadedCache.PointsOfInterest ?? new Dictionary<(MapId, PoiType), List<Vector3>>();
-                        OreNodes = loadedCache.OreNodes ?? new Dictionary<(MapId, OreNodes), List<Vector3>>();
-                        HerbNodes = loadedCache.HerbNodes ?? new Dictionary<(MapId, HerbNodes), List<Vector3>>();
+                        OreNodes = loadedCache.OreNodes ?? new Dictionary<(MapId, OreNode), List<Vector3>>();
+                        HerbNodes = loadedCache.HerbNodes ?? new Dictionary<(MapId, HerbNode), List<Vector3>>();
                     }
                     else
                     {
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Data.Cache
                 }
                 catch
                 {
-                    AmeisenLogger.Instance.Log("Cache", "Deleting invalid cache", LogLevel.Debug);
+                    AmeisenLogger.I.Log("Cache", "Deleting invalid cache", LogLevel.Debug);
                     stream.Close();
                     File.Delete(FilePath);
                     Clear();

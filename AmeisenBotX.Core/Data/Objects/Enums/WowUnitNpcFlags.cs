@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     [Flags]
     public enum WowUnitNpcFlags : int

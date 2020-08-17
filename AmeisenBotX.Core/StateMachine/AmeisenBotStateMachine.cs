@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Statemachine
     {
         public AmeisenBotStateMachine(string botDataPath, AmeisenBotConfig config, WowInterface wowInterface)
         {
-            AmeisenLogger.Instance.Log("StateMachine", "Starting AmeisenBotStateMachine", LogLevel.Verbose);
+            AmeisenLogger.I.Log("StateMachine", "Starting AmeisenBotStateMachine", LogLevel.Verbose);
 
             BotDataPath = botDataPath;
             Config = config;
@@ -112,7 +112,7 @@ namespace AmeisenBotX.Core.Statemachine
                 if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
                     && SetState(BotState.None))
                 {
-                    AmeisenLogger.Instance.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
+                    AmeisenLogger.I.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
 
                     WowCrashed = true;
                     GetState<StateIdle>().FirstStart = true;
@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Statemachine
                         if (SetState(BotState.LoadingScreen, true))
                         {
                             OnStateOverride?.Invoke(CurrentState.Key);
-                            AmeisenLogger.Instance.Log("StateMachine", "World is not loaded", LogLevel.Verbose);
+                            AmeisenLogger.I.Log("StateMachine", "World is not loaded", LogLevel.Verbose);
                             return;
                         }
                     }
@@ -174,20 +174,18 @@ namespace AmeisenBotX.Core.Statemachine
                             if (CurrentState.Key != BotState.Dead
                                 && CurrentState.Key != BotState.Ghost)
                             {
-                                // if (Config.AutoDodgeAoeSpells
-                                //     && BotUtils.IsPositionInsideAoeSpell(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.GetNearAoeSpells())
-                                //     && SetState(BotState.InsideAoeDamage, true))
-                                // {
-                                //     OnStateOverride(CurrentState.Key);
-                                //     return;
-                                // }
+                                if (Config.AutoDodgeAoeSpells
+                                    && GetState<StateInsideAoeDamage>().IsInsideAeoDamage()
+                                    && SetState(BotState.InsideAoeDamage, true))
+                                {
+                                    OnStateOverride?.Invoke(CurrentState.Key);
+                                    return;
+                                }
 
-                                // TODO: handle combat bug, sometimes when combat ends, the player stays in combat for no reason
                                 if (!WowInterface.Globals.IgnoreCombat
                                     && WowInterface.Globals.ForceCombat
                                     || (!(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
-                                        && ((WowInterface.ObjectManager.Player.IsInCombat
-                                        || IsAnyPartymemberInCombat())
+                                        && ((WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
                                         && WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any())))
                                 {
                                     if (SetState(BotState.Attacking, true))
@@ -234,7 +232,7 @@ namespace AmeisenBotX.Core.Statemachine
                 return false;
             }
 
-            AmeisenLogger.Instance.Log("StateMachine", $"Changing State to {state}");
+            AmeisenLogger.I.Log("StateMachine", $"Changing State to {state}");
 
             LastState = CurrentState.Key;
 
@@ -242,7 +240,7 @@ namespace AmeisenBotX.Core.Statemachine
             // it will override any existing state
             if (!ignoreExit)
             {
-                CurrentState.Value.Exit();
+                CurrentState.Value.Leave();
             }
 
             CurrentState = States.First(s => s.Key == state);

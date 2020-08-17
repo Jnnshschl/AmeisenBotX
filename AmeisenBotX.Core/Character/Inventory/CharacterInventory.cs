@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Character.Inventory
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Inventory JSON:\n{resultJson}\n{e}", LogLevel.Error);
+                AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Inventory JSON:\n{resultJson}\n{e}", LogLevel.Error);
             }
         }
     }

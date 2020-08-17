@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.Structs;
+﻿using AmeisenBotX.Core.Data.Objects.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

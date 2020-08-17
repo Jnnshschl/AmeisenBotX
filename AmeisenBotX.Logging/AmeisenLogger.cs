@@ -37,7 +37,7 @@ namespace AmeisenBotX.Logging
             }
         }
 
-        public static AmeisenLogger Instance
+        public static AmeisenLogger I
         {
             get
             {
@@ -100,13 +100,13 @@ namespace AmeisenBotX.Logging
             }
         }
 
-        public void Log(string tag, string message, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName] string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
+        public void Log(string tag, string log, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName] string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
             Task.Run(() =>
             {
                 if (logLevel <= ActiveLogLevel)
                 {
-                    LogBuilder.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",-24} {message}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+                    LogBuilder.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",-24} {log}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
                 }
             });
         }

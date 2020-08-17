@@ -3,7 +3,7 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Dungeon.Profiles.Classic;
 using AmeisenBotX.Core.Dungeon.Profiles.TBC;
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Dungeon
                     new Selector<DungeonBlackboard>
                     (
                         "AmITheLeader",
-                        (b) => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid || WowInterface.ObjectManager.PartymemberGuids.Count() == 0,
+                        (b) => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
                         new Selector<DungeonBlackboard>
                         (
                             "AreAllPlayersPresent",
@@ -175,7 +175,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool AreAllPlayersPresent(double distance)
         {
-            return WowInterface.ObjectManager.Partymembers.Count() == 0
+            return !WowInterface.ObjectManager.Partymembers.Any()
                 || WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.ObjectManager.Player.Position, distance)
                    .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count() - 1;
         }

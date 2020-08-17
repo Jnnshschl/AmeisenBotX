@@ -4,7 +4,7 @@ using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override string Author => "Lukas";
 
-        public override WowClass Class => WowClass.Shaman;
+        public override WowClass WowClass => WowClass.Shaman;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 

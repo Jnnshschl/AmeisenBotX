@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives

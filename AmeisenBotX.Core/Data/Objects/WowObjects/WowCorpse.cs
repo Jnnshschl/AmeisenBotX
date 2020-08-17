@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using System;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     [Serializable]
     public class WowCorpse : WowObject

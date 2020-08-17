@@ -2,7 +2,8 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using System;
@@ -18,7 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public HunterBeastmastery(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
             PetManager = new PetManager(WowInterface,
-                TimeSpan.FromSeconds(15),
+                TimeSpan.FromSeconds(5),
                 () => CastSpellIfPossible(mendPetSpell, 0, true),
                 () => CastSpellIfPossible(callPetSpell, 0),
                 () => CastSpellIfPossible(revivePetSpell, 0));
@@ -26,7 +27,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { aspectOfTheDragonhawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheDragonhawkSpell, 0, true) },
-                { aspectOfTheHawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheHawkSpell, 0, true) },
+                { aspectOfTheHawkSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(aspectOfTheDragonhawkSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheHawkSpell, 0, true) },
                 { aspectOfTheViperSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(aspectOfTheViperSpell, 0, true) }
             };
 
@@ -45,7 +46,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Hunter;
+        public override WowClass WowClass => WowClass.Hunter;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -120,9 +121,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
                     // make some distance
-                    if (WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
+                    if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
+                        || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 3.0))
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 15
@@ -137,6 +139,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                             && CastSpellIfPossible(disengageSpell, 0, true))
                         {
                             ReadyToDisengage = false;
+                            SlowTargetWhenPossible = true;
                             return;
                         }
 
@@ -184,8 +187,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
-                            || CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        if (CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
                             || CastSpellIfPossible(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;

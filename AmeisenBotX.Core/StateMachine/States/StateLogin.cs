@@ -12,11 +12,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             LoginAttemptEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
 
-        private void SetUlowGfxSettings()
-        {
-            WowInterface.HookManager.LuaDoString("SetCVar(\"gxcolorbits\",\"16\");SetCVar(\"gxdepthbits\",\"16\");SetCVar(\"skycloudlod\",\"0\");SetCVar(\"particledensity\",\"0.3\");SetCVar(\"lod\",\"0\");SetCVar(\"mapshadows\",\"0\");SetCVar(\"maxlights\",\"0\");SetCVar(\"specular\",\"0\");SetCVar(\"waterlod\",\"0\");SetCVar(\"basemip\",\"1\");SetCVar(\"shadowlevel\",\"1\")");
-        }
-
         private TimegatedEvent LoginAttemptEvent { get; set; }
 
         private int LoginCounter { get; set; }
@@ -49,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.UTF8, out string gameState))
                 {
-                    AmeisenLogger.Instance.Log("Login", $"Gamestate is: {gameState}");
+                    AmeisenLogger.I.Log("Login", $"Gamestate is: {gameState}");
 
                     switch (gameState.ToUpper())
                     {
@@ -59,7 +54,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                             break;
 
                         case "CHARSELECT":
-                            AmeisenLogger.Instance.Log("Login", $"Selecting character slot: {Config.CharacterSlot}");
+                            AmeisenLogger.I.Log("Login", $"Selecting character slot: {Config.CharacterSlot}");
                             WowInterface.HookManager.LuaDoString($"if CharacterSelectUI and CharacterSelectUI:IsVisible()then CharacterSelect_SelectCharacter({Config.CharacterSlot})EnterWorld();elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()then CharacterCreate_Back()end");
                             break;
 
@@ -87,8 +82,13 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
+        }
+
+        private void SetUlowGfxSettings()
+        {
+            WowInterface.HookManager.LuaDoString("SetCVar(\"gxcolorbits\",\"16\");SetCVar(\"gxdepthbits\",\"16\");SetCVar(\"skycloudlod\",\"0\");SetCVar(\"particledensity\",\"0.3\");SetCVar(\"lod\",\"0\");SetCVar(\"mapshadows\",\"0\");SetCVar(\"maxlights\",\"0\");SetCVar(\"specular\",\"0\");SetCVar(\"waterlod\",\"0\");SetCVar(\"basemip\",\"1\");SetCVar(\"shadowlevel\",\"1\")");
         }
     }
 }

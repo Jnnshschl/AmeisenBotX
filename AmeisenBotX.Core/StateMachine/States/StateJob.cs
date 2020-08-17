@@ -17,7 +17,7 @@
             WowInterface.JobEngine.Execute();
         }
 
-        public override void Exit()
+        public override void Leave()
         {
             WowInterface.Globals.IgnoreMountDistance = false;
             WowInterface.JobEngine.Reset();

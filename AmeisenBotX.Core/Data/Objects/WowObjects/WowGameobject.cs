@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowGameobject : WowObject
     {

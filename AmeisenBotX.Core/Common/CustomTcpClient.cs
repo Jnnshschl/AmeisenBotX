@@ -49,14 +49,14 @@ namespace AmeisenBotX.Core.Common
             TcpClient.Close();
         }
 
-        public async Task<string> SendString(int msgType, string payload)
+        public string SendString(int msgType, string payload)
         {
             Writer.WriteLineAsync($"{msgType}{payload}").Wait();
             Writer.FlushAsync().Wait();
             return Reader.ReadLineAsync().Result;
         }
 
-        private async void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
+        private void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
         {
             // only start one timer tick at a time
             if (Interlocked.CompareExchange(ref connectionTimerBusy, 1, 0) == 1)
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Common
                 }
                 else
                 {
-                    IsConnected = Reader != null && Writer != null && SendString(0, "1").Result?.Length > 0;
+                    IsConnected = Reader != null && Writer != null && SendString(0, "1")?.Length > 0;
 
                     if (!IsConnected)
                     {

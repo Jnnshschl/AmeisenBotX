@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Core.Data.Enums
 {
     [Flags]
-    public enum DispelType
+    public enum DispelTypes
     {
         None = 0,
         Curse = 1 << 0,

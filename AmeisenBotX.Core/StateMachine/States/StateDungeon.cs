@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowInterface.CombatClass?.OutOfCombatExecute();
         }
 
-        public override void Exit()
+        public override void Leave()
         {
             StateMachine.OnStateOverride -= StateMachine_OnStateOverride;
             WowInterface.MovementEngine.Reset();

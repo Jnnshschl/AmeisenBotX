@@ -1,14 +1,14 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowUnit : WowObject
     {
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObject
 
         public bool IsDazed => UnitFlags[(int)WowUnitFlags.Dazed];
 
-        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags.Dead]) && !UnitFlags2[(int)WowUnitFlags2.FeignDeath];
+        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags.Dead]) && !UnitFlags2[(int)WowUnit2Flags.FeignDeath];
 
         public bool IsDisarmed => UnitFlags[(int)WowUnitFlags.Disarmed];
 

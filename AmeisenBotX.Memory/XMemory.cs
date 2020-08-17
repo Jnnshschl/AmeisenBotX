@@ -147,7 +147,7 @@ namespace AmeisenBotX.Memory
         {
             lock (allocLock)
             {
-                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
+                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
                 if (address != IntPtr.Zero)
                 {
                     MemoryAllocations.Add(address, size);
@@ -184,7 +184,7 @@ namespace AmeisenBotX.Memory
             lock (allocLock)
             {
                 if (MemoryAllocations.ContainsKey(address)
-                    && VirtualFreeEx(ProcessHandle, address, 0, AllocationType.Release))
+                    && VirtualFreeEx(ProcessHandle, address, 0, AllocationTypes.Release))
                 {
                     MemoryAllocations.Remove(address);
                     return true;
@@ -228,7 +228,7 @@ namespace AmeisenBotX.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MemoryProtect(IntPtr address, uint size, MemoryProtection memoryProtection, out MemoryProtection oldMemoryProtection)
+        public bool MemoryProtect(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection)
         {
             return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
         }
@@ -238,7 +238,7 @@ namespace AmeisenBotX.Memory
         {
             uint size = (uint)sizeof(T);
 
-            if (MemoryProtect(address, size, MemoryProtection.ExecuteReadWrite, out MemoryProtection oldMemoryProtection))
+            if (MemoryProtect(address, size, MemoryProtectionFlags.ExecuteReadWrite, out MemoryProtectionFlags oldMemoryProtection))
             {
                 Write(address, data);
                 MemoryProtect(address, size, oldMemoryProtection, out _);
@@ -358,7 +358,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
-            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThread(ThreadAccess.SuspendResume))
+            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThread(ThreadAccessFlags.SuspendResume))
             {
                 NtResumeThread(MainThreadHandle, out _);
             }
@@ -378,7 +378,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
-            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThread(ThreadAccess.SuspendResume))
+            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThread(ThreadAccessFlags.SuspendResume))
             {
                 NtSuspendThread(MainThreadHandle, out _);
             }
@@ -412,7 +412,7 @@ namespace AmeisenBotX.Memory
             return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
         }
 
-        private bool TryOpenMainThread(ThreadAccess threadAccess)
+        private bool TryOpenMainThread(ThreadAccessFlags threadAccess)
         {
             try
             {

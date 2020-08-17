@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,8 @@ namespace AmeisenBotX.Core.Data
         ulong LastTargetGuid { get; }
 
         MapId MapId { get; }
+
+        int ObjectCount { get; }
 
         WowUnit Partyleader { get; }
 
@@ -58,8 +60,6 @@ namespace AmeisenBotX.Core.Data
         string ZoneName { get; }
 
         string ZoneSubName { get; }
-
-        int ObjectCount { get; }
 
         WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds);
 

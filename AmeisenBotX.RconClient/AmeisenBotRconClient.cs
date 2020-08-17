@@ -72,12 +72,7 @@ namespace AmeisenBotX.RconClient
 
         private Uri RegisterEnpoint { get; }
 
-        public void Dispose()
-        {
-            HttpClient.Dispose();
-        }
-
-        public async Task<bool> KeepAlive()
+        public bool KeepAlive()
         {
             using StringContent content = new StringContent(JsonConvert.SerializeObject(new KeepAliveMessage() { Guid = Guid }), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(KeepaliveEnpoint, content).Result;
@@ -93,7 +88,7 @@ namespace AmeisenBotX.RconClient
             }
         }
 
-        public async Task<bool> PullPendingActions()
+        public bool PullPendingActions()
         {
             HttpResponseMessage dataResponse = HttpClient.GetAsync(ActionEnpoint).Result;
 
@@ -109,7 +104,7 @@ namespace AmeisenBotX.RconClient
             }
         }
 
-        public async Task<bool> Register()
+        public bool Register()
         {
             using StringContent content = new StringContent(JsonConvert.SerializeObject(RegisterMessage), Encoding.UTF8, "application/json");
             HttpResponseMessage registerResponse = HttpClient.PostAsync(RegisterEnpoint, content).Result;
@@ -126,7 +121,7 @@ namespace AmeisenBotX.RconClient
             }
         }
 
-        public async Task<bool> SendData(DataMessage dataMessage)
+        public bool SendData(DataMessage dataMessage)
         {
             if (dataMessage == null) return false;
 
@@ -146,7 +141,7 @@ namespace AmeisenBotX.RconClient
             }
         }
 
-        public async Task<bool> SendImage(string image)
+        public bool SendImage(string image)
         {
             using StringContent content = new StringContent(JsonConvert.SerializeObject(new ImageMessage() { Guid = Guid, Image = image }), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(ImageEnpoint, content).Result;

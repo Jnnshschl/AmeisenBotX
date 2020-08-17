@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Event
                     {
                         if (EventDictionary.ContainsKey(x.Name))
                         {
-                            AmeisenLogger.Instance.Log("WoWEvents", $"[{x.Timestamp}] {x.Name} fired: {JsonConvert.SerializeObject(x.Arguments)}", LogLevel.Verbose);
+                            AmeisenLogger.I.Log("WoWEvents", $"[{x.Timestamp}] {x.Name} fired: {JsonConvert.SerializeObject(x.Arguments)}", LogLevel.Verbose);
 
                             for (int i = 0; i < EventDictionary[x.Name].Count; ++i)
                             {
@@ -96,11 +96,11 @@ namespace AmeisenBotX.Core.Event
         {
             if (!IsActive)
             {
-                AmeisenLogger.Instance.Log("EventHook", $"Starting EventHookManager", LogLevel.Verbose);
+                AmeisenLogger.I.Log("EventHook", $"Starting EventHookManager", LogLevel.Verbose);
 
-                AmeisenLogger.Instance.Log("EventHook", $"EventTableName:   {EventTableName}", LogLevel.Verbose);
-                AmeisenLogger.Instance.Log("EventHook", $"EventFrameName:   {EventFrameName}", LogLevel.Verbose);
-                AmeisenLogger.Instance.Log("EventHook", $"EventHandlerName: {EventHandlerName}", LogLevel.Verbose);
+                AmeisenLogger.I.Log("EventHook", $"EventTableName:   {EventTableName}", LogLevel.Verbose);
+                AmeisenLogger.I.Log("EventHook", $"EventFrameName:   {EventFrameName}", LogLevel.Verbose);
+                AmeisenLogger.I.Log("EventHook", $"EventHandlerName: {EventHandlerName}", LogLevel.Verbose);
 
                 IsActive = true;
                 SetupEventHook();
@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Event
         {
             if (IsActive)
             {
-                AmeisenLogger.Instance.Log("EventHook", $"Stopping EventHookManager", LogLevel.Verbose);
+                AmeisenLogger.I.Log("EventHook", $"Stopping EventHookManager", LogLevel.Verbose);
                 Setup();
 
                 IsActive = false;
@@ -126,13 +126,13 @@ namespace AmeisenBotX.Core.Event
 
         public void Subscribe(string eventName, WowEventAction onEventFired)
         {
-            AmeisenLogger.Instance.Log("EventHook", $"Subscribing to event: {eventName}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("EventHook", $"Subscribing to event: {eventName}", LogLevel.Verbose);
             SubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
         public void Unsubscribe(string eventName, WowEventAction onEventFired)
         {
-            AmeisenLogger.Instance.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
             UnsubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Event
 
         private void SetupEventHook()
         {
-            AmeisenLogger.Instance.Log("EventHook", $"Setting up the EventHookManager", LogLevel.Verbose);
+            AmeisenLogger.I.Log("EventHook", $"Setting up the EventHookManager", LogLevel.Verbose);
 
             StringBuilder luaStuff = new StringBuilder();
 

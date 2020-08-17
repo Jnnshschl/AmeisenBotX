@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Relaxing
     {
         public RelaxEngine(WowInterface wowInterface)
         {
-            AmeisenLogger.Instance.Log("RelaxEngine", $"Initializing", LogLevel.Verbose);
+            AmeisenLogger.I.Log("RelaxEngine", $"Initializing", LogLevel.Verbose);
 
             WowInterface = wowInterface;
         }

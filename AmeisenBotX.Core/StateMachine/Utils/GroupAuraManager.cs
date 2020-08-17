@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +13,13 @@ namespace AmeisenBotX.Core.Statemachine.Utils
         {
             WowInterface = wowInterface;
             SpellsToKeepActiveOnParty = new List<(string, CastSpellOnUnit)>();
-            RemoveBadAurasSpells = new List<((string, DispelType), CastSpellOnUnit)>();
+            RemoveBadAurasSpells = new List<((string, DispelTypes), CastSpellOnUnit)>();
             LastBuffed = new Dictionary<ulong, TimegatedEvent>();
         }
 
         public delegate bool CastSpellOnUnit(string spellName, ulong guid);
 
-        public List<((string, DispelType), CastSpellOnUnit)> RemoveBadAurasSpells { get; private set; }
+        public List<((string, DispelTypes), CastSpellOnUnit)> RemoveBadAurasSpells { get; private set; }
 
         public List<(string, CastSpellOnUnit)> SpellsToKeepActiveOnParty { get; private set; }
 

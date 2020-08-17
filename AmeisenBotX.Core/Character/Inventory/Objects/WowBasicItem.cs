@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
             {
                 BagId = item.BagId;
                 BagSlot = item.BagSlot;
-                Count = Count;
+                Count = item.Count;
                 Durability = item.Durability;
                 EquipLocation = item.EquipLocation;
                 EquipSlot = item.EquipSlot;

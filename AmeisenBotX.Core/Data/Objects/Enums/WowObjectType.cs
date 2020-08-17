@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.Objects.WowObject
+﻿namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public enum WowObjectType
     {

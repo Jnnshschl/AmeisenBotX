@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Utils;
@@ -106,6 +106,24 @@ namespace AmeisenBotX
         private Brush TextBrush { get; set; }
 
         private Font TextFont { get; set; }
+
+        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
+        {
+            // X and Y swapped intentionally here !
+            double relativeX = x + ((posA.Y - posB.Y) * scale);
+            double relativeY = y + ((posA.X - posB.X) * scale);
+
+            double originX = relativeX - x;
+            double originY = relativeY - y;
+
+            double rSin = Math.Sin(rotation);
+            double cSin = Math.Cos(rotation);
+
+            double newX = originX * cSin - originY * rSin;
+            double newY = originX * rSin + originY * cSin;
+
+            return new Point((int)(newX + x), (int)(newY + y));
+        }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
@@ -326,24 +344,6 @@ namespace AmeisenBotX
             return bitmapImageMap;
         }
 
-        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
-        {
-            // X and Y swapped intentionally here !
-            double relativeX = x + ((posA.Y - posB.Y) * scale);
-            double relativeY = y + ((posA.X - posB.X) * scale);
-
-            double originX = relativeX - x;
-            double originY = relativeY - y;
-
-            double rSin = Math.Sin(rotation);
-            double cSin = Math.Cos(rotation);
-
-            double newX = originX * cSin - originY * rSin;
-            double newY = originX * rSin + originY * cSin;
-
-            return new Point((int)(newX + x), (int)(newY + y));
-        }
-
         private void MapTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             // only start one timer tick at a time
@@ -373,7 +373,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void RenderBlacklistNode(int x, int y, Brush blacklistNodeBrush, Pen blacklistNodePen, Graphics graphics, int size, int radius)
+        private static void RenderBlacklistNode(int x, int y, Brush blacklistNodeBrush, Pen blacklistNodePen, Graphics graphics, int size, int radius)
         {
             int offsetStart = (int)Math.Floor(size / 2.0);
             graphics.FillRectangle(blacklistNodeBrush, new Rectangle(x - offsetStart, y - offsetStart, size, size));
@@ -408,7 +408,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void RenderGameobject(int width, int height, string name, Brush dotBrush, Brush textBrush, Font textFont, Graphics graphics, int size = 3)
+        private static void RenderGameobject(int width, int height, string name, Brush dotBrush, Brush textBrush, Font textFont, Graphics graphics, int size = 3)
         {
             int offsetStart = (int)Math.Floor(size / 2.0);
             graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
@@ -425,17 +425,17 @@ namespace AmeisenBotX
             IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
-                .Where(e => Enum.IsDefined(typeof(HerbNodes), e.DisplayId));
+                .Where(e => Enum.IsDefined(typeof(HerbNode), e.DisplayId));
 
             for (int i = 0; i < herbNodes.Count(); ++i)
             {
                 WowGameobject gameobject = herbNodes.ElementAt(i);
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
-                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((HerbNodes)gameobject.DisplayId).ToString(), HerbBrush, TextBrush, TextFont, graphics);
+                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((HerbNode)gameobject.DisplayId).ToString(), HerbBrush, TextBrush, TextFont, graphics);
             }
         }
 
-        private void RenderNode(int x1, int y1, int x2, int y2, Brush dotBrush, Pen linePen, Graphics graphics, int size)
+        private static void RenderNode(int x1, int y1, int x2, int y2, Brush dotBrush, Pen linePen, Graphics graphics, int size)
         {
             int offsetStart = (int)Math.Floor(size / 2.0);
             graphics.FillRectangle(dotBrush, new Rectangle(x1 - offsetStart, y1 - offsetStart, size, size));
@@ -448,18 +448,18 @@ namespace AmeisenBotX
             List<WowGameobject> oreNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
-                .Where(e => Enum.IsDefined(typeof(OreNodes), e.DisplayId))
+                .Where(e => Enum.IsDefined(typeof(OreNode), e.DisplayId))
                 .ToList();
 
             for (int i = 0; i < oreNodes.Count; ++i)
             {
                 WowGameobject gameobject = oreNodes[i];
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
-                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((OreNodes)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
+                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((OreNode)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
             }
         }
 
-        private void RenderUnit(int width, int height, string name, string subtext, Brush dotBrush, Brush textBrush, Font textFont, Font subtextFont, Brush subTextBrush, Graphics graphics, int size = 3)
+        private static void RenderUnit(int width, int height, string name, string subtext, Brush dotBrush, Brush textBrush, Font textFont, Font subtextFont, Brush subTextBrush, Graphics graphics, int size = 3)
         {
             int offsetStart = (int)Math.Floor(size / 2.0);
             graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));

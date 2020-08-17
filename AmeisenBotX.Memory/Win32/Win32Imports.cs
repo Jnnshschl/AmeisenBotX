@@ -14,7 +14,7 @@ namespace AmeisenBotX.Memory.Win32
         public const int SWP_NOZORDER = 0x4;
 
         [Flags]
-        public enum AllocationType : uint
+        public enum AllocationTypes
         {
             Commit = 0x1000,
             Reserve = 0x2000,
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum MemoryProtection : uint
+        public enum MemoryProtectionFlags
         {
             NoAccess = 0x1,
             ReadOnly = 0x2,
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum ProcessAccessFlags : uint
+        public enum ProcessAccessFlags
         {
             All = 0x1F0FFF,
             Terminate = 0x1,
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum ThreadAccess : uint
+        public enum ThreadAccessFlags
         {
             Terminate = 0x1,
             SuspendResume = 0x2,
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Memory.Win32
         }
 
         [Flags]
-        public enum WindowFlags : uint
+        public enum WindowFlags
         {
             NoSize = 0x1,
             NoMove = 0x2,
@@ -138,7 +138,8 @@ namespace AmeisenBotX.Memory.Win32
         public static extern bool CloseHandle(IntPtr threadHandle);
 
         [DllImport("kernel32", SetLastError = true)]
-        public static extern bool CreateProcess(
+        public static extern bool CreateProcess
+        (
             string lpApplicationName,
             string lpCommandLine,
             IntPtr lpProcessAttributes,
@@ -179,7 +180,7 @@ namespace AmeisenBotX.Memory.Win32
         public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool inheritHandle, int processId);
 
         [DllImport("kernel32", SetLastError = true)]
-        public static extern IntPtr OpenThread(ThreadAccess threadAccess, bool inheritHandle, uint threadId);
+        public static extern IntPtr OpenThread(ThreadAccessFlags threadAccess, bool inheritHandle, uint threadId);
 
         [DllImport("user32", SetLastError = true)]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -194,13 +195,13 @@ namespace AmeisenBotX.Memory.Win32
         public static extern IntPtr SetWindowPos(IntPtr windowHandle, IntPtr windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
         [DllImport("kernel32", SetLastError = true)]
-        public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtection memoryProtection);
+        public static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationTypes allocationType, MemoryProtectionFlags memoryProtection);
 
         [DllImport("kernel32", SetLastError = true)]
-        public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
+        public static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationTypes allocationType);
 
         [DllImport("kernel32", SetLastError = true)]
-        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
+        public static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtectionFlags flNewProtect, out MemoryProtectionFlags lpflOldProtect);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation

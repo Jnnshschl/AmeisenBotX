@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject.Structs;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject
+namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     [Serializable]
     public class WowDynobject : WowObject

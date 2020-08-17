@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.Character.Spells
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Spells JSON:\n{rawSpells}\n{e}", LogLevel.Error);
+                AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Spells JSON:\n{rawSpells}\n{e}", LogLevel.Error);
             }
         }
     }

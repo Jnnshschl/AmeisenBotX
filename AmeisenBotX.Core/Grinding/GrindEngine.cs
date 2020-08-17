@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Cache.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
@@ -77,6 +77,11 @@ namespace AmeisenBotX.Core.Grinding
                          && e.Position.GetDistance(GrindingSpot.Position) < GrindingSpot.Radius)
                 .OrderBy(e => e.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position));
 
+            if (WowInterface.ObjectManager.Player.IsInCombat && WowInterface.ObjectManager.Player.IsMounted)
+            {
+                WowInterface.HookManager.Dismount();
+            }
+
             if (distanceToSpot < GrindingSpot.Radius)
             {
                 if (nearUnits != null && nearUnits.Any())
@@ -128,7 +133,7 @@ namespace AmeisenBotX.Core.Grinding
                         TargetPosition = default;
                         return;
                     }
-                    else
+                    else if (!WowInterface.MovementEngine.Path.Any() || WowInterface.MovementEngine.IsAtTargetPosition)
                     {
                         MoveToRandomPositionOnSpot();
                     }
@@ -142,7 +147,10 @@ namespace AmeisenBotX.Core.Grinding
                     return;
                 }
 
-                MoveToRandomPositionOnSpot();
+                if (!WowInterface.MovementEngine.Path.Any() || WowInterface.MovementEngine.IsAtTargetPosition)
+                {
+                    MoveToRandomPositionOnSpot();
+                }
             }
         }
 

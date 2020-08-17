@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs.Enums
+namespace AmeisenBotX.Core.Data.Objects.WowObjects.Structs.Enums
 {
     public static class WowEnchantmentHelper
     {

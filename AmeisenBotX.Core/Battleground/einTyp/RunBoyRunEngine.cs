@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 
@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
             this.isHorde = WowInterface.ObjectManager.Player.IsHorde();
         }
 
-        public void Exit()
+        public void Leave()
         {
 
         }

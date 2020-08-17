@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,14 +21,15 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            IEnumerable<WowUnit> healableUnits = WowInterface.ObjectManager.Partymembers;
-            healableUnits = healableUnits.Concat(WowInterface.ObjectManager.PartyPets);
+            List<WowUnit> healableUnits = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+            healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+            healableUnits.Add(WowInterface.ObjectManager.Player);
 
             // order by type id, so that players have priority
             possibleTargets = healableUnits
                 .Where(e => e.Health < e.MaxHealth && !e.IsDead)
                 .OrderByDescending(e => e.Type)
-                .ThenBy(e => e.HealthPercentage);
+                .ThenByDescending(e => e.MaxHealth - e.Health);
 
             return possibleTargets.Any();
         }

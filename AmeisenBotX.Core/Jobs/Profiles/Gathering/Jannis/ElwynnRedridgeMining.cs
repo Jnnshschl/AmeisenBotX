@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis
 
         public List<Vector3> MailboxNodes { get; } = new List<Vector3>() { new Vector3(-9456, 47, 57), new Vector3(-9250, -2145, 64) };
 
-        public List<OreNodes> OreTypes { get; } = new List<OreNodes>() { OreNodes.Copper, OreNodes.Tin, OreNodes.Silver, OreNodes.Iron };
+        public List<OreNode> OreTypes { get; } = new List<OreNode>() { OreNode.Copper, OreNode.Tin, OreNode.Silver, OreNode.Iron };
 
         public override string ToString()
         {

@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Runtime.CompilerServices;
@@ -22,19 +22,6 @@ namespace AmeisenBotX.Core.Common
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
         {
             return CalculatePositionAround(position, rotation, (float)Math.PI, distanceToMove);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Percentage(int value, int max)
-        {
-            if (value == 0 || max == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return value / (double)max * 100.0;
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,6 +64,19 @@ namespace AmeisenBotX.Core.Common
         {
             double distance = a.Position.GetDistance(b.Position);
             return distance < maxDistance && distance > maxDistance;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Percentage(int value, int max)
+        {
+            if (value == 0 || max == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return value / (double)max * 100.0;
+            }
         }
     }
 }

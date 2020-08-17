@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            if (WowInterface.ObjectManager.Target != null
-                && WowInterface.ObjectManager.TargetGuid != 0
+            if (WowInterface.ObjectManager.TargetGuid != 0
+                && WowInterface.ObjectManager.Target != null
                 && (WowInterface.ObjectManager.Target.IsDead
                 || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly
                 || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 WowInterface.HookManager.ClearTarget();
             }
 
-            bool keepCurrentTarget = (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.TargetGuid != 0) 
+            bool keepCurrentTarget = (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
                 && (WowInterface.ObjectManager.Target?.GetType() == typeof(WowPlayer)
                 || WowInterface.ObjectManager.Target?.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
 

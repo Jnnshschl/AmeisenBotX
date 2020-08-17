@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     {
                         if (keyValuePair.Value(selectedUnit))
                         {
-                            AmeisenLogger.Instance.Log("Interrupt", $"Interrupted \"{selectedUnit}\" using CastInterruptFunction: \"{keyValuePair.Key}\"");
+                            AmeisenLogger.I.Log("Interrupt", $"Interrupted \"{selectedUnit}\" using CastInterruptFunction: \"{keyValuePair.Key}\"");
                             return true;
                         }
                     }
