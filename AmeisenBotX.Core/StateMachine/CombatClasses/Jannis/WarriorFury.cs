@@ -146,10 +146,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.Player.Rage > 25 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 8.0).Count() > 2 && CastSpellIfPossibleWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
-                            || (WowInterface.ObjectManager.Player.Rage > 35 && CastSpellIfPossibleWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        if (HeroicStrikeEvent.Run())
                         {
-                            return;
+                            if ((WowInterface.ObjectManager.Player.Rage > 25 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 8.0).Count() > 2 && CastSpellIfPossibleWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                                || (WowInterface.ObjectManager.Player.Rage > 35 && CastSpellIfPossibleWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                            {
+                                return;
+                            }
                         }
                     }
                 }

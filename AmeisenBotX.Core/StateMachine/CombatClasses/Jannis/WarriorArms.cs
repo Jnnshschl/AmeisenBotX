@@ -130,7 +130,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && CastSpellIfPossible(bladestormSpell, 0, true))
                             || CastSpellIfPossibleWarrior(overpowerSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)
                             || CastSpellIfPossibleWarrior(mortalStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || CastSpellIfPossibleWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            || (HeroicStrikeEvent.Run() && CastSpellIfPossibleWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                         {
                             return;
                         }

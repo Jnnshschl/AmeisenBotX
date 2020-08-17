@@ -202,10 +202,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Leave()
         {
-            if (!Config.FollowPositionDynamic)
-            {
-                WowInterface.MovementEngine.StopMovement();
-            }
+            WowInterface.MovementEngine.StopMovement();
         }
 
         private WowPlayer SkipIfOutOfRange(WowPlayer playerToFollow)
