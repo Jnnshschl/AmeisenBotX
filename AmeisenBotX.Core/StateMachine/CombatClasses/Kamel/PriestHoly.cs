@@ -203,26 +203,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private void BuffMe()
         {
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Power Word: Fortitude") && CustomCastSpell(PowerWordFortitudeSpell))
-            {
-                return;
-            } 
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell))
-            {
-                return;
-            }  
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell))
-            {
-                return;
-            } 
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell))
-            {
-                return;
-            }   
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
-            {
-                return;
-            }
+            //if ((!WowInterface.ObjectManager.Player.HasBuffByName("Power Word: Fortitude") || !WowInterface.ObjectManager.Target.HasBuffByName("Power Word: Fortitude")) && CustomCastSpell(PowerWordFortitudeSpell))
+            //{
+            //    return;
+            //} 
+            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell))
+            //{
+            //    return;
+            //}  
+            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell))
+            //{
+            //    return;
+            //} 
+            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell))
+            //{
+            //    return;
+            //}   
+            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
+            //{
+            //    return;
+            //}
         }
 
         private void StartHeal()
