@@ -11,11 +11,11 @@ namespace AmeisenBotX.Core.Movement
 
         bool IsGhost { get; set; }
 
-        PathfindingStatus PathfindingStatus { get; }
-
         MovementAction MovementAction { get; }
 
         List<Vector3> Path { get; }
+
+        PathfindingStatus PathfindingStatus { get; }
 
         void Execute();
 

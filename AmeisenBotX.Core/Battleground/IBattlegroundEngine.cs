@@ -12,6 +12,6 @@
 
         void Execute();
 
-        void Exit();
+        void Leave();
     }
 }

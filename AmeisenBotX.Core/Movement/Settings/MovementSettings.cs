@@ -12,7 +12,7 @@
 
         public float MaxAcceleration { get; set; } = 1f;
 
-        public double MaxDistanceMovedJumpUnstuck { get; set; } = 1.0;
+        public double MaxDistanceMovedJumpUnstuck { get; set; } = 0.3;
 
         public float MaxSteering { get; set; } = 1f;
 

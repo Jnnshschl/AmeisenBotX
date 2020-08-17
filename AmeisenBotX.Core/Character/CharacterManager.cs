@@ -164,8 +164,8 @@ namespace AmeisenBotX.Core.Character
 
         public void Jump()
         {
-            AmeisenLogger.Instance.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKeys.VK_SPACE), 500, 1000));
+            AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
+            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKey.VKSPACE), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateAll()
         {
-            AmeisenLogger.Instance.Log("CharacterManager", $"Updating full character", LogLevel.Verbose);
+            AmeisenLogger.I.Log("CharacterManager", $"Updating full character", LogLevel.Verbose);
 
             Parallel.Invoke
             (
@@ -219,7 +219,7 @@ namespace AmeisenBotX.Core.Character
                             IWowItem item = itemsLikeEquipped.ElementAt(f);
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
-                                AmeisenLogger.Instance.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
+                                AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
                                 WowInterface.HookManager.ReplaceItem(null, item);
                                 Equipment.Update();
                                 break;
@@ -233,13 +233,45 @@ namespace AmeisenBotX.Core.Character
                         if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)itemToEquip))
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
-                            AmeisenLogger.Instance.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
+                            AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
                             WowInterface.HookManager.ReplaceItem(null, itemToEquip);
                             Equipment.Update();
                         }
                     }
                 }
             }
+        }
+
+        private static string SlotToEquipLocation(int slot)
+        {
+            return slot switch
+            {
+                0 => "INVTYPE_AMMO",
+                1 => "INVTYPE_HEAD",
+                2 => "INVTYPE_NECK",
+                3 => "INVTYPE_SHOULDER",
+                4 => "INVTYPE_BODY",
+                5 => "INVTYPE_CHEST|INVTYPE_ROBE",
+                6 => "INVTYPE_WAIST",
+                7 => "INVTYPE_LEGS",
+                8 => "INVTYPE_FEET",
+                9 => "INVTYPE_WRIST",
+                10 => "INVTYPE_HAND",
+                11 => "INVTYPE_FINGER",
+                12 => "INVTYPE_FINGER",
+                13 => "INVTYPE_TRINKET",
+                14 => "INVTYPE_TRINKET",
+                15 => "INVTYPE_CLOAK",
+                16 => "INVTYPE_2HWEAPON|INVTYPE_WEAPON|INVTYPE_WEAPONMAINHAND",
+                17 => "INVTYPE_SHIELD|INVTYPE_WEAPONOFFHAND|INVTYPE_HOLDABLE",
+                18 => "INVTYPE_RANGED|INVTYPE_THROWN|INVTYPE_RANGEDRIGHT|INVTYPE_RELIC",
+                19 => "INVTYPE_TABARD",
+                20 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                21 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                22 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                23 => "INVTYPE_BAG|INVTYPE_QUIVER",
+                _ => "none",
+            };
         }
 
         private bool GetItemsByEquiplocation(string equiplocation, out List<IWowItem> matchedItems, out int expectedItemCount)
@@ -281,38 +313,6 @@ namespace AmeisenBotX.Core.Character
             }
 
             return true;
-        }
-
-        private static string SlotToEquipLocation(int slot)
-        {
-            return slot switch
-            {
-                0 => "INVTYPE_AMMO",
-                1 => "INVTYPE_HEAD",
-                2 => "INVTYPE_NECK",
-                3 => "INVTYPE_SHOULDER",
-                4 => "INVTYPE_BODY",
-                5 => "INVTYPE_CHEST|INVTYPE_ROBE",
-                6 => "INVTYPE_WAIST",
-                7 => "INVTYPE_LEGS",
-                8 => "INVTYPE_FEET",
-                9 => "INVTYPE_WRIST",
-                10 => "INVTYPE_HAND",
-                11 => "INVTYPE_FINGER",
-                12 => "INVTYPE_FINGER",
-                13 => "INVTYPE_TRINKET",
-                14 => "INVTYPE_TRINKET",
-                15 => "INVTYPE_CLOAK",
-                16 => "INVTYPE_2HWEAPON|INVTYPE_WEAPON|INVTYPE_WEAPONMAINHAND",
-                17 => "INVTYPE_SHIELD|INVTYPE_WEAPONOFFHAND|INVTYPE_HOLDABLE",
-                18 => "INVTYPE_RANGED|INVTYPE_THROWN|INVTYPE_RANGEDRIGHT|INVTYPE_RELIC",
-                19 => "INVTYPE_TABARD",
-                20 => "INVTYPE_BAG|INVTYPE_QUIVER",
-                21 => "INVTYPE_BAG|INVTYPE_QUIVER",
-                22 => "INVTYPE_BAG|INVTYPE_QUIVER",
-                23 => "INVTYPE_BAG|INVTYPE_QUIVER",
-                _ => "none",
-            };
         }
 
         private void TryAddAllBags(List<IWowItem> matchedItems, ref int expectedItemCount)

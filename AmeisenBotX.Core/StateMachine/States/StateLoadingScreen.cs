@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            AmeisenLogger.Instance.Log("LoadingScreen", "Entered loading screen");
+            AmeisenLogger.I.Log("LoadingScreen", "Entered loading screen");
             WowInterface.CombatClass.PriorityTargets = null;
         }
 
@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
             {
-                AmeisenLogger.Instance.Log("LoadingScreen", "WowProcess exited");
+                AmeisenLogger.I.Log("LoadingScreen", "WowProcess exited");
                 StateMachine.SetState(BotState.None);
                 return;
             }
@@ -39,9 +39,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
-            AmeisenLogger.Instance.Log("LoadingScreen", "Exited loading screen");
+            AmeisenLogger.I.Log("LoadingScreen", "Exited loading screen");
             WowInterface.MovementEngine.StopMovement();
         }
     }

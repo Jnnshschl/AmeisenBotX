@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Core.Data.Objects.WowObject.Structs.SubStructs
+namespace AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct QuestlogEntry

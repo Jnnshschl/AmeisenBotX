@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         List<Vector3> MailboxNodes { get; }
 
-        List<OreNodes> OreTypes { get; }
+        List<OreNode> OreTypes { get; }
 
         List<Vector3> Path { get; }
     }

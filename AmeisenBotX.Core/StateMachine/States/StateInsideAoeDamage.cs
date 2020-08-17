@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
         }
 
-        private List<int> FriendlySpells { get; } = new List<int>()
+        private List<int> Blacklisted { get; } = new List<int>()
         {
             0
         };
@@ -24,27 +24,31 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (WowInterface.ObjectManager != null
-                && WowInterface.ObjectManager.Player != null)
+            WowDynobject aoeSpellObject = WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
+                .FirstOrDefault(e => !Blacklisted.Contains(e.SpellId)
+                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 3.0
+                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
+
+            if (aoeSpellObject == null)
             {
-                // TODO: exclude friendly spells like Circle of Healing
-                WowDynobject aoeSpellObject = WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
-                    .FirstOrDefault(e => FriendlySpells.Contains(e.SpellId) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 1);
-
-                if (aoeSpellObject == null)
-                {
-                    StateMachine.SetState(StateMachine.LastState);
-                    return;
-                }
-
-                Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
-
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, targetPosition);
+                StateMachine.SetState(StateMachine.LastState);
+                return;
             }
+
+            Vector3 targetPosition = FindPositionOutsideOfAoeSpell(aoeSpellObject.Position, aoeSpellObject.Radius);
+            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, targetPosition);
         }
 
-        public override void Exit()
+        public override void Leave()
         {
+        }
+
+        public bool IsInsideAeoDamage()
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
+                   .Any(e => !Blacklisted.Contains(e.SpellId)
+                          && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 3.0
+                          && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
         }
 
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)
@@ -54,7 +58,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             double angle = Math.Atan2(angleX, angleY);
 
-            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 3;
+            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 4.0;
 
             double x = WowInterface.ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
             double y = WowInterface.ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);

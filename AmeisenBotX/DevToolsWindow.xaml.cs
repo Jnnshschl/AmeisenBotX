@@ -4,7 +4,7 @@ using AmeisenBotX.Core.Data.Cache.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
@@ -91,7 +91,7 @@ namespace AmeisenBotX
             {
                 listviewCacheOre.Items.Clear();
 
-                foreach (KeyValuePair<(MapId, OreNodes), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.OreNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                foreach (KeyValuePair<(MapId, OreNode), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.OreNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
                 {
                     listviewCacheOre.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
                 }
@@ -100,7 +100,7 @@ namespace AmeisenBotX
             {
                 listviewCacheHerb.Items.Clear();
 
-                foreach (KeyValuePair<(MapId, HerbNodes), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.HerbNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                foreach (KeyValuePair<(MapId, HerbNode), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.HerbNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
                 {
                     listviewCacheHerb.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
                 }

@@ -4,7 +4,7 @@ using System.Linq;
 using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 namespace AmeisenBotX.Core.Battleground.KamelBG
@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         }
 
-        public void Exit()
+        public void Leave()
         {
 
         }

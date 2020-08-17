@@ -15,7 +15,7 @@
             WowInterface.GrindingEngine.Execute();
         }
 
-        public override void Exit()
+        public override void Leave()
         {
             WowInterface.GrindingEngine.Exit();
         }

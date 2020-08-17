@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.UTF8, out string gameState))
                 {
-                    AmeisenLogger.Instance.Log("Login", $"Gamestate is: {gameState}");
+                    AmeisenLogger.I.Log("Login", $"Gamestate is: {gameState}");
 
                     switch (gameState.ToUpper())
                     {
@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                             break;
 
                         case "CHARSELECT":
-                            AmeisenLogger.Instance.Log("Login", $"Selecting character slot: {Config.CharacterSlot}");
+                            AmeisenLogger.I.Log("Login", $"Selecting character slot: {Config.CharacterSlot}");
                             WowInterface.HookManager.LuaDoString($"if CharacterSelectUI and CharacterSelectUI:IsVisible()then CharacterSelect_SelectCharacter({Config.CharacterSlot})EnterWorld();elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()then CharacterCreate_Back()end");
                             break;
 
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
         }
 

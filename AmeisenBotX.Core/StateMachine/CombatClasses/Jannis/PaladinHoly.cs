@@ -2,7 +2,8 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using System.Collections.Generic;
@@ -18,7 +19,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { blessingOfWisdomSpell, () => CastSpellIfPossible(blessingOfWisdomSpell, WowInterface.ObjectManager.PlayerGuid, true) },
-                { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, WowInterface.ObjectManager.PlayerGuid, true) }
+                { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { sealOfWisdomSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && CastSpellIfPossible(sealOfWisdomSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { sealOfVengeanceSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && CastSpellIfPossible(sealOfVengeanceSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -33,7 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Paladin;
+        public override WowClass WowClass => WowClass.Paladin;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -106,22 +109,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void ExecuteCC()
         {
-            if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
-                && NeedToHealSomeone())
+            if (WowInterface.ObjectManager.Partymembers.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
             {
-                return;
-            }
-
-            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
-            {
-                if (WowInterface.ObjectManager.Player.IsAutoAttacking
-                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                if (NeedToHealSomeone())
                 {
-                    WowInterface.HookManager.StartAutoAttack();
                     return;
                 }
-
-                if (CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
+            }
+            else if (SelectTarget(DpsTargetManager))
+            {
+                if ((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell)) 
+                    && CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -129,6 +127,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (CastSpellIfPossible(exorcismSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
+                }
+
+                if (WowInterface.ObjectManager.Target != null)
+                {
+                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking
+                        && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                    {
+                        if (AutoAttackEvent.Run())
+                        {
+                            WowInterface.HookManager.StartAutoAttack();
+                        }
+
+                        return;
+                    }
+                    else
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
+                        return;
+                    }
                 }
             }
         }
@@ -147,9 +164,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.Any() ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
+                WowUnit targetUnit = unitsToHeal.Count() > 1 ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
 
-                if (targetUnit.HealthPercentage < 12.0
+                if (targetUnit.HealthPercentage < 15.0
                     && CastSpellIfPossible(layOnHandsSpell, 0))
                 {
                     return true;

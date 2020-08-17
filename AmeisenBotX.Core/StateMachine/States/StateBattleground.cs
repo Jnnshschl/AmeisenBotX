@@ -35,9 +35,9 @@
             WowInterface.BattlegroundEngine.Execute();
         }
 
-        public override void Exit()
+        public override void Leave()
         {
-            WowInterface.BattlegroundEngine?.Exit();
+            WowInterface.BattlegroundEngine?.Leave();
             WowInterface.MovementEngine.Reset();
         }
     }

@@ -16,7 +16,7 @@
             WowInterface.QuestEngine.Execute();
         }
 
-        public override void Exit()
+        public override void Leave()
         {
         }
     }

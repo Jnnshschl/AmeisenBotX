@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
 using System;
@@ -29,8 +29,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { corruptionSpell, () => !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell) && CastSpellIfPossible(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { curseOftheElementsSpell, () => CastSpellIfPossible(curseOftheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { immolateSpell, () => CastSpellIfPossible(immolateSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { immolateSpell, () => CastSpellIfPossible(immolateSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { curseOfDoomSpell, () => CastSpellIfPossible(curseOfDoomSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { curseOftheElementsSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(curseOfDoomSpell) && CastSpellIfPossible(curseOftheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
             };
 
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
@@ -38,7 +39,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Warlock;
+        public override WowClass WowClass => WowClass.Warlock;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -105,12 +106,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 20
-                        && WowInterface.ObjectManager.Player.HealthPercentage > 60
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 50.0
+                        && WowInterface.ObjectManager.Player.HealthPercentage > 60.0
                         && CastSpellIfPossible(lifeTapSpell, 0)
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 80
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 80.0
                         && CastSpellIfPossible(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 50
+                    || (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
                         && CastSpellIfPossible(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || CastSpellIfPossible(metamorphosisSpell, 0)
                     || (WowInterface.ObjectManager.Pet?.Health > 0 && CastSpellIfPossible(demonicEmpowermentSpell, 0)))
@@ -123,9 +124,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
                     {
                         if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
-                            && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
+                            && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6.0
                                 && CastSpellIfPossible(howlOfTerrorSpell, 0, true))
-                            || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
+                            || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12.0
                                 && CastSpellIfPossible(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
                         {
                             LastFearAttempt = DateTime.Now;
@@ -133,7 +134,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         }
                     }
 
-                    if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
+                    if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5.0
                         && WowInterface.ObjectManager.Target.HealthPercentage < 25.0
                         && CastSpellIfPossible(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
@@ -148,7 +149,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                if (CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
+                bool hasDecimation = WowInterface.ObjectManager.Player.HasBuffByName(decimationSpell);
+                bool hasMoltenCore = WowInterface.ObjectManager.Player.HasBuffByName(moltenCoreSpell);
+
+                if (hasDecimation && hasMoltenCore && CastSpellIfPossible(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+                else if (hasDecimation && CastSpellIfPossible(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+                else if (hasMoltenCore && CastSpellIfPossible(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+                else if (CastSpellIfPossible(shadowBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }

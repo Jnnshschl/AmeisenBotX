@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Data.Enums
 {
-    public enum HerbNodes : int
+    public enum HerbNode : int
     {
         AddersTongue = 8084,
         AncientLichen = 6967,

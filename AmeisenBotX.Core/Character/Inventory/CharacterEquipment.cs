@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Character.Inventory
             }
             catch (Exception e)
             {
-                AmeisenLogger.Instance.Log("CharacterManager", $"Failed to parse Equipment JSON:\n{resultJson}\n{e}", LogLevel.Error);
+                AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Equipment JSON:\n{resultJson}\n{e}", LogLevel.Error);
             }
         }
 

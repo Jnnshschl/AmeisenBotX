@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using AmeisenBotX.Core.Movement.SMovementEngine.Extra.Shortcuts;
+using AmeisenBotX.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 // new DeeprunTramShortcut(wowInterface)
             };
 
-            MovementWatchdog = new Timer(1000);
+            MovementWatchdog = new Timer(250);
             MovementWatchdog.Elapsed += MovementWatchdog_Elapsed;
 
             if (WowInterface.MovementSettings.EnableDistanceMovedJumpCheck)
@@ -54,7 +55,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     new Selector<MovementBlackboard>
                     (
                         "NeedToUnstuck",
-                        (b) => false, // ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                        (b) => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
                         new Leaf<MovementBlackboard>((b) => DoUnstuck()),
                         new Selector<MovementBlackboard>
                         (
@@ -357,6 +358,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 {
                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                         && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
+                        && !WowInterface.ObjectManager.Player.IsInCombat
                         && !IsGhost
                         && WowInterface.CharacterManager.Mounts.Any()
                         && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
@@ -437,10 +439,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private void MovementWatchdog_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (MovementAction == MovementAction.None)
+            if (MovementAction == MovementAction.None || WowInterface.ObjectManager.Player.IsCasting)
             {
                 ShouldBeMoving = false;
-                return;
             }
 
             // check wether we should be moving or not
@@ -449,12 +450,19 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 // if we already need to jump, dont check it again
                 if (!JumpOnNextMove)
                 {
-                    MovedDistance = LastPlayerPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position);
+                    MovedDistance = LastPlayerPosition.GetDistance(WowInterface.ObjectManager.Player.Position);
+                    AmeisenLogger.I.Log("Movement", $"Moved {MovedDistance}m since last check");
+
                     LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
 
                     if (MovedDistance > WowInterface.MovementSettings.MinDistanceMovedJumpUnstuck
                         && MovedDistance < WowInterface.MovementSettings.MaxDistanceMovedJumpUnstuck)
                     {
+                        if (StuckCounter > 0 && WowInterface.ObjectManager.Player.IsMounted)
+                        {
+                            WowInterface.HookManager.Dismount();
+                        }
+
                         ++StuckCounter;
                         JumpOnNextMove = true;
                     }

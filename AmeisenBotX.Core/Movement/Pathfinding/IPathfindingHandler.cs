@@ -5,14 +5,14 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 {
     public interface IPathfindingHandler
     {
-        bool CastMovementRay(int mapId, Vector3 start, Vector3 end);
+        bool CastMovementRay(int mapId, Vector3 origin, Vector3 target);
 
-        List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end);
+        List<Vector3> GetPath(int mapId, Vector3 origin, Vector3 target);
 
         Vector3 GetRandomPoint(int mapId);
 
-        Vector3 GetRandomPointAround(int mapId, Vector3 start, float maxRadius);
+        Vector3 GetRandomPointAround(int mapId, Vector3 origin, float maxRadius);
 
-        Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end);
+        Vector3 MoveAlongSurface(int mapId, Vector3 origin, Vector3 target);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json.Linq;
 using System;
@@ -186,9 +186,9 @@ namespace AmeisenBotX.Core.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsPositionInsideAoeSpell(Vector3 position, List<WowDynobject> wowDynobjects)
+        public static bool IsPositionInsideAoeSpell(Vector3 position, IEnumerable<WowDynobject> wowDynobjects)
         {
-            return wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 1);
+            return wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 3.0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -229,14 +229,14 @@ namespace AmeisenBotX.Core.Common
         {
             if (shift)
             {
-                PostMessage(windowHandle, WM_KEYDOWN, new IntPtr((int)VirtualKeys.VK_SHIFT), new IntPtr(0));
+                PostMessage(windowHandle, WM_KEYDOWN, new IntPtr((int)VirtualKey.VKSHIFT), new IntPtr(0));
             }
 
             PostMessage(windowHandle, WM_KEYPRESS, key, new IntPtr(0));
 
             if (shift)
             {
-                PostMessage(windowHandle, WM_KEYUP, new IntPtr((int)VirtualKeys.VK_SHIFT), new IntPtr(0));
+                PostMessage(windowHandle, WM_KEYUP, new IntPtr((int)VirtualKey.VKSHIFT), new IntPtr(0));
             }
         }
 

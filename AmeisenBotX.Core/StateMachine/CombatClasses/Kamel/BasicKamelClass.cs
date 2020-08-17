@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public TimegatedEvent AutoAttackEvent { get; private set; }
         public TimegatedEvent TargetSelectEvent { get; private set; }
 
-        public abstract WowClass Class { get; }
+        public abstract WowClass WowClass { get; }
 
         public abstract Dictionary<string, dynamic> Configureables { get; set; }
 
@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override string ToString()
         {
-            return $"[{Class}] [{Role}] {Displayname} ({Author})";
+            return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
         }
     }
 }

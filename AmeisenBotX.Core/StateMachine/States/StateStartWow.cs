@@ -17,12 +17,12 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Enter()
         {
-            AmeisenLogger.Instance.Log("StartWow", "Setting TOS and EULA to 1 in config");
+            AmeisenLogger.I.Log("StartWow", "Setting TOS and EULA to 1 in config");
             CheckTosAndEula();
 
             if (Config.AutoChangeRealmlist)
             {
-                AmeisenLogger.Instance.Log("StartWow", "Changing Realmlist");
+                AmeisenLogger.I.Log("StartWow", "Changing Realmlist");
                 ChangeRealmlist();
             }
         }
@@ -33,16 +33,16 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
                 {
-                    AmeisenLogger.Instance.Log("StartWow", "Starting WoW Process");
+                    AmeisenLogger.I.Log("StartWow", "Starting WoW Process");
                     WowInterface.WowProcess = XMemory.StartProcessNoActivate(Config.PathToWowExe);
 
-                    AmeisenLogger.Instance.Log("StartWow", "Waiting for input idle");
+                    AmeisenLogger.I.Log("StartWow", "Waiting for input idle");
                     WowInterface.WowProcess.WaitForInputIdle();
                 }
 
                 if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited)
                 {
-                    AmeisenLogger.Instance.Log("StartWow", $"Attaching XMemory to {WowInterface.WowProcess.ProcessName}:{WowInterface.WowProcess.Id}");
+                    AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {WowInterface.WowProcess.ProcessName}:{WowInterface.WowProcess.Id}");
 
                     try
                     {
@@ -52,22 +52,22 @@ namespace AmeisenBotX.Core.Statemachine.States
                             {
                                 OnWoWStarted?.Invoke();
                             }
-                            catch (Exception ex) { AmeisenLogger.Instance.Log("StartWow", $"Error at OnWoWStarted:\n{ex}"); }
+                            catch (Exception ex) { AmeisenLogger.I.Log("StartWow", $"Error at OnWoWStarted:\n{ex}"); }
 
-                            AmeisenLogger.Instance.Log("StartWow", $"Switching to login state...");
+                            AmeisenLogger.I.Log("StartWow", $"Switching to login state...");
                             StateMachine.SetState(BotState.Login);
                         }
                         else
                         {
-                            AmeisenLogger.Instance.Log("StartWow", $"Attaching XMemory failed...");
+                            AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed...");
                         }
                     }
-                    catch (Exception e) { AmeisenLogger.Instance.Log("StartWow", $"Attaching XMemory failed:\n{e}"); }
+                    catch (Exception e) { AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed:\n{e}"); }
                 }
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
         }
 
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             catch
             {
-                AmeisenLogger.Instance.Log("StartWow", "Cannot write realmlist to config.wtf");
+                AmeisenLogger.I.Log("StartWow", "Cannot write realmlist to config.wtf");
             }
         }
 
@@ -176,7 +176,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             catch
             {
-                AmeisenLogger.Instance.Log("StartWow", "Cannot write to config.wtf");
+                AmeisenLogger.I.Log("StartWow", "Cannot write to config.wtf");
             }
         }
     }

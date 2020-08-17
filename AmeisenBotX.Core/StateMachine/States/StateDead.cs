@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
             SetMapAndPosition = false;
         }

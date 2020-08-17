@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public string Author => "einTyp";
 
-        public WowClass Class => WowClass.Warrior;
+        public WowClass WowClass => WowClass.Warrior;
 
         public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 

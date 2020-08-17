@@ -25,10 +25,5 @@ namespace AmeisenBotX.Designer
         {
             DragMove();
         }
-
-        private void RenderTree()
-        {
-
-        }
     }
 }

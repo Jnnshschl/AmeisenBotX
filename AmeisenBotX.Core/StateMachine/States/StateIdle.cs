@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        public override void Exit()
+        public override void Leave()
         {
         }
 

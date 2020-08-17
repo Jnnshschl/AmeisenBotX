@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis
             Profile?.Execute();
         }
 
-        public void Exit()
+        public void Leave()
         {
         }
 

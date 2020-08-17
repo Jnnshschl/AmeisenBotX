@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,25 +15,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
     {
         public WarriorFury(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>();
+            MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
+            {
+                { battleShoutSpell, () => CastSpellIfPossible(battleShoutSpell, 0, true) }
+            };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { hamstringSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && CastSpellIfPossible(hamstringSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { rendSpell, () => WowInterface.ObjectManager.Player.Rage > 75 && CastSpellIfPossible(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { rendSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.Player.Rage > 75 && CastSpellIfPossible(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossible(intimidatingShoutSpell, x.Guid, true) }
+                { 0, (x) => CastSpellIfPossibleWarrior(intimidatingShoutSpell, berserkerStanceSpell, x.Guid, true) },
+                { 1, (x) => CastSpellIfPossibleWarrior(intimidatingShoutSpell, battleStanceSpell, x.Guid, true) }
             };
-
-            WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += SpellBook_OnSpellBookUpdate;
         }
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Warrior;
+        public override WowClass WowClass => WowClass.Warrior;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -102,28 +104,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (distanceToTarget > 5.0)
                     {
                         if (CastSpellIfPossibleWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || CastSpellIfPossibleWarrior(interceptSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                            || (CastSpellIfPossible(berserkerRageSpell, WowInterface.ObjectManager.Target.Guid, true) && CastSpellIfPossibleWarrior(interceptSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)))
                         {
                             return;
                         }
                     }
                     else
                     {
-                        if (CastSpellIfPossible(berserkerRageSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            && CastSpellIfPossible(bloodrageSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            && CastSpellIfPossible(recklessnessSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
+                            && CastSpellIfPossible(enragedRegenerationSpell, 0, true))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.IsCasting
-                           && CastSpellIfPossibleWarrior(pummelSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (CastSpellIfPossible(berserkerRageSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.Target.HealthPercentage < 20)
-                           && CastSpellIfPossibleWarrior(executeSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (CastSpellIfPossibleWarrior(bloodthirstSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            && CastSpellIfPossibleWarrior(whirlwindSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
@@ -134,10 +134,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                             return;
                         }
 
-                        if (CastSpellIfPossibleWarrior(bloodthirstSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || CastSpellIfPossibleWarrior(whirlwindSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || (WowInterface.ObjectManager.Player.Rage > 60 && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 5).Count() > 2 && CastSpellIfPossibleWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
-                            || (WowInterface.ObjectManager.Player.Rage > 60 && CastSpellIfPossibleWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        if (CastSpellIfPossible(bloodrageSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            && CastSpellIfPossible(recklessnessSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if ((WowInterface.ObjectManager.Target.HealthPercentage < 20)
+                           && CastSpellIfPossibleWarrior(executeSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if ((WowInterface.ObjectManager.Player.Rage > 25 && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 5).Count() > 2 && CastSpellIfPossibleWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                            || (WowInterface.ObjectManager.Player.Rage > 35 && CastSpellIfPossibleWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                         {
                             return;
                         }
@@ -151,18 +161,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (MyAuraManager.Tick())
             {
                 return;
-            }
-        }
-
-        private void SpellBook_OnSpellBookUpdate()
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(berserkerStanceSpell))
-            {
-                MyAuraManager.BuffsToKeepActive.Add(berserkerStanceSpell, () => CastSpellIfPossible(berserkerStanceSpell, 0, true));
-            }
-            else if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(battleStanceSpell))
-            {
-                MyAuraManager.BuffsToKeepActive.Add(battleStanceSpell, () => CastSpellIfPossible(battleStanceSpell, 0, true));
             }
         }
     }

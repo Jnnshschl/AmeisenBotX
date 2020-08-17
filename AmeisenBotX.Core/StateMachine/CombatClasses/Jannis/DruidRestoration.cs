@@ -3,10 +3,9 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
-using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +30,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Druid;
+        public override WowClass WowClass => WowClass.Druid;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
@@ -119,37 +118,46 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            // when we're solo, we don't need to heal as much as we would do in a dungeon group
-            if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
-                && NeedToHealSomeone())
+            if (WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead))
             {
-                return;
+                if (NeedToHealSomeone())
+                {
+                    return;
+                }
             }
-
-            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || !WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead)) && SelectTarget(DpsTargetManager))
+            else
             {
-                if (!WowInterface.ObjectManager.Target.HasBuffByName(moonfireSpell)
-                    && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                // when we're solo, we don't need to heal as much as we would do in a dungeon group
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 75.0 && NeedToHealSomeone())
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (SelectTarget(DpsTargetManager))
                 {
-                    return;
-                }
+                    if (!WowInterface.ObjectManager.Target.HasBuffByName(moonfireSpell)
+                        && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
 
-                if (CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
+                    if (CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }
 
         public override void OutOfCombatExecute()
         {
-            if (WowInterface.ObjectManager.Player.HasBuffByName("Food")
-                || WowInterface.ObjectManager.Player.HasBuffByName("Drink"))
+            if ((WowInterface.ObjectManager.Player.HasBuffByName("Food") && WowInterface.ObjectManager.Player.HealthPercentage < 100.0)
+                || (WowInterface.ObjectManager.Player.HasBuffByName("Drink") && WowInterface.ObjectManager.Player.ManaPercentage < 100.0))
             {
                 return;
             }
@@ -167,24 +175,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
-                AmeisenLogger.Instance.Log("DRUID", $"Need to heal {unitsToHeal.Count()} units");
-
-                if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 2
+                if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 3
                     && CastSpellIfPossible(tranquilitySpell, 0, true))
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {tranquilitySpell}");
                     return true;
                 }
 
                 WowUnit target = unitsToHeal.First();
-                AmeisenLogger.Instance.Log("DRUID", $"Healing {target}");
 
                 if (target.HealthPercentage < 90.0
                     && target.HealthPercentage > 78.0
                     && unitsToHeal.Count(e => e.HealthPercentage < 75.0) > 2
                     && CastSpellIfPossible(wildGrowthSpell, target.Guid, true))
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {wildGrowthSpell}");
                     return true;
                 }
 
@@ -192,7 +195,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && CastSpellIfPossible(naturesSwiftnessSpell, target.Guid, true)
                     && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {naturesSwiftnessSpell} and {healingTouchSpell}");
                     return true;
                 }
 
@@ -202,7 +204,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && CastSpellIfPossible(swiftmendSpell, target.Guid, true)
                     && SwiftmendEvent.Run())
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {swiftmendSpell}");
                     return true;
                 }
 
@@ -211,29 +212,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     && !target.HasBuffByName(rejuvenationSpell)
                     && CastSpellIfPossible(rejuvenationSpell, target.Guid, true))
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {rejuvenationSpell}");
                     return true;
                 }
 
-                // if (target.HealthPercentage < 98.0
-                //     && target.HealthPercentage > 80.0
-                //     && !target.HasBuffByName(lifebloomSpell)
-                //     && CastSpellIfPossible(lifebloomSpell, target.Guid, true))
-                // {
-                //     return true;
-                // }
+                if (target.HealthPercentage < 98.0
+                    && target.HealthPercentage > 80.0
+                    && !target.HasBuffByName(lifebloomSpell)
+                    && CastSpellIfPossible(lifebloomSpell, target.Guid, true))
+                {
+                    return true;
+                }
 
                 if (target.HealthPercentage < 85.0
                     && CastSpellIfPossible(regrowthSpell, target.Guid, true))
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {regrowthSpell}");
                     return true;
                 }
 
                 if (target.HealthPercentage < 85.0
                     && CastSpellIfPossible(nourishSpell, target.Guid, true))
                 {
-                    AmeisenLogger.Instance.Log("DRUID", $"Casting {nourishSpell}");
+                    return true;
+                }
+
+                if (target.HealthPercentage < 85.0
+                    && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
+                {
                     return true;
                 }
             }

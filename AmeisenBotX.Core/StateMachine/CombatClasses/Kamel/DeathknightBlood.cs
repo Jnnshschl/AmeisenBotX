@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.Utils;
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public string Author => "Kamel";
 
-        public WowClass Class => WowClass.Deathknight;
+        public WowClass WowClass => WowClass.Deathknight;
 
         public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 

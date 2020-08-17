@@ -21,6 +21,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public abstract void Execute();
 
-        public abstract void Exit();
+        public abstract void Leave();
     }
 }

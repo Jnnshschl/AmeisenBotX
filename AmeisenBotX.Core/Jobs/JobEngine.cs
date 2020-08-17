@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Jobs
     {
         public JobEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
-            AmeisenLogger.Instance.Log("JobEngine", $"Initializing", LogLevel.Verbose);
+            AmeisenLogger.I.Log("JobEngine", $"Initializing", LogLevel.Verbose);
 
             WowInterface = wowInterface;
             Config = config;
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Jobs
 
         public void Enter()
         {
-            AmeisenLogger.Instance.Log("JobEngine", $"Entering JobEngine", LogLevel.Verbose);
+            AmeisenLogger.I.Log("JobEngine", $"Entering JobEngine", LogLevel.Verbose);
             CheckForPathRecovering = true;
             GeneratedPathToNode = false;
         }
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Jobs
 
         public void Reset()
         {
-            AmeisenLogger.Instance.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
+            AmeisenLogger.I.Log("JobEngine", $"Resetting JobEngine", LogLevel.Verbose);
         }
 
         private void ExecuteMining(IMiningProfile miningProfile)
@@ -171,23 +171,23 @@ namespace AmeisenBotX.Core.Jobs
                 WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
-                             && Enum.IsDefined(typeof(OreNodes), e.DisplayId)
-                             && miningProfile.OreTypes.Contains((OreNodes)e.DisplayId)
-                             && (((OreNodes)e.DisplayId) == OreNodes.Copper
-                             || (((OreNodes)e.DisplayId) == OreNodes.Tin && miningSkill >= 65)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Silver && miningSkill >= 75)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Iron && miningSkill >= 125)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Gold && miningSkill >= 155)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Mithril && miningSkill >= 175)
-                             || (((OreNodes)e.DisplayId) == OreNodes.DarkIron && miningSkill >= 230)
-                             || (((OreNodes)e.DisplayId) == OreNodes.SmallThorium && miningSkill >= 245)
-                             || (((OreNodes)e.DisplayId) == OreNodes.RichThorium && miningSkill >= 275)
-                             || (((OreNodes)e.DisplayId) == OreNodes.FelIron && miningSkill >= 300)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Adamantite && miningSkill >= 325)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Cobalt && miningSkill >= 350)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Khorium && miningSkill >= 375)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Saronite && miningSkill >= 400)
-                             || (((OreNodes)e.DisplayId) == OreNodes.Titanium && miningSkill >= 450)))
+                             && Enum.IsDefined(typeof(OreNode), e.DisplayId)
+                             && miningProfile.OreTypes.Contains((OreNode)e.DisplayId)
+                             && (((OreNode)e.DisplayId) == OreNode.Copper
+                             || (((OreNode)e.DisplayId) == OreNode.Tin && miningSkill >= 65)
+                             || (((OreNode)e.DisplayId) == OreNode.Silver && miningSkill >= 75)
+                             || (((OreNode)e.DisplayId) == OreNode.Iron && miningSkill >= 125)
+                             || (((OreNode)e.DisplayId) == OreNode.Gold && miningSkill >= 155)
+                             || (((OreNode)e.DisplayId) == OreNode.Mithril && miningSkill >= 175)
+                             || (((OreNode)e.DisplayId) == OreNode.DarkIron && miningSkill >= 230)
+                             || (((OreNode)e.DisplayId) == OreNode.SmallThorium && miningSkill >= 245)
+                             || (((OreNode)e.DisplayId) == OreNode.RichThorium && miningSkill >= 275)
+                             || (((OreNode)e.DisplayId) == OreNode.FelIron && miningSkill >= 300)
+                             || (((OreNode)e.DisplayId) == OreNode.Adamantite && miningSkill >= 325)
+                             || (((OreNode)e.DisplayId) == OreNode.Cobalt && miningSkill >= 350)
+                             || (((OreNode)e.DisplayId) == OreNode.Khorium && miningSkill >= 375)
+                             || (((OreNode)e.DisplayId) == OreNode.Saronite && miningSkill >= 400)
+                             || (((OreNode)e.DisplayId) == OreNode.Titanium && miningSkill >= 450)))
                     .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
 

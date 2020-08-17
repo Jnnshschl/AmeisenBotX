@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObject;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Personality.Enums;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObject;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 PriorityTargets = new List<string>() { "Frost Tomb" };
             }
 
-            if (WowInterface.ObjectManager.TargetGuid != 0
+            if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null
                 && (WowInterface.ObjectManager.Target.IsDead
                     || WowInterface.ObjectManager.Target.IsNotAttackable
                     || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
@@ -54,10 +54,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
                 .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => BotUtils.IsValidUnit(e)
-                    && !e.IsDead
-                    && e.IsInCombat
-                    && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
-                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
+                         && !e.IsDead
+                         && e.IsInCombat
+                         && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
+                         && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
                 .OrderByDescending(e => e.Type) // make sure players are at the top (pvp)
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
                 .ThenByDescending(e => e.MaxHealth);
@@ -75,7 +75,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // get enemies tagged by me or no one, or players
-            nearEnemies = nearEnemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer));
+            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 50.0)
+                .Where(e => BotUtils.IsValidUnit(e)
+                         && !e.IsDead 
+                         && (e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer)));
 
             if (nearEnemies.Any())
             {

@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override string Author => "Jannis";
 
-        public override WowClass Class => WowClass.Druid;
+        public override WowClass WowClass => WowClass.Druid;
 
         public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
