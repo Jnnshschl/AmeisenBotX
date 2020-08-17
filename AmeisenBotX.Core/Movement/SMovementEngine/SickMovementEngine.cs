@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     new Selector<MovementBlackboard>
                     (
                         "NeedToUnstuck",
-                        (b) => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                        (b) => false, //ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
                         new Leaf<MovementBlackboard>((b) => DoUnstuck()),
                         new Selector<MovementBlackboard>
                         (

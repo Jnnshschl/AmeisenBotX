@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -31,6 +33,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 0, (x) => CastSpellIfPossibleWarrior(intimidatingShoutSpell, berserkerStanceSpell, x.Guid, true) },
                 { 1, (x) => CastSpellIfPossibleWarrior(intimidatingShoutSpell, battleStanceSpell, x.Guid, true) }
             };
+
+            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
 
         public override string Author => "Jannis";
@@ -96,6 +100,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override string Version => "1.0";
 
         public override bool WalkBehindEnemy => false;
+
+        private TimegatedEvent HeroicStrikeEvent { get; }
 
         public override void ExecuteCC()
         {

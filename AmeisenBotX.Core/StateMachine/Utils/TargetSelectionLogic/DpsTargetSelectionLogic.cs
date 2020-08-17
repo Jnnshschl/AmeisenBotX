@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // get enemies tagged by me or no one, or players
-            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 50.0)
+            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => BotUtils.IsValidUnit(e)
                          && !e.IsDead 
                          && (e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer)));

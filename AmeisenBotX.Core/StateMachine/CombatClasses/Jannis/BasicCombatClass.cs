@@ -771,10 +771,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         CastSpell(requiredStance, true);
                     }
-                    else
-                    {
-                        return false;
-                    }
 
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
