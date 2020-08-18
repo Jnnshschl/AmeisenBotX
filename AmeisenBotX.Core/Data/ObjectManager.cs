@@ -127,11 +127,10 @@ namespace AmeisenBotX.Core.Data
             {
                 return GetNearEnemies<T>(position, distance)
                     .Where(e => e.IsInCombat
-                             && (e.TargetGuid == PlayerGuid
+                             || e.TargetGuid == PlayerGuid
                              || PartymemberGuids.Contains(e.TargetGuid)
                              || PartyPetGuids.Contains(e.TargetGuid)
-                             || e.IsTaggedByMe
-                             || !e.IsTaggedByOther));
+                             && (e.IsTaggedByMe || !e.IsTaggedByOther));
             }
         }
 
