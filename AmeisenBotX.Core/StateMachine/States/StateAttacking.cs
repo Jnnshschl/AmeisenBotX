@@ -55,25 +55,18 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && WowInterface.ObjectManager.Player != null)
             {
                 // use the default MovementEngine to move if the CombatClass doesnt
-                if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
+                if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
+                    && WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
                 {
-                    if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
+                    if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
+                        || WowInterface.ObjectManager.Target.IsDead
+                        || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
                     {
-                        if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
-                            || WowInterface.ObjectManager.Target.IsDead
-                            || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
-                        {
-                            WowInterface.MovementEngine.Reset();
-                        }
-                        else
-                        {
-                            HandleMovement(WowInterface.ObjectManager.Target);
-
-                            if (WowInterface.CombatClass != null)
-                            {
-                                WowInterface.CombatClass.TargetInLineOfSight = WowInterface.ObjectManager.TargetGuid == 0 || TargetInLos;
-                            }
-                        }
+                        WowInterface.MovementEngine.Reset();
+                    }
+                    else
+                    {
+                        HandleMovement(WowInterface.ObjectManager.Target);
                     }
                 }
 
@@ -124,7 +117,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private double GetMeeleRange()
         {
-            return Math.Max(WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) ? 1.5 : 3.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
+            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5 : Math.Max(3.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
         }
 
         private bool HandleMovement(WowUnit target)
@@ -136,6 +129,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             else if (LineOfSightCheck.Run(out bool isInLos, () => WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
             {
                 TargetInLos = isInLos;
+            }
+
+            if (WowInterface.CombatClass != null)
+            {
+                WowInterface.CombatClass.TargetInLineOfSight = WowInterface.ObjectManager.TargetGuid == 0 || TargetInLos;
             }
 
             if (!WowInterface.HookManager.IsClickToMoveActive()
@@ -184,16 +182,13 @@ namespace AmeisenBotX.Core.Statemachine.States
                         positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle2D(target.Position, meanGroupPosition));
                     }
                 }
+                else if (WowInterface.CombatClass.Role != CombatClassRole.Heal)
+                {
+                    positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), (float)GetMeeleRange() / 2.0f * -1f);
+                }
                 else
                 {
-                    if (WowInterface.CombatClass.Role != CombatClassRole.Heal)
-                    {
-                        positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position), (float)GetMeeleRange() / 2.0f * -1f);
-                    }
-                    else
-                    {
-                        positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(target.Position, WowInterface.ObjectManager.Player.Position), 24.0f);
-                    }
+                    positionToGoTo = BotUtils.MoveAhead(target.Position, BotMath.GetFacingAngle2D(target.Position, WowInterface.ObjectManager.Player.Position), 24.0f);
                 }
 
                 WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);

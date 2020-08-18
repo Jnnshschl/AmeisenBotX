@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.CharacterManager.UpdateAll();
                 }
 
-                // WowInterface.MovementEngine.StopMovement();
+                WowInterface.MovementEngine.StopMovement();
             }
         }
 
