@@ -11,31 +11,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PriestShadow : BasicCombatClass
     {
-        public PriestShadow(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public PriestShadow(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { shadowformSpell, () => CastSpellIfPossible(shadowformSpell, WowInterface.ObjectManager.PlayerGuid, true) },
-                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
-                { vampiricEmbraceSpell, () => CastSpellIfPossible(vampiricEmbraceSpell, WowInterface.ObjectManager.PlayerGuid, true) }
+                { shadowformSpell, () => TryCastSpell(shadowformSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { vampiricEmbraceSpell, () => TryCastSpell(vampiricEmbraceSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { vampiricTouchSpell, () => CastSpellIfPossible(vampiricTouchSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { devouringPlagueSpell, () => CastSpellIfPossible(devouringPlagueSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { shadowWordPainSpell, () => CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { mindBlastSpell, () => CastSpellIfPossible(mindBlastSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { devouringPlagueSpell, () => TryCastSpell(devouringPlagueSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { shadowWordPainSpell, () => TryCastSpell(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { mindBlastSpell, () => TryCastSpell(mindBlastSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Priest;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
 
@@ -92,32 +86,36 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Priest;
+
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                && CastSpellIfPossible(hymnOfHopeSpell, 0))
+                && TryCastSpell(hymnOfHopeSpell, 0))
                 {
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 90
-                    && CastSpellIfPossible(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
+                    && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(flashHealSpell, WowInterface.ObjectManager.TargetGuid))
+                    && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }
 
                 if (!WowInterface.ObjectManager.Player.IsCasting
-                    && CastSpellIfPossible(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
+                    && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -126,15 +124,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick()
-                || GroupAuraManager.Tick())
-            {
-                return;
-            }
+            base.OutOfCombatExecute();
 
-            if (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(resurrectionSpell))
+            if (HandleDeadPartymembers(resurrectionSpell))
             {
                 return;
             }

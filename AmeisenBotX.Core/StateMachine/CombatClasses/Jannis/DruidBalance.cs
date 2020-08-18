@@ -14,37 +14,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DruidBalance : BasicCombatClass
     {
-        public DruidBalance(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public DruidBalance(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { moonkinFormSpell, () => CastSpellIfPossible(moonkinFormSpell, 0, true) },
-                { thornsSpell, () => CastSpellIfPossible(thornsSpell, 0, true) },
-                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true) }
+                { moonkinFormSpell, () => TryCastSpell(moonkinFormSpell, 0, true) },
+                { thornsSpell, () => TryCastSpell(thornsSpell, 0, true) },
+                { markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { moonfireSpell, () => LunarEclipse && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { insectSwarmSpell, () => SolarEclipse && CastSpellIfPossible(insectSwarmSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossible(faerieFireSpell, x.Guid, true) },
+                { 0, (x) => TryCastSpell(faerieFireSpell, x.Guid, true) },
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
             SolarEclipse = false;
             LunarEclipse = true;
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Druid;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
 
@@ -109,13 +103,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
-        public override void ExecuteCC()
+        public override WowClass WowClass => WowClass.Druid;
+
+        public override void Execute()
         {
+            base.Execute();
+
             CheckForEclipseProcs();
 
             if (SelectTarget(DpsTargetManager))
             {
-                if (CastSpellIfPossible(naturesGraspSpell, 0))
+                if (TryCastSpell(naturesGraspSpell, 0))
                 {
                     return;
                 }
@@ -124,7 +122,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (distance < 12.0
                     && WowInterface.ObjectManager.Target.HasBuffByName(entanglingRootsSpell)
-                    && CastSpellIfPossibleDk(entanglingRootsSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                    && TryCastSpellDk(entanglingRootsSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
                 {
                     return;
                 }
@@ -135,20 +133,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
 
                 if ((WowInterface.ObjectManager.Player.ManaPercentage < 30
-                        && CastSpellIfPossible(innervateSpell, 0))
+                        && TryCastSpell(innervateSpell, 0))
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                        && CastSpellIfPossible(barkskinSpell, 0, true))
+                        && TryCastSpell(barkskinSpell, 0, true))
                     || (LunarEclipse
-                        && CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || (SolarEclipse
-                        && CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
                     || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                        && CastSpellIfPossible(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        && TryCastSpell(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(forceOfNatureSpell, 0, true))
+                if (TryCastSpell(forceOfNatureSpell, 0, true))
                 {
                     WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
                 }
@@ -157,9 +155,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (GroupAuraManager.Tick()
-                || MyAuraManager.Tick()
-                || NeedToHealMySelf())
+            base.OutOfCombatExecute();
+
+            if (NeedToHealMySelf())
             {
                 return;
             }
@@ -186,13 +184,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.ObjectManager.Player.HealthPercentage < 60
                 && !WowInterface.ObjectManager.Player.HasBuffByName(rejuvenationSpell)
-                && CastSpellIfPossible(rejuvenationSpell, 0, true))
+                && TryCastSpell(rejuvenationSpell, 0, true))
             {
                 return true;
             }
 
             if (WowInterface.ObjectManager.Player.HealthPercentage < 40
-                && CastSpellIfPossible(healingTouchSpell, 0, true))
+                && TryCastSpell(healingTouchSpell, 0, true))
             {
                 return true;
             }

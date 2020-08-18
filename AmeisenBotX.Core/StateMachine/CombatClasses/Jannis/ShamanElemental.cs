@@ -14,31 +14,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class ShamanElemental : BasicCombatClass
     {
-        public ShamanElemental(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public ShamanElemental(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0, true) },
-                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0, true) }
+                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true) },
+                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { flameShockSpell, () => CastSpellIfPossible(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossible(windShearSpell, x.Guid, true) },
-                { 1, (x) => CastSpellIfPossible(hexSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(windShearSpell, x.Guid, true) },
+                { 1, (x) => TryCastSpell(hexSpell, x.Guid, true) }
             };
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Shaman;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
 
@@ -94,24 +88,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Shaman;
+
         private bool HexedTarget { get; set; }
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                 && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
-                && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
+                && TryCastSpell(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     HexedTarget = true;
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
+                    && TryCastSpell(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
                 {
                     return;
                 }
@@ -119,18 +117,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Target != null)
                 {
                     if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
-                            && CastSpellIfPossible(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            && TryCastSpell(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
                         || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
                             && WowInterface.ObjectManager.Target.HealthPercentage < 25
-                            && CastSpellIfPossible(heroismSpell, 0))
-                        || CastSpellIfPossible(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(elementalMasterySpell, 0))
+                            && TryCastSpell(heroismSpell, 0))
+                        || TryCastSpell(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || TryCastSpell(elementalMasterySpell, 0))
                     {
                         return;
                     }
 
-                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || TryCastSpell(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
@@ -140,9 +138,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
-                || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(ancestralSpiritSpell))
+            base.OutOfCombatExecute();
+
+            if (HandleDeadPartymembers(ancestralSpiritSpell))
             {
                 return;
             }
@@ -152,10 +150,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (HexedTarget)
-            {
-                HexedTarget = false;
-            }
+            HexedTarget = false;
         }
     }
 }

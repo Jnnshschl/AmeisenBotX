@@ -39,16 +39,16 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, targetPosition);
         }
 
-        public override void Leave()
-        {
-        }
-
         public bool IsInsideAeoDamage()
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                    .Any(e => !Blacklisted.Contains(e.SpellId)
                           && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 3.0
                           && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
+        }
+
+        public override void Leave()
+        {
         }
 
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)

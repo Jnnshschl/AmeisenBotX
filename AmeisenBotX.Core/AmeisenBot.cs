@@ -251,6 +251,28 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Stop();
         }
 
+        private static T LoadClassByName<T>(List<T> profiles, string profileName)
+        {
+            AmeisenLogger.I.Log("AmeisenBot", $"Loading {typeof(T).Name,-24} {profileName}", LogLevel.Verbose);
+            return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static void LoadPosition(Rect rect, IntPtr windowHandle)
+        {
+            try
+            {
+                if (rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                {
+                    XMemory.SetWindowPosition(windowHandle, rect);
+                    AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {rect}", LogLevel.Verbose);
+                }
+            }
+            catch (Exception e)
+            {
+                AmeisenLogger.I.Log("AmeisenBot", $"Failed to set window position:\n{e}", LogLevel.Error);
+            }
+        }
+
         private static void SetupLogging(string botDataPath, string accountName)
         {
             AmeisenLogger.I.ChangeLogFolder(Path.Combine(botDataPath, accountName, "log/"));
@@ -317,34 +339,34 @@ namespace AmeisenBotX.Core
             // ------------------------------------ >
             CombatClasses = new List<ICombatClass>
             {
-                new Statemachine.CombatClasses.Jannis.DeathknightBlood(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.DeathknightFrost(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.DeathknightUnholy(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidBalance(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidFeralBear(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidFeralCat(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidRestoration(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.HunterBeastmastery(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.HunterMarksmanship(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.HunterSurvival(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.MageArcane(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.MageFire(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.PaladinHoly(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.PaladinProtection(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.PaladinRetribution(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.PriestDiscipline(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.PriestHoly(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.PriestShadow(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.RogueAssassination(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.ShamanElemental(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.ShamanEnhancement(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.ShamanRestoration(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarlockAffliction(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarlockDemonology(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarlockDestruction(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarriorArms(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarriorFury(WowInterface, StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarriorProtection(WowInterface, StateMachine),
+                new Statemachine.CombatClasses.Jannis.DeathknightBlood(StateMachine),
+                new Statemachine.CombatClasses.Jannis.DeathknightFrost(StateMachine),
+                new Statemachine.CombatClasses.Jannis.DeathknightUnholy(StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidBalance(StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidFeralBear(StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidFeralCat(StateMachine),
+                new Statemachine.CombatClasses.Jannis.DruidRestoration(StateMachine),
+                new Statemachine.CombatClasses.Jannis.HunterBeastmastery(StateMachine),
+                new Statemachine.CombatClasses.Jannis.HunterMarksmanship(StateMachine),
+                new Statemachine.CombatClasses.Jannis.HunterSurvival(StateMachine),
+                new Statemachine.CombatClasses.Jannis.MageArcane(StateMachine),
+                new Statemachine.CombatClasses.Jannis.MageFire(StateMachine),
+                new Statemachine.CombatClasses.Jannis.PaladinHoly(StateMachine),
+                new Statemachine.CombatClasses.Jannis.PaladinProtection(StateMachine),
+                new Statemachine.CombatClasses.Jannis.PaladinRetribution(StateMachine),
+                new Statemachine.CombatClasses.Jannis.PriestDiscipline(StateMachine),
+                new Statemachine.CombatClasses.Jannis.PriestHoly(StateMachine),
+                new Statemachine.CombatClasses.Jannis.PriestShadow(StateMachine),
+                new Statemachine.CombatClasses.Jannis.RogueAssassination(StateMachine),
+                new Statemachine.CombatClasses.Jannis.ShamanElemental(StateMachine),
+                new Statemachine.CombatClasses.Jannis.ShamanEnhancement(StateMachine),
+                new Statemachine.CombatClasses.Jannis.ShamanRestoration(StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarlockAffliction(StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarlockDemonology(StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarlockDestruction(StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarriorArms(StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarriorFury(StateMachine),
+                new Statemachine.CombatClasses.Jannis.WarriorProtection(StateMachine),
                 new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
                 new Statemachine.CombatClasses.Kamel.RestorationShaman (WowInterface),
                 new Statemachine.CombatClasses.Kamel.PriestHoly (WowInterface),
@@ -389,12 +411,6 @@ namespace AmeisenBotX.Core
             };
         }
 
-        private static T LoadClassByName<T>(List<T> profiles, string profileName)
-        {
-            AmeisenLogger.I.Log("AmeisenBot", $"Loading {typeof(T).Name,-24} {profileName}", LogLevel.Verbose);
-            return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
-        }
-
         private void LoadCustomCombatClass()
         {
             AmeisenLogger.I.Log("AmeisenBot", $"Loading custom CombatClass: {Config.CustomCombatClassFile}", LogLevel.Verbose);
@@ -418,22 +434,6 @@ namespace AmeisenBotX.Core
                     OnCombatClassCompilationStatusChanged?.Invoke(false, e.GetType().Name, e.ToString());
                     WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
                 }
-            }
-        }
-
-        private static void LoadPosition(Rect rect, IntPtr windowHandle)
-        {
-            try
-            {
-                if (rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
-                {
-                    XMemory.SetWindowPosition(windowHandle, rect);
-                    AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {rect}", LogLevel.Verbose);
-                }
-            }
-            catch (Exception e)
-            {
-                AmeisenLogger.I.Log("AmeisenBot", $"Failed to set window position:\n{e}", LogLevel.Error);
             }
         }
 
@@ -961,7 +961,7 @@ namespace AmeisenBotX.Core
             // Misc Events
             // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT", WowInterface.CombatLogParser.Parse);
+            WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT", WowInterface.CombatLogParser.Parse);
         }
     }
 }

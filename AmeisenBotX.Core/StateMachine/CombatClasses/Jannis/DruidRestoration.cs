@@ -15,24 +15,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DruidRestoration : BasicCombatClass
     {
-        public DruidRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public DruidRestoration(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Any() && CastSpellIfPossible(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
-                { markOfTheWildSpell, () => CastSpellIfPossible(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
+                { treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true) }
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
             SwiftmendEvent = new TimegatedEvent(TimeSpan.FromSeconds(15));
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Druid;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Druid Restoration spec.";
 
@@ -102,18 +96,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Druid;
+
         private TimegatedEvent SwiftmendEvent { get; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (WowInterface.ObjectManager.Player.ManaPercentage < 30.0
-                && CastSpellIfPossible(innervateSpell, 0, true))
+                && TryCastSpell(innervateSpell, 0, true))
             {
                 return;
             }
 
             if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
-                && CastSpellIfPossible(barkskinSpell, 0, true))
+                && TryCastSpell(barkskinSpell, 0, true))
             {
                 return;
             }
@@ -136,17 +134,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (SelectTarget(DpsTargetManager))
                 {
                     if (!WowInterface.ObjectManager.Target.HasBuffByName(moonfireSpell)
-                        && CastSpellIfPossible(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (CastSpellIfPossible(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if (TryCastSpell(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (CastSpellIfPossible(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if (TryCastSpell(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
@@ -156,15 +154,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if ((WowInterface.ObjectManager.Player.HasBuffByName("Food") && WowInterface.ObjectManager.Player.HealthPercentage < 100.0)
-                || (WowInterface.ObjectManager.Player.HasBuffByName("Drink") && WowInterface.ObjectManager.Player.ManaPercentage < 100.0))
-            {
-                return;
-            }
+            base.OutOfCombatExecute();
 
-            if (GroupAuraManager.Tick()
-                || MyAuraManager.Tick()
-                || NeedToHealSomeone()
+            if (NeedToHealSomeone()
                 || HandleDeadPartymembers(reviveSpell))
             {
                 return;
@@ -176,7 +168,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
                 if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 3
-                    && CastSpellIfPossible(tranquilitySpell, 0, true))
+                    && TryCastSpell(tranquilitySpell, 0, true))
                 {
                     return true;
                 }
@@ -186,14 +178,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target.HealthPercentage < 90.0
                     && target.HealthPercentage > 78.0
                     && unitsToHeal.Count(e => e.HealthPercentage < 75.0) > 2
-                    && CastSpellIfPossible(wildGrowthSpell, target.Guid, true))
+                    && TryCastSpell(wildGrowthSpell, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 20.0
-                    && CastSpellIfPossible(naturesSwiftnessSpell, target.Guid, true)
-                    && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
+                    && TryCastSpell(naturesSwiftnessSpell, target.Guid, true)
+                    && TryCastSpell(healingTouchSpell, target.Guid, true))
                 {
                     return true;
                 }
@@ -201,7 +193,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target.HealthPercentage < 50.0
                     && (target.HasBuffByName(regrowthSpell) || target.HasBuffByName(rejuvenationSpell))
                     && SwiftmendEvent.Ready
-                    && CastSpellIfPossible(swiftmendSpell, target.Guid, true)
+                    && TryCastSpell(swiftmendSpell, target.Guid, true)
                     && SwiftmendEvent.Run())
                 {
                     return true;
@@ -210,7 +202,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target.HealthPercentage < 95.0
                     && target.HealthPercentage > 80.0
                     && !target.HasBuffByName(rejuvenationSpell)
-                    && CastSpellIfPossible(rejuvenationSpell, target.Guid, true))
+                    && TryCastSpell(rejuvenationSpell, target.Guid, true))
                 {
                     return true;
                 }
@@ -218,25 +210,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target.HealthPercentage < 98.0
                     && target.HealthPercentage > 80.0
                     && !target.HasBuffByName(lifebloomSpell)
-                    && CastSpellIfPossible(lifebloomSpell, target.Guid, true))
+                    && TryCastSpell(lifebloomSpell, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 85.0
-                    && CastSpellIfPossible(regrowthSpell, target.Guid, true))
+                    && TryCastSpell(regrowthSpell, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 85.0
-                    && CastSpellIfPossible(nourishSpell, target.Guid, true))
+                    && TryCastSpell(nourishSpell, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 85.0
-                    && CastSpellIfPossible(healingTouchSpell, target.Guid, true))
+                    && TryCastSpell(healingTouchSpell, target.Guid, true))
                 {
                     return true;
                 }

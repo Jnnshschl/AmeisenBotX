@@ -43,7 +43,11 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (((!WowInterface.ObjectManager.Player.IsInCombat
                 && !StateMachine.IsAnyPartymemberInCombat())
-                    || !WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any())
+                    || (!WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()
+                        && !(WowInterface.ObjectManager.Target != null
+                            && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
+                            && !WowInterface.ObjectManager.Target.IsDead
+                            && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly)))
                 && !WowInterface.Globals.ForceCombat
                 && StateMachine.SetState(BotState.Idle))
             {

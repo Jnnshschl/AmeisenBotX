@@ -10,8 +10,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
     {
         string Author { get; }
 
-        WowClass WowClass { get; }
-
         Dictionary<string, dynamic> Configureables { get; set; }
 
         string Description { get; }
@@ -35,6 +33,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         string Version { get; }
 
         bool WalkBehindEnemy { get; }
+
+        WowClass WowClass { get; }
 
         void Execute();
 

@@ -11,32 +11,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DeathknightUnholy : BasicCombatClass
     {
-        public DeathknightUnholy(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public DeathknightUnholy(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { unholyPresenceSpell, () => CastSpellIfPossibleDk(unholyPresenceSpell, 0) },
-                { hornOfWinterSpell, () => CastSpellIfPossibleDk(hornOfWinterSpell, 0, true) }
+                { unholyPresenceSpell, () => TryCastSpellDk(unholyPresenceSpell, 0) },
+                { hornOfWinterSpell, () => TryCastSpellDk(hornOfWinterSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { frostFeverSpell, () => CastSpellIfPossibleDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) },
-                { bloodPlagueSpell, () => CastSpellIfPossibleDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) }
+                { frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) },
+                { bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossibleDk(mindFreezeSpell, x.Guid, true) },
-                { 1, (x) => CastSpellIfPossibleDk(strangulateSpell, x.Guid, false, true) }
+                { 0, (x) => TryCastSpellDk(mindFreezeSpell, x.Guid, true) },
+                { 1, (x) => TryCastSpellDk(strangulateSpell, x.Guid, false, true) }
             };
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Deathknight;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
 
@@ -92,42 +86,46 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
-        public override void ExecuteCC()
+        public override WowClass WowClass => WowClass.Deathknight;
+
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                   && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+                   && TryCastSpellDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }
 
                 if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
                     && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
-                    && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
                 {
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
-                    && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
+                if (TryCastSpellDk(empowerRuneWeapon, 0))
                 {
                     return;
                 }
 
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 60
-                        && CastSpellIfPossibleDk(iceboundFortitudeSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || CastSpellIfPossibleDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
-                    || CastSpellIfPossibleDk(scourgeStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
-                    || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || CastSpellIfPossibleDk(summonGargoyleSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        && TryCastSpellDk(iceboundFortitudeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || TryCastSpellDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
+                    || TryCastSpellDk(scourgeStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
+                    || TryCastSpellDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || TryCastSpellDk(summonGargoyleSpell, WowInterface.ObjectManager.TargetGuid, true)
                     || (WowInterface.ObjectManager.Player.Runeenergy > 60
-                        && CastSpellIfPossibleDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
+                        && TryCastSpellDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
                 {
                     return;
                 }
@@ -136,7 +134,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            MyAuraManager.Tick();
+            base.OutOfCombatExecute();
         }
     }
 }

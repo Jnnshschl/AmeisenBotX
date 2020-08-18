@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -27,9 +26,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         //Basic
         public TimegatedEvent AutoAttackEvent { get; private set; }
-        public TimegatedEvent TargetSelectEvent { get; private set; }
-
-        public abstract WowClass WowClass { get; }
 
         public abstract Dictionary<string, dynamic> Configureables { get; set; }
 
@@ -40,22 +36,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public TimegatedEvent getonthemount { get; private set; }
 
         public abstract bool HandlesMovement { get; }
+
         public abstract bool IsMelee { get; }
+
+        public abstract IWowItemComparator ItemComparator { get; set; }
 
         public IEnumerable<string> PriorityTargets { get; set; }
 
-        public abstract IWowItemComparator ItemComparator { get; set; }
         public abstract CombatClassRole Role { get; }
 
         public abstract TalentTree Talents { get; }
 
         public bool TargetInLineOfSight { get; set; }
 
+        public TimegatedEvent TargetSelectEvent { get; private set; }
+
         public abstract bool UseAutoAttacks { get; }
 
         public abstract string Version { get; }
 
         public abstract bool WalkBehindEnemy { get; }
+
+        public abstract WowClass WowClass { get; }
 
         public WowInterface WowInterface { get; internal set; }
 

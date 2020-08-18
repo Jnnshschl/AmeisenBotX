@@ -13,11 +13,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class ShamanRestoration : BasicCombatClass
     {
-        public ShamanRestoration(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public ShamanRestoration(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { waterShieldSpell, () => CastSpellIfPossible(waterShieldSpell, 0, true) }
+                { waterShieldSpell, () => TryCastSpell(waterShieldSpell, 0, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -26,12 +26,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 5000, healingWaveSpell },
             };
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Shaman;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
 
@@ -86,12 +80,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Shaman;
+
         private DateTime LastDeadPartymembersCheck { get; set; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (NeedToHealSomeone())
             {
                 return;
@@ -100,12 +98,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if (SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target.HasBuffByName(flameShockSpell)
-                    && CastSpellIfPossible(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    && TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpell(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -114,10 +112,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
-                || NeedToHealSomeone()
-                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(ancestralSpiritSpell)))
+            base.OutOfCombatExecute();
+
+            if (HandleDeadPartymembers(ancestralSpiritSpell))
             {
                 return;
             }
@@ -137,20 +134,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Target != null)
                 {
                     if (WowInterface.ObjectManager.Target.HealthPercentage < 25
-                        && CastSpellIfPossible(earthShieldSpell, 0, true))
+                        && TryCastSpell(earthShieldSpell, 0, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 4
-                        && CastSpellIfPossible(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 6
-                        && (CastSpellIfPossible(naturesSwiftnessSpell, 0, true)
-                        || CastSpellIfPossible(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        && (TryCastSpell(naturesSwiftnessSpell, 0, true)
+                        || TryCastSpell(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                     {
                         return true;
                     }
@@ -160,7 +157,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (CastSpellIfPossible(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
+                        if (TryCastSpell(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return true;
                         }

@@ -14,31 +14,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class ShamanEnhancement : BasicCombatClass
     {
-        public ShamanEnhancement(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public ShamanEnhancement(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && CastSpellIfPossible(lightningShieldSpell, 0, true) },
-                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(waterShieldSpell, 0, true) }
+                { lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true) },
+                { waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { flameShockSpell, () => CastSpellIfPossible(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossible(windShearSpell, x.Guid, true) },
-                { 1, (x) => CastSpellIfPossible(hexSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(windShearSpell, x.Guid, true) },
+                { 1, (x) => TryCastSpell(hexSpell, x.Guid, true) }
             };
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Shaman;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Enhancement Shaman spec.";
 
@@ -94,12 +88,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Shaman;
+
         private bool HexedTarget { get; set; }
 
         private DateTime LastDeadPartymembersCheck { get; set; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
@@ -110,14 +108,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                     && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
-                    && CastSpellIfPossible(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    && TryCastSpell(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     HexedTarget = true;
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && CastSpellIfPossible(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
+                    && TryCastSpell(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
                 {
                     return;
                 }
@@ -126,17 +124,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if ((WowInterface.ObjectManager.Target.MaxHealth > 10000000
                             && WowInterface.ObjectManager.Target.HealthPercentage < 25
-                            && CastSpellIfPossible(heroismSpell, 0))
-                        || CastSpellIfPossible(stormstrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(lavaLashSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || CastSpellIfPossible(earthShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            && TryCastSpell(heroismSpell, 0))
+                        || TryCastSpell(stormstrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || TryCastSpell(lavaLashSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || TryCastSpell(earthShockSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
 
                     if (WowInterface.ObjectManager.Player.HasBuffByName(maelstromWeaponSpell)
                         && WowInterface.ObjectManager.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell).StackCount >= 5
-                        && CastSpellIfPossible(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
                     {
                         return;
                     }
@@ -146,9 +144,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
-                || DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(ancestralSpiritSpell))
+            base.OutOfCombatExecute();
+
+            if (HandleDeadPartymembers(ancestralSpiritSpell))
             {
                 return;
             }
@@ -159,10 +157,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (HexedTarget)
-            {
-                HexedTarget = false;
-            }
+            HexedTarget = false;
         }
     }
 }

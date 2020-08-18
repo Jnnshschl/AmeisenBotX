@@ -15,34 +15,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class DeathknightBlood : BasicCombatClass
     {
-        public DeathknightBlood(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public DeathknightBlood(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { bloodPresenceSpell, () => CastSpellIfPossibleDk(bloodPresenceSpell, 0) },
-                { hornOfWinterSpell, () => CastSpellIfPossibleDk(hornOfWinterSpell, 0, true) }
+                { bloodPresenceSpell, () => TryCastSpellDk(bloodPresenceSpell, 0) },
+                { hornOfWinterSpell, () => TryCastSpellDk(hornOfWinterSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { frostFeverSpell, () => CastSpellIfPossibleDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) },
-                { bloodPlagueSpell, () => CastSpellIfPossibleDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) }
+                { frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) },
+                { bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossibleDk(mindFreezeSpell, x.Guid, true) },
-                { 1, (x) => CastSpellIfPossibleDk(strangulateSpell, x.Guid, false, true) }
+                { 0, (x) => TryCastSpellDk(mindFreezeSpell, x.Guid, true) },
+                { 1, (x) => TryCastSpellDk(strangulateSpell, x.Guid, false, true) }
             };
 
             BloodBoilEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Deathknight;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
@@ -99,32 +93,36 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Deathknight;
+
         private TimegatedEvent BloodBoilEvent { get; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                    && CastSpellIfPossibleDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+                    && TryCastSpellDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 6.0
-                    && CastSpellIfPossibleDk(deathGripSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                    && TryCastSpellDk(deathGripSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
                 {
                     return;
                 }
 
                 if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
                     && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
-                    && CastSpellIfPossibleDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossibleDk(empowerRuneWeapon, 0))
+                if (TryCastSpellDk(empowerRuneWeapon, 0))
                 {
                     return;
                 }
@@ -132,17 +130,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 12.0).Count();
 
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 70
-                        && CastSpellIfPossibleDk(runeTapSpell, 0, false, false, true))
+                        && TryCastSpellDk(runeTapSpell, 0, false, false, true))
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                        && (CastSpellIfPossibleDk(iceboundFortitudeSpell, 0, true) || CastSpellIfPossibleDk(antiMagicShellSpell, 0, true)))
+                        && (TryCastSpellDk(iceboundFortitudeSpell, 0, true) || TryCastSpellDk(antiMagicShellSpell, 0, true)))
                     || (WowInterface.ObjectManager.Player.HealthPercentage < 50
-                        && CastSpellIfPossibleDk(vampiricBloodSpell, 0, false, false, true))
+                        && TryCastSpellDk(vampiricBloodSpell, 0, false, false, true))
                     || (nearEnemies > 2
-                        && (CastSpellIfPossibleDkArea(deathAndDecaySpell, 0) || (BloodBoilEvent.Run() && CastSpellIfPossibleDk(bloodBoilSpell, 0))))
-                    || CastSpellIfPossibleDk(unbreakableArmorSpell, 0, false, false, true)
-                    || CastSpellIfPossibleDk(deathStrike, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
-                    || CastSpellIfPossibleDk(heartStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true)
-                    || CastSpellIfPossibleDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && (TryCastAoeSpellDk(deathAndDecaySpell, 0) || (BloodBoilEvent.Run() && TryCastSpellDk(bloodBoilSpell, 0))))
+                    || TryCastSpellDk(unbreakableArmorSpell, 0, false, false, true)
+                    || TryCastSpellDk(deathStrike, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
+                    || TryCastSpellDk(heartStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true)
+                    || TryCastSpellDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -151,7 +149,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            MyAuraManager.Tick();
+            base.OutOfCombatExecute();
         }
     }
 }

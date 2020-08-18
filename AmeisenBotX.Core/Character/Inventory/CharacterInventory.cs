@@ -3,6 +3,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Character.Inventory
 {
@@ -39,6 +40,11 @@ namespace AmeisenBotX.Core.Character.Inventory
         }
 
         private WowInterface WowInterface { get; }
+
+        public bool HasItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return Items.Any(e => e.Name.Equals(name, stringComparison));
+        }
 
         public void Update()
         {

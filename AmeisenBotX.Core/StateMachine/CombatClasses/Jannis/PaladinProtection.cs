@@ -11,29 +11,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PaladinProtection : BasicCombatClass
     {
-        public PaladinProtection(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public PaladinProtection(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { devotionAuraSpell, () => CastSpellIfPossible(devotionAuraSpell, 0, true) },
-                { blessingOfKingsSpell, () => CastSpellIfPossible(blessingOfKingsSpell, 0, true) },
-                { sealOfVengeanceSpell, () => CastSpellIfPossible(sealOfVengeanceSpell, 0, true) },
-                { righteousFurySpell, () => CastSpellIfPossible(righteousFurySpell, 0, true) }
+                { devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, 0, true) },
+                { blessingOfKingsSpell, () => TryCastSpell(blessingOfKingsSpell, 0, true) },
+                { sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true) },
+                { righteousFurySpell, () => TryCastSpell(righteousFurySpell, 0, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossible(hammerOfJusticeSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(hammerOfJusticeSpell, x.Guid, true) }
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfKingsSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfKingsSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Paladin;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Protection Paladin spec.";
 
@@ -42,8 +36,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => true;
-
-        private bool Use9SecSpell { get; set; }
 
         public override IWowItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new List<WeaponType>() { WeaponType.TWOHANDED_SWORDS, WeaponType.TWOHANDED_MACES, WeaponType.TWOHANDED_AXES });
 
@@ -92,29 +84,35 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
-        public override void ExecuteCC()
+        public override WowClass WowClass => WowClass.Paladin;
+
+        private bool Use9SecSpell { get; set; }
+
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(TankTargetManager))
             {
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 10.0
-                    && CastSpellIfPossible(layOnHandsSpell, 0, true))
+                    && TryCastSpell(layOnHandsSpell, 0, true))
                 {
                     return;
                 }
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 20.0
-                    && CastSpellIfPossible(flashOfLightSpell, 0, true))
+                    && TryCastSpell(flashOfLightSpell, 0, true))
                 {
                     return;
                 }
                 else if (WowInterface.ObjectManager.Player.HealthPercentage < 35.0
-                    && CastSpellIfPossible(holyLightSpell, 0, true))
+                    && TryCastSpell(holyLightSpell, 0, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(sacredShieldSpell, 0, true)
-                    || CastSpellIfPossible(divinePleaSpell, 0, true))
+                if (TryCastSpell(sacredShieldSpell, 0, true)
+                    || TryCastSpell(divinePleaSpell, 0, true))
                 {
                     return;
                 }
@@ -122,28 +120,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Target != null)
                 {
                     if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                        && CastSpellIfPossible(handOfReckoningSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        && TryCastSpell(handOfReckoningSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         return;
                     }
 
-                    if (CastSpellIfPossible(avengersShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (WowInterface.ObjectManager.Target.HealthPercentage < 20.0 && CastSpellIfPossible(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                    if (TryCastSpell(avengersShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
+                        || (WowInterface.ObjectManager.Target.HealthPercentage < 20.0 && TryCastSpell(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true)))
                     {
                         return;
                     }
 
                     if (Use9SecSpell
                         && (((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell))
-                                && CastSpellIfPossible(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
-                            || CastSpellIfPossible(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                                && TryCastSpell(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            || TryCastSpell(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || TryCastSpell(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)))
                     {
                         Use9SecSpell = false;
                         return;
                     }
-                    else if (CastSpellIfPossible(shieldOfTheRighteousnessSpell, WowInterface.ObjectManager.TargetGuid, true)
-                             || CastSpellIfPossible(hammerOfTheRighteousSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, WowInterface.ObjectManager.TargetGuid, true)
+                             || TryCastSpell(hammerOfTheRighteousSpell, WowInterface.ObjectManager.Target.Guid, true))
                     {
                         Use9SecSpell = true;
                         return;
@@ -156,11 +154,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             Use9SecSpell = true;
 
-            if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick())
-            {
-                return;
-            }
+            base.OutOfCombatExecute();
         }
     }
 }

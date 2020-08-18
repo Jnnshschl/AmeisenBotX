@@ -15,33 +15,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class WarriorArms : BasicCombatClass
     {
-        public WarriorArms(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public WarriorArms(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { battleShoutSpell, () => CastSpellIfPossible(battleShoutSpell, 0, true) }
+                { battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true) }
             };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { hamstringSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && CastSpellIfPossible(hamstringSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { rendSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.Player.Rage > 75 && CastSpellIfPossible(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { hamstringSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { rendSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossibleWarrior(intimidatingShoutSpell, berserkerStanceSpell, x.Guid, true) },
-                { 1, (x) => CastSpellIfPossibleWarrior(intimidatingShoutSpell, battleStanceSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpellWarrior(intimidatingShoutSpell, berserkerStanceSpell, x.Guid, true) },
+                { 1, (x) => TryCastSpellWarrior(intimidatingShoutSpell, battleStanceSpell, x.Guid, true) }
             };
 
             HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Warrior;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Arms Warrior spec.";
 
@@ -101,10 +95,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Warrior;
+
         private TimegatedEvent HeroicStrikeEvent { get; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target != null)
@@ -113,8 +111,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     if (distanceToTarget > 3.0)
                     {
-                        if (CastSpellIfPossibleWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || CastSpellIfPossibleWarrior(interceptSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
@@ -122,15 +120,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     else
                     {
                         if ((WowInterface.ObjectManager.Target.HealthPercentage < 20 || WowInterface.ObjectManager.Target.HasBuffByName("Sudden Death"))
-                           && CastSpellIfPossibleWarrior(executeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                           && TryCastSpellWarrior(executeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && CastSpellIfPossible(bladestormSpell, 0, true))
-                            || CastSpellIfPossibleWarrior(overpowerSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || CastSpellIfPossibleWarrior(mortalStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || (HeroicStrikeEvent.Run() && CastSpellIfPossibleWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
+                            || TryCastSpellWarrior(overpowerSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || TryCastSpellWarrior(mortalStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                         {
                             return;
                         }
@@ -141,10 +139,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
-            {
-                return;
-            }
+            base.OutOfCombatExecute();
         }
     }
 }

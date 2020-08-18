@@ -11,25 +11,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class RogueAssassination : BasicCombatClass
     {
-        public RogueAssassination(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public RogueAssassination(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { sliceAndDiceSpell, () => CastSpellIfPossibleRogue(sliceAndDiceSpell, 0, true, true, 1) },
-                { coldBloodSpell, () => CastSpellIfPossibleRogue(coldBloodSpell, 0, true) }
+                { sliceAndDiceSpell, () => TryCastSpellRogue(sliceAndDiceSpell, 0, true, true, 1) },
+                { coldBloodSpell, () => TryCastSpellRogue(coldBloodSpell, 0, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossibleRogue(kickSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpellRogue(kickSpell, x.Guid, true) }
             };
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Rogue;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
 
@@ -84,12 +78,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => true;
 
-        public override void ExecuteCC()
+        public override WowClass WowClass => WowClass.Rogue;
+
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
-                        && CastSpellIfPossibleRogue(cloakOfShadowsSpell, 0, true)))
+                        && TryCastSpellRogue(cloakOfShadowsSpell, 0, true)))
                 {
                     return;
                 }
@@ -97,14 +95,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Target != null)
                 {
                     if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
-                            && CastSpellIfPossibleRogue(sprintSpell, 0, true)))
+                            && TryCastSpellRogue(sprintSpell, 0, true)))
                     {
                         return;
                     }
                 }
 
-                if (CastSpellIfPossibleRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
-                    || CastSpellIfPossibleRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpellRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
+                    || TryCastSpellRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -113,10 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick())
-            {
-                return;
-            }
+            base.OutOfCombatExecute();
         }
     }
 }

@@ -125,6 +125,48 @@ namespace AmeisenBotX
             return new Point((int)(newX + x), (int)(newY + y));
         }
 
+        private static void RenderBlacklistNode(int x, int y, Brush blacklistNodeBrush, Pen blacklistNodePen, Graphics graphics, int size, int radius)
+        {
+            int offsetStart = (int)Math.Floor(size / 2.0);
+            graphics.FillRectangle(blacklistNodeBrush, new Rectangle(x - offsetStart, y - offsetStart, size, size));
+            graphics.DrawEllipse(blacklistNodePen, new Rectangle(x - radius, y - radius, radius * 2, radius * 2));
+        }
+
+        private static void RenderGameobject(int width, int height, string name, Brush dotBrush, Brush textBrush, Font textFont, Graphics graphics, int size = 3)
+        {
+            int offsetStart = (int)Math.Floor(size / 2.0);
+            graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                float nameWidth = graphics.MeasureString(name, textFont).Width;
+                graphics.DrawString(name, textFont, textBrush, width - (nameWidth / 2F), height + 8);
+            }
+        }
+
+        private static void RenderNode(int x1, int y1, int x2, int y2, Brush dotBrush, Pen linePen, Graphics graphics, int size)
+        {
+            int offsetStart = (int)Math.Floor(size / 2.0);
+            graphics.FillRectangle(dotBrush, new Rectangle(x1 - offsetStart, y1 - offsetStart, size, size));
+            graphics.FillRectangle(dotBrush, new Rectangle(x2 - offsetStart, y2 - offsetStart, size, size));
+            graphics.DrawLine(linePen, x1, y1, x2, y2);
+        }
+
+        private static void RenderUnit(int width, int height, string name, string subtext, Brush dotBrush, Brush textBrush, Font textFont, Font subtextFont, Brush subTextBrush, Graphics graphics, int size = 3)
+        {
+            int offsetStart = (int)Math.Floor(size / 2.0);
+            graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                float nameWidth = graphics.MeasureString(name, textFont).Width;
+                graphics.DrawString(name, textFont, textBrush, width - (nameWidth / 2F), height + 8);
+
+                float subtextWidth = graphics.MeasureString(subtext, subtextFont).Width;
+                graphics.DrawString(subtext, subtextFont, subTextBrush, width - (subtextWidth / 2F), height + 20);
+            }
+        }
+
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
             MapTimer.Stop();
@@ -373,19 +415,14 @@ namespace AmeisenBotX
             }
         }
 
-        private static void RenderBlacklistNode(int x, int y, Brush blacklistNodeBrush, Pen blacklistNodePen, Graphics graphics, int size, int radius)
-        {
-            int offsetStart = (int)Math.Floor(size / 2.0);
-            graphics.FillRectangle(blacklistNodeBrush, new Rectangle(x - offsetStart, y - offsetStart, size, size));
-            graphics.DrawEllipse(blacklistNodePen, new Rectangle(x - radius, y - radius, radius * 2, radius * 2));
-        }
-
         private void RenderCurrentPath(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
         {
-            for (int i = 0; i < AmeisenBot.WowInterface.MovementEngine.Path.Count; ++i)
+            List<Vector3> path = AmeisenBot.WowInterface.MovementEngine.Path.ToList();
+
+            for (int i = 0; i < path.Count; ++i)
             {
-                Vector3 node = AmeisenBot.WowInterface.MovementEngine.Path[i];
-                Vector3 prevNode = i == 0 ? playerPosition : AmeisenBot.WowInterface.MovementEngine.Path[i - 1];
+                Vector3 node = path[i];
+                Vector3 prevNode = i == 0 ? playerPosition : path[i - 1];
 
                 Point nodePositionOnMap = GetRelativePosition(playerPosition, node, playerRotation, halfWidth, halfHeight, scale);
                 Point prevNodePositionOnMap = GetRelativePosition(playerPosition, prevNode, playerRotation, halfWidth, halfHeight, scale);
@@ -408,18 +445,6 @@ namespace AmeisenBotX
             }
         }
 
-        private static void RenderGameobject(int width, int height, string name, Brush dotBrush, Brush textBrush, Font textFont, Graphics graphics, int size = 3)
-        {
-            int offsetStart = (int)Math.Floor(size / 2.0);
-            graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                float nameWidth = graphics.MeasureString(name, textFont).Width;
-                graphics.DrawString(name, textFont, textBrush, width - (nameWidth / 2F), height + 8);
-            }
-        }
-
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
         {
             IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
@@ -435,14 +460,6 @@ namespace AmeisenBotX
             }
         }
 
-        private static void RenderNode(int x1, int y1, int x2, int y2, Brush dotBrush, Pen linePen, Graphics graphics, int size)
-        {
-            int offsetStart = (int)Math.Floor(size / 2.0);
-            graphics.FillRectangle(dotBrush, new Rectangle(x1 - offsetStart, y1 - offsetStart, size, size));
-            graphics.FillRectangle(dotBrush, new Rectangle(x2 - offsetStart, y2 - offsetStart, size, size));
-            graphics.DrawLine(linePen, x1, y1, x2, y2);
-        }
-
         private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
         {
             List<WowGameobject> oreNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
@@ -456,21 +473,6 @@ namespace AmeisenBotX
                 WowGameobject gameobject = oreNodes[i];
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
                 RenderGameobject(positionOnMap.X, positionOnMap.Y, ((OreNode)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
-            }
-        }
-
-        private static void RenderUnit(int width, int height, string name, string subtext, Brush dotBrush, Brush textBrush, Font textFont, Font subtextFont, Brush subTextBrush, Graphics graphics, int size = 3)
-        {
-            int offsetStart = (int)Math.Floor(size / 2.0);
-            graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                float nameWidth = graphics.MeasureString(name, textFont).Width;
-                graphics.DrawString(name, textFont, textBrush, width - (nameWidth / 2F), height + 8);
-
-                float subtextWidth = graphics.MeasureString(subtext, subtextFont).Width;
-                graphics.DrawString(subtext, subtextFont, subTextBrush, width - (subtextWidth / 2F), height + 20);
             }
         }
 

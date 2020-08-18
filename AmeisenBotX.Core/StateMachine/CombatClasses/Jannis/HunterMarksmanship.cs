@@ -16,38 +16,38 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class HunterMarksmanship : BasicCombatClass
     {
-        public HunterMarksmanship(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public HunterMarksmanship(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
-            PetManager = new PetManager(WowInterface,
-                   TimeSpan.FromSeconds(15),
-                   () => CastSpellIfPossible(mendPetSpell, 0, true),
-                   () => CastSpellIfPossible(callPetSpell, 0),
-                   () => CastSpellIfPossible(revivePetSpell, 0));
+            PetManager = new PetManager
+            (
+                WowInterface,
+                TimeSpan.FromSeconds(15),
+                () => TryCastSpell(mendPetSpell, 0, true),
+                () => TryCastSpell(callPetSpell, 0),
+                () => TryCastSpell(revivePetSpell, 0)
+            );
 
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { aspectOfTheDragonhawkSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheDragonhawkSpell, 0, true) },
-                { aspectOfTheHawkSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(aspectOfTheDragonhawkSpell) && WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && CastSpellIfPossible(aspectOfTheHawkSpell, 0, true) },
-                { aspectOfTheViperSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && CastSpellIfPossible(aspectOfTheViperSpell, 0, true) }
+                { aspectOfTheViperSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && TryCastSpell(aspectOfTheViperSpell, 0, true) }
             };
+
+            if (SpellChain.Get(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string aspectToUse, aspectOfTheDragonhawkSpell, aspectOfTheHawkSpell))
+            {
+                MyAuraManager.BuffsToKeepActive.Add(aspectToUse, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && TryCastSpell(aspectToUse, 0, true));
+            }
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { huntersMarkSpell, () => CastSpellIfPossible(huntersMarkSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { serpentStingSpell, () => CastSpellIfPossible(serpentStingSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { serpentStingSpell, () => TryCastSpell(serpentStingSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => CastSpellIfPossible(silencingShotSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(silencingShotSpell, x.Guid, true) }
             };
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Hunter;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Marksmanship Hunter spec.";
 
@@ -104,14 +104,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Hunter;
+
         private PetManager PetManager { get; set; }
 
         private bool ReadyToDisengage { get; set; } = false;
 
         private bool SlowTargetWhenPossible { get; set; } = false;
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if (SelectTarget(DpsTargetManager))
             {
                 if (PetManager.Tick()) { return; }
@@ -130,7 +134,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 15
-                        && CastSpellIfPossible(feignDeathSpell, 0))
+                        && TryCastSpell(feignDeathSpell, 0))
                     {
                         return;
                     }
@@ -138,13 +142,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (distanceToTarget < 5.0)
                     {
                         if (ReadyToDisengage
-                            && CastSpellIfPossible(disengageSpell, 0, true))
+                            && TryCastSpell(disengageSpell, 0, true))
                         {
                             ReadyToDisengage = false;
                             return;
                         }
 
-                        if (CastSpellIfPossible(frostTrapSpell, 0, true))
+                        if (TryCastSpell(frostTrapSpell, 0, true))
                         {
                             ReadyToDisengage = true;
                             SlowTargetWhenPossible = true;
@@ -152,13 +156,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         }
 
                         if (WowInterface.ObjectManager.Player.HealthPercentage < 30
-                            && CastSpellIfPossible(deterrenceSpell, 0, true))
+                            && TryCastSpell(deterrenceSpell, 0, true))
                         {
                             return;
                         }
 
-                        if (CastSpellIfPossible(raptorStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || CastSpellIfPossible(mongooseBiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        if (TryCastSpell(raptorStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || TryCastSpell(mongooseBiteSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;
                         }
@@ -166,32 +170,32 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     else
                     {
                         if (SlowTargetWhenPossible
-                            && CastSpellIfPossible(disengageSpell, 0, true))
+                            && TryCastSpell(disengageSpell, 0, true))
                         {
                             SlowTargetWhenPossible = false;
                             return;
                         }
 
                         if (target.HealthPercentage < 20
-                            && CastSpellIfPossible(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            && TryCastSpell(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;
                         }
 
-                        CastSpellIfPossible(killCommandSpell, WowInterface.ObjectManager.TargetGuid, true);
-                        CastSpellIfPossible(rapidFireSpell, WowInterface.ObjectManager.TargetGuid);
+                        TryCastSpell(killCommandSpell, WowInterface.ObjectManager.TargetGuid, true);
+                        TryCastSpell(rapidFireSpell, WowInterface.ObjectManager.TargetGuid);
 
                         if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count() > 2
-                            && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            && TryCastSpell(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && CastSpellIfPossible(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
-                            || CastSpellIfPossible(chimeraShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || CastSpellIfPossible(aimedShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || CastSpellIfPossible(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || CastSpellIfPossible(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            || TryCastSpell(chimeraShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || TryCastSpell(aimedShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || TryCastSpell(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
+                            || TryCastSpell(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             return;
                         }
@@ -202,14 +206,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
-                || PetManager.Tick())
+            ReadyToDisengage = false;
+            SlowTargetWhenPossible = false;
+
+            base.OutOfCombatExecute();
+
+            if (PetManager.Tick())
             {
                 return;
             }
-
-            ReadyToDisengage = false;
-            SlowTargetWhenPossible = false;
         }
     }
 }

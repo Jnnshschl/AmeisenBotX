@@ -13,12 +13,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public class PriestDiscipline : BasicCombatClass
     {
-        public PriestDiscipline(WowInterface wowInterface, AmeisenBotStateMachine stateMachine) : base(wowInterface, stateMachine)
+        public PriestDiscipline(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { powerWordFortitudeSpell, () => CastSpellIfPossible(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
-                { innerFireSpell, () => CastSpellIfPossible(innerFireSpell, 0, true) }
+                { powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true) },
+                { innerFireSpell, () => TryCastSpell(innerFireSpell, 0, true) }
             };
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -29,14 +29,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { 5000, greaterHealSpell },
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => CastSpellIfPossible(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
-
-        public override string Author => "Jannis";
-
-        public override WowClass WowClass => WowClass.Priest;
-
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "FCFS based CombatClass for the Discipline Priest spec.";
 
@@ -93,12 +87,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool WalkBehindEnemy => false;
 
+        public override WowClass WowClass => WowClass.Priest;
+
         private DateTime LastDeadPartymembersCheck { get; set; }
 
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
-        public override void ExecuteCC()
+        public override void Execute()
         {
+            base.Execute();
+
             if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
                 && NeedToHealSomeone())
             {
@@ -108,22 +106,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.ObjectManager.Player.ManaPercentage > 50) && SelectTarget(DpsTargetManager))
             {
                 if (WowInterface.ObjectManager.Target.HasBuffByName(shadowWordPainSpell)
-                    && CastSpellIfPossible(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    && TryCastSpell(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(holyShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpell(holyShockSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (CastSpellIfPossible(consecrationSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpell(consecrationSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }
@@ -132,11 +130,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override void OutOfCombatExecute()
         {
-            if (MyAuraManager.Tick()
-                || GroupAuraManager.Tick()
-                || NeedToHealSomeone()
-                || (DateTime.Now - LastDeadPartymembersCheck > TimeSpan.FromSeconds(deadPartymembersCheckTime)
-                && HandleDeadPartymembers(resurrectionSpell)))
+            base.OutOfCombatExecute();
+
+            if (NeedToHealSomeone()
+                || HandleDeadPartymembers(resurrectionSpell))
             {
                 return;
             }
@@ -149,7 +146,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowUnit target = unitsToHeal.First();
 
                 if (unitsToHeal.Count() > 3
-                    && CastSpellIfPossible(prayerOfHealingSpell, target.Guid, true))
+                    && TryCastSpell(prayerOfHealingSpell, target.Guid, true))
                 {
                     return true;
                 }
@@ -157,19 +154,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (target.Guid != WowInterface.ObjectManager.PlayerGuid
                     && target.HealthPercentage < 70
                     && WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && CastSpellIfPossible(bindingHealSpell, target.Guid, true))
+                    && TryCastSpell(bindingHealSpell, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 50
-                    && CastSpellIfPossible(hymnOfHopeSpell, 0))
+                    && TryCastSpell(hymnOfHopeSpell, 0))
                 {
                     return true;
                 }
 
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 20
-                    && CastSpellIfPossible(desperatePrayerSpell, 0))
+                    && TryCastSpell(desperatePrayerSpell, 0))
                 {
                     return true;
                 }
@@ -177,10 +174,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if ((target.HealthPercentage < 98 && target.HealthPercentage > 80
                         && !target.HasBuffByName(weakenedSoulSpell)
                         && !target.HasBuffByName(powerWordShieldSpell)
-                        && CastSpellIfPossible(powerWordShieldSpell, target.Guid, true))
+                        && TryCastSpell(powerWordShieldSpell, target.Guid, true))
                     || (target.HealthPercentage < 90 && target.HealthPercentage > 80
                         && !target.HasBuffByName(renewSpell)
-                        && CastSpellIfPossible(renewSpell, target.Guid, true)))
+                        && TryCastSpell(renewSpell, target.Guid, true)))
                 {
                     return true;
                 }
@@ -190,7 +187,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                 {
-                    if (CastSpellIfPossible(keyValuePair.Value, target.Guid, true))
+                    if (TryCastSpell(keyValuePair.Value, target.Guid, true))
                     {
                         return true;
                     }
