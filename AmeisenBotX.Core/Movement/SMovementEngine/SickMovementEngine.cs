@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
 
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            PathfindingEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
+            PathfindingEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
@@ -265,10 +265,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private bool DoINeedToFindAPath()
         {
-            return PathfindingEvent.Run()
-                || Nodes == null 
+            return PathfindingEvent.Ready
+                && (Nodes == null 
                 || Nodes.Count == 0 // we have no path
-                || PathFinalNode.GetDistance(TargetPosition) > 1.0; // target position changed
+                || PathFinalNode.GetDistance(TargetPosition) > 1.0); // target position changed
         }
 
         private BehaviorTreeStatus DoUnstuck()
@@ -302,6 +302,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
         {
             List<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+            PathfindingEvent.Run();
 
             if (path != null && path.Count > 0)
             {
