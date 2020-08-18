@@ -41,9 +41,9 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (!WowInterface.ObjectManager.Player.IsInCombat 
-                && !StateMachine.IsAnyPartymemberInCombat()
-                && !WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()
+            if (((!WowInterface.ObjectManager.Player.IsInCombat
+                && !StateMachine.IsAnyPartymemberInCombat())
+                    || !WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any())
                 && !WowInterface.Globals.ForceCombat
                 && StateMachine.SetState(BotState.Idle))
             {
