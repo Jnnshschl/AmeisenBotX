@@ -36,6 +36,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly))
             {
                 WowInterface.HookManager.ClearTarget();
+                possibleTargets = null;
+                return false;
             }
 
             if (PriorityTargets != null && PriorityTargets.Any())
@@ -52,7 +54,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
-                .GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
+                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                          && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
                 .OrderByDescending(e => e.Type) // make sure players are at the top (pvp)
@@ -69,10 +71,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             }
 
             // get enemies tagged by me or no one, or players
-            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
-                .Where(e => BotUtils.IsValidUnit(e)
-                         && !e.IsDead
-                         && (e.IsTaggedByMe || !e.IsTaggedByOther || e.GetType() == typeof(WowPlayer)));
+            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0);
 
             if (nearEnemies.Any())
             {

@@ -134,8 +134,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (Use9SecSpell
                         && (((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell))
                                 && TryCastSpell(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
-                            || TryCastSpell(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || TryCastSpell(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                            || TryCastSpell(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)
+                            || TryCastSpell(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true)))
                     {
                         Use9SecSpell = false;
                         return;

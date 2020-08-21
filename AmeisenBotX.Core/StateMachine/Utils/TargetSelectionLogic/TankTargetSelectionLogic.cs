@@ -31,6 +31,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
             {
                 WowInterface.HookManager.ClearTarget();
+                possibleTargets = null;
+                return false;
             }
 
             bool keepCurrentTarget = (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
