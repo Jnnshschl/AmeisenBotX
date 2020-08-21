@@ -155,7 +155,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // do buffing etc...
-            WowInterface.CombatClass?.OutOfCombatExecute();
+            if (WowInterface.CombatClass != null)
+            {
+                WowInterface.CombatClass.TargetInLineOfSight = true;
+                WowInterface.CombatClass.OutOfCombatExecute();
+            }
 
             if (StateMachine.StateOverride != BotState.Idle
                 && StateMachine.StateOverride != BotState.None)
