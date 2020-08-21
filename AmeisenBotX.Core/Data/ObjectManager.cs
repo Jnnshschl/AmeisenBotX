@@ -19,23 +19,18 @@ namespace AmeisenBotX.Core.Data
         private readonly List<(IntPtr, WowObjectType)> objectPointers;
         private readonly object queryLock = new object();
 
-        private readonly WowObject[] wowObjects;
-        private IEnumerable<ulong> partymemberGuids;
-        private IEnumerable<WowUnit> partymembers;
-        private IEnumerable<ulong> partypetGuids;
-        private IEnumerable<WowUnit> partypets;
-
         public ObjectManager(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
             Config = config;
 
-            partymemberGuids = new List<ulong>();
-            partypetGuids = new List<ulong>();
-            wowObjects = new WowObject[2048];
+            PartymemberGuids = new List<ulong>();
+            PartyPetGuids = new List<ulong>();
             objectPointers = new List<(IntPtr, WowObjectType)>(2048);
-            partymembers = new List<WowUnit>();
-            partypets = new List<WowUnit>();
+            Partymembers = new List<WowUnit>();
+            PartyPets = new List<WowUnit>();
+
+            WowObjects = new ConcurrentBag<WowObject>();
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
@@ -60,13 +55,13 @@ namespace AmeisenBotX.Core.Data
 
         public ulong PartyleaderGuid { get; private set; }
 
-        public IEnumerable<ulong> PartymemberGuids { get { lock (queryLock) { return partymemberGuids; } } }
+        public List<ulong> PartymemberGuids { get; private set; }
 
-        public IEnumerable<WowUnit> Partymembers { get { lock (queryLock) { return partymembers; } } }
+        public List<WowUnit> Partymembers { get; private set; }
 
-        public IEnumerable<ulong> PartyPetGuids { get { lock (queryLock) { return partypetGuids; } } }
+        public List<ulong> PartyPetGuids { get; private set; }
 
-        public IEnumerable<WowUnit> PartyPets { get { lock (queryLock) { return partypets; } } }
+        public List<WowUnit> PartyPets { get; private set; }
 
         public WowUnit Pet { get; private set; }
 
@@ -82,7 +77,7 @@ namespace AmeisenBotX.Core.Data
 
         public ulong TargetGuid { get; private set; }
 
-        public IEnumerable<WowObject> WowObjects { get; private set; }
+        public ConcurrentBag<WowObject> WowObjects { get; private set; }
 
         public int ZoneId { get; private set; }
 
@@ -121,35 +116,37 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit
-        {
-            lock (queryLock)
-            {
-                return GetNearEnemies<T>(position, distance).Where(e => e.IsInCombat);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
+        public List<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
                 return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat
-                             && (PartymemberGuids.Contains(e.TargetGuid) || PartyPetGuids.Contains(e.TargetGuid)));
+                    .Where(e => e.IsInCombat)
+                    .ToList();
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowDynobject> GetNearAoeSpells()
+        public List<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowDynobject>();
+                return GetNearEnemies<T>(position, distance)
+                    .Where(e => e.IsInCombat && (PartymemberGuids.Contains(e.TargetGuid) || PartyPetGuids.Contains(e.TargetGuid)))
+                    .ToList();
             }
         }
 
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public List<WowDynobject> GetNearAoeSpells()
+        {
+            lock (queryLock)
+            {
+                return WowObjects.OfType<WowDynobject>().ToList();
+            }
+        }
+
+        public List<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -157,12 +154,13 @@ namespace AmeisenBotX.Core.Data
                     .Where(e => !e.IsDead
                          && !e.IsNotAttackable
                          && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                         && e.Position.GetDistance(position) < distance);
+                         && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
+        public List<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -170,12 +168,13 @@ namespace AmeisenBotX.Core.Data
                     .Where(e => !e.IsDead
                              && !e.IsNotAttackable
                              && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
-                             && e.Position.GetDistance(position) < distance);
+                             && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, double distance) where T : WowUnit
+        public List<T> GetNearPartymembers<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -183,16 +182,17 @@ namespace AmeisenBotX.Core.Data
                     .Where(e => !e.IsDead
                              && !e.IsNotAttackable
                              && (PartymemberGuids.Contains(e.Guid) || PartyPetGuids.Contains(e.Guid))
-                             && e.Position.GetDistance(position) < distance);
+                             && e.Position.GetDistance(position) < distance)
+                    .ToList();
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance)
+        public List<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance)
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance);
+                return WowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance).ToList();
             }
         }
 
@@ -214,52 +214,47 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public void ProcessObject(int id, (IntPtr, WowObjectType) x)
+        public WowObject ProcessObject(IntPtr ptr, WowObjectType type)
         {
-            if (WowInterface.XMemory.Read(IntPtr.Add(x.Item1, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress)
+            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress)
                 && WowInterface.XMemory.Read(descriptorAddress, out ulong guid))
             {
-                WowObject obj = wowObjects.FirstOrDefault(e => e?.Guid == guid);
-
-                if (obj != null && obj.BaseAddress == x.Item1)
+                WowObject obj = type switch
                 {
-                    obj.Update();
-                }
-                else
-                {
-                    wowObjects[id] = x.Item2 switch
-                    {
-                        WowObjectType.Container => new WowContainer(x.Item1, x.Item2, descriptorAddress),
-                        WowObjectType.Corpse => new WowCorpse(x.Item1, x.Item2, descriptorAddress),
-                        WowObjectType.Item => new WowItem(x.Item1, x.Item2, descriptorAddress),
-                        WowObjectType.Dynobject => new WowDynobject(x.Item1, x.Item2, descriptorAddress),
-                        WowObjectType.Gameobject => new WowGameobject(x.Item1, x.Item2, descriptorAddress),
-                        WowObjectType.Player => new WowPlayer(x.Item1, x.Item2, descriptorAddress),
-                        WowObjectType.Unit => new WowUnit(x.Item1, x.Item2, descriptorAddress),
-                        _ => new WowObject(x.Item1, x.Item2, descriptorAddress),
-                    };
+                    WowObjectType.Container => new WowContainer(ptr, type, descriptorAddress),
+                    WowObjectType.Corpse => new WowCorpse(ptr, type, descriptorAddress),
+                    WowObjectType.Item => new WowItem(ptr, type, descriptorAddress),
+                    WowObjectType.Dynobject => new WowDynobject(ptr, type, descriptorAddress),
+                    WowObjectType.Gameobject => new WowGameobject(ptr, type, descriptorAddress),
+                    WowObjectType.Player => new WowPlayer(ptr, type, descriptorAddress),
+                    WowObjectType.Unit => new WowUnit(ptr, type, descriptorAddress),
+                    _ => new WowObject(ptr, type, descriptorAddress),
+                };
 
-                    wowObjects[id].Update();
-                }
+                obj.Update();
 
-                if (wowObjects[id] != null && (x.Item2 == WowObjectType.Unit || x.Item2 == WowObjectType.Player))
+                if (obj != null && (type == WowObjectType.Unit || type == WowObjectType.Player))
                 {
-                    if (wowObjects[id].Guid == PlayerGuid)
+                    if (obj.Guid == PlayerGuid)
                     {
                         if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
                         {
-                            ((WowPlayer)wowObjects[id]).ComboPoints = comboPoints;
+                            ((WowPlayer)obj).ComboPoints = comboPoints;
                         }
 
-                        Player = (WowPlayer)wowObjects[id];
+                        Player = (WowPlayer)obj;
                     }
 
-                    if (wowObjects[id].Guid == TargetGuid) { Target = (WowUnit)wowObjects[id]; }
-                    if (wowObjects[id].Guid == PetGuid) { Pet = (WowUnit)wowObjects[id]; }
-                    if (wowObjects[id].Guid == LastTargetGuid) { LastTarget = (WowUnit)wowObjects[id]; }
-                    if (wowObjects[id].Guid == PartyleaderGuid) { Partyleader = (WowUnit)wowObjects[id]; }
+                    if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
+                    if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
+                    if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
+                    if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
                 }
+
+                return obj;
             }
+
+            return null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -330,19 +325,20 @@ namespace AmeisenBotX.Core.Data
                 }
 
                 ObjectCount = objectPointers.Count;
-                Parallel.For(0, objectPointers.Count, (x, y) => ProcessObject(x, objectPointers[x]));
-                WowObjects = wowObjects[..ObjectCount];
+
+                WowObjects.Clear();
+                Parallel.For(0, objectPointers.Count, (x, y) => WowObjects.Add(ProcessObject(objectPointers[x].Item1, objectPointers[x].Item2)));
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();
 
                 if (PartyleaderGuid > 0)
                 {
-                    partymemberGuids = ReadPartymemberGuids();
-                    partymembers = wowObjects.OfType<WowUnit>().Where(e => partymemberGuids.Contains(e.Guid));
+                    PartymemberGuids = ReadPartymemberGuids().ToList();
+                    Partymembers = WowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
 
-                    partypets = wowObjects.OfType<WowUnit>().Where(e => partymemberGuids.Contains(e.SummonedByGuid));
-                    partypetGuids = partypets.Select(e => e.Guid);
+                    PartyPets = WowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
+                    PartyPetGuids = PartyPets.Select(e => e.Guid).ToList();
                 }
             }
 

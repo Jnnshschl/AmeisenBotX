@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
 
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            PathfindingEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            PathfindingEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);

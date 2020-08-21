@@ -176,8 +176,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 WowUnit target = unitsToHeal.First();
 
                 if (target.HealthPercentage < 90.0
-                    && target.HealthPercentage > 78.0
-                    && unitsToHeal.Count(e => e.HealthPercentage < 75.0) > 2
+                    && target.HealthPercentage > 75.0
+                    && unitsToHeal.Count(e => e.HealthPercentage < 90.0) > 1
                     && TryCastSpell(wildGrowthSpell, target.Guid, true))
                 {
                     return true;
@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
 
                 if (target.HealthPercentage < 95.0
-                    && target.HealthPercentage > 80.0
+                    && target.HealthPercentage > 70.0
                     && !target.HasBuffByName(rejuvenationSpell)
                     && TryCastSpell(rejuvenationSpell, target.Guid, true))
                 {
@@ -208,27 +208,28 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 }
 
                 if (target.HealthPercentage < 98.0
-                    && target.HealthPercentage > 80.0
+                    && target.HealthPercentage > 70.0
                     && !target.HasBuffByName(lifebloomSpell)
                     && TryCastSpell(lifebloomSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 85.0
-                    && TryCastSpell(regrowthSpell, target.Guid, true))
-                {
-                    return true;
-                }
-
-                if (target.HealthPercentage < 85.0
+                if (target.HealthPercentage < 65.0
                     && TryCastSpell(nourishSpell, target.Guid, true))
                 {
                     return true;
                 }
 
-                if (target.HealthPercentage < 85.0
+                if (target.HealthPercentage < 65.0
                     && TryCastSpell(healingTouchSpell, target.Guid, true))
+                {
+                    return true;
+                }
+
+                if (target.HealthPercentage < 65.0
+                    && !target.HasBuffByName(regrowthSpell)
+                    && TryCastSpell(regrowthSpell, target.Guid, true))
                 {
                     return true;
                 }
