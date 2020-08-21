@@ -188,22 +188,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
-                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                if ((WowInterface.ObjectManager.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                if (WowInterface.ObjectManager.Target != null)
                 {
-                    if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                    double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.ObjectManager.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
                     {
-                        if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            WowInterface.HookManager.CastSpell(stance);
-                            return true;
-                        }
-                        else
-                        {
-                            WowInterface.HookManager.CastSpell(spellName);
-                            return true;
+                            if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
+                            {
+                                WowInterface.HookManager.CastSpell(stance);
+                                return true;
+                            }
+                            else
+                            {
+                                WowInterface.HookManager.CastSpell(spellName);
+                                return true;
+                            }
                         }
                     }
                 }
@@ -367,7 +370,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 40)
                 .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                .FirstOrDefault();
+                .FirstOrDefault();//&& e.Type(Player)
 
                 if (nearTarget != null)
                 {

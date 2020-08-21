@@ -142,13 +142,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
+
+            partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+
             if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
             {
                 WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 WowInterface.HookManager.CastSpell(ResurrectionSpell);
             }
-            
+
             UseSpellOnlyInCombat = false;
             BuffMe();
             StartHeal();
@@ -227,7 +231,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private void StartHeal()
         {
-            List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
+
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+            //healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
+
+            partyMemberToHeal = partyMemberToHeal.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
             if (partyMemberToHeal.Count > 0)
             {
@@ -242,10 +251,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     return;
                 }
 
-                targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
-                if (targetIsInRange)
+
+                if (WowInterface.ObjectManager.Target != null)
                 {
-                    if (WowInterface.ObjectManager.Target != null)
+                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
+                    if (targetIsInRange)
                     {
                         if (!TargetInLineOfSight)
                         {
@@ -256,37 +266,37 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             WowInterface.HookManager.StopClickToMoveIfActive();
                             WowInterface.MovementEngine.Reset();
                         }
-                        
+
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 50 && CustomCastSpell(FadeSpell))
                         {
                             return;
-                        }  
-                        
+                        }
+
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 30 && CustomCastSpell(DesperatePrayerSpell))
                         {
                             return;
-                        } 
-                        
+                        }
+
                         if (WowInterface.ObjectManager.Target.HealthPercentage < 55 && CustomCastSpell(GreaterHealSpell))
                         {
                             return;
-                        }  
-                        
+                        }
+
                         if (WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(FlashHealSpell))
                         {
                             return;
-                        }   
-                        
+                        }
+
                         if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(CircleOfHealingSpell))
                         {
                             return;
-                        }    
-                        
+                        }
+
                         if (!WowInterface.ObjectManager.Target.HasBuffByName("Renew") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(RenewSpell))
                         {
                             return;
-                        }  
-                        
+                        }
+
                         if (UseSpellOnlyInCombat && !WowInterface.ObjectManager.Target.HasBuffByName("Weakened Soul") && !WowInterface.ObjectManager.Target.HasBuffByName("Power Word: Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(PowerWordShieldSpell))
                         {
                             return;
@@ -321,7 +331,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 80 && CustomCastSpell(HolyFireSpell))
                         {
                             return;
-                        }   
+                        }
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 80 && CustomCastSpell(SmiteSpell))
                         {
                             return;
