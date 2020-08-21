@@ -465,7 +465,7 @@ namespace AmeisenBotX.Core
         {
             if (AccountName.Length > 0 && !Config.AutoPositionWow)
             {
-                LoadPosition(Config.WowWindowRect, WowInterface.WowProcess.MainWindowHandle);
+                LoadPosition(Config.WowWindowRect, WowInterface.XMemory.Process.MainWindowHandle);
             }
         }
 

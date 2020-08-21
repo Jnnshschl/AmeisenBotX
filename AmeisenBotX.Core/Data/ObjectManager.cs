@@ -125,12 +125,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat
-                             || e.TargetGuid == PlayerGuid
-                             || PartymemberGuids.Contains(e.TargetGuid)
-                             || PartyPetGuids.Contains(e.TargetGuid)
-                             && (e.IsTaggedByMe || !e.IsTaggedByOther));
+                return GetNearEnemies<T>(position, distance).Where(e => e.IsInCombat);
             }
         }
 
@@ -141,8 +136,7 @@ namespace AmeisenBotX.Core.Data
             {
                 return GetNearEnemies<T>(position, distance)
                     .Where(e => e.IsInCombat
-                             && (PartymemberGuids.Contains(e.TargetGuid)
-                             || PartyPetGuids.Contains(e.TargetGuid)));
+                             && (PartymemberGuids.Contains(e.TargetGuid) || PartyPetGuids.Contains(e.TargetGuid)));
             }
         }
 
@@ -160,9 +154,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects.OfType<T>()
-                .Where(e => e != null
-                         && e.Guid != PlayerGuid
-                         && !e.IsDead
+                    .Where(e => !e.IsDead
                          && !e.IsNotAttackable
                          && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
                          && e.Position.GetDistance(position) < distance);
@@ -175,9 +167,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects.OfType<T>()
-                    .Where(e => e != null
-                             && e.Guid != PlayerGuid
-                             && !e.IsDead
+                    .Where(e => !e.IsDead
                              && !e.IsNotAttackable
                              && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
                              && e.Position.GetDistance(position) < distance);
@@ -190,9 +180,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return WowObjects.OfType<T>()
-                    .Where(e => e != null
-                             && e.Guid != PlayerGuid
-                             && !e.IsDead
+                    .Where(e => !e.IsDead
                              && !e.IsNotAttackable
                              && (PartymemberGuids.Contains(e.Guid) || PartyPetGuids.Contains(e.Guid))
                              && e.Position.GetDistance(position) < distance);

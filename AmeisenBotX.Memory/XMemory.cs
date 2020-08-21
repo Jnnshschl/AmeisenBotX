@@ -129,7 +129,7 @@ namespace AmeisenBotX.Memory
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
 
-            if (CreateProcess(null, $"{processCmd} -windowed -d3d9", IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 CloseHandle(processInformation.hProcess);
                 CloseHandle(processInformation.hThread);
@@ -299,7 +299,7 @@ namespace AmeisenBotX.Memory
             {
                 if (RpmGateWay(address, pBuffer, lenght))
                 {
-                    List<byte> strBuffer = new List<byte>();
+                    List<byte> strBuffer = new List<byte>(lenght);
 
                     for (int i = 0; i < lenght; ++i)
                     {
@@ -366,13 +366,15 @@ namespace AmeisenBotX.Memory
 
         public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
         {
-            SetParent(Process.MainWindowHandle, mainWindowHandle);
+            if (Process.MainWindowHandle != IntPtr.Zero && mainWindowHandle != IntPtr.Zero)
+            {
+                SetParent(Process.MainWindowHandle, mainWindowHandle);
 
-            int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
-            style = style & ~(int)WindowStyles.WS_CAPTION & ~(int)WindowStyles.WS_THICKFRAME;
-            SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
+                int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE) & ~(int)WindowStyles.WS_CAPTION & ~(int)WindowStyles.WS_THICKFRAME;
+                SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
-            ResizeParentWindow(offsetX, offsetY, width, height);
+                ResizeParentWindow(offsetX, offsetY, width, height);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

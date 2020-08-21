@@ -44,34 +44,28 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.Health > 0 && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
-                if (nearPriorityEnemies != null && nearPriorityEnemies.Any())
+                if (nearPriorityEnemies.Any())
                 {
-                    possibleTargets = nearPriorityEnemies.ToList();
+                    possibleTargets = nearPriorityEnemies;
                     return true;
                 }
             }
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
-                .GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
-                .Where(e => BotUtils.IsValidUnit(e)
-                         && !e.IsDead
-                         && e.IsInCombat
-                         && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
+                .GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
+                .Where(e => !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                          && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
                 .OrderByDescending(e => e.Type) // make sure players are at the top (pvp)
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
-                .ThenByDescending(e => e.MaxHealth);
+                .ThenByDescending(e => e.Level)
+                .ThenBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
             // TODO: need to handle duels, our target will
             // be friendly there but is attackable
             if (nearEnemies.Any())
             {
-                possibleTargets = new List<WowUnit>() { nearEnemies.FirstOrDefault() };
-
-                if (possibleTargets != null)
-                {
-                    return true;
-                }
+                possibleTargets = nearEnemies;
+                return true;
             }
 
             // get enemies tagged by me or no one, or players
