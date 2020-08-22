@@ -34,6 +34,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string FearWardSpell = "Fear Ward";
         private const string PowerWordFortitudeSpell = "Power Word: Fortitude";
         private const string ShadowProtectionSpell = "Shadow Protection";
+        private const string PrayerofFortitude = "Prayer of Fortitude";
+        private const string PrayerofShadowProtection = "Prayer of Shadow Protection";
 
         private Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
@@ -61,6 +63,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(FearWardSpell, DateTime.Now);
             spellCoolDown.Add(PowerWordFortitudeSpell, DateTime.Now);
             spellCoolDown.Add(ShadowProtectionSpell, DateTime.Now);
+            spellCoolDown.Add(PrayerofFortitude, DateTime.Now);
+            spellCoolDown.Add(PrayerofShadowProtection, DateTime.Now);
 
 
             //Time event
@@ -87,7 +91,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public override CombatClassRole Role => CombatClassRole.Heal;
 
         //Time event
-
         public TimegatedEvent revivePlayerEvent { get; private set; }
 
         public override TalentTree Talents { get; } = new TalentTree()
@@ -136,7 +139,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public override void ExecuteCC()
         {
             UseSpellOnlyInCombat = true;
-            BuffMe();
+            BuffManager();
             StartHeal();
         }
 
@@ -154,7 +157,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
 
             UseSpellOnlyInCombat = false;
-            BuffMe();
+            BuffManager();
             StartHeal();
         }
 
@@ -172,7 +175,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            WowInterface.HookManager.CastSpell(spellName);
+                            WowInterface.HookManager.CastSpell(spellName, castOnSelf);
                             return true;
                         }
                     }
@@ -205,28 +208,61 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             return false;
         }
 
-        private void BuffMe()
+        private void BuffManager()
         {
+            if (TargetSelectEvent.Run())
+            {
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+                CastBuff.Add(WowInterface.ObjectManager.Player);
+
+                CastBuff = CastBuff.Where(e => (!e.HasBuffByName("Prayer of Fortitude") || !e.HasBuffByName("Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+
+                if (CastBuff != null)
+                {
+                    if (CastBuff.Count > 0)
+                    {
+                        if (WowInterface.ObjectManager.TargetGuid != CastBuff.FirstOrDefault().Guid)
+                        {
+                            WowInterface.HookManager.TargetGuid(CastBuff.FirstOrDefault().Guid);
+                        }
+                    }
+                    if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
+                    {
+                        if (!TargetInLineOfSight)
+                        {
+                            return;
+                        }
+                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Prayer of Fortitude") && CustomCastSpell(PrayerofFortitude))
+                        {
+                            return;
+                        }
+                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Prayer of Shadow Protection")  && CustomCastSpell(PrayerofShadowProtection))
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
             //if ((!WowInterface.ObjectManager.Player.HasBuffByName("Power Word: Fortitude") || !WowInterface.ObjectManager.Target.HasBuffByName("Power Word: Fortitude")) && CustomCastSpell(PowerWordFortitudeSpell))
             //{
             //    return;
             //} 
-            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell))
-            //{
-            //    return;
-            //}  
-            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell))
-            //{
-            //    return;
-            //} 
-            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell))
-            //{
-            //    return;
-            //}   
+            if (!WowInterface.ObjectManager.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell, true))
+            {
+                return;
+            }  
+            if (!WowInterface.ObjectManager.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell, true))
+            {
+                return;
+            } 
+            if (!WowInterface.ObjectManager.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell, true))
+            {
+                return;
+            }   
             //if (!WowInterface.ObjectManager.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
             //{
             //    return;
-            //}
+            //}  
         }
 
         private void StartHeal()
@@ -245,14 +281,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 }
 
-                if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.Target.HealthPercentage >= 90)
-                {
-                    WowInterface.HookManager.LuaDoString("SpellStopCasting()");
-                    return;
-                }
-
-
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
                 {
                     targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
                     if (targetIsInRange)
@@ -265,6 +294,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             WowInterface.HookManager.StopClickToMoveIfActive();
                             WowInterface.MovementEngine.Reset();
+                        }
+
+                        if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.Target.HealthPercentage >= 90)
+                        {
+                            WowInterface.HookManager.LuaDoString("SpellStopCasting()");
+                            return;
                         }
 
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 50 && CustomCastSpell(FadeSpell))
