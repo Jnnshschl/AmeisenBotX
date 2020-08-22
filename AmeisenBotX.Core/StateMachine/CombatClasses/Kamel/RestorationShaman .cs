@@ -311,14 +311,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 }
 
-                if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.Target.HealthPercentage >= 90)
-                {
-                    WowInterface.HookManager.LuaDoString("SpellStopCasting()");
-                    return;
-                }
-
-
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
                 {
                     targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
                     if (targetIsInRange)
@@ -331,6 +324,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             WowInterface.HookManager.StopClickToMoveIfActive();
                             WowInterface.MovementEngine.Reset();
+                        }
+
+                        if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.Target.HealthPercentage >= 90)
+                        {
+                            WowInterface.HookManager.LuaDoString("SpellStopCasting()");
+                            return;
                         }
 
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
