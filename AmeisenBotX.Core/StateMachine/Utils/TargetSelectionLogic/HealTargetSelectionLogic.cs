@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
             List<WowUnit> healableUnits = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-            healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+            // healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
             healableUnits.Add(WowInterface.ObjectManager.Player);
 
             // order by type id, so that players have priority

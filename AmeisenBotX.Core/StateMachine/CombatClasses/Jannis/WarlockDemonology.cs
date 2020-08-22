@@ -44,8 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 { corruptionSpell, () => !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
                 { immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { curseOfDoomSpell, () => TryCastSpell(curseOfDoomSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { curseOftheElementsSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(curseOfDoomSpell) && TryCastSpell(curseOftheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, WowInterface.ObjectManager.TargetGuid, true) },
             };
         }
 

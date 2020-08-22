@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { corruptionSpell, () => !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { curseOftheElementsSpell, () => TryCastSpell(curseOftheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
+                { curseOfTheElementsSpell, () => TryCastSpell(curseOfTheElementsSpell, WowInterface.ObjectManager.TargetGuid, true) },
                 { immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
         }

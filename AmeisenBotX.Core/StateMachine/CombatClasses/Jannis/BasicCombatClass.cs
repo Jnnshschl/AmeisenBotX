@@ -301,7 +301,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string corruptionSpell = "Corruption";
         protected const string curseOfAgonySpell = "Curse of Agony";
         protected const string curseOfDoomSpell = "Curse of Doom";
-        protected const string curseOftheElementsSpell = "Curse of the Elements";
+        protected const string curseOfTheElementsSpell = "Curse of the Elements";
+        protected const string curseOfTonguesSpell = "Curse of Tongues";
         protected const string decimationSpell = "Decimation";
         protected const string demonArmorSpell = "Demon Armor";
         protected const string demonicEmpowermentSpell = "Demonic Empowerment";
@@ -546,7 +547,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             int[] useableManaItems = new int[]
             {
                 // potions
-                2245, 3385, 3827, 6149, 13443, 13444, 33448,
+                2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
             };
 
             if (WowInterface.ObjectManager.Player.ManaPercentage < Configureables["HealingItemManaThreshold"])

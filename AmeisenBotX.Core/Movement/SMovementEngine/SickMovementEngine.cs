@@ -265,10 +265,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private bool DoINeedToFindAPath()
         {
-            return PathfindingEvent.Ready
-                && (Nodes == null 
+            return Nodes == null 
                 || Nodes.Count == 0 // we have no path
-                || PathFinalNode.GetDistance(TargetPosition) > 1.0); // target position changed
+                || PathFinalNode.GetDistance(TargetPosition) > 3.0; // target position changed
         }
 
         private BehaviorTreeStatus DoUnstuck()
