@@ -82,11 +82,12 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
 
                         WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
+
                         if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
                              && lootOpen > 0)
                         {
                             WowInterface.HookManager.LootEveryThing();
-                            UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
 
                             if (UnitLootQueue.Count > 0)
                             {
