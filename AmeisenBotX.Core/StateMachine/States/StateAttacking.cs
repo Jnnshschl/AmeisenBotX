@@ -53,19 +53,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && WowInterface.ObjectManager.Player != null)
             {
                 // use the default MovementEngine to move if the CombatClass doesnt
-                if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
-                    && WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
+                if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement))
                 {
-                    if (WowInterface.ObjectManager.Target.Guid == WowInterface.ObjectManager.PlayerGuid
-                        || WowInterface.ObjectManager.Target.IsDead
-                        || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target))
-                    {
-                        WowInterface.MovementEngine.Reset();
-                    }
-                    else
-                    {
-                        HandleMovement(WowInterface.ObjectManager.Target);
-                    }
+                    HandleMovement(WowInterface.ObjectManager.Target);
                 }
 
                 // if no CombatClass is loaded, just autoattack
@@ -121,7 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         private bool HandleMovement(WowUnit target)
         {
             // handle the LOS check
-            if (target.Guid == WowInterface.ObjectManager.PlayerGuid)
+            if (target == null || target.Guid == WowInterface.ObjectManager.PlayerGuid)
             {
                 TargetInLos = true;
             }
@@ -137,7 +127,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // check if we are facing the unit
-            if (!WowInterface.HookManager.IsClickToMoveActive()
+            if (target != null
+                && !WowInterface.HookManager.IsClickToMoveActive()
                 && FacingCheck.Run()
                 && target.Guid != WowInterface.ObjectManager.PlayerGuid
                 && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
@@ -145,55 +136,65 @@ namespace AmeisenBotX.Core.Statemachine.States
                 WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
             }
 
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
-
             // do we need to move
-            if (distance > DistanceToKeep || !TargetInLos)
+            if (target == null)
             {
-                Vector3 positionToGoTo = Vector3.Zero;
+                // just move to our group
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, GetMeanGroupPosition());
+                return true;
+            }
+            else
+            {
+                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
 
-                if (WowInterface.CombatClass != null)
+                if (distance > DistanceToKeep || !TargetInLos)
                 {
-                    // handle special movement needs
-                    if (WowInterface.CombatClass.WalkBehindEnemy)
+                    Vector3 positionToGoTo = Vector3.Zero;
+
+                    if (WowInterface.CombatClass != null)
                     {
-                        if (WowInterface.CombatClass.Role == CombatClassRole.Dps
-                            && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid) // prevent spinning
+                        // handle special movement needs
+                        if (WowInterface.CombatClass.WalkBehindEnemy)
                         {
-                            // walk behind enemy
-                            positionToGoTo = BotMath.CalculatePositionBehind(target.Position, target.Rotation);
+                            if (WowInterface.CombatClass.Role == CombatClassRole.Dps
+                                && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid) // prevent spinning
+                            {
+                                // walk behind enemy
+                                positionToGoTo = BotMath.CalculatePositionBehind(target.Position, target.Rotation);
+                            }
+                            else if (WowInterface.CombatClass.Role == CombatClassRole.Tank
+                                && WowInterface.ObjectManager.Partymembers.Any()) // no need to rotate
+                            {
+                                // rotate the boss away from the group
+                                Vector3 meanGroupPosition = GetMeanGroupPosition();
+                                positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle2D(target.Position, meanGroupPosition));
+                            }
                         }
-                        else if (WowInterface.CombatClass.Role == CombatClassRole.Tank
-                            && WowInterface.ObjectManager.Partymembers.Any()) // no need to rotate
+                        else if (WowInterface.CombatClass.Role == CombatClassRole.Heal)
                         {
-                            // rotate the boss away from the group
-                            Vector3 meanGroupPosition = GetMeanGroupPosition();
-                            positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle2D(target.Position, meanGroupPosition));
+                            // move to group
+                            Vector3 position = target != null ? target.Position : GetMeanGroupPosition();
+                            positionToGoTo = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, position, 4f);
                         }
-                    }
-                    else if (WowInterface.CombatClass.Role == CombatClassRole.Heal)
-                    {
-                        // move to group
-                        positionToGoTo = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, target.Position, 12f);
-                    }
-                    else
-                    {
-                        // just move to the enemies melee/ranged range
-                        positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
+                        else
+                        {
+                            // just move to the enemies melee/ranged range
+                            positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
+                        }
+
+                        WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
+                        return true;
                     }
 
+                    // just move to the enemies melee/ranged range
+                    positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
                     WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
                     return true;
                 }
-
-                // just move to the enemies melee/ranged range
-                positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
-                WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
-                return true;
             }
 
             // no need to move
-            WowInterface.MovementEngine.StopMovement();
+            // WowInterface.MovementEngine.StopMovement();
             return false;
         }
 

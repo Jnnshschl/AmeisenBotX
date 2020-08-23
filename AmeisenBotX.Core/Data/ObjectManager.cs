@@ -216,8 +216,7 @@ namespace AmeisenBotX.Core.Data
 
         public WowObject ProcessObject(IntPtr ptr, WowObjectType type)
         {
-            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress)
-                && WowInterface.XMemory.Read(descriptorAddress, out ulong guid))
+            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
                 WowObject obj = type switch
                 {

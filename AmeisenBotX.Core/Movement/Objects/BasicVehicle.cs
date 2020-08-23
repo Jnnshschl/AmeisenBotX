@@ -211,7 +211,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
                     if (enablePlayerForces)
                     {
-                        forces.Add(Seperate(0.1f));
+                        forces.Add(Seperate(0.03f));
                     }
 
                     // forces.Add(PlayerVehicle.AvoidObstacles(2f));
@@ -219,8 +219,8 @@ namespace AmeisenBotX.Core.Movement.Objects
 
                 case MovementAction.Following:
                     forces.Add(Seek(targetPosition, 1f));
-                    forces.Add(Seperate(0.1f));
-                    forces.Add(AvoidObstacles(0.1f));
+                    forces.Add(Seperate(0.03f));
+                    forces.Add(AvoidObstacles(0.03f));
                     break;
 
                 case MovementAction.Chasing:

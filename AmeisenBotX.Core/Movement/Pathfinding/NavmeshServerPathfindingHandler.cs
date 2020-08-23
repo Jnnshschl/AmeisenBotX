@@ -17,36 +17,36 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<Vector3>(1, mapId, start, end, MovementType.CastMovementRay) != default;
+            return BuildAndSendPathRequest<Vector3>(mapId, start, end, MovementType.CastMovementRay) != default;
         }
 
         public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(1, mapId, start, end, MovementType.FindPath, PathRequestFlags.CatmullRomSpline);
+            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.FindPath, PathRequestFlags.CatmullRomSpline);
         }
 
         public Vector3 GetRandomPoint(int mapId)
         {
-            return BuildAndSendRandomPointRequest(2, mapId, Vector3.Zero, 0f);
+            return BuildAndSendRandomPointRequest(mapId, Vector3.Zero, 0f);
         }
 
         public Vector3 GetRandomPointAround(int mapId, Vector3 start, float maxRadius)
         {
-            return BuildAndSendRandomPointRequest(2, mapId, start, maxRadius);
+            return BuildAndSendRandomPointRequest(mapId, start, maxRadius);
         }
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<Vector3>(1, mapId, start, end, MovementType.MoveAlongSurface);
+            return BuildAndSendPathRequest<Vector3>(mapId, start, end, MovementType.MoveAlongSurface);
         }
 
-        private T BuildAndSendPathRequest<T>(int msgType, int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
+        private T BuildAndSendPathRequest<T>(int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
         {
             if (IsConnected)
             {
                 try
                 {
-                    string response = SendString(msgType, JsonConvert.SerializeObject(new PathRequest(mapId, start, end, pathRequestFlags, movementType)));
+                    string response = SendString(1, JsonConvert.SerializeObject(new PathRequest(mapId, start, end, pathRequestFlags, movementType)));
 
                     if (BotUtils.IsValidJson(response))
                     {
@@ -62,13 +62,13 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             return default;
         }
 
-        private Vector3 BuildAndSendRandomPointRequest(int msgType, int mapId, Vector3 start, float maxRadius)
+        private Vector3 BuildAndSendRandomPointRequest(int mapId, Vector3 start, float maxRadius)
         {
             if (IsConnected)
             {
                 try
                 {
-                    string response = SendString(msgType, JsonConvert.SerializeObject(new RandomPointRequest(mapId, start, maxRadius)));
+                    string response = SendString(2, JsonConvert.SerializeObject(new RandomPointRequest(mapId, start, maxRadius)));
 
                     if (string.IsNullOrWhiteSpace(response))
                     {
