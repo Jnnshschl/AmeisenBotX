@@ -578,54 +578,6 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.LootEveryThing();
         }
 
-        private void OnMerchantShow(long timestamp, List<string> args)
-        {
-            if (WowInterface.ObjectManager.Target == null)
-            {
-                return;
-            }
-
-            Task.Delay(2000).Wait();
-
-            if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
-            {
-                WowInterface.HookManager.RepairAllItems();
-            }
-
-            if (Config.AutoSell)
-            {
-                foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
-                {
-                    IWowItem itemToSell = item;
-
-                    if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-                        || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
-                        || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
-                        || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
-                        || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
-                        || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
-                    {
-                        continue;
-                    }
-
-                    if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                    {
-                        // equip item and sell the other after
-                        itemToSell = itemToReplace;
-                        WowInterface.HookManager.ReplaceItem(null, item);
-                    }
-
-                    if (itemToSell != null
-                        && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
-                    {
-                        WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
-                        WowInterface.HookManager.CofirmBop();
-                        Task.Delay(50).Wait();
-                    }
-                }
-            }
-        }
-
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
             if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
@@ -903,10 +855,6 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
             WowInterface.EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
             // WowInterface.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
-
-            // Merchant Events
-            // --------------- >
-            WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
             // ---------- >
