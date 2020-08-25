@@ -182,7 +182,7 @@ namespace AmeisenBotX.Core.Statemachine
                                     return;
                                 }
 
-                                if (!WowInterface.Globals.IgnoreCombat 
+                                if (!WowInterface.Globals.IgnoreCombat
                                     && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
                                     && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
                                     && WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any())

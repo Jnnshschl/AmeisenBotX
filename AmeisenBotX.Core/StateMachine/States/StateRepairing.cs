@@ -1,4 +1,7 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
@@ -82,16 +85,46 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.UnitSelectGossipOption(1);
                         return;
                     }
+
+                    WowInterface.HookManager.RepairAllItems();
+
+                    if (Config.AutoSell)
+                    {
+                        foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+                        {
+                            IWowItem itemToSell = item;
+
+                            if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+                                || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
+                                || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
+                                || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
+                                || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
+                                || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
+                            {
+                                continue;
+                            }
+
+                            if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                            {
+                                // equip item and sell the other after
+                                itemToSell = itemToReplace;
+                                WowInterface.HookManager.ReplaceItem(null, item);
+                            }
+
+                            if (itemToSell != null
+                                && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
+                            {
+                                WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
+                                WowInterface.HookManager.CofirmBop();
+                            }
+                        }
+                    }
                 }
             }
             else
             {
                 StateMachine.SetState(BotState.Idle);
             }
-        }
-
-        public override void Leave()
-        {
         }
 
         public bool IsRepairNpcNear(out WowUnit unit)
@@ -105,6 +138,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                               && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
 
             return unit != null;
+        }
+
+        public override void Leave()
+        {
         }
 
         internal bool NeedToRepair()

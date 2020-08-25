@@ -151,9 +151,7 @@ namespace AmeisenBotX.Core.Hook
 
         void Mount(int index);
 
-        void OverrideWorldCheckOff();
-
-        void OverrideWorldCheckOn();
+        void OverrideWorldLoadedCheck(bool status);
 
         void QueryQuestsCompleted();
 

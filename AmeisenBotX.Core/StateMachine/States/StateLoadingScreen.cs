@@ -1,4 +1,6 @@
 ﻿using AmeisenBotX.Logging;
+using System;
+using System.Text;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -23,12 +25,13 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            // if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string gameState)
-            //     && gameState.Contains("login") || gameState.Contains("charselect"))
-            // {
-            //     StateMachine.SetState(BotState.Login);
-            //     return;
-            // }
+            if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string glueFrame)
+                && glueFrame.Equals("login", StringComparison.OrdinalIgnoreCase))
+            {
+                AmeisenLogger.I.Log("LoadingScreen", "Returned to login screen");
+                StateMachine.SetState(BotState.Login);
+                return;
+            }
 
             WowInterface.ObjectManager.RefreshIsWorldLoaded();
 

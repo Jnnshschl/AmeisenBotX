@@ -5,7 +5,6 @@ using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Event
 {
@@ -36,6 +35,8 @@ namespace AmeisenBotX.Core.Event
         private string EventFrameName { get; set; }
 
         private string EventHandlerName { get; set; }
+
+        private string EventHookSetupLua { get; set; }
 
         private string EventTableName { get; set; }
 
@@ -68,26 +69,27 @@ namespace AmeisenBotX.Core.Event
                 PendingLuaToExecute.Dequeue();
             }
 
-            // Unminified lua code can be found im my github repo "WowLuaStuff"
-            if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}='['if {EventTableName} then for a,b in pairs({EventTableName})do {{v:0}}={{v:0}}..'{{'for c,d in pairs(b)do if type(d)==\"table\"then {{v:0}}={{v:0}}..'\"args\": ['for e,f in pairs(d)do {{v:0}}={{v:0}}..'\"'..f..'\"'if e<=table.getn(d)then {{v:0}}={{v:0}}..','end end;{{v:0}}={{v:0}}..']}}'if a<table.getn({EventTableName})then {{v:0}}={{v:0}}..','end else if type(d)==\"string\"then {{v:0}}={{v:0}}..'\"event\": \"'..d..'\",'else {{v:0}}={{v:0}}..'\"time\": \"'..d..'\",'end end end end end {{v:0}}={{v:0}}..']'{EventTableName}={{}}"), out string eventJson)
+            // unminified lua code can be found im my github repo "WowLuaStuff"
+            if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}='['if not {EventFrameName} then {EventHookSetupLua} end if {EventTableName} then for a,b in pairs({EventTableName})do {{v:0}}={{v:0}}..'{{'for c,d in pairs(b)do if type(d)==\"table\"then {{v:0}}={{v:0}}..'\"args\": ['for e,f in pairs(d)do {{v:0}}={{v:0}}..'\"'..f..'\"'if e<=table.getn(d)then {{v:0}}={{v:0}}..','end end;{{v:0}}={{v:0}}..']}}'if a<table.getn({EventTableName})then {{v:0}}={{v:0}}..','end else if type(d)==\"string\"then {{v:0}}={{v:0}}..'\"event\": \"'..d..'\",'else {{v:0}}={{v:0}}..'\"time\": \"'..d..'\",'end end end end end {{v:0}}={{v:0}}..']'{EventTableName}={{}}"), out string eventJson)
                 && eventJson.Length > 2)
             {
+                AmeisenLogger.I.Log("WoWEvents", $"Firing events: {eventJson}", LogLevel.Verbose);
                 List<WowEvent> events = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson, JsonSerializerSettings);
 
                 if (events != null && events.Count > 0)
                 {
-                    Parallel.ForEach(events, x =>
+                    foreach (WowEvent x in events)
                     {
                         if (EventDictionary.ContainsKey(x.Name))
                         {
-                            AmeisenLogger.I.Log("WoWEvents", $"[{x.Timestamp}] {x.Name} fired: {JsonConvert.SerializeObject(x.Arguments)}", LogLevel.Verbose);
+                            List<WowEventAction> actions = EventDictionary[x.Name];
 
-                            for (int i = 0; i < EventDictionary[x.Name].Count; ++i)
+                            for (int i = 0; i < actions.Count; ++i)
                             {
-                                EventDictionary[x.Name][i](x.Timestamp, x.Arguments);
+                                actions[i](x.Timestamp, x.Arguments);
                             }
                         }
-                    });
+                    }
                 }
             }
         }
@@ -204,14 +206,13 @@ namespace AmeisenBotX.Core.Event
 
             StringBuilder luaStuff = new StringBuilder();
 
-            luaStuff.Append($"{EventFrameName}=CreateFrame(\"FRAME\",\"{EventFrameName}\") ");
-            luaStuff.Append($"{EventTableName}={{}} ");
-            luaStuff.Append($"function {EventHandlerName}(self,event,...) ");
-            luaStuff.Append($"table.insert({EventTableName},{{time(),event, {{...}}}})end ");
-            luaStuff.Append($"if {EventFrameName}:GetScript(\"OnEvent\")==nil then ");
-            luaStuff.Append($"{EventFrameName}:SetScript(\"OnEvent\",{EventHandlerName}) end");
+            luaStuff.Append($"{EventFrameName}=CreateFrame(\"FRAME\",\"{EventFrameName}\");{EventTableName}={{}};");
+            luaStuff.Append($"function {EventHandlerName}(self,event,...)table.insert({EventTableName},{{time(),event, {{...}}}})end;");
+            luaStuff.Append($"if {EventFrameName}:GetScript(\"OnEvent\")==nil then {EventFrameName}:SetScript(\"OnEvent\",{EventHandlerName}) end");
 
-            PendingLuaToExecute.Enqueue(luaStuff.ToString());
+            EventHookSetupLua = luaStuff.ToString();
+
+            PendingLuaToExecute.Enqueue(EventHookSetupLua);
         }
     }
 }

@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Battleground.Jannis;
 using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Common;
@@ -55,7 +54,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Timer = System.Threading.Timer;
 
 namespace AmeisenBotX.Core
@@ -170,7 +168,13 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
             IsRunning = false;
-            StateMachine.SetState(BotState.Idle);
+
+            if (StateMachine.CurrentState.Key != BotState.StartWow
+                && StateMachine.CurrentState.Key != BotState.Login
+                && StateMachine.CurrentState.Key != BotState.LoadingScreen)
+            {
+                StateMachine.SetState(BotState.Idle);
+            }
         }
 
         public void ReloadConfig()
@@ -201,7 +205,7 @@ namespace AmeisenBotX.Core
 
             if (Config.SaveBotWindowPosition)
             {
-                LoadPosition(Config.BotWindowRect, MainWindowHandle);
+                LoadWindowPosition(Config.BotWindowRect, MainWindowHandle);
             }
 
             StateMachineTimer = new Timer(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
@@ -234,18 +238,24 @@ namespace AmeisenBotX.Core
             }
 
             WowInterface.EventHookManager.Stop();
+
+            if (Config.AutocloseWow)
+            {
+                WowInterface.HookManager.LuaDoString("ForceQuit()");
+            }
+
             WowInterface.HookManager.DisposeHook();
 
             WowInterface.BotCache.Save();
 
-            if (Config.AutocloseWow)
-            {
-                AmeisenLogger.I.Log("AmeisenBot", "Killing WoW process", LogLevel.Debug);
-                if (WowInterface.XMemory.Process != null && !WowInterface.XMemory.Process.HasExited)
-                {
-                    WowInterface.XMemory.Process.Kill();
-                }
-            }
+            // if (Config.AutocloseWow)
+            // {
+            //     AmeisenLogger.I.Log("AmeisenBot", "Killing WoW process", LogLevel.Debug);
+            //     if (WowInterface.XMemory.Process != null && !WowInterface.XMemory.Process.HasExited)
+            //     {
+            //         WowInterface.XMemory.Process.Kill();
+            //     }
+            // }
 
             AmeisenLogger.I.Log("AmeisenBot", $"Exiting AmeisenBot", LogLevel.Debug);
             AmeisenLogger.I.Stop();
@@ -257,19 +267,16 @@ namespace AmeisenBotX.Core
             return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static void LoadPosition(Rect rect, IntPtr windowHandle)
+        private static void LoadWindowPosition(Rect rect, IntPtr windowHandle)
         {
-            try
+            if (windowHandle != IntPtr.Zero && rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
             {
-                if (rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
-                {
-                    XMemory.SetWindowPosition(windowHandle, rect);
-                    AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {rect}", LogLevel.Verbose);
-                }
+                XMemory.SetWindowPosition(windowHandle, rect);
+                AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {rect}", LogLevel.Verbose);
             }
-            catch (Exception e)
+            else
             {
-                AmeisenLogger.I.Log("AmeisenBot", $"Failed to set window position:\n{e}", LogLevel.Error);
+                AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {windowHandle} to {rect}", LogLevel.Warning);
             }
         }
 
@@ -464,9 +471,9 @@ namespace AmeisenBotX.Core
 
         private void LoadWowWindowPosition()
         {
-            if (AccountName.Length > 0 && !Config.AutoPositionWow)
+            if (Config.SaveWowWindowPosition && !Config.AutoPositionWow)
             {
-                LoadPosition(Config.WowWindowRect, WowInterface.XMemory.Process.MainWindowHandle);
+                LoadWindowPosition(Config.WowWindowRect, WowInterface.XMemory.Process.MainWindowHandle);
             }
         }
 
@@ -576,54 +583,6 @@ namespace AmeisenBotX.Core
             }
 
             WowInterface.HookManager.LootEveryThing();
-        }
-
-        private void OnMerchantShow(long timestamp, List<string> args)
-        {
-            if (WowInterface.ObjectManager.Target == null)
-            {
-                return;
-            }
-
-            Task.Delay(2000).Wait();
-
-            if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
-            {
-                WowInterface.HookManager.RepairAllItems();
-            }
-
-            if (Config.AutoSell)
-            {
-                foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
-                {
-                    IWowItem itemToSell = item;
-
-                    if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-                        || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
-                        || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
-                        || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
-                        || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
-                        || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
-                    {
-                        continue;
-                    }
-
-                    if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                    {
-                        // equip item and sell the other after
-                        itemToSell = itemToReplace;
-                        WowInterface.HookManager.ReplaceItem(null, item);
-                    }
-
-                    if (itemToSell != null
-                        && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
-                    {
-                        WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
-                        WowInterface.HookManager.CofirmBop();
-                        Task.Delay(50).Wait();
-                    }
-                }
-            }
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
@@ -906,7 +865,7 @@ namespace AmeisenBotX.Core
 
             // Merchant Events
             // --------------- >
-            WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            // WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
             // ---------- >
