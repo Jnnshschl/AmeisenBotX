@@ -779,17 +779,10 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OverrideWorldCheckOff()
+        public void OverrideWorldLoadedCheck(bool status)
         {
-            OverrideWorldCheck = false;
-            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OverrideWorldCheckOn()
-        {
-            OverrideWorldCheck = true;
-            WowInterface.XMemory.Write(OverrideWorldCheckAddress, 1);
+            OverrideWorldCheck = status;
+            WowInterface.XMemory.Write(OverrideWorldCheckAddress, status ? 1 : 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -954,7 +947,7 @@ namespace AmeisenBotX.Core.Hook
             do
             {
                 EndsceneAddress = GetEndScene();
-                AmeisenLogger.I.Log("HookManager", $"Endscene is at: 0x{EndsceneAddress:X}", LogLevel.Verbose);
+                AmeisenLogger.I.Log("HookManager", $"Endscene is at: 0x{EndsceneAddress.ToInt32():X}", LogLevel.Verbose);
 
                 if (EndsceneAddress == IntPtr.Zero)
                 {
@@ -1183,39 +1176,39 @@ namespace AmeisenBotX.Core.Hook
 
             CodeToExecuteAddress = codeToExecuteAddress;
             WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: 0x{CodeToExecuteAddress:X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: 0x{CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr returnValueAddress)) { return false; }
 
             ReturnValueAddress = returnValueAddress;
             WowInterface.XMemory.Write(ReturnValueAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook ReturnValueAddress: 0x{ReturnValueAddress:X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"EndsceneHook ReturnValueAddress: 0x{ReturnValueAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to override the is ingame check, used at the login
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress)) { return false; }
 
             OverrideWorldCheckAddress = overrideWorldCheckAddress;
             WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook OverrideWorldCheckAddress: 0x{OverrideWorldCheckAddress:X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"EndsceneHook OverrideWorldCheckAddress: 0x{OverrideWorldCheckAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the original endscene code
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out IntPtr codecaveForGateway)) { return false; }
 
             CodecaveForGateway = codecaveForGateway;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForGateway ({MEM_ALLOC_GATEWAY_SIZE} bytes): 0x{CodecaveForGateway:X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForGateway ({MEM_ALLOC_GATEWAY_SIZE} bytes): 0x{CodecaveForGateway.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_CHECK_SIZE, out IntPtr codecaveForCheck)) { return false; }
 
             CodecaveForCheck = codecaveForCheck;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): 0x{CodecaveForCheck:X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): 0x{CodecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution)) { return false; }
 
             CodecaveForExecution = codecaveForExecution;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): 0x{CodecaveForExecution:X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): 0x{CodecaveForExecution.ToInt32():X}", LogLevel.Verbose);
 
             return true;
         }

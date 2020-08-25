@@ -103,6 +103,21 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
+        private Vector3 GetMeanGroupPosition()
+        {
+            Vector3 meanGroupPosition = new Vector3();
+
+            foreach (WowUnit unit in WowInterface.ObjectManager.Partymembers)
+            {
+                if (unit.Guid != WowInterface.ObjectManager.PlayerGuid)
+                {
+                    meanGroupPosition += unit.Position;
+                }
+            }
+
+            return meanGroupPosition;
+        }
+
         private double GetMeeleRange()
         {
             return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5 : Math.Max(3.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
@@ -196,21 +211,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             // no need to move
             // WowInterface.MovementEngine.StopMovement();
             return false;
-        }
-
-        private Vector3 GetMeanGroupPosition()
-        {
-            Vector3 meanGroupPosition = new Vector3();
-
-            foreach (WowUnit unit in WowInterface.ObjectManager.Partymembers)
-            {
-                if (unit.Guid != WowInterface.ObjectManager.PlayerGuid)
-                {
-                    meanGroupPosition += unit.Position;
-                }
-            }
-
-            return meanGroupPosition;
         }
     }
 }
