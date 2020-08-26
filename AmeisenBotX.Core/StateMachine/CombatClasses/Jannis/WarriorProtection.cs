@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(TankTargetManager))
+            if (SelectTarget(TargetManagerTank))
             {
                 if ((WowInterface.ObjectManager.Player.IsFleeing
                     || WowInterface.ObjectManager.Player.IsDazed

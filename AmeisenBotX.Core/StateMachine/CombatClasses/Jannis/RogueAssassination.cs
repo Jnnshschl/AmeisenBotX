@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
                         && TryCastSpellRogue(cloakOfShadowsSpell, 0, true)))

@@ -1053,6 +1053,11 @@ namespace AmeisenBotX.Core.Hook
             SendChatMessage("/startattack");
         }
 
+        public void StopCasting()
+        {
+            LuaDoString("SpellStopCasting()");
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void StopClickToMoveIfActive()
         {

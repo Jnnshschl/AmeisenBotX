@@ -21,11 +21,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
     public abstract class BasicCombatClass : ICombatClass
     {
-        protected const int deadPartymembersCheckTime = 4;
-        protected const int eclipseCheckTime = 1;
-        protected const int fearAttemptDelay = 5;
-        protected const int petstatusCheckTime = 2;
-
         #region Deathknight
 
         protected const string antiMagicShellSpell = "Anti-Magic Shell";
@@ -378,6 +373,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         #endregion Warrior
 
+        private readonly float maxAngle = (float)(Math.PI * 2.0);
+
+        private readonly int[] useableHealingItems = new int[]
+        {
+            // potions
+            118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
+            // healthstones
+            5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889, 36892,
+        };
+
+        private readonly int[] useableManaItems = new int[]
+        {
+            // potions
+            2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
+        };
+
         protected BasicCombatClass(AmeisenBotStateMachine stateMachine)
         {
             WowInterface = WowInterface.I;
@@ -392,9 +403,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
-            DpsTargetManager = new TargetManager(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TankTargetManager = new TargetManager(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            HealTargetManager = new TargetManager(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
 
             MyAuraManager = new AuraManager(() => WowInterface.ObjectManager.Player?.Auras);
             TargetAuraManager = new AuraManager(() => WowInterface.ObjectManager.Target?.Auras);
@@ -403,17 +414,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
-            CheckFacingEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
-            NearInterruptUnitsEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
-            UpdatePriorityUnits = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
+            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public string Author { get; } = "Jannis";
-
-        public TimegatedEvent AutoAttackEvent { get; private set; }
-
-        public TimegatedEvent CheckFacingEvent { get; set; }
 
         public Dictionary<string, dynamic> Configureables { get; set; }
 
@@ -423,13 +428,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract string Displayname { get; }
 
-        public TargetManager DpsTargetManager { get; private set; }
+        public TimegatedEvent EventAutoAttack { get; private set; }
+
+        public TimegatedEvent EventCheckFacing { get; set; }
 
         public GroupAuraManager GroupAuraManager { get; private set; }
 
         public abstract bool HandlesMovement { get; }
-
-        public TargetManager HealTargetManager { get; private set; }
 
         public abstract bool IsMelee { get; }
 
@@ -437,9 +442,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public AuraManager MyAuraManager { get; private set; }
 
-        public TimegatedEvent NearInterruptUnitsEvent { get; set; }
-
-        public IEnumerable<string> PriorityTargets { get => DpsTargetManager.PriorityTargets; set => DpsTargetManager.PriorityTargets = value; }
+        public IEnumerable<string> PriorityTargets { get => TargetManagerDps.PriorityTargets; set => TargetManagerDps.PriorityTargets = value; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
@@ -447,15 +450,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public abstract TalentTree Talents { get; }
 
-        public TargetManager TankTargetManager { get; private set; }
-
         public AuraManager TargetAuraManager { get; private set; }
 
         public bool TargetInLineOfSight { get; set; }
 
         public InterruptManager TargetInterruptManager { get; private set; }
 
-        public TimegatedEvent UpdatePriorityUnits { get; set; }
+        public TargetManager TargetManagerDps { get; private set; }
+
+        public TargetManager TargetManagerHeal { get; private set; }
+
+        public TargetManager TargetManagerTank { get; private set; }
 
         public abstract bool UseAutoAttacks { get; }
 
@@ -473,7 +478,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.ObjectManager.Player.IsCasting)
             {
-                if (WowInterface.ObjectManager.Target != null && CheckFacingEvent.Run())
+                if (!TargetInLineOfSight)
+                {
+                    WowInterface.HookManager.StopCasting();
+                }
+
+                if (WowInterface.ObjectManager.Target != null && EventCheckFacing.Run())
                 {
                     CheckFacing(WowInterface.ObjectManager.Target);
                 }
@@ -484,37 +494,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // Update Priority Units
             // --------------------------- >
 
-            if (UpdatePriorityUnits.Run())
+            if (StateMachine.CurrentState.Key == BotState.Dungeon
+                && WowInterface.DungeonEngine != null
+                && WowInterface.DungeonEngine.Profile.PriorityUnits != null
+                && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
             {
-                if (StateMachine.CurrentState.Key == BotState.Dungeon
-                    && WowInterface.DungeonEngine != null
-                    && WowInterface.DungeonEngine.Profile.PriorityUnits != null
-                    && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
-                {
-                    DpsTargetManager.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits.ToList();
-                }
+                TargetManagerDps.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits;
             }
 
             // Autoattacks
             // --------------------------- >
 
             if (UseAutoAttacks
+                && EventAutoAttack.Run()
                 && !WowInterface.ObjectManager.Player.IsAutoAttacking
-                && AutoAttackEvent.Run()
                 && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
                 WowInterface.HookManager.StartAutoAttack();
             }
 
-            // Interrupting
+            // Units to interrupt
             // --------------------------- >
 
-            if (NearInterruptUnitsEvent.Run())
-            {
-                TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 30.0).ToList();
-            }
+            TargetInterruptManager.UnitsToWatch = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 30.0).ToList();
 
-            // Buffs, Debuffs
+            // Buffs, Debuffs, Interrupts
             // --------------------------- >
 
             if (TargetAuraManager.Tick()
@@ -526,37 +530,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // Useable items, potions, etc.
             // ---------------------------- >
 
-            int[] useableHealingItems = new int[]
-            {
-                // potions
-                118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
-                // healthstones
-                5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889, 36892,
-            };
-
             if (WowInterface.ObjectManager.Player.HealthPercentage < Configureables["HealingItemHealthThreshold"])
             {
-                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+                IWowItem healthItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
-                if (healthstone != null)
+                if (healthItem != null)
                 {
-                    WowInterface.HookManager.UseItemByName(healthstone.Name);
+                    WowInterface.HookManager.UseItemByName(healthItem.Name);
                 }
             }
 
-            int[] useableManaItems = new int[]
-            {
-                // potions
-                2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
-            };
-
             if (WowInterface.ObjectManager.Player.ManaPercentage < Configureables["HealingItemManaThreshold"])
             {
-                IWowItem healthstone = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+                IWowItem manaItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 
-                if (healthstone != null)
+                if (manaItem != null)
                 {
-                    WowInterface.HookManager.UseItemByName(healthstone.Name);
+                    WowInterface.HookManager.UseItemByName(manaItem.Name);
                 }
             }
 
@@ -573,16 +563,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf
-                && WowInterface.ObjectManager.Player.HealthPercentage < 50.0
-                && TryCastSpell("Stoneform", 0))
-            {
-                return;
-            }
-
-            if (WowInterface.ObjectManager.Player.Race == WowRace.Draenei
-                && WowInterface.ObjectManager.Player.HealthPercentage < 50.0
-                && TryCastSpell("Gift of the Naaru", 0))
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
+                && ((WowInterface.ObjectManager.Player.Race == WowRace.Draenei && TryCastSpell("Gift of the Naaru", 0))
+                    || (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf && TryCastSpell("Stoneform", 0))))
             {
                 return;
             }
@@ -676,6 +659,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (WowInterface.ObjectManager.Player.TargetGuid != guid)
                 {
                     WowInterface.HookManager.TargetGuid(guid);
+                    WowInterface.ObjectManager.UpdateWowObjects();
                 }
             }
 
@@ -917,7 +901,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
             float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
-            float maxAngle = (float)(Math.PI * 2.0);
 
             if (angleDiff < 0)
             {
@@ -929,7 +912,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 angleDiff -= maxAngle;
             }
 
-            if (angleDiff > 1.5)
+            if (angleDiff > 1.0)
             {
                 WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
             }

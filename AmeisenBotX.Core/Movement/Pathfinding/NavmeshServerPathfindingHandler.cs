@@ -52,6 +52,10 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
                     {
                         return JsonConvert.DeserializeObject<T>(response);
                     }
+                    else
+                    {
+                        AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendPathRequest no valid JSON response: {response}", LogLevel.Error);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -70,13 +74,13 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
                 {
                     string response = SendString(2, JsonConvert.SerializeObject(new RandomPointRequest(mapId, start, maxRadius)));
 
-                    if (string.IsNullOrWhiteSpace(response))
-                    {
-                        return Vector3.Zero;
-                    }
-                    else if (BotUtils.IsValidJson(response))
+                    if (BotUtils.IsValidJson(response))
                     {
                         return JsonConvert.DeserializeObject<Vector3>(response);
+                    }
+                    else
+                    {
+                        AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest no valid JSON response: {response}", LogLevel.Error);
                     }
                 }
                 catch (Exception e)

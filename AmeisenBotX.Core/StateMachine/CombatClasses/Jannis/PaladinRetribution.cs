@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if ((WowInterface.ObjectManager.Player.HealthPercentage < 20.0
                         && TryCastSpell(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))

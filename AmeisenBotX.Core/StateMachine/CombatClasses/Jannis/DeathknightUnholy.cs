@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
                    && TryCastSpellDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))

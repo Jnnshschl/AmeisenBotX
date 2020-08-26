@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
                     || CheckForWeaponEnchantment(EquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))

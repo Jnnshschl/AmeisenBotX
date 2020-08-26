@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                 && WowInterface.ObjectManager.Target.Type == WowObjectType.Player

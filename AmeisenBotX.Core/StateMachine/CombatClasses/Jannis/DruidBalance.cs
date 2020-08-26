@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             CheckForEclipseProcs();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (TryCastSpell(naturesGraspSpell, 0))
                 {

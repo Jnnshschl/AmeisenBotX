@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Logging;
 using System;
 using System.Linq;
 
@@ -49,11 +50,10 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // we can do nothing until the ObjectManager is initialzed
-            if (WowInterface.ObjectManager != null
-                && WowInterface.ObjectManager.Player != null)
+            if (WowInterface.ObjectManager != null && WowInterface.ObjectManager.Player != null)
             {
                 // use the default MovementEngine to move if the CombatClass doesnt
-                if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement))
+                if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
                     HandleMovement(WowInterface.ObjectManager.Target);
                 }
@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.CombatClass.Execute();
                 }
 
-                if (WowInterface.ObjectManager.TargetGuid == 0)
+                if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.ObjectManager.Target == null)
                 {
                     if (WowInterface.Globals.ForceCombat)
                     {
@@ -80,6 +80,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
                     {
+                        AmeisenLogger.I.Log("Combat", $"Following {player} because we have nothing else to do");
+
                         if (RandomPosEvent.Run())
                         {
                             Offset = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, player.Position, Config.MinFollowDistance * 0.3f);
@@ -197,13 +199,13 @@ namespace AmeisenBotX.Core.Statemachine.States
                             positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
                         }
 
-                        WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
                         return true;
                     }
 
                     // just move to the enemies melee/ranged range
                     positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
-                    WowInterface.MovementEngine.SetMovementAction(distance > 6.0 ? MovementAction.Moving : MovementAction.DirectMove, positionToGoTo);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
                     return true;
                 }
             }

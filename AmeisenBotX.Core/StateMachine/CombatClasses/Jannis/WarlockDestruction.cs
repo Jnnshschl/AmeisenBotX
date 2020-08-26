@@ -105,7 +105,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (PetManager.Tick()) { return; }
 
@@ -124,7 +124,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
                     {
-                        if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(fearAttemptDelay)
+                        if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(5)
                             && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
                             || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12

@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 30
                 && TryCastSpell(hymnOfHopeSpell, 0))

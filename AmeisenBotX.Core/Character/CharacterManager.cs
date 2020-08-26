@@ -170,7 +170,10 @@ namespace AmeisenBotX.Core.Character
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
         {
-            if (pos == default) { return; }
+            if (pos == default || (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveX, out Vector3 currentTargetPos) && currentTargetPos == pos))
+            {
+                return;
+            }
 
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);

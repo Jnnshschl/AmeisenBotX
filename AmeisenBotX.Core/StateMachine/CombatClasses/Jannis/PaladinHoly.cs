@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
             }
-            else if (SelectTarget(DpsTargetManager))
+            else if (SelectTarget(TargetManagerDps))
             {
                 if ((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell))
                     && TryCastSpell(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -132,7 +132,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking
                         && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
                     {
-                        if (AutoAttackEvent.Run())
+                        if (EventAutoAttack.Run())
                         {
                             WowInterface.HookManager.StartAutoAttack();
                         }
@@ -160,7 +160,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
                 WowUnit targetUnit = unitsToHeal.Count() > 1 ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
 

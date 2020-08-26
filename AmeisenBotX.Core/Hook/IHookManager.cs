@@ -187,6 +187,8 @@ namespace AmeisenBotX.Core.Hook
 
         void StartAutoAttack();
 
+        void StopCasting();
+
         void StopClickToMoveIfActive();
 
         void TargetGuid(ulong guid);

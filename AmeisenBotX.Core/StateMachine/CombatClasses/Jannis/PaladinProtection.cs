@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(TankTargetManager))
+            if (SelectTarget(TargetManagerTank))
             {
                 if (WowInterface.ObjectManager.Player.HealthPercentage < 10.0
                     && TryCastSpell(layOnHandsSpell, 0, true))

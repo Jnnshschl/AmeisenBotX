@@ -68,7 +68,6 @@ namespace AmeisenBotX.Core.Common
                 if (TcpClient == null)
                 {
                     TcpClient = new TcpClient() { NoDelay = true };
-
                     TcpClient.ConnectAsync(Ip, Port).Wait();
 
                     if (TcpClient.Client.Connected)
@@ -104,12 +103,6 @@ namespace AmeisenBotX.Core.Common
             }
             catch
             {
-                // server is maybe not running or whatever
-                TcpClient.Close();
-                TcpClient.Dispose();
-                TcpClient = null;
-
-                IsConnected = false;
             }
             finally
             {
@@ -121,7 +114,6 @@ namespace AmeisenBotX.Core.Common
         {
             Ip = ip;
             Port = port;
-            TcpClient = new TcpClient();
 
             ConnectionWatchdog = new Timer(watchdogPollMs);
             ConnectionWatchdog.Elapsed += ConnectionWatchdogTick;

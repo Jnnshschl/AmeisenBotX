@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            if (SelectTarget(DpsTargetManager))
+            if (SelectTarget(TargetManagerDps))
             {
                 if (WowInterface.ObjectManager.Target.HasBuffByName(flameShockSpell)
                     && TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (HealTargetManager.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
                 WowInterface.HookManager.TargetGuid(unitsToHeal.First().Guid);
 
