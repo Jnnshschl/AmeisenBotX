@@ -44,9 +44,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         {
             if (IsConnected)
             {
+                string response = string.Empty;
+
                 try
                 {
-                    string response = SendString(1, JsonConvert.SerializeObject(new PathRequest(mapId, start, end, pathRequestFlags, movementType)));
+                    response = SendString(1, JsonConvert.SerializeObject(new PathRequest(mapId, start, end, pathRequestFlags, movementType)));
 
                     if (BotUtils.IsValidJson(response))
                     {
@@ -59,7 +61,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendPathRequest failed:\n{e}", LogLevel.Error);
+                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendPathRequest failed: {response}\n{e}", LogLevel.Error);
                 }
             }
 
@@ -70,9 +72,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         {
             if (IsConnected)
             {
+                string response = string.Empty;
+
                 try
                 {
-                    string response = SendString(2, JsonConvert.SerializeObject(new RandomPointRequest(mapId, start, maxRadius)));
+                    response = SendString(2, JsonConvert.SerializeObject(new RandomPointRequest(mapId, start, maxRadius)));
 
                     if (BotUtils.IsValidJson(response))
                     {
@@ -85,7 +89,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed:\n{e}", LogLevel.Error);
+                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed: {response}\n{e}", LogLevel.Error);
                 }
             }
 
