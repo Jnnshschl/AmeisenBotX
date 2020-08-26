@@ -20,8 +20,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
 
-        public Vector3 Offset { get; set; }
-
         public bool TargetInLos { get; private set; }
 
         private TimegatedEvent FacingCheck { get; set; }
@@ -81,13 +79,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
                     {
                         AmeisenLogger.I.Log("Combat", $"Following {player} because we have nothing else to do");
-
-                        if (RandomPosEvent.Run())
-                        {
-                            Offset = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, player.Position, Config.MinFollowDistance * 0.3f);
-                        }
-
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position + Offset);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
                     }
                 }
             }
@@ -190,8 +182,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         else if (WowInterface.CombatClass.Role == CombatClassRole.Heal)
                         {
                             // move to group
-                            Vector3 position = target != null ? target.Position : GetMeanGroupPosition();
-                            positionToGoTo = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, position, 4f);
+                            positionToGoTo = target != null ? target.Position : GetMeanGroupPosition();
                         }
                         else
                         {
