@@ -49,6 +49,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
                 .GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0)
                 .Where(e => e.IsInCombat
+                    && !(WowInterface.ObjectManager.MapId == MapId.PitOfSaron && e.Name == "Rimefang")
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));

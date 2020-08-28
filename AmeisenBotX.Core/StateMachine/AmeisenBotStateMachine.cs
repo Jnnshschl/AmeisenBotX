@@ -175,10 +175,13 @@ namespace AmeisenBotX.Core.Statemachine
                                 && CurrentState.Key != BotState.Ghost)
                             {
                                 if (Config.AutoDodgeAoeSpells
-                                    && GetState<StateInsideAoeDamage>().IsInsideAeoDamage()
-                                    && SetState(BotState.InsideAoeDamage, true))
+                                    && GetState<StateInsideAoeDamage>().IsInsideAeoDamage())
                                 {
-                                    OnStateOverride?.Invoke(CurrentState.Key);
+                                    if (SetState(BotState.InsideAoeDamage, true))
+                                    {
+                                        OnStateOverride?.Invoke(CurrentState.Key);
+                                    }
+
                                     return;
                                 }
 

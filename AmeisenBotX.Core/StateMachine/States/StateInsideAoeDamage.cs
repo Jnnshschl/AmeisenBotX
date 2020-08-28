@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             WowDynobject aoeSpellObject = WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                 .FirstOrDefault(e => !Blacklisted.Contains(e.SpellId)
-                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 3.0
+                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 5.0
                     && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
 
             if (aoeSpellObject == null)
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                    .Any(e => !Blacklisted.Contains(e.SpellId)
-                          && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 3.0
+                          && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 5.0
                           && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
         }
 
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             double angle = Math.Atan2(angleX, angleY);
 
-            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 4.0;
+            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 6.0;
 
             double x = WowInterface.ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
             double y = WowInterface.ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);

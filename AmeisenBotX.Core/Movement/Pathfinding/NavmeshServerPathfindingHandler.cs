@@ -36,7 +36,8 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
-            return SendPathRequest(mapId, start, end, MovementType.MoveAlongSurface)[0];
+            Vector3[] pos = SendPathRequest(mapId, start, end, MovementType.MoveAlongSurface);
+            return pos != null ? pos[0] : Vector3.Zero;
         }
 
         private unsafe Vector3[] SendPathRequest(int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)

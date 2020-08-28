@@ -78,12 +78,17 @@ namespace AmeisenBotX.Core.Common
                     if (TcpClient.Client.Connected)
                     {
                         Stream = TcpClient.GetStream();
+                        Stream.ReadTimeout = 1000;
+                        Stream.WriteTimeout = 1000;
+
                         Reader = new BinaryReader(Stream);
+
+                        ConnectionFailedCounter = 0;
                     }
                 }
                 else
                 {
-                    IsConnected = true; //Stream != null && Reader != null && SendData(1)?[0] == 1;
+                    IsConnected = Stream != null && Reader != null && SendData(0, 4)?[0] == 1;
 
                     if (!IsConnected)
                     {
@@ -92,23 +97,24 @@ namespace AmeisenBotX.Core.Common
                     else
                     {
                         ConnectionFailedCounter = 0;
-                    }
-
-                    if (ConnectionFailedCounter > 3)
-                    {
-                        TcpClient.Close();
-                        TcpClient.Dispose();
-                        TcpClient = null;
-
-                        IsConnected = false;
-                    }
+                    }                    
                 }
             }
             catch
             {
+                ++ConnectionFailedCounter;
             }
             finally
             {
+                if (ConnectionFailedCounter > 3)
+                {
+                    TcpClient.Close();
+                    TcpClient.Dispose();
+                    TcpClient = null;
+
+                    IsConnected = false;
+                }
+
                 connectionTimerBusy = 0;
             }
         }
