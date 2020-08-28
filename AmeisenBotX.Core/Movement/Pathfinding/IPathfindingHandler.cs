@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
     {
         bool CastMovementRay(int mapId, Vector3 origin, Vector3 target);
 
-        List<Vector3> GetPath(int mapId, Vector3 origin, Vector3 target);
+        IEnumerable<Vector3> GetPath(int mapId, Vector3 origin, Vector3 target);
 
         Vector3 GetRandomPoint(int mapId);
 

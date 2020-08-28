@@ -108,10 +108,10 @@ namespace AmeisenBotX
                 {
                     AmeisenBot.WowInterface.XMemory.ResizeParentWindow
                     (
-                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
-                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
-                        (int)Math.Floor(wowRect.ActualWidth * M11),
-                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                        (int)(wowRect.Margin.Left * M11 + 1),
+                        (int)(wowRect.Margin.Top * M22 + 1),
+                        (int)(wowRect.ActualWidth * M11),
+                        (int)(wowRect.ActualHeight * M22)
                     );
                 });
             }
@@ -265,10 +265,10 @@ namespace AmeisenBotX
                     AmeisenBot.WowInterface.XMemory.SetupAutoPosition
                     (
                         InteropHelper.EnsureHandle(),
-                        (int)Math.Ceiling(wowRect.Margin.Left * M11) + 1,
-                        (int)Math.Ceiling(wowRect.Margin.Top * M22) + 1,
-                        (int)Math.Floor(wowRect.ActualWidth * M11),
-                        (int)Math.Floor(wowRect.ActualHeight * M22)
+                        (int)(wowRect.Margin.Left * M11 + 1),
+                        (int)(wowRect.Margin.Top * M22 + 1),
+                        (int)(wowRect.ActualWidth * M11),
+                        (int)(wowRect.ActualHeight * M22)
                     );
                 });
 

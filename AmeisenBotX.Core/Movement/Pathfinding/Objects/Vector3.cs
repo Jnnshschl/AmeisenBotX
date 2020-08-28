@@ -155,13 +155,13 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double GetDistance(Vector3 b)
         {
-            return Math.Sqrt(((X - b.X) * (X - b.X)) + ((Y - b.Y) * (Y - b.Y)) + ((Z - b.Z) * (Z - b.Z)));
+            return MathF.Sqrt(MathF.Pow((X - b.X), 2) + MathF.Pow((Y - b.Y), 2) + MathF.Pow((Z - b.Z), 2));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double GetDistance2D(Vector3 b)
         {
-            return Math.Sqrt(((X - b.X) * (X - b.X)) + ((Y - b.Y) * (Y - b.Y)));
+            return MathF.Sqrt(((X - b.X) * (X - b.X)) + ((Y - b.Y) * (Y - b.Y)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,21 +176,21 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float GetMagnitude()
         {
-            return Convert.ToSingle(Math.Sqrt((X * X) + (Y * Y) + (Z * Z)));
+            return Convert.ToSingle(MathF.Sqrt((X * X) + (Y * Y) + (Z * Z)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float GetMagnitude2D()
         {
-            return Convert.ToSingle(Math.Sqrt((X * X) + (Y * Y)));
+            return Convert.ToSingle(MathF.Sqrt((X * X) + (Y * Y)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Limit(float limit)
         {
-            X = X < 0f ? Math.Max(X, limit * -1) : Math.Min(X, limit);
-            Y = Y < 0f ? Math.Max(Y, limit * -1) : Math.Min(Y, limit);
-            Z = Z < 0f ? Math.Max(Z, limit * -1) : Math.Min(Z, limit);
+            X = X < 0f ? MathF.Max(X, limit * -1) : MathF.Min(X, limit);
+            Y = Y < 0f ? MathF.Max(Y, limit * -1) : MathF.Min(Y, limit);
+            Z = Z < 0f ? MathF.Max(Z, limit * -1) : MathF.Min(Z, limit);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -243,16 +243,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Rotate(double degrees)
+        public void Rotate(float degrees)
         {
-            RotateRadians(degrees * (Math.PI / 180));
+            RotateRadians(degrees * (MathF.PI / 180));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RotateRadians(double radians)
+        public void RotateRadians(float radians)
         {
-            double ca = Math.Cos(radians);
-            double sa = Math.Sin(radians);
+            double ca = MathF.Cos(radians);
+            double sa = MathF.Sin(radians);
 
             X = Convert.ToSingle(ca * X - sa * Y);
             Y = Convert.ToSingle(sa * X + ca * Y);

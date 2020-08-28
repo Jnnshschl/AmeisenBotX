@@ -40,7 +40,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
 
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            PathfindingEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
             Blackboard = new MovementBlackboard(UpdateBlackboard);
@@ -159,8 +158,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         private TimegatedEvent JumpCheckEvent { get; }
 
         private Timer MovementWatchdog { get; }
-
-        private TimegatedEvent PathfindingEvent { get; }
 
         private List<IShortcut> Shortcuts { get; }
 
@@ -326,21 +323,20 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
 
             AmeisenLogger.I.Log("Pathfinding", $"Finding path: {WowInterface.ObjectManager.Player.Position} -> {TargetPosition}");
-            List<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
-            PathfindingEvent.Run();
+            IEnumerable<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
-            if (path != null && path.Count > 0)
+            if (path != null && path.Any())
             {
                 Nodes.Clear();
 
-                for (int i = 0; i < path.Count; ++i)
+                for (int i = 0; i < path.Count(); ++i)
                 {
-                    Nodes.Enqueue(path[i]);
+                    Nodes.Enqueue(path.ElementAt(i));
                 }
 
                 PathFinalNode = Nodes.Last();
                 PathfindingStatus = PathFinalNode.GetDistance(TargetPosition) > 3.0 ? PathfindingStatus.PathIncomplete : PathfindingStatus.PathComplete;
-                AmeisenLogger.I.Log("Pathfinding", $"Pathfinding status: {PathfindingStatus} Node count: {path.Count}");
+                AmeisenLogger.I.Log("Pathfinding", $"Pathfinding status: {PathfindingStatus} Node count: {path.Count()}");
                 return BehaviorTreeStatus.Success;
             }
             else

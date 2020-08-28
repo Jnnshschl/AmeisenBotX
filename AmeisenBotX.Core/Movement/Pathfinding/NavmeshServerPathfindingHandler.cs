@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -17,12 +16,12 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<Vector3>(mapId, start, end, MovementType.CastMovementRay) != default;
+            return false; // SendCastRayRequest(mapId, start, end, MovementType.CastMovementRay);
         }
 
-        public List<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
+        public IEnumerable<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<List<Vector3>>(mapId, start, end, MovementType.FindPath, PathRequestFlags.CatmullRomSpline);
+            return SendPathRequest(mapId, start, end, MovementType.FindPath, PathRequestFlags.CatmullRomSpline);
         }
 
         public Vector3 GetRandomPoint(int mapId)
@@ -37,59 +36,62 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
         {
-            return BuildAndSendPathRequest<Vector3>(mapId, start, end, MovementType.MoveAlongSurface);
+            return SendPathRequest(mapId, start, end, MovementType.MoveAlongSurface)[0];
         }
 
-        private T BuildAndSendPathRequest<T>(int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
+        private unsafe Vector3[] SendPathRequest(int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
         {
             if (IsConnected)
             {
-                string response = string.Empty;
+                byte[] response = null;
 
                 try
                 {
-                    response = SendString(1, JsonConvert.SerializeObject(new PathRequest(mapId, start, end, pathRequestFlags, movementType)));
+                    response = SendData(new PathRequest(mapId, start, end, pathRequestFlags, movementType), sizeof(PathRequest));
 
-                    if (BotUtils.IsValidJson(response))
+                    if (response != null && response.Length >= sizeof(Vector3))
                     {
-                        return JsonConvert.DeserializeObject<T>(response);
-                    }
-                    else
-                    {
-                        AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendPathRequest no valid JSON response: {response}", LogLevel.Error);
+                        int nodeCount = response.Length / sizeof(Vector3);
+                        Vector3[] path = new Vector3[nodeCount];
+
+                        fixed (byte* pResult = response)
+                        fixed (Vector3* pPath = path)
+                        {
+                            Buffer.MemoryCopy(pResult, pPath, response.Length, response.Length);
+                            return path;
+                        }
                     }
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendPathRequest failed: {response}\n{e}", LogLevel.Error);
+                    AmeisenLogger.I.Log("Pathfinding", $"SendPathRequest failed: {BotUtils.ByteArrayToString(response)}\n{e}", LogLevel.Error);
                 }
             }
 
             return default;
         }
 
-        private Vector3 BuildAndSendRandomPointRequest(int mapId, Vector3 start, float maxRadius)
+        private unsafe Vector3 BuildAndSendRandomPointRequest(int mapId, Vector3 start, float maxRadius)
         {
             if (IsConnected)
             {
-                string response = string.Empty;
+                byte[] response = null;
 
                 try
                 {
-                    response = SendString(2, JsonConvert.SerializeObject(new RandomPointRequest(mapId, start, maxRadius)));
+                    response = SendData(new RandomPointRequest(mapId, start, maxRadius), sizeof(RandomPointRequest));
 
-                    if (BotUtils.IsValidJson(response))
+                    if (response != null && response.Length >= sizeof(Vector3))
                     {
-                        return JsonConvert.DeserializeObject<Vector3>(response);
-                    }
-                    else
-                    {
-                        AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest no valid JSON response: {response}", LogLevel.Error);
+                        fixed (byte* pResult = response)
+                        {
+                            return new Span<Vector3>(pResult, 1)[0];
+                        }
                     }
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed: {response}\n{e}", LogLevel.Error);
+                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed: {BotUtils.ByteArrayToString(response)}\n{e}", LogLevel.Error);
                 }
             }
 

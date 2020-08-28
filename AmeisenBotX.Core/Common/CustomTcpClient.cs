@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -32,27 +34,30 @@ namespace AmeisenBotX.Core.Common
 
         protected Timer ConnectionWatchdog { get; private set; }
 
-        protected StreamReader Reader { get; set; }
-
         protected TcpClient TcpClient { get; private set; }
 
-        protected StreamWriter Writer { get; set; }
+        protected NetworkStream Stream { get; private set; }
+
+        protected BinaryReader Reader { get; private set; }
 
         private int ConnectionFailedCounter { get; set; }
 
         public void Disconnect()
         {
             ConnectionWatchdog.Stop();
-            Reader.Close();
-            Writer.Close();
             TcpClient.Close();
         }
 
-        public string SendString(int msgType, string payload)
+        public unsafe byte[] SendData<T>(T data, int size) where T : unmanaged
         {
-            Writer.WriteLineAsync($"{msgType}{payload}").Wait();
-            Writer.FlushAsync().Wait();
-            return Reader.ReadLineAsync().Result;
+            if (Stream == null) return null;
+
+            Stream.Write(BitConverter.GetBytes(size));
+            Stream.Write(new Span<byte>(&data, size));
+            Stream.Flush();
+
+            int dataSize = BitConverter.ToInt32(Reader.ReadBytes(4), 0);
+            return Reader.ReadBytes(dataSize);
         }
 
         private void ConnectionWatchdogTick(object sender, ElapsedEventArgs e)
@@ -72,15 +77,13 @@ namespace AmeisenBotX.Core.Common
 
                     if (TcpClient.Client.Connected)
                     {
-                        NetworkStream stream = TcpClient.GetStream();
-
-                        Reader = new StreamReader(stream, Encoding.ASCII);
-                        Writer = new StreamWriter(stream, Encoding.ASCII);
+                        Stream = TcpClient.GetStream();
+                        Reader = new BinaryReader(Stream);
                     }
                 }
                 else
                 {
-                    IsConnected = Reader != null && Writer != null && SendString(0, "1")?.Length > 0;
+                    IsConnected = true; //Stream != null && Reader != null && SendData(1)?[0] == 1;
 
                     if (!IsConnected)
                     {

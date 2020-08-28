@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ByteArrayToString(byte[] bytes)
         {
-            return BitConverter.ToString(bytes).Replace("-", " ", StringComparison.OrdinalIgnoreCase);
+            return bytes != null ? BitConverter.ToString(bytes).Replace("-", " ", StringComparison.OrdinalIgnoreCase) : "null";
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, float offset)
         {
-            return BotMath.CalculatePositionAround(targetPosition, rotation, (float)0.0, offset);
+            return BotMath.CalculatePositionAround(targetPosition, rotation, 0f, offset);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Common
     {
         public static Vector3 CalculatePositionAround(Vector3 position, float rotation, float angle, float distance = 2.0f)
         {
-            float rSin = (float)Math.Sin(rotation + angle) * distance;
-            float cSin = (float)Math.Cos(rotation + angle) * distance;
+            float rSin = MathF.Sin(rotation + angle) * distance;
+            float cSin = MathF.Cos(rotation + angle) * distance;
 
             float x = position.X + cSin;
             float y = position.Y + rSin;
@@ -21,13 +21,13 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
         {
-            return CalculatePositionAround(position, rotation, (float)Math.PI, distanceToMove);
+            return CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampAngles(float rotation)
         {
-            float rMax = (float)Math.PI * 2.0f;
+            float rMax = MathF.PI * 2.0f;
 
             if (rotation < 0.0f)
             {
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle2D(Vector3 position, Vector3 targetPosition)
-            => ClampAngles(Convert.ToSingle(Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X)));
+            => ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
         {
