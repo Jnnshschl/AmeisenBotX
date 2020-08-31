@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -48,7 +49,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (IsRepairNpcNear(out WowUnit selectedUnit))
             {
-                if (!WowInterface.MovementEngine.IsAtTargetPosition)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 1.5)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
@@ -73,7 +74,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         return;
                     }
 
-                    WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                     WowInterface.MovementEngine.StopMovement();
 
                     if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
@@ -81,6 +81,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
                         return;
                     }
+
+                    // WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                    WowInterface.CharacterManager.ClickToMove(selectedUnit.Position, selectedUnit.Guid, Character.Enums.ClickToMoveType.Interact, 20.9f, 1.5f);
 
                     if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
                     {
@@ -116,40 +119,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                                 WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
                                 WowInterface.HookManager.CofirmBop();
                                 Task.Delay(50).Wait();
-                            }
-                        }
-                    }
-
-                    WowInterface.HookManager.RepairAllItems();
-
-                    if (Config.AutoSell)
-                    {
-                        foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
-                        {
-                            IWowItem itemToSell = item;
-
-                            if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-                                || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
-                                || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
-                                || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
-                                || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
-                                || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
-                            {
-                                continue;
-                            }
-
-                            if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                            {
-                                // equip item and sell the other after
-                                itemToSell = itemToReplace;
-                                WowInterface.HookManager.ReplaceItem(null, item);
-                            }
-
-                            if (itemToSell != null
-                                && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
-                            {
-                                WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
-                                WowInterface.HookManager.CofirmBop();
                             }
                         }
                     }

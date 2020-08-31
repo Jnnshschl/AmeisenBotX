@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateSelling(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             Blacklist = new List<ulong>();
-            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
             InventoryUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (IsVendorNpcNear(out WowUnit selectedUnit))
             {
-                if (!WowInterface.MovementEngine.IsAtTargetPosition)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 1.5)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
@@ -73,7 +73,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         return;
                     }
 
-                    WowInterface.HookManager.UnitOnRightClick(selectedUnit);
                     WowInterface.MovementEngine.StopMovement();
 
                     if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
@@ -81,6 +80,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                         WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
                         return;
                     }
+
+                    // WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                    WowInterface.CharacterManager.ClickToMove(selectedUnit.Position, selectedUnit.Guid, Character.Enums.ClickToMoveType.Interact, 20.9f, 1.5f);
 
                     if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
                     {

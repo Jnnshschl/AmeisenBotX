@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Objects;
@@ -44,6 +45,8 @@ namespace AmeisenBotX.Core.Character
         void Jump();
 
         void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f);
+
+        void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
 
         void UpdateAll();
 

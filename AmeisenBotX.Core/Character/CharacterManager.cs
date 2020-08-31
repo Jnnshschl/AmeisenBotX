@@ -177,8 +177,22 @@ namespace AmeisenBotX.Core.Character
 
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
-            // WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, WowInterface.ObjectManager.PlayerGuid);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, ClickToMoveType.Move);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
+        }
+
+        public void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
+        {
+            if (pos == default || (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveX, out Vector3 currentTargetPos) && currentTargetPos == pos))
+            {
+                return;
+            }
+
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, guid);
+            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, clickToMoveType);
             WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
         }
 
