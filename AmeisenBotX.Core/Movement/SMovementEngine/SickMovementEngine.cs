@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             WowInterface = wowInterface;
             Config = config;
 
-            Nodes = new ConcurrentQueue<Vector3>();
+            PathNodes = new ConcurrentQueue<Vector3>();
             PlayerVehicle = new BasicVehicle(wowInterface);
 
             Shortcuts = new List<IShortcut>()
@@ -42,72 +42,74 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
-            Blackboard = new MovementBlackboard(UpdateBlackboard);
-            BehaviorTree = new AmeisenBotBehaviorTree<MovementBlackboard>
+            BehaviorTree = new AmeisenBotBehaviorTree
             (
                 "MovementTree",
-                new Selector<MovementBlackboard>
+                new Selector
                 (
                     "DoINeedToMove",
-                    (b) => TargetPosition != default 
+                    () => TargetPosition != default
                         && !WowInterface.ObjectManager.Player.IsDead
-                        && MovementAction != MovementAction.None 
+                        && MovementAction != MovementAction.None
                         && !IsNearPosition(TargetPosition),
-                    new Selector<MovementBlackboard>
+                    new Selector
                     (
                         "DoINeedToJump",
-                        (b) => JumpOnNextMove,
-                        new Leaf<MovementBlackboard>((b) =>
+                        () => JumpOnNextMove,
+                        new Leaf(() =>
                         {
                             WowInterface.CharacterManager.Jump();
                             JumpOnNextMove = false;
                             return BehaviorTreeStatus.Success;
                         }),
-                        new Selector<MovementBlackboard>
+                        new Selector
                         (
                             "DoINeedToUnstuck",
-                            (b) => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
-                            new Leaf<MovementBlackboard>((b) => DoUnstuck()),
-                            new Selector<MovementBlackboard>
+                            () => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                            new Leaf(DoUnstuck),
+                            new Selector
                             (
                                 "DoINeedToDirectlyMove",
-                                (b) => IsDirectMovingState()
+                                () => IsDirectMovingState()
                                     || WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 3.0
                                     || WowInterface.ObjectManager.Player.IsSwimming
                                     || WowInterface.ObjectManager.Player.IsFlying
                                     || ForceDirectMove,
-                                new Leaf<MovementBlackboard>(HandleDirectMoving),
-                                new Selector<MovementBlackboard>
+                                new Leaf(HandleDirectMoving),
+                                new Selector
                                 (
                                     "DoINeedToFindAPath",
-                                    (b) => DoINeedToFindAPath(),
-                                    new Leaf<MovementBlackboard>
+                                    DoINeedToFindAPath,
+                                    new Leaf
                                     (
                                         "FindPathToTargetPosition",
                                         FindPathToTargetPosition
                                     ),
-                                    new Selector<MovementBlackboard>
+                                    new Selector
                                     (
-                                        "DoINeedToMove",
-                                        (b) => Nodes.TryPeek(out Vector3 node) && IsNearPosition(node),
-                                        new Leaf<MovementBlackboard>("CheckWaypoint", HandleWaypointCheck),
-                                        new Leaf<MovementBlackboard>("MoveToNode", HandleMovement)
+                                        "DoINeedToMount",
+                                        DoINeedToMount,
+                                        new Leaf("MountUp", MountUp),
+                                        new Selector
+                                        (
+                                            "DoINeedToMove",
+                                            () => PathNodes.TryPeek(out Vector3 node) && !IsNearPosition(node),
+                                            new Leaf("MoveToNode", HandleMovement),
+                                            new Leaf("CheckWaypoint", HandleWaypointCheck)
+                                        )
                                     )
                                 )
                             )
                         )
                     ),
-                    new Leaf<MovementBlackboard>((b) => { return BehaviorTreeStatus.Success; })
-                ),
-                Blackboard
+                    new Leaf(() => { return BehaviorTreeStatus.Success; })
+                )
             );
         }
 
         public IShortcut ActiveShortcut { get; set; }
 
-        public AmeisenBotBehaviorTree<MovementBlackboard> BehaviorTree { get; }
-
-        public MovementBlackboard Blackboard { get; }
+        public AmeisenBotBehaviorTree BehaviorTree { get; }
 
         public bool ForceDirectMove { get; private set; }
 
@@ -127,13 +129,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public MovementAction MovementAction { get; private set; }
 
-        public ConcurrentQueue<Vector3> Nodes { get; private set; }
-
-        public List<Vector3> Path => Nodes.ToList();
+        public List<Vector3> Path => PathNodes.ToList();
 
         public Vector3 PathFinalNode { get; private set; }
 
         public PathfindingStatus PathfindingStatus { get; private set; }
+
+        public ConcurrentQueue<Vector3> PathNodes { get; private set; }
 
         public BasicVehicle PlayerVehicle { get; }
 
@@ -191,7 +193,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
                     if (!shortcutUsePathfinding)
                     {
-                        Nodes.Clear();
+                        PathNodes.Clear();
                         MovementAction = MovementAction.DirectMove;
                         ForceDirectMove = true;
                     }
@@ -226,9 +228,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             StuckPosition = default;
             ShouldBeMoving = false;
 
-            if (Nodes.Count > 0)
+            if (PathNodes.Count > 0)
             {
-                Nodes.Clear();
+                PathNodes.Clear();
             }
         }
 
@@ -276,9 +278,23 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private bool DoINeedToFindAPath()
         {
-            return Nodes == null
-                || Nodes.Count == 0 // we have no path
+            return PathNodes == null
+                || PathNodes.Count == 0 // we have no path
                 || PathFinalNode.GetDistance(TargetPosition) > 3.0; // target position changed
+        }
+
+        private bool DoINeedToMount()
+        {
+            return Config.UseMounts
+                && !WowInterface.ObjectManager.Player.IsMounted
+                && !IsGhost
+                && !WowInterface.ObjectManager.Player.IsInCombat
+                && WowInterface.CharacterManager.Mounts != null
+                && WowInterface.CharacterManager.Mounts.Any()
+                && !WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
+                && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
+                && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
+                && WowInterface.HookManager.IsOutdoors();
         }
 
         private BehaviorTreeStatus DoUnstuck()
@@ -315,7 +331,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             return BehaviorTreeStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
+        private BehaviorTreeStatus FindPathToTargetPosition()
         {
             if (PathfindingStatus == PathfindingStatus.Failed)
             {
@@ -327,16 +343,19 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             if (path != null && path.Any())
             {
-                Nodes.Clear();
+                int pathLenght = path.Count();
 
-                for (int i = 0; i < path.Count(); ++i)
+                PathNodes.Clear();
+
+                for (int i = 0; i < pathLenght; ++i)
                 {
-                    Nodes.Enqueue(path.ElementAt(i));
+                    PathNodes.Enqueue(path.ElementAt(i));
                 }
 
-                PathFinalNode = Nodes.Last();
+                PathFinalNode = Path[pathLenght];
                 PathfindingStatus = PathFinalNode.GetDistance(TargetPosition) > 3.0 ? PathfindingStatus.PathIncomplete : PathfindingStatus.PathComplete;
-                AmeisenLogger.I.Log("Pathfinding", $"Pathfinding status: {PathfindingStatus} Node count: {path.Count()}");
+
+                AmeisenLogger.I.Log("Pathfinding", $"Pathfinding status: {PathfindingStatus} Node count: {pathLenght}");
                 return BehaviorTreeStatus.Success;
             }
             else
@@ -347,85 +366,38 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        private BehaviorTreeStatus HandleDirectMoving(MovementBlackboard blackboard)
+        private BehaviorTreeStatus HandleDirectMoving()
         {
-            if (Nodes.TryPeek(out Vector3 checkNodePos)
+            if (PathNodes.TryPeek(out Vector3 checkNodePos)
                 && IsNearPosition(checkNodePos))
             {
-                Nodes.TryDequeue(out _);
+                PathNodes.TryDequeue(out _);
             }
 
-            Vector3 targetPos = Nodes.Count > 1 && Nodes.TryPeek(out Vector3 node) ? node : TargetPosition;
-            Vector3 positionToGoTo;
+            // target pos is used to follow path in the water, we
+            // need to move directly there to prevent going to
+            // the top level of the water because we are
+            // submerged a bit while swimming
+            Vector3 targetPos = PathNodes.Count > 0 && PathNodes.TryPeek(out Vector3 node) ? node : TargetPosition;
 
             if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
             {
                 PlayerVehicle.IsOnWaterSurface = WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsUnderwater;
-                positionToGoTo = targetPos;
             }
             else
             {
-                positionToGoTo = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+                targetPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, targetPos);
             }
 
-            PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, positionToGoTo, TargetRotation);
+            PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, targetPos, TargetRotation);
             ShouldBeMoving = true;
 
             return IsNearPosition(TargetPosition) ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus HandleMovement(MovementBlackboard blackboard)
+        private BehaviorTreeStatus HandleMovement()
         {
-            if (Config.UseMounts)
-            {
-                if ((MountCheck.Run() || IsCastingMount) && WowInterface.CharacterManager.Mounts != null)
-                {
-                    if (!WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
-                        && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
-                        && !WowInterface.ObjectManager.Player.IsInCombat
-                        && !IsGhost
-                        && WowInterface.CharacterManager.Mounts.Any()
-                        && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
-                        && !WowInterface.ObjectManager.Player.IsMounted
-                        && WowInterface.HookManager.IsOutdoors())
-                    {
-                        IEnumerable<WowMount> filteredMounts;
-
-                        if (Config.UseOnlySpecificMounts)
-                        {
-                            filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name)).ToList();
-                        }
-                        else
-                        {
-                            filteredMounts = WowInterface.CharacterManager.Mounts;
-                        }
-
-                        if (filteredMounts != null && filteredMounts.Any())
-                        {
-                            WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
-                            WowInterface.MovementEngine.StopMovement();
-                            IsCastingMount = true;
-                            WowInterface.HookManager.Mount(mount.Index);
-                        }
-
-                        return BehaviorTreeStatus.Ongoing;
-                    }
-                }
-
-                if (IsCastingMount)
-                {
-                    if (WowInterface.ObjectManager.Player.IsCasting)
-                    {
-                        return BehaviorTreeStatus.Ongoing;
-                    }
-                    else
-                    {
-                        IsCastingMount = false;
-                    }
-                }
-            }
-
-            if (Nodes.TryPeek(out Vector3 node))
+            if (PathNodes.TryPeek(out Vector3 node))
             {
                 ShouldBeMoving = true;
                 PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, node, TargetRotation);
@@ -438,13 +410,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        private BehaviorTreeStatus HandleWaypointCheck(MovementBlackboard blackboard)
+        private BehaviorTreeStatus HandleWaypointCheck()
         {
-            if (Nodes.TryDequeue(out _))
+            if (PathNodes.TryDequeue(out _))
             {
-                if (Nodes.Count == 0)
+                if (PathNodes.Count == 0)
                 {
-                    MovementAction = MovementAction.None;
+                    StopMovement();
                 }
 
                 return BehaviorTreeStatus.Success;
@@ -459,6 +431,48 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         {
             return MovementAction != MovementAction.Moving
                 && MovementAction != MovementAction.Following;
+        }
+
+        private BehaviorTreeStatus MountUp()
+        {
+            if (IsCastingMount)
+            {
+                if (WowInterface.ObjectManager.Player.IsCasting)
+                {
+                    return BehaviorTreeStatus.Ongoing;
+                }
+                else
+                {
+                    IsCastingMount = false;
+                }
+            }
+            else if(MountCheck.Run())
+            {
+                IEnumerable<WowMount> filteredMounts;
+
+                if (Config.UseOnlySpecificMounts)
+                {
+                    filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name));
+                }
+                else
+                {
+                    filteredMounts = WowInterface.CharacterManager.Mounts;
+                }
+
+                if (filteredMounts != null && filteredMounts.Any())
+                {
+                    WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
+
+                    StopMovement();
+
+                    IsCastingMount = true;
+                    WowInterface.HookManager.Mount(mount.Index);
+
+                    return BehaviorTreeStatus.Ongoing;
+                }
+            }
+
+            return WowInterface.ObjectManager.Player.IsMounted ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Failed;
         }
 
         private void MovementWatchdog_Elapsed(object sender, ElapsedEventArgs e)

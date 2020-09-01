@@ -4,6 +4,52 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
+    public class DualSelector : Composite
+    {
+        public DualSelector(Func<bool> conditionA, Func<bool> conditionB, Node nodeNone, Node nodeA, Node nodeB, Node nodeBoth) : base("")
+        {
+            ConditionA = conditionA;
+            ConditionB = conditionB;
+            Children = new List<Node>() { nodeNone, nodeA, nodeB, nodeBoth };
+        }
+
+        public DualSelector(string name, Func<bool> conditionA, Func<bool> conditionB, Node nodeNone, Node nodeA, Node nodeB, Node nodeBoth) : base(name)
+        {
+            ConditionA = conditionA;
+            ConditionB = conditionB;
+            Children = new List<Node>() { nodeNone, nodeA, nodeB, nodeBoth };
+        }
+
+        public Func<bool> ConditionA { get; set; }
+
+        public Func<bool> ConditionB { get; set; }
+
+        public override BehaviorTreeStatus Execute()
+        {
+            return GetNodeToExecute().Execute();
+        }
+
+        internal override Node GetNodeToExecute()
+        {
+            if (ConditionA() && ConditionB())
+            {
+                return Children[3];
+            }
+            else if (ConditionA() && !ConditionB())
+            {
+                return Children[1];
+            }
+            else if (!ConditionA() && ConditionB())
+            {
+                return Children[2];
+            }
+            else
+            {
+                return Children[0];
+            }
+        }
+    }
+
     public class DualSelector<T> : Composite<T>
     {
         public DualSelector(Func<T, bool> conditionA, Func<T, bool> conditionB, Node<T> nodeNone, Node<T> nodeA, Node<T> nodeB, Node<T> nodeBoth) : base("")

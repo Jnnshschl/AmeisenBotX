@@ -2,8 +2,6 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -34,11 +32,11 @@ namespace AmeisenBotX.Core.Common
 
         protected Timer ConnectionWatchdog { get; private set; }
 
-        protected TcpClient TcpClient { get; private set; }
+        protected BinaryReader Reader { get; private set; }
 
         protected NetworkStream Stream { get; private set; }
 
-        protected BinaryReader Reader { get; private set; }
+        protected TcpClient TcpClient { get; private set; }
 
         private int ConnectionFailedCounter { get; set; }
 
@@ -97,7 +95,7 @@ namespace AmeisenBotX.Core.Common
                     else
                     {
                         ConnectionFailedCounter = 0;
-                    }                    
+                    }
                 }
             }
             catch

@@ -40,6 +40,33 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             return pos != null ? pos[0] : Vector3.Zero;
         }
 
+        private unsafe Vector3 BuildAndSendRandomPointRequest(int mapId, Vector3 start, float maxRadius)
+        {
+            if (IsConnected)
+            {
+                byte[] response = null;
+
+                try
+                {
+                    response = SendData(new RandomPointRequest(mapId, start, maxRadius), sizeof(RandomPointRequest));
+
+                    if (response != null && response.Length >= sizeof(Vector3))
+                    {
+                        fixed (byte* pResult = response)
+                        {
+                            return new Span<Vector3>(pResult, 1)[0];
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed: {BotUtils.ByteArrayToString(response)}\n{e}", LogLevel.Error);
+                }
+            }
+
+            return Vector3.Zero;
+        }
+
         private unsafe Vector3[] SendPathRequest(int mapId, Vector3 start, Vector3 end, MovementType movementType, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
         {
             if (IsConnected)
@@ -70,33 +97,6 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             }
 
             return default;
-        }
-
-        private unsafe Vector3 BuildAndSendRandomPointRequest(int mapId, Vector3 start, float maxRadius)
-        {
-            if (IsConnected)
-            {
-                byte[] response = null;
-
-                try
-                {
-                    response = SendData(new RandomPointRequest(mapId, start, maxRadius), sizeof(RandomPointRequest));
-
-                    if (response != null && response.Length >= sizeof(Vector3))
-                    {
-                        fixed (byte* pResult = response)
-                        {
-                            return new Span<Vector3>(pResult, 1)[0];
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed: {BotUtils.ByteArrayToString(response)}\n{e}", LogLevel.Error);
-                }
-            }
-
-            return Vector3.Zero;
         }
     }
 }

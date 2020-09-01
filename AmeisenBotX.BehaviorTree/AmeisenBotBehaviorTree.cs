@@ -5,6 +5,67 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree
 {
+    public class AmeisenBotBehaviorTree
+    {
+        public AmeisenBotBehaviorTree(Node node, bool resumeOngoingNodes = false)
+        {
+            RootNode = node;
+            ResumeOngoingNodes = resumeOngoingNodes;
+        }
+
+        public AmeisenBotBehaviorTree(string name, Node node, bool resumeOngoingNodes = false)
+        {
+            Name = name;
+            RootNode = node;
+            ResumeOngoingNodes = resumeOngoingNodes;
+        }
+
+        public string LastExecutedName { get; private set; }
+
+        public string Name { get; }
+
+        public Node OngoingNode { get; private set; }
+
+        public bool ResumeOngoingNodes { get; set; }
+
+        public Node RootNode { get; set; }
+
+        public BehaviorTreeStatus Tick()
+        {
+            if (ResumeOngoingNodes)
+            {
+                if (OngoingNode != null)
+                {
+                    BehaviorTreeStatus status = OngoingNode.Execute();
+
+                    if (status == BehaviorTreeStatus.Failed || status == BehaviorTreeStatus.Success)
+                    {
+                        OngoingNode = null;
+                    }
+
+                    return status;
+                }
+                else
+                {
+                    BehaviorTreeStatus status = RootNode.Execute();
+
+                    if (status == BehaviorTreeStatus.Ongoing)
+                    {
+                        OngoingNode = RootNode.GetNodeToExecute();
+                    }
+
+                    return status;
+                }
+            }
+            else
+            {
+                Node nodeToExecute = RootNode.GetNodeToExecute();
+                LastExecutedName = nodeToExecute.Name;
+                return nodeToExecute.Execute();
+            }
+        }
+    }
+
     public class AmeisenBotBehaviorTree<T> where T : IBlackboard
     {
         public AmeisenBotBehaviorTree(Node<T> node, T blackboard, bool resumeOngoingNodes = false)
