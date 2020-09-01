@@ -32,10 +32,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { aspectOfTheViperSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && TryCastSpell(aspectOfTheViperSpell, 0, true) }
             };
 
-            if (SpellChain.Get(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string aspectToUse, aspectOfTheDragonhawkSpell, aspectOfTheHawkSpell))
+            WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
-                MyAuraManager.BuffsToKeepActive.Add(aspectToUse, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && TryCastSpell(aspectToUse, 0, true));
-            }
+                if (SpellChain.Get(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string aspectToUse, aspectOfTheDragonhawkSpell, aspectOfTheHawkSpell))
+                {
+                    MyAuraManager.BuffsToKeepActive.Add(aspectToUse, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && TryCastSpell(aspectToUse, 0, true));
+                }
+            };
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {

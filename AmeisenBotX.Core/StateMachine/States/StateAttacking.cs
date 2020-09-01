@@ -187,7 +187,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         else
                         {
                             // just move to the enemies melee/ranged range
-                            positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
+                            positionToGoTo = target.Position;
                         }
 
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
@@ -195,14 +195,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
 
                     // just move to the enemies melee/ranged range
-                    positionToGoTo = BotUtils.MoveAhead(target.Position, WowInterface.ObjectManager.Player.Position, (float)-DistanceToKeep);
+                    positionToGoTo = target.Position;
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
                     return true;
                 }
             }
 
             // no need to move
-            // WowInterface.MovementEngine.StopMovement();
+            WowInterface.MovementEngine.StopMovement();
             return false;
         }
     }

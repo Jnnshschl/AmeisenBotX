@@ -270,6 +270,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             {
                 AmeisenLogger.I.Log("Movement", "Stopping Movement");
                 WowInterface.HookManager.StopClickToMoveIfActive();
+                ShouldBeMoving = false;
                 Reset();
             }
         }
@@ -317,11 +318,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private BehaviorTreeStatus FindPathToTargetPosition(MovementBlackboard blackboard)
         {
-            if (PathfindingStatus == PathfindingStatus.Failed)
-            {
-                return BehaviorTreeStatus.Failed;
-            }
-
             AmeisenLogger.I.Log("Pathfinding", $"Finding path: {WowInterface.ObjectManager.Player.Position} -> {TargetPosition}");
             IEnumerable<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
@@ -365,7 +361,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
             else
             {
-                positionToGoTo = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
+                positionToGoTo = targetPos; // WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
             }
 
             PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, positionToGoTo, TargetRotation);
