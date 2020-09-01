@@ -39,38 +39,6 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             return SendPathRequest(mapId, start, end, MovementType.MoveAlongSurface, out Vector3[] path) ? path[0] : Vector3.Zero;
         }
 
-        private unsafe bool SendPathRequest(int mapId, Vector3 start, Vector3 end, MovementType movementType, out Vector3[] path, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
-        {
-            if (IsConnected)
-            {
-                try
-                {
-                    byte[] response = SendData(new PathRequest(mapId, start, end, pathRequestFlags, movementType), sizeof(PathRequest));
-
-                    if (response != null && response.Length >= sizeof(Vector3))
-                    {
-                        int nodeCount = response.Length / sizeof(Vector3);
-
-                        path = new Vector3[nodeCount];
-
-                        fixed (byte* pResult = response)
-                        fixed (Vector3* pPath = path)
-                        {
-                            Buffer.MemoryCopy(pResult, pPath, response.Length, response.Length);
-                            return true;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    AmeisenLogger.I.Log("Pathfinding", $"SendPathRequest failed:\n{e}", LogLevel.Error);
-                }
-            }
-
-            path = null;
-            return false;
-        }
-
         private unsafe bool BuildAndSendRandomPointRequest(int mapId, Vector3 start, float maxRadius, out Vector3 point)
         {
             if (IsConnected)
@@ -90,11 +58,40 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed:\n{e}", LogLevel.Error);
+                    AmeisenLogger.I.Log("Pathfinding", $"SendPathRequest failed:\n{e}", LogLevel.Error);
                 }
             }
 
             point = Vector3.Zero;
+            return false;
+        }
+
+        private unsafe bool SendPathRequest(int mapId, Vector3 start, Vector3 end, MovementType movementType, out Vector3[] path, PathRequestFlags pathRequestFlags = PathRequestFlags.None)
+        {
+            if (IsConnected)
+            {
+                try
+                {
+                    byte[] response = SendData(new PathRequest(mapId, start, end, pathRequestFlags, movementType), sizeof(PathRequest));
+
+                    if (response != null && response.Length >= sizeof(Vector3))
+                    {
+                        int nodeCount = response.Length / sizeof(Vector3);
+
+                        fixed (byte* pResult = response)
+                        {
+                            path = new Span<Vector3>(pResult, nodeCount).ToArray();
+                            return true;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.I.Log("Pathfinding", $"BuildAndSendRandomPointRequest failed:\n{e}", LogLevel.Error);
+                }
+            }
+
+            path = null;
             return false;
         }
     }

@@ -30,6 +30,8 @@ namespace AmeisenBotX.Core.Character
 
         void AntiAfk();
 
+        void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
+
         bool HasFoodInBag();
 
         bool HasRefreshmentInBag();
@@ -45,8 +47,6 @@ namespace AmeisenBotX.Core.Character
         void Jump();
 
         void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f);
-
-        void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
 
         void UpdateAll();
 

@@ -5,6 +5,43 @@ using System.Linq;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
+    public class Waterfall : Composite
+    {
+        public Waterfall(Node fallbackNode, params (Func<bool> condition, Node node)[] conditionNodePairs) : base("")
+        {
+            FallbackNode = fallbackNode;
+            ConditionNodePairs = conditionNodePairs.ToList();
+        }
+
+        public Waterfall(string name, Node fallbackNode, params (Func<bool> condition, Node node)[] conditionNodePairs) : base(name)
+        {
+            FallbackNode = fallbackNode;
+            ConditionNodePairs = conditionNodePairs.ToList();
+        }
+
+        public List<(Func<bool> condition, Node node)> ConditionNodePairs { get; }
+
+        public Node FallbackNode { get; set; }
+
+        public override BehaviorTreeStatus Execute()
+        {
+            return GetNodeToExecute().Execute();
+        }
+
+        internal override Node GetNodeToExecute()
+        {
+            for (int i = 0; i < ConditionNodePairs.Count; ++i)
+            {
+                if (ConditionNodePairs[i].condition())
+                {
+                    return ConditionNodePairs[i].node;
+                }
+            }
+
+            return FallbackNode;
+        }
+    }
+
     public class Waterfall<T> : Composite<T>
     {
         public Waterfall(Node<T> fallbackNode, params (Func<T, bool> condition, Node<T> node)[] conditionNodePairs) : base("")
