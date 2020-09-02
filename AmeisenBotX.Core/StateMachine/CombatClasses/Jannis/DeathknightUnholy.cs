@@ -16,6 +16,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
                 { unholyPresenceSpell, () => TryCastSpellDk(unholyPresenceSpell, 0) },
+
                 { hornOfWinterSpell, () => TryCastSpellDk(hornOfWinterSpell, 0, true) }
             };
 
