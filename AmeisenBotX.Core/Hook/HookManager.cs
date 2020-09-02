@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -12,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -179,10 +179,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void ClickToMove(WowPlayer player, Vector3 position)
         {
-            if (player == null)
-            {
-                return;
-            }
+            if (player == null) return;
 
             if (WowInterface.XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
@@ -243,10 +240,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void DisposeHook()
         {
-            if (!IsWoWHooked)
-            {
-                return;
-            }
+            if (!IsWoWHooked) return;
 
             AmeisenLogger.I.Log("HookManager", "Disposing EnsceneHook", LogLevel.Verbose);
 
@@ -335,11 +329,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void FacePosition(WowPlayer player, Vector3 positionToFace)
         {
-            if (player == null)
-            {
-                return;
-            }
-
+            if (player == null) return;
             SetFacing(player, BotMath.GetFacingAngle2D(player.Position, positionToFace));
         }
 
@@ -822,10 +812,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ReplaceItem(IWowItem currentItem, IWowItem newItem)
         {
-            if (newItem == null)
-            {
-                return;
-            }
+            if (newItem == null) return;
 
             if (currentItem == null)
             {
@@ -910,11 +897,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetFacing(WowUnit unit, float angle)
         {
-            if (unit == null)
-            {
-                return;
-            }
-
+            if (unit == null) return;
             CallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'), Environment.TickCount });
         }
 
@@ -1086,10 +1069,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void TargetGuid(ulong guid)
         {
-            if (guid < 0)
-            {
-                return;
-            }
+            if (guid < 0) return;
 
             byte[] guidBytes = BitConverter.GetBytes(guid);
             string[] asm = new string[]
@@ -1157,11 +1137,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UnitOnRightClick(WowUnit wowUnit)
         {
-            if (wowUnit == null)
-            {
-                return;
-            }
-
+            if (wowUnit == null) return;
             CallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
 
@@ -1192,11 +1168,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowObjectOnRightClick(WowObject wowObject)
         {
-            if (wowObject == null)
-            {
-                return;
-            }
-
+            if (wowObject == null) return;
             CallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
         }
 

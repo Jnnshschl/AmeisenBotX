@@ -11,7 +11,6 @@ using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AmeisenBotX.Core.Grinding
 {

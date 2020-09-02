@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Numerics;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public override unsafe void Update()
+        public unsafe override void Update()
         {
             base.Update();
 

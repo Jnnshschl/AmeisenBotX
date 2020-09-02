@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace AmeisenBotX.Core.Common
@@ -44,9 +43,7 @@ namespace AmeisenBotX.Core.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle2D(Vector3 position, Vector3 targetPosition)
-        {
-            return ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
-        }
+            => ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
         {

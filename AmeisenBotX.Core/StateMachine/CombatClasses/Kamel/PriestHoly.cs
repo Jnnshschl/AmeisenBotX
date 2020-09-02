@@ -5,7 +5,6 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
@@ -146,10 +145,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-            {
-                WowInterface.ObjectManager.Player
-            };
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -215,10 +212,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-                {
-                    WowInterface.ObjectManager.Player
-                };
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+                CastBuff.Add(WowInterface.ObjectManager.Player);
 
                 CastBuff = CastBuff.Where(e => (!e.HasBuffByName("Prayer of Fortitude") || !e.HasBuffByName("Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -241,7 +236,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             return;
                         }
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Prayer of Shadow Protection") && CustomCastSpell(PrayerofShadowProtection))
+                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Prayer of Shadow Protection")  && CustomCastSpell(PrayerofShadowProtection))
                         {
                             return;
                         }
@@ -255,15 +250,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             if (!WowInterface.ObjectManager.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell, true))
             {
                 return;
-            }
+            }  
             if (!WowInterface.ObjectManager.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell, true))
             {
                 return;
-            }
+            } 
             if (!WowInterface.ObjectManager.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell, true))
             {
                 return;
-            }
+            }   
             //if (!WowInterface.ObjectManager.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
             //{
             //    return;
@@ -273,11 +268,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private void StartHeal()
         {
 
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-            {
-                //healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
-                WowInterface.ObjectManager.Player
-            };
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
+            //healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 

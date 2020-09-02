@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class ArmsItemComparator : IWowItemComparator
     {
-        private WowInterface WowInterface;
+        WowInterface WowInterface;
 
         public ArmsItemComparator(WowInterface wowInterface)
         {

@@ -8,7 +8,6 @@ using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
@@ -164,10 +163,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 WowUnit target = WowInterface.ObjectManager.Target;
                 WowUnit leader = null;
                 if (leaderGuid != 0)
-                {
                     leader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid);
-                }
-
                 if (leaderGuid != 0 && leaderGuid != WowInterface.ObjectManager.PlayerGuid && leader != null && !(leader.IsDead || leader.Health < 1))
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
@@ -393,10 +389,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             if (computeNewRoute)
             {
                 if (!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
-                {
                     WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
-                }
-
                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, target.Position, target.Rotation);
             }
         }

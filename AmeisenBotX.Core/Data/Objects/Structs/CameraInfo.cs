@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Data.Objects.Structs

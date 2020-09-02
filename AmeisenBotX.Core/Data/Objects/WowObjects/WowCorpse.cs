@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
         }
 
-        public override unsafe void Update()
+        public unsafe override void Update()
         {
             base.Update();
 

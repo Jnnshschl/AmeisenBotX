@@ -5,7 +5,6 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding
 {

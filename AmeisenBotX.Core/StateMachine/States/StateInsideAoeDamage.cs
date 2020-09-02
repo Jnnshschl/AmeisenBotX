@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -54,17 +53,22 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private Vector3 FindPositionOutsideOfAoeSpell(Vector3 aoePosition, float aoeRadius)
         {
-            float angleX = WowInterface.ObjectManager.Player.Position.X - aoePosition.X;
-            float angleY = WowInterface.ObjectManager.Player.Position.Y - aoePosition.Y;
+            double angleX = WowInterface.ObjectManager.Player.Position.X - aoePosition.X;
+            double angleY = WowInterface.ObjectManager.Player.Position.Y - aoePosition.Y;
 
-            float angle = MathF.Atan2(angleX, angleY);
+            double angle = Math.Atan2(angleX, angleY);
 
-            float distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 6f;
+            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 6.0;
 
-            float x = WowInterface.ObjectManager.Player.Position.X + (MathF.Cos(angle) * distanceToMove);
-            float y = WowInterface.ObjectManager.Player.Position.Y + (MathF.Sin(angle) * distanceToMove);
+            double x = WowInterface.ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
+            double y = WowInterface.ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);
 
-            return new Vector3(x, y, WowInterface.ObjectManager.Player.Position.Z);
+            return new Vector3()
+            {
+                X = Convert.ToSingle(x),
+                Y = Convert.ToSingle(y),
+                Z = WowInterface.ObjectManager.Player.Position.Z
+            };
         }
     }
 }

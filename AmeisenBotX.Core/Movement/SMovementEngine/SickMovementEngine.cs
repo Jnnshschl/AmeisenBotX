@@ -13,7 +13,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Timers;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine
@@ -45,43 +44,59 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
             BehaviorTree = new AmeisenBotBehaviorTree
             (
+                "MovementTree",
                 new Selector
                 (
                     "DoINeedToMove",
                     () => TargetPosition != default
-                       && MovementAction != MovementAction.None
-                       && !WowInterface.ObjectManager.Player.IsDead
-                       && !IsNearPosition(TargetPosition),
+                        && !WowInterface.ObjectManager.Player.IsDead
+                        && MovementAction != MovementAction.None
+                        && !IsNearPosition(TargetPosition),
                     new Selector
                     (
-                        "DoINeedToUnstuck",
-                        () => ShouldBeMoving
-                           && !ForceDirectMove
-                           && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
-                        new Leaf(DoUnstuck),
+                        "DoINeedToJump",
+                        () => JumpOnNextMove,
+                        new Leaf(() =>
+                        {
+                            WowInterface.CharacterManager.Jump();
+                            JumpOnNextMove = false;
+                            return BehaviorTreeStatus.Success;
+                        }),
                         new Selector
                         (
-                            "DoINeedToDirectlyMove",
-                            () => ForceDirectMove
-                               || WowInterface.ObjectManager.Player.IsSwimming
-                               || WowInterface.ObjectManager.Player.IsFlying
-                               || (MovementAction != MovementAction.Moving && MovementAction != MovementAction.Following)
-                               || WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 3.0,
-                            new Leaf(HandleDirectMoving),
+                            "DoINeedToUnstuck",
+                            () => ShouldBeMoving && !ForceDirectMove && StuckCounter > WowInterface.MovementSettings.StuckCounterUnstuck,
+                            new Leaf(DoUnstuck),
                             new Selector
                             (
-                                DoINeedToFindAPath,
-                                new Leaf(FindPathToTargetPosition),
+                                "DoINeedToDirectlyMove",
+                                () => IsDirectMovingState()
+                                    || WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 3.0
+                                    || WowInterface.ObjectManager.Player.IsSwimming
+                                    || WowInterface.ObjectManager.Player.IsFlying
+                                    || ForceDirectMove,
+                                new Leaf(HandleDirectMoving),
                                 new Selector
                                 (
-                                    DoINeedToMount,
-                                    new Leaf(MountUp),
+                                    "DoINeedToFindAPath",
+                                    DoINeedToFindAPath,
+                                    new Leaf
+                                    (
+                                        "FindPathToTargetPosition",
+                                        FindPathToTargetPosition
+                                    ),
                                     new Selector
                                     (
-                                        "DoINeedToMove",
-                                        () => PathNodes.TryPeek(out Vector3 node) && !IsNearPosition(node),
-                                        new Leaf(HandleMovement),
-                                        new Leaf(HandleWaypointCheck)
+                                        "DoINeedToMount",
+                                        DoINeedToMount,
+                                        new Leaf("MountUp", MountUp),
+                                        new Selector
+                                        (
+                                            "DoINeedToMove",
+                                            () => PathNodes.TryPeek(out Vector3 node) && !IsNearPosition(node),
+                                            new Leaf("MoveToNode", HandleMovement),
+                                            new Leaf("CheckWaypoint", HandleWaypointCheck)
+                                        )
                                     )
                                 )
                             )
@@ -198,10 +213,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
         }
 
-        public bool IsNearPosition(Vector3 position)
-        {
-            return position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
-        }
+        public bool IsNearPosition(Vector3 position) => position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
 
         public void Reset()
         {
@@ -268,8 +280,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         private bool DoINeedToFindAPath()
         {
             return PathNodes == null
-                || PathNodes.Count == 0; // we have no path
-                                         // || PathFinalNode.GetDistance(TargetPosition) > 3.0; // target position changed
+                || PathNodes.Count == 0 // we have no path
+                || PathFinalNode.GetDistance(TargetPosition) > 3.0; // target position changed
         }
 
         private bool DoINeedToMount()
@@ -376,12 +388,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, targetPos, TargetRotation);
             ShouldBeMoving = true;
 
-            if (JumpOnNextMove)
-            {
-                WowInterface.CharacterManager.Jump();
-                JumpOnNextMove = false;
-            }
-
             return IsNearPosition(TargetPosition) ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
         }
 
@@ -391,13 +397,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             {
                 ShouldBeMoving = true;
                 PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, node, TargetRotation);
-
-                if (JumpOnNextMove)
-                {
-                    WowInterface.CharacterManager.Jump();
-                    JumpOnNextMove = false;
-                }
-
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -422,6 +421,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             {
                 return BehaviorTreeStatus.Failed;
             }
+        }
+
+        private bool IsDirectMovingState()
+        {
+            return MovementAction != MovementAction.Moving
+                && MovementAction != MovementAction.Following;
         }
 
         private BehaviorTreeStatus MountUp()
@@ -508,6 +513,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             {
                 StuckCounter = 0;
             }
+        }
+
+        private void UpdateBlackboard()
+        {
         }
     }
 }

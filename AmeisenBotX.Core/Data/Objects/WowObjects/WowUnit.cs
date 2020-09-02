@@ -6,7 +6,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObjects
@@ -207,17 +206,14 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return Auras != null && Auras.Any(e => e.Name == name);
         }
 
-        public bool IsInMeleeRange(WowUnit wowUnit)
-        {
-            return wowUnit != null && Position.GetDistance(wowUnit.Position) < Math.Max(4.5, CombatReach + wowUnit.CombatReach + 1);
-        }
+        public bool IsInMeleeRange(WowUnit wowUnit) => wowUnit != null && Position.GetDistance(wowUnit.Position) < Math.Max(4.5, CombatReach + wowUnit.CombatReach + 1);
 
         public override string ToString()
         {
             return $"Unit: [{Guid}] {Name} lvl. {Level}";
         }
 
-        public override unsafe void Update()
+        public unsafe override void Update()
         {
             base.Update();
 

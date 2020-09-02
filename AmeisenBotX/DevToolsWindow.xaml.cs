@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 
@@ -141,11 +140,7 @@ namespace AmeisenBotX
 
                 foreach (WowObject x in AmeisenBot.WowInterface.ObjectManager.WowObjects)
                 {
-                    if (x == null)
-                    {
-                        break;
-                    }
-
+                    if (x == null) break;
                     wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.WowInterface.ObjectManager.Player.Position), 2)));
                 }
 

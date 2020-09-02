@@ -7,7 +7,6 @@ using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Units.Unitives;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 {

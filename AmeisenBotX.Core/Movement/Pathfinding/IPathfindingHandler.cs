@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Numerics;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding
 {

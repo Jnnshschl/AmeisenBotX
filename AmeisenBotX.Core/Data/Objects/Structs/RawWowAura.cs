@@ -35,8 +35,6 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
         }
 
         public override string ToString()
-        {
-            return $"{SpellId} (lvl. {Level}) x{StackCount} [CG: {Creator}], Harmful: {IsHarmful}, Passive: {IsPassive}";
-        }
+            => $"{SpellId} (lvl. {Level}) x{StackCount} [CG: {Creator}], Harmful: {IsHarmful}, Passive: {IsPassive}";
     }
 }
