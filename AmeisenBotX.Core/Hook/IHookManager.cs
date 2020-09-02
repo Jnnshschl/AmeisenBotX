@@ -3,10 +3,10 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Hook
 {

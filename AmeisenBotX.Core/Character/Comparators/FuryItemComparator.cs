@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class FuryItemComparator : IWowItemComparator
     {
-        WowInterface WowInterface;
+        private WowInterface WowInterface;
 
         public FuryItemComparator(WowInterface wowInterface)
         {
@@ -45,31 +45,31 @@ namespace AmeisenBotX.Core.Character.Comparators
         private double GetRating(IWowItem item, EquipmentSlot slot)
         {
             double rating = 0;
-            if (item.Stats.TryGetValue("ITEM_MOD_CRIT_MELEE_RATING_SHORT", out string meleeCritString) 
+            if (item.Stats.TryGetValue("ITEM_MOD_CRIT_MELEE_RATING_SHORT", out string meleeCritString)
                 && double.TryParse(meleeCritString, NumberStyles.Any, CultureInfo.InvariantCulture, out double meleeCrit))
             {
                 rating += 0.5f * meleeCrit;
             }
 
-            if (item.Stats.TryGetValue("ITEM_MOD_CRIT_RATING_SHORT", out string critString) 
+            if (item.Stats.TryGetValue("ITEM_MOD_CRIT_RATING_SHORT", out string critString)
                 && double.TryParse(critString, NumberStyles.Any, CultureInfo.InvariantCulture, out double crit))
             {
                 rating += 0.5f * crit;
             }
 
-            if (item.Stats.TryGetValue("ITEM_MOD_AGILITY_SHORT", out string agilityString) 
+            if (item.Stats.TryGetValue("ITEM_MOD_AGILITY_SHORT", out string agilityString)
                 && double.TryParse(agilityString, NumberStyles.Any, CultureInfo.InvariantCulture, out double agility))
             {
                 rating += 0.5f * agility;
             }
 
-            if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) 
+            if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString)
                 && double.TryParse(attackString, NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
             {
                 rating += 0.5f * attack;
             }
 
-            if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) 
+            if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString)
                 && double.TryParse(strengthString, NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
             {
                 rating += 1f * strength;
@@ -78,12 +78,12 @@ namespace AmeisenBotX.Core.Character.Comparators
             if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
             {
                 // also 2nd weapons
-                if (item.GetType() == typeof(WowWeapon) 
-                    && (WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES) 
-                    || (WowInterface.CharacterManager.SpellBook.IsSpellKnown("Titan's Grip") 
+                if (item.GetType() == typeof(WowWeapon)
+                    && (WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)
+                    || (WowInterface.CharacterManager.SpellBook.IsSpellKnown("Titan's Grip")
                     && WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES))))
                 {
-                    if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString) 
+                    if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString)
                         && double.TryParse(dpsString, NumberStyles.Any, CultureInfo.InvariantCulture, out double dps))
                     {
                         rating += 2f * dps;
@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core.Character.Comparators
                 || slot.Equals(EquipmentSlot.INVSLOT_TRINKET2)))
             {
                 // armor stats
-                if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString) 
+                if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString)
                     && double.TryParse(armorString, NumberStyles.Any, CultureInfo.InvariantCulture, out double armor))
                 {
                     rating += 0.1f * armor;

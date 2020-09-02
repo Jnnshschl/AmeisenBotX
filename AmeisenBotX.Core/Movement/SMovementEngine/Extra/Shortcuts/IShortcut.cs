@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine.Extra.Shortcuts
 {

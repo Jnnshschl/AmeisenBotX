@@ -3,8 +3,8 @@ using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Data.Cache
 {

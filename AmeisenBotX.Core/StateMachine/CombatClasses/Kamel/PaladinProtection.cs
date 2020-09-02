@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
@@ -142,8 +143,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            {
+                WowInterface.ObjectManager.Player
+            };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -197,8 +200,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-                CastBuff.Add(WowInterface.ObjectManager.Player);
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+                {
+                    WowInterface.ObjectManager.Player
+                };
 
                 CastBuff = CastBuff.Where(e => !e.HasBuffByName("Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -227,15 +232,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             if (!WowInterface.ObjectManager.Player.HasBuffByName("Seal of Light") && CustomCastSpell(sealofLightSpell))
             {
                 return;
-            } 
+            }
             if (!WowInterface.ObjectManager.Player.HasBuffByName("Devotion Aura") && CustomCastSpell(devotionAuraSpell))
             {
                 return;
-            }   
+            }
             if (!WowInterface.ObjectManager.Player.HasBuffByName("Righteous Fury") && CustomCastSpell(righteousFurySpell))
             {
                 return;
-            } 
+            }
         }
 
         private void StartAttack()
@@ -258,27 +263,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 15 && CustomCastSpell(layonHandsSpell))
                     {
                         return;
-                    }   
+                    }
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 25 && CustomCastSpell(holyLightSpell))
                     {
                         return;
-                    }   
+                    }
                     if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(divineProtectionSpell))
                     {
                         return;
-                    }        
+                    }
                     if (WowInterface.ObjectManager.Target.HealthPercentage <= 20 && CustomCastSpell(hammerofWrathSpell))
                     {
                         return;
-                    }    
+                    }
                     if ((WowInterface.ObjectManager.Target.HealthPercentage <= 20 || WowInterface.ObjectManager.Player.HealthPercentage <= 30 || WowInterface.ObjectManager.Target.IsCasting) && CustomCastSpell(hammerofJusticeSpell))
                     {
                         return;
-                    }  
+                    }
                     if (CustomCastSpell(handofReckoningSpell))
                     {
                         return;
-                    }      
+                    }
                     if (CustomCastSpell(avengersShieldSpell))
                     {
                         return;
@@ -294,7 +299,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     if (CustomCastSpell(holyShieldSpell))
                     {
                         return;
-                    }      
+                    }
                     if (CustomCastSpell(exorcismSpell))
                     {
                         return;

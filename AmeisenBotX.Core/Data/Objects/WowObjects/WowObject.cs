@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"Object: {Guid}";
         }
 
-        public unsafe virtual void Update()
+        public virtual unsafe void Update()
         {
             if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, out RawWowObject objPtr))
             {

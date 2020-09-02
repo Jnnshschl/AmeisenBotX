@@ -9,6 +9,7 @@ using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Statemachine
 {

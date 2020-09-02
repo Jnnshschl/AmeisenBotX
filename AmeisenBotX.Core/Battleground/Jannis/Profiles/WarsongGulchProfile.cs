@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 {

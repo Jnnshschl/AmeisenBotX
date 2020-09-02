@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(GameobjectDisplayId), DisplayId) ? ((GameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
-        public unsafe override void Update()
+        public override unsafe void Update()
         {
             base.Update();
 

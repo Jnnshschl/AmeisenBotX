@@ -1,15 +1,12 @@
-﻿using System;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using AmeisenBotX.Core.Battleground;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System.Numerics;
 namespace AmeisenBotX.Core.Battleground.KamelBG
 {
-    class KummelEngine : IBattlegroundEngine
+    internal class KummelEngine : IBattlegroundEngine
     {
         private static int PICKED_UP = 1;
         private static int OWN_TEAM_FLAG = 2;
@@ -126,7 +123,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         {
                             WowUnit enemyFlagCarrier = getFlagCarrier();
                             if (enemyFlagCarrier != null)
+                            {
                                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position);
+                            }
                             else if (startPosition != null)
                             {
                                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ausgangAlly);
@@ -179,9 +178,13 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
+            {
                 return flagCarrierList[0];
+            }
             else
+            {
                 return null;
+            }
         }
 
         private WowObject getFlagObject()
@@ -192,14 +195,18 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 .Where(x => Enum.IsDefined(typeof(GameobjectDisplayId), x.DisplayId)
                          && targetFlag == (GameobjectDisplayId)x.DisplayId).ToList();
             if (flagObjectList.Count > 0)
+            {
                 return flagObjectList[0];
+            }
             else
+            {
                 return null;
+            }
         }
 
-        private void muell ()
-        { 
-        
+        private void muell()
+        {
+
         }
     }
 }

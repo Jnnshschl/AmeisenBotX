@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 {
@@ -24,8 +25,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
         private double distanceTraveled = 0;
 
         private bool hasTargetMoved = false;
-
-        bool isAttackingFromBehind = false;
+        private bool isAttackingFromBehind = false;
 
         private bool isSneaky = false;
 
@@ -257,10 +257,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (this.isAttackingFromBehind)
             {
-                if(WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                {
                     WowInterface.MovementEngine.StopMovement();
-                if(WowInterface.ObjectManager.Player.IsInCombat)
+                }
+
+                if (WowInterface.ObjectManager.Player.IsInCombat)
+                {
                     isAttackingFromBehind = false;
+                }
             }
 
             if (computeNewRoute)
@@ -273,7 +278,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 {
                     this.isAttackingFromBehind = true;
                     if (!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
+                    {
                         WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    }
+
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastTargetPosition, LastTargetRotation);
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives

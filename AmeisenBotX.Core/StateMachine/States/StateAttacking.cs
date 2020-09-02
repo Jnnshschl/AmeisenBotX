@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Logging;
 using System;
 using System.Linq;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
