@@ -11,6 +11,7 @@ using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Jobs
 {

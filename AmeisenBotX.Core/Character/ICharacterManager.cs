@@ -5,8 +5,8 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Character
 {

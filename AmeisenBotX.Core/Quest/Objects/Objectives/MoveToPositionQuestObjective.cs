@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Drawing;
+using System.Numerics;
 using Rect = AmeisenBotX.Memory.Win32.Rect;
 
 namespace AmeisenBotX.Overlay.Utils
@@ -12,10 +12,10 @@ namespace AmeisenBotX.Overlay.Utils
 
         public static bool WorldToScreen(Rect clientRect, CameraInfo cameraInfo, Vector3 position, out Point screenCoordinates)
         {
-            Vector3 diff = new Vector3(position) - cameraInfo.Pos;
+            Vector3 diff = position - cameraInfo.Pos;
             screenCoordinates = new Point(0, 0);
 
-            if ((diff * cameraInfo.ViewMatrix.FirstCol) < Vector3.Zero)
+            if ((diff * cameraInfo.ViewMatrix.FirstCol) == Vector3.Zero)
             {
                 return false;
             }

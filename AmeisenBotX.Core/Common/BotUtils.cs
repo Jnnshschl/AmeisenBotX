@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -67,7 +68,10 @@ namespace AmeisenBotX.Core.Common
 
         public static string CleanString(string input)
         {
-            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
 
             StringBuilder sb = new StringBuilder(input.Length);
 
@@ -95,7 +99,10 @@ namespace AmeisenBotX.Core.Common
         /// <returns>(LUA string, return variable name)</returns>
         public static (string, string) ObfuscateLua(string input)
         {
-            if (string.IsNullOrWhiteSpace(input)) return (string.Empty, string.Empty);
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return (string.Empty, string.Empty);
+            }
 
             string returnValueName = "";
 
@@ -167,7 +174,10 @@ namespace AmeisenBotX.Core.Common
 
         public static bool IsValidJson(string strInput)
         {
-            if (string.IsNullOrWhiteSpace(strInput)) return false;
+            if (string.IsNullOrWhiteSpace(strInput))
+            {
+                return false;
+            }
 
             strInput = strInput.Trim();
 

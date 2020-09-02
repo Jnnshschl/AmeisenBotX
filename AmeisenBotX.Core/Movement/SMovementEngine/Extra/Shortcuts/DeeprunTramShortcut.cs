@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Linq;
+using System.Numerics;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine.Extra.Shortcuts
 {
