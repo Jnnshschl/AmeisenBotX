@@ -364,6 +364,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
             else
             {
+                ShouldBeMoving = false;
                 PathfindingStatus = PathfindingStatus.Failed;
                 AmeisenLogger.I.Log("Pathfinding", "Pathfinding failed");
                 return BehaviorTreeStatus.Failed;
