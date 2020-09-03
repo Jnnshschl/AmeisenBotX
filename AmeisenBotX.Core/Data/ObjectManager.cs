@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,21 +17,22 @@ namespace AmeisenBotX.Core.Data
 {
     public class ObjectManager : IObjectManager
     {
-        private readonly List<(IntPtr, WowObjectType)> objectPointers;
         private readonly object queryLock = new object();
+        private readonly (IntPtr, WowObjectType)[] WowObjectPointers;
+        private WowObject[] wowObjects;
 
         public ObjectManager(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
             Config = config;
 
+            WowObjectPointers = new (IntPtr, WowObjectType)[2048];
+            WowObjectPool = ArrayPool<WowObject>.Create(2048, 1);
+
             PartymemberGuids = new List<ulong>();
             PartyPetGuids = new List<ulong>();
-            objectPointers = new List<(IntPtr, WowObjectType)>(2048);
             Partymembers = new List<WowUnit>();
             PartyPets = new List<WowUnit>();
-
-            WowObjects = new ConcurrentBag<WowObject>();
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
@@ -77,7 +79,7 @@ namespace AmeisenBotX.Core.Data
 
         public ulong TargetGuid { get; private set; }
 
-        public ConcurrentBag<WowObject> WowObjects { get; private set; }
+        public IEnumerable<WowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
 
         public int ZoneId { get; private set; }
 
@@ -91,12 +93,14 @@ namespace AmeisenBotX.Core.Data
 
         private WowInterface WowInterface { get; }
 
+        private ArrayPool<WowObject> WowObjectPool { get; }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds)
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowGameobject>()
+                return wowObjects.OfType<WowGameobject>()
                     .Where(e => displayIds.Contains(e.DisplayId))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
@@ -108,7 +112,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowUnit>()
+                return wowObjects.OfType<WowUnit>()
                         .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId))
                         .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                         .FirstOrDefault();
@@ -142,7 +146,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowDynobject>().ToList();
+                return wowObjects.OfType<WowDynobject>().ToList();
             }
         }
 
@@ -150,7 +154,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>()
+                return wowObjects.OfType<T>()
                     .Where(e => !e.IsDead
                          && !e.IsNotAttackable
                          && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
@@ -164,7 +168,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>()
+                return wowObjects.OfType<T>()
                     .Where(e => !e.IsDead
                              && !e.IsNotAttackable
                              && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
@@ -178,7 +182,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>()
+                return wowObjects.OfType<T>()
                     .Where(e => !e.IsDead
                              && !e.IsNotAttackable
                              && (PartymemberGuids.Contains(e.Guid) || PartyPetGuids.Contains(e.Guid))
@@ -192,7 +196,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance).ToList();
+                return wowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance).ToList();
             }
         }
 
@@ -201,7 +205,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
+                return wowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
             }
         }
 
@@ -210,7 +214,7 @@ namespace AmeisenBotX.Core.Data
         {
             lock (queryLock)
             {
-                return WowObjects.OfType<T>().FirstOrDefault(e => e.Name.Equals(name, stringComparison));
+                return wowObjects.OfType<T>().FirstOrDefault(e => e.Name.Equals(name, stringComparison));
             }
         }
 
@@ -313,20 +317,21 @@ namespace AmeisenBotX.Core.Data
                 WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, (int)WowInterface.OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
                 WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.WowObjectType), out int activeObjectType);
 
-                objectPointers.Clear();
+                int count = 0;
 
                 while (activeObjectType > 0 && activeObjectType < 8)
                 {
-                    objectPointers.Add((activeObjectBaseAddress, (WowObjectType)activeObjectType));
+                    WowObjectPointers[count] = (activeObjectBaseAddress, (WowObjectType)activeObjectType);
+                    ++count;
 
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.NextObject), out activeObjectBaseAddress);
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.WowObjectType), out activeObjectType);
                 }
 
-                ObjectCount = objectPointers.Count;
+                ObjectCount = count;
+                wowObjects = WowObjectPool.Rent(count);
 
-                WowObjects.Clear();
-                Parallel.For(0, objectPointers.Count, (x, y) => WowObjects.Add(ProcessObject(objectPointers[x].Item1, objectPointers[x].Item2)));
+                Parallel.For(0, count, (x, y) => wowObjects[x] = ProcessObject(WowObjectPointers[x].Item1, WowObjectPointers[x].Item2));
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();
@@ -334,9 +339,9 @@ namespace AmeisenBotX.Core.Data
                 if (PartyleaderGuid > 0)
                 {
                     PartymemberGuids = ReadPartymemberGuids().ToList();
-                    Partymembers = WowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
+                    Partymembers = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid)).ToList();
 
-                    PartyPets = WowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
+                    PartyPets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid)).ToList();
                     PartyPetGuids = PartyPets.Select(e => e.Guid).ToList();
                 }
             }
@@ -346,13 +351,13 @@ namespace AmeisenBotX.Core.Data
                 Task.Run(() => CachePois());
             }
 
-            OnObjectUpdateComplete?.Invoke(WowObjects);
+            OnObjectUpdateComplete?.Invoke(wowObjects);
         }
 
         private void CachePois()
         {
-            IEnumerable<WowGameobject> wowGameobjects = WowObjects.OfType<WowGameobject>();
-            IEnumerable<WowUnit> wowUnits = WowObjects.OfType<WowUnit>();
+            IEnumerable<WowGameobject> wowGameobjects = wowObjects.OfType<WowGameobject>();
+            IEnumerable<WowUnit> wowUnits = wowObjects.OfType<WowUnit>();
 
             foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(OreNode), e.DisplayId)))
             {

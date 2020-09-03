@@ -51,6 +51,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     () => TargetPosition != default
                         && !WowInterface.ObjectManager.Player.IsDead
                         && MovementAction != MovementAction.None
+                        && DateTime.Now > PreventMovementUntil
                         && !IsNearPosition(TargetPosition),
                     new Selector
                     (
@@ -214,6 +215,13 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         }
 
         public bool IsNearPosition(Vector3 position) => position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
+
+        private DateTime PreventMovementUntil { get; set; }
+
+        public void PreventMovement(TimeSpan timeSpan)
+        {
+            PreventMovementUntil = DateTime.Now + timeSpan;
+        }
 
         public void Reset()
         {

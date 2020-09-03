@@ -6,9 +6,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3
+    public struct Vector3 : IEquatable<Vector3>
     {
-        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
+        public static Vector3 Zero { get; } = new Vector3(0, 0, 0);
+
+        public Vector3(float a)
+        {
+            X = a;
+            Y = a;
+            Z = a;
+        }
 
         public Vector3(float x, float y, float z)
         {
@@ -30,12 +37,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 FromArray(float[] array)
         {
-            return new Vector3()
-            {
-                X = array[0],
-                Y = array[1],
-                Z = array[2]
-            };
+            return new Vector3(array[0], array[1], array[2]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,9 +53,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Vector3 left, Vector3 right)
+        public static bool operator !=(Vector3 a, Vector3 b)
         {
-            return !(left == right);
+            return a.X != b.X
+                && a.Y != b.Y
+                && a.Z != b.Z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,25 +97,27 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(Vector3 left, Vector3 right)
+        public static bool operator <(Vector3 a, Vector3 b)
         {
-            return left.X < right.X
-                   && left.Y < right.Y
-                   && left.Z < right.Z;
+            return a.X < b.X
+                && a.Y < b.Y
+                && a.Z < b.Z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Vector3 left, Vector3 right)
+        public static bool operator ==(Vector3 a, Vector3 b)
         {
-            return left.Equals(right);
+            return a.X == b.X
+                && a.Y == b.Y
+                && a.Z == b.Z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(Vector3 left, Vector3 right)
+        public static bool operator >(Vector3 a, Vector3 b)
         {
-            return left.X > right.X
-                   && left.Y > right.Y
-                   && left.Z > right.Z;
+            return a.X > b.X
+                && a.Y > b.Y
+                && a.Z > b.Z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,39 +137,31 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Divide(Vector3 vector)
+        public void Divide(Vector3 v)
         {
-            X = vector.X > 0 ? X / vector.X : 0;
-            Y = vector.Y > 0 ? Y / vector.Y : 0;
-            Z = vector.Z > 0 ? Z / vector.Z : 0;
+            X = v.X > 0f ? X / v.X : 0f;
+            Y = v.Y > 0f ? Y / v.Y : 0f;
+            Z = v.Z > 0f ? Z / v.Z : 0f;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Divide(float n)
         {
-            X = n > 0 ? X / n : 0;
-            Y = n > 0 ? Y / n : 0;
-            Z = n > 0 ? Z / n : 0;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj.GetType() == typeof(Vector3)
-                       && ((Vector3)obj).X == X
-                       && ((Vector3)obj).Y == Y
-                       && ((Vector3)obj).Z == Z;
+            X = n > 0f ? X / n : 0f;
+            Y = n > 0f ? Y / n : 0f;
+            Z = n > 0f ? Z / n : 0f;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double GetDistance(Vector3 b)
+        public float GetDistance(Vector3 v)
         {
-            return MathF.Sqrt(MathF.Pow((X - b.X), 2) + MathF.Pow((Y - b.Y), 2) + MathF.Pow((Z - b.Z), 2));
+            return MathF.Sqrt(MathF.Pow(X - v.X, 2) + MathF.Pow(Y - v.Y, 2) + MathF.Pow(Z - v.Z, 2));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double GetDistance2D(Vector3 b)
+        public float GetDistance2D(Vector3 v)
         {
-            return MathF.Sqrt(((X - b.X) * (X - b.X)) + ((Y - b.Y) * (Y - b.Y)));
+            return MathF.Sqrt(MathF.Pow(X - v.X, 2) + MathF.Pow(Y - v.Y, 2));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,39 +174,51 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float Dot()
+        {
+            return MathF.Pow(X, 2) + MathF.Pow(Y, 2) + MathF.Pow(Z, 2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float Dot2D()
+        {
+            return MathF.Pow(X, 2) + MathF.Pow(Y, 2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float GetMagnitude()
         {
-            return Convert.ToSingle(MathF.Sqrt((X * X) + (Y * Y) + (Z * Z)));
+            return MathF.Sqrt(Dot());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float GetMagnitude2D()
         {
-            return Convert.ToSingle(MathF.Sqrt((X * X) + (Y * Y)));
+            return MathF.Sqrt(Dot2D());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Limit(float limit)
         {
-            X = X < 0f ? MathF.Max(X, limit * -1) : MathF.Min(X, limit);
-            Y = Y < 0f ? MathF.Max(Y, limit * -1) : MathF.Min(Y, limit);
-            Z = Z < 0f ? MathF.Max(Z, limit * -1) : MathF.Min(Z, limit);
+            X = X < 0f ? MathF.Max(X, limit * -1f) : MathF.Min(X, limit);
+            Y = Y < 0f ? MathF.Max(Y, limit * -1f) : MathF.Min(Y, limit);
+            Z = Z < 0f ? MathF.Max(Z, limit * -1f) : MathF.Min(Z, limit);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Multiply(Vector3 vector)
         {
-            X = vector.X > 0 ? X * vector.X : 0;
-            Y = vector.Y > 0 ? Y * vector.Y : 0;
-            Z = vector.Z > 0 ? Z * vector.Z : 0;
+            X = vector.X > 0f ? X * vector.X : 0f;
+            Y = vector.Y > 0f ? Y * vector.Y : 0f;
+            Z = vector.Z > 0f ? Z * vector.Z : 0f;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Multiply(float n)
         {
-            X = n > 0 ? X * n : 0;
-            Y = n > 0 ? Y * n : 0;
-            Z = n > 0 ? Z * n : 0;
+            X = n > 0f ? X * n : 0f;
+            Y = n > 0f ? Y * n : 0f;
+            Z = n > 0f ? Z * n : 0f;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -220,7 +230,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Normalize(float magnitude)
         {
-            if (magnitude > 0)
+            if (magnitude > 0f)
             {
                 X /= magnitude;
                 Y /= magnitude;
@@ -247,17 +257,17 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Rotate(float degrees)
         {
-            RotateRadians(degrees * (MathF.PI / 180));
+            RotateRadians(degrees * (MathF.PI / 180f));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RotateRadians(float radians)
         {
-            double ca = MathF.Cos(radians);
-            double sa = MathF.Sin(radians);
+            float ca = MathF.Cos(radians);
+            float sa = MathF.Sin(radians);
 
-            X = Convert.ToSingle(ca * X - sa * Y);
-            Y = Convert.ToSingle(sa * X + ca * Y);
+            X = ca * X - sa * Y;
+            Y = sa * X + ca * Y;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -285,7 +295,22 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
-            return $"X: {X}, Y: {Y}, Z: {Z}";
+            return $"<{X}|{Y}|{Z}>";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Vector3 vector)
+            {
+                return this == vector;
+            }
+
+            return false;
+        }
+
+        public bool Equals(Vector3 other)
+        {
+            return this == other;
         }
     }
 }

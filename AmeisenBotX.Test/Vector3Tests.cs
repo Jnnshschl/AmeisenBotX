@@ -259,7 +259,7 @@ namespace AmeisenBotX.Test
             Assert.AreEqual(-1f, a.X);
 
             a = new Vector3(1, 0, 0);
-            a.RotateRadians(Math.PI);
+            a.RotateRadians(MathF.PI);
 
             Assert.AreEqual(-1f, a.X);
         }

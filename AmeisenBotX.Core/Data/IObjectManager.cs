@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Data
 
         ulong TargetGuid { get; }
 
-        ConcurrentBag<WowObject> WowObjects { get; }
+        IEnumerable<WowObject> WowObjects { get; }
 
         int ZoneId { get; }
 

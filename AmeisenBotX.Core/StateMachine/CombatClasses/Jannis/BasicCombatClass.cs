@@ -729,7 +729,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.StopMovement();
+                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -766,7 +766,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.StopMovement();
+                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -800,7 +800,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.StopMovement();
+                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -845,7 +845,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.StopMovement();
+                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 

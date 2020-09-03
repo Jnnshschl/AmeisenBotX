@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement
@@ -26,5 +27,7 @@ namespace AmeisenBotX.Core.Movement
         void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, bool disableShortcuts = false);
 
         void StopMovement();
+
+        void PreventMovement(TimeSpan timeSpan);
     }
 }
