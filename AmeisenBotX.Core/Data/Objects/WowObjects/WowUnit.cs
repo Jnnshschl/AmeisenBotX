@@ -221,12 +221,12 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
             if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
             {
-                Class = (WowClass)((objPtr.Bytes0 >> 8) & 0xFF);
+                Class = (WowClass)(objPtr.Class);
                 CombatReach = objPtr.CombatReach;
                 DisplayId = objPtr.DisplayId;
                 Energy = objPtr.Power4;
                 FactionTemplate = objPtr.FactionTemplate;
-                Gender = (WowGender)((objPtr.Bytes0 >> 16) & 0xFF);
+                Gender = (WowGender)(objPtr.Gender);
                 Health = objPtr.Health;
                 Level = objPtr.Level;
                 Mana = objPtr.Power1;
@@ -236,8 +236,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
                 MaxRage = objPtr.MaxPower2 / 10;
                 MaxRuneenergy = objPtr.MaxPower7 / 10;
                 NpcFlags = objPtr.NpcFlags;
-                PowerType = (WowPowertype)((objPtr.Bytes0 >> 24) & 0xFF);
-                Race = (WowRace)((objPtr.Bytes0 >> 0) & 0xFF);
+                PowerType = (WowPowertype)(objPtr.Powertype);
+                Race = (WowRace)(objPtr.Race);
                 Rage = objPtr.Power2 / 10;
                 Runeenergy = objPtr.Power7 / 10;
                 SummonedByGuid = objPtr.SummonedBy;
