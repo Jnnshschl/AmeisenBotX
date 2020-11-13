@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils
             {
                 foreach (Spell spell in spells)
                 {
-                    if (!Cooldowns.ContainsKey(spell.Name.ToUpper()))
+                    if (!Cooldowns.ContainsKey(spell.Name))
                     {
-                        Cooldowns.Add(spell.Name.ToUpper(), DateTime.Now);
+                        Cooldowns.Add(spell.Name, DateTime.Now);
                     }
                 }
             }
@@ -26,12 +26,11 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public bool IsSpellOnCooldown(string spellname)
         {
-            if (Cooldowns.ContainsKey(spellname.ToUpper()))
+            if (string.IsNullOrWhiteSpace(spellname)) return false;
+
+            if (Cooldowns.TryGetValue(spellname.ToUpperInvariant(), out DateTime dateTime))
             {
-                if (Cooldowns.TryGetValue(spellname.ToUpper(), out DateTime dateTime))
-                {
-                    return dateTime > DateTime.Now;
-                }
+                return dateTime > DateTime.Now;
             }
 
             return false;
@@ -39,16 +38,34 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public bool SetSpellCooldown(string spellname, int cooldownLeftMs)
         {
-            if (!Cooldowns.ContainsKey(spellname.ToUpper()))
+            if (string.IsNullOrWhiteSpace(spellname)) return false;
+
+            spellname = spellname.ToUpperInvariant();
+
+            if (!Cooldowns.ContainsKey(spellname))
             {
-                Cooldowns.Add(spellname.ToUpper(), DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs));
+                Cooldowns.Add(spellname, DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs));
             }
             else
             {
-                Cooldowns[spellname.ToUpper()] = DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs);
+                Cooldowns[spellname] = DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs);
             }
 
             return true;
+        }
+
+        public int GetSpellCooldown(string spellname)
+        {
+            if (string.IsNullOrWhiteSpace(spellname)) return 0;
+
+            spellname = spellname.ToUpperInvariant();
+
+            if (Cooldowns.ContainsKey(spellname))
+            {
+                return (int)(Cooldowns[spellname] - DateTime.Now).TotalMilliseconds;
+            }
+
+            return 0;
         }
     }
 }

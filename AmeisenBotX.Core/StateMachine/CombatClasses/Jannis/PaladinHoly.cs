@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (WowInterface.ObjectManager.Partymembers.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+            if (WowInterface.ObjectManager.Partymembers.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 65.0)
             {
                 if (NeedToHealSomeone())
                 {
@@ -127,23 +127,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking
+                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.5
+                    && EventAutoAttack.Run())
                 {
-                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking
-                        && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
-                    {
-                        if (EventAutoAttack.Run())
-                        {
-                            WowInterface.HookManager.LuaStartAutoAttack();
-                        }
-
-                        return;
-                    }
-                    else
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
-                        return;
-                    }
+                    WowInterface.HookManager.LuaStartAutoAttack();
+                    return;
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
+                    return;
                 }
             }
         }

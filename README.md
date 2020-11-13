@@ -4,6 +4,8 @@ Hopefully the last rewrite of my WoW bot. I've learned much during the other 2 a
 
 If you need more support or just want to say hi, visit the website https://ameisenbotx.de/.
 
+See the bot in action: https://www.youtube.com/channel/UCxwiiRjjQVETtatGzKAoIcQ
+
 Currently supported versions:
 
 * 3.3.5a 12340

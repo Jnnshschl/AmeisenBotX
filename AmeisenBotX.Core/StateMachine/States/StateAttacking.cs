@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(1000));
         }
 
-        public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
+        public float DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28f;
 
         public bool TargetInLos { get; private set; }
 
@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                             {
                                 WowInterface.Globals.ForceCombat = false;
                             }
-                        
+
                             if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
                             {
                                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
@@ -135,9 +135,9 @@ namespace AmeisenBotX.Core.Statemachine.States
             return meanGroupPosition / count;
         }
 
-        private double GetMeeleRange()
+        private float GetMeeleRange()
         {
-            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5 : MathF.Max(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
+            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5f : MathF.Max(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
         }
 
         private bool HandleMovement(WowUnit target)
@@ -177,7 +177,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else
             {
-                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
+                float distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
 
                 if (distance > DistanceToKeep || !TargetInLos)
                 {
@@ -189,7 +189,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                         if (WowInterface.CombatClass.WalkBehindEnemy)
                         {
                             if (WowInterface.CombatClass.Role == CombatClassRole.Dps
-                                && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid) // prevent spinning
+                                && (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                                    || WowInterface.ObjectManager.Target.Type == WowObjectType.Player)) // prevent spinning
                             {
                                 // walk behind enemy
                                 positionToGoTo = BotMath.CalculatePositionBehind(target.Position, target.Rotation);
@@ -213,8 +214,18 @@ namespace AmeisenBotX.Core.Statemachine.States
                             positionToGoTo = target.Position;
                         }
 
+                        if (TargetInLos)
+                        {
+                            positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, positionToGoTo, -(DistanceToKeep * 0.8f));
+                        }
+
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
                         return true;
+                    }
+
+                    if (TargetInLos)
+                    {
+                        positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, positionToGoTo, -(DistanceToKeep * 0.8f));
                     }
 
                     // just move to the enemies melee/ranged range

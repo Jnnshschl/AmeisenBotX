@@ -15,7 +15,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects.Structs
         public ulong Target;
         public ulong ChannelObject;
         public int ChannelSpell;
-        public int Bytes0;
+        public byte Race;
+        public byte Class;
+        public byte Gender;
+        public byte PowerType;
         public int Health;
         public int Power1;
         public int Power2;

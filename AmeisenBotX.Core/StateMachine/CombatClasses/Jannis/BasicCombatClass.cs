@@ -342,10 +342,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string defensiveStanceSpell = "Defensive Stance";
         protected const string demoralizingShoutSpell = "Demoralizing Shout";
         protected const string devastateSpell = "Devastate";
+        protected const string deathWishSpell = "Death Wish";
         protected const string disarmSpell = "Disarm";
         protected const string enragedRegenerationSpell = "Enraged Regeneration";
         protected const string executeSpell = "Execute";
         protected const string hamstringSpell = "Hamstring";
+        protected const string heroicFurySpell = "Heroic Fury";
         protected const string heroicStrikeSpell = "Heroic Strike";
         protected const string heroicThrowSpell = "Heroic Throw";
         protected const string interceptSpell = "Intercept";
@@ -415,7 +417,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
             EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
-            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
         public string Author { get; } = "Jannis";
