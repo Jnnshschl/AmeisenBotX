@@ -36,6 +36,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         WowClass WowClass { get; }
 
+        IEnumerable<string> BlacklistedTargets { get; set; }
+
         void Execute();
 
         void OutOfCombatExecute();

@@ -79,6 +79,8 @@ namespace AmeisenBotX.Core.Data
 
         public ulong TargetGuid { get; private set; }
 
+        public WowUnit Vehicle { get; private set; }
+
         public IEnumerable<WowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
 
         public int ZoneId { get; private set; }
@@ -88,6 +90,8 @@ namespace AmeisenBotX.Core.Data
         public string ZoneSubName { get; private set; }
 
         private AmeisenBotConfig Config { get; }
+
+        private bool PlayerGuidIsVehicle { get; set; }
 
         private TimegatedEvent PoiCacheEvent { get; }
 
@@ -157,7 +161,7 @@ namespace AmeisenBotX.Core.Data
                 return wowObjects.OfType<T>()
                     .Where(e => !e.IsDead
                          && !e.IsNotAttackable
-                         && WowInterface.HookManager.GetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                         && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Friendly
                          && e.Position.GetDistance(position) < distance)
                     .ToList();
             }
@@ -171,7 +175,7 @@ namespace AmeisenBotX.Core.Data
                 return wowObjects.OfType<T>()
                     .Where(e => !e.IsDead
                              && !e.IsNotAttackable
-                             && WowInterface.HookManager.GetUnitReaction(Player, e) == WowUnitReaction.Friendly
+                             && WowInterface.HookManager.WowGetUnitReaction(Player, e) == WowUnitReaction.Friendly
                              && e.Position.GetDistance(position) < distance)
                     .ToList();
             }
@@ -240,12 +244,22 @@ namespace AmeisenBotX.Core.Data
                 {
                     if (obj.Guid == PlayerGuid)
                     {
-                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
-                        {
-                            ((WowPlayer)obj).ComboPoints = comboPoints;
-                        }
+                        PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer);
 
-                        Player = (WowPlayer)obj;
+                        if (!PlayerGuidIsVehicle)
+                        {
+                            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
+                            {
+                                ((WowPlayer)obj).ComboPoints = comboPoints;
+                            }
+
+                            Player = (WowPlayer)obj;
+                            Vehicle = null;
+                        }
+                        else
+                        {
+                            Vehicle = (WowUnit)obj;
+                        }
                     }
 
                     if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
@@ -332,6 +346,17 @@ namespace AmeisenBotX.Core.Data
                 wowObjects = WowObjectPool.Rent(count);
 
                 Parallel.For(0, count, (x, y) => wowObjects[x] = ProcessObject(WowObjectPointers[x].Item1, WowObjectPointers[x].Item2));
+
+                if (PlayerGuidIsVehicle)
+                {
+                    // get the object with last known "good" guid
+                    WowPlayer possiblePlayer = wowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Guid == Player.Guid);
+
+                    if (possiblePlayer != null)
+                    {
+                        Player = possiblePlayer;
+                    }
+                }
 
                 // read the party/raid leaders guid and if there is one, the group too
                 PartyleaderGuid = ReadLeaderGuid();

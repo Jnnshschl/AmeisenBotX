@@ -58,8 +58,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     if (RightClickEvent.Run())
                     {
                         WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.StopClickToMoveIfActive();
-                        WowInterface.HookManager.WowObjectOnRightClick(lootableObject);
+                        WowInterface.HookManager.WowStopClickToMove();
+                        WowInterface.HookManager.WowObjectRightClick(lootableObject);
                     }
                 }
             }

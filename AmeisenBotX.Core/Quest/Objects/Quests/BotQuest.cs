@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
             if (objectPositionCombo.Item1 != null)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 3.0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item1.Position);
                 }
@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else
                     {
-                        WowInterface.HookManager.AcceptQuest(GossipId);
+                        WowInterface.HookManager.LuaAcceptQuest(GossipId);
                     }
 
                     ActionToggle = !ActionToggle;
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             else if (objectPositionCombo.Item2 != default)
             {
                 // move to position
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 3.0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item2);
                 }
@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             if (objectPositionCombo.Item1 != null)
             {
                 // move to unit / object
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 3.0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item1.Position);
                 }
@@ -131,7 +131,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else if (ActionEvent.Run())
                     {
                         // TODO: get best reward
-                        WowInterface.HookManager.CompleteQuestAndGetReward(WowInterface.ObjectManager.Player.QuestlogEntries.FindIndex(e => e.Id == Id) + 1, 1, GossipId);
+                        WowInterface.HookManager.LuaCompleteQuestAndGetReward(WowInterface.ObjectManager.Player.QuestlogEntries.FindIndex(e => e.Id == Id) + 1, 1, GossipId);
                     }
 
                     ActionToggle = !ActionToggle;
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             else if (objectPositionCombo.Item2 != default)
             {
                 // move to position
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 3.0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item2);
                 }
@@ -156,11 +156,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
         {
             if (obj.GetType() == typeof(WowGameobject))
             {
-                WowInterface.HookManager.WowObjectOnRightClick(obj);
+                WowInterface.HookManager.WowObjectRightClick(obj);
             }
             else if (obj.GetType() == typeof(WowUnit))
             {
-                WowInterface.HookManager.UnitOnRightClick((WowUnit)obj);
+                WowInterface.HookManager.WowUnitRightClick((WowUnit)obj);
             }
         }
     }

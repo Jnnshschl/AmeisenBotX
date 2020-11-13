@@ -28,7 +28,7 @@
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundFinished, out int bgFinished)
                 && bgFinished == 1)
             {
-                WowInterface.HookManager.LeaveBattleground();
+                WowInterface.HookManager.LuaLeaveBattleground();
                 return;
             }
 

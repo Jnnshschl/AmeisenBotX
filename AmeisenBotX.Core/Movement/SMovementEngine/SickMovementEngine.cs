@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 MovementWatchdog.Start();
             }
 
-            JumpCheckEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            ObstacleCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
             BehaviorTree = new AmeisenBotBehaviorTree
@@ -50,6 +50,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     "DoINeedToMove",
                     () => TargetPosition != default
                         && !WowInterface.ObjectManager.Player.IsDead
+                        && !WowInterface.ObjectManager.Player.IsCasting
+                        && (WowInterface.ObjectManager.Vehicle == null || !WowInterface.ObjectManager.Vehicle.IsCasting)
                         && MovementAction != MovementAction.None
                         && DateTime.Now > PreventMovementUntil
                         && !IsNearPosition(TargetPosition),
@@ -120,6 +122,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool IsGhost { get; set; }
 
+        public bool Teleported { get; set; }
+
         public bool JumpOnNextMove { get; private set; }
 
         public Vector3 LastPlayerPosition { get; private set; }
@@ -158,7 +162,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private AmeisenBotConfig Config { get; }
 
-        private TimegatedEvent JumpCheckEvent { get; }
+        private TimegatedEvent ObstacleCheckEvent { get; }
 
         private Timer MovementWatchdog { get; }
 
@@ -173,11 +177,11 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 // check for obstacles in our way
                 if (WowInterface.MovementSettings.EnableTracelineJumpCheck
                     && !JumpOnNextMove
-                    && JumpCheckEvent.Run())
+                    && ObstacleCheckEvent.Run())
                 {
-                    Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.JumpCheckDistance);
+                    Vector3 pos = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, WowInterface.MovementSettings.ObstacleCheckDistance);
 
-                    if (!WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, pos, WowInterface.MovementSettings.JumpCheckHeight))
+                    if (!WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, pos, WowInterface.MovementSettings.ObstacleCheckHeight))
                     {
                         JumpOnNextMove = true;
                     }
@@ -242,12 +246,14 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false)
+        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false)
         {
             if (ActiveShortcut != null && (disableShortcuts || ActiveShortcut.Finished))
             {
                 ActiveShortcut = null;
             }
+
+            ForceDirectMove = forceDirectMove;
 
             if (MovementAction == movementAction
                 && TargetPosition == positionToGoTo
@@ -279,7 +285,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             if (MovementAction != MovementAction.None)
             {
                 AmeisenLogger.I.Log("Movement", "Stopping Movement");
-                WowInterface.HookManager.StopClickToMoveIfActive();
+                WowInterface.HookManager.WowStopClickToMove();
                 ShouldBeMoving = false;
                 Reset();
             }
@@ -287,9 +293,17 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private bool DoINeedToFindAPath()
         {
+            bool hasTeleported = Teleported;
+
+            if (Teleported)
+            {
+                Teleported = false;
+            }
+
             return PathNodes == null
                 || PathNodes.Count == 0 // we have no path
-                || PathFinalNode.GetDistance(TargetPosition) > 3.0; // target position changed
+                || PathFinalNode.GetDistance(TargetPosition) > 3.0 // target position changed
+                || hasTeleported;
         }
 
         private bool DoINeedToMount()
@@ -303,7 +317,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 && !WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                 && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
                 && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
-                && WowInterface.HookManager.IsOutdoors();
+                && WowInterface.HookManager.LuaIsOutdoors();
         }
 
         private BehaviorTreeStatus DoUnstuck()
@@ -373,29 +387,36 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private BehaviorTreeStatus HandleDirectMoving()
         {
-            if (PathNodes.TryPeek(out Vector3 checkNodePos)
-                && IsNearPosition(checkNodePos))
+            if (ForceDirectMove)
             {
-                PathNodes.TryDequeue(out _);
-            }
-
-            // target pos is used to follow path in the water, we
-            // need to move directly there to prevent going to
-            // the top level of the water because we are
-            // submerged a bit while swimming
-            Vector3 targetPos = PathNodes.Count > 0 && PathNodes.TryPeek(out Vector3 node) ? node : TargetPosition;
-
-            if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
-            {
-                PlayerVehicle.IsOnWaterSurface = WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsUnderwater;
+                WowInterface.CharacterManager.MoveToPosition(TargetPosition);
             }
             else
             {
-                targetPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, targetPos);
-            }
+                if (PathNodes.TryPeek(out Vector3 checkNodePos)
+                    && IsNearPosition(checkNodePos))
+                {
+                    PathNodes.TryDequeue(out _);
+                }
 
-            PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, targetPos, TargetRotation);
-            ShouldBeMoving = true;
+                // target pos is used to follow path in the water, we
+                // need to move directly there to prevent going to
+                // the top level of the water because we are
+                // submerged a bit while swimming
+                Vector3 targetPos = PathNodes.Count > 0 && PathNodes.TryPeek(out Vector3 node) ? node : TargetPosition;
+
+                if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
+                {
+                    PlayerVehicle.IsOnWaterSurface = WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsUnderwater;
+                }
+                else
+                {
+                    targetPos = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, targetPos);
+                }
+
+                PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction, targetPos, TargetRotation);
+                ShouldBeMoving = true;
+            }
 
             return IsNearPosition(TargetPosition) ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Ongoing;
         }
@@ -471,7 +492,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     StopMovement();
 
                     IsCastingMount = true;
-                    WowInterface.HookManager.Mount(mount.Index);
+                    WowInterface.HookManager.LuaCallCompanion(mount.Index);
 
                     return BehaviorTreeStatus.Ongoing;
                 }
@@ -482,6 +503,21 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private void MovementWatchdog_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (ForceDirectMove)
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player?.Position.GetDistance(LastPlayerPosition) > 25.0)
+            {
+                LastPlayerPosition = WowInterface.ObjectManager.Player.Position;
+                Teleported = true;
+
+                Reset();
+
+                return;
+            }
+
             if (MovementAction == MovementAction.None
                 || WowInterface.ObjectManager.Player.IsCasting
                 || IsNearPosition(TargetPosition))
@@ -506,7 +542,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     {
                         if (StuckCounter > 0 && WowInterface.ObjectManager.Player.IsMounted)
                         {
-                            WowInterface.HookManager.Dismount();
+                            WowInterface.HookManager.LuaDismissCompanion();
                         }
 
                         ++StuckCounter;

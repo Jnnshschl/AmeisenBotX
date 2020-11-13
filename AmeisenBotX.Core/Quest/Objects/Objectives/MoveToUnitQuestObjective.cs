@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
             if (Finished)
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.StopClickToMoveIfActive();
+                WowInterface.HookManager.WowStopClickToMove();
                 return;
             }
 

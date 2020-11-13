@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else
             {
-                WowInterface.HookManager.RetrieveCorpse();
+                WowInterface.HookManager.LuaRetrieveCorpse();
                 return BehaviorTreeStatus.Success;
             }
         }

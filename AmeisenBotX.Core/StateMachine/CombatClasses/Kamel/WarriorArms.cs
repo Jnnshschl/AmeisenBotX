@@ -198,12 +198,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
                         {
-                            WowInterface.HookManager.CastSpell(stance);
+                            WowInterface.HookManager.LuaCastSpell(stance);
                             return true;
                         }
                         else
                         {
-                            WowInterface.HookManager.CastSpell(spellName);
+                            WowInterface.HookManager.LuaCastSpell(spellName);
                             return true;
                         }
                     }
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (DateTime.Now > spellCoolDown[spellName])
             {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(spellName));
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
                 return true;
             }
 
@@ -228,9 +228,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
             {
-                if (WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
+                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.HookManager.ClearTarget();
+                    WowInterface.HookManager.WowClearTarget();
                     return;
                 }
 
@@ -238,7 +238,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 {
                     if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.HookManager.StartAutoAttack();
+                        WowInterface.HookManager.LuaStartAutoAttack();
                     }
 
                     if (WowInterface.ObjectManager.Target.IsCasting && CustomCastSpell(pummelSpell))
@@ -358,7 +358,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                 if (nearTarget != null)
                 {
-                    WowInterface.HookManager.TargetGuid(nearTarget.Guid);
+                    WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
 
                     if (!TargetInLineOfSight)
                     {

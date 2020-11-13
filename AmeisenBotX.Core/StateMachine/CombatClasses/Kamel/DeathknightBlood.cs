@@ -43,6 +43,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public IEnumerable<string> PriorityTargets { get; set; }
 
+        public IEnumerable<string> BlacklistedTargets { get; set; }
+
         public CombatClassRole Role => CombatClassRole.Dps;
 
         public TalentTree Talents { get; } = null;
@@ -68,7 +70,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 // make sure we're auto attacking
                 if (!ObjectManager.Player.IsAutoAttacking)
                 {
-                    HookManager.StartAutoAttack();
+                    HookManager.LuaStartAutoAttack();
                 }
 
                 HandleAttacking(target);
@@ -87,7 +89,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                 if (ObjectManager.Player.TargetGuid != guid)
                 {
-                    HookManager.TargetGuid(guid);
+                    HookManager.WowTargetGuid(guid);
                 }
             }
 
@@ -102,25 +104,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100;
             double playerHealthPercent = (ObjectManager.Player.Health / (double)ObjectManager.Player.MaxHealth) * 100.0;
-            (string, int) targetCastingInfo = HookManager.GetUnitCastingInfo(WowLuaUnit.Target);
+            (string, int) targetCastingInfo = HookManager.LuaGetUnitCastingInfo(WowLuaUnit.Target);
             //List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
             //myBuffs.Any(e => e.Equals("Chains of Ice"))
 
-            if (HookManager.GetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
+            if (HookManager.LuaGetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
             {
-                HookManager.CastSpell("Death Grip");
+                HookManager.LuaCastSpell("Death Grip");
                 return;
             }
             if (target.IsFleeing && distanceToTarget <= 30)
             {
-                HookManager.CastSpell("Chains of Ice");
+                HookManager.LuaCastSpell("Chains of Ice");
                 return;
             }
 
-            if (HookManager.GetSpellCooldown("Army of the Dead") <= 0 &&
+            if (HookManager.LuaGetSpellCooldown("Army of the Dead") <= 0 &&
                 IsOneOfAllRunesReady())
             {
-                HookManager.CastSpell("Army of the Dead");
+                HookManager.LuaCastSpell("Army of the Dead");
                 return;
             }
 
@@ -130,11 +132,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 .ToList();
 
             if (unitsNearPlayer.Count > 2 &&
-                HookManager.GetSpellCooldown("Blood Boil") <= 0 &&
-                HookManager.IsRuneReady(0) ||
-                HookManager.IsRuneReady(1))
+                HookManager.LuaGetSpellCooldown("Blood Boil") <= 0 &&
+                HookManager.WowIsRuneReady(0) ||
+                HookManager.WowIsRuneReady(1))
             {
-                HookManager.CastSpell("Blood Boil");
+                HookManager.LuaCastSpell("Blood Boil");
                 return;
             }
 
@@ -144,31 +146,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                 .ToList();
 
             if (unitsNearTarget.Count > 2 &&
-                HookManager.GetSpellCooldown("Death and Decay") <= 0 &&
+                HookManager.LuaGetSpellCooldown("Death and Decay") <= 0 &&
                 IsOneOfAllRunesReady())
             {
-                HookManager.CastSpell("Death and Decay");
-                HookManager.ClickOnTerrain(target.Position);
+                HookManager.LuaCastSpell("Death and Decay");
+                HookManager.WowClickOnTerrain(target.Position);
                 return;
             }
 
-            if (HookManager.GetSpellCooldown("Icy Touch") <= 0 &&
-                HookManager.IsRuneReady(2) ||
-                HookManager.IsRuneReady(3))
+            if (HookManager.LuaGetSpellCooldown("Icy Touch") <= 0 &&
+                HookManager.WowIsRuneReady(2) ||
+                HookManager.WowIsRuneReady(3))
             {
-                HookManager.CastSpell("Icy Touch");
+                HookManager.LuaCastSpell("Icy Touch");
                 return;
             }
         }
 
         private bool IsOneOfAllRunesReady()
         {
-            return HookManager.IsRuneReady(0)
-                       || HookManager.IsRuneReady(1)
-                       && HookManager.IsRuneReady(2)
-                       || HookManager.IsRuneReady(3)
-                       && HookManager.IsRuneReady(4)
-                       || HookManager.IsRuneReady(5);
+            return HookManager.WowIsRuneReady(0)
+                       || HookManager.WowIsRuneReady(1)
+                       && HookManager.WowIsRuneReady(2)
+                       || HookManager.WowIsRuneReady(3)
+                       && HookManager.WowIsRuneReady(4)
+                       || HookManager.WowIsRuneReady(5);
         }
     }
 }

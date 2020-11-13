@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     if (isAtPosition(ownFlag.Position))
                     {
                         // own flag reached, save it!
-                        WowInterface.HookManager.WowObjectOnRightClick(ownFlag);
+                        WowInterface.HookManager.WowObjectRightClick(ownFlag);
                         hasStateChanged = true;
                     }
                 }
@@ -112,7 +112,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, 
                             BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float) WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                         if (isInCombatReach(enemyFlagCarrier.Position))
-                            WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                            WowInterface.HookManager.WowTargetGuid(enemyFlagCarrier.Guid);
                         if (isEnemyClose())
                         {
                             WowInterface.Globals.ForceCombat = true;
@@ -149,7 +149,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                             WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
                                 BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                             if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal && isInCombatReach(enemyFlagCarrier.Position))
-                                WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                                WowInterface.HookManager.WowTargetGuid(enemyFlagCarrier.Guid);
                             if (isEnemyClose())
                             {
                                 WowInterface.Globals.ForceCombat = true;
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         {
                             // flag reached, save it!
                             hasStateChanged = true;
-                            WowInterface.HookManager.WowObjectOnRightClick(enemyFlag);
+                            WowInterface.HookManager.WowObjectRightClick(enemyFlag);
                         }
                     }
                     else
@@ -225,7 +225,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
                             BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                         if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal && isInCombatReach(enemyFlagCarrier.Position))
-                            WowInterface.HookManager.TargetGuid(enemyFlagCarrier.Guid);
+                            WowInterface.HookManager.WowTargetGuid(enemyFlagCarrier.Guid);
                         if (isEnemyClose())
                         {
                             WowInterface.Globals.ForceCombat = true;
@@ -248,7 +248,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     {
                         // flag reached, save it!
                         hasStateChanged = true;
-                        WowInterface.HookManager.WowObjectOnRightClick(enemyFlag);
+                        WowInterface.HookManager.WowObjectRightClick(enemyFlag);
                     }
                 }
                 else
@@ -273,7 +273,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         private WowUnit getEnemyFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral && !e.IsDead && e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
+            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral && !e.IsDead && e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
                 return flagCarrierList[0];
             else
@@ -282,7 +282,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         private WowUnit getTeamFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => (WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
+            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => (WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Friendly || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
                 return flagCarrierList[0];
             else
@@ -325,7 +325,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
         }
         private bool isEnemyClose()
         {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>() != null && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Any(e => WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral);
+            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>() != null && WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Any(e => WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral);
         }
         private bool IsGateOpen()
         {

@@ -86,21 +86,21 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     else
                     {
                         FlagState = 0;
-                        WowInterface.HookManager.SendChatMessage("/y The flag just lies around! Let's take it!");
+                        WowInterface.HookManager.LuaSendChatMessage("/y The flag just lies around! Let's take it!");
                     }
                 }
                 else
                 {
                     FlagState = PICKED_UP;
-                    if (hasFlag || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, FlagCarrier) == WowUnitReaction.Friendly || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, FlagCarrier) == WowUnitReaction.Neutral)
+                    if (hasFlag || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, FlagCarrier) == WowUnitReaction.Friendly || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, FlagCarrier) == WowUnitReaction.Neutral)
                     {
                         FlagState |= OWN_TEAM_FLAG;
-                        WowInterface.HookManager.SendChatMessage("/y We got it!");
+                        WowInterface.HookManager.LuaSendChatMessage("/y We got it!");
 
                     }
                     else
                     {
-                        WowInterface.HookManager.SendChatMessage("/y They've got the flag!");
+                        WowInterface.HookManager.LuaSendChatMessage("/y They've got the flag!");
                     }
                 }
             }
@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                             WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ownFlag.Position);
                             if (WowInterface.MovementEngine.IsAtTargetPosition)
                             {
-                                WowInterface.HookManager.WowObjectOnRightClick(FlagObject);
+                                WowInterface.HookManager.WowObjectRightClick(FlagObject);
                             }
                         }
                         else
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, FlagObject.Position);
                 if (WowInterface.MovementEngine.IsAtTargetPosition) // limit the executions
                 {
-                    WowInterface.HookManager.WowObjectOnRightClick(FlagObject);
+                    WowInterface.HookManager.WowObjectRightClick(FlagObject);
                 }
             }
             else if (startPosition != null)

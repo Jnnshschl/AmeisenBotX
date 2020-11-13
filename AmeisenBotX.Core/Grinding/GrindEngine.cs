@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Grinding
 
             if (WowInterface.ObjectManager.Player.IsInCombat && WowInterface.ObjectManager.Player.IsMounted)
             {
-                WowInterface.HookManager.Dismount();
+                WowInterface.HookManager.LuaDismissCompanion();
             }
 
             if (distanceToSpot < GrindingSpot.Radius)
@@ -100,12 +100,12 @@ namespace AmeisenBotX.Core.Grinding
 
                     if (TargetInLosEvent.Run() || switchedTarget)
                     {
-                        TargetInLos = WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, nearestUnit.Position);
+                        TargetInLos = WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, nearestUnit.Position);
                     }
 
                     if (nearestUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20.0 && TargetInLos)
                     {
-                        WowInterface.HookManager.TargetGuid(nearestUnit.Guid);
+                        WowInterface.HookManager.WowTargetGuid(nearestUnit.Guid);
                         WowInterface.Globals.ForceCombat = true;
                     }
                     else

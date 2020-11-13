@@ -206,7 +206,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return Auras != null && Auras.Any(e => e.Name == name);
         }
 
-        public bool IsInMeleeRange(WowUnit wowUnit) => wowUnit != null && Position.GetDistance(wowUnit.Position) < Math.Max(4.5, CombatReach + wowUnit.CombatReach + 1);
+        public bool IsInMeleeRange(WowUnit wowUnit) => wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
 
         public override string ToString()
         {
@@ -259,7 +259,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             }
 
             Array.Clear(Auras, 0, Auras.Length);
-            WowInterface.I.HookManager.GetUnitAuras(BaseAddress, ref Auras, out AuraCount);
+            WowInterface.I.HookManager.WowGetUnitAuras(BaseAddress, ref Auras, out AuraCount);
 
             if (WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitPosition), out Vector3 position))
             {

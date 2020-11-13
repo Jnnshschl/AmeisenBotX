@@ -69,10 +69,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 {
                     if (TalkEvent.Run())
                     {
-                        WowInterface.HookManager.StopClickToMoveIfActive();
+                        WowInterface.HookManager.WowStopClickToMove();
                         WowInterface.MovementEngine.Reset();
 
-                        WowInterface.HookManager.UnitOnRightClick(WowUnit);
+                        WowInterface.HookManager.WowUnitRightClick(WowUnit);
 
                         ++Counter;
                         if (Counter > GossipIds.Count)
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                             Counter = 1;
                         }
 
-                        WowInterface.HookManager.UnitSelectGossipOption(GossipIds[Counter - 1]);
+                        WowInterface.HookManager.LuaSelectGossipOption(GossipIds[Counter - 1]);
                     }
                 }
                 else

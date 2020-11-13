@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Movement
 
         void Reset();
 
-        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, bool disableShortcuts = false);
+        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false);
 
         void StopMovement();
 

@@ -1,10 +1,10 @@
 ﻿namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
-    public delegate bool CastSpellQuestObjectiveCondition();
+    public delegate bool CastVehicleSpellQuestObjectiveCondition();
 
-    public class CastSpellQuestObjective : IQuestObjective
+    public class CastVehicleSpellQuestObjective : IQuestObjective
     {
-        public CastSpellQuestObjective(WowInterface wowInterface, int spellId, CastSpellQuestObjectiveCondition condition)
+        public CastVehicleSpellQuestObjective(WowInterface wowInterface, int spellId, CastVehicleSpellQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
             SpellId = spellId;
@@ -15,7 +15,7 @@
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
-        private CastSpellQuestObjectiveCondition Condition { get; }
+        private CastVehicleSpellQuestObjectiveCondition Condition { get; }
 
         private int SpellId { get; }
 
@@ -23,8 +23,8 @@
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
-            
+            if (Finished || WowInterface.ObjectManager.Vehicle.IsCasting) { return; }
+
             WowInterface.MovementEngine.Reset();
             WowInterface.HookManager.WowStopClickToMove();
             WowInterface.HookManager.LuaCastSpellById(SpellId);

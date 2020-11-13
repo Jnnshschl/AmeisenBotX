@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Character.Talents
 
         public void Update()
         {
-            TalentTree = new TalentTree(WowInterface.HookManager.GetTalents());
+            TalentTree = new TalentTree(WowInterface.HookManager.LuaGetTalents());
         }
 
         private static bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree, out List<(int, int, int)> talentsToSpend)

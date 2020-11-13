@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (!WowInterface.HookManager.IsWoWHooked)
             {
-                WowInterface.HookManager.SetupEndsceneHook();
+                WowInterface.HookManager.WowSetupEndsceneHook();
 
                 if (Config.AutoSetUlowGfxSettings)
                 {
@@ -27,14 +27,14 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
             {
                 StateMachine.SetState(BotState.Idle);
-                WowInterface.HookManager.OverrideWorldLoadedCheck(false);
+                WowInterface.HookManager.BotOverrideWorldLoadedCheck(false);
                 return;
             }
         }
 
         public override void Execute()
         {
-            WowInterface.HookManager.OverrideWorldLoadedCheck(true);
+            WowInterface.HookManager.BotOverrideWorldLoadedCheck(true);
 
             if (LoginAttemptEvent.Run())
             {
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
                 {
                     StateMachine.SetState(BotState.Idle);
-                    WowInterface.HookManager.OverrideWorldLoadedCheck(false);
+                    WowInterface.HookManager.BotOverrideWorldLoadedCheck(false);
                     return;
                 }
             }

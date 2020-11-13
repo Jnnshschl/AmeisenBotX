@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
             {
                 if (!WowInterface.I.BotCache.TryGetSpellName(SpellId, out string name))
                 {
-                    name = WowInterface.I.HookManager.GetSpellNameById(SpellId);
+                    name = WowInterface.I.HookManager.LuaGetSpellNameById(SpellId);
                     WowInterface.I.BotCache.CacheSpellName(SpellId, name);
                 }
 

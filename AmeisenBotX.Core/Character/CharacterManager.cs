@@ -184,7 +184,7 @@ namespace AmeisenBotX.Core.Character
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
         {
-            if (pos == default || (WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveX, out Vector3 currentTargetPos) && currentTargetPos == pos))
+            if (pos == default)
             {
                 return;
             }
@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Character
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
-                                WowInterface.HookManager.ReplaceItem(null, item);
+                                WowInterface.HookManager.LuaEquipItem(item, itemToReplace);
                                 Equipment.Update();
                                 break;
                             }
@@ -251,7 +251,7 @@ namespace AmeisenBotX.Core.Character
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
-                            WowInterface.HookManager.ReplaceItem(null, itemToEquip);
+                            WowInterface.HookManager.LuaEquipItem(itemToEquip);
                             Equipment.Update();
                         }
                     }
@@ -376,7 +376,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            if (int.TryParse(WowInterface.HookManager.GetMoney(), out int money))
+            if (int.TryParse(WowInterface.HookManager.LuaGetMoney(), out int money))
             {
                 Money = money;
             }
@@ -386,14 +386,14 @@ namespace AmeisenBotX.Core.Character
         {
             try
             {
-                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.HookManager.GetMounts());
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.HookManager.LuaGetMounts());
             }
             catch { }
         }
 
         private void UpdateSkills()
         {
-            Skills = WowInterface.HookManager.GetSkills();
+            Skills = WowInterface.HookManager.LuaGetSkills();
         }
     }
 }

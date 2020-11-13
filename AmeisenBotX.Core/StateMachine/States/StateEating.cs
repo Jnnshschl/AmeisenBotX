@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 LastAction = DateTime.Now;
                 string itemName = WowInterface.CharacterManager.Inventory.Items.First(e => Enum.IsDefined(t, e.Id)).Name;
-                WowInterface.HookManager.UseItemByName(itemName);
+                WowInterface.HookManager.LuaUseItemByName(itemName);
 
                 if (t == typeof(WowRefreshment))
                 {

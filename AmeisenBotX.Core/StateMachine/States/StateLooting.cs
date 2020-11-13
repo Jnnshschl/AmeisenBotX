@@ -78,16 +78,16 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         if (WowInterface.MovementEngine.IsAtTargetPosition)
                         {
-                            WowInterface.HookManager.StopClickToMoveIfActive();
+                            WowInterface.HookManager.WowStopClickToMove();
                         }
 
-                        WowInterface.HookManager.UnitOnRightClick(selectedUnit);
+                        WowInterface.HookManager.WowUnitRightClick(selectedUnit);
                         UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
 
                         if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
                              && lootOpen > 0)
                         {
-                            WowInterface.HookManager.LootEveryThing();
+                            WowInterface.HookManager.LuaLootEveryThing();
 
                             if (UnitLootQueue.Count > 0)
                             {

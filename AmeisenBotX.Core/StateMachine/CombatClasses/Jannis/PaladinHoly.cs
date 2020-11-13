@@ -134,7 +134,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         if (EventAutoAttack.Run())
                         {
-                            WowInterface.HookManager.StartAutoAttack();
+                            WowInterface.HookManager.LuaStartAutoAttack();
                         }
 
                         return;
@@ -162,7 +162,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.Count() > 1 ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
+                WowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.HasBuffByName(beaconOfLightSpell));
+
+                if (targetUnit == null)
+                {
+                    unitsToHeal.FirstOrDefault(e => e != null);
+
+                    if (targetUnit == null)
+                    {
+                        return false;
+                    }
+                }
 
                 if (targetUnit.HealthPercentage < 15.0
                     && TryCastSpell(layOnHandsSpell, 0))

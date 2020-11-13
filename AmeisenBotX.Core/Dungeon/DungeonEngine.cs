@@ -184,7 +184,7 @@ namespace AmeisenBotX.Core.Dungeon
         {
             if (ExitDungeonEvent.Run())
             {
-                if (WowInterface.HookManager.IsInLfgGroup())
+                if (WowInterface.HookManager.LuaIsInLfgGroup())
                 {
                     WowInterface.HookManager.LuaDoString("LFGTeleport(true);");
                 }

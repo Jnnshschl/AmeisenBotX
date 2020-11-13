@@ -1,10 +1,14 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Tactic;
+using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
 using AmeisenBotX.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.States
@@ -15,7 +19,6 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(100));
             LineOfSightCheck = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(1000));
-            RandomPosEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
         }
 
         public double DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28.0;
@@ -26,8 +29,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private TimegatedEvent<bool> LineOfSightCheck { get; set; }
 
-        private TimegatedEvent RandomPosEvent { get; }
-
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
@@ -35,6 +36,15 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (Config.MaxFps != Config.MaxFpsCombat)
             {
                 WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFpsCombat});SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat})");
+            }
+
+            if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
+            {
+                // Anub Rhekan
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3273, -3476, 287)) < 100.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new SortedList<int, ITactic>() { { 0, new AnubRhekan10Tactic(WowInterface) } });
+                }
             }
         }
 
@@ -50,36 +60,45 @@ namespace AmeisenBotX.Core.Statemachine.States
             // we can do nothing until the ObjectManager is initialzed
             if (WowInterface.ObjectManager != null && WowInterface.ObjectManager.Player != null)
             {
+                WowInterface.TacticEngine.Execute(WowInterface.CombatClass.Role, WowInterface.CombatClass.IsMelee, out bool handlesMovement, out bool allowAttacking);
+
                 // use the default MovementEngine to move if the CombatClass doesnt
                 if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
-                    HandleMovement(WowInterface.ObjectManager.Target);
+                    if (!handlesMovement)
+                    {
+                        if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.ObjectManager.Target == null)
+                        {
+                            if (WowInterface.Globals.ForceCombat)
+                            {
+                                WowInterface.Globals.ForceCombat = false;
+                            }
+                        
+                            if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
+                            {
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
+                            }
+                        }
+                        else
+                        {
+                            HandleMovement(WowInterface.ObjectManager.Target);
+                        }
+                    }
                 }
 
                 // if no CombatClass is loaded, just autoattack
-                if (WowInterface.CombatClass == null)
+                if (allowAttacking)
                 {
-                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
+                    if (WowInterface.CombatClass == null)
                     {
-                        WowInterface.HookManager.StartAutoAttack();
+                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
+                        {
+                            WowInterface.HookManager.LuaStartAutoAttack();
+                        }
                     }
-                }
-                else
-                {
-                    WowInterface.CombatClass.Execute();
-                }
-
-                if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.ObjectManager.Target == null)
-                {
-                    if (WowInterface.Globals.ForceCombat)
+                    else
                     {
-                        WowInterface.Globals.ForceCombat = false;
-                    }
-
-                    if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
-                    {
-                        AmeisenLogger.I.Log("Combat", $"Following {player} because we have nothing else to do");
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
+                        WowInterface.CombatClass.Execute();
                     }
                 }
             }
@@ -88,7 +107,9 @@ namespace AmeisenBotX.Core.Statemachine.States
         public override void Leave()
         {
             TargetInLos = true;
+
             WowInterface.MovementEngine.Reset();
+            WowInterface.TacticEngine.Reset();
 
             if (Config.MaxFps != Config.MaxFpsCombat)
             {
@@ -100,21 +121,23 @@ namespace AmeisenBotX.Core.Statemachine.States
         private Vector3 GetMeanGroupPosition()
         {
             Vector3 meanGroupPosition = new Vector3();
+            int count = 0;
 
             foreach (WowUnit unit in WowInterface.ObjectManager.Partymembers)
             {
-                if (unit.Guid != WowInterface.ObjectManager.PlayerGuid)
+                if (unit.Guid != WowInterface.ObjectManager.PlayerGuid && unit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 100.0)
                 {
                     meanGroupPosition += unit.Position;
+                    ++count;
                 }
             }
 
-            return meanGroupPosition;
+            return meanGroupPosition / count;
         }
 
         private double GetMeeleRange()
         {
-            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5 : Math.Max(3.0, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.75);
+            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5 : MathF.Max(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
         }
 
         private bool HandleMovement(WowUnit target)
@@ -124,7 +147,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 TargetInLos = true;
             }
-            else if (LineOfSightCheck.Run(out bool isInLos, () => WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
+            else if (LineOfSightCheck.Run(out bool isInLos, () => WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
             {
                 TargetInLos = isInLos;
             }
@@ -137,12 +160,12 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             // check if we are facing the unit
             if (target != null
-                && !WowInterface.HookManager.IsClickToMoveActive()
+                && !WowInterface.HookManager.WowIsClickToMoveActive()
                 && FacingCheck.Run()
                 && target.Guid != WowInterface.ObjectManager.PlayerGuid
                 && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
             {
-                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
             }
 
             // do we need to move

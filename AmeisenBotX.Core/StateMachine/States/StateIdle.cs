@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
 
                     WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                    WowInterface.HookManager.EnableClickToMove();
+                    WowInterface.HookManager.WowEnableClickToMove();
                 }
 
                 if (RefreshCharacterEvent.Run())
@@ -205,7 +205,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 2)
             {
-                WowInterface.HookManager.AcceptBattlegroundInvite();
+                WowInterface.HookManager.LuaAcceptBattlegroundInvite();
             }
         }
 
@@ -233,10 +233,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, possibleQuestgiver.Position))
                         {
-                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, possibleQuestgiver.Position);
+                            WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, possibleQuestgiver.Position);
                         }
 
-                        WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
+                        WowInterface.HookManager.WowUnitRightClick(possibleQuestgiver);
                         return true;
                     }
                 }

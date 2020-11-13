@@ -1,15 +1,15 @@
-﻿namespace AmeisenBotX.Core.Quest.Objects.Objectives
-{
-    public delegate bool BotActionQuestObjectiveCondition();
+﻿using System;
 
+namespace AmeisenBotX.Core.Quest.Objects.Objectives
+{
     public class BotActionQuestObjective : IQuestObjective
     {
-        public BotActionQuestObjective(BotActionQuestObjectiveCondition action)
+        public BotActionQuestObjective(Action action)
         {
             Action = action;
         }
 
-        public BotActionQuestObjectiveCondition Action { get; }
+        public Action Action { get; }
 
         public bool Finished => Progress == 100.0;
 

@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public IEnumerable<string> PriorityTargets { get; set; }
 
+        public IEnumerable<string> BlacklistedTargets { get; set; }
+
         private WowInterface WowInterface { get; }
 
         public void Reset()

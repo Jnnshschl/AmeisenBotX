@@ -6,17 +6,17 @@
 
         public bool EnableTracelineJumpCheck { get; set; } = true;
 
-        public float JumpCheckDistance { get; set; } = 0.3f;
+        public float ObstacleCheckDistance { get; set; } = 0.5f;
 
-        public float JumpCheckHeight { get; set; } = 0.7f;
+        public float ObstacleCheckHeight { get; set; } = 0.6f;
 
         public float MaxAcceleration { get; set; } = 1f;
 
-        public double MaxDistanceMovedJumpUnstuck { get; set; } = 0.3;
+        public double MaxDistanceMovedJumpUnstuck { get; set; } = 0.5;
 
         public float MaxSteering { get; set; } = 1f;
 
-        public float MaxVelocity { get; set; } = 9f;
+        public float MaxVelocity { get; set; } = 4f;
 
         public double MinDistanceMovedJumpUnstuck { get; set; } = -1.0;
 
@@ -28,8 +28,8 @@
 
         public float UnstuckDistance { get; set; } = 6.0f;
 
-        public double WaypointCheckThreshold { get; set; } = 2.0;
+        public double WaypointCheckThreshold { get; set; } = 1.0;
 
-        public double WaypointCheckThresholdMounted { get; set; } = 3.5;
+        public double WaypointCheckThresholdMounted { get; set; } = 3.0;
     }
 }

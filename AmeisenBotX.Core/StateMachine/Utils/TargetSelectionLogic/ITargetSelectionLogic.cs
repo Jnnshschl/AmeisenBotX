@@ -6,6 +6,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
     public interface ITargetSelectionLogic
     {
         IEnumerable<string> PriorityTargets { get; set; }
+        IEnumerable<string> BlacklistedTargets { get; set; }
 
         void Reset();
 

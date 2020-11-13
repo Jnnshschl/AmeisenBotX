@@ -35,6 +35,7 @@ using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.States;
+using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -511,12 +512,12 @@ namespace AmeisenBotX.Core
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.CofirmBop();
+            WowInterface.HookManager.LuaCofirmStaticPopup();
         }
 
         private void OnConfirmLootRoll(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.CofirmLootRoll();
+            WowInterface.HookManager.LuaCofirmLootRoll();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
@@ -531,7 +532,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.HookManager.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+                WowInterface.HookManager.LuaClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
             }
         }
 
@@ -539,7 +540,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.HookManager.SelectLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : CombatClassRole.Dps);
+                WowInterface.HookManager.LuaSetLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : CombatClassRole.Dps);
             }
         }
 
@@ -547,15 +548,15 @@ namespace AmeisenBotX.Core
         {
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemLink = WowInterface.HookManager.GetLootRollItemLink(rollId);
-                string itemJson = WowInterface.HookManager.GetItemJsonByNameOrLink(itemLink);
+                string itemLink = WowInterface.HookManager.LuaGetLootRollItemLink(rollId);
+                string itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
 
                 WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                 if (item.Name == "0" || item.ItemLink == "0")
                 {
                     // get the item id and try again
-                    itemJson = WowInterface.HookManager.GetItemJsonByNameOrLink(
+                    itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(
                         itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                         .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
 
@@ -566,23 +567,23 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    WowInterface.HookManager.RollOnItem(rollId, RollType.Need);
+                    WowInterface.HookManager.LuaRollOnLoot(rollId, RollType.Need);
                     return;
                 }
             }
 
-            WowInterface.HookManager.RollOnItem(rollId, RollType.Pass);
+            WowInterface.HookManager.LuaRollOnLoot(rollId, RollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
             if (Config.LootOnlyMoneyAndQuestitems)
             {
-                WowInterface.HookManager.LootOnlyMoneyAndQuestItems();
+                WowInterface.HookManager.LuaLootMoneyAndQuestItems();
                 return;
             }
 
-            WowInterface.HookManager.LootEveryThing();
+            WowInterface.HookManager.LuaLootEveryThing();
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
@@ -592,7 +593,7 @@ namespace AmeisenBotX.Core
                 return;
             }
 
-            WowInterface.HookManager.AcceptPartyInvite();
+            WowInterface.HookManager.LuaAcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
@@ -601,7 +602,7 @@ namespace AmeisenBotX.Core
             {
                 if (args.Count == 1 && args[0] == "1")
                 {
-                    WowInterface.HookManager.AcceptBattlegroundInvite();
+                    WowInterface.HookManager.LuaAcceptBattlegroundInvite();
                 }
             }
         }
@@ -618,7 +619,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests)
             {
-                WowInterface.HookManager.AutoAcceptQuests();
+                WowInterface.HookManager.LuaAcceptQuests();
             }
         }
 
@@ -632,12 +633,12 @@ namespace AmeisenBotX.Core
 
         private void OnReadyCheck(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.CofirmReadyCheck(true);
+            WowInterface.HookManager.LuaCofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.AcceptResurrect();
+            WowInterface.HookManager.LuaAcceptResurrect();
         }
 
         private void OnShowQuestFrame(long timestamp, List<string> args)
@@ -650,7 +651,7 @@ namespace AmeisenBotX.Core
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.AcceptSummon();
+            WowInterface.HookManager.LuaAcceptSummon();
         }
 
         private void OnTalentPointsChange(long timestamp, List<string> args)
@@ -659,7 +660,7 @@ namespace AmeisenBotX.Core
             {
                 TalentUpdateRunning = true;
                 WowInterface.CharacterManager.TalentManager.Update();
-                WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.HookManager.GetUnspentTalentPoints());
+                WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.HookManager.LuaGetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
         }
@@ -810,8 +811,9 @@ namespace AmeisenBotX.Core
             WowInterface.JobEngine = new JobEngine(WowInterface, Config);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface, StateMachine);
             WowInterface.RelaxEngine = new RelaxEngine(WowInterface);
-            WowInterface.QuestEngine = new QuestEngine(WowInterface);
+            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
             WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
+            WowInterface.TacticEngine = new TacticEngine();
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = new MovementSettings();

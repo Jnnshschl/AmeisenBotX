@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     if (WowInterface.ObjectManager.TargetGuid != selectedUnit.Guid)
                     {
-                        WowInterface.HookManager.TargetGuid(selectedUnit.Guid);
+                        WowInterface.HookManager.WowTargetGuid(selectedUnit.Guid);
                         return;
                     }
 
@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
                     {
-                        WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
+                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
                         return;
                     }
 
@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
                     {
-                        WowInterface.HookManager.RepairAllItems();
+                        WowInterface.HookManager.LuaRepairAllItems();
                     }
 
                     if (Config.AutoSell)
@@ -109,14 +109,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                             {
                                 // equip item and sell the other after
                                 itemToSell = itemToReplace;
-                                WowInterface.HookManager.ReplaceItem(null, item);
+                                WowInterface.HookManager.LuaEquipItem(item, itemToReplace);
                             }
 
                             if (itemToSell != null
                                 && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
                             {
-                                WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
-                                WowInterface.HookManager.CofirmBop();
+                                WowInterface.HookManager.LuaUseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
+                                WowInterface.HookManager.LuaCofirmStaticPopup();
                                 Task.Delay(50).Wait();
                             }
                         }
@@ -140,20 +140,20 @@ namespace AmeisenBotX.Core.Statemachine.States
                         {
                             // equip item and sell the other after
                             itemToSell = itemToReplace;
-                            WowInterface.HookManager.ReplaceItem(null, item);
+                            WowInterface.HookManager.LuaEquipItem(item, itemToReplace);
                         }
 
                         if (itemToSell != null
                             && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
                         {
-                            WowInterface.HookManager.UseItemByBagAndSlot(itemToSell.BagId, itemToSell.BagSlot);
-                            WowInterface.HookManager.CofirmBop();
+                            WowInterface.HookManager.LuaUseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
+                            WowInterface.HookManager.LuaCofirmStaticPopup();
                         }
                     }
 
                     if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
                     {
-                        WowInterface.HookManager.RepairAllItems();
+                        WowInterface.HookManager.LuaRepairAllItems();
                     }
                 }
             }
@@ -170,7 +170,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                               && !Blacklist.Contains(e.Guid)
                               && !e.IsDead
                               && e.IsVendor
-                              && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Hostile
+                              && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Hostile
                               && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
 
             return unit != null;

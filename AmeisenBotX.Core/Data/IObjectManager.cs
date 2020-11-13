@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Data
@@ -53,6 +52,8 @@ namespace AmeisenBotX.Core.Data
         WowUnit Target { get; }
 
         ulong TargetGuid { get; }
+
+        WowUnit Vehicle { get; }
 
         IEnumerable<WowObject> WowObjects { get; }
 

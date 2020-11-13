@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         }
 
         public IEnumerable<string> PriorityTargets { get; set; }
+        
+        public IEnumerable<string> BlacklistedTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -35,9 +37,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 && (WowInterface.ObjectManager.Target.IsDead
                     || WowInterface.ObjectManager.Target.IsNotAttackable
                     || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
-                    || WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly))
+                    || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly))
             {
-                WowInterface.HookManager.ClearTarget();
+                WowInterface.HookManager.WowClearTarget();
                 possibleTargets = null;
                 return false;
             }

@@ -52,6 +52,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public IEnumerable<string> PriorityTargets { get; set; }
 
+        public IEnumerable<string> BlacklistedTargets { get; set; }
+
         public bool TargetInLineOfSight { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Dps;
@@ -134,15 +136,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             {
                 if (distanceTraveled < 0.001)
                 {
-                    WowInterface.HookManager.ClearTarget();
-                    WowInterface.HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.HookManager.LuaSendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                     WowInterface.Globals.ForceCombat = false;
                 }
                 else
                 {
-                    WowInterface.HookManager.ClearTarget();
-                    WowInterface.HookManager.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.HookManager.LuaSendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -185,8 +187,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 else if (!Dancing || standing)
                 {
                     standing = false;
-                    WowInterface.HookManager.ClearTarget();
-                    WowInterface.HookManager.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.HookManager.LuaSendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -195,8 +197,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 if (!Dancing || !standing)
                 {
                     standing = true;
-                    WowInterface.HookManager.ClearTarget();
-                    WowInterface.HookManager.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.HookManager.LuaSendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -204,7 +206,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private void HandleAttacking(WowUnit target)
         {
-            WowInterface.HookManager.TargetGuid(target.Guid);
+            WowInterface.HookManager.WowTargetGuid(target.Guid);
             spells.CastNextSpell(distanceToTarget, target, multipleTargets);
             if (target.IsDead || target.Health < 1)
             {
@@ -227,7 +229,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             if(computeNewRoute)
             {
                 if(!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
-                    WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, target.Position, target.Rotation);
             }
         }
@@ -239,7 +241,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 return false;
             }
 
-            List<WowUnit> wowUnits = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
+            List<WowUnit> wowUnits = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead || target.Health < 1) ? 2147483647 : target.Health;
             bool inCombat = target == null ? false : target.IsInCombat;
@@ -257,7 +259,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                             targetCount++;
                         }
 
-                        if (((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth)) && WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, unit.Position))
+                        if (((unit.IsInCombat && unit.Health < targetHealth) || (!inCombat && grinding && unit.Health < targetHealth)) && WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, unit.Position))
                         {
                             target = unit;
                             targetHealth = unit.Health;
@@ -270,7 +272,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (target == null || !(target.IsDead || target.Health < 1 || target.Auras.Any(e => e.Name.Contains("Spirit of Redem"))))
             {
-                WowInterface.HookManager.ClearTarget();
+                WowInterface.HookManager.WowClearTarget();
                 newTargetFound = false;
                 target = null;
             }
@@ -281,7 +283,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (newTargetFound)
             {
-                WowInterface.HookManager.TargetGuid(target.Guid);
+                WowInterface.HookManager.WowTargetGuid(target.Guid);
                 spells.ResetAfterTargetDeath();
             }
 
@@ -365,7 +367,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                 if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                 {
-                    WowInterface.HookManager.StartAutoAttack();
+                    WowInterface.HookManager.LuaStartAutoAttack();
                 }
 
                 Player = WowInterface.ObjectManager.Player;
@@ -379,18 +381,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 }
                 else if (lowHealth && !askedForHelp)
                 {
-                    WowInterface.HookManager.SendChatMessage("/helpme");
+                    WowInterface.HookManager.LuaSendChatMessage("/helpme");
                     askedForHelp = true;
                 }
                 else if (mediumHealth && !askedForHeal)
                 {
-                    WowInterface.HookManager.SendChatMessage("/healme");
+                    WowInterface.HookManager.LuaSendChatMessage("/healme");
                     askedForHeal = true;
                 }
 
                 if (lowHealth && rage > 15 && IsReady(EnragedRegeneration))
                 {
-                    WowInterface.HookManager.SendChatMessage("/s Oh shit");
+                    WowInterface.HookManager.LuaSendChatMessage("/s Oh shit");
                     CastSpell(EnragedRegeneration, ref rage, 15, 180, false);
                 }
 
@@ -400,7 +402,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 }
                 else if (rage > 10 && IsReady(BattleShout))
                 {
-                    WowInterface.HookManager.SendChatMessage("/roar");
+                    WowInterface.HookManager.LuaSendChatMessage("/roar");
                     CastSpell(BattleShout, ref rage, 10, 120, true); // lasts 2 min
                 }
                 else if (IsInBerserkerStance && rage > 10 && Player.HealthPercentage > 50 && IsReady(Recklessness))
@@ -453,7 +455,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                                     // charge
                                     if (IsReady(Charge))
                                     {
-                                        WowInterface.HookManager.SendChatMessage("/incoming");
+                                        WowInterface.HookManager.LuaSendChatMessage("/incoming");
                                         CastSpell(Charge, ref rage, 0, 15, false);
                                     }
                                 }
@@ -503,7 +505,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                                 }
                                 else if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
                                 {
-                                    WowInterface.HookManager.StartAutoAttack();
+                                    WowInterface.HookManager.LuaStartAutoAttack();
                                 }
                             }
                         }
@@ -543,7 +545,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
-                WowInterface.HookManager.CastSpell(spell);
+                WowInterface.HookManager.LuaCastSpell(spell);
                 rage -= rageCosts;
                 if (cooldown > 0)
                 {
@@ -558,7 +560,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private void ChangeToStance(string stance, out int rage)
             {
-                WowInterface.HookManager.CastSpell(stance);
+                WowInterface.HookManager.LuaCastSpell(stance);
                 rage = UpdateRage();
                 NextStance = DateTime.Now.AddSeconds(1);
                 IsInBerserkerStance = stance == BerserkerStance;
@@ -578,7 +580,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     result &= !nextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable);
                 }
 
-                result &= WowInterface.HookManager.GetSpellCooldown(spell) <= 0 && WowInterface.HookManager.GetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0;
+                result &= WowInterface.HookManager.LuaGetSpellCooldown(spell) <= 0 && WowInterface.HookManager.LuaGetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0;
                 return result;
             }
 
