@@ -48,7 +48,7 @@ namespace AmeisenBotX
 
         private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot.WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
+            if (AmeisenBot.WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
             {
                 textboxLuaResult.Text = result;
             }

@@ -486,7 +486,7 @@ namespace AmeisenBotX
             {
                 WowUnit unit = wowUnits[i];
 
-                Brush selectedBrush = unit.IsDead ? DeadBrush : (AmeisenBot.WowInterface.HookManager.GetUnitReaction(AmeisenBot.WowInterface.ObjectManager.Player, unit)) switch
+                Brush selectedBrush = unit.IsDead ? DeadBrush : (AmeisenBot.WowInterface.HookManager.WowGetUnitReaction(AmeisenBot.WowInterface.ObjectManager.Player, unit)) switch
                 {
                     WowUnitReaction.HostileGuard => EnemyBrush,
                     WowUnitReaction.Hostile => EnemyBrush,
