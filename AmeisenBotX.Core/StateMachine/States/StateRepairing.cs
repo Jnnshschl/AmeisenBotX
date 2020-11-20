@@ -1,14 +1,11 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
+using AmeisenBotX.Core.StateMachine.Routines;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -48,7 +45,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (IsRepairNpcNear(out WowUnit selectedUnit))
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 1.5)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.5)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
@@ -65,24 +62,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                         }
                     }
                 }
-                else if (InteractionEvent.Run())
+                else if (InteractionEvent.Run() && SpeakToMerchantRoutine.Run(WowInterface, selectedUnit))
                 {
-                    if (WowInterface.ObjectManager.TargetGuid != selectedUnit.Guid)
-                    {
-                        WowInterface.HookManager.WowTargetGuid(selectedUnit.Guid);
-                        return;
-                    }
-
-                    WowInterface.MovementEngine.StopMovement();
-
-                    if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
-                    {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, selectedUnit.Position);
-                        return;
-                    }
-
-                    // WowInterface.HookManager.UnitOnRightClick(selectedUnit);
-                    WowInterface.CharacterManager.ClickToMove(selectedUnit.Position, selectedUnit.Guid, Character.Enums.ClickToMoveType.Interact, 20.9f, 1.5f);
+                    WowInterface.I.MovementEngine.StopMovement();
 
                     if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
                     {
@@ -91,40 +73,13 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (Config.AutoSell)
                     {
-                        foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
-                        {
-                            IWowItem itemToSell = item;
-
-                            if (Config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-                                || (!Config.SellGrayItems && item.ItemQuality == ItemQuality.Poor)
-                                || (!Config.SellWhiteItems && item.ItemQuality == ItemQuality.Common)
-                                || (!Config.SellGreenItems && item.ItemQuality == ItemQuality.Uncommon)
-                                || (!Config.SellBlueItems && item.ItemQuality == ItemQuality.Rare)
-                                || (!Config.SellPurpleItems && item.ItemQuality == ItemQuality.Epic))
-                            {
-                                continue;
-                            }
-
-                            if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
-                            {
-                                // equip item and sell the other after
-                                itemToSell = itemToReplace;
-                                WowInterface.HookManager.LuaEquipItem(item, itemToReplace);
-                            }
-
-                            if (itemToSell != null
-                                && (WowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
-                            {
-                                WowInterface.HookManager.LuaUseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
-                                WowInterface.HookManager.LuaCofirmStaticPopup();
-                                Task.Delay(50).Wait();
-                            }
-                        }
+                        SellItemsRoutine.Run(WowInterface, Config);
                     }
                 }
             }
             else
             {
+                WowInterface.HookManager.LuaClickUiElement("MerchantFrameCloseButton");
                 StateMachine.SetState(BotState.Idle);
             }
         }

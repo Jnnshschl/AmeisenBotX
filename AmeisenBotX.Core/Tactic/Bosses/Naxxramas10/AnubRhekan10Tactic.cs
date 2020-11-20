@@ -20,15 +20,15 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
 
-        private Vector3 MiddleSpot { get; } = new Vector3(3274, -3476, 287);
-
         private Vector3 ImpaleDodgePos { get; set; }
 
         private bool LocustSwarmActive => (LocustSwarmActivated + TimeSpan.FromSeconds(20)) > DateTime.Now;
 
-        private bool TankingIsKiting { get; set; } = false;
-
         private bool MeleeDpsIsMovingToMid { get; set; } = false;
+
+        private Vector3 MiddleSpot { get; } = new Vector3(3274, -3476, 287);
+
+        private bool TankingIsKiting { get; set; } = false;
 
         private bool TankingIsUsingA { get; set; } = true;
 
@@ -64,15 +64,13 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private WowInterface WowInterface { get; }
 
-        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking)
+        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking) => role switch
         {
-            return role switch
-            {
-                CombatClassRole.Tank => DoTank(out handlesMovement, out allowAttacking),
-                CombatClassRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
-                CombatClassRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
-            };
-        }
+            CombatClassRole.Tank => DoTank(out handlesMovement, out allowAttacking),
+            CombatClassRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
+            CombatClassRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
+            _ => throw new NotImplementedException(), // should never happen
+        };
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {

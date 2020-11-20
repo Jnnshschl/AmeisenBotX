@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
@@ -12,13 +13,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowUnit : WowObject
     {
-        public int AuraCount = 0;
-
-        public WowAura[] Auras = new WowAura[40];
+        private WowAura[] auras;
 
         public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
+
+        public int AuraCount { get; set; }
+
+        public IEnumerable<WowAura> Auras => auras;
 
         public WowClass Class { get; set; }
 
@@ -255,11 +258,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
             if (Type == WowObjectType.Unit)
             {
+                // dont read the name for players
                 Name = ReadUnitName();
             }
 
-            Array.Clear(Auras, 0, Auras.Length);
-            WowInterface.I.HookManager.WowGetUnitAuras(BaseAddress, ref Auras, out AuraCount);
+            auras = new WowAura[40];
+            WowInterface.I.HookManager.WowGetUnitAuras(BaseAddress, ref auras, out int auraCount);
+            AuraCount = auraCount;
 
             if (WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitPosition), out Vector3 position))
             {
@@ -289,7 +294,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         private string ReadUnitName()
         {
-            if (WowInterface.I.BotCache.TryGetUnitName(Guid, out string cachedName))
+            if (WowInterface.I.Db.TryGetUnitName(Guid, out string cachedName))
             {
                 return cachedName;
             }
@@ -300,7 +305,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             {
                 if (name.Length > 0)
                 {
-                    WowInterface.I.BotCache.CacheName(Guid, name);
+                    WowInterface.I.Db.CacheName(Guid, name);
                 }
 
                 return name;

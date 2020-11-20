@@ -11,7 +11,6 @@ using AmeisenBotX.Core.Dungeon.Profiles.WotLK;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace AmeisenBotX.Core.Dungeon
 {
     public class DungeonEngine : IDungeonEngine
     {
-        public DungeonEngine(WowInterface wowInterface, AmeisenBotStateMachine stateMachine)
+        public DungeonEngine(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
 

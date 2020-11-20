@@ -140,11 +140,11 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr TickCount { get; } = new IntPtr(0xB499A4);
 
+        public IntPtr WowDynobjectPosition { get; } = new IntPtr(0xE8);
+
         public IntPtr WowGameobjectPosition { get; } = new IntPtr(0x1D8);
 
         public IntPtr WowObjectDescriptor { get; } = new IntPtr(0x8);
-
-        public IntPtr WowDynobjectPosition { get; } = new IntPtr(0xE8);
 
         public IntPtr WowObjectType { get; } = new IntPtr(0x14);
 

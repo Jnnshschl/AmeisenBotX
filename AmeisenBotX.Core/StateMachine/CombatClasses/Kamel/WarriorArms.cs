@@ -316,10 +316,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         return;
                     }
 
-                    {
-                        return;
-                    }
-
                     if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
                     {
                         return;

@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Cache.Enums;
+using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
@@ -61,8 +61,7 @@ namespace AmeisenBotX.Core.Grinding
             }
 
             if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
-                && WowInterface.BotCache.PointsOfInterest.TryGetValue((WowInterface.ObjectManager.MapId, PoiType.Repair), out List<Vector3> repairNpcs)
-                && repairNpcs.Any(e => e.GetDistance(WowInterface.ObjectManager.Player.Position) < 4096.0))
+                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, PoiType.Repair, WowInterface.ObjectManager.Player.Position, 4096.0, out IEnumerable<Vector3> repairNpcs))
             {
                 GoToNpcAndRepair(repairNpcs);
                 return;
@@ -165,7 +164,7 @@ namespace AmeisenBotX.Core.Grinding
             Profile = questProfile;
         }
 
-        private void GoToNpcAndRepair(List<Vector3> repairNpcs)
+        private void GoToNpcAndRepair(IEnumerable<Vector3> repairNpcs)
         {
             Vector3 repairNpc = repairNpcs.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
 

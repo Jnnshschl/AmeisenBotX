@@ -317,7 +317,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
                     StartedCasting[id] = wowInterface.ObjectManager.Vehicle.IsCasting;
                 }
-                else if(!wowInterface.ObjectManager.Vehicle.IsCasting)
+                else if (!wowInterface.ObjectManager.Vehicle.IsCasting)
                 {
                     CastedSpell[id] = true;
                 }

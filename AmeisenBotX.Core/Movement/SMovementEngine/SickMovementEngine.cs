@@ -39,6 +39,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 MovementWatchdog.Start();
             }
 
+            PathDecayEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
             ObstacleCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             MountCheck = new TimegatedEvent(TimeSpan.FromSeconds(3));
 
@@ -122,8 +123,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool IsGhost { get; set; }
 
-        public bool Teleported { get; set; }
-
         public bool JumpOnNextMove { get; private set; }
 
         public Vector3 LastPlayerPosition { get; private set; }
@@ -158,13 +157,19 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public float TargetRotation { get; private set; }
 
+        public bool Teleported { get; set; }
+
         public Vector3 UnstuckTargetPosition { get; private set; }
 
         private AmeisenBotConfig Config { get; }
 
+        private Timer MovementWatchdog { get; }
+
         private TimegatedEvent ObstacleCheckEvent { get; }
 
-        private Timer MovementWatchdog { get; }
+        private TimegatedEvent PathDecayEvent { get; }
+
+        private DateTime PreventMovementUntil { get; set; }
 
         private List<IShortcut> Shortcuts { get; }
 
@@ -215,12 +220,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
         {
-            return WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
+            return WowInterface.ObjectManager.Player.IsSwimming
+                || WowInterface.ObjectManager.Player.IsFlying
+                || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
         }
 
         public bool IsNearPosition(Vector3 position) => position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
-
-        private DateTime PreventMovementUntil { get; set; }
 
         public void PreventMovement(TimeSpan timeSpan)
         {
@@ -240,7 +245,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             StuckPosition = default;
             ShouldBeMoving = false;
 
-            if (PathNodes.Count > 0)
+            if (!PathNodes.IsEmpty)
             {
                 PathNodes.Clear();
             }
@@ -287,7 +292,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 AmeisenLogger.I.Log("Movement", "Stopping Movement");
                 WowInterface.HookManager.WowStopClickToMove();
                 ShouldBeMoving = false;
+
                 Reset();
+                PlayerVehicle.Reset();
             }
         }
 
@@ -300,8 +307,9 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 Teleported = false;
             }
 
-            return PathNodes == null
-                || PathNodes.Count == 0 // we have no path
+            return PathDecayEvent.Run()
+                || PathNodes == null
+                || PathNodes.IsEmpty // we have no path
                 || PathFinalNode.GetDistance(TargetPosition) > 3.0 // target position changed
                 || hasTeleported;
         }
@@ -403,7 +411,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 // need to move directly there to prevent going to
                 // the top level of the water because we are
                 // submerged a bit while swimming
-                Vector3 targetPos = PathNodes.Count > 0 && PathNodes.TryPeek(out Vector3 node) ? node : TargetPosition;
+                Vector3 targetPos = !PathNodes.IsEmpty && PathNodes.TryPeek(out Vector3 node) ? node : TargetPosition;
 
                 if (WowInterface.ObjectManager.Player.IsSwimming || WowInterface.ObjectManager.Player.IsFlying)
                 {
@@ -440,7 +448,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         {
             if (PathNodes.TryDequeue(out _))
             {
-                if (PathNodes.Count == 0)
+                if (PathNodes.IsEmpty)
                 {
                     StopMovement();
                 }
@@ -526,7 +534,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
 
             // check wether we should be moving or not
-            if (ShouldBeMoving)
+            if (ShouldBeMoving && PathfindingStatus != PathfindingStatus.PathIncomplete)
             {
                 // if we already need to jump, dont check it again
                 if (!JumpOnNextMove)
@@ -558,10 +566,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             {
                 StuckCounter = 0;
             }
-        }
-
-        private void UpdateBlackboard()
-        {
         }
     }
 }

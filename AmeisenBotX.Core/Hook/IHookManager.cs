@@ -68,6 +68,8 @@ namespace AmeisenBotX.Core.Hook
 
         int LuaGetGossipOptionCount();
 
+        string[] LuaGetGossipTypes();
+
         string LuaGetInventoryItems();
 
         string LuaGetItemBySlot(int itemslot);
@@ -154,6 +156,8 @@ namespace AmeisenBotX.Core.Hook
         void LuaStartAutoAttack();
 
         void LuaTargetUnit(WowLuaUnit unit);
+
+        bool LuaUiIsVisible(params string[] uiElement);
 
         void LuaUseContainerItem(int bagId, int bagSlot);
 

@@ -1,8 +1,6 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Cache.Enums;
-using AmeisenBotX.Core.Data.CombatLog.Enums;
-using AmeisenBotX.Core.Data.CombatLog.Objects;
+using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -82,34 +80,43 @@ namespace AmeisenBotX
             {
                 listviewCachePoi.Items.Clear();
 
-                foreach (KeyValuePair<(MapId, PoiType), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.PointsOfInterest.OrderBy(e => e.Key.Item2).ThenBy(e => e.Key.Item1))
+                foreach (KeyValuePair<MapId, Dictionary<PoiType, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllPointsOfInterest().OrderBy(e => e.Key))
                 {
-                    listviewCachePoi.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
+                    foreach (KeyValuePair<PoiType, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
+                    {
+                        listviewCachePoi.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
+                    }
                 }
             }
-            if (tabcontrolMain.SelectedIndex == 1)
+            else if (tabcontrolMain.SelectedIndex == 1)
             {
                 listviewCacheOre.Items.Clear();
 
-                foreach (KeyValuePair<(MapId, OreNode), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.OreNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                foreach (KeyValuePair<MapId, Dictionary<OreNode, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllOreNodes().OrderBy(e => e.Key))
                 {
-                    listviewCacheOre.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
+                    foreach (KeyValuePair<OreNode, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
+                    {
+                        listviewCacheOre.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
+                    }
                 }
             }
             else if (tabcontrolMain.SelectedIndex == 2)
             {
                 listviewCacheHerb.Items.Clear();
 
-                foreach (KeyValuePair<(MapId, HerbNode), List<Vector3>> x in AmeisenBot.WowInterface.BotCache.HerbNodes.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                foreach (KeyValuePair<MapId, Dictionary<HerbNode, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllHerbNodes().OrderBy(e => e.Key))
                 {
-                    listviewCacheHerb.Items.Add($"{x.Key.Item1} {x.Key.Item2}: {JsonConvert.SerializeObject(x.Value)}");
+                    foreach (KeyValuePair<HerbNode, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
+                    {
+                        listviewCacheHerb.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
+                    }
                 }
             }
             else if (tabcontrolMain.SelectedIndex == 3)
             {
                 listviewCacheNames.Items.Clear();
 
-                foreach (KeyValuePair<ulong, string> x in AmeisenBot.WowInterface.BotCache.NameCache.OrderBy(e => e.Value))
+                foreach (KeyValuePair<ulong, string> x in AmeisenBot.WowInterface.Db.AllNames().OrderBy(e => e.Value))
                 {
                     listviewCacheNames.Items.Add(x);
                 }
@@ -118,16 +125,19 @@ namespace AmeisenBotX
             {
                 listviewCacheReactions.Items.Clear();
 
-                foreach (KeyValuePair<(int, int), WowUnitReaction> x in AmeisenBot.WowInterface.BotCache.ReactionCache.OrderBy(e => e.Key.Item1).ThenBy(e => e.Key.Item2))
+                foreach (KeyValuePair<int, Dictionary<int, WowUnitReaction>> mapIdPair in AmeisenBot.WowInterface.Db.AllReactions().OrderBy(e => e.Key))
                 {
-                    listviewCacheReactions.Items.Add(x);
+                    foreach (KeyValuePair<int, WowUnitReaction> typePair in mapIdPair.Value.OrderBy(e => e.Key))
+                    {
+                        listviewCacheReactions.Items.Add($"{mapIdPair.Key} {typePair.Key}: {typePair.Value}");
+                    }
                 }
             }
             else if (tabcontrolMain.SelectedIndex == 5)
             {
                 listviewCacheSpellnames.Items.Clear();
 
-                foreach (KeyValuePair<int, string> x in AmeisenBot.WowInterface.BotCache.SpellNameCache.OrderBy(e => e.Value))
+                foreach (KeyValuePair<int, string> x in AmeisenBot.WowInterface.Db.AllSpellNames().OrderBy(e => e.Value))
                 {
                     listviewCacheSpellnames.Items.Add(x);
                 }
@@ -147,30 +157,6 @@ namespace AmeisenBotX
                 foreach ((WowObject, double) x in wowObjects.OrderBy(e => e.Item2))
                 {
                     listviewNearWowObjects.Items.Add(x);
-                }
-            }
-            else if (tabcontrolMain.SelectedIndex == 9)
-            {
-                listviewCombatlog.Items.Clear();
-
-                foreach (KeyValuePair<(CombatLogEntryType, CombatLogEntrySubtype), List<BasicCombatLogEntry>> logitem in AmeisenBot.WowInterface.BotCache.CombatLogEntries.OrderByDescending(e => e.Value.Count))
-                {
-                    listviewCombatlog.Items.Add($"{logitem.Key}: {logitem.Value.Count} Entries");
-                }
-            }
-            else if (tabcontrolMain.SelectedIndex == 10)
-            {
-                listviewCombatlogKills.Items.Clear();
-
-                if (AmeisenBot.WowInterface.BotCache.CombatLogEntries.ContainsKey((CombatLogEntryType.PARTY, CombatLogEntrySubtype.KILL)))
-                {
-                    foreach (KeyValuePair<string, int> logitem in AmeisenBot.WowInterface.BotCache.CombatLogEntries[(CombatLogEntryType.PARTY, CombatLogEntrySubtype.KILL)]
-                        .GroupBy(x => x.DestinationName)
-                        .Select(x => new KeyValuePair<string, int>(x.Key, x.Count()))
-                        .OrderByDescending(x => x.Value))
-                    {
-                        listviewCombatlogKills.Items.Add($"{logitem.Key}: {logitem.Value}");
-                    }
                 }
             }
         }

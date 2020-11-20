@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     {
                         if (HeroicStrikeEvent.Ready && !WowInterface.ObjectManager.Player.HasBuffByName(recklessnessSpell))
                         {
-                            if ((WowInterface.ObjectManager.Player.Rage > 50 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 8.0).Count > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                            if ((WowInterface.ObjectManager.Player.Rage > 50 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 8.0).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
                                 || (WowInterface.ObjectManager.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
                             {
                                 HeroicStrikeEvent.Run();

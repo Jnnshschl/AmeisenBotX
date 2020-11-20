@@ -65,11 +65,30 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Vector3 steering = desired;
             steering -= Velocity;
-            steering.Limit(WowInterface.MovementSettings.MaxSteering);
+
+            if (WowInterface.ObjectManager.Player.IsInCombat
+                || WowInterface.Globals.ForceCombat)
+            {
+                steering.Limit(WowInterface.MovementSettings.MaxSteeringCombat);
+            }
+            else
+            {
+                steering.Limit(WowInterface.MovementSettings.MaxSteering);
+            }
 
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
-            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
+
+            if (WowInterface.ObjectManager.Player.IsInCombat
+                || WowInterface.Globals.ForceCombat)
+            {
+                acceleration.Limit(WowInterface.MovementSettings.MaxAccelerationCombat);
+            }
+            else
+            {
+                acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
+            }
+
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -78,6 +97,11 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 positionAhead = CalculateFuturePosition(position, targetRotation, targetVelocity);
             return Seek(positionAhead, multiplier);
+        }
+
+        public void Reset()
+        {
+            Velocity = new Vector3();
         }
 
         public Vector3 Seek(Vector3 position, float multiplier)
@@ -211,10 +235,10 @@ namespace AmeisenBotX.Core.Movement.Objects
 
                     if (enablePlayerForces)
                     {
-                        forces.Add(Seperate(0.03f));
+                        forces.Add(Seperate(0.05f));
                     }
 
-                    // forces.Add(PlayerVehicle.AvoidObstacles(2f));
+                    forces.Add(AvoidObstacles(0.5f));
                     break;
 
                 case MovementAction.Following:
@@ -258,18 +282,15 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 force = new Vector3(0, 0, 0);
 
-            if (WowInterface.BotCache.TryGetBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, maxDistance, out List<Vector3> nodes))
+            if (WowInterface.Db.TryGetBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, maxDistance, out IEnumerable<Vector3> nodes))
             {
-                if (nodes.Count > 0)
-                {
-                    force += Flee(nodes.First(), 0.5f);
-                }
+                force += Flee(nodes.First(), 0.5f);
             }
 
             return force;
         }
 
-        private Vector3 GetObjectForceAroundMe<T>(double maxDistance = 6) where T : WowObject
+        private Vector3 GetObjectForceAroundMe<T>(float maxDistance = 3.0f) where T : WowObject
         {
             Vector3 force = new Vector3(0, 0, 0);
             Vector3 vehiclePosition = WowInterface.ObjectManager.Player.Position;
@@ -280,15 +301,16 @@ namespace AmeisenBotX.Core.Movement.Objects
             // we need to know every objects position and distance
             // to later apply a force pushing us back from it that
             // is relational to the objects distance.
-            T[] objects = WowInterface.ObjectManager.WowObjects.OfType<T>().ToArray();
+            IEnumerable<T> objects = WowInterface.ObjectManager.WowObjects.OfType<T>();
 
-            for (int i = 0; i < objects.Length; ++i)
+            for (int i = 0; i < objects.Count(); ++i)
             {
-                double distance = objects[i].Position.GetDistance(vehiclePosition);
+                T obj = objects.ElementAt(i);
+                double distance = obj.Position.GetDistance(vehiclePosition);
 
                 if (distance < maxDistance)
                 {
-                    objectDistances.Add((objects[i].Position, distance));
+                    objectDistances.Add((obj.Position, distance));
                 }
             }
 

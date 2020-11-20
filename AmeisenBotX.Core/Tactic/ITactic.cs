@@ -1,7 +1,4 @@
 ﻿using AmeisenBotX.Core.Statemachine.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AmeisenBotX.Core.Tactic
 {

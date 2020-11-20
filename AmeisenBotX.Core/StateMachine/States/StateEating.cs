@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                     && WowInterface.ObjectManager.Player.MaxMana > 0
                     && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
-                    && WowInterface.CharacterManager.HasRefreshmentInBag())
+                    && WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>(true))
                 {
                     t = typeof(WowRefreshment);
                     if ((CurrentlyEating.Length > 0 || CurrentlyDrinking.Length > 0)
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
                 else if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                         && WowInterface.CharacterManager.HasFoodInBag())
+                         && WowInterface.CharacterManager.HasItemTypeInBag<WowFood>(true))
                 {
                     t = typeof(WowFood);
                     if (CurrentlyEating.Length > 0
@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
                 else if (WowInterface.ObjectManager.Player.MaxMana > 0
                          && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
-                         && WowInterface.CharacterManager.HasWaterInBag())
+                         && WowInterface.CharacterManager.HasItemTypeInBag<WowWater>(true))
                 {
                     t = typeof(WowWater);
                     if (CurrentlyDrinking.Length > 0
@@ -97,14 +97,14 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             return ((WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                          && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
-                         && WowInterface.CharacterManager.HasRefreshmentInBag())
+                         && WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>(true))
                      // Food
                      || (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                         && WowInterface.CharacterManager.HasFoodInBag())
+                         && WowInterface.CharacterManager.HasItemTypeInBag<WowFood>(true))
                      // Water
                      || (WowInterface.ObjectManager.Player.MaxMana > 0
                          && WowInterface.ObjectManager.Player.ManaPercentage < Config.DrinkUntilPercent
-                         && WowInterface.CharacterManager.HasWaterInBag()));
+                         && WowInterface.CharacterManager.HasItemTypeInBag<WowWater>(true)));
         }
     }
 }

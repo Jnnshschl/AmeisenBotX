@@ -24,7 +24,7 @@
         public void Execute()
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
-            
+
             WowInterface.MovementEngine.Reset();
             WowInterface.HookManager.WowStopClickToMove();
             WowInterface.HookManager.LuaCastSpellById(SpellId);

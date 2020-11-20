@@ -18,7 +18,6 @@ namespace AmeisenBotX.Core.Common
 {
     public static class BotUtils
     {
-#pragma warning disable IDE0051
         private const uint MK_CONTROL = 0x8;
         private const uint MK_LBUTTON = 0x1;
         private const uint MK_MBUTTON = 0x10;
@@ -36,7 +35,6 @@ namespace AmeisenBotX.Core.Common
         private const uint WM_RBUTTONDBLCLK = 0x206;
         private const uint WM_RBUTTONDOWN = 0x204;
         private const uint WM_RBUTTONUP = 0x205;
-#pragma warning restore IDE0051
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string BigValueToString(double value)
@@ -60,9 +58,9 @@ namespace AmeisenBotX.Core.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void HoldKey(IntPtr windowHandle, IntPtr key)
+        public static string Capitalize(string input)
         {
-            SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
+            return string.IsNullOrWhiteSpace(input) ? string.Empty : input.First().ToString().ToUpper(CultureInfo.InvariantCulture) + input[1..];
         }
 
         public static string CleanString(string input)
@@ -81,6 +79,95 @@ namespace AmeisenBotX.Core.Common
             }
 
             return sb.ToString();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string FastRandomString()
+        {
+            return Path.GetRandomFileName().Replace(".", string.Empty, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string FastRandomStringOnlyLetters()
+        {
+            return new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
+        }
+
+        public static string GenerateUniqueString(int byteCount)
+        {
+            using RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+            byte[] bytes = new byte[byteCount];
+            rng.GetBytes(bytes);
+
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static string GetColorByQuality(ItemQuality itemQuality)
+        {
+            return itemQuality switch
+            {
+                ItemQuality.Unique => "#00ccff",
+                ItemQuality.Poor => "#9d9d9d",
+                ItemQuality.Common => "#ffffff",
+                ItemQuality.Uncommon => "#1eff00",
+                ItemQuality.Rare => "#0070dd",
+                ItemQuality.Epic => "#a335ee",
+                ItemQuality.Legendary => "#ff8000",
+                ItemQuality.Artifact => "#e6cc80",
+                _ => "#ffffff",
+            };
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void HoldKey(IntPtr windowHandle, IntPtr key)
+        {
+            SendMessage(windowHandle, WM_KEYDOWN, key, new IntPtr(0));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsPositionInsideAoeSpell(Vector3 position, IEnumerable<WowDynobject> wowDynobjects)
+        {
+            return wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 3.0f);
+        }
+
+        public static bool IsValidJson(string strInput)
+        {
+            if (string.IsNullOrWhiteSpace(strInput)) return false;
+
+            strInput = strInput.Trim();
+
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}"))
+                || (strInput.StartsWith("[") && strInput.EndsWith("]")))
+            {
+                try
+                {
+                    JToken obj = JToken.Parse(strInput);
+                    return true;
+                }
+                catch { }
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValidUnit(WowUnit unit)
+        {
+            return unit != null
+                && !unit.IsNotAttackable;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, float offset)
+        {
+            return MoveAhead(targetPosition, BotMath.GetFacingAngle2D(origin, targetPosition), offset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, float offset)
+        {
+            return BotMath.CalculatePositionAround(targetPosition, rotation, 0f, offset);
         }
 
         /// <summary>
@@ -119,95 +206,6 @@ namespace AmeisenBotX.Core.Common
             }
 
             return (input, returnValueName);
-        }
-
-        public static string GenerateUniqueString(int byteCount)
-        {
-            using RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-
-            byte[] bytes = new byte[byteCount];
-            rng.GetBytes(bytes);
-
-            return Convert.ToBase64String(bytes);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string FastRandomStringOnlyLetters()
-        {
-            return new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string FastRandomString()
-        {
-            return Path.GetRandomFileName().Replace(".", string.Empty, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public static string GetColorByQuality(ItemQuality itemQuality)
-        {
-            return itemQuality switch
-            {
-                ItemQuality.Unique => "#00ccff",
-                ItemQuality.Poor => "#9d9d9d",
-                ItemQuality.Common => "#ffffff",
-                ItemQuality.Uncommon => "#1eff00",
-                ItemQuality.Rare => "#0070dd",
-                ItemQuality.Epic => "#a335ee",
-                ItemQuality.Legendary => "#ff8000",
-                ItemQuality.Artifact => "#e6cc80",
-                _ => "#ffffff",
-            };
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string Capitalize(string input)
-        {
-            return string.IsNullOrWhiteSpace(input) ? string.Empty : input.First().ToString().ToUpper(CultureInfo.InvariantCulture) + input.Substring(1);
-        }
-
-        public static bool IsValidJson(string strInput)
-        {
-            if (string.IsNullOrWhiteSpace(strInput)) return false;
-
-            strInput = strInput.Trim();
-
-            if ((strInput.StartsWith("{", StringComparison.OrdinalIgnoreCase) && strInput.EndsWith("}", StringComparison.OrdinalIgnoreCase))
-                || (strInput.StartsWith("[", StringComparison.OrdinalIgnoreCase) && strInput.EndsWith("]", StringComparison.OrdinalIgnoreCase)))
-            {
-                try
-                {
-                    JToken obj = JToken.Parse(strInput);
-                    return true;
-                }
-                catch { }
-            }
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsPositionInsideAoeSpell(Vector3 position, IEnumerable<WowDynobject> wowDynobjects)
-        {
-            return wowDynobjects.Any(e => e.Position.GetDistance(position) < e.Radius + 3.0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsValidUnit(WowUnit unit)
-        {
-            return unit != null
-                && !unit.IsNotAttackable;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, float offset)
-        {
-            return MoveAhead(targetPosition, BotMath.GetFacingAngle2D(origin, targetPosition), offset);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, float offset)
-        {
-            return BotMath.CalculatePositionAround(targetPosition, rotation, 0f, offset);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

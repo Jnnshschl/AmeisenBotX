@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Memory.Win32;
+﻿using AmeisenBotX.Core.Movement.Settings;
+using AmeisenBotX.Memory.Win32;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace AmeisenBotX.Core
 {
@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core
 
         public bool ChatProtocols { get; set; } = false;
 
-        public List<string> CustomCombatClassDependencies { get; set; } = new List<string>() { "System.dll", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AmeisenBotX.Core.dll") };
+        public List<string> CustomCombatClassDependencies { get; set; }
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
 
@@ -85,11 +85,17 @@ namespace AmeisenBotX.Core
 
         public string GrindingProfile { get; set; } = string.Empty;
 
+        public bool IdleActions { get; set; } = false;
+
+        public int IdleActionsMaxCooldown { get; set; } = 12000;
+
+        public int IdleActionsMinCooldown { get; set; } = 3000;
+
         public bool IgnoreCombatWhileMounted { get; set; } = true;
 
         public double ItemRepairThreshold { get; set; } = 25;
 
-        public List<string> ItemSellBlacklist { get; set; } = new List<string> { "Hearthstone" };
+        public List<string> ItemSellBlacklist { get; set; }
 
         public string JobEngineMailHeader { get; set; } = string.Empty;
 
@@ -139,6 +145,8 @@ namespace AmeisenBotX.Core
 
         public string Mounts { get; set; } = string.Empty;
 
+        public MovementSettings MovementSettings { get; set; } = new MovementSettings();
+
         public int NameshServerPort { get; set; } = 47110;
 
         public string NavmeshServerIp { get; set; } = "127.0.0.1";
@@ -174,6 +182,10 @@ namespace AmeisenBotX.Core
         public string Realm { get; set; } = "AmeisenRealm";
 
         public string Realmlist { get; set; } = "127.0.0.1";
+
+        public int RelaxActionCooldownMax { get; set; } = 5;
+
+        public int RelaxActionCooldownMin { get; set; } = 2;
 
         public bool ReleaseSpirit { get; set; } = false;
 

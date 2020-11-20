@@ -1,8 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +14,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             WowInterface = wowInterface;
         }
 
-        public IEnumerable<string> PriorityTargets { get; set; }
-        
         public IEnumerable<string> BlacklistedTargets { get; set; }
+
+        public IEnumerable<string> PriorityTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 

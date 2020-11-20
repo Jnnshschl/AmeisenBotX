@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
 
-                if (selectedUnit != null && selectedUnit.IsDead && selectedUnit.IsLootable)
+                if (selectedUnit != null)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 

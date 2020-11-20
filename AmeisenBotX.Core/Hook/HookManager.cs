@@ -221,11 +221,11 @@ namespace AmeisenBotX.Core.Hook
 
                 if (WowInterface.XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
                 {
-                    WowInterface.XMemory.WriteBytes(memAlloc, bytes);
-                    WowInterface.XMemory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
-
                     if (memAlloc != IntPtr.Zero)
                     {
+                        WowInterface.XMemory.WriteBytes(memAlloc, bytes);
+                        WowInterface.XMemory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
+
                         string[] asm = new string[]
                         {
                             "PUSH 0",
@@ -251,7 +251,7 @@ namespace AmeisenBotX.Core.Hook
         {
             if (newItem == null) return;
 
-            if (currentItem == null)
+            if (currentItem == null || currentItem.EquipSlot == EquipmentSlot.NOT_EQUIPABLE)
             {
                 LuaDoString($"EquipItemByName(\"{newItem.Name}\")");
             }
@@ -300,6 +300,19 @@ namespace AmeisenBotX.Core.Hook
             return WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetNumGossipOptions()"), out string sresult)
                 && int.TryParse(sresult, out int gossipCount)
                  ? gossipCount : 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string[] LuaGetGossipTypes()
+        {
+            try
+            {
+                WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"function {v:1}(...)for a=1,select(\"#\",...),2 do {v:0}={v:0}..select(a+1,...)..\";\"end end;{v:1}(GetGossipOptions())"), out string result);
+                return result.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            }
+            catch { }
+
+            return Array.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -583,7 +596,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaSellItemsByQuality(ItemQuality itemQuality)
         {
-            LuaDoString($"local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c and string.find(c,\"{BotUtils.GetColorByQuality(itemQuality).Substring(1)}\")then b={{GetItemInfo(c)}}a=a+b[11]UseContainerItem(d,e)end end end");
+            LuaDoString($"local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c and string.find(c,\"{BotUtils.GetColorByQuality(itemQuality)[1..]}\")then b={{GetItemInfo(c)}}a=a+b[11]UseContainerItem(d,e)end end end");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -628,6 +641,25 @@ namespace AmeisenBotX.Core.Hook
         public void LuaTargetUnit(WowLuaUnit unit)
         {
             LuaDoString($"TargetUnit(\"{unit}\");");
+        }
+
+        public bool LuaUiIsVisible(params string[] uiElements)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < uiElements.Length; ++i)
+            {
+                sb.Append($"{uiElements[i]}:IsVisible()");
+
+                if (i < uiElements.Length - 1)
+                {
+                    sb.Append($" or ");
+                }
+            }
+
+            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0 if {sb} then {{v:0}}=1 end"), out string r)
+                && int.TryParse(r, out int result)
+                && result == 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -862,7 +894,7 @@ namespace AmeisenBotX.Core.Hook
                 return reaction;
             }
 
-            if (WowInterface.BotCache.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
+            if (WowInterface.Db.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
             {
                 return cachedReaction;
             }
@@ -879,7 +911,7 @@ namespace AmeisenBotX.Core.Hook
             if (returnBytes.Length > 0)
             {
                 reaction = (WowUnitReaction)BitConverter.ToInt32(returnBytes, 0);
-                WowInterface.BotCache.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
+                WowInterface.Db.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
             }
 
             return reaction;

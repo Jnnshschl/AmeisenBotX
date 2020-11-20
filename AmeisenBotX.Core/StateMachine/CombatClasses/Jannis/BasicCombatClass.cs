@@ -339,10 +339,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string cleaveSpell = "Cleave";
         protected const string commandingShoutSpell = "Commanding Shout";
         protected const string concussionBlowSpell = "Concussion Blow";
+        protected const string deathWishSpell = "Death Wish";
         protected const string defensiveStanceSpell = "Defensive Stance";
         protected const string demoralizingShoutSpell = "Demoralizing Shout";
         protected const string devastateSpell = "Devastate";
-        protected const string deathWishSpell = "Death Wish";
         protected const string disarmSpell = "Disarm";
         protected const string enragedRegenerationSpell = "Enraged Regeneration";
         protected const string executeSpell = "Execute";
@@ -416,7 +416,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
-            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
+            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
@@ -487,12 +487,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     WowInterface.HookManager.LuaSpellStopCasting();
                 }
 
-                if (WowInterface.ObjectManager.Target != null && EventCheckFacing.Run())
-                {
-                    CheckFacing(WowInterface.ObjectManager.Target);
-                }
-
                 return;
+            }
+
+            if (WowInterface.ObjectManager.Target != null && EventCheckFacing.Run())
+            {
+                CheckFacing(WowInterface.ObjectManager.Target);
             }
 
             // Update Priority Units
@@ -875,9 +875,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase)) parts[1] = parts[1].Replace(',', '.');
 
                 if (int.TryParse(parts[0], out int castSuccessful)
-                    && float.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out float cooldown))
+                    && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))
                 {
-                    cooldown = MathF.Max(cooldown, 0);
+                    cooldown = Math.Max(cooldown, 0);
                     CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
 
                     if (castSuccessful == 1)

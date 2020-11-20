@@ -24,10 +24,10 @@ namespace AmeisenBotX.Core.Data.Objects.Structs
         {
             get
             {
-                if (!WowInterface.I.BotCache.TryGetSpellName(SpellId, out string name))
+                if (!WowInterface.I.Db.TryGetSpellName(SpellId, out string name))
                 {
                     name = WowInterface.I.HookManager.LuaGetSpellNameById(SpellId);
-                    WowInterface.I.BotCache.CacheSpellName(SpellId, name);
+                    WowInterface.I.Db.CacheSpellName(SpellId, name);
                 }
 
                 return name;

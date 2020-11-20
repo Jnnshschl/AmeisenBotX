@@ -276,5 +276,10 @@
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>
         </Button>
+        <Button x:Name="buttonToggleRelationshipWindow" Content="🙂" Margin="0,0,140,0" BorderThickness="1,0,0,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleRelationshipWindow_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" Width="28">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
     </Grid>
 </Window>

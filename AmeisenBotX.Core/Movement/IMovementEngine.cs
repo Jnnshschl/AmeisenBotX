@@ -22,12 +22,12 @@ namespace AmeisenBotX.Core.Movement
 
         bool HasCompletePathToPosition(Vector3 position, double maxDistance);
 
+        void PreventMovement(TimeSpan timeSpan);
+
         void Reset();
 
         void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false);
 
         void StopMovement();
-
-        void PreventMovement(TimeSpan timeSpan);
     }
 }

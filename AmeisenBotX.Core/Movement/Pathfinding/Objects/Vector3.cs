@@ -295,7 +295,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
-            return $"<{X}|{Y}|{Z}>";
+            return $"{X}, {Y}, {Z}";
         }
 
         public override bool Equals(object obj)

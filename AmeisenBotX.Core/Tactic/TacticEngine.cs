@@ -1,10 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Tactic.Bosses;
-using System;
+﻿using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace AmeisenBotX.Core.Tactic
 {
@@ -16,11 +11,6 @@ namespace AmeisenBotX.Core.Tactic
         }
 
         private SortedList<int, ITactic> Tactics { get; set; }
-
-        public void LoadTactics(SortedList<int, ITactic> tactics)
-        {
-            Tactics = tactics;
-        }
 
         public bool Execute(CombatClassRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {
@@ -35,6 +25,11 @@ namespace AmeisenBotX.Core.Tactic
             handlesMovement = false;
             allowAttacking = true;
             return false;
+        }
+
+        public void LoadTactics(SortedList<int, ITactic> tactics)
+        {
+            Tactics = tactics;
         }
 
         public void Reset()

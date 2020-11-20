@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Cache;
+using AmeisenBotX.Core.Data.Db;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
@@ -15,7 +15,6 @@ using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Quest;
-using AmeisenBotX.Core.Relaxing;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Memory;
@@ -36,9 +35,9 @@ namespace AmeisenBotX.Core
 
         public IBattlegroundEngine BattlegroundEngine { get; set; }
 
-        public IAmeisenBotCache BotCache { get; set; }
+        public IAmeisenBotDb Db { get; set; }
 
-        public BotPersonality BotPersonality { get; set; }
+        public BotPersonality Personality { get; set; }
 
         public ICharacterManager CharacterManager { get; set; }
 
@@ -74,12 +73,10 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotRconClient RconClient { get; set; }
 
-        public RelaxEngine RelaxEngine { get; set; }
+        public TacticEngine TacticEngine { get; set; }
 
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
-
-        public TacticEngine TacticEngine { get; set; }
     }
 }

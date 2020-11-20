@@ -10,6 +10,9 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowPlayer : WowUnit
     {
+        private VisibleItemEnchantment[] itemEnchantments;
+        private QuestlogEntry[] questlogEntries;
+
         public WowPlayer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
@@ -22,11 +25,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public bool IsUnderwater { get; set; }
 
-        public List<VisibleItemEnchantment> ItemEnchantments { get; private set; }
+        public IEnumerable<VisibleItemEnchantment> ItemEnchantments => itemEnchantments;
 
         public int NextLevelXp { get; set; }
 
-        public List<QuestlogEntry> QuestlogEntries { get; private set; }
+        public IEnumerable<QuestlogEntry> QuestlogEntries => questlogEntries;
 
         public int Xp { get; set; }
 
@@ -35,19 +38,19 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
         public bool IsAlliance()
         {
             return Race == WowRace.Draenei
-                        || Race == WowRace.Human
-                        || Race == WowRace.Dwarf
-                        || Race == WowRace.Gnome
-                        || Race == WowRace.Nightelf;
+                || Race == WowRace.Human
+                || Race == WowRace.Dwarf
+                || Race == WowRace.Gnome
+                || Race == WowRace.Nightelf;
         }
 
         public bool IsHorde()
         {
             return Race == WowRace.Undead
-                        || Race == WowRace.Orc
-                        || Race == WowRace.Bloodelf
-                        || Race == WowRace.Tauren
-                        || Race == WowRace.Troll;
+                || Race == WowRace.Orc
+                || Race == WowRace.Bloodelf
+                || Race == WowRace.Tauren
+                || Race == WowRace.Troll;
         }
 
         public override string ToString()
@@ -63,12 +66,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             {
                 Xp = objPtr.Xp;
                 NextLevelXp = objPtr.NextLevelXp;
-
                 XpPercentage = BotMath.Percentage(Xp, NextLevelXp);
-
                 Name = ReadPlayerName();
 
-                QuestlogEntries = new List<QuestlogEntry>()
+                questlogEntries = new QuestlogEntry[]
                 {
                     objPtr.QuestlogEntry1,
                     objPtr.QuestlogEntry2,
@@ -97,7 +98,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
                     objPtr.QuestlogEntry25,
                 };
 
-                ItemEnchantments = new List<VisibleItemEnchantment>()
+                itemEnchantments = new VisibleItemEnchantment[]
                 {
                     objPtr.VisibleItemEnchantment1,
                     objPtr.VisibleItemEnchantment2,
@@ -140,19 +141,16 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         private string ReadPlayerName()
         {
-            if (WowInterface.I.BotCache.TryGetUnitName(Guid, out string cachedName))
+            if (WowInterface.I.Db.TryGetUnitName(Guid, out string cachedName))
             {
                 return cachedName;
             }
 
-            uint shortGuid;
-            uint offset;
-
             WowInterface.I.XMemory.Read(IntPtr.Add(WowInterface.I.OffsetList.NameStore, (int)WowInterface.I.OffsetList.NameMask), out uint nameMask);
             WowInterface.I.XMemory.Read(IntPtr.Add(WowInterface.I.OffsetList.NameStore, (int)WowInterface.I.OffsetList.NameBase), out uint nameBase);
 
-            shortGuid = (uint)Guid & 0xfffffff;
-            offset = 12 * (nameMask & shortGuid);
+            uint shortGuid = (uint)Guid & 0xfffffff;
+            uint offset = 12 * (nameMask & shortGuid);
 
             WowInterface.I.XMemory.Read(new IntPtr(nameBase + offset + 8), out uint current);
             WowInterface.I.XMemory.Read(new IntPtr(nameBase + offset), out offset);
@@ -180,7 +178,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
             if (name.Length > 0)
             {
-                WowInterface.I.BotCache.CacheName(Guid, name);
+                WowInterface.I.Db.CacheName(Guid, name);
             }
 
             return name;

@@ -15,7 +15,6 @@ using AmeisenBotX.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,20 +27,6 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        private Brush CurrentTickTimeBadBrush { get; }
-
-        private Brush CurrentTickTimeGoodBrush { get; }
-
-        private Brush DarkBackgroundBrush { get; }
-
-        private Brush DarkForegroundBrush { get; }
-
-        private Brush TextAccentBrush { get; }
-
-        private string DataPath { get; } = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\AmeisenBotX\\profiles\\";
-
-        private Dictionary<BotState, Window> StateConfigWindows { get; set; }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -84,6 +69,16 @@ namespace AmeisenBotX
 
         private AmeisenBot AmeisenBot { get; set; }
 
+        private Brush CurrentTickTimeBadBrush { get; }
+
+        private Brush CurrentTickTimeGoodBrush { get; }
+
+        private Brush DarkBackgroundBrush { get; }
+
+        private Brush DarkForegroundBrush { get; }
+
+        private string DataPath { get; } = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\AmeisenBotX\\profiles\\";
+
         private DevToolsWindow DevToolsWindow { get; set; }
 
         private bool DrawOverlay { get; set; }
@@ -105,6 +100,12 @@ namespace AmeisenBotX
         private long NotificationLastTimestamp { get; set; }
 
         private bool PendingNotification { get; set; }
+
+        private RelationshipWindow RelationshipWindow { get; set; }
+
+        private Dictionary<BotState, Window> StateConfigWindows { get; set; }
+
+        private Brush TextAccentBrush { get; }
 
         /// <summary>
         /// Used to resize the wow window when autoposition is enabled
@@ -134,7 +135,7 @@ namespace AmeisenBotX
 
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.BotCache.Clear();
+            AmeisenBot.WowInterface.Db.Clear();
         }
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
@@ -224,6 +225,12 @@ namespace AmeisenBotX
         {
             DrawOverlay = !DrawOverlay;
             buttonToggleOverlay.Foreground = DrawOverlay ? CurrentTickTimeGoodBrush : DarkForegroundBrush;
+        }
+
+        private void ButtonToggleRelationshipWindow_Click(object sender, RoutedEventArgs e)
+        {
+            RelationshipWindow ??= new RelationshipWindow(AmeisenBot);
+            RelationshipWindow.Show();
         }
 
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
@@ -557,6 +564,7 @@ namespace AmeisenBotX
             InfoWindow?.Close();
             MapWindow?.Close();
             DevToolsWindow?.Close();
+            RelationshipWindow?.Close();
 
             if (StateConfigWindows != null)
             {
@@ -587,7 +595,7 @@ namespace AmeisenBotX
 
             comboboxStateOverride.SelectedIndex = 0;
 
-            labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
+            labelPID.Content = $"PID: {Environment.ProcessId}";
 
             if (Config.Autopilot)
             {

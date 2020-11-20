@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Profiles;
@@ -16,7 +17,7 @@ namespace AmeisenBotX.Core.Quest
         {
             WowInterface = wowInterface;
             Config = config;
-            stateMachine = stateMachine;
+            StateMachine = stateMachine;
 
             CompletedQuests = new List<int>();
             QueryCompletedQuestsEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
@@ -28,13 +29,13 @@ namespace AmeisenBotX.Core.Quest
 
         public bool UpdatedCompletedQuests { get; set; }
 
-        private TimegatedEvent QueryCompletedQuestsEvent { get; }
+        private AmeisenBotConfig Config { get; }
 
-        private WowInterface WowInterface { get; }
+        private TimegatedEvent QueryCompletedQuestsEvent { get; }
 
         private AmeisenBotStateMachine StateMachine { get; }
 
-        private AmeisenBotConfig Config { get; }
+        private WowInterface WowInterface { get; }
 
         public void Execute()
         {
@@ -62,11 +63,11 @@ namespace AmeisenBotX.Core.Quest
             {
                 // do i need to recover my hp
                 if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                    && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 60.0).Count > 0)
+                    && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 60.0).Any())
                 {
                     // wait or eat something
 
-                    if (WowInterface.CharacterManager.HasFoodInBag() || WowInterface.CharacterManager.HasRefreshmentInBag())
+                    if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
                     {
                         StateMachine.SetState(BotState.Eating);
                         return;

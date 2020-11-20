@@ -6,7 +6,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
-using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,12 +59,18 @@ namespace AmeisenBotX.Core.Statemachine.States
             // we can do nothing until the ObjectManager is initialzed
             if (WowInterface.ObjectManager != null && WowInterface.ObjectManager.Player != null)
             {
-                WowInterface.TacticEngine.Execute(WowInterface.CombatClass.Role, WowInterface.CombatClass.IsMelee, out bool handlesMovement, out bool allowAttacking);
+                bool tacticsMovement = false;
+                bool tacticsAllowAttacking = false;
+
+                if (WowInterface.CombatClass != null)
+                {
+                    WowInterface.TacticEngine.Execute(WowInterface.CombatClass.Role, WowInterface.CombatClass.IsMelee, out tacticsMovement, out tacticsAllowAttacking);
+                }
 
                 // use the default MovementEngine to move if the CombatClass doesnt
                 if (WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesMovement)
                 {
-                    if (!handlesMovement)
+                    if (!tacticsMovement)
                     {
                         if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.ObjectManager.Target == null)
                         {
@@ -87,7 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
 
                 // if no CombatClass is loaded, just autoattack
-                if (allowAttacking)
+                if (tacticsAllowAttacking)
                 {
                     if (WowInterface.CombatClass == null)
                     {

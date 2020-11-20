@@ -229,26 +229,6 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCombatlog" Header="Combatlog" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
-                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
-                    <Border.BorderBrush>
-                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                    </Border.BorderBrush>
-                    <Grid>
-                        <ListView x:Name="listviewCombatlog" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
-                    </Grid>
-                </Border>
-            </TabItem>
-            <TabItem x:Name="tabitemCombatlogKills" Header="Kills" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
-                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
-                    <Border.BorderBrush>
-                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                    </Border.BorderBrush>
-                    <Grid>
-                        <ListView x:Name="listviewCombatlogKills" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
-                    </Grid>
-                </Border>
-            </TabItem>
         </TabControl>
     </Grid>
 </Window>

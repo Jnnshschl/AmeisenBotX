@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
     {
         string Author { get; }
 
+        IEnumerable<string> BlacklistedTargets { get; set; }
+
         Dictionary<string, dynamic> Configureables { get; set; }
 
         string Description { get; }
@@ -35,8 +37,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         bool WalkBehindEnemy { get; }
 
         WowClass WowClass { get; }
-
-        IEnumerable<string> BlacklistedTargets { get; set; }
 
         void Execute();
 
