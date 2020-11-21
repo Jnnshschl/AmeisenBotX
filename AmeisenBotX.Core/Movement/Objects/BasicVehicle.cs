@@ -49,7 +49,15 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             desired -= position;
             desired.Normalize2D(desired.GetMagnitude2D());
-            desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
+
+            float maxVelocity = WowInterface.MovementSettings.MaxVelocity;
+
+            if (WowInterface.ObjectManager.Player.IsMounted)
+            {
+                maxVelocity *= 2;
+            }
+
+            desired.Multiply(maxVelocity);
 
             if (distanceToTarget > 20)
             {
@@ -69,11 +77,25 @@ namespace AmeisenBotX.Core.Movement.Objects
             if (WowInterface.ObjectManager.Player.IsInCombat
                 || WowInterface.Globals.ForceCombat)
             {
-                steering.Limit(WowInterface.MovementSettings.MaxSteeringCombat);
+                float maxSteeringCombat = WowInterface.MovementSettings.MaxSteeringCombat;
+
+                if (WowInterface.ObjectManager.Player.IsMounted)
+                {
+                    maxSteeringCombat *= 2;
+                }
+
+                steering.Limit(maxSteeringCombat);
             }
             else
             {
-                steering.Limit(WowInterface.MovementSettings.MaxSteering);
+                float maxSteering = WowInterface.MovementSettings.MaxSteering;
+
+                if (WowInterface.ObjectManager.Player.IsMounted)
+                {
+                    maxSteering *= 2;
+                }
+
+                steering.Limit(maxSteering);
             }
 
             Vector3 acceleration = new Vector3(0, 0, 0);
@@ -82,11 +104,25 @@ namespace AmeisenBotX.Core.Movement.Objects
             if (WowInterface.ObjectManager.Player.IsInCombat
                 || WowInterface.Globals.ForceCombat)
             {
-                acceleration.Limit(WowInterface.MovementSettings.MaxAccelerationCombat);
+                float maxAcceleration = WowInterface.MovementSettings.MaxAccelerationCombat;
+
+                if (WowInterface.ObjectManager.Player.IsMounted)
+                {
+                    maxAcceleration *= 2;
+                }
+
+                acceleration.Limit(maxAcceleration);
             }
             else
             {
-                acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
+                float maxAcceleration = WowInterface.MovementSettings.MaxAcceleration;
+
+                if (WowInterface.ObjectManager.Player.IsMounted)
+                {
+                    maxAcceleration *= 2;
+                }
+
+                acceleration.Limit(maxAcceleration);
             }
 
             acceleration.Multiply(multiplier);
@@ -112,7 +148,15 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             desired -= currentPosition;
             desired.Normalize2D(desired.GetMagnitude2D());
-            desired.Multiply(WowInterface.MovementSettings.MaxVelocity);
+
+            float maxVelocity = WowInterface.MovementSettings.MaxVelocity;
+
+            if (WowInterface.ObjectManager.Player.IsMounted)
+            {
+                maxVelocity *= 2;
+            }
+
+            desired.Multiply(maxVelocity);
 
             if (distanceToTarget < 4)
             {
@@ -121,11 +165,27 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             Vector3 steering = desired;
             steering -= Velocity;
-            steering.Limit(WowInterface.MovementSettings.MaxSteering);
+
+            float maxSteering = WowInterface.MovementSettings.MaxSteering;
+
+            if (WowInterface.ObjectManager.Player.IsMounted)
+            {
+                maxVelocity *= 2;
+            }
+
+            steering.Limit(maxVelocity);
 
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
-            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
+
+            float maxAcceleration = WowInterface.MovementSettings.MaxAcceleration;
+
+            if (WowInterface.ObjectManager.Player.IsMounted)
+            {
+                maxAcceleration *= 2;
+            }
+
+            acceleration.Limit(maxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -134,7 +194,15 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += GetObjectForceAroundMe<WowPlayer>(WowInterface.MovementSettings.SeperationDistance);
-            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
+
+            float maxAcceleration = WowInterface.MovementSettings.MaxAcceleration;
+
+            if (WowInterface.ObjectManager.Player.IsMounted)
+            {
+                maxAcceleration *= 2;
+            }
+
+            acceleration.Limit(maxAcceleration);
             acceleration.Multiply(multiplier);
             return acceleration;
         }
@@ -165,7 +233,14 @@ namespace AmeisenBotX.Core.Movement.Objects
                 Velocity = new Vector3(Velocity.X, Velocity.Y, 0f);
             }
 
-            Velocity.Limit(WowInterface.MovementSettings.MaxVelocity);
+            float maxVelocity = WowInterface.MovementSettings.MaxVelocity;
+
+            if (WowInterface.ObjectManager.Player.IsMounted)
+            {
+                maxVelocity *= 2;
+            }
+
+            Velocity.Limit(maxVelocity);
 
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             currentPosition.Add(Velocity);
