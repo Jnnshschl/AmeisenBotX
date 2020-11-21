@@ -218,7 +218,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 else if (ActionEvent.Run())
                 {
                     WowInterface.Globals.ForceCombat = true;
-                    WowInterface.HookManager.TargetGuid(weakestPlayer.Guid);
+                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
                 }
             }
             else
@@ -252,7 +252,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     else if (ActionEvent.Run())
                     {
                         WowInterface.Globals.ForceCombat = true;
-                        WowInterface.HookManager.TargetGuid(nearEnemy.Guid);
+                        WowInterface.HookManager.WowTargetGuid(nearEnemy.Guid);
                     }
                 }
             }
@@ -340,7 +340,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             else if (ActionEvent.Run())
             {
                 WowInterface.Globals.ForceCombat = true;
-                WowInterface.HookManager.TargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
+                WowInterface.HookManager.WowTargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
             return BehaviorTreeStatus.Ongoing;
@@ -408,7 +408,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     else if (ActionEvent.Run())
                     {
                         WowInterface.Globals.ForceCombat = true;
-                        WowInterface.HookManager.TargetGuid(nearEnemy.Guid);
+                        WowInterface.HookManager.WowTargetGuid(nearEnemy.Guid);
                     }
                 }
             }
@@ -426,7 +426,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                 if (LosCheckEvent.Run())
                 {
-                    if (WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, position, 2f))
+                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, position, 2f))
                     {
                         InLos = true;
                     }
@@ -457,7 +457,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         {
             try
             {
-                if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
+                if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
                 {
                     dynamic bgState = JsonConvert.DeserializeObject(result);
 
@@ -545,7 +545,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 }
                 else if (ActionEvent.Run())
                 {
-                    WowInterface.HookManager.WowObjectOnRightClick(nearestFlag);
+                    WowInterface.HookManager.WowObjectRightClick(nearestFlag);
                 }
             }
             else

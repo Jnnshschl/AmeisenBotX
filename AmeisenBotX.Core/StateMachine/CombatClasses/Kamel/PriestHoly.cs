@@ -168,8 +168,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
             {
-                WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
-                WowInterface.HookManager.CastSpell(ResurrectionSpell);
+                WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                WowInterface.HookManager.LuaCastSpell(ResurrectionSpell);
             }
 
             UseSpellOnlyInCombat = false;
@@ -191,20 +191,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            WowInterface.HookManager.CastSpell(spellName, castOnSelf);
+                            WowInterface.HookManager.LuaCastSpell(spellName, castOnSelf);
                             return true;
                         }
                     }
                 }
                 else
                 {
-                    WowInterface.HookManager.TargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                    WowInterface.HookManager.WowTargetGuid(WowInterface.ObjectManager.PlayerGuid);
 
                     Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
                     if ((WowInterface.ObjectManager.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
                     {
-                        WowInterface.HookManager.CastSpell(spellName);
+                        WowInterface.HookManager.LuaCastSpell(spellName);
                         return true;
                     }
                 }
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (DateTime.Now > spellCoolDown[spellName])
             {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.GetSpellCooldown(spellName));
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
                 return true;
             }
 
@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                     {
                         if (WowInterface.ObjectManager.TargetGuid != CastBuff.FirstOrDefault().Guid)
                         {
-                            WowInterface.HookManager.TargetGuid(CastBuff.FirstOrDefault().Guid);
+                            WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
                         }
                     }
                     if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
@@ -294,7 +294,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             {
                 if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.FirstOrDefault().Guid)
                 {
-                    WowInterface.HookManager.TargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                    WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 }
 
                 if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
@@ -308,7 +308,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         }
                         if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
                         {
-                            WowInterface.HookManager.StopClickToMoveIfActive();
+                            WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();
                         }
 
@@ -398,7 +398,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                     if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null && nearTarget != null)
                     {
-                        WowInterface.HookManager.TargetGuid(nearTarget.Guid);
+                        WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
 
                         if (!TargetInLineOfSight)
                         {
@@ -406,7 +406,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         }
                         if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
                         {
-                            WowInterface.HookManager.StopClickToMoveIfActive();
+                            WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();
                         }
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 80 && CustomCastSpell(HolyFireSpell))

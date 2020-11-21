@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="Settings" Height="390" Width="686" MinHeight="390" MinWidth="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="/icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        Title="Settings" Height="390" Width="686" MinHeight="390" MinWidth="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -226,26 +226,6 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Button.Foreground>
                         </Button>
-                    </Grid>
-                </Border>
-            </TabItem>
-            <TabItem x:Name="tabitemCombatlog" Header="Combatlog" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
-                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
-                    <Border.BorderBrush>
-                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                    </Border.BorderBrush>
-                    <Grid>
-                        <ListView x:Name="listviewCombatlog" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
-                    </Grid>
-                </Border>
-            </TabItem>
-            <TabItem x:Name="tabitemCombatlogKills" Header="Kills" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
-                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
-                    <Border.BorderBrush>
-                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                    </Border.BorderBrush>
-                    <Grid>
-                        <ListView x:Name="listviewCombatlogKills" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
                     </Grid>
                 </Border>
             </TabItem>

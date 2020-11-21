@@ -148,6 +148,7 @@ namespace AmeisenBotX.Memory
             lock (allocLock)
             {
                 address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
+
                 if (address != IntPtr.Zero)
                 {
                     MemoryAllocations.Add(address, size);
@@ -162,12 +163,14 @@ namespace AmeisenBotX.Memory
         public bool Attach(Process wowProcess)
         {
             Process = wowProcess;
+
             if (Process == null || Process.HasExited)
             {
                 return false;
             }
 
             ProcessHandle = OpenProcess(ProcessAccessFlags.All, false, wowProcess.Id);
+
             if (ProcessHandle == IntPtr.Zero)
             {
                 return false;

@@ -113,6 +113,7 @@ namespace AmeisenBotX
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
                 Config.Friends = textboxFriends.Text;
                 Config.IgnoreCombatWhileMounted = checkboxIgnoreCombatMounted.IsChecked.GetValueOrDefault(false);
+                Config.IdleActions = checkboxIdleActions.IsChecked.GetValueOrDefault(false);
                 Config.ItemRepairThreshold = sliderRepair.Value;
                 Config.ItemSellBlacklist = new List<string>(textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries));
                 Config.JobEngineMailHeader = textboxMailHeader.Text;
@@ -160,6 +161,17 @@ namespace AmeisenBotX
                 Config.UseMountsInParty = checkboxUseMountsInParty.IsChecked.GetValueOrDefault(false);
                 Config.UseOnlySpecificMounts = checkboxOnlySpecificMounts.IsChecked.GetValueOrDefault(false);
                 Config.Username = textboxUsername.Text;
+
+                Config.MovementSettings.EnableDistanceMovedJumpCheck = checkboxDistanceMovedJumpCheck.IsChecked.GetValueOrDefault(false);
+                Config.MovementSettings.EnableTracelineJumpCheck = checkboxTracelineJumpCheck.IsChecked.GetValueOrDefault(false);
+                Config.MovementSettings.MaxAcceleration = (float)sliderMaxAccelerationNormal.Value / 100.0f;
+                Config.MovementSettings.MaxAccelerationCombat = (float)sliderMaxAccelerationCombat.Value / 100.0f;
+                Config.MovementSettings.MaxSteering = (float)sliderMaxSteeringNormal.Value / 100.0f;
+                Config.MovementSettings.MaxVelocity = (float)sliderMaxVelocity.Value;
+                Config.MovementSettings.WaypointCheckThresholdMounted = (float)sliderWaypointThresholdMount.Value;
+                Config.MovementSettings.MaxSteeringCombat = (float)sliderMaxSteeringCombat.Value / 100.0f;
+                Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
+                Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
 
                 SaveConfig = true;
                 Close();
@@ -366,6 +378,7 @@ namespace AmeisenBotX
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
             checkboxFollowSpecificCharacter.IsChecked = Config.FollowSpecificCharacter;
             checkboxGroupMembers.IsChecked = Config.FollowGroupMembers;
+            checkboxIdleActions.IsChecked = Config.IdleActions;
             checkboxIgnoreCombatMounted.IsChecked = Config.IgnoreCombatWhileMounted;
             checkboxLooting.IsChecked = Config.LootUnits;
             checkboxLootOnlyMoneyAndQuestitems.IsChecked = Config.LootOnlyMoneyAndQuestitems;
@@ -422,6 +435,17 @@ namespace AmeisenBotX
             textboxUsername.Text = Config.Username;
             textboxWowPath.Text = Config.PathToWowExe;
 
+            checkboxDistanceMovedJumpCheck.IsChecked = Config.MovementSettings.EnableDistanceMovedJumpCheck;
+            checkboxTracelineJumpCheck.IsChecked = Config.MovementSettings.EnableTracelineJumpCheck;
+            sliderMaxAccelerationCombat.Value = Config.MovementSettings.MaxAccelerationCombat * 100.0f;
+            sliderMaxAccelerationNormal.Value = Config.MovementSettings.MaxAcceleration * 100.0f;
+            sliderMaxSteeringCombat.Value = Config.MovementSettings.MaxSteeringCombat * 100.0f;
+            sliderMaxSteeringNormal.Value = Config.MovementSettings.MaxSteering * 100.0f;
+            sliderMaxVelocity.Value = Config.MovementSettings.MaxVelocity;
+            sliderPlayerSeperationDistance.Value = Config.MovementSettings.SeperationDistance;
+            sliderWaypointThreshold.Value = Config.MovementSettings.WaypointCheckThreshold;
+            sliderWaypointThresholdMount.Value = Config.MovementSettings.WaypointCheckThresholdMounted;
+
             ChangedSomething = false;
         }
 
@@ -467,6 +491,24 @@ namespace AmeisenBotX
             }
         }
 
+        private void SliderMaxAccelerationCombat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMaxAccelerationCombat.Content = $"Max Acceleration: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderMaxAccelerationNormal_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMaxAccelerationNormal.Content = $"Max Acceleration: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                ChangedSomething = true;
+            }
+        }
+
         private void SliderMaxFollowDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (WindowLoaded)
@@ -490,6 +532,33 @@ namespace AmeisenBotX
             if (WindowLoaded)
             {
                 labelMaxFpsCombat.Content = $"Max FPS Combat: {Math.Round(e.NewValue)}";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderMaxSteeringCombat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMaxSteeringCombat.Content = $"Max Steering: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderMaxSteeringNormal_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMaxSteeringNormal.Content = $"Max Steering: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderMaxVelocity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelMaxVelocity.Content = $"Max Velocity: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
                 ChangedSomething = true;
             }
         }
@@ -521,11 +590,38 @@ namespace AmeisenBotX
             }
         }
 
+        private void SliderPlayerSeperationDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelPlayerSeperationDistance.Content = $"Player Seperation Distance: {MathF.Round((float)e.NewValue, 2)}m";
+                ChangedSomething = true;
+            }
+        }
+
         private void SliderRepair_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (WindowLoaded)
             {
                 labelRepairThreshold.Content = $"Repair: {Math.Round(e.NewValue)}%";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderWaypointThreshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelWaypointThreshold.Content = $"Waypoint Threshold: {MathF.Round((float)e.NewValue, 2)}m";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderWaypointThresholdMount_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelWaypointThresholdMount.Content = $"Waypoint Threshold (Mount): {MathF.Round((float)e.NewValue, 2)}m";
                 ChangedSomething = true;
             }
         }

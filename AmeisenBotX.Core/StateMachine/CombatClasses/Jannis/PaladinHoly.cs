@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.Execute();
 
-            if (WowInterface.ObjectManager.Partymembers.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 75.0)
+            if (WowInterface.ObjectManager.Partymembers.Any() || WowInterface.ObjectManager.Player.HealthPercentage < 65.0)
             {
                 if (NeedToHealSomeone())
                 {
@@ -127,23 +127,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (!WowInterface.ObjectManager.Player.IsAutoAttacking
+                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.5
+                    && EventAutoAttack.Run())
                 {
-                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking
-                        && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
-                    {
-                        if (EventAutoAttack.Run())
-                        {
-                            WowInterface.HookManager.StartAutoAttack();
-                        }
-
-                        return;
-                    }
-                    else
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
-                        return;
-                    }
+                    WowInterface.HookManager.LuaStartAutoAttack();
+                    return;
+                }
+                else
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.Target.Position);
+                    return;
                 }
             }
         }
@@ -162,7 +156,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.Count() > 1 ? unitsToHeal.First(e => !e.HasBuffByName(beaconOfLightSpell)) : unitsToHeal.First();
+                WowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.HasBuffByName(beaconOfLightSpell));
+
+                if (targetUnit == null)
+                {
+                    unitsToHeal.FirstOrDefault(e => e != null);
+
+                    if (targetUnit == null)
+                    {
+                        return false;
+                    }
+                }
 
                 if (targetUnit.HealthPercentage < 15.0
                     && TryCastSpell(layOnHandsSpell, 0))

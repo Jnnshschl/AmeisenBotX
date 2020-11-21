@@ -16,197 +16,197 @@ namespace AmeisenBotX.Core.Hook
 
         bool IsWoWHooked { get; }
 
-        void AcceptBattlegroundInvite();
-
-        void AcceptPartyInvite();
-
-        void AcceptQuest(int gossipId);
-
-        void AcceptResurrect();
-
-        void AcceptSummon();
-
-        void AutoAcceptQuests();
-
-        void CancelSummon();
-
-        int CastAndGetSpellCooldown(string spellName, bool castOnSelf = false);
-
-        void CastSpell(string name, bool castOnSelf = false);
-
-        void CastSpellById(int spellId);
-
-        void ClearTarget();
-
-        void ClickOnTerrain(Vector3 position);
-
-        void ClickToMove(WowPlayer player, Vector3 position);
-
-        void ClickUiElement(string elementName);
-
-        void CofirmBop();
-
-        void CofirmLootRoll();
-
-        void CofirmReadyCheck(bool isReady);
-
-        void CompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId);
-
-        void DeclinePartyInvite();
-
-        void DeclineResurrect();
-
-        void Dismount();
+        void BotOverrideWorldLoadedCheck(bool status);
 
         void DisposeHook();
 
-        void EnableClickToMove();
+        void LuaAcceptBattlegroundInvite();
 
-        bool ExecuteLuaAndRead((string, string) commandVariableTuple, out string result);
+        void LuaAcceptPartyInvite();
 
-        bool ExecuteLuaAndRead(string command, string variable, out string result);
+        void LuaAcceptQuest(int gossipId);
 
-        void FacePosition(WowPlayer player, Vector3 positionToFace);
+        void LuaAcceptQuests();
 
-        List<int> GetCompletedQuests();
+        void LuaAcceptResurrect();
 
-        string GetEquipmentItems();
+        void LuaAcceptSummon();
 
-        int GetFreeBagSlotCount();
+        void LuaCallCompanion(int index, string type = "MOUNT");
 
-        int GetGossipOptionCount();
+        void LuaCancelSummon();
 
-        string GetInventoryItems();
+        void LuaCastSpell(string name, bool castOnSelf = false);
 
-        string GetItemBySlot(int itemslot);
+        void LuaCastSpellById(int spellId);
 
-        string GetItemJsonByNameOrLink(string itemName);
+        void LuaClickUiElement(string elementName);
 
-        string GetItemStats(string itemLink);
+        void LuaCofirmLootRoll();
 
-        bool GetLocalizedText(string variable, out string result);
+        void LuaCofirmReadyCheck(bool isReady);
 
-        string GetLootRollItemLink(int rollId);
+        void LuaCofirmStaticPopup();
 
-        string GetMoney();
+        void LuaCompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId);
 
-        string GetMounts();
+        void LuaDeclinePartyInvite();
 
-        void GetQuestReward(int id);
+        void LuaDeclineResurrect();
 
-        Dictionary<RuneType, int> GetRunesReady();
+        void LuaDismissCompanion(string type = "MOUNT");
 
-        Dictionary<string, (int, int)> GetSkills();
+        bool LuaDoString(string command);
+
+        void LuaEquipItem(IWowItem newItem, IWowItem currentItem = null);
+
+        List<int> LuaGetCompletedQuests();
+
+        string LuaGetEquipmentItems();
+
+        int LuaGetFreeBagSlotCount();
+
+        int LuaGetGossipOptionCount();
+
+        string[] LuaGetGossipTypes();
+
+        string LuaGetInventoryItems();
+
+        string LuaGetItemBySlot(int itemslot);
+
+        string LuaGetItemJsonByNameOrLink(string itemName);
+
+        string LuaGetItemStats(string itemLink);
+
+        string LuaGetLootRollItemLink(int rollId);
+
+        string LuaGetMoney();
+
+        string LuaGetMounts();
+
+        void LuaGetQuestReward(int id);
+
+        Dictionary<string, (int, int)> LuaGetSkills();
 
         /// <summary>
         /// Get the spells cooldown left in milliseconds
         /// </summary>
         /// <param name="spellName"></param>
         /// <returns>ms cooldown left</returns>
-        int GetSpellCooldown(string spellName);
+        int LuaGetSpellCooldown(string spellName);
 
-        string GetSpellNameById(int spellId);
+        string LuaGetSpellNameById(int spellId);
 
-        string GetSpells();
+        string LuaGetSpells();
 
-        string GetTalents();
+        string LuaGetTalents();
 
-        public void GetUnitAuras(IntPtr baseAddress, ref WowAura[] auraTable, out int auraCount);
+        (string, int) LuaGetUnitCastingInfo(WowLuaUnit luaunit);
 
-        (string, int) GetUnitCastingInfo(WowLuaUnit luaunit);
+        int LuaGetUnspentTalentPoints();
 
-        WowUnitReaction GetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
+        bool LuaHasUnitStealableBuffs(WowLuaUnit luaUnit);
 
-        int GetUnspentTalentPoints();
+        bool LuaIsBgInviteReady();
 
-        bool HasUnitStealableBuffs(WowLuaUnit luaUnit);
+        bool LuaIsGhost(WowLuaUnit luaUnit);
 
-        bool IsBgInviteReady();
+        bool LuaIsInLfgGroup();
 
-        bool IsClickToMoveActive();
+        bool LuaIsOutdoors();
 
-        bool IsGhost(WowLuaUnit luaUnit);
+        void LuaKickNpcsOutOfVehicle();
 
-        bool IsInLfgGroup();
+        void LuaLearnAllAvaiableSpells();
 
-        bool IsInLineOfSight(Vector3 start, Vector3 end, float heightAdjust = 1.5f);
+        void LuaLeaveBattleground();
 
-        bool IsOutdoors();
+        void LuaLootEveryThing();
 
-        bool IsRuneReady(int runeId);
+        void LuaLootMoneyAndQuestItems();
 
-        bool IsSpellKnown(int spellId, bool isPetSpell = false);
+        void LuaQueryQuestsCompleted();
 
-        void KickNpcsOutOfVehicle();
+        void LuaQueueBattlegroundByName(string bgName);
 
-        void LearnAllAvaiableSpells();
+        void LuaRepairAllItems();
 
-        void LeaveBattleground();
+        void LuaRepopMe();
 
-        void LootEveryThing();
+        void LuaRetrieveCorpse();
 
-        void LootOnlyMoneyAndQuestItems();
+        void LuaRollOnLoot(int rollId, RollType rollType);
 
-        bool LuaDoString(string command);
+        void LuaSelectGossipOption(int gossipId);
 
-        void Mount(int index);
+        void LuaSellAllItems();
 
-        void OverrideWorldLoadedCheck(bool status);
+        void LuaSellItemsByName(string itemName);
 
-        void QueryQuestsCompleted();
+        void LuaSellItemsByQuality(ItemQuality itemQuality);
 
-        void QueueBattlegroundByName(string bgName);
+        void LuaSendChatMessage(string message);
 
-        void ReleaseSpirit();
+        void LuaSendItemMailToCharacter(string itemName, string receiver);
 
-        void RepairAllItems();
+        void LuaSetLfgRole(CombatClassRole combatClassRole);
 
-        void ReplaceItem(IWowItem currentItem, IWowItem newItem);
+        void LuaSpellStopCasting();
 
-        void RetrieveCorpse();
+        void LuaStartAutoAttack();
 
-        void RollOnItem(int rollId, RollType rollType);
+        void LuaTargetUnit(WowLuaUnit unit);
 
-        void SelectLfgRole(CombatClassRole combatClassRole);
+        bool LuaUiIsVisible(params string[] uiElement);
 
-        void SellAllItems();
+        void LuaUseContainerItem(int bagId, int bagSlot);
 
-        void SellItemsByName(string itemName);
+        void LuaUseInventoryItem(EquipmentSlot equipmentSlot);
 
-        void SellItemsByQuality(ItemQuality itemQuality);
+        void LuaUseItemByName(string itemName);
 
-        void SendChatMessage(string message);
+        void WowClearTarget();
 
-        void SendItemMailToCharacter(string itemName, string receiver);
+        void WowClickOnTerrain(Vector3 position);
 
-        void SetFacing(WowUnit unit, float angle);
+        void WowClickToMove(WowPlayer player, Vector3 position);
 
-        void SetRenderState(bool renderingEnabled);
+        void WowEnableClickToMove();
 
-        bool SetupEndsceneHook();
+        bool WowExecuteLuaAndRead((string, string) commandVariableTuple, out string result);
 
-        void StartAutoAttack();
+        bool WowExecuteLuaAndRead(string command, string variable, out string result);
 
-        void StopCasting();
+        void WowFacePosition(WowPlayer player, Vector3 positionToFace);
 
-        void StopClickToMoveIfActive();
+        bool WowGetLocalizedText(string variable, out string result);
 
-        void TargetGuid(ulong guid);
+        Dictionary<RuneType, int> WowGetRunesReady();
 
-        void TargetLuaUnit(WowLuaUnit unit);
+        public void WowGetUnitAuras(IntPtr baseAddress, ref WowAura[] auraTable, out int auraCount);
 
-        byte TraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171);
+        WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
 
-        void UnitOnRightClick(WowUnit wowUnit);
+        bool WowIsClickToMoveActive();
 
-        void UnitSelectGossipOption(int gossipId);
+        bool WowIsInLineOfSight(Vector3 start, Vector3 end, float heightAdjust = 1.5f);
 
-        void UseInventoryItem(EquipmentSlot equipmentSlot);
+        bool WowIsRuneReady(int runeId);
 
-        void UseItemByBagAndSlot(int bagId, int bagSlot);
+        void WowObjectRightClick(WowObject gObject);
 
-        void UseItemByName(string itemName);
+        void WowSetFacing(WowUnit unit, float angle);
 
-        void WowObjectOnRightClick(WowObject gObject);
+        void WowSetRenderState(bool renderingEnabled);
+
+        bool WowSetupEndsceneHook();
+
+        void WowStopClickToMove();
+
+        void WowTargetGuid(ulong guid);
+
+        byte WowTraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171);
+
+        void WowUnitRightClick(WowUnit wowUnit);
     }
 }

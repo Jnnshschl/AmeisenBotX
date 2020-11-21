@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (TryCastSpell(forceOfNatureSpell, 0, true))
                 {
-                    WowInterface.HookManager.ClickOnTerrain(WowInterface.ObjectManager.Player.Position);
+                    WowInterface.HookManager.WowClickOnTerrain(WowInterface.ObjectManager.Player.Position);
                 }
             }
         }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="AmeisenBot" Height="280" Width="420" MinHeight="280" MinWidth="420" Closing="Window_Closing" WindowStyle="None" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="/icon.png" AllowsTransparency="False">
+        Title="AmeisenBot" Height="280" Width="420" MinHeight="280" MinWidth="420" Closing="Window_Closing" WindowStyle="None" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded" Icon="icon.png" AllowsTransparency="False">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -272,6 +272,11 @@
             </Rectangle.Fill>
         </Rectangle>
         <Button x:Name="buttonNotification" Content="💡" Margin="201,0,0,0" BorderThickness="0,0,1,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Left" Width="28" Click="ButtonNotification_Click">
+            <Button.Foreground>
+                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+            </Button.Foreground>
+        </Button>
+        <Button x:Name="buttonToggleRelationshipWindow" Content="🙂" Margin="0,0,140,0" BorderThickness="1,0,0,0" FontFamily="Verdana" Style="{DynamicResource ButtonStyleDark}" Click="ButtonToggleRelationshipWindow_Click" FontWeight="Bold" SnapsToDevicePixels="True" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" Width="28">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

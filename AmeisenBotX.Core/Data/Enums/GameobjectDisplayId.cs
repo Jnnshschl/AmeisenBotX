@@ -2,6 +2,8 @@
 {
     public enum GameobjectDisplayId
     {
+        CookingCampfire = 192,
+        FishingBobber = 668,
         WsgAllianceFlag = 5912,
         WsgHordeFlag = 5913,
         StormwindNightelfBoat = 3015,

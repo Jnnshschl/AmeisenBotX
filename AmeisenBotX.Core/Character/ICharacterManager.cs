@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
@@ -18,6 +19,8 @@ namespace AmeisenBotX.Core.Character
 
         IWowItemComparator ItemComparator { get; set; }
 
+        List<EquipmentSlot> ItemSlotsToSkip { get; set; }
+
         int Money { get; }
 
         List<WowMount> Mounts { get; }
@@ -32,11 +35,7 @@ namespace AmeisenBotX.Core.Character
 
         void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
 
-        bool HasFoodInBag();
-
-        bool HasRefreshmentInBag();
-
-        bool HasWaterInBag();
+        bool HasItemTypeInBag<T>(bool needsToBeUseable = false);
 
         bool IsAbleToUseArmor(WowArmor item);
 

@@ -10,6 +10,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
     {
         string Author { get; }
 
+        IEnumerable<string> BlacklistedTargets { get; set; }
+
         Dictionary<string, dynamic> Configureables { get; set; }
 
         string Description { get; }

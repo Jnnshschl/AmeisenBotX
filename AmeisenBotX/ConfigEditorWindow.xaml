@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
-        Title="MainWindow" Height="390" Width="686" MinHeight="390" MinWidth="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Icon="/icon.png" Loaded="Window_Loaded">
+        Title="MainWindow" Height="390" Width="686" MinHeight="390" MinWidth="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="Window_MouseLeftButtonDown" Icon="icon.png" Loaded="Window_Loaded">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -402,7 +402,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <CheckBox x:Name="checkboxOnlyFriendsMode" Content="Only Friends Mode" HorizontalAlignment="Left" Margin="471,131,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181" Checked="CheckboxOnlyFriendsMode_Checked" Unchecked="CheckboxOnlyFriendsMode_Unchecked">
+                        <CheckBox x:Name="checkboxOnlyFriendsMode" Content="Only Friends Mode" HorizontalAlignment="Left" Margin="471,0,0,0" VerticalAlignment="Center" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181" Checked="CheckboxOnlyFriendsMode_Checked" Unchecked="CheckboxOnlyFriendsMode_Unchecked">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>
@@ -413,7 +413,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        <TextBox x:Name="textboxFriends" HorizontalAlignment="Left" Height="58" Margin="472,152,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" IsEnabled="False" TabIndex="12" Style="{DynamicResource TextBoxStyleDark}">
+                        <TextBox x:Name="textboxFriends" HorizontalAlignment="Left" Height="58" Margin="472,173,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="180" FontFamily="Bahnschrift Light" FontSize="14" BorderThickness="1,0,0,1" IsEnabled="False" TabIndex="12" Style="{DynamicResource TextBoxStyleDark}">
                             <TextBox.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
                             </TextBox.BorderBrush>
@@ -424,12 +424,12 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </TextBox.Background>
                         </TextBox>
-                        <Label Content="name1,name2,name3" HorizontalAlignment="Left" Margin="472,210,0,0" VerticalAlignment="Top" Padding="0" FontSize="9" FontStyle="Italic">
+                        <Label Content="name1,name2,name3" HorizontalAlignment="Left" Margin="472,231,0,0" VerticalAlignment="Top" Padding="0" FontSize="9" FontStyle="Italic">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
                             </Label.Foreground>
                         </Label>
-                        <Label x:Name="labelFps_Copy" Content="Friends" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,100,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                        <Label x:Name="labelFps_Copy" Content="Friends" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,121,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
@@ -479,6 +479,117 @@
                             </CheckBox.Background>
                         </CheckBox>
                         <CheckBox x:Name="checkboxLootOnlyMoneyAndQuestitems" Content="Only Money and Questitems" HorizontalAlignment="Left" Margin="243,88,0,0" VerticalAlignment="Top" Checked="CheckboxFollowSpecificCharacter_Checked" Unchecked="CheckboxFollowSpecificCharacter_Unchecked" TabIndex="11" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <CheckBox x:Name="checkboxIdleActions" Content="Idle Actions" HorizontalAlignment="Left" Margin="471,76,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem x:Name="tabitemMovement" Header="Movement" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Slider x:Name="sliderMaxAccelerationNormal" HorizontalAlignment="Left" Margin="4,107,0,0" VerticalAlignment="Top" Width="179" Maximum="100" Minimum="1" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxAccelerationNormal_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelFollowing3" Content="Normal:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                            </Label.BorderBrush>
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderMaxSteeringNormal" HorizontalAlignment="Left" Margin="4,59,0,0" VerticalAlignment="Top" Width="179" Maximum="100" Minimum="1" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxSteeringNormal_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelMaxSteeringNormal" Content="Max Steering:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,34,0,0" Padding="0,5,5,5" Width="179">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label x:Name="labelMaxAccelerationNormal" Content="Max Acceleration:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="3,82,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderMaxAccelerationCombat" HorizontalAlignment="Left" Margin="244,107,0,0" VerticalAlignment="Top" Width="179" Maximum="100" Minimum="1" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxAccelerationCombat_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelFollowing3_Copy" Content="Combat:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="244,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
+                            </Label.BorderBrush>
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderMaxSteeringCombat" HorizontalAlignment="Left" Margin="244,59,0,0" VerticalAlignment="Top" Width="179" Maximum="100" Minimum="1" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxSteeringCombat_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelMaxSteeringCombat" Content="Max Steering:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="244,34,0,0" Padding="0,5,5,5" Width="179">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label x:Name="labelMaxAccelerationCombat" Content="Max Acceleration:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="242,82,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label x:Name="labelWindowPositions_Copy2" Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,4,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderMaxVelocity" HorizontalAlignment="Left" Margin="472,59,0,0" VerticalAlignment="Top" Width="179" Maximum="12" Minimum="0.1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxVelocity_ValueChanged" FontFamily="Bahnschrift Light" LargeChange="0.1" />
+                        <Label x:Name="labelMaxVelocity" Content="Max Velocity:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,34,0,0" Padding="0,5,5,5" Width="179">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderWaypointThreshold" HorizontalAlignment="Left" Margin="472,107,0,0" VerticalAlignment="Top" Width="179" Maximum="12" Minimum="0.1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderWaypointThreshold_ValueChanged" FontFamily="Bahnschrift Light" LargeChange="0.1" />
+                        <Label x:Name="labelWaypointThreshold" Content="Waypoint Treshold:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,82,0,0" Padding="0,5,5,5" Width="179">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderWaypointThresholdMount" HorizontalAlignment="Left" Margin="472,155,0,0" VerticalAlignment="Top" Width="179" Minimum="0.1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderWaypointThresholdMount_ValueChanged" FontFamily="Bahnschrift Light" LargeChange="0.1" />
+                        <Label x:Name="labelWaypointThresholdMount" Content="Waypoint Treshold (Mount):" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,130,0,0" Padding="0,5,5,5" Width="179">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderPlayerSeperationDistance" HorizontalAlignment="Left" Margin="472,203,0,0" VerticalAlignment="Top" Width="179" Maximum="8" Minimum="0.1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderPlayerSeperationDistance_ValueChanged" FontFamily="Bahnschrift Light" LargeChange="0.1" />
+                        <Label x:Name="labelPlayerSeperationDistance" Content="Player Seperation Distance:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,178,0,0" Padding="0,5,5,5" Width="179">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxTracelineJumpCheck" Content="Traceline Jump-Check" HorizontalAlignment="Left" Margin="472,234,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <CheckBox x:Name="checkboxDistanceMovedJumpCheck" Content="Distance Moved Jump-Check" HorizontalAlignment="Left" Margin="472,255,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>

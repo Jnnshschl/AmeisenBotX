@@ -105,7 +105,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                    if (distanceToTarget > 5.0)
+                    if ((WowInterface.ObjectManager.Player.IsDazed
+                        || WowInterface.ObjectManager.Player.IsConfused
+                        || WowInterface.ObjectManager.Player.IsPossessed
+                        || WowInterface.ObjectManager.Player.IsFleeing)
+                        && TryCastSpell(heroicFurySpell, 0))
+                    {
+                        return;
+                    }
+
+                    if (distanceToTarget > 4.0)
                     {
                         if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
                             || (TryCastSpell(berserkerRageSpell, WowInterface.ObjectManager.Target.Guid, true) && TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)))
@@ -115,13 +124,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     }
                     else
                     {
-                        if (TryCastSpell(berserkerRageSpell, 0))
+                        if (HeroicStrikeEvent.Ready && !WowInterface.ObjectManager.Player.HasBuffByName(recklessnessSpell))
                         {
-                            return;
+                            if ((WowInterface.ObjectManager.Player.Rage > 50 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 8.0).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                                || (WowInterface.ObjectManager.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                            {
+                                HeroicStrikeEvent.Run();
+                                return;
+                            }
                         }
 
                         if (TryCastSpellWarrior(bloodthirstSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true)
                             || TryCastSpellWarrior(whirlwindSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        // dont prevent BT or WW with GCD
+                        if (CooldownManager.GetSpellCooldown(bloodthirstSpell) <= 1200
+                            || CooldownManager.GetSpellCooldown(whirlwindSpell) <= 1200)
                         {
                             return;
                         }
@@ -132,25 +153,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                             return;
                         }
 
-                        if (TryCastSpell(bloodrageSpell, WowInterface.ObjectManager.Target.Guid, true, WowInterface.ObjectManager.Player.Health)
-                            || TryCastSpell(recklessnessSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        if (TryCastSpell(berserkerRageSpell, 0))
                         {
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.Target.HealthPercentage < 20)
+                        if (TryCastSpell(bloodrageSpell, WowInterface.ObjectManager.Target.Guid, true, WowInterface.ObjectManager.Player.Health))
+                        {
+                            return;
+                        }
+
+                        if (TryCastSpell(recklessnessSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if (TryCastSpell(deathWishSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        {
+                            return;
+                        }
+
+                        if (WowInterface.ObjectManager.Player.Rage > 25
+                           && WowInterface.ObjectManager.Target.HealthPercentage < 20
                            && TryCastSpellWarrior(executeSpell, berserkerStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
                         {
                             return;
-                        }
-
-                        if (HeroicStrikeEvent.Run())
-                        {
-                            if ((WowInterface.ObjectManager.Player.Rage > 25 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 8.0).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
-                                || (WowInterface.ObjectManager.Player.Rage > 35 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.ObjectManager.TargetGuid, true)))
-                            {
-                                return;
-                            }
                         }
                     }
                 }

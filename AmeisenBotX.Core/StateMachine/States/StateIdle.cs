@@ -2,6 +2,8 @@
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.StateMachine.States.Idle;
+using AmeisenBotX.Core.StateMachine.States.Idle.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,17 @@ namespace AmeisenBotX.Core.Statemachine.States
         public StateIdle(AmeisenBotStateMachine stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             FirstStart = true;
+            IdleActionManager = new IdleActionManager(config.IdleActionsMaxCooldown, config.IdleActionsMinCooldown, new List<IIdleAction>()
+            {
+                new AuctionHouseIdleAction(),
+                new CheckMailsIdleAction(),
+                new FishingIdleAction(),
+                new LookAroundIdleAction(),
+                new LookAtGroupIdleAction(),
+                new RandomEmoteIdleAction(),
+                new SitByCampfireIdleAction(),
+                new SitToChairIdleAction(stateMachine, Config.MinFollowDistance),
+            });
 
             BagSlotCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
             EatCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
@@ -22,15 +35,20 @@ namespace AmeisenBotX.Core.Statemachine.States
             QuestgiverCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
             QuestgiverRightClickEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
             RefreshCharacterEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            IdleActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
         }
 
         public bool FirstStart { get; set; }
+
+        public IdleActionManager IdleActionManager { get; set; }
 
         public int QuestgiverGossipOptionCount { get; set; }
 
         private TimegatedEvent BagSlotCheckEvent { get; }
 
         private TimegatedEvent EatCheckEvent { get; }
+
+        private TimegatedEvent IdleActionEvent { get; }
 
         private TimegatedEvent LootCheckEvent { get; }
 
@@ -58,7 +76,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
 
                     WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                    WowInterface.HookManager.EnableClickToMove();
+                    WowInterface.HookManager.WowEnableClickToMove();
                 }
 
                 if (RefreshCharacterEvent.Run())
@@ -67,6 +85,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
 
                 WowInterface.MovementEngine.StopMovement();
+
+                IdleActionManager.Reset();
             }
         }
 
@@ -74,11 +94,6 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             // WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, new Vector3(-4918, -940, 501));
             // return;
-
-            if (WowInterface.ObjectManager.Player.IsCasting)
-            {
-                return;
-            }
 
             // do we need to loot stuff
             if (LootCheckEvent.Run()
@@ -166,10 +181,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 StateMachine.SetState(StateMachine.StateOverride);
             }
-        }
 
-        public override void Leave()
-        {
+            if (Config.IdleActions && IdleActionEvent.Run())
+            {
+                IdleActionManager.Tick(Config.Autopilot);
+            }
         }
 
         public bool IsUnitToFollowThere(out WowUnit playerToFollow, bool ignoreRange = false)
@@ -200,12 +216,17 @@ namespace AmeisenBotX.Core.Statemachine.States
             return false;
         }
 
+        public override void Leave()
+        {
+            WowInterface.CharacterManager.ItemSlotsToSkip.Clear();
+        }
+
         private void CheckForBattlegroundInvites()
         {
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 2)
             {
-                WowInterface.HookManager.AcceptBattlegroundInvite();
+                WowInterface.HookManager.LuaAcceptBattlegroundInvite();
             }
         }
 
@@ -233,10 +254,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, possibleQuestgiver.Position))
                         {
-                            WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, possibleQuestgiver.Position);
+                            WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, possibleQuestgiver.Position);
                         }
 
-                        WowInterface.HookManager.UnitOnRightClick(possibleQuestgiver);
+                        WowInterface.HookManager.WowUnitRightClick(possibleQuestgiver);
                         return true;
                     }
                 }

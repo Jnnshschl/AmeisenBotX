@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             WowDynobject aoeSpellObject = WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                 .FirstOrDefault(e => !Blacklisted.Contains(e.SpellId)
                     && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 5.0
-                    && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
+                    && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
 
             if (aoeSpellObject == null)
             {
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                    .Any(e => !Blacklisted.Contains(e.SpellId)
                           && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius + 5.0
-                          && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
+                          && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly);
         }
 
         public override void Leave()

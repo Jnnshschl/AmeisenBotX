@@ -59,10 +59,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 {
                     if (UseEvent.Run())
                     {
-                        WowInterface.HookManager.StopClickToMoveIfActive();
+                        WowInterface.HookManager.WowStopClickToMove();
                         WowInterface.MovementEngine.Reset();
 
-                        WowInterface.HookManager.WowObjectOnRightClick(WowGameobject);
+                        WowInterface.HookManager.WowObjectRightClick(WowGameobject);
                     }
                 }
                 else

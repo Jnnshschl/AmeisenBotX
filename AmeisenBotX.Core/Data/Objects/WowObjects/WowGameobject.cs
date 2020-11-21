@@ -15,6 +15,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public byte Bytes0 { get; set; }
 
+        public ulong CreatedBy { get; set; }
+
         public int DisplayId { get; set; }
 
         public int Faction { get; set; }
@@ -38,6 +40,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
                 && WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowGameobjectPosition), out Vector3 position))
             {
                 GameobjectType = (WowGameobjectType)objPtr.GameobjectBytes1;
+                CreatedBy = objPtr.CreatedBy;
                 Bytes0 = objPtr.GameobjectBytes0;
                 DisplayId = objPtr.DisplayId;
                 Faction = objPtr.Faction;

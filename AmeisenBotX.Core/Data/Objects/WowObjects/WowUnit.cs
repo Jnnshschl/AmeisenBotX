@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
@@ -12,13 +13,15 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 {
     public class WowUnit : WowObject
     {
-        public int AuraCount = 0;
-
-        public WowAura[] Auras = new WowAura[40];
+        private WowAura[] auras;
 
         public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
+
+        public int AuraCount { get; set; }
+
+        public IEnumerable<WowAura> Auras => auras;
 
         public WowClass Class { get; set; }
 
@@ -206,7 +209,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return Auras != null && Auras.Any(e => e.Name == name);
         }
 
-        public bool IsInMeleeRange(WowUnit wowUnit) => wowUnit != null && Position.GetDistance(wowUnit.Position) < Math.Max(4.5, CombatReach + wowUnit.CombatReach + 1);
+        public bool IsInMeleeRange(WowUnit wowUnit) => wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
 
         public override string ToString()
         {
@@ -221,12 +224,12 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
             if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
             {
-                Class = (WowClass)((objPtr.Bytes0 >> 8) & 0xFF);
+                Class = (WowClass)(objPtr.Class);
                 CombatReach = objPtr.CombatReach;
                 DisplayId = objPtr.DisplayId;
                 Energy = objPtr.Power4;
                 FactionTemplate = objPtr.FactionTemplate;
-                Gender = (WowGender)((objPtr.Bytes0 >> 16) & 0xFF);
+                Gender = (WowGender)(objPtr.Gender);
                 Health = objPtr.Health;
                 Level = objPtr.Level;
                 Mana = objPtr.Power1;
@@ -236,8 +239,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
                 MaxRage = objPtr.MaxPower2 / 10;
                 MaxRuneenergy = objPtr.MaxPower7 / 10;
                 NpcFlags = objPtr.NpcFlags;
-                PowerType = (WowPowertype)((objPtr.Bytes0 >> 24) & 0xFF);
-                Race = (WowRace)((objPtr.Bytes0 >> 0) & 0xFF);
+                PowerType = (WowPowertype)(objPtr.PowerType);
+                Race = (WowRace)(objPtr.Race);
                 Rage = objPtr.Power2 / 10;
                 Runeenergy = objPtr.Power7 / 10;
                 SummonedByGuid = objPtr.SummonedBy;
@@ -255,11 +258,13 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
             if (Type == WowObjectType.Unit)
             {
+                // dont read the name for players
                 Name = ReadUnitName();
             }
 
-            Array.Clear(Auras, 0, Auras.Length);
-            WowInterface.I.HookManager.GetUnitAuras(BaseAddress, ref Auras, out AuraCount);
+            auras = new WowAura[40];
+            WowInterface.I.HookManager.WowGetUnitAuras(BaseAddress, ref auras, out int auraCount);
+            AuraCount = auraCount;
 
             if (WowInterface.I.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)WowInterface.I.OffsetList.WowUnitPosition), out Vector3 position))
             {
@@ -289,7 +294,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         private string ReadUnitName()
         {
-            if (WowInterface.I.BotCache.TryGetUnitName(Guid, out string cachedName))
+            if (WowInterface.I.Db.TryGetUnitName(Guid, out string cachedName))
             {
                 return cachedName;
             }
@@ -300,7 +305,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             {
                 if (name.Length > 0)
                 {
-                    WowInterface.I.BotCache.CacheName(Guid, name);
+                    WowInterface.I.Db.CacheName(Guid, name);
                 }
 
                 return name;

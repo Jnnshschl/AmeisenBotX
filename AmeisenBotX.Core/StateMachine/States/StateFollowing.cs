@@ -169,7 +169,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     {
                         WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
                         WowInterface.MovementEngine.StopMovement();
-                        WowInterface.HookManager.Mount(mount.Index);
+                        WowInterface.HookManager.LuaCallCompanion(mount.Index);
                     }
                 }
 
@@ -180,7 +180,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (LosCheckEvent.Run())
             {
-                if (WowInterface.HookManager.IsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2f))
+                if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2f))
                 {
                     InLos = true;
                 }

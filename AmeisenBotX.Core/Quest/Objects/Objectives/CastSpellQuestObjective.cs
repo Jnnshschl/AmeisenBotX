@@ -25,7 +25,9 @@
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
 
-            WowInterface.HookManager.CastSpellById(SpellId);
+            WowInterface.MovementEngine.Reset();
+            WowInterface.HookManager.WowStopClickToMove();
+            WowInterface.HookManager.LuaCastSpellById(SpellId);
         }
     }
 }

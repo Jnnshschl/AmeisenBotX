@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 { livingBombSpell, () => TryCastSpell(livingBombSpell, WowInterface.ObjectManager.TargetGuid, true) }
             };
 
-            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.HasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.ObjectManager.TargetGuid, true);
+            TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.ObjectManager.TargetGuid, true);
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {

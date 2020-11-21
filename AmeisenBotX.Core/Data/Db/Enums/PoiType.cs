@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.Cache.Enums
+﻿namespace AmeisenBotX.Core.Data.Db.Enums
 {
     public enum PoiType
     {
@@ -7,6 +7,8 @@
         ClassTrainer,
         Mailbox,
         Ore,
-        Herb
+        Herb,
+        FishingSpot,
+        Auctioneer,
     }
 }

@@ -339,6 +339,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string cleaveSpell = "Cleave";
         protected const string commandingShoutSpell = "Commanding Shout";
         protected const string concussionBlowSpell = "Concussion Blow";
+        protected const string deathWishSpell = "Death Wish";
         protected const string defensiveStanceSpell = "Defensive Stance";
         protected const string demoralizingShoutSpell = "Demoralizing Shout";
         protected const string devastateSpell = "Devastate";
@@ -346,6 +347,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string enragedRegenerationSpell = "Enraged Regeneration";
         protected const string executeSpell = "Execute";
         protected const string hamstringSpell = "Hamstring";
+        protected const string heroicFurySpell = "Heroic Fury";
         protected const string heroicStrikeSpell = "Heroic Strike";
         protected const string heroicThrowSpell = "Heroic Throw";
         protected const string interceptSpell = "Intercept";
@@ -414,11 +416,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             TargetInterruptManager = new InterruptManager(new List<WowUnit>() { WowInterface.ObjectManager.Target }, null);
 
-            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
-            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
         public string Author { get; } = "Jannis";
+
+        public IEnumerable<string> BlacklistedTargets { get => TargetManagerDps.BlacklistedTargets; set => TargetManagerDps.BlacklistedTargets = value; }
 
         public Dictionary<string, dynamic> Configureables { get; set; }
 
@@ -480,15 +484,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (!TargetInLineOfSight)
                 {
-                    WowInterface.HookManager.StopCasting();
-                }
-
-                if (WowInterface.ObjectManager.Target != null && EventCheckFacing.Run())
-                {
-                    CheckFacing(WowInterface.ObjectManager.Target);
+                    WowInterface.HookManager.LuaSpellStopCasting();
                 }
 
                 return;
+            }
+
+            if (WowInterface.ObjectManager.Target != null && EventCheckFacing.Run())
+            {
+                CheckFacing(WowInterface.ObjectManager.Target);
             }
 
             // Update Priority Units
@@ -510,7 +514,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 && !WowInterface.ObjectManager.Player.IsAutoAttacking
                 && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
             {
-                WowInterface.HookManager.StartAutoAttack();
+                WowInterface.HookManager.LuaStartAutoAttack();
             }
 
             // Units to interrupt
@@ -536,7 +540,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (healthItem != null)
                 {
-                    WowInterface.HookManager.UseItemByName(healthItem.Name);
+                    WowInterface.HookManager.LuaUseItemByName(healthItem.Name);
                 }
             }
 
@@ -546,7 +550,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (manaItem != null)
                 {
-                    WowInterface.HookManager.UseItemByName(manaItem.Name);
+                    WowInterface.HookManager.LuaUseItemByName(manaItem.Name);
                 }
             }
 
@@ -658,7 +662,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 if (WowInterface.ObjectManager.Player.TargetGuid != guid)
                 {
-                    WowInterface.HookManager.TargetGuid(guid);
+                    WowInterface.HookManager.WowTargetGuid(guid);
                     WowInterface.ObjectManager.UpdateWowObjects();
                 }
             }
@@ -674,7 +678,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (GetValidTarget(guid, out WowUnit target, out bool _))
                 {
-                    WowInterface.HookManager.ClickOnTerrain(target.Position);
+                    WowInterface.HookManager.WowClickOnTerrain(target.Position);
                     return true;
                 }
             }
@@ -688,7 +692,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (GetValidTarget(guid, out WowUnit target, out bool _))
                 {
-                    WowInterface.HookManager.ClickOnTerrain(target.Position);
+                    WowInterface.HookManager.WowClickOnTerrain(target.Position);
                     return true;
                 }
             }
@@ -723,7 +727,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.TargetGuid(guid);
+                        WowInterface.HookManager.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -748,7 +752,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 bool isTargetMyself = guid == 0;
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-                Dictionary<RuneType, int> runes = WowInterface.HookManager.GetRunesReady();
+                Dictionary<RuneType, int> runes = WowInterface.HookManager.WowGetRunesReady();
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
@@ -760,7 +764,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.TargetGuid(guid);
+                        WowInterface.HookManager.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -794,7 +798,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.TargetGuid(guid);
+                        WowInterface.HookManager.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -839,7 +843,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.TargetGuid(guid);
+                        WowInterface.HookManager.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -859,7 +863,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         private bool CastSpell(string spellName, bool castOnSelf)
         {
             // spits out stuff like this "1;300" (1 or 0 wether the cast was successful or not);(the cooldown in ms)
-            if (WowInterface.HookManager.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
+            if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
             {
                 if (result.Length < 3) return false;
 
@@ -873,7 +877,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 if (int.TryParse(parts[0], out int castSuccessful)
                     && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))
                 {
-                    cooldown = Math.Max(Math.Round(cooldown), 0);
+                    cooldown = Math.Max(cooldown, 0);
                     CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
 
                     if (castSuccessful == 1)
@@ -914,7 +918,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (angleDiff > 1.0)
             {
-                WowInterface.HookManager.FacePosition(WowInterface.ObjectManager.Player, target.Position);
+                WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
             }
         }
 

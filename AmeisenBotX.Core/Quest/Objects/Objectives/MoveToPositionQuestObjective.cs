@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             MovementAction = movementAction;
         }
 
-        public bool Finished => Progress == 100.0;
+        public bool Finished { get; set; }
 
         public double Progress => WantedPosition.GetDistance(WowInterface.ObjectManager.Player.Position) < Distance ? 100.0 : 0.0;
 
@@ -27,10 +27,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished)
+            if (Finished || Progress == 100.0)
             {
+                Finished = true;
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.StopClickToMoveIfActive();
+                WowInterface.HookManager.WowStopClickToMove();
                 return;
             }
 

@@ -48,8 +48,8 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            FreeBagSlots = WowInterface.HookManager.GetFreeBagSlotCount();
-            string resultJson = WowInterface.HookManager.GetInventoryItems();
+            FreeBagSlots = WowInterface.HookManager.LuaGetFreeBagSlotCount();
+            string resultJson = WowInterface.HookManager.LuaGetInventoryItems();
 
             try
             {

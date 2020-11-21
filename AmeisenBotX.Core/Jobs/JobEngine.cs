@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Jobs
 
                         if (MailSentEvent.Run())
                         {
-                            WowInterface.HookManager.WowObjectOnRightClick(mailboxNode);
+                            WowInterface.HookManager.WowObjectRightClick(mailboxNode);
                             WowInterface.HookManager.LuaDoString("MailFrameTab2:Click();");
 
                             int usedItems = 0;
@@ -134,7 +134,7 @@ namespace AmeisenBotX.Core.Jobs
                                     continue;
                                 }
 
-                                WowInterface.HookManager.UseItemByBagAndSlot(item.BagId, item.BagSlot);
+                                WowInterface.HookManager.LuaUseContainerItem(item.BagId, item.BagSlot);
                                 ++usedItems;
                             }
 
@@ -231,7 +231,7 @@ namespace AmeisenBotX.Core.Jobs
                 {
                     if (WowInterface.ObjectManager.Player.IsMounted)
                     {
-                        WowInterface.HookManager.Dismount();
+                        WowInterface.HookManager.LuaDismissCompanion();
                         return;
                     }
 
@@ -242,11 +242,11 @@ namespace AmeisenBotX.Core.Jobs
                         if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
                         {
-                            WowInterface.HookManager.LootEveryThing();
+                            WowInterface.HookManager.LuaLootEveryThing();
                         }
                         else
                         {
-                            WowInterface.HookManager.WowObjectOnRightClick(node);
+                            WowInterface.HookManager.WowObjectRightClick(node);
                         }
                     }
 

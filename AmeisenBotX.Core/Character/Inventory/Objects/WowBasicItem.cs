@@ -88,5 +88,10 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         [JsonProperty("type")]
         public string Type { get; set; }
+
+        public override string ToString()
+        {
+            return $"[{BagId}][{BagSlot}] - [{ItemQuality}][{Type}] {Name} (ilvl. {ItemLevel} | lvl.{RequiredLevel} | {Subtype} | {Price})";
+        }
     }
 }

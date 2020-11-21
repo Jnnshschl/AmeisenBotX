@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (Finished)
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.StopClickToMoveIfActive();
+                WowInterface.HookManager.WowStopClickToMove();
                 return;
             }
 

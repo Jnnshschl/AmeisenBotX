@@ -126,17 +126,17 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
                                 new MoveToObjectQuestObjective(wowInterface, 8123, 5.0),
-                                new UseObjectQuestObjective(wowInterface, 8123, () => wowInterface.ObjectManager.PetGuid > 0),
-                                new WaitUntilQuestObjective(() => wowInterface.ObjectManager.Pet != null && wowInterface.ObjectManager.Pet.Position.GetDistance(new Vector3(1758, -5876, 166)) < 16.0),
-                                new MovePetToPositionQuestObjective(wowInterface, new Vector3(1813, -5991, 131), 4.0, MovementAction.DirectMove),
-                                new CastPetSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 0, new Vector3(1813, -5991, 131), 5.0)),
-                                new MovePetToPositionQuestObjective(wowInterface, new Vector3(1652, -5996, 151), 4.0, MovementAction.DirectMove),
-                                new CastPetSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 1, new Vector3(1652, -5996, 151), 5.0)),
-                                new MovePetToPositionQuestObjective(wowInterface, new Vector3(1601, -5738, 140), 4.0, MovementAction.DirectMove),
-                                new CastPetSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 2, new Vector3(1601, -5738, 140), 5.0)),
-                                new MovePetToPositionQuestObjective(wowInterface, new Vector3(1392, -5704, 162), 4.0, MovementAction.DirectMove),
-                                new CastPetSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 3, new Vector3(1392, -5704, 162), 5.0)),
-                                new CastPetSpellQuestObjective(wowInterface, 52694, () => CastedSpell[3] == true && wowInterface.ObjectManager.PetGuid == 0)
+                                new UseObjectQuestObjective(wowInterface, 8123, () => wowInterface.ObjectManager.Vehicle != null),
+                                new WaitUntilQuestObjective(() => wowInterface.ObjectManager.Vehicle != null && wowInterface.ObjectManager.Vehicle.Position.GetDistance(new Vector3(1758, -5876, 166)) < 32.0),
+                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1813, -5991, 131), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 0, new Vector3(1813, -5991, 131), 5.0)),
+                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1652, -5996, 151), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 1, new Vector3(1652, -5996, 151), 5.0)),
+                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1601, -5738, 140), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 2, new Vector3(1601, -5738, 140), 5.0)),
+                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1392, -5704, 162), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 3, new Vector3(1392, -5704, 162), 5.0)),
+                                new CastVehicleSpellQuestObjective(wowInterface, 52694, () => CastedSpell[3] == true && wowInterface.ObjectManager.Vehicle == null)
                             })
                         }
                     )
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2385, -5645, 421), 3.0),
+                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2385, -5645, 421), 2.5),
                                 new WaitUntilQuestObjective(() => wowInterface.ObjectManager.Player.Position.Z < 390.0 && wowInterface.ObjectManager.Player.Position.Z > 350.0)
                             })
                         }
@@ -236,7 +236,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                                 new UseUnitQuestObjective(wowInterface, 25571, false, () => wowInterface.ObjectManager.PetGuid > 0),
                                 new MoveToPositionQuestObjective(wowInterface, new Vector3(2353, -5704, 153), 48.0),
                                 new MoveToUnitQuestObjective(wowInterface, 16416, 16.0),
-                                new CastPetSpellQuestObjective(wowInterface, 52264, () => wowInterface.ObjectManager.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
+                                new CastVehicleSpellQuestObjective(wowInterface, 52264, () => wowInterface.ObjectManager.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
                             }),
                             new BotActionQuestObjective(() => wowInterface.Globals.IgnoreCombat = false)
                         }
@@ -286,6 +286,8 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
         private bool[] CastedSpell { get; } = new bool[4];
 
+        private bool[] StartedCasting { get; } = new bool[4];
+
         private bool StolenPalomino { get; set; }
 
         public override string ToString()
@@ -295,18 +297,33 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
         private bool CheckEyeCastingState(WowInterface wowInterface, int id, Vector3 positionToCast, double distance)
         {
-            if (wowInterface.ObjectManager.Pet == null || positionToCast.GetDistance(wowInterface.ObjectManager.Pet.Position) > distance)
+            if (CastedSpell[id])
             {
-                return false;
+                return true;
+            }
+            else
+            {
+                if (wowInterface.ObjectManager.Vehicle == null)
+                {
+                    return false;
+                }
+
+                if (!StartedCasting[id])
+                {
+                    if (positionToCast.GetDistance(wowInterface.ObjectManager.Vehicle.Position) > distance)
+                    {
+                        return false;
+                    }
+
+                    StartedCasting[id] = wowInterface.ObjectManager.Vehicle.IsCasting;
+                }
+                else if (!wowInterface.ObjectManager.Vehicle.IsCasting)
+                {
+                    CastedSpell[id] = true;
+                }
             }
 
-            if (!CastedSpell[id])
-            {
-                CastedSpell[id] = wowInterface.ObjectManager.Pet.IsCasting;
-                return false;
-            }
-
-            return !wowInterface.ObjectManager.Pet.IsCasting && CastedSpell[id];
+            return false;
         }
     }
 }

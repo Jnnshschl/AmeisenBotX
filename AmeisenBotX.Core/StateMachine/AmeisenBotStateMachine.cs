@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Statemachine
 
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
-            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.IsGhost(WowLuaUnit.Player));
+            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.LuaIsGhost(WowLuaUnit.Player));
             RenderSwitchEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             CurrentState = States.First();
@@ -211,7 +211,7 @@ namespace AmeisenBotX.Core.Statemachine
                     if (Config.AutoDisableRender && RenderSwitchEvent.Run())
                     {
                         IntPtr foregroundWindow = XMemory.GetForegroundWindow();
-                        WowInterface.HookManager.SetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+                        WowInterface.HookManager.WowSetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
                     }
                 }
             }
@@ -246,11 +246,7 @@ namespace AmeisenBotX.Core.Statemachine
             }
 
             CurrentState = States.First(s => s.Key == state);
-
-            if (!ignoreExit)
-            {
-                CurrentState.Value.Enter();
-            }
+            CurrentState.Value.Enter();
 
             OnStateMachineStateChanged?.Invoke();
             return true;

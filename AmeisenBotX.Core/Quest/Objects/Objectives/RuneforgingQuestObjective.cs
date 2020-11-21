@@ -30,18 +30,18 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting)
             {
-                WowInterface.HookManager.ClickUiElement("TradeSkillFrameCloseButton"); return;
+                WowInterface.HookManager.LuaClickUiElement("TradeSkillFrameCloseButton"); return;
             }
 
             if (EnchantEvent.Run())
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.StopClickToMoveIfActive();
+                WowInterface.HookManager.WowStopClickToMove();
 
-                WowInterface.HookManager.CastSpell("Runeforging");
-                WowInterface.HookManager.ClickUiElement("TradeSkillCreateButton");
-                WowInterface.HookManager.UseInventoryItem(EquipmentSlot.INVSLOT_MAINHAND);
-                WowInterface.HookManager.ClickUiElement("StaticPopup1Button1");
+                WowInterface.HookManager.LuaCastSpell("Runeforging");
+                WowInterface.HookManager.LuaClickUiElement("TradeSkillCreateButton");
+                WowInterface.HookManager.LuaUseInventoryItem(EquipmentSlot.INVSLOT_MAINHAND);
+                WowInterface.HookManager.LuaClickUiElement("StaticPopup1Button1");
             }
         }
     }

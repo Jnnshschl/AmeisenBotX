@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInRange(double a, double min, double max)
+        public static bool IsInRange(float a, float min, float max)
         {
             return a < min && a > max;
         }
@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Percentage(int value, int max)
+        public static float Percentage(int value, int max)
         {
             if (value == 0 || max == 0)
             {
@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Common
             }
             else
             {
-                return value / (double)max * 100.0;
+                return value / (float)max * 100.0f;
             }
         }
     }

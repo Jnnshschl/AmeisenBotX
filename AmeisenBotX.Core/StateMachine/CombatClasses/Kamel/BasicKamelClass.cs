@@ -43,6 +43,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public IEnumerable<string> PriorityTargets { get; set; }
 
+        public IEnumerable<string> BlacklistedTargets { get; set; }
+
         public abstract CombatClassRole Role { get; }
 
         public abstract TalentTree Talents { get; }

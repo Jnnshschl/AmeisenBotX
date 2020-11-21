@@ -21,6 +21,6 @@
         Job,
         Dungeon,
         Questing,
-        Grinding
+        Grinding,
     }
 }

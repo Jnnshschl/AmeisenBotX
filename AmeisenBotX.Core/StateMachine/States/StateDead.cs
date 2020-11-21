@@ -38,10 +38,10 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (Config.ReleaseSpirit || WowInterface.ObjectManager.MapId.IsBattlegroundMap())
                 {
-                    WowInterface.HookManager.ReleaseSpirit();
+                    WowInterface.HookManager.LuaRepopMe();
                 }
             }
-            else if (WowInterface.HookManager.IsGhost(WowLuaUnit.Player))
+            else if (WowInterface.HookManager.LuaIsGhost(WowLuaUnit.Player))
             {
                 StateMachine.SetState(BotState.Ghost);
             }

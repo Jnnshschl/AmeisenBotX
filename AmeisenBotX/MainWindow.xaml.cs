@@ -15,7 +15,6 @@ using AmeisenBotX.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,24 +27,23 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        private readonly Brush currentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
-        private readonly Brush currentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
-        private readonly Brush darkBackgroundBrush;
-        private readonly Brush darkForegroundBrush;
-        private readonly string dataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
-        private readonly Brush textAccentBrush;
-
-        private Dictionary<BotState, Window> StateConfigWindows;
-
         public MainWindow()
         {
             InitializeComponent();
 
             Config = LoadConfig();
 
-            darkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
-            darkBackgroundBrush = new SolidColorBrush((Color)FindResource("DarkBackground"));
-            textAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
+            CurrentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
+            CurrentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
+            DarkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
+            DarkBackgroundBrush = new SolidColorBrush((Color)FindResource("DarkBackground"));
+            TextAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
+
+            CurrentTickTimeBadBrush.Freeze();
+            CurrentTickTimeGoodBrush.Freeze();
+            DarkForegroundBrush.Freeze();
+            DarkBackgroundBrush.Freeze();
+            TextAccentBrush.Freeze();
 
             LabelUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
             NotificationEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
@@ -71,6 +69,16 @@ namespace AmeisenBotX
 
         private AmeisenBot AmeisenBot { get; set; }
 
+        private Brush CurrentTickTimeBadBrush { get; }
+
+        private Brush CurrentTickTimeGoodBrush { get; }
+
+        private Brush DarkBackgroundBrush { get; }
+
+        private Brush DarkForegroundBrush { get; }
+
+        private string DataPath { get; } = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\AmeisenBotX\\profiles\\";
+
         private DevToolsWindow DevToolsWindow { get; set; }
 
         private bool DrawOverlay { get; set; }
@@ -92,6 +100,12 @@ namespace AmeisenBotX
         private long NotificationLastTimestamp { get; set; }
 
         private bool PendingNotification { get; set; }
+
+        private RelationshipWindow RelationshipWindow { get; set; }
+
+        private Dictionary<BotState, Window> StateConfigWindows { get; set; }
+
+        private Brush TextAccentBrush { get; }
 
         /// <summary>
         /// Used to resize the wow window when autoposition is enabled
@@ -121,12 +135,12 @@ namespace AmeisenBotX
 
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.BotCache.Clear();
+            AmeisenBot.WowInterface.Db.Clear();
         }
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            ConfigEditorWindow configWindow = new ConfigEditorWindow(dataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            ConfigEditorWindow configWindow = new ConfigEditorWindow(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
             configWindow.ShowDialog();
 
             if (configWindow.SaveConfig)
@@ -163,13 +177,13 @@ namespace AmeisenBotX
             {
                 AmeisenBot.Pause();
                 buttonStartPause.Content = "▶";
-                buttonStartPause.Foreground = textAccentBrush;
+                buttonStartPause.Foreground = TextAccentBrush;
             }
             else
             {
                 AmeisenBot.Resume();
                 buttonStartPause.Content = "||";
-                buttonStartPause.Foreground = darkForegroundBrush;
+                buttonStartPause.Foreground = DarkForegroundBrush;
             }
         }
 
@@ -192,7 +206,7 @@ namespace AmeisenBotX
         private void ButtonToggleAutopilot_Click(object sender, RoutedEventArgs e)
         {
             AmeisenBot.Config.Autopilot = !AmeisenBot.Config.Autopilot;
-            buttonToggleAutopilot.Foreground = AmeisenBot.Config.Autopilot ? currentTickTimeGoodBrush : darkForegroundBrush;
+            buttonToggleAutopilot.Foreground = AmeisenBot.Config.Autopilot ? CurrentTickTimeGoodBrush : DarkForegroundBrush;
         }
 
         private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e)
@@ -210,13 +224,19 @@ namespace AmeisenBotX
         private void ButtonToggleOverlay_Click(object sender, RoutedEventArgs e)
         {
             DrawOverlay = !DrawOverlay;
-            buttonToggleOverlay.Foreground = DrawOverlay ? currentTickTimeGoodBrush : darkForegroundBrush;
+            buttonToggleOverlay.Foreground = DrawOverlay ? CurrentTickTimeGoodBrush : DarkForegroundBrush;
+        }
+
+        private void ButtonToggleRelationshipWindow_Click(object sender, RoutedEventArgs e)
+        {
+            RelationshipWindow ??= new RelationshipWindow(AmeisenBot);
+            RelationshipWindow.Show();
         }
 
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
             RenderState = !RenderState;
-            AmeisenBot.WowInterface.HookManager.SetRenderState(RenderState);
+            AmeisenBot.WowInterface.HookManager.WowSetRenderState(RenderState);
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -230,7 +250,20 @@ namespace AmeisenBotX
 
         private AmeisenBotConfig LoadConfig()
         {
-            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(dataPath);
+            if (Directory.Exists(DataPath))
+            {
+                Directory.CreateDirectory(DataPath);
+            }
+
+            // check for older data folder
+            string oldDataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
+
+            if (Directory.Exists(oldDataPath))
+            {
+                MessageBox.Show("You need to move the content of your \"\\\\data\\\\\" folder to \"%AppData%\\\\Roaming\\\\AmeisenbotX\\\\profiles\\\\\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(DataPath);
             loadConfigWindow.ShowDialog();
 
             if (loadConfigWindow.ConfigToLoad.Length > 0)
@@ -309,7 +342,7 @@ namespace AmeisenBotX
                     {
                         if (NotificationBlinkState)
                         {
-                            buttonNotification.Foreground = darkBackgroundBrush;
+                            buttonNotification.Foreground = DarkBackgroundBrush;
                             buttonNotification.Background = NoticifactionColor;
                         }
                         else
@@ -496,11 +529,11 @@ namespace AmeisenBotX
 
             if (executionMs <= Config.StateMachineTickMs)
             {
-                labelCurrentTickTime.Foreground = currentTickTimeGoodBrush;
+                labelCurrentTickTime.Foreground = CurrentTickTimeGoodBrush;
             }
             else
             {
-                labelCurrentTickTime.Foreground = currentTickTimeBadBrush;
+                labelCurrentTickTime.Foreground = CurrentTickTimeBadBrush;
                 AmeisenLogger.I.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
@@ -510,11 +543,11 @@ namespace AmeisenBotX
 
             if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
-                labelHookCallCount.Foreground = currentTickTimeGoodBrush;
+                labelHookCallCount.Foreground = CurrentTickTimeGoodBrush;
             }
             else
             {
-                labelHookCallCount.Foreground = currentTickTimeBadBrush;
+                labelHookCallCount.Foreground = CurrentTickTimeBadBrush;
                 AmeisenLogger.I.Log("MainWindow", "High HookCall count, maybe increase your FPS", LogLevel.Warning);
             }
 
@@ -531,6 +564,7 @@ namespace AmeisenBotX
             InfoWindow?.Close();
             MapWindow?.Close();
             DevToolsWindow?.Close();
+            RelationshipWindow?.Close();
 
             if (StateConfigWindows != null)
             {
@@ -561,16 +595,16 @@ namespace AmeisenBotX
 
             comboboxStateOverride.SelectedIndex = 0;
 
-            labelPID.Content = $"PID: {Process.GetCurrentProcess().Id}";
+            labelPID.Content = $"PID: {Environment.ProcessId}";
 
             if (Config.Autopilot)
             {
-                buttonToggleAutopilot.Foreground = currentTickTimeGoodBrush;
+                buttonToggleAutopilot.Foreground = CurrentTickTimeGoodBrush;
             }
 
             // Init the bot
             // ------------ >
-            AmeisenBot = new AmeisenBot(dataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
+            AmeisenBot = new AmeisenBot(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;

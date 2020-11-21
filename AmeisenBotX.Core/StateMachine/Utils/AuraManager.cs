@@ -20,15 +20,15 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public delegate bool DispellDebuffsFunction();
 
-        public delegate WowAura[] GetAurasFunction();
+        public delegate IEnumerable<WowAura> GetAurasFunction();
 
-        public WowAura[] Auras { get; private set; }
+        public IEnumerable<WowAura> Auras { get; private set; }
 
-        public WowAura[] Buffs => Auras;
+        public IEnumerable<WowAura> Buffs => Auras;
 
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
 
-        public WowAura[] Debuffs => Auras;
+        public IEnumerable<WowAura> Debuffs => Auras;
 
         public Dictionary<string, CastFunction> DebuffsToKeepActive { get; set; }
 
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
         {
             Auras = GetAuras();
 
-            if (Auras == null || Auras.Length == 0)
+            if (Auras == null || !Auras.Any())
             {
                 return false;
             }
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     }
                 }
 
-                if (Buffs.Length > 0 && DispellBuffs != null)
+                if (Buffs.Any() && DispellBuffs != null)
                 {
                     DispellBuffs();
                 }
@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     }
                 }
 
-                if (Debuffs.Length > 0 && DispellDebuffs != null)
+                if (Debuffs.Any() && DispellDebuffs != null)
                 {
                     // DispellDebuffs();
                 }

@@ -42,13 +42,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (WowInterface.ObjectManager.Target != null
                 && !WowInterface.ObjectManager.Target.IsDead
                 && !WowInterface.ObjectManager.Target.IsNotAttackable
-                && WowInterface.HookManager.GetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly)
+                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly)
             {
                 WowUnit = WowInterface.ObjectManager.Target;
             }
             else
             {
-                WowInterface.HookManager.ClearTarget();
+                WowInterface.HookManager.WowClearTarget();
 
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
@@ -62,9 +62,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
                 {
-                    WowInterface.HookManager.StopClickToMoveIfActive();
+                    WowInterface.HookManager.WowStopClickToMove();
                     WowInterface.MovementEngine.Reset();
-                    WowInterface.HookManager.UnitOnRightClick(WowUnit);
+                    WowInterface.HookManager.WowUnitRightClick(WowUnit);
                 }
                 else
                 {
