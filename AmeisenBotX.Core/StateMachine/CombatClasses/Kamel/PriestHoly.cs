@@ -14,6 +14,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     internal class PriestHoly : BasicKamelClass
     {
+        //Spells Race
+        private const string EveryManforHimselfSpell = "Every Man for Himself";
+
         //Spells / dmg
         private const string SmiteSpell = "Smite";
         private const string HolyFireSpell = "Holy Fire";
@@ -27,6 +30,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string CircleOfHealingSpell = "Circle of Healing";
         private const string DesperatePrayerSpell = "Desperate Prayer";
         private const string FadeSpell = "Fade";
+        private const string PrayerofHealingSpell = "Prayer of Healing";
+        private const string PrayerofMendingSpell = "Prayer of Mending";
+        private const string GuardianSpiritSpell = "Guardian Spirit";
+        private const string HymnofHopeSpell = "Hymn of Hope";
+        private const string DivineHymnSpell = "Divine Hymn";
 
         //Buffs
         private const string DivineSpiritSpell = "Divine Spirit";
@@ -42,6 +50,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public PriestHoly(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
+            
+            //Spells Race
+            spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
 
             //Spells / dmg
             spellCoolDown.Add(SmiteSpell, DateTime.Now);
@@ -56,6 +67,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             spellCoolDown.Add(CircleOfHealingSpell, DateTime.Now);
             spellCoolDown.Add(DesperatePrayerSpell, DateTime.Now);
             spellCoolDown.Add(FadeSpell, DateTime.Now);
+            spellCoolDown.Add(PrayerofHealingSpell, DateTime.Now);
+            spellCoolDown.Add(PrayerofMendingSpell, DateTime.Now);
+            spellCoolDown.Add(GuardianSpiritSpell, DateTime.Now);
+            spellCoolDown.Add(HymnofHopeSpell, DateTime.Now);
+            spellCoolDown.Add(DivineHymnSpell, DateTime.Now);
 
             //Buffs
             spellCoolDown.Add(DivineSpiritSpell, DateTime.Now);
@@ -302,7 +318,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
+                        if (UseSpellOnlyInCombat && (WowInterface.ObjectManager.Player.IsConfused || WowInterface.ObjectManager.Player.IsSilenced || WowInterface.ObjectManager.Player.IsDazed ) && CustomCastSpell(EveryManforHimselfSpell))
+                        {
+                            return;
+                        }     
+                        
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage <= 20 && CustomCastSpell(HymnofHopeSpell))
+                        {
+                            return;
+                        }
+
+                        if (partyMemberToHeal.Count >= 5 && WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(DivineHymnSpell))
+                        {
+                            return;
+                        }
+
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 50 && CustomCastSpell(FadeSpell))
+                        {
+                            return;
+                        }  
+                        
+                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 30 && CustomCastSpell(GuardianSpiritSpell))
                         {
                             return;
                         }
@@ -321,8 +357,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             return;
                         }
-
+                        
                         if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(CircleOfHealingSpell))
+                        {
+                            return;
+                        }   
+                        
+                        if (UseSpellOnlyInCombat && partyMemberToHeal.Count >= 2 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(PrayerofMendingSpell))
+                        {
+                            return;
+                        }   
+                        
+                        if (UseSpellOnlyInCombat && partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(PrayerofHealingSpell))
                         {
                             return;
                         }

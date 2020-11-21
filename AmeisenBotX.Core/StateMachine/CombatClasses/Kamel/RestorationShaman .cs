@@ -332,6 +332,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                             return;
                         }
 
+                        //if (UseSpellOnlyInCombat)
+                        //{
+                        //    WowInterface.HookManager.UseItemByName("Talisman of Resuregence");
+                        //    return;
+                        //}   
+                        
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
                         {
                             return;
