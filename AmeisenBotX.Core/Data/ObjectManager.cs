@@ -374,10 +374,10 @@ namespace AmeisenBotX.Core.Data
                 CachePois();
             }
 
-            if (RelationshipEvent.Run())
-            {
-                CheckGroupRelationships();
-            }
+            // if (RelationshipEvent.Run())
+            // {
+            //     CheckGroupRelationships();
+            // }
 
             OnObjectUpdateComplete?.Invoke(wowObjects);
         }
