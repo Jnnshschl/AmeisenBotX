@@ -51,7 +51,8 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
 
         public void Execute()
         {
-            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.I.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.I.ObjectManager.Player.Position, 24.0).Where(e => e.Guid != WowInterface.I.ObjectManager.PlayerGuid);
+            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.I.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.I.ObjectManager.Player.Position, 24.0)
+                .Where(e => e.Guid != WowInterface.I.ObjectManager.PlayerGuid && WowInterface.I.ObjectManager.PartymemberGuids.Contains(e.Guid));
 
             if (friendsAroundMe.Any())
             {
