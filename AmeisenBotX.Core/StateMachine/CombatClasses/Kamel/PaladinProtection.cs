@@ -395,7 +395,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                         if (nearTarget != null)
                         {
-                            WowInterface.HookManager.TargetGuid(nearTarget.Guid);
+                            WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
 
                             if (!TargetInLineOfSight)
                             {
@@ -435,7 +435,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
                         if (nearTargetToTank != null)
                         {
-                            WowInterface.HookManager.TargetGuid(nearTargetToTank.Guid);
+                            WowInterface.HookManager.WowTargetGuid(nearTargetToTank.Guid);
 
                             if (!TargetInLineOfSight)
                             {
