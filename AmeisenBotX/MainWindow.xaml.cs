@@ -602,6 +602,11 @@ namespace AmeisenBotX
                 buttonToggleAutopilot.Foreground = CurrentTickTimeGoodBrush;
             }
 
+            if (!Directory.Exists(DataPath))
+            {
+                Directory.CreateDirectory(DataPath);
+            }
+
             // Init the bot
             // ------------ >
             AmeisenBot = new AmeisenBot(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());

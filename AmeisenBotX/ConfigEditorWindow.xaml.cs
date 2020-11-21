@@ -416,7 +416,7 @@ namespace AmeisenBotX
             textboxEventPull.Text = Config.EventPullMs.ToString(CultureInfo.InvariantCulture);
             textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
             textboxFriends.Text = Config.Friends;
-            textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist);
+            textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist ?? new List<string>());
             textboxMailHeader.Text = Config.JobEngineMailHeader;
             textboxMailReceiver.Text = Config.JobEngineMailReceiver;
             textboxMailText.Text = Config.JobEngineMailText;
