@@ -17,16 +17,16 @@ namespace AmeisenBotX.Test
             Vector3 leftPos = new Vector3(-4, 0, 0);
             Vector3 rightPos = new Vector3(4, 0, 0);
 
-            float facingAngle = BotMath.GetFacingAngle2D(middlePos, rightPos);
+            float facingAngle = BotMath.GetFacingAngle(middlePos, rightPos);
             Assert.AreEqual(0f, Math.Round(facingAngle, 4));
 
-            facingAngle = BotMath.GetFacingAngle2D(middlePos, topPos);
+            facingAngle = BotMath.GetFacingAngle(middlePos, topPos);
             Assert.AreEqual(Math.Round(Math.PI * 0.5, 4), Math.Round(facingAngle, 4));
 
-            facingAngle = BotMath.GetFacingAngle2D(middlePos, bottomPos);
+            facingAngle = BotMath.GetFacingAngle(middlePos, bottomPos);
             Assert.AreEqual(Math.Round(Math.PI * 1.5, 4), Math.Round(facingAngle, 4));
 
-            facingAngle = BotMath.GetFacingAngle2D(middlePos, leftPos);
+            facingAngle = BotMath.GetFacingAngle(middlePos, leftPos);
             Assert.AreEqual(Math.Round(Math.PI, 4), Math.Round(facingAngle, 4));
         }
 

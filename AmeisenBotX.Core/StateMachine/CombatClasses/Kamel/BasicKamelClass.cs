@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
 
-            PriorityTargets = new List<string>();
+            PriorityTargetDisplayIds = new List<int>();
         }
 
         public abstract string Author { get; }
@@ -41,9 +41,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public abstract IWowItemComparator ItemComparator { get; set; }
 
-        public IEnumerable<string> PriorityTargets { get; set; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
-        public IEnumerable<string> BlacklistedTargets { get; set; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         public abstract CombatClassRole Role { get; }
 

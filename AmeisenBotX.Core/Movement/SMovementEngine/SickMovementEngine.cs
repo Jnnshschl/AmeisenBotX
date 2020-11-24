@@ -258,6 +258,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 ActiveShortcut = null;
             }
 
+            if (Config.AutoDodgeAoeSpells && !forceDirectMove && BotUtils.IsPositionInsideAoeSpell(positionToGoTo, WowInterface.ObjectManager.GetNearAoeSpells()))
+            {
+                // dont run into harmful aoe spells
+                return;
+            }
+
             ForceDirectMove = forceDirectMove;
 
             if (MovementAction == movementAction
@@ -367,7 +373,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             AmeisenLogger.I.Log("Pathfinding", $"Finding path: {WowInterface.ObjectManager.Player.Position} -> {TargetPosition}");
             IEnumerable<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
-            if (path != null && path.Any())
+            if (path != null && path.Any() )
             {
                 int pathLenght = path.Count();
 

@@ -12,24 +12,29 @@ namespace AmeisenBotX.Core.Tactic
 
         private SortedList<int, ITactic> Tactics { get; set; }
 
-        public bool Execute(CombatClassRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking)
+        public bool Execute(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
             if (Tactics.Count > 0)
             {
                 foreach (ITactic tactic in Tactics.Values)
                 {
-                    if (tactic.ExecuteTactic(role, isMelee, out handlesMovement, out allowAttacking)) return true;
+                    if (tactic.ExecuteTactic(role, isMelee, out preventMovement, out allowAttacking)) return true;
                 }
             }
 
-            handlesMovement = false;
+            preventMovement = false;
             allowAttacking = true;
             return false;
         }
 
-        public void LoadTactics(SortedList<int, ITactic> tactics)
+        public void LoadTactics(params ITactic[] tactics)
         {
-            Tactics = tactics;
+            Tactics = new SortedList<int, ITactic>();
+
+            for (int i = 0; i < tactics.Length; ++i)
+            {
+                Tactics.Add(i, tactics[i]);
+            }
         }
 
         public void Reset()

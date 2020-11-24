@@ -41,9 +41,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public IWowItemComparator ItemComparator => null;
 
-        public IEnumerable<string> PriorityTargets { get; set; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
-        public IEnumerable<string> BlacklistedTargets { get; set; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Dps;
 

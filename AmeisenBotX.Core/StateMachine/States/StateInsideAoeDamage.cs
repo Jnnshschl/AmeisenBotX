@@ -58,17 +58,19 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             double angle = Math.Atan2(angleX, angleY);
 
-            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 6.0;
+            double distanceToMove = aoeRadius - WowInterface.ObjectManager.Player.Position.GetDistance(aoePosition) + 12.0;
 
             double x = WowInterface.ObjectManager.Player.Position.X + (Math.Cos(angle) * distanceToMove);
             double y = WowInterface.ObjectManager.Player.Position.Y + (Math.Sin(angle) * distanceToMove);
 
-            return new Vector3()
+            Vector3 targetPos = new Vector3()
             {
                 X = Convert.ToSingle(x),
                 Y = Convert.ToSingle(y),
                 Z = WowInterface.ObjectManager.Player.Position.Z
             };
+
+            return WowInterface.I.PathfindingHandler.GetRandomPointAround((int)WowInterface.I.ObjectManager.MapId, targetPos, 5.0f);
         }
     }
 }

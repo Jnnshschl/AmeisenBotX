@@ -211,7 +211,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
             new DungeonNode(new Vector3(413, 58, 249)),
         };
 
-        public List<string> PriorityUnits { get; } = new List<string>() { "Web Wrap" };
+        public List<int> PriorityUnits { get; } = new List<int>();
 
         public int RequiredItemLevel { get; } = 100;
 

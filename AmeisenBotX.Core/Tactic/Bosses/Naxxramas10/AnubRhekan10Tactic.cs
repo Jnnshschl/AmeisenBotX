@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private Vector3 ImpaleDodgePos { get; set; }
 
-        private bool LocustSwarmActive => (LocustSwarmActivated + TimeSpan.FromSeconds(20)) > DateTime.Now;
+        private bool LocustSwarmActive => (LocustSwarmActivated + TimeSpan.FromSeconds(20)) > DateTime.UtcNow;
 
         private bool MeleeDpsIsMovingToMid { get; set; } = false;
 
@@ -64,11 +64,11 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private WowInterface WowInterface { get; }
 
-        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking) => role switch
+        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking) => role switch
         {
-            CombatClassRole.Tank => DoTank(out handlesMovement, out allowAttacking),
-            CombatClassRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
-            CombatClassRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
+            CombatClassRole.Tank => DoTank(out preventMovement, out allowAttacking),
+            CombatClassRole.Heal => DoDpsHeal(false, out preventMovement, out allowAttacking),
+            CombatClassRole.Dps => DoDpsHeal(isMelee, out preventMovement, out allowAttacking),
             _ => throw new NotImplementedException(), // should never happen
         };
 
@@ -84,15 +84,15 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                 // Locust Swarm
                 if (wowUnit.CurrentlyCastingSpellId == 28785)
                 {
-                    LocustSwarmActivated = DateTime.Now;
-                    WowInterface.CombatClass.BlacklistedTargets = new List<string>() { wowUnit.Name };
+                    LocustSwarmActivated = DateTime.UtcNow;
+                    WowInterface.CombatClass.BlacklistedTargetDisplayIds = AnubRhekanDisplayId;
 
                     MeleeDpsIsMovingToMid = true;
                 }
 
                 if (!LocustSwarmActive)
                 {
-                    WowInterface.CombatClass.BlacklistedTargets = null;
+                    WowInterface.CombatClass.BlacklistedTargetDisplayIds = null;
                 }
 
                 if (!isMelee)

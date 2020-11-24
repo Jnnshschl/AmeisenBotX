@@ -211,7 +211,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
             new DungeonNode(new Vector3(-386, 147, 8)),
         };
 
-        public List<string> PriorityUnits { get; } = new List<string>();
+        public List<int> PriorityUnits { get; } = new List<int>();
 
         public int RequiredItemLevel { get; } = 10;
 

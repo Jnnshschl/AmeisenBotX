@@ -332,7 +332,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
             new DungeonNode(new Vector3(22, -29, -3)),
         };
 
-        public List<string> PriorityUnits { get; } = new List<string>();
+        public List<int> PriorityUnits { get; } = new List<int>();
 
         public int RequiredItemLevel { get; } = 65;
 

@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             WowInterface = wowInterface;
         }
 
-        public IEnumerable<string> BlacklistedTargets { get; set; }
+        public IEnumerable<int> BlacklistedTargets { get; set; }
 
-        public IEnumerable<string> PriorityTargets { get; set; }
+        public IEnumerable<int> PriorityTargets { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -26,11 +26,6 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            //if ((PriorityTargets == null || !PriorityTargets.Any()) && WowInterface.ObjectManager.MapId == MapId.UtgardeKeep)
-            //{
-            //    PriorityTargets = new List<string>() { "Frost Tomb" };
-            //}
-
             if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null
                 && (WowInterface.ObjectManager.Target.IsDead
                     || WowInterface.ObjectManager.Target.IsNotAttackable
@@ -45,7 +40,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             if (PriorityTargets != null && PriorityTargets.Any())
             {
                 IEnumerable<WowUnit> nearPriorityEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 64.0)
-                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.Health > 0 && PriorityTargets.Any(x => e.Name.Equals(x, StringComparison.OrdinalIgnoreCase)))
+                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.Health > 0 && e.IsInCombat && PriorityTargets.Any(x => e.DisplayId == x) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
                 if (nearPriorityEnemies.Any())

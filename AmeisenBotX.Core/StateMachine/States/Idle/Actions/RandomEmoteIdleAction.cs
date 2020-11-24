@@ -15,6 +15,8 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
                 "train",
                 "joke",
                 "laugh",
+                "dance",
+                "sit",
             };
 
             EmotesWithInteraction = new List<string>()
@@ -22,7 +24,12 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
                 "hi",
                 "wink",
                 "salute",
-                "kiss",
+                "fart",
+                "flex",
+                "laugh",
+                "rude",
+                "roar",
+                "applaud",
             };
 
             Rnd = new Random();
@@ -54,7 +61,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             IEnumerable<WowPlayer> friendsAroundMe = WowInterface.I.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.I.ObjectManager.Player.Position, 24.0)
                 .Where(e => e.Guid != WowInterface.I.ObjectManager.PlayerGuid && WowInterface.I.ObjectManager.PartymemberGuids.Contains(e.Guid));
 
-            if (friendsAroundMe.Any())
+            if (friendsAroundMe.Any() && Rnd.NextDouble() > 0.5)
             {
                 WowPlayer player = friendsAroundMe.ElementAt(Rnd.Next(0, friendsAroundMe.Count()));
 

@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Dungeon
                 CurrentNodes.Enqueue(profile.Nodes[i]);
             }
 
-            WowInterface.CombatClass.PriorityTargets = profile.PriorityUnits;
+            WowInterface.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
             TotalNodes = CurrentNodes.Count;
         }
 

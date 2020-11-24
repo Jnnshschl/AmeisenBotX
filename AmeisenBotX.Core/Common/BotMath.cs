@@ -20,9 +20,7 @@ namespace AmeisenBotX.Core.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
-        {
-            return CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
-        }
+            => CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampAngles(float rotation)
@@ -42,22 +40,18 @@ namespace AmeisenBotX.Core.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float GetFacingAngle2D(Vector3 position, Vector3 targetPosition)
+        public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
             => ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
 
-        public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
-        {
-            float facingAngle = GetFacingAngle2D(position, targetPosition);
-            float angleDiff = ClampAngles(facingAngle - rotation);
+        public static float GetAngleDiff(Vector3 position, float rotation, Vector3 targetPosition)
+            => GetFacingAngle(position, targetPosition) - rotation;
 
-            return angleDiff < maxAngleDiff;
-        }
+        public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
+            => MathF.Abs(GetAngleDiff(position, rotation, targetPosition)) < maxAngleDiff;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRange(float a, float min, float max)
-        {
-            return a < min && a > max;
-        }
+            => a < min && a > max;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRange(WowObject a, WowObject b, double maxDistance)

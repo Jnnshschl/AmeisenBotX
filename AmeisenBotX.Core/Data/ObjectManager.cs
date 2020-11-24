@@ -343,6 +343,7 @@ namespace AmeisenBotX.Core.Data
 
                 ObjectCount = count;
 
+                Array.Clear(wowObjects, 0, wowObjects.Length);
                 Parallel.For(0, count, (x, y) => wowObjects[x] = ProcessObject(wowObjectPointers[x].Item1, wowObjectPointers[x].Item2));
 
                 if (PlayerGuidIsVehicle)

@@ -6,6 +6,8 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
+using AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls;
+using AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,12 +39,36 @@ namespace AmeisenBotX.Core.Statemachine.States
                 WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFpsCombat});SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat})");
             }
 
-            if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
+            LoadTactics();
+        }
+
+        private void LoadTactics()
+        {
+            if (WowInterface.ObjectManager.MapId == MapId.TheForgeOfSouls)
             {
-                // Anub Rhekan
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3273, -3476, 287)) < 100.0)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5297, 2506, 686)) < 70.0)
                 {
-                    WowInterface.TacticEngine.LoadTactics(new SortedList<int, ITactic>() { { 0, new AnubRhekan10Tactic(WowInterface) } });
+                    // Corrupted Soul Fragements
+                    WowInterface.I.CombatClass.PriorityTargetDisplayIds = new List<int>() { 30233 };
+                    WowInterface.TacticEngine.LoadTactics(new BronjahmTactic());
+                }
+                else if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5662, 2507, 709)) < 120.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new DevourerOfSoulsTactic());
+                }
+            }
+            else if (WowInterface.ObjectManager.MapId == MapId.PitOfSaron)
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(823, 110, 509)) < 150.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic());
+                }
+            }
+            else if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3273, -3476, 287)) < 120.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new AnubRhekan10Tactic(WowInterface));
                 }
             }
         }
@@ -205,7 +231,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                             {
                                 // rotate the boss away from the group
                                 Vector3 meanGroupPosition = GetMeanGroupPosition();
-                                positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle2D(target.Position, meanGroupPosition));
+                                positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle(target.Position, meanGroupPosition));
                             }
                         }
                         else if (WowInterface.CombatClass.Role == CombatClassRole.Heal)

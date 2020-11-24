@@ -14,12 +14,12 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
             TargetSwitchEvent = new TimegatedEvent(minTargetSwitchTime);
 
-            PriorityTargets = new List<string>();
+            PriorityTargets = new List<int>();
         }
 
-        public IEnumerable<string> BlacklistedTargets { get => TargetSelectionLogic.BlacklistedTargets; set => TargetSelectionLogic.BlacklistedTargets = value; }
+        public IEnumerable<int> BlacklistedTargets { get => TargetSelectionLogic.BlacklistedTargets; set => TargetSelectionLogic.BlacklistedTargets = value; }
 
-        public IEnumerable<string> PriorityTargets { get => TargetSelectionLogic.PriorityTargets; set => TargetSelectionLogic.PriorityTargets = value; }
+        public IEnumerable<int> PriorityTargets { get => TargetSelectionLogic.PriorityTargets; set => TargetSelectionLogic.PriorityTargets = value; }
 
         public ITargetSelectionLogic TargetSelectionLogic { get; }
 

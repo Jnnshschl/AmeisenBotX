@@ -58,9 +58,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public IWowItemComparator ItemComparator => new AssassinationItemComparator();
 
-        public IEnumerable<string> PriorityTargets { get; set; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
-        public IEnumerable<string> BlacklistedTargets { get; set; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         public CombatClassRole Role => CombatClassRole.Dps;
 

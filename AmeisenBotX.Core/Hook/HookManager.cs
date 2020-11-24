@@ -790,7 +790,7 @@ namespace AmeisenBotX.Core.Hook
         public void WowFacePosition(WowPlayer player, Vector3 positionToFace)
         {
             if (player == null) return;
-            WowSetFacing(player, BotMath.GetFacingAngle2D(player.Position, positionToFace));
+            WowSetFacing(player, BotMath.GetFacingAngle(player.Position, positionToFace));
         }
 
         public bool WowGetLocalizedText(string variable, out string result)
@@ -908,7 +908,7 @@ namespace AmeisenBotX.Core.Hook
 
             byte[] returnBytes = WowCallObjectFunction(wowUnitA.BaseAddress, WowInterface.OffsetList.FunctionUnitGetReaction, new List<object>() { wowUnitB.BaseAddress }, true);
 
-            if (returnBytes.Length > 0)
+            if (returnBytes?.Length > 0)
             {
                 reaction = (WowUnitReaction)BitConverter.ToInt32(returnBytes, 0);
                 WowInterface.Db.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);

@@ -422,7 +422,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public string Author { get; } = "Jannis";
 
-        public IEnumerable<string> BlacklistedTargets { get => TargetManagerDps.BlacklistedTargets; set => TargetManagerDps.BlacklistedTargets = value; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetManagerDps.BlacklistedTargets; set => TargetManagerDps.BlacklistedTargets = value; }
 
         public Dictionary<string, dynamic> Configureables { get; set; }
 
@@ -446,7 +446,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public AuraManager MyAuraManager { get; private set; }
 
-        public IEnumerable<string> PriorityTargets { get => TargetManagerDps.PriorityTargets; set => TargetManagerDps.PriorityTargets = value; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get => TargetManagerDps.PriorityTargets; set => TargetManagerDps.PriorityTargets = value; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
@@ -903,7 +903,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
 
-            float facingAngle = BotMath.GetFacingAngle2D(WowInterface.ObjectManager.Player.Position, target.Position);
+            float facingAngle = BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, target.Position);
             float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
 
             if (angleDiff < 0)

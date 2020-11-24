@@ -50,9 +50,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public IWowItemComparator ItemComparator => new FuryItemComparator(WowInterface);
 
-        public IEnumerable<string> PriorityTargets { get; set; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
-        public IEnumerable<string> BlacklistedTargets { get; set; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         public bool TargetInLineOfSight { get; set; }
 

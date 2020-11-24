@@ -161,7 +161,7 @@ namespace AmeisenBotX.Core.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, float offset)
         {
-            return MoveAhead(targetPosition, BotMath.GetFacingAngle2D(origin, targetPosition), offset);
+            return MoveAhead(targetPosition, BotMath.GetFacingAngle(origin, targetPosition), offset);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

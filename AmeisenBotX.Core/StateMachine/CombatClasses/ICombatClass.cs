@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
     {
         string Author { get; }
 
-        IEnumerable<string> BlacklistedTargets { get; set; }
+        IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         Dictionary<string, dynamic> Configureables { get; set; }
 
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         IWowItemComparator ItemComparator { get; }
 
-        IEnumerable<string> PriorityTargets { get; set; }
+        IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
         CombatClassRole Role { get; }
 
