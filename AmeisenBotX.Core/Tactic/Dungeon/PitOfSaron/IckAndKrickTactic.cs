@@ -75,20 +75,6 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                         }
                     }
                 }
-                else if (role == CombatClassRole.Dps || role == CombatClassRole.Heal)
-                {
-                    float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(MidPosition);
-
-                    if (!isMelee && distanceToMid < 20.0f)
-                    {
-                        // move to the outer ring
-                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.Player.Position, MidPosition), -22.0f));
-
-                        preventMovement = true;
-                        allowAttacking = false;
-                        return true;
-                    }
-                }
             }
 
             return false;
