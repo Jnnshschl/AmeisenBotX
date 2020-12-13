@@ -375,6 +375,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         #endregion Warrior
 
+        #region Racials
+
+        protected const string berserkingSpell = "Berserking"; // Troll 
+        protected const string bloodFurySpell = "Blood Fury"; // Orc
+
+        #endregion Racials
+
         private readonly float maxAngle = (float)(Math.PI * 2.0);
 
         private readonly int[] useableHealingItems = new int[]
@@ -478,6 +485,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private AmeisenBotStateMachine StateMachine { get; }
 
+        public bool IsWanding { get; private set; } = false;
+
         public virtual void Execute()
         {
             if (WowInterface.ObjectManager.Player.IsCasting)
@@ -508,13 +517,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             // Autoattacks
             // --------------------------- >
-
-            if (UseAutoAttacks
-                && EventAutoAttack.Run()
-                && !WowInterface.ObjectManager.Player.IsAutoAttacking
-                && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (UseAutoAttacks)
             {
-                WowInterface.HookManager.LuaStartAutoAttack();
+                IsWanding = WowInterface.CharacterManager.SpellBook.IsSpellKnown("Shoot")
+                    && WowInterface.CharacterManager.Equipment.Items.ContainsKey(EquipmentSlot.INVSLOT_RANGED)
+                    && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
+                    && (IsWanding || TryCastSpell("Shoot", WowInterface.ObjectManager.TargetGuid));
+
+                if (!IsWanding
+                    && EventAutoAttack.Run()
+                    && !WowInterface.ObjectManager.Player.IsAutoAttacking
+                    && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.LuaStartAutoAttack();
+                }
             }
 
             // Units to interrupt
@@ -883,6 +899,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (castSuccessful == 1)
                     {
                         AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+                        IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }
                     else
