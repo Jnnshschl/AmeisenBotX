@@ -28,6 +28,7 @@ using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Quest.Profiles;
+using AmeisenBotX.Core.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
@@ -404,7 +405,8 @@ namespace AmeisenBotX.Core
             // ------------------------------------ >
             QuestProfiles = new List<IQuestProfile>
             {
-                new DeathknightStartAreaQuestProfile(WowInterface)
+                new DeathknightStartAreaQuestProfile(WowInterface),
+                new X5Horde1To80Profile(WowInterface)
             };
         }
 

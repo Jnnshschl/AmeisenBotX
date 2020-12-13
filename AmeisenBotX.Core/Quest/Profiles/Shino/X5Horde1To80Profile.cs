@@ -17,5 +17,9 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
                 valleyOfStrength.QCuttingTeeth
             });
         }
+        public override string ToString()
+        {
+            return $"[1-80] X5Horde1To80Profile (Shino)";
+        }
     }
 }
