@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             },
         };
 
-        public override bool UseAutoAttacks => false;
+        public override bool UseAutoAttacks => true;
 
         public override string Version => "1.0";
 
@@ -114,8 +114,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                if (!WowInterface.ObjectManager.Player.IsCasting
+                if (TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
+                {
+                    return;
+                }
+
+                if ((!WowInterface.ObjectManager.Player.IsCasting || WowInterface.ObjectManager.Player.IsWanding)
                     && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+
+                if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }

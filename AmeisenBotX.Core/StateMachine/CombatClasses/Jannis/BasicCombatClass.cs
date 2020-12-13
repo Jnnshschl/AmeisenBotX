@@ -375,6 +375,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         #endregion Warrior
 
+        #region Racials
+
+        protected const string berserkingSpell = "Berserking"; // Troll 
+        protected const string bloodFurySpell = "Blood Fury"; // Orc
+
+        #endregion Racials
+
         private readonly float maxAngle = (float)(Math.PI * 2.0);
 
         private readonly int[] useableHealingItems = new int[]
@@ -508,13 +515,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             // Autoattacks
             // --------------------------- >
-
-            if (UseAutoAttacks
-                && EventAutoAttack.Run()
-                && !WowInterface.ObjectManager.Player.IsAutoAttacking
-                && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+            if (UseAutoAttacks)
             {
-                WowInterface.HookManager.LuaStartAutoAttack();
+                bool shootingWand = WowInterface.CharacterManager.SpellBook.IsSpellKnown("Shoot")
+                    && WowInterface.CharacterManager.Equipment.Items.ContainsKey(EquipmentSlot.INVSLOT_RANGED)
+                    && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
+                    && (WowInterface.ObjectManager.Player.IsWanding || TryCastSpell("Shoot", WowInterface.ObjectManager.TargetGuid));
+
+                if (!shootingWand
+                    && EventAutoAttack.Run()
+                    && !WowInterface.ObjectManager.Player.IsAutoAttacking
+                    && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                {
+                    WowInterface.HookManager.LuaStartAutoAttack();
+                }
             }
 
             // Units to interrupt
