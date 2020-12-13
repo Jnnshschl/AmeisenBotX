@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
                 {
                     AmeisenLogger.I.Log("StartWow", "Starting WoW Process");
-                    WowInterface.WowProcess = XMemory.StartProcessNoActivate($"{Config.PathToWowExe} -windowed -d3d9");
+                    WowInterface.WowProcess = XMemory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9");
 
                     AmeisenLogger.I.Log("StartWow", "Waiting for input idle");
                     WowInterface.WowProcess.WaitForInputIdle();
