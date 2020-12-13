@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
-        public override string Version => "1.0";
+        public override string Version => "1.1";
 
         public override bool WalkBehindEnemy => false;
 
@@ -96,25 +96,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                && TryCastSpell(hymnOfHopeSpell, 0))
-                {
-                    return;
-                }
-
                 if (WowInterface.ObjectManager.Player.ManaPercentage < 90
                     && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid))
+                if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+                    && TryCastSpell(hymnOfHopeSpell, 0))
                 {
                     return;
                 }
 
-                if (TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
+                if (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+                {
+                    return;
+                }
+
+                if (WowInterface.ObjectManager.Player.ManaPercentage >= 50 
+                    && TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
                 {
                     return;
                 }
@@ -125,7 +126,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid))
+                if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
                 }

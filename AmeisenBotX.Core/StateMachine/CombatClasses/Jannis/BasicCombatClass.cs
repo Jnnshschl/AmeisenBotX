@@ -753,7 +753,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
-                    IsWanding = IsWanding && spellName == "Shoot";
                     return CastSpell(spellName, isTargetMyself);
                 }
             }
@@ -900,6 +899,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if (castSuccessful == 1)
                     {
                         AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+                        IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }
                     else
