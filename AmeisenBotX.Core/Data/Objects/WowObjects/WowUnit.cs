@@ -55,8 +55,6 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public bool IsCasting => CurrentlyCastingSpellId > 0 || CurrentlyChannelingSpellId > 0;
 
-        public bool IsWanding => CurrentlyCastingSpellId == 5019;
-
         public bool IsClasstrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
 
         public bool IsConfused => UnitFlags[(int)WowUnitFlags.Confused];

@@ -485,6 +485,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private AmeisenBotStateMachine StateMachine { get; }
 
+        public bool IsWanding { get; private set; } = false;
+
         public virtual void Execute()
         {
             if (WowInterface.ObjectManager.Player.IsCasting)
@@ -517,12 +519,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // --------------------------- >
             if (UseAutoAttacks)
             {
-                bool shootingWand = WowInterface.CharacterManager.SpellBook.IsSpellKnown("Shoot")
+                IsWanding = WowInterface.CharacterManager.SpellBook.IsSpellKnown("Shoot")
                     && WowInterface.CharacterManager.Equipment.Items.ContainsKey(EquipmentSlot.INVSLOT_RANGED)
                     && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
-                    && (WowInterface.ObjectManager.Player.IsWanding || TryCastSpell("Shoot", WowInterface.ObjectManager.TargetGuid));
+                    && (IsWanding || TryCastSpell("Shoot", WowInterface.ObjectManager.TargetGuid));
 
-                if (!shootingWand
+                if (!IsWanding
                     && EventAutoAttack.Run()
                     && !WowInterface.ObjectManager.Player.IsAutoAttacking
                     && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
@@ -751,6 +753,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                         CheckFacing(target);
                     }
 
+                    IsWanding = IsWanding && spellName == "Shoot";
                     return CastSpell(spellName, isTargetMyself);
                 }
             }

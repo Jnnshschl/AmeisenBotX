@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     return;
                 }
 
-                if ((!WowInterface.ObjectManager.Player.IsCasting || WowInterface.ObjectManager.Player.IsWanding)
+                if (!WowInterface.ObjectManager.Player.IsCasting
                     && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
                 {
                     return;
