@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Quest.Quests.StartArea
         public ValleyOfStrength(WowInterface wowInterface)
         {
             QCuttingTeeth = new BotQuest(
-                wowInterface, 788, "Cutting Teeth", 55, 1,
+                wowInterface, 788, "Cutting Teeth", 1, 1,
                 () => (wowInterface.ObjectManager.GetClosestWowUnitByDisplayId(new List<int> { 1653 }), new Vector3(-600, -4186, 41)),
                 () => (wowInterface.ObjectManager.GetClosestWowUnitByDisplayId(new List<int> { 1653 }), new Vector3(-600, -4186, 41)),
                 new List<IQuestObjective>()
