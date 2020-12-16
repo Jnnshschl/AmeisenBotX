@@ -373,6 +373,7 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface),
                 new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface),
+                new Statemachine.CombatClasses.ToadLump.Rogue(StateMachine),
             };
         }
 
