@@ -82,9 +82,10 @@ namespace AmeisenBotX.Core
 
             // TODO: refactor this
             WowInterface = WowInterface.I;
-            SetupWowInterface();
-
+            SetupWowInterfacePreStateMachine();
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
+            SetupWowInterfacePostStateMachine();
+
             StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
 
             RconScreenshotEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
@@ -781,7 +782,7 @@ namespace AmeisenBotX.Core
             }
         }
 
-        private void SetupWowInterface()
+        private void SetupWowInterfacePreStateMachine()
         {
             WowInterface.Globals = new AmeisenBotGlobals();
 
@@ -801,13 +802,18 @@ namespace AmeisenBotX.Core
 
             WowInterface.JobEngine = new JobEngine(WowInterface, Config);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface);
-            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
-            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
+           
             WowInterface.TacticEngine = new TacticEngine();
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
+        }
+
+        private void SetupWowInterfacePostStateMachine()
+        {
+            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
+            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
         }
 
         private void StateMachineTimerTick(object state)
