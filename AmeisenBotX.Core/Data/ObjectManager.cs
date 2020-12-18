@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat);
+                    .Where(e => e.IsInCombat && e.TargetGuid == WowInterface.ObjectManager.Player.Guid);
             }
         }
 
