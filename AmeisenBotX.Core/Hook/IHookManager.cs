@@ -165,6 +165,8 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaUseItemByName(string itemName);
 
+        void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
+
         void WowClearTarget();
 
         void WowClickOnTerrain(Vector3 position);

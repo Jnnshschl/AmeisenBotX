@@ -681,6 +681,26 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LuaAbandonQuestsNotIn(IEnumerable<string> questNames)
+        {
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogEntries()"), out string r1)
+                && int.TryParse(r1, out int numQuestLogEntries))
+            {
+                for (int i = 1; i <= numQuestLogEntries; i++)
+                {
+                    if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetQuestLogTitle({i})"), out string questLogTitle) && !questNames.Contains(questLogTitle))
+                    {
+                        LuaDoString($"SelectQuestLogEntry({i})");
+                        LuaDoString($"SetAbandonQuest()");
+                        LuaDoString($"AbandonQuest()");
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowClearTarget()
         {
             WowTargetGuid(0);

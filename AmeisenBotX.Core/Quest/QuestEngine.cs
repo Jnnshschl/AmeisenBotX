@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs;
 
 namespace AmeisenBotX.Core.Quest
 {
@@ -47,7 +48,7 @@ namespace AmeisenBotX.Core.Quest
 
             if (!UpdatedCompletedQuests)
             {
-                if (!WowInterface.EventHookManager.EventDictionary.Any(e => e.Key == "QUEST_QUERY_COMPLETE"))
+                if (WowInterface.EventHookManager.EventDictionary.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
                 {
                     WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
                 }
@@ -76,6 +77,13 @@ namespace AmeisenBotX.Core.Quest
                 }
 
                 IEnumerable<BotQuest> selectedQuests = Profile.Quests.Peek().Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.QuestlogEntries.Any(x => x.Id == e.Id));
+                
+                // Drop all quest that are not selected
+                if (WowInterface.ObjectManager.Player.QuestlogEntries.Any(entry =>
+                    selectedQuests.All(q => q.Id != entry.Id)))
+                {
+                    WowInterface.HookManager.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
+                }
 
                 if (selectedQuests.Any())
                 {
