@@ -92,7 +92,14 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else
                     {
-                        WowInterface.HookManager.LuaAcceptQuest(GossipId);
+                        if (WowInterface.HookManager.LuaGetGossipIdByTitle(Name, out int gossipId))
+                        {
+                            WowInterface.HookManager.LuaAcceptQuest(gossipId);
+                        }
+                        else
+                        {
+                            WowInterface.HookManager.LuaAcceptQuest(GossipId);
+                        }
                     }
 
                     ActionToggle = !ActionToggle;

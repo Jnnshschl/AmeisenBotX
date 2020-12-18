@@ -701,6 +701,20 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaGetGossipIdByTitle(string title, out int gossipId)
+        {
+            gossipId = 0;
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,g2,_,g3,_,g4,_,g5,_,g6,_ = GetGossipOptions(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k+1; break end; end;"), out string r1)
+                && int.TryParse(r1, out int foundGossipId))
+            {
+                gossipId = foundGossipId;
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowClearTarget()
         {
             WowTargetGuid(0);

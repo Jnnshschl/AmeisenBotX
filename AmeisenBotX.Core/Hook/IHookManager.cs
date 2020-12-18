@@ -167,6 +167,8 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
 
+        bool LuaGetGossipIdByTitle(string title, out int gossipId);
+
         void WowClearTarget();
 
         void WowClickOnTerrain(Vector3 position);
