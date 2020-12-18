@@ -101,6 +101,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (WowUnit != null)
             {
                 AbortedPath = true;
+                // TODO: Distance depending on CombatClass
                 if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
                 {
                     WowInterface.HookManager.WowStopClickToMove();
