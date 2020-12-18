@@ -23,6 +23,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private Queue<ulong> UnitLootQueue { get; set; }
 
+        private const float MaxLootDistance = 5.0f;
+
         public override void Enter()
         {
             WowInterface.MovementEngine.Reset();
@@ -68,7 +70,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (LastOpenLootTry.Run())
                     {
-                        if (WowInterface.MovementEngine.IsAtTargetPosition)
+                        if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
                             Loot(selectedUnit);
