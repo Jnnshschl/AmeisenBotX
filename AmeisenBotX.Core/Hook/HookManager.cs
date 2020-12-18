@@ -704,7 +704,7 @@ namespace AmeisenBotX.Core.Hook
         public bool LuaGetGossipIdByTitle(string title, out int gossipId)
         {
             gossipId = 0;
-            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,g2,_,g3,_,g4,_,g5,_,g6,_ = GetGossipOptions(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k+1; break end; end;"), out string r1)
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,_,g2,_,_,_,_,g3,_,_,_,_,g4,_,_,_,_,g5,_,_,_,_,g6,_,_,_,_ = GetGossipAvailableQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k; break end; end;"), out string r1)
                 && int.TryParse(r1, out int foundGossipId))
             {
                 gossipId = foundGossipId;

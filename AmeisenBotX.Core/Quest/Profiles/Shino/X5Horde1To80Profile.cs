@@ -15,11 +15,11 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
                 new QYourPlaceInTheWorld(wowInterface)
             });
             Quests.Enqueue(new List<BotQuest>() {
-                new QCuttingTeeth(wowInterface),
-                new QGalgarCactusAppleSurprise(wowInterface)
+                new QCuttingTeeth(wowInterface)
             });
             Quests.Enqueue(new List<BotQuest>() {
-                new QStingOfTheScorpid(wowInterface)
+                new QStingOfTheScorpid(wowInterface),
+                new QGalgarCactusAppleSurprise(wowInterface)
             });
             Quests.Enqueue(new List<BotQuest>() {
                 new QSarkoth(wowInterface)
