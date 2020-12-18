@@ -121,9 +121,21 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return wowObjects.OfType<WowUnit>()
-                        .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId))
-                        .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                        .FirstOrDefault();
+                    .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public WowUnit GetClosestWowUnitByNpcId(IEnumerable<int> npcIds, bool onlyQuestgiver = true)
+        {
+            lock (queryLock)
+            {
+                return wowObjects.OfType<WowUnit>()
+                    .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && npcIds.Contains(WowGUID.NpcId(e.Guid)))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
             }
         }
 

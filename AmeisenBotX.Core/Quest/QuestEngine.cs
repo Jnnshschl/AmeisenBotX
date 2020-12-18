@@ -7,7 +7,9 @@ using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs;
 
 namespace AmeisenBotX.Core.Quest
 {
@@ -36,6 +38,8 @@ namespace AmeisenBotX.Core.Quest
         private AmeisenBotStateMachine StateMachine { get; }
 
         private WowInterface WowInterface { get; }
+        
+        private DateTime LastAbandonQuestTime { get; set; } = DateTime.Now;
 
         public void Execute()
         {
@@ -46,7 +50,7 @@ namespace AmeisenBotX.Core.Quest
 
             if (!UpdatedCompletedQuests)
             {
-                if (!WowInterface.EventHookManager.EventDictionary.Any(e => e.Key == "QUEST_QUERY_COMPLETE"))
+                if (WowInterface.EventHookManager.EventDictionary.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
                 {
                     WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
                 }
@@ -69,12 +73,20 @@ namespace AmeisenBotX.Core.Quest
 
                     if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
                     {
-                        StateMachine.SetState(BotState.Eating);
+                        // TODO: This causes a Nullpointer!
+                        //StateMachine.SetState(BotState.Eating);
                         return;
                     }
                 }
 
-                IEnumerable<BotQuest> selectedQuests = Profile.Quests.Peek().Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.QuestlogEntries.Any(x => x.Id == e.Id));
+                IEnumerable<BotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
+                
+                // Drop all quest that are not selected
+                if (WowInterface.ObjectManager.Player.QuestlogEntries.Count() == 25 && DateTime.Now.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
+                {
+                    WowInterface.HookManager.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
+                    LastAbandonQuestTime = DateTime.Now;
+                }
 
                 if (selectedQuests.Any())
                 {
@@ -95,11 +107,7 @@ namespace AmeisenBotX.Core.Quest
                         if (selectedQuests.Any(e => !e.Finished))
                         {
                             BotQuest activeQuest = selectedQuests.FirstOrDefault(e => !e.Finished);
-
-                            if (activeQuest != null)
-                            {
-                                activeQuest.Execute();
-                            }
+                            activeQuest?.Execute();
                         }
                         else
                         {
@@ -108,8 +116,11 @@ namespace AmeisenBotX.Core.Quest
 
                             if (notReturnedQuest != null)
                             {
-                                notReturnedQuest.CompleteQuest();
-                                CompletedQuests.Add(notReturnedQuest.Id);
+                                if (notReturnedQuest.CompleteQuest())
+                                {
+                                    CompletedQuests.Add(notReturnedQuest.Id);
+                                }
+
                                 return;
                             }
                         }

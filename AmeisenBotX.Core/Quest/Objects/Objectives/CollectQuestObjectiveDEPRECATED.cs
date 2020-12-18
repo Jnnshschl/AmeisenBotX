@@ -4,45 +4,33 @@ using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
-    public class CollectQuestObjective : IQuestObjective
+    public class CollectQuestObjectiveDEPRECATED : IQuestObjective
     {
-        public CollectQuestObjective(WowInterface wowInterface, int itemId, int itemAmount, List<int> gameObjectIds, List<Vector3> positions)
+        public CollectQuestObjectiveDEPRECATED(WowInterface wowInterface, int itemId, int itemAmount, int objectDisplayId, List<AreaNode> area)
         {
             WowInterface = wowInterface;
             ItemId = itemId;
             WantedItemAmount = itemAmount;
-            GameObjectIds = gameObjectIds;
-            Area = positions.Select(pos => new AreaNode(pos, 10.0)).ToList();
-            RightClickEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1500));
+            ObjectDisplayId = objectDisplayId;
+            Area = area;
+
+            RightClickEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public List<AreaNode> Area { get; set; }
 
-        public bool Finished => Math.Abs(Progress - 100.0) < 0.0001;
+        public bool Finished => Progress == 100.0;
 
-        public double Progress
-        {
-            get
-            {
-                if (WantedItemAmount == 0)
-                {
-                    return 100.0;
-                }
-                
-                var inventoryItem = WowInterface.CharacterManager.Inventory.Items.Find(item => item.Id == ItemId);
-                return inventoryItem != null ? Math.Min(100.0 * ((float)inventoryItem.Count) / ((float)WantedItemAmount), 100.0) : 0.0;
-            }
-        }
+        public double Progress => Math.Round((double)CurrentItemAmount / (double)WantedItemAmount * 100.0, 1);
 
         private int CurrentItemAmount => WowInterface.CharacterManager.Inventory.Items.Count(e => e.Id == ItemId);
 
         private int ItemId { get; }
 
-        private List<int> GameObjectIds { get; }
+        private int ObjectDisplayId { get; }
 
         private TimegatedEvent RightClickEvent { get; }
 
@@ -55,13 +43,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (Finished) { return; }
 
             WowGameobject lootableObject = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                .Where(e => GameObjectIds.Contains(e.EntryId))
+                .Where(e => e.DisplayId == ObjectDisplayId)
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                 .FirstOrDefault();
 
             if (lootableObject != null)
             {
-                if (lootableObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 5.0)
+                if (lootableObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, lootableObject.Position);
                 }

@@ -213,7 +213,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public override string ToString()
         {
-            return $"Unit: [{Guid}] {Name} lvl. {Level}";
+            return $"Unit: [{Guid}] {Name} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
         }
 
         public unsafe override void Update()

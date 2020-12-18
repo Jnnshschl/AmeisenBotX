@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new CollectQuestObjective(wowInterface, 38607, 1, 7961, new List<AreaNode>()
+                                new CollectQuestObjectiveDEPRECATED(wowInterface, 38607, 1, 7961, new List<AreaNode>()
                                 {
                                     new AreaNode(new Vector3(2504, -5563, 421), 32.0)
                                 }),
