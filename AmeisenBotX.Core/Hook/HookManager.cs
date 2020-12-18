@@ -663,6 +663,21 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private string LuaGetCVar(string CVar)
+        {
+            WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetCVar(\"{CVar}\");"), out string result);
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaAutoLootEnabled()
+        {
+            string r = LuaGetCVar("autoLootDefault");
+            int.TryParse(r, out int result);
+            return result == 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaUseContainerItem(int bagId, int bagSlot)
         {
             LuaDoString($"UseContainerItem({bagId}, {bagSlot})");
