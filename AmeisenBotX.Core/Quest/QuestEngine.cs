@@ -73,7 +73,8 @@ namespace AmeisenBotX.Core.Quest
 
                     if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
                     {
-                        StateMachine.SetState(BotState.Eating);
+                        // TODO: This causes a Nullpointer!
+                        //StateMachine.SetState(BotState.Eating);
                         return;
                     }
                 }
@@ -115,8 +116,11 @@ namespace AmeisenBotX.Core.Quest
 
                             if (notReturnedQuest != null)
                             {
-                                notReturnedQuest.CompleteQuest();
-                                CompletedQuests.Add(notReturnedQuest.Id);
+                                if (notReturnedQuest.CompleteQuest())
+                                {
+                                    CompletedQuests.Add(notReturnedQuest.Id);
+                                }
+
                                 return;
                             }
                         }

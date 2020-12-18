@@ -116,9 +116,21 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LuaAcceptQuest(int gossipId)
+        public void LuaSelectGossipActiveQuest(int gossipId)
         {
-            LuaDoString($"SelectGossipAvailableQuest({gossipId});AcceptQuest()");
+            LuaDoString($"SelectGossipActiveQuest({gossipId})");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LuaCompleteQuest()
+        {
+            LuaDoString($"CompleteQuest()");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LuaAcceptQuest()
+        {
+            LuaDoString($"AcceptQuest()");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -190,7 +202,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaCompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId)
         {
-            LuaDoString($"SelectGossipActiveQuest(max({gossipId},GetNumGossipActiveQuests()));CompleteQuest({questlogId});GetQuestReward({rewardId})");
+            LuaDoString($"SelectGossipActiveQuest({gossipId});CompleteQuest({questlogId});GetQuestReward({rewardId})");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -708,6 +720,20 @@ namespace AmeisenBotX.Core.Hook
                 && int.TryParse(r1, out int foundGossipId))
             {
                 gossipId = foundGossipId;
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaQuestLogIdByTitle(string title, out int questLogId)
+        {
+            questLogId = 0;
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"for i=1,GetNumQuestLogEntries() do if GetQuestLogTitle(i) == \"{title}\" then {{v:0}}=i; break end; end;"), out string r1)
+                && int.TryParse(r1, out int foundQuestLogId))
+            {
+                questLogId = foundQuestLogId;
                 return true;
             }
 
