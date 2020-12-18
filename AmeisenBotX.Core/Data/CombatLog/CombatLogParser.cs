@@ -4,6 +4,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace AmeisenBotX.Core.Data.CombatLog
 {
@@ -24,6 +25,7 @@ namespace AmeisenBotX.Core.Data.CombatLog
             {
                 KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key = new KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype>(basicCombatLogEntry.Type, basicCombatLogEntry.Subtype);
                 WowInterface.Db.CacheCombatLogEntry(key, basicCombatLogEntry);
+                WowInterface.Db.GetCombatLogSubject().Next(basicCombatLogEntry);
             }
         }
     }

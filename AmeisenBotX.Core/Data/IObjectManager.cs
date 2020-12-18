@@ -66,6 +66,7 @@ namespace AmeisenBotX.Core.Data
         WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds);
 
         WowUnit GetClosestWowUnitByDisplayId(IEnumerable<int> displayIds, bool onlyQuestgiver = true);
+        WowUnit GetClosestWowUnitByNpcId(IEnumerable<int> npcIds, bool onlyQuestgiver = true);
 
         IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit;
 

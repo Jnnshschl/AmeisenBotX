@@ -10,13 +10,13 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
     {
         public List<string> Args { get; set; }
 
-        public string DestinationGuid { get; set; }
+        public ulong DestinationGuid { get; set; }
 
         public string DestinationName { get; set; }
 
         public int Flags { get; set; }
 
-        public string SourceGuid { get; set; }
+        public ulong SourceGuid { get; set; }
 
         public string SourceName { get; set; }
 
@@ -69,7 +69,14 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
                 return false;
             }
 
-            basicCombatLogEntry.SourceGuid = eventArgs[2];
+            if (ulong.TryParse(eventArgs[2].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong sourceGuid))
+            {
+                basicCombatLogEntry.SourceGuid = sourceGuid;
+            }
+            else
+            {
+                return false;
+            }
             basicCombatLogEntry.SourceName = eventArgs[3];
 
             if (int.TryParse(eventArgs[4], out int flags))
@@ -81,7 +88,14 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
                 return false;
             }
 
-            basicCombatLogEntry.DestinationGuid = eventArgs[5];
+            if (ulong.TryParse(eventArgs[5].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong destGuid))
+            {
+                basicCombatLogEntry.DestinationGuid = destGuid;
+            }
+            else
+            {
+                return false;
+            }
             basicCombatLogEntry.DestinationName = eventArgs[6];
 
             if (int.TryParse(eventArgs[7], out int targetFlags))

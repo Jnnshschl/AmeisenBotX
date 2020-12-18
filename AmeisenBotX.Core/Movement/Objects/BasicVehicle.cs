@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 acceleration = new Vector3(0, 0, 0);
 
             acceleration += GetObjectForceAroundMe<WowObject>();
-            // acceleration += GetNearestBlacklistForce(12);
+            acceleration += GetNearestBlacklistForce(12);
 
             acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);

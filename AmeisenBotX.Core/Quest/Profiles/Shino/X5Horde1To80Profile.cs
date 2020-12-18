@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Quest.Objects.Quests;
-using AmeisenBotX.Core.Quest.Quests.StartArea;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Quest.Quests.StartArea.ValleyOfStrength;
 
 namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
@@ -10,11 +10,22 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
 
         public X5Horde1To80Profile(WowInterface wowInterface)
         {
-            var valleyOfStrength = new ValleyOfStrength(wowInterface);
-
             Quests = new Queue<List<BotQuest>>();
             Quests.Enqueue(new List<BotQuest>() {
-                valleyOfStrength.QCuttingTeeth
+                new QYourPlaceInTheWorld(wowInterface)
+            });
+            Quests.Enqueue(new List<BotQuest>() {
+                new QCuttingTeeth(wowInterface),
+                new QGalgarCactusAppleSurprise(wowInterface)
+            });
+            Quests.Enqueue(new List<BotQuest>() {
+                new QStingOfTheScorpid(wowInterface)
+            });
+            Quests.Enqueue(new List<BotQuest>() {
+                new QSarkoth(wowInterface)
+            });
+            Quests.Enqueue(new List<BotQuest>() {
+                new QSarkoth2(wowInterface)
             });
         }
         public override string ToString()

@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool ActionToggle { get; set; }
 
-        public bool Finished => (Objectives != null && !Objectives.Any(e => !e.Finished)) || Progress == 100.0;
+        public bool Finished => (Objectives != null && Objectives.All(e => e.Finished)) || Progress == 100.0;
 
         public BotQuestGetPosition GetEndObject { get; set; }
 

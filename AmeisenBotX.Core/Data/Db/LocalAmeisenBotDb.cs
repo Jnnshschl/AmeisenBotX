@@ -21,12 +21,14 @@ namespace AmeisenBotX.Core.Data.Db
     {
         public LocalAmeisenBotDb()
         {
+            CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
         }
 
         public ConcurrentDictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
 
         public ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>> CombatLogEntries { get; private set; }
+        public BasicCombatLogEntrySubject CombatLogSubject { get; }
 
         public ConcurrentDictionary<MapId, Dictionary<HerbNode, List<Vector3>>> HerbNodes { get; private set; }
 
@@ -354,6 +356,11 @@ namespace AmeisenBotX.Core.Data.Db
             {
                 PlayerRelationships[player.Guid].Poll(player);
             }
+        }
+
+        public BasicCombatLogEntrySubject GetCombatLogSubject()
+        {
+            return CombatLogSubject;
         }
     }
 }

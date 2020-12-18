@@ -7,6 +7,7 @@ using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Quest
@@ -95,11 +96,7 @@ namespace AmeisenBotX.Core.Quest
                         if (selectedQuests.Any(e => !e.Finished))
                         {
                             BotQuest activeQuest = selectedQuests.FirstOrDefault(e => !e.Finished);
-
-                            if (activeQuest != null)
-                            {
-                                activeQuest.Execute();
-                            }
+                            activeQuest?.Execute();
                         }
                         else
                         {
