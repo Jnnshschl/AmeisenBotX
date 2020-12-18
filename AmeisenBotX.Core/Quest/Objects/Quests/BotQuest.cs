@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Quests
@@ -94,10 +95,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     {
                         if (WowInterface.HookManager.LuaGetGossipIdByTitle(Name, out int gossipId))
                         {
+                            Debug.WriteLine("TEST1");
                             WowInterface.HookManager.LuaAcceptQuest(gossipId);
                         }
                         else
                         {
+                            Debug.WriteLine("TEST2");
                             WowInterface.HookManager.LuaAcceptQuest(GossipId);
                         }
                     }

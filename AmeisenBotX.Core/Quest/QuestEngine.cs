@@ -38,6 +38,8 @@ namespace AmeisenBotX.Core.Quest
         private AmeisenBotStateMachine StateMachine { get; }
 
         private WowInterface WowInterface { get; }
+        
+        private DateTime LastAbandonQuestTime { get; set; } = DateTime.Now;
 
         public void Execute()
         {
@@ -76,13 +78,13 @@ namespace AmeisenBotX.Core.Quest
                     }
                 }
 
-                IEnumerable<BotQuest> selectedQuests = Profile.Quests.Peek().Where(e => (!e.Returned && !CompletedQuests.Contains(e.Id)) || WowInterface.ObjectManager.Player.QuestlogEntries.Any(x => x.Id == e.Id));
+                IEnumerable<BotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
                 
                 // Drop all quest that are not selected
-                if (WowInterface.ObjectManager.Player.QuestlogEntries.Any(entry =>
-                    selectedQuests.All(q => q.Id != entry.Id)))
+                if (WowInterface.ObjectManager.Player.QuestlogEntries.Count() == 25 && DateTime.Now.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
                 {
                     WowInterface.HookManager.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
+                    LastAbandonQuestTime = DateTime.Now;
                 }
 
                 if (selectedQuests.Any())
