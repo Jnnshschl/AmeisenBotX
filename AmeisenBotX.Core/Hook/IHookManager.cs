@@ -159,6 +159,8 @@ namespace AmeisenBotX.Core.Hook
 
         bool LuaUiIsVisible(params string[] uiElement);
 
+        bool LuaAutoLootEnabled();
+
         void LuaUseContainerItem(int bagId, int bagSlot);
 
         void LuaUseInventoryItem(EquipmentSlot equipmentSlot);

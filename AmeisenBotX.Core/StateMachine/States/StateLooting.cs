@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -21,6 +22,8 @@ namespace AmeisenBotX.Core.Statemachine.States
         private TimegatedEvent LastOpenLootTry { get; set; }
 
         private Queue<ulong> UnitLootQueue { get; set; }
+
+        private const float MaxLootDistance = 5.0f;
 
         public override void Enter()
         {
@@ -43,7 +46,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     WowUnit lootableUnit = wowUnits.ElementAt(i);
 
-                    if (!UnitLootQueue.Contains(lootableUnit.Guid))
+                    if (!UnitLootQueue.Contains(lootableUnit.Guid) && !UnitsAlreadyLootedList.Contains(lootableUnit.Guid))
                     {
                         UnitLootQueue.Enqueue(lootableUnit.Guid);
                     }
@@ -56,17 +59,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else
             {
-                if (UnitsAlreadyLootedList.Contains(UnitLootQueue.Peek()))
-                {
-                    if (UnitLootQueue.Count > 0)
-                    {
-                        UnitLootQueue.Dequeue();
-                    }
-
-                    return;
-                }
-
                 WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                    .Where(e => e.IsLootable)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
 
@@ -76,23 +70,10 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     if (LastOpenLootTry.Run())
                     {
-                        if (WowInterface.MovementEngine.IsAtTargetPosition)
+                        if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
-                        }
-
-                        WowInterface.HookManager.WowUnitRightClick(selectedUnit);
-                        UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
-
-                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
-                             && lootOpen > 0)
-                        {
-                            WowInterface.HookManager.LuaLootEveryThing();
-
-                            if (UnitLootQueue.Count > 0)
-                            {
-                                UnitLootQueue.Dequeue();
-                            }
+                            Loot(selectedUnit);
                         }
                     }
                 }
@@ -103,6 +84,21 @@ namespace AmeisenBotX.Core.Statemachine.States
                         UnitLootQueue.Dequeue();
                     }
                 }
+            }
+        }
+
+        private void Loot(WowUnit unit)
+        {
+            WowInterface.HookManager.WowUnitRightClick(unit);
+
+            // if AutoLoot is enabled, the unit will be dequeued after it is looted because it will no longer be IsLootable
+            // there is no need to handle the dequeing here
+            if (WowInterface.HookManager.LuaAutoLootEnabled()
+                  && WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
+                  && lootOpen > 0)
+            {
+                WowInterface.HookManager.LuaLootEveryThing();
+                UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
             }
         }
 
