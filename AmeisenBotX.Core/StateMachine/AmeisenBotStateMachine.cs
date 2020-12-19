@@ -167,15 +167,27 @@ namespace AmeisenBotX.Core.Statemachine
 
                             // we cant fight when we are dead or a ghost
                             if (CurrentState.Key != BotState.Dead
-                                && CurrentState.Key != BotState.Ghost 
-                                && !WowInterface.Globals.IgnoreCombat
-                                && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
-                                && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat())
-                                && WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()
-                                && SetState(BotState.Attacking, true))
+                                && CurrentState.Key != BotState.Ghost)
                             {
-                                OnStateOverride?.Invoke(CurrentState.Key);
-                                return;
+                                if (Config.AutoDodgeAoeSpells
+                                    && GetState<StateInsideAoeDamage>().IsInsideAeoDamage())
+                                {
+                                    if (SetState(BotState.InsideAoeDamage, true))
+                                    {
+                                        OnStateOverride?.Invoke(CurrentState.Key);
+                                    }
+                                }
+                                else if (!WowInterface.Globals.IgnoreCombat
+                                        && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
+                                        && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()
+                                        || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
+                                {
+                                    if (SetState(BotState.Attacking, true))
+                                    {
+                                        OnStateOverride?.Invoke(CurrentState.Key);
+                                        return;
+                                    }
+                                }
                             }
                         }
                     }

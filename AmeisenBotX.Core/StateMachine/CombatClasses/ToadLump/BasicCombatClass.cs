@@ -12,12 +12,13 @@ using AmeisenBotX.Core.Statemachine.Utils;
 using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.ToadLump
 {
     public abstract class BasicCombatClass : ICombatClass
     {
@@ -249,6 +250,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string sliceAndDiceSpell = "Slice and Dice";
         protected const string sprintSpell = "Sprint";
         protected const string stealthSpell = "Stealth";
+        protected const string sinisterStrikeSpell = "Sinister Strike";
+        protected const string feintSpell = "Feint";
+        protected const string backstabSpell = "Backstab";
 
         #endregion Rogue
 
@@ -427,7 +431,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
-        public string Author { get; } = "Jannis";
+        public string Author { get; } = "ToadLump";
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetManagerDps.BlacklistedTargets; set => TargetManagerDps.BlacklistedTargets = value; }
 
@@ -674,7 +678,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (targetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
             {
-                ulong guid = targetToTarget.First().Guid;
+                WowUnit closestUnit = targetToTarget.MinBy(value => value.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
+                ulong guid = closestUnit.Guid;
 
                 if (WowInterface.ObjectManager.Player.TargetGuid != guid)
                 {
@@ -881,23 +886,14 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // spits out stuff like this "1;300" (1 or 0 wether the cast was successful or not);(the cooldown in ms)
             if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
             {
-                if (result.Length < 3)
-                {
-                    return false;
-                }
+                if (result.Length < 3) return false;
 
                 string[] parts = result.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                if (parts.Length < 2)
-                {
-                    return false;
-                }
+                if (parts.Length < 2) return false;
 
                 // replace comma with dot in the cooldown
-                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase))
-                {
-                    parts[1] = parts[1].Replace(',', '.');
-                }
+                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase)) parts[1] = parts[1].Replace(',', '.');
 
                 if (int.TryParse(parts[0], out int castSuccessful)
                     && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))

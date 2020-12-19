@@ -28,6 +28,7 @@ using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Quest.Profiles;
+using AmeisenBotX.Core.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses;
@@ -85,9 +86,10 @@ namespace AmeisenBotX.Core
 
             // TODO: refactor this
             WowInterface = WowInterface.I;
-            SetupWowInterface();
-
+            SetupWowInterfacePreStateMachine();
             StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
+            SetupWowInterfacePostStateMachine();
+
             StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
 
             RconScreenshotEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
@@ -376,6 +378,7 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface),
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface),
                 new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface),
+                new Statemachine.CombatClasses.ToadLump.Rogue(StateMachine),
             };
         }
 
@@ -407,7 +410,8 @@ namespace AmeisenBotX.Core
             // ------------------------------------ >
             QuestProfiles = new List<IQuestProfile>
             {
-                new DeathknightStartAreaQuestProfile(WowInterface)
+                new DeathknightStartAreaQuestProfile(WowInterface),
+                new X5Horde1To80Profile(WowInterface)
             };
         }
 
@@ -791,7 +795,7 @@ namespace AmeisenBotX.Core
             }
         }
 
-        private void SetupWowInterface()
+        private void SetupWowInterfacePreStateMachine()
         {
             WowInterface.Globals = new AmeisenBotGlobals();
 
@@ -811,13 +815,18 @@ namespace AmeisenBotX.Core
 
             WowInterface.JobEngine = new JobEngine(WowInterface, Config);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface);
-            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
-            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
+           
             WowInterface.TacticEngine = new TacticEngine();
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
+        }
+
+        private void SetupWowInterfacePostStateMachine()
+        {
+            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
+            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
         }
 
         private void StateMachineTimerTick(object state)
@@ -923,7 +932,7 @@ namespace AmeisenBotX.Core
             // Misc Events
             // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT", WowInterface.CombatLogParser.Parse);
+            WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }
     }
 }

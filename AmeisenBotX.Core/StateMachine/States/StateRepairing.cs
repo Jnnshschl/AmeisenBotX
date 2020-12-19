@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         internal bool NeedToRepair()
         {
             return WowInterface.CharacterManager.Equipment.Items
-                       .Any(e => e.Value.MaxDurability > 0 && (e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold);
+                       .Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold);
         }
     }
 }

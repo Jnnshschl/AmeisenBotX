@@ -5,12 +5,13 @@ using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace AmeisenBotX.Core.Quest.Objects.Quests
 {
     public delegate (WowObject, Vector3) BotQuestGetPosition();
 
-    public class BotQuest
+    public class BotQuest : IBotQuest
     {
         public BotQuest(WowInterface wowInterface, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, List<IQuestObjective> objectives)
         {
@@ -33,15 +34,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool ActionToggle { get; set; }
 
-        public bool Finished => (Objectives != null && !Objectives.Any(e => !e.Finished)) || Progress == 100.0;
+        public bool Finished => (Objectives != null && Objectives.All(e => e.Finished)) || Progress == 100.0;
 
         public BotQuestGetPosition GetEndObject { get; set; }
 
         public BotQuestGetPosition GetStartObject { get; set; }
 
         public int GossipId { get; set; }
-
-        public bool HasQuest => WowInterface.ObjectManager.Player.QuestlogEntries.Any(e => e.Id == Id);
 
         public int Id { get; set; }
 
@@ -72,9 +71,24 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         private WowInterface WowInterface { get; }
 
+        private bool CheckedIfAccepted { get; set; } = false;
+
         public void AcceptQuest()
         {
-            if (HasQuest) { Accepted = true; return; }
+            if (!CheckedIfAccepted)
+            {
+                if (WowInterface.HookManager.LuaQuestLogIdByTitle(Name, out int _questLogId))
+                {
+                    Accepted = true;
+                }
+
+                CheckedIfAccepted = true;
+            }
+            
+            if (Accepted)
+            {
+                return;
+            }
 
             (WowObject, Vector3) objectPositionCombo = GetStartObject();
 
@@ -92,7 +106,17 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else
                     {
-                        WowInterface.HookManager.LuaAcceptQuest(GossipId);
+                        var acceptGossipId = GossipId;
+                        if (WowInterface.HookManager.LuaGetGossipIdByTitle(Name, out int gossipId))
+                        {
+                            acceptGossipId = gossipId;
+                        }
+
+                        WowInterface.HookManager.LuaSelectGossipActiveQuest(acceptGossipId);
+                        Thread.Sleep(250);
+                        WowInterface.HookManager.LuaAcceptQuest();
+
+                        Accepted = true;
                     }
 
                     ActionToggle = !ActionToggle;
@@ -108,9 +132,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             }
         }
 
-        public void CompleteQuest()
+        public bool CompleteQuest()
         {
-            if (!HasQuest || !Finished) { Returned = true; return; }
+            if (Returned)
+            {
+                return true;
+            }
 
             (WowObject, Vector3) objectPositionCombo = GetEndObject();
 
@@ -130,8 +157,21 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else if (ActionEvent.Run())
                     {
-                        // TODO: get best reward
-                        WowInterface.HookManager.LuaCompleteQuestAndGetReward(WowInterface.ObjectManager.Player.QuestlogEntries.ToList().FindIndex(e => e.Id == Id) + 1, 1, GossipId);
+                        var turnInGossipId = GossipId;
+                        if (WowInterface.HookManager.LuaGetGossipIdByTitle(Name, out int gossipId))
+                        {
+                            turnInGossipId = gossipId;
+                        }
+
+
+                        WowInterface.HookManager.LuaSelectGossipActiveQuest(turnInGossipId);
+                        Thread.Sleep(250);
+                        WowInterface.HookManager.LuaCompleteQuest();
+                        Thread.Sleep(250);
+                        WowInterface.HookManager.LuaGetQuestReward(1);
+
+                        Returned = true;
+                        return true;
                     }
 
                     ActionToggle = !ActionToggle;
@@ -145,6 +185,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, objectPositionCombo.Item2);
                 }
             }
+
+            return false;
         }
 
         public void Execute()

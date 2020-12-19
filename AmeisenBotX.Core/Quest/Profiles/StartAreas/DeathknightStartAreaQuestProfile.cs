@@ -14,11 +14,11 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
     {
         public DeathknightStartAreaQuestProfile(WowInterface wowInterface)
         {
-            Quests = new Queue<List<BotQuest>>();
+            Quests = new Queue<List<IBotQuest>>();
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new CollectQuestObjective(wowInterface, 38607, 1, 7961, new List<AreaNode>()
+                                new CollectQuestObjectiveDEPRECATED(wowInterface, 38607, 1, 7961, new List<AreaNode>()
                                 {
                                     new AreaNode(new Vector3(2504, -5563, 421), 32.0)
                                 }),
@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -145,7 +145,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -183,7 +183,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -205,7 +205,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -282,7 +282,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
             );
         }
 
-        public Queue<List<BotQuest>> Quests { get; }
+        public Queue<List<IBotQuest>> Quests { get; }
 
         private bool[] CastedSpell { get; } = new bool[4];
 

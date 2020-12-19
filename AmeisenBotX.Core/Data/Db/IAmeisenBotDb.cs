@@ -67,5 +67,7 @@ namespace AmeisenBotX.Core.Data.Db
         bool TryGetUnitName(ulong guid, out string name);
 
         void UpdatePlayerRelationship(WowPlayer player);
+
+        BasicCombatLogEntrySubject GetCombatLogSubject();
     }
 }
