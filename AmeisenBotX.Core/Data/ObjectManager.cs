@@ -150,6 +150,18 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, double distance) where T : WowUnit
+        {
+            lock (queryLock)
+            {
+                return GetNearEnemies<T>(position, distance)
+                    .Where(e => e.IsInCombat 
+                        && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)
+                        && WowInterface.ObjectManager.PartyPetGuids.Contains(e.TargetGuid));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
