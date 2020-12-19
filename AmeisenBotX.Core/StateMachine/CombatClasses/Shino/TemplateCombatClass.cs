@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
 
         protected abstract Spell GetOpeningSpell();
 
-        public void AttackTarget()
+        public override void AttackTarget()
         {
             WowUnit target = WowInterface.ObjectManager.Target;
             if (target == null)

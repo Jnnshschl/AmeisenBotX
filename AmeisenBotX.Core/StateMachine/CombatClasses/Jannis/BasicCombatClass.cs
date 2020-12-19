@@ -607,7 +607,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        public void AttackTarget()
+        public virtual void AttackTarget()
         {
             WowUnit target = WowInterface.ObjectManager.Target;
             if (target == null)
