@@ -158,7 +158,7 @@ namespace AmeisenBotX.Core.Statemachine
                                 }
                             }
                             else if (GhostCheckEvent.Run(out bool isGhost)
-                                && isGhost 
+                                && isGhost
                                 && SetState(BotState.Ghost, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);
@@ -167,26 +167,16 @@ namespace AmeisenBotX.Core.Statemachine
 
                             // we cant fight when we are dead or a ghost
                             if (CurrentState.Key != BotState.Dead
-                                && CurrentState.Key != BotState.Ghost)
+                                && CurrentState.Key != BotState.Ghost
+                                && !WowInterface.Globals.IgnoreCombat
+                                && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
+                                && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()
+                                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
                             {
-                                if (Config.AutoDodgeAoeSpells
-                                    && GetState<StateInsideAoeDamage>().IsInsideAeoDamage())
+                                if (SetState(BotState.Attacking, true))
                                 {
-                                    if (SetState(BotState.InsideAoeDamage, true))
-                                    {
-                                        OnStateOverride?.Invoke(CurrentState.Key);
-                                    }
-                                }
-                                else if (!WowInterface.Globals.IgnoreCombat
-                                        && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
-                                        && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                        || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
-                                {
-                                    if (SetState(BotState.Attacking, true))
-                                    {
-                                        OnStateOverride?.Invoke(CurrentState.Key);
-                                        return;
-                                    }
+                                    OnStateOverride?.Invoke(CurrentState.Key);
+                                    return;
                                 }
                             }
                         }
