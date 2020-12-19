@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             NpcIds = npcIds;
             CollectOrKillAmount = collectOrKillAmount;
             QuestItemId = questItemId;
-            SearchAreas = new SearchAreaEnsemble(areas);
+            SearchAreas = new SearchAreaEnsamble(areas);
 
             if (!CollectQuestItem)
             {
@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         
         private int CollectOrKillAmount { get; }
         
-        private SearchAreaEnsemble SearchAreas { get; }
+        private SearchAreaEnsamble SearchAreas { get; }
         
         private int Killed { get; set; }
         
@@ -71,10 +71,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private WowInterface WowInterface { get; }
 
         private WowUnit WowUnit { get; set; }
-        
-        private Vector3 LastSearchPosition { get; set; } = Vector3.Zero;
-
-        private bool AbortedPath { get; set; } = true;
 
         public void Execute()
         {
@@ -100,7 +96,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (WowUnit != null)
             {
-                AbortedPath = true;
+                SearchAreas.NotifyDetour();
                 // TODO: Distance depending on CombatClass
                 if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
                 {
@@ -113,18 +109,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowUnit.Position);
                 }
             }
-            else
+            else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath())
             {
-                if (WowInterface.MovementEngine.IsAtTargetPosition || AbortedPath)
-                {
-                    if (!AbortedPath || LastSearchPosition == Vector3.Zero)
-                    {
-                        LastSearchPosition = SearchAreas.GetNextPosition(WowInterface);
-                    }
-
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, LastSearchPosition);
-                    AbortedPath = false;
-                }
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving,
+                    SearchAreas.GetNextPosition(WowInterface));
             }
         }
 
