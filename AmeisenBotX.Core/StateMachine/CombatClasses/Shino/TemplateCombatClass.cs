@@ -12,6 +12,13 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
         {
         }
 
+        public string Author { get; } = "Shino";
+
+        public override string ToString()
+        {
+            return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
+        }
+
         protected abstract Spell GetOpeningSpell();
 
         public void AttackTarget()
