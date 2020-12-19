@@ -4,8 +4,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -13,7 +11,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 {
     public delegate (WowObject, Vector3) BotQuestGetPosition();
 
-    public class BotQuest
+    public class BotQuest : IBotQuest
     {
         public BotQuest(WowInterface wowInterface, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, List<IQuestObjective> objectives)
         {
