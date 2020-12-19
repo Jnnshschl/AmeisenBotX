@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
@@ -141,6 +142,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
+        }
+
+        protected override Spell GetOpeningSpell()
+        {
+            Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(shadowWordPainSpell);
+            if (spell != null)
+            {
+                return spell;
+            }
+            return WowInterface.CharacterManager.SpellBook.GetSpellByName(smiteSpell);
+        }
+
+        public float GetCombatDistance()
+        {
+            return 15.0f;
         }
     }
 }

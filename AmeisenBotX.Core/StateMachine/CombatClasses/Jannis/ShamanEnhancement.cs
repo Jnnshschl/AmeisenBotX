@@ -7,6 +7,7 @@ using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
@@ -158,6 +159,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             HexedTarget = false;
+        }
+
+        protected override Spell GetOpeningSpell()
+        {
+            throw new NotImplementedException();
         }
     }
 }

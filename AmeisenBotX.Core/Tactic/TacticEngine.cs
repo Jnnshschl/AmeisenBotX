@@ -41,5 +41,10 @@ namespace AmeisenBotX.Core.Tactic
         {
             Tactics.Clear();
         }
+        
+        public bool HasTactics()
+        {
+            return Tactics.Count > 0;
+        }
     }
 }

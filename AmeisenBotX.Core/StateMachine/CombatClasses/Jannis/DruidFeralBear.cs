@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
@@ -157,6 +158,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
+        }
+
+        protected override Spell GetOpeningSpell()
+        {
+            throw new System.NotImplementedException();
         }
 
         private bool NeedToHealMySelf()

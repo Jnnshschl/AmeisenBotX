@@ -9,6 +9,7 @@ using AmeisenBotX.Core.Statemachine.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
@@ -161,6 +162,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
+        }
+
+        protected override Spell GetOpeningSpell()
+        {
+            throw new NotImplementedException();
         }
 
         private bool NeedToHealSomeone()

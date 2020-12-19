@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
@@ -969,7 +970,31 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
-            return distance >= spell.MinRange && distance <= spell.MaxRange;
+            return distance >= spell.MinRange + 1.0 && distance <= spell.MaxRange - 1.0;
+        }
+
+        protected abstract Spell GetOpeningSpell();
+
+        public void AttackTarget()
+        {
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if (target == null)
+            {
+                return;
+            }
+
+            Spell openingSpell = GetOpeningSpell();
+            if (IsInRange(openingSpell, target) && WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position))
+            {
+                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.MovementEngine.StopMovement();
+                WowInterface.MovementEngine.Reset();
+                TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+            }
         }
     }
 }
