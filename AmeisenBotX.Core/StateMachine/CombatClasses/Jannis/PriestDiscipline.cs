@@ -139,12 +139,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
         }
-
-        protected override Spell GetOpeningSpell()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         private bool NeedToHealSomeone()
         {
             if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))

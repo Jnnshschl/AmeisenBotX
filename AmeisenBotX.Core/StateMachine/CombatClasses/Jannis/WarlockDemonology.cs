@@ -193,10 +193,5 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 return;
             }
         }
-
-        protected override Spell GetOpeningSpell()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

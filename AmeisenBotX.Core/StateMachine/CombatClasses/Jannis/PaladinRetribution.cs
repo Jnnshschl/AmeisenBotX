@@ -131,10 +131,5 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             base.OutOfCombatExecute();
         }
-
-        protected override Spell GetOpeningSpell()
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

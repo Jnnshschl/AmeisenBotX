@@ -6,11 +6,12 @@ using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using AmeisenBotX.Core.Character.Spells.Objects;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Shino;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 {
-    public class PriestShadow : BasicCombatClass
+    public class PriestShadow : TemplateCombatClass
     {
         public PriestShadow(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
@@ -83,7 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
-        public override string Version => "1.1";
+        public override string Version => "1.2";
 
         public override bool WalkBehindEnemy => false;
 
@@ -142,6 +143,16 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
+        }
+
+        protected override Spell GetOpeningSpell()
+        {
+            Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(shadowWordPainSpell);
+            if (spell != null)
+            {
+                return spell;
+            }
+            return WowInterface.CharacterManager.SpellBook.GetSpellByName(smiteSpell);
         }
     }
 }

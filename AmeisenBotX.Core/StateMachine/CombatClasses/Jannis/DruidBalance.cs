@@ -164,11 +164,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        protected override Spell GetOpeningSpell()
-        {
-            throw new NotImplementedException();
-        }
-
         private bool CheckForEclipseProcs()
         {
             if (WowInterface.ObjectManager.Player.HasBuffByName(eclipseLunarSpell))

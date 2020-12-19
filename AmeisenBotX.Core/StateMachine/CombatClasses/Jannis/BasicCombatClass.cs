@@ -962,7 +962,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        private bool IsInRange(Spell spell, WowUnit wowUnit)
+        protected bool IsInRange(Spell spell, WowUnit wowUnit)
         {
             if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
             {
@@ -971,30 +971,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
             return distance >= spell.MinRange + 1.0 && distance <= spell.MaxRange - 1.0;
-        }
-
-        protected abstract Spell GetOpeningSpell();
-
-        public void AttackTarget()
-        {
-            WowUnit target = WowInterface.ObjectManager.Target;
-            if (target == null)
-            {
-                return;
-            }
-
-            Spell openingSpell = GetOpeningSpell();
-            if (IsInRange(openingSpell, target) && WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position))
-            {
-                WowInterface.HookManager.WowStopClickToMove();
-                WowInterface.MovementEngine.StopMovement();
-                WowInterface.MovementEngine.Reset();
-                TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
-            }
-            else
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
-            }
         }
     }
 }

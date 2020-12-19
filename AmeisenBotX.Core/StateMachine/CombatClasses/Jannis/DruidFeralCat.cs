@@ -157,11 +157,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        protected override Spell GetOpeningSpell()
-        {
-            throw new System.NotImplementedException();
-        }
-
         private bool NeedToHealMySelf()
         {
             if (WowInterface.ObjectManager.Player.HealthPercentage < 60
