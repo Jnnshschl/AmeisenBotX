@@ -42,9 +42,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         void OutOfCombatExecute();
 
-        void AttackTarget()
-        {
-            // TODO: REMOVE DEFAULT IMPL!
-        }
+        void AttackTarget();
     }
 }
