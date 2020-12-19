@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private bool multipleTargets = false;
         private bool standing = false;
-        private WowInterface WowInterface;
+        private readonly WowInterface WowInterface;
 
         public WarriorFury(WowInterface wowInterface)
         {
@@ -165,7 +165,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 WowUnit target = WowInterface.ObjectManager.Target;
                 WowUnit leader = null;
                 if (leaderGuid != 0)
+                {
                     leader = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid);
+                }
+
                 if (leaderGuid != 0 && leaderGuid != WowInterface.ObjectManager.PlayerGuid && leader != null && !(leader.IsDead || leader.Health < 1))
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
@@ -229,7 +232,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             if(computeNewRoute)
             {
                 if(!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
+                {
                     WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                }
+
                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, target.Position, target.Rotation);
             }
         }
@@ -335,7 +341,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private bool askedForHeal = false;
             private bool askedForHelp = false;
-            private WowInterface WowInterface;
+            private readonly WowInterface WowInterface;
 
             public WarriorFurySpells(WowInterface wowInterface)
             {

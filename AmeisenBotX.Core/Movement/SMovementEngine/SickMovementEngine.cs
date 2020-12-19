@@ -3,6 +3,7 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -106,7 +107,12 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             )
                         )
                     ),
-                    new Leaf(() => { return BehaviorTreeStatus.Success; })
+                    new Selector
+                    (
+                        () => Config.AutoDodgeAoeSpells && DoINeedToDodgeAoeSpell(),
+                        new Leaf(DodgeAoeSpell),
+                        new Leaf(() => { return BehaviorTreeStatus.Success; })
+                    )
                 )
             );
         }
@@ -165,6 +171,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private Timer MovementWatchdog { get; }
 
+        private IEnumerable<WowDynobject> NearAoeSpells { get; set; }
+
         private TimegatedEvent ObstacleCheckEvent { get; }
 
         private TimegatedEvent PathDecayEvent { get; }
@@ -213,9 +221,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     ShortcutPosition = default;
                 }
 
-                BehaviorTree.Tick();
                 ForceDirectMove = false;
             }
+
+            BehaviorTree.Tick();
         }
 
         public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
@@ -225,7 +234,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
         }
 
-        public bool IsNearPosition(Vector3 position) => position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
+        public bool IsNearPosition(Vector3 position)
+        {
+            return position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
+        }
 
         public void PreventMovement(TimeSpan timeSpan)
         {
@@ -253,15 +265,20 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false)
         {
+            if (Config.AutoDodgeAoeSpells && !forceDirectMove)
+            {
+                IEnumerable<WowDynobject> aoeSpells = WowInterface.ObjectManager.GetAoeSpells(positionToGoTo);
+
+                if (aoeSpells.Any())
+                {
+                    // dont run into harmful aoe spells
+                    positionToGoTo = GetPositionOutsideOfAoeSpells(positionToGoTo, aoeSpells);
+                }
+            }
+
             if (ActiveShortcut != null && (disableShortcuts || ActiveShortcut.Finished))
             {
                 ActiveShortcut = null;
-            }
-
-            if (Config.AutoDodgeAoeSpells && !forceDirectMove && BotUtils.IsPositionInsideAoeSpell(positionToGoTo, WowInterface.ObjectManager.GetNearAoeSpells()))
-            {
-                // dont run into harmful aoe spells
-                return;
             }
 
             ForceDirectMove = forceDirectMove;
@@ -278,7 +295,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             TargetRotation = targetRotation;
             PathfindingStatus = PathfindingStatus.None;
 
-            double distanceToTargetPos = WowInterface.ObjectManager.Player.Position.GetDistance(positionToGoTo) * 2.0;
+            float distanceToTargetPos = WowInterface.ObjectManager.Player.Position.GetDistance(positionToGoTo) * 2.0f;
 
             if (!disableShortcuts && Shortcuts.Any(e => distanceToTargetPos >= e.MinDistanceUntilWorth))
             {
@@ -302,6 +319,25 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 Reset();
                 PlayerVehicle.Reset();
             }
+        }
+
+        private BehaviorTreeStatus DodgeAoeSpell()
+        {
+            Vector3 targetPosition = GetPositionOutsideOfAoeSpells(WowInterface.ObjectManager.Player.Position, NearAoeSpells);
+
+            if (targetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.5f)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition);
+                return BehaviorTreeStatus.Success;
+            }
+
+            return BehaviorTreeStatus.Success;
+        }
+
+        private bool DoINeedToDodgeAoeSpell()
+        {
+            NearAoeSpells = WowInterface.ObjectManager.GetAoeSpells(WowInterface.ObjectManager.Player.Position);
+            return NearAoeSpells.Any();
         }
 
         private bool DoINeedToFindAPath()
@@ -373,7 +409,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             AmeisenLogger.I.Log("Pathfinding", $"Finding path: {WowInterface.ObjectManager.Player.Position} -> {TargetPosition}");
             IEnumerable<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, TargetPosition);
 
-            if (path != null && path.Any() )
+            if (path != null && path.Any())
             {
                 int pathLenght = path.Count();
 
@@ -397,6 +433,25 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 AmeisenLogger.I.Log("Pathfinding", "Pathfinding failed");
                 return BehaviorTreeStatus.Failed;
             }
+        }
+
+        private Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<WowDynobject> aoeSpells)
+        {
+            if (aoeSpells.Any())
+            {
+                // build mean position and move away x meters from it
+                // x is the biggest distance we have to move
+                Vector3 meanAoePos = BotMath.GetMeanPosition(aoeSpells.Select(e => e.Position));
+                float distanceToMove = aoeSpells.Max(e => e.Radius);
+
+                // get average ange to produce the outgoing angle
+                float outgoingAngle = aoeSpells.Average(e => BotMath.GetFacingAngle(e.Position, meanAoePos));
+
+                // "repell" the position from the aoe spell
+                return BotUtils.MoveAhead(targetPosition, outgoingAngle, distanceToMove + 3.5f);
+            }
+
+            return targetPosition;
         }
 
         private BehaviorTreeStatus HandleDirectMoving()

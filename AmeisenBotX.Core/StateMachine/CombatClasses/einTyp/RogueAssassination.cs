@@ -23,16 +23,15 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         private double distanceTraveled = 0;
 
-        private bool hasTargetMoved = false;
-
-        bool isAttackingFromBehind = false;
+        private readonly bool hasTargetMoved = false;
+        private bool isAttackingFromBehind = false;
 
         private bool isSneaky = false;
 
         private bool standing = false;
 
         private bool wasInStealth = false;
-        private WowInterface WowInterface;
+        private readonly WowInterface WowInterface;
 
         public RogueAssassination(WowInterface wowInterface)
         {
@@ -257,25 +256,33 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 wasInStealth = false;
             }
 
-            if (this.isAttackingFromBehind)
+            if (isAttackingFromBehind)
             {
                 if(WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                {
                     WowInterface.MovementEngine.StopMovement();
-                if(WowInterface.ObjectManager.Player.IsInCombat)
+                }
+
+                if (WowInterface.ObjectManager.Player.IsInCombat)
+                {
                     isAttackingFromBehind = false;
+                }
             }
 
             if (computeNewRoute)
             {
-                if (!this.isAttackingFromBehind && isSneaky && distanceToBehindTarget > 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                if (!isAttackingFromBehind && isSneaky && distanceToBehindTarget > 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastBehindTargetPosition);
                 }
                 else
                 {
-                    this.isAttackingFromBehind = true;
+                    isAttackingFromBehind = true;
                     if (!BotMath.IsFacing(LastPlayerPosition, WowInterface.ObjectManager.Player.Rotation, LastTargetPosition, 0.5f))
+                    {
                         WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    }
+
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastTargetPosition, LastTargetRotation);
                 }
             }
@@ -379,7 +386,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             private int comboCnt = 0;
 
-            private WowInterface WowInterface;
+            private readonly WowInterface WowInterface;
 
             public RogueAssassinSpells(WowInterface wowInterface)
             {

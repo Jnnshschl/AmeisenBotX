@@ -2,8 +2,8 @@
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Db;
 using AmeisenBotX.Core.Data.CombatLog;
+using AmeisenBotX.Core.Data.Db;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Grinding;

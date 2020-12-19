@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
-                if (SpellChain.Get(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string aspectToUse, aspectOfTheDragonhawkSpell, aspectOfTheHawkSpell))
+                if (SpellChain.Run(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string aspectToUse, aspectOfTheDragonhawkSpell, aspectOfTheHawkSpell))
                 {
                     MyAuraManager.BuffsToKeepActive.Add(aspectToUse, () => WowInterface.ObjectManager.Player.ManaPercentage > 50.0 && TryCastSpell(aspectToUse, 0, true));
                 }

@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 

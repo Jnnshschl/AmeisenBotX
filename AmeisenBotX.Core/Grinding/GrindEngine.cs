@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Grinding
                 return;
             }
 
-            if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
+            if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && (e.Value.Durability * (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
                 && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, PoiType.Repair, WowInterface.ObjectManager.Player.Position, 4096.0, out IEnumerable<Vector3> repairNpcs))
             {
                 GoToNpcAndRepair(repairNpcs);

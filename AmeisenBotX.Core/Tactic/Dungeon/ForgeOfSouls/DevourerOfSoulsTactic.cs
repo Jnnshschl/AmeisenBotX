@@ -5,9 +5,6 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 {
@@ -44,12 +41,12 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == CombatClassRole.Tank)
                 {
-                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(GetMeanGroupPosition(), MidPosition), 8.0f);
+                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(BotUtils.GetMeanGroupPosition(), MidPosition), 8.0f);
                     float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
 
                     if (wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid)
                     {
-                        if (distanceToMid > 5.0f)
+                        if (distanceToMid > 5.0f && WowInterface.I.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
                             WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, modifiedCenterPosition);
@@ -60,40 +57,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                         }
                     }
                 }
-                else if (role == CombatClassRole.Dps || role == CombatClassRole.Heal)
-                {
-                    float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(MidPosition);
-
-                    if (!isMelee && distanceToMid < 20.0f)
-                    {
-                        // move to the outer ring of the arena
-                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.Player.Position, MidPosition), -22.0f));
-
-                        preventMovement = true;
-                        allowAttacking = false;
-                        return true;
-                    }
-                }
             }
 
             return false;
-        }
-
-        private Vector3 GetMeanGroupPosition()
-        {
-            Vector3 meanGroupPosition = new Vector3();
-            float count = 0;
-
-            foreach (WowUnit unit in WowInterface.I.ObjectManager.Partymembers)
-            {
-                if (unit.Guid != WowInterface.I.ObjectManager.PlayerGuid && unit.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) < 100.0)
-                {
-                    meanGroupPosition += unit.Position;
-                    ++count;
-                }
-            }
-
-            return meanGroupPosition / count;
         }
     }
 }

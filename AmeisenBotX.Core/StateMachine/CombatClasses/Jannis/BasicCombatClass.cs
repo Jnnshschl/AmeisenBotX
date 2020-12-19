@@ -865,14 +865,23 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             // spits out stuff like this "1;300" (1 or 0 wether the cast was successful or not);(the cooldown in ms)
             if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
             {
-                if (result.Length < 3) return false;
+                if (result.Length < 3)
+                {
+                    return false;
+                }
 
                 string[] parts = result.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                if (parts.Length < 2) return false;
+                if (parts.Length < 2)
+                {
+                    return false;
+                }
 
                 // replace comma with dot in the cooldown
-                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase)) parts[1] = parts[1].Replace(',', '.');
+                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase))
+                {
+                    parts[1] = parts[1].Replace(',', '.');
+                }
 
                 if (int.TryParse(parts[0], out int castSuccessful)
                     && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))

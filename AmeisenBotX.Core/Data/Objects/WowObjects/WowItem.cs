@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public unsafe override void Update()
+        public override unsafe void Update()
         {
             base.Update();
 

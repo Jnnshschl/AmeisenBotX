@@ -4,7 +4,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public static class SpellChain
     {
-        public static bool Get(Func<string, bool> selectFunction, out string spellToCast, params string[] spells)
+        public static bool Run(Func<string, bool> selectFunction, out string spellToCast, params string[] spells)
         {
             for (int i = 0; i < spells.Length; ++i)
             {

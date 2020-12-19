@@ -267,7 +267,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             {
                                 new MoveToPositionQuestObjective(wowInterface, new Vector3(2340, -5687, 154), 40.0),
                                 new WaitUntilQuestObjective(() => wowInterface.ObjectManager.Player.HealthPercentage > 50.0),
-                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, false, () => wowInterface.ObjectManager.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
+                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, () => wowInterface.ObjectManager.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
                             })
                         }
                     ),

@@ -116,7 +116,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         {
                             WowUnit enemyFlagCarrier = GetFlagCarrier();
                             if (enemyFlagCarrier != null)
+                            {
                                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position);
+                            }
                             else if (startPosition != default)
                             {
                                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ausgangAlly);
@@ -173,9 +175,13 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
+            {
                 return flagCarrierList[0];
+            }
             else
+            {
                 return null;
+            }
         }
 
         private WowObject GetFlagObject()
@@ -186,9 +192,13 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 .Where(x => Enum.IsDefined(typeof(GameobjectDisplayId), x.DisplayId)
                          && targetFlag == (GameobjectDisplayId)x.DisplayId).ToList();
             if (flagObjectList.Count > 0)
+            {
                 return flagObjectList[0];
+            }
             else
+            {
                 return null;
+            }
         }
 
         private void OnFlagAlliance(long timestamp, List<string> args)

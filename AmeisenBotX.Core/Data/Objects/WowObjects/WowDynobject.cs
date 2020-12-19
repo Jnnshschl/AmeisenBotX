@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public unsafe override void Update()
+        public override unsafe void Update()
         {
             base.Update();
 

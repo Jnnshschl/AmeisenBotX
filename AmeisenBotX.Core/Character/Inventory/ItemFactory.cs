@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public static class ItemFactory
     {
-        private static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
+        private static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
         {
             Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
         };

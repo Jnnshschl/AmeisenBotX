@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string PrayerofFortitude = "Prayer of Fortitude";
         private const string PrayerofShadowProtection = "Prayer of Shadow Protection";
 
-        private Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public PriestHoly(WowInterface wowInterface) : base()
         {
@@ -161,8 +161,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            {
+                WowInterface.ObjectManager.Player
+            };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -228,8 +230,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-                CastBuff.Add(WowInterface.ObjectManager.Player);
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+                {
+                    WowInterface.ObjectManager.Player
+                };
 
                 CastBuff = CastBuff.Where(e => (!e.HasBuffByName("Prayer of Fortitude") || !e.HasBuffByName("Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -284,9 +288,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private void StartHeal()
         {
 
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-            //healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
-            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            {
+                //healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+                WowInterface.ObjectManager.Player
+            };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 

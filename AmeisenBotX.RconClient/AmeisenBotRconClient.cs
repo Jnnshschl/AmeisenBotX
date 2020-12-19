@@ -122,7 +122,10 @@ namespace AmeisenBotX.RconClient
 
         public bool SendData(DataMessage dataMessage)
         {
-            if (dataMessage == null) return false;
+            if (dataMessage == null)
+            {
+                return false;
+            }
 
             dataMessage.Guid = Guid;
 

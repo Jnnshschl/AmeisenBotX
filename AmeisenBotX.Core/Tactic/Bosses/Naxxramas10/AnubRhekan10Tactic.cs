@@ -64,13 +64,16 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private WowInterface WowInterface { get; }
 
-        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking) => role switch
+        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
-            CombatClassRole.Tank => DoTank(out preventMovement, out allowAttacking),
-            CombatClassRole.Heal => DoDpsHeal(false, out preventMovement, out allowAttacking),
-            CombatClassRole.Dps => DoDpsHeal(isMelee, out preventMovement, out allowAttacking),
-            _ => throw new NotImplementedException(), // should never happen
-        };
+            return role switch
+            {
+                CombatClassRole.Tank => DoTank(out preventMovement, out allowAttacking),
+                CombatClassRole.Heal => DoDpsHeal(false, out preventMovement, out allowAttacking),
+                CombatClassRole.Dps => DoDpsHeal(isMelee, out preventMovement, out allowAttacking),
+                _ => throw new NotImplementedException(), // should never happen
+            };
+        }
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {

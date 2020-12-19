@@ -209,14 +209,17 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return Auras != null && Auras.Any(e => e.Name == name);
         }
 
-        public bool IsInMeleeRange(WowUnit wowUnit) => wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
+        public bool IsInMeleeRange(WowUnit wowUnit)
+        {
+            return wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
+        }
 
         public override string ToString()
         {
             return $"Unit: [{Guid}] {Name} lvl. {Level}";
         }
 
-        public unsafe override void Update()
+        public override unsafe void Update()
         {
             base.Update();
 

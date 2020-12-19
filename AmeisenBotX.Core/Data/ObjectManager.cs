@@ -147,15 +147,6 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowDynobject> GetNearAoeSpells()
-        {
-            lock (queryLock)
-            {
-                return wowObjects.OfType<WowDynobject>();
-            }
-        }
-
         public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
@@ -482,6 +473,14 @@ namespace AmeisenBotX.Core.Data
             }
 
             return 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
+                .Where(e => e.Position.GetDistance(position) < e.Radius + extends
+                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Neutral));
         }
 
         private IEnumerable<ulong> ReadPartymemberGuids()

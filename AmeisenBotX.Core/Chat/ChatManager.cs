@@ -23,7 +23,10 @@ namespace AmeisenBotX.Core.Chat
 
         private string DataPath { get; }
 
-        public string ProtocolName(string type) => $"{DataPath}\\\\chatprotocols\\\\chat-{type}-{DateTime.Now:dd-M-yyyy}.txt";
+        public string ProtocolName(string type)
+        {
+            return $"{DataPath}\\\\chatprotocols\\\\chat-{type}-{DateTime.Now:dd-M-yyyy}.txt";
+        }
 
         public bool TryParseMessage(ChatMessageType type, long timestamp, List<string> args)
         {

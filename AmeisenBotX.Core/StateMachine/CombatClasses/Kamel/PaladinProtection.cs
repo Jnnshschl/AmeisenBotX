@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         private const string devotionAuraSpell = "Devotion Aura";
         private const string righteousFurySpell = "Righteous Fury";
 
-        private Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public PaladinProtection(WowInterface wowInterface) : base()
         {
@@ -165,8 +165,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-            partyMemberToHeal.Add(WowInterface.ObjectManager.Player);
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            {
+                WowInterface.ObjectManager.Player
+            };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
@@ -220,8 +222,10 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers);
-                CastBuff.Add(WowInterface.ObjectManager.Player);
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+                {
+                    WowInterface.ObjectManager.Player
+                };
 
                 CastBuff = CastBuff.Where(e => !e.HasBuffByName("Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 

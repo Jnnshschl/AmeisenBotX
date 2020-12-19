@@ -11,24 +11,22 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class TalkToUnitQuestObjective : IQuestObjective
     {
-        public TalkToUnitQuestObjective(WowInterface wowInterface, int displayId, List<int> gossipIds, bool questgiversOnly, TalkToUnitQuestObjectiveCondition condition)
+        public TalkToUnitQuestObjective(WowInterface wowInterface, int displayId, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
             DisplayIds = new List<int>() { displayId };
             GossipIds = gossipIds;
             Condition = condition;
-            QuestgiversOnly = questgiversOnly;
 
             TalkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
 
-        public TalkToUnitQuestObjective(WowInterface wowInterface, List<int> displayIds, List<int> gossipIds, bool questgiversOnly, TalkToUnitQuestObjectiveCondition condition)
+        public TalkToUnitQuestObjective(WowInterface wowInterface, List<int> displayIds, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
         {
             WowInterface = wowInterface;
             DisplayIds = displayIds;
             GossipIds = gossipIds;
             Condition = condition;
-            QuestgiversOnly = questgiversOnly;
 
             TalkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
         }
@@ -44,8 +42,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private List<int> DisplayIds { get; }
 
         private List<int> GossipIds { get; }
-
-        private bool QuestgiversOnly { get; }
 
         private TimegatedEvent TalkEvent { get; }
 
