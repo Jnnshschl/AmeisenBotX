@@ -2,13 +2,10 @@
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.CombatClasses.Jannis;
-using AmeisenBotX.Core.Statemachine.States;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
@@ -102,20 +99,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (WowUnit != null)
             {
-                AbortedPath = true;
-                WowInterface.CombatClass.AttackTarget();
                 SearchAreas.NotifyDetour();
-                // TODO: Distance depending on CombatClass
-                if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
-                {
-                    WowInterface.HookManager.WowStopClickToMove();
-                    WowInterface.MovementEngine.Reset();
-                    WowInterface.HookManager.WowUnitRightClick(WowUnit);
-                }
-                else
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowUnit.Position);
-                }
+                WowInterface.CombatClass.AttackTarget();
             }
             else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath())
             {
