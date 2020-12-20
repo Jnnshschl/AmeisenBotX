@@ -73,5 +73,16 @@ namespace AmeisenBotX.Core.Character.Inventory
                 AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Inventory JSON:\n{resultJson}\n{e}", LogLevel.Error);
             }
         }
+
+        public void DestroyItemByName(string name,
+            StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            if (!HasItemByName(name, stringComparison))
+            {
+                return;
+            }
+
+            WowInterface.HookManager.LuaDeleteInventoryItemByName(name);
+        }
     }
 }
