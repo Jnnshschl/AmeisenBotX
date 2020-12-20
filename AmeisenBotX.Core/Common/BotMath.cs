@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace AmeisenBotX.Core.Common
@@ -18,9 +19,25 @@ namespace AmeisenBotX.Core.Common
             return new Vector3(x, y, position.Z);
         }
 
+        public static Vector3 GetMeanPosition(IEnumerable<Vector3> positions)
+        {
+            Vector3 meanPosition = new Vector3();
+            float count = 0;
+
+            foreach (Vector3 position in positions)
+            {
+                meanPosition += position;
+                ++count;
+            }
+
+            return meanPosition / count;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
-            => CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
+        {
+            return CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampAngles(float rotation)
@@ -41,17 +58,25 @@ namespace AmeisenBotX.Core.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
-            => ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
+        {
+            return ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
+        }
 
         public static float GetAngleDiff(Vector3 position, float rotation, Vector3 targetPosition)
-            => GetFacingAngle(position, targetPosition) - rotation;
+        {
+            return GetFacingAngle(position, targetPosition) - rotation;
+        }
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
-            => MathF.Abs(GetAngleDiff(position, rotation, targetPosition)) < maxAngleDiff;
+        {
+            return MathF.Abs(GetAngleDiff(position, rotation, targetPosition)) < maxAngleDiff;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRange(float a, float min, float max)
-            => a < min && a > max;
+        {
+            return a < min && a > max;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRange(WowObject a, WowObject b, double maxDistance)

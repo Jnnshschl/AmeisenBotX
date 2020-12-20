@@ -48,7 +48,10 @@ namespace AmeisenBotX.Core.Common
 
         public unsafe byte[] SendData<T>(T data, int size) where T : unmanaged
         {
-            if (Stream == null) return null;
+            if (Stream == null)
+            {
+                return null;
+            }
 
             Stream.Write(BitConverter.GetBytes(size));
             Stream.Write(new Span<byte>(&data, size));

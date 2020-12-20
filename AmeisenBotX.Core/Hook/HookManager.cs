@@ -84,7 +84,10 @@ namespace AmeisenBotX.Core.Hook
 
         public void DisposeHook()
         {
-            if (!IsWoWHooked) return;
+            if (!IsWoWHooked)
+            {
+                return;
+            }
 
             AmeisenLogger.I.Log("HookManager", "Disposing EnsceneHook", LogLevel.Verbose);
 
@@ -261,7 +264,10 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaEquipItem(IWowItem newItem, IWowItem currentItem = null)
         {
-            if (newItem == null) return;
+            if (newItem == null)
+            {
+                return;
+            }
 
             if (currentItem == null || currentItem.EquipSlot == EquipmentSlot.NOT_EQUIPABLE)
             {
@@ -783,7 +789,10 @@ namespace AmeisenBotX.Core.Hook
 
         public void WowClickToMove(WowPlayer player, Vector3 position)
         {
-            if (player == null) return;
+            if (player == null)
+            {
+                return;
+            }
 
             if (WowInterface.XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
@@ -864,7 +873,11 @@ namespace AmeisenBotX.Core.Hook
 
         public void WowFacePosition(WowPlayer player, Vector3 positionToFace)
         {
-            if (player == null) return;
+            if (player == null)
+            {
+                return;
+            }
+
             WowSetFacing(player, BotMath.GetFacingAngle(player.Position, positionToFace));
         }
 
@@ -1018,14 +1031,22 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowObjectRightClick(WowObject wowObject)
         {
-            if (wowObject == null) return;
+            if (wowObject == null)
+            {
+                return;
+            }
+
             WowCallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowSetFacing(WowUnit unit, float angle)
         {
-            if (unit == null) return;
+            if (unit == null)
+            {
+                return;
+            }
+
             WowCallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'), Environment.TickCount });
         }
 
@@ -1154,7 +1175,7 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress}"); // 5 bytes
 
             // note if you increase the hookSize we need to add more NOP's
-            WowInterface.XMemory.Fasm.AddLine($"NOP");                                   // 2 bytes
+            WowInterface.XMemory.Fasm.AddLine($"NOP"); // 2 bytes
 
             WowInterface.XMemory.Fasm.Inject((uint)CodecaveForGateway + (uint)OriginalEndsceneBytes.Length);
             WowInterface.XMemory.Fasm.Clear();
@@ -1185,7 +1206,10 @@ namespace AmeisenBotX.Core.Hook
 
         public void WowTargetGuid(ulong guid)
         {
-            if (guid < 0) return;
+            if (guid < 0)
+            {
+                return;
+            }
 
             byte[] guidBytes = BitConverter.GetBytes(guid);
             string[] asm = new string[]
@@ -1247,7 +1271,11 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowUnitRightClick(WowUnit wowUnit)
         {
-            if (wowUnit == null) return;
+            if (wowUnit == null)
+            {
+                return;
+            }
+
             WowCallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
 

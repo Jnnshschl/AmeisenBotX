@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
             WowInterface.CharacterManager.SpellBook.OnSpellBookUpdate += () =>
             {
-                if (SpellChain.Get(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string armorToUse, felArmorSpell, demonArmorSpell, demonSkinSpell))
+                if (SpellChain.Run(WowInterface.CharacterManager.SpellBook.IsSpellKnown, out string armorToUse, felArmorSpell, demonArmorSpell, demonSkinSpell))
                 {
                     MyAuraManager.BuffsToKeepActive.Add(armorToUse, () => TryCastSpell(armorToUse, 0, true));
                 }

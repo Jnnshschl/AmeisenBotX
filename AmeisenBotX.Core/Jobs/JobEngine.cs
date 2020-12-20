@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Jobs
 
             if (WowInterface.CharacterManager.Inventory.FreeBagSlots < 3 && SellActionsNeeded == 0)
             {
-                SellActionsNeeded = (int)Math.Ceiling((double)WowInterface.CharacterManager.Inventory.Items.Count / 12.0); // 12 items per mail
+                SellActionsNeeded = (int)Math.Ceiling(WowInterface.CharacterManager.Inventory.Items.Count / 12.0); // 12 items per mail
                 CheckForPathRecovering = true;
             }
 

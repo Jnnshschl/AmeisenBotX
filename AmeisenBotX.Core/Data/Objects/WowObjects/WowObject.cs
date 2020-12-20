@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"Object: {Guid}";
         }
 
-        public unsafe virtual void Update()
+        public virtual unsafe void Update()
         {
             if (WowInterface.I.XMemory.ReadStruct(DescriptorAddress, out RawWowObject objPtr))
             {

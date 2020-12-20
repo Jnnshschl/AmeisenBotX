@@ -72,6 +72,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 LastAction = DateTime.Now;
                 string itemName = WowInterface.CharacterManager.Inventory.Items.First(e => Enum.IsDefined(t, e.Id)).Name;
                 WowInterface.HookManager.LuaUseItemByName(itemName);
+                WowInterface.MovementEngine.StopMovement();
 
                 if (t == typeof(WowRefreshment))
                 {
@@ -91,6 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Leave()
         {
+            WowInterface.MovementEngine.StopMovement();
         }
 
         internal bool NeedToEat()

@@ -6,11 +6,11 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class ArmsItemComparator : IWowItemComparator
     {
-        WowInterface WowInterface;
+        private readonly WowInterface WowInterface;
 
         public ArmsItemComparator(WowInterface wowInterface)
         {
-            this.WowInterface = wowInterface;
+            WowInterface = wowInterface;
         }
         public bool IsBetter(IWowItem current, IWowItem item)
         {

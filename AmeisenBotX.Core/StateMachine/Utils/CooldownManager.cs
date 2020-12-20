@@ -26,7 +26,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public bool IsSpellOnCooldown(string spellname)
         {
-            if (string.IsNullOrWhiteSpace(spellname)) return false;
+            if (string.IsNullOrWhiteSpace(spellname))
+            {
+                return false;
+            }
 
             if (Cooldowns.TryGetValue(spellname.ToUpperInvariant(), out DateTime dateTime))
             {
@@ -38,7 +41,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public bool SetSpellCooldown(string spellname, int cooldownLeftMs)
         {
-            if (string.IsNullOrWhiteSpace(spellname)) return false;
+            if (string.IsNullOrWhiteSpace(spellname))
+            {
+                return false;
+            }
 
             spellname = spellname.ToUpperInvariant();
 
@@ -56,7 +62,10 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public int GetSpellCooldown(string spellname)
         {
-            if (string.IsNullOrWhiteSpace(spellname)) return 0;
+            if (string.IsNullOrWhiteSpace(spellname))
+            {
+                return 0;
+            }
 
             spellname = spellname.ToUpperInvariant();
 

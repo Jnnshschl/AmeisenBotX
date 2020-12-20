@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
@@ -19,6 +17,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             Area = searchArea;
             CurrentSearchPathIndex = 0;
             CalculateSearchPath();
+        }
+
+        public float GetClosestVertexDistance(Vector3 position)
+        {
+            return Area.Select(pos => pos.GetDistance(position)).Min();
         }
 
         public Vector3 GetClosestEntry(WowInterface wowInterface)
@@ -40,12 +43,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             {
                 double totalDistance = 0.0;
                 IEnumerable<Vector3> path = wowInterface.PathfindingHandler.GetPath((int)wowInterface.ObjectManager.MapId, currentPosition, vertex);
-                Vector3 lastPosition = currentPosition;
-                foreach (Vector3 pathPosition in path)
+                if (path != null)
                 {
-                    totalDistance += pathPosition.GetDistance(lastPosition);
-                    lastPosition = pathPosition;
+                    Vector3 lastPosition = currentPosition;
+                    foreach (Vector3 pathPosition in path)
+                    {
+                        totalDistance += pathPosition.GetDistance(lastPosition);
+                        lastPosition = pathPosition;
+                    }
                 }
+
                 distances.Add(totalDistance);
             }
             

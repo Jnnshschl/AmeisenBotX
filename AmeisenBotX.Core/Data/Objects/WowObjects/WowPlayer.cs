@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return $"Player: [{Guid}] {Name} lvl. {Level}";
         }
 
-        public unsafe override void Update()
+        public override unsafe void Update()
         {
             base.Update();
 

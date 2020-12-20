@@ -14,11 +14,11 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
     {
         public DeathknightStartAreaQuestProfile(WowInterface wowInterface)
         {
-            Quests = new Queue<List<BotQuest>>();
+            Quests = new Queue<List<IBotQuest>>();
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -145,7 +145,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -183,7 +183,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -205,7 +205,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 
             Quests.Enqueue
             (
-                new List<BotQuest>()
+                new List<IBotQuest>()
                 {
                     new BotQuest
                     (
@@ -267,7 +267,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             {
                                 new MoveToPositionQuestObjective(wowInterface, new Vector3(2340, -5687, 154), 40.0),
                                 new WaitUntilQuestObjective(() => wowInterface.ObjectManager.Player.HealthPercentage > 50.0),
-                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, false, () => wowInterface.ObjectManager.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
+                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, () => wowInterface.ObjectManager.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
                             })
                         }
                     ),
@@ -282,7 +282,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
             );
         }
 
-        public Queue<List<BotQuest>> Quests { get; }
+        public Queue<List<IBotQuest>> Quests { get; }
 
         private bool[] CastedSpell { get; } = new bool[4];
 

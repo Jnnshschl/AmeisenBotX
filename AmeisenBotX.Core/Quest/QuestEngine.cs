@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Quest
                     }
                 }
 
-                IEnumerable<BotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
+                IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
                 
                 // Drop all quest that are not selected
                 if (WowInterface.ObjectManager.Player.QuestlogEntries.Count() == 25 && DateTime.Now.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Quest
 
                 if (selectedQuests.Any())
                 {
-                    BotQuest notAcceptedQuest = selectedQuests.FirstOrDefault(e => !e.Accepted);
+                    IBotQuest notAcceptedQuest = selectedQuests.FirstOrDefault(e => !e.Accepted);
 
                     // make sure we got all quests
                     if (notAcceptedQuest != null)
@@ -106,13 +106,13 @@ namespace AmeisenBotX.Core.Quest
                         // do the quests if not all of them are finished
                         if (selectedQuests.Any(e => !e.Finished))
                         {
-                            BotQuest activeQuest = selectedQuests.FirstOrDefault(e => !e.Finished);
+                            IBotQuest activeQuest = selectedQuests.FirstOrDefault(e => !e.Finished);
                             activeQuest?.Execute();
                         }
                         else
                         {
                             // make sure we return all quests
-                            BotQuest notReturnedQuest = selectedQuests.FirstOrDefault(e => !e.Returned);
+                            IBotQuest notReturnedQuest = selectedQuests.FirstOrDefault(e => !e.Returned);
 
                             if (notReturnedQuest != null)
                             {

@@ -73,7 +73,10 @@ namespace AmeisenBotX.Core
 
             ExecutionMsStopwatch = new Stopwatch();
 
-            if (!Directory.Exists(BotDataPath)) Directory.CreateDirectory(BotDataPath);
+            if (!Directory.Exists(BotDataPath))
+            {
+                Directory.CreateDirectory(BotDataPath);
+            }
 
             SetupLogging(botDataPath, accountName);
 
@@ -741,7 +744,15 @@ namespace AmeisenBotX.Core
                                 switch (WowInterface.RconClient.PendingActions.First())
                                 {
                                     case ActionType.PauseResume:
-                                        if (IsRunning) Pause(); else Resume();
+                                        if (IsRunning)
+                                        {
+                                            Pause();
+                                        }
+                                        else
+                                        {
+                                            Resume();
+                                        }
+
                                         break;
 
                                     default: break;

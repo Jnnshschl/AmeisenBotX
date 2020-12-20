@@ -89,8 +89,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 Offset = new Vector3
                 {
-                    X = ((float)rnd.NextDouble() * (float)(Config.MinFollowDistance * 2)) - (float)(Config.MinFollowDistance),
-                    Y = ((float)rnd.NextDouble() * (float)(Config.MinFollowDistance * 2)) - (float)(Config.MinFollowDistance),
+                    X = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
+                    Y = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
                     Z = 0f
                 };
             }

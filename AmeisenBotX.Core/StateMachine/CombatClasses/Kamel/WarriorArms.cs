@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
-        private Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public WarriorArms(WowInterface wowInterface) : base()
         {

@@ -42,7 +42,6 @@ namespace AmeisenBotX.Core.Statemachine
                 { BotState.Ghost, new StateGhost(this, config, WowInterface) },
                 { BotState.Grinding, new StateGrinding(this, config, WowInterface) },
                 { BotState.Idle, new StateIdle(this, config, WowInterface) },
-                { BotState.InsideAoeDamage, new StateInsideAoeDamage(this, config, WowInterface) },
                 { BotState.Job, new StateJob(this, config, WowInterface) },
                 { BotState.LoadingScreen, new StateLoadingScreen(this, config, WowInterface) },
                 { BotState.Login, new StateLogin(this, config, WowInterface) },
@@ -159,50 +158,29 @@ namespace AmeisenBotX.Core.Statemachine
                                 }
                             }
                             else if (GhostCheckEvent.Run(out bool isGhost)
-                                && isGhost)
+                                && isGhost
+                                && SetState(BotState.Ghost, true))
                             {
-                                // we cant be a ghost if we are still dead
-                                if (SetState(BotState.Ghost, true))
+                                OnStateOverride?.Invoke(CurrentState.Key);
+                                return;
+                            }
+
+                            // we cant fight when we are dead or a ghost
+                            if (CurrentState.Key != BotState.Dead
+                                && CurrentState.Key != BotState.Ghost
+                                && !WowInterface.Globals.IgnoreCombat
+                                && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
+                                && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()
+                                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
+                            {
+                                if (SetState(BotState.Attacking, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
                                     return;
                                 }
                             }
-
-                            // we cant fight nor do we receive damage when we are dead or a ghost
-                            // so ignore these overrides
-                            if (CurrentState.Key != BotState.Dead
-                                && CurrentState.Key != BotState.Ghost)
-                            {
-                                if (Config.AutoDodgeAoeSpells
-                                    && GetState<StateInsideAoeDamage>().IsInsideAeoDamage())
-                                {
-                                    if (SetState(BotState.InsideAoeDamage, true))
-                                    {
-                                        OnStateOverride?.Invoke(CurrentState.Key);
-                                    }
-                                }
-                                else if (!WowInterface.Globals.IgnoreCombat
-                                        && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
-                                        && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                        || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
-                                {
-                                    if (SetState(BotState.Attacking, true))
-                                    {
-                                        OnStateOverride?.Invoke(CurrentState.Key);
-                                        return;
-                                    }
-                                }
-                            }
                         }
                     }
-
-                    // if (CurrentState.Key == BotState.Idle
-                    //     && CurrentState.Key != StateOverride
-                    //     && StateOverride != BotState.None)
-                    // {
-                    //     SetState(StateOverride);
-                    // }
 
                     // auto disable rendering when not in focus
                     if (Config.AutoDisableRender && RenderSwitchEvent.Run())

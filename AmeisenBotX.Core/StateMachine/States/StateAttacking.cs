@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
 using AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls;
 using AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron;
@@ -149,23 +148,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
         }
 
-        private Vector3 GetMeanGroupPosition()
-        {
-            Vector3 meanGroupPosition = new Vector3();
-            int count = 0;
-
-            foreach (WowUnit unit in WowInterface.ObjectManager.Partymembers)
-            {
-                if (unit.Guid != WowInterface.ObjectManager.PlayerGuid && unit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 100.0)
-                {
-                    meanGroupPosition += unit.Position;
-                    ++count;
-                }
-            }
-
-            return meanGroupPosition / count;
-        }
-
         private float GetMeeleRange()
         {
             return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5f : MathF.Max(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
@@ -203,7 +185,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (target == null)
             {
                 // just move to our group
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, GetMeanGroupPosition());
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.GetMeanGroupPosition());
                 return true;
             }
             else
@@ -230,14 +212,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                                 && WowInterface.ObjectManager.Partymembers.Any()) // no need to rotate
                             {
                                 // rotate the boss away from the group
-                                Vector3 meanGroupPosition = GetMeanGroupPosition();
+                                Vector3 meanGroupPosition = BotUtils.GetMeanGroupPosition();
                                 positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle(target.Position, meanGroupPosition));
                             }
                         }
                         else if (WowInterface.CombatClass.Role == CombatClassRole.Heal)
                         {
                             // move to group
-                            positionToGoTo = target != null ? target.Position : GetMeanGroupPosition();
+                            positionToGoTo = target != null ? target.Position : BotUtils.GetMeanGroupPosition();
                         }
                         else
                         {

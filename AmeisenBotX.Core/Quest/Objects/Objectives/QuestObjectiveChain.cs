@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => (double)QuestObjectives.Count(e => QuestObjectives.IndexOf(e) <= AlreadyCompletedIndex || e.Finished) / (double)QuestObjectives.Count * 100.0;
+        public double Progress => QuestObjectives.Count(e => QuestObjectives.IndexOf(e) <= AlreadyCompletedIndex || e.Finished) / (double)QuestObjectives.Count * 100.0;
 
         private int AlreadyCompletedIndex
         {

@@ -6,25 +6,25 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
     class X5Horde1To80Profile : IQuestProfile
     {
-        public Queue<List<BotQuest>> Quests { get; }
+        public Queue<List<IBotQuest>> Quests { get; }
 
         public X5Horde1To80Profile(WowInterface wowInterface)
         {
-            Quests = new Queue<List<BotQuest>>();
-            Quests.Enqueue(new List<BotQuest>() {
+            Quests = new Queue<List<IBotQuest>>();
+            Quests.Enqueue(new List<IBotQuest>() {
                 new QYourPlaceInTheWorld(wowInterface)
             });
-            Quests.Enqueue(new List<BotQuest>() {
+            Quests.Enqueue(new List<IBotQuest>() {
                 new QCuttingTeeth(wowInterface)
             });
-            Quests.Enqueue(new List<BotQuest>() {
+            Quests.Enqueue(new List<IBotQuest>() {
                 new QStingOfTheScorpid(wowInterface),
                 new QGalgarCactusAppleSurprise(wowInterface)
             });
-            Quests.Enqueue(new List<BotQuest>() {
+            Quests.Enqueue(new List<IBotQuest>() {
                 new QSarkoth(wowInterface)
             });
-            Quests.Enqueue(new List<BotQuest>() {
+            Quests.Enqueue(new List<IBotQuest>() {
                 new QSarkoth2(wowInterface)
             });
         }

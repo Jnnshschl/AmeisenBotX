@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     && !BlacklistedTargets.Contains(e.DisplayId)
                     && !(WowInterface.ObjectManager.MapId == MapId.PitOfSaron && e.Name == "Rimefang")
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
-                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.GetNearAoeSpells().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
+                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
             bool keepCurrentTarget = (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
@@ -60,7 +60,6 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 possibleTargets = null;
                 return false;
             }
-
 
             enemies = enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 100.0));
 
