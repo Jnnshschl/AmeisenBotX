@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
@@ -606,6 +607,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
+        public virtual void AttackTarget()
+        {
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if (target == null)
+            {
+                return;
+            }
+            
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            {
+                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.MovementEngine.Reset();
+                WowInterface.HookManager.WowUnitRightClick(target);
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+            }
+        }
+
         public override string ToString()
         {
             return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
@@ -970,7 +991,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
-        private bool IsInRange(Spell spell, WowUnit wowUnit)
+        protected bool IsInRange(Spell spell, WowUnit wowUnit)
         {
             if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
             {
@@ -978,7 +999,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
-            return distance >= spell.MinRange && distance <= spell.MaxRange;
+            return distance >= spell.MinRange + 1.0 && distance <= spell.MaxRange - 1.0;
         }
     }
 }

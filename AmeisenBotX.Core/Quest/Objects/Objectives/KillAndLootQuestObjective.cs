@@ -2,7 +2,6 @@
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
@@ -75,39 +74,33 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         public void Execute()
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
-            
+
             if (WowInterface.ObjectManager.Target != null
-                && !WowInterface.ObjectManager.Target.IsDead
-                && !WowInterface.ObjectManager.Target.IsNotAttackable
-                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly)
-            {
-                WowUnit = WowInterface.ObjectManager.Target;
-            }
-            else
+                && !NpcIds.Contains(WowGUID.NpcId(WowInterface.ObjectManager.Target.Guid)))
             {
                 WowInterface.HookManager.WowClearTarget();
+                WowUnit = null;
+            }
 
+            if (!WowInterface.ObjectManager.Player.IsInCombat)
+            {
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
-                    .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)))
+                    .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)) && !e.IsNotAttackable 
+                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
+
+                if (WowUnit != null)
+                {
+                    WowInterface.HookManager.WowTargetGuid(WowUnit.Guid);
+                }
             }
 
             if (WowUnit != null)
             {
                 SearchAreas.NotifyDetour();
-                // TODO: Distance depending on CombatClass
-                if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
-                {
-                    WowInterface.HookManager.WowStopClickToMove();
-                    WowInterface.MovementEngine.Reset();
-                    WowInterface.HookManager.WowUnitRightClick(WowUnit);
-                }
-                else
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowUnit.Position);
-                }
+                WowInterface.CombatClass.AttackTarget();
             }
             else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath())
             {
