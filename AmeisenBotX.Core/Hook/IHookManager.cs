@@ -191,6 +191,8 @@ namespace AmeisenBotX.Core.Hook
 
         bool LuaGetQuestLogIdByTitle(string title, out int questLogId);
 
+        void LuaSelectQuestByNameOrGossipId(string questName, int gossipId, bool isAvailableQuest);
+
         void WowClearTarget();
 
         void WowClickOnTerrain(Vector3 position);

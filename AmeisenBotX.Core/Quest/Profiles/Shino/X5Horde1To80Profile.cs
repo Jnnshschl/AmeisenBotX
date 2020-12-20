@@ -32,6 +32,10 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
             Quests.Enqueue(new List<IBotQuest>() {
                 new QAPeonBurden(wowInterface)
             });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QVanquishTheBetrayers(wowInterface),
+                new QEncroachment(wowInterface)
+            });
         }
         public override string ToString()
         {
