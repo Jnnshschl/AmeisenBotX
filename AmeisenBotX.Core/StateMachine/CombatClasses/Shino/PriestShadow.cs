@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.StateMachine.CombatClasses.Shino;
@@ -90,56 +89,46 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 
         public override WowClass WowClass => WowClass.Priest;
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
         public override void Execute()
         {
             base.Execute();
-
-            if (SelectTarget(TargetManagerDps))
+            
+            if (WowInterface.ObjectManager.Target == null)
             {
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 90
-                    && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
-                {
-                    return;
-                }
-
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                    && TryCastSpell(hymnOfHopeSpell, 0))
-                {
-                    return;
-                }
-
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
-                }
-
-                if (WowInterface.ObjectManager.Player.ManaPercentage >= 50 
-                    && TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
-                {
-                    return;
-                }
-
-                if (!WowInterface.ObjectManager.Player.IsCasting
-                    && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
-                }
-
-                if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
-                }
+                return;
             }
-        }
+            
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
+                && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
+            {
+                return;
+            }
 
-        public override void OutOfCombatExecute()
-        {
-            base.OutOfCombatExecute();
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+                && TryCastSpell(hymnOfHopeSpell, 0))
+            {
+                return;
+            }
 
-            if (HandleDeadPartymembers(resurrectionSpell))
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.ManaPercentage >= 50 
+                && TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
+            {
+                return;
+            }
+
+            if (!WowInterface.ObjectManager.Player.IsCasting
+                && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
+            {
+                return;
+            }
+
+            if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
             {
                 return;
             }
