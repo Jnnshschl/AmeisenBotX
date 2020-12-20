@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.Objects.Structs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.Utils
@@ -10,6 +11,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
         public AuraManager(GetAurasFunction getAurasFunction)
         {
             BuffsToKeepActive = new Dictionary<string, CastFunction>();
+            BuffsToKeepUpCondition = new Dictionary<string, Condition>();
             DebuffsToKeepActive = new Dictionary<string, CastFunction>();
             GetAuras = getAurasFunction;
         }
@@ -20,6 +22,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public delegate bool DispellDebuffsFunction();
 
+        public delegate bool Condition();
+
         public delegate IEnumerable<WowAura> GetAurasFunction();
 
         public IEnumerable<WowAura> Auras { get; private set; }
@@ -27,6 +31,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils
         public IEnumerable<WowAura> Buffs => Auras;
 
         public Dictionary<string, CastFunction> BuffsToKeepActive { get; set; }
+        
+        public Dictionary<string, Condition> BuffsToKeepUpCondition { get; set; }
 
         public IEnumerable<WowAura> Debuffs => Auras;
 
@@ -54,7 +60,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
                     foreach (KeyValuePair<string, CastFunction> keyValuePair in BuffsToKeepActive)
                     {
                         if (!Buffs.Any(e => e.SpellId != 0 && e.Name.Equals(keyValuePair.Key, StringComparison.OrdinalIgnoreCase))
-                            && keyValuePair.Value())
+                            && (!BuffsToKeepUpCondition.ContainsKey(keyValuePair.Key) || BuffsToKeepUpCondition[keyValuePair.Key]()) && keyValuePair.Value())
                         {
                             return true;
                         }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace AmeisenBotX.Core.Character.Spells.Objects
 {
@@ -27,5 +28,17 @@ namespace AmeisenBotX.Core.Character.Spells.Objects
 
         [JsonProperty("spellBookName")]
         public string SpellbookName { get; set; }
+
+        public bool GetRank(out int rank)
+        {
+            var result = Regex.Match(this.Rank, @"\d+");
+            if (result.Success && int.TryParse(result.Value, out rank))
+            {
+                return true;
+            }
+
+            rank = 0;
+            return false;
+        }
     }
 }
