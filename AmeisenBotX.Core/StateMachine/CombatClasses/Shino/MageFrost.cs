@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
 using AmeisenBotX.Core.Character.Spells.Objects;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.StateMachine.CombatClasses.Shino;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
@@ -97,68 +98,67 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
         public override void Execute()
         {
             base.Execute();
-            
-            if (WowInterface.ObjectManager.Target == null)
-            {
-                return;
-            }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
+            if (SelectTarget(out WowUnit target))
             {
-                return;
-            }
+                if (WowInterface.ObjectManager.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
+                {
+                    return;
+                }
 
-            if (CooldownManager.IsSpellOnCooldown(summonWaterElementalSpell) &&
-                CooldownManager.IsSpellOnCooldown(icyVeinsSpell))
-            {
-                TryCastSpell(coldSnapSpell, 0);
-            }
+                if (CooldownManager.IsSpellOnCooldown(summonWaterElementalSpell) &&
+                    CooldownManager.IsSpellOnCooldown(icyVeinsSpell))
+                {
+                    TryCastSpell(coldSnapSpell, 0);
+                }
 
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(freezeSpell))
-            {
-                TryCastAoeSpell(freezeSpell, WowInterface.ObjectManager.TargetGuid);
-            }
+                if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(freezeSpell))
+                {
+                    TryCastAoeSpell(freezeSpell, target.Guid);
+                }
 
-            if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 9.0 
-                && TryCastSpell(frostNovaSpell, 0, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 9.0 
+                    && TryCastSpell(frostNovaSpell, 0, true))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0
-                && TryCastSpell(blinkSpell, 0, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0
+                    && TryCastSpell(blinkSpell, 0, true))
+                {
+                    return;
+                }
 
-            if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0 
-                && WowInterface.ObjectManager.Player.HealthPercentage <= 50.0
-                && CooldownManager.IsSpellOnCooldown(blinkSpell) && TryCastSpell(iceBlockSpell, 0, true))
-            {
-                return;
-            }
+                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0 
+                    && WowInterface.ObjectManager.Player.HealthPercentage <= 50.0
+                    && CooldownManager.IsSpellOnCooldown(blinkSpell) && TryCastSpell(iceBlockSpell, 0, true))
+                {
+                    return;
+                }
 
-            if (TryCastSpell(summonWaterElementalSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
-            }
+                if (TryCastSpell(summonWaterElementalSpell, target.Guid, true))
+                {
+                    return;
+                }
 
-            if (TryCastSpell(deepFreezeSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
-            }
+                if (TryCastSpell(deepFreezeSpell, target.Guid, true))
+                {
+                    return;
+                }
 
-            TryCastSpell(icyVeinsSpell, 0, true);
-            TryCastSpell(berserkingSpell, 0, true);
+                TryCastSpell(icyVeinsSpell, 0, true);
+                TryCastSpell(berserkingSpell, 0, true);
 
-            if (TryCastSpell(frostBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
-            {
-                return;
-            }
+                if (TryCastSpell(frostBoltSpell, target.Guid, true))
+                {
+                    return;
+                }
 
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(frostBoltSpell))
-            {
-                TryCastSpell(fireballSpell, WowInterface.ObjectManager.TargetGuid, true);
+                if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(frostBoltSpell))
+                {
+                    TryCastSpell(fireballSpell, target.Guid, true);
+                }
+
             }
         }
 

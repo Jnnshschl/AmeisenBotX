@@ -27,11 +27,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         public double GetPathDistance(int mapId, Vector3 start, Vector3 end)
         {
             var path = GetPath(mapId, start, end);
+            return GetPathDistance(path, start);
+        }
+
+        public double GetPathDistance(IEnumerable<Vector3> path, Vector3 start)
+        {
             if (path == null)
             {
                 return Double.MaxValue;
             }
-            
+
             double totalDistance = 0.0;
             Vector3 lastPosition = start;
             foreach (Vector3 pathPosition in path)

@@ -76,14 +76,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         public void Execute()
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
-
-            if (WowInterface.ObjectManager.Target != null
-                && !NpcIds.Contains(WowGUID.NpcId(WowInterface.ObjectManager.Target.Guid)))
-            {
-                WowInterface.HookManager.WowClearTarget();
-                WowUnit = null;
-            }
-
+            
             if (!WowInterface.ObjectManager.Player.IsInCombat && DateTime.Now.Subtract(LastUnitCheck).TotalMilliseconds >= 2500.0)
             {
                 LastUnitCheck = DateTime.Now;
@@ -95,6 +88,28 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     .Take(6)
                     .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, e.Position))
                     .FirstOrDefault();
+
+                // Kill enemies in the path
+                var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
+                    WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Target.Position);
+
+                if (path != null)
+                {
+                    if (WowInterface.PathfindingHandler.GetPathDistance(path, WowInterface.ObjectManager.Target.Position) > 40.0)
+                    {
+                        foreach (Vector3 pathPosition in path)
+                        {
+                            var nearEnemies =
+                                WowInterface.ObjectManager.GetNearEnemies<WowUnit>(pathPosition, 15.0);
+                            if (nearEnemies.Any())
+                            {
+                                WowUnit = nearEnemies.FirstOrDefault();
+                                break;
+                            }
+                        }
+                    }
+
+                }
 
                 if (WowUnit != null)
                 {
