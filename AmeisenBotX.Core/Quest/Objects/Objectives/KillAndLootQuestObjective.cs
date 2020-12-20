@@ -70,6 +70,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private WowInterface WowInterface { get; }
 
         private WowUnit WowUnit { get; set; }
+        
+        private DateTime LastUnitCheck { get; set; } = DateTime.Now;
 
         public void Execute()
         {
@@ -82,13 +84,16 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 WowUnit = null;
             }
 
-            if (!WowInterface.ObjectManager.Player.IsInCombat)
+            if (!WowInterface.ObjectManager.Player.IsInCombat && DateTime.Now.Subtract(LastUnitCheck).TotalMilliseconds >= 2500.0)
             {
+                LastUnitCheck = DateTime.Now;
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)) && !e.IsNotAttackable 
                                 && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .Take(6)
+                    .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, e.Position))
                     .FirstOrDefault();
 
                 if (WowUnit != null)

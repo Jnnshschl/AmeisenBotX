@@ -24,6 +24,25 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
             return SendPathRequest(mapId, start, end, MovementType.FindPath, out Vector3[] path, PathRequestFlags.CatmullRomSpline) ? path : null;
         }
 
+        public double GetPathDistance(int mapId, Vector3 start, Vector3 end)
+        {
+            var path = GetPath(mapId, start, end);
+            if (path == null)
+            {
+                return Double.MaxValue;
+            }
+            
+            double totalDistance = 0.0;
+            Vector3 lastPosition = start;
+            foreach (Vector3 pathPosition in path)
+            {
+                totalDistance += pathPosition.GetDistance(lastPosition);
+                lastPosition = pathPosition;
+            }
+
+            return totalDistance;
+        }
+
         public Vector3 GetRandomPoint(int mapId)
         {
             return BuildAndSendRandomPointRequest(mapId, Vector3.Zero, 0f, out Vector3 point) ? point : Vector3.Zero;
