@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using AmeisenBotX.Core.Character.Inventory;
@@ -172,26 +173,36 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                         Thread.Sleep(250);
 
                         bool selectedReward = false;
-                        if (WowInterface.HookManager.LuaGetGossipActiveQuestTitleById(gossipId,
-                            out string selectedQuestTitle))
+                        // TODO: This only works for the english locale!
+                        if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(Name, out int questLogId))
                         {
-                            if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(selectedQuestTitle, out int questLogId))
+                            WowInterface.HookManager.LuaSelectQuestLogEntry(questLogId);
+                            if (WowInterface.HookManager.LuaGetNumQuestLogChoices(out int numChoices))
                             {
-                                WowInterface.HookManager.LuaSelectQuestLogEntry(questLogId);
-                                for (int i = 1; i <= 10; ++i)
+                                for (int i = 1; i <= numChoices; ++i)
                                 {
-                                    if (WowInterface.HookManager.LuaGetQuestLogChoiceItemLink(i, out string itemLink))
+                                    if (WowInterface.HookManager.LuaGetQuestLogChoiceItemLink(i,
+                                        out string itemLink))
                                     {
-                                        string itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
+                                        string itemJson =
+                                            WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
 
-                                        WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
+                                        WowBasicItem item =
+                                            ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
+
+                                        if (item == null)
+                                        {
+                                            break;
+                                        }
 
                                         if (item.Name == "0" || item.ItemLink == "0")
                                         {
                                             // get the item id and try again
                                             itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(
-                                                itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                                                    .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                                                itemLink.Split(new string[] {"Hitem:"},
+                                                        StringSplitOptions.RemoveEmptyEntries)[1]
+                                                    .Split(new string[] {":"},
+                                                        StringSplitOptions.RemoveEmptyEntries)[0]);
 
                                             item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                                         }
@@ -209,7 +220,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                                         break;
                                     }
                                 }
-                                
                             }
                         }
                         

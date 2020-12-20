@@ -11,6 +11,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -388,6 +389,20 @@ namespace AmeisenBotX.Core.Hook
                 }
 
                 itemLink = result;
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaGetNumQuestLogChoices(out int numChoices)
+        {
+            numChoices = 0;
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogChoices();"),
+                out string result) && int.TryParse(result, out int num))
+            {
+                numChoices = num;
                 return true;
             }
 

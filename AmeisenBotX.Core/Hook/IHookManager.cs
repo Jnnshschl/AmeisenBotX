@@ -89,6 +89,8 @@ namespace AmeisenBotX.Core.Hook
         string LuaGetLootRollItemLink(int rollId);
         
         bool LuaGetQuestLogChoiceItemLink(int index, out string itemLink);
+        
+        bool LuaGetNumQuestLogChoices(out int numChoices);
 
         string LuaGetMoney();
 

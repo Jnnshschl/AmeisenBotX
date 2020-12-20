@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Character;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
@@ -39,7 +40,19 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
+        public override IWowItemComparator ItemComparator
+        {
+            get =>
+                new SimpleItemComparator((CharacterManager)WowInterface.CharacterManager, new Dictionary<string, double>()
+                {
+                    { "ITEM_MOD_INTELLECT_SHORT", 2.5 },
+                    { "ITEM_MOD_SPELL_POWER_SHORT", 2.5 },
+                    { "RESISTANCE0_NAME", 2.0 },
+                    { "ITEM_MOD_POWER_REGEN0_SHORT", 2.0 },
+                    { "ITEM_MOD_HASTE_RATING_SHORT", 2.0 },
+                });
+            set { }
+        }
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 
