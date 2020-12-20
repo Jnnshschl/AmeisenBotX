@@ -25,6 +25,10 @@ namespace AmeisenBotX.Core.Hook
         void LuaAcceptPartyInvite();
 
         void LuaSelectGossipActiveQuest(int gossipId);
+        
+        void LuaSelectGossipAvailableQuest(int gossipId);
+        
+        void LuaSelectQuestLogEntry(int gossipId);
 
         void LuaCompleteQuest();
 
@@ -83,6 +87,10 @@ namespace AmeisenBotX.Core.Hook
         string LuaGetItemStats(string itemLink);
 
         string LuaGetLootRollItemLink(int rollId);
+        
+        bool LuaGetQuestLogChoiceItemLink(int index, out string itemLink);
+        
+        bool LuaGetNumQuestLogChoices(out int numChoices);
 
         string LuaGetMoney();
 
@@ -173,9 +181,13 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
 
-        bool LuaGetGossipIdByTitle(string title, out int gossipId);
+        bool LuaGetGossipIdByAvailableQuestTitle(string title, out int gossipId);
+        
+        bool LuaGetGossipIdByActiveQuestTitle(string title, out int gossipId);
+        
+        bool LuaGetGossipActiveQuestTitleById(int gossipId, out string title);
 
-        bool LuaQuestLogIdByTitle(string title, out int questLogId);
+        bool LuaGetQuestLogIdByTitle(string title, out int questLogId);
 
         void WowClearTarget();
 

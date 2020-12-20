@@ -11,6 +11,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -122,6 +123,18 @@ namespace AmeisenBotX.Core.Hook
         public void LuaSelectGossipActiveQuest(int gossipId)
         {
             LuaDoString($"SelectGossipActiveQuest({gossipId})");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LuaSelectGossipAvailableQuest(int gossipId)
+        {
+            LuaDoString($"SelectGossipAvailableQuest({gossipId})");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LuaSelectQuestLogEntry(int questLogEntry)
+        {
+            LuaDoString($"SelectQuestLogEntry({questLogEntry})");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -361,6 +374,39 @@ namespace AmeisenBotX.Core.Hook
         public string LuaGetLootRollItemLink(int rollId)
         {
             return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetLootRollItemLink({rollId});"), out string result) ? result : string.Empty;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaGetQuestLogChoiceItemLink(int index, out string itemLink)
+        {
+            itemLink = "";
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetQuestLogItemLink(\"choice\", {index});"),
+                out string result))
+            {
+                if (result == "nil")
+                {
+                    return false;
+                }
+
+                itemLink = result;
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaGetNumQuestLogChoices(out int numChoices)
+        {
+            numChoices = 0;
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogChoices();"),
+                out string result) && int.TryParse(result, out int num))
+            {
+                numChoices = num;
+                return true;
+            }
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -734,10 +780,10 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool LuaGetGossipIdByTitle(string title, out int gossipId)
+        public bool LuaGetGossipIdByAvailableQuestTitle(string title, out int gossipId)
         {
             gossipId = 0;
-            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,_,g2,_,_,_,_,g3,_,_,_,_,g4,_,_,_,_,g5,_,_,_,_,g6,_,_,_,_ = GetGossipAvailableQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k; break end; end;"), out string r1)
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,_,g2,_,_,_,_,g3,_,_,_,_,g4,_,_,_,_,g5,_,_,_,_,g6 = GetGossipAvailableQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k; break end; end;"), out string r1)
                 && int.TryParse(r1, out int foundGossipId))
             {
                 gossipId = foundGossipId;
@@ -748,7 +794,39 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool LuaQuestLogIdByTitle(string title, out int questLogId)
+        public bool LuaGetGossipIdByActiveQuestTitle(string title, out int gossipId)
+        {
+            gossipId = 0;
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,g2,_,_,_,g3,_,_,_,g4,_,_,_,g5,_,_,_,g6 = GetGossipActiveQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k; break end; end;"), out string r1)
+                && int.TryParse(r1, out int foundGossipId))
+            {
+                gossipId = foundGossipId;
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaGetGossipActiveQuestTitleById(int gossipId, out string title)
+        {
+            title = "";
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,g2,_,_,_,g3,_,_,_,g4,_,_,_,g5,_,_,_,g6 = GetGossipActiveQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; {{v:0}}=gps[{gossipId}]"), out string r1))
+            {
+                if (r1 == "nil")
+                {
+                    return false;
+                }
+                
+                title = r1;
+                return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool LuaGetQuestLogIdByTitle(string title, out int questLogId)
         {
             questLogId = 0;
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"for i=1,GetNumQuestLogEntries() do if GetQuestLogTitle(i) == \"{title}\" then {{v:0}}=i; break end; end;"), out string r1)

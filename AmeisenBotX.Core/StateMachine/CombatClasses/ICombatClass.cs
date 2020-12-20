@@ -1,8 +1,10 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using System;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
