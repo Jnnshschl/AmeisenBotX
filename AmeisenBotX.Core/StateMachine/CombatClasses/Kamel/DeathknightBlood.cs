@@ -11,6 +11,7 @@ using AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
@@ -18,10 +19,13 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
     {
         public DeathknightBlood(WowInterface wowInterface)
         {
+            WowInterface = wowInterface;
             ObjectManager = wowInterface.ObjectManager;
             HookManager = wowInterface.HookManager;
             TargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
+        
+        private WowInterface WowInterface { get; }
 
         public string Author => "Kamel";
 
@@ -79,6 +83,26 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public void OutOfCombatExecute()
         {
+        }
+
+        public void AttackTarget()
+        {
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if (target == null)
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            {
+                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.MovementEngine.Reset();
+                WowInterface.HookManager.WowUnitRightClick(target);
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+            }
         }
 
         private void HandleAttacking(WowUnit target)

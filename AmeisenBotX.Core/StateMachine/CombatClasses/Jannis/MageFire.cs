@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 
