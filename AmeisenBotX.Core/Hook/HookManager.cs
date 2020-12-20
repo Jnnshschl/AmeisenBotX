@@ -840,6 +840,12 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LuaDeleteInventoryItemByName(string itemName)
+        {
+            LuaDoString($"for b=0,4 do for s=1,GetContainerNumSlots(b) do local l=GetContainerItemLink(b,s); if l and string.find(l, \"{itemName}\") then PickupContainerItem(b,s); DeleteCursorItem(); end; end; end");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowClearTarget()
         {
             WowTargetGuid(0);
