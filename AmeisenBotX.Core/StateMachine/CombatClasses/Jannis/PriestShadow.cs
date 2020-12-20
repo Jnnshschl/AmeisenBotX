@@ -39,20 +39,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => false;
-
-        public override IWowItemComparator ItemComparator
-        {
-            get =>
-                new SimpleItemComparator((CharacterManager)WowInterface.CharacterManager, new Dictionary<string, double>()
-                {
-                    { StatType.INTELLECT, 2.5 },
-                    { StatType.SPELL_POWER, 2.5 },
-                    { StatType.ARMOR, 2.0 },
-                    { StatType.MP5, 2.0 },
-                    { StatType.HASTE, 2.0 },
-                });
-            set { }
-        }
+        
+        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
         public override CombatClassRole Role => CombatClassRole.Dps;
 

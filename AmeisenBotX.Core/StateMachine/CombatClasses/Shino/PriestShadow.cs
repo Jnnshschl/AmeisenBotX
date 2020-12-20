@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.StateMachine.CombatClasses.Shino;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
@@ -41,8 +42,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 
         public override bool IsMelee => false;
 
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
-
+        public override IWowItemComparator ItemComparator
+        {
+            get =>
+                new SimpleItemComparator((CharacterManager)WowInterface.CharacterManager, new Dictionary<string, double>()
+                {
+                    { StatType.INTELLECT, 2.5 },
+                    { StatType.SPELL_POWER, 2.5 },
+                    { StatType.ARMOR, 2.0 },
+                    { StatType.MP5, 2.0 },
+                    { StatType.HASTE, 2.0 },
+                });
+            set { }
+        }
+        
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override TalentTree Talents { get; } = new TalentTree()
