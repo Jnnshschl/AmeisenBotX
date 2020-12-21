@@ -209,6 +209,8 @@ namespace AmeisenBotX.Core
 
         public double StateMachineTickMs { get; set; } = 10;
 
+        public bool StayCloseToGroupInCombat { get; set; } = false;
+
         public double SupportRange { get; set; } = 64.0;
 
         public bool UseBuiltInCombatClass { get; set; } = true;

@@ -103,6 +103,9 @@ namespace AmeisenBotX.Core.Data
 
         private WowInterface WowInterface { get; }
 
+        public Vector3 MeanGroupPosition { get; private set; }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds)
         {
@@ -380,6 +383,8 @@ namespace AmeisenBotX.Core.Data
                     PartymemberGuids = ReadPartymemberGuids();
                     Partymembers = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid));
 
+                    MeanGroupPosition = GetMeanGroupPosition();
+
                     PartyPetGuids = PartyPets.Select(e => e.Guid);
                     PartyPets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
                 }
@@ -396,6 +401,23 @@ namespace AmeisenBotX.Core.Data
             // }
 
             OnObjectUpdateComplete?.Invoke(wowObjects);
+        }
+
+        public Vector3 GetMeanGroupPosition(bool includeSelf = false)
+        {
+            Vector3 meanGroupPosition = new Vector3();
+            float count = 0;
+
+            foreach (WowUnit unit in Partymembers)
+            {
+                if ((includeSelf || unit.Guid != PlayerGuid) && unit.Position.GetDistance(Player.Position) < 100.0f)
+                {
+                    meanGroupPosition += unit.Position;
+                    ++count;
+                }
+            }
+
+            return meanGroupPosition / count;
         }
 
         private void CachePois()

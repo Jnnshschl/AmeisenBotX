@@ -121,23 +121,6 @@ namespace AmeisenBotX.Core.Common
             };
         }
 
-        public static Vector3 GetMeanGroupPosition(bool includeSelf = false)
-        {
-            Vector3 meanGroupPosition = new Vector3();
-            float count = 0;
-
-            foreach (WowUnit unit in WowInterface.I.ObjectManager.Partymembers)
-            {
-                if ((includeSelf || unit.Guid != WowInterface.I.ObjectManager.PlayerGuid) && unit.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) < 100.0f)
-                {
-                    meanGroupPosition += unit.Position;
-                    ++count;
-                }
-            }
-
-            return meanGroupPosition / count;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void HoldKey(IntPtr windowHandle, IntPtr key)
         {

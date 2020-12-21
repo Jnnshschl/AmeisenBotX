@@ -185,7 +185,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (target == null)
             {
                 // just move to our group
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.GetMeanGroupPosition());
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.MeanGroupPosition);
                 return true;
             }
             else
@@ -212,14 +212,14 @@ namespace AmeisenBotX.Core.Statemachine.States
                                 && WowInterface.ObjectManager.Partymembers.Any()) // no need to rotate
                             {
                                 // rotate the boss away from the group
-                                Vector3 meanGroupPosition = BotUtils.GetMeanGroupPosition();
+                                Vector3 meanGroupPosition = WowInterface.ObjectManager.MeanGroupPosition;
                                 positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle(target.Position, meanGroupPosition));
                             }
                         }
                         else if (WowInterface.CombatClass.Role == CombatClassRole.Heal)
                         {
                             // move to group
-                            positionToGoTo = target != null ? target.Position : BotUtils.GetMeanGroupPosition();
+                            positionToGoTo = target != null ? target.Position : WowInterface.ObjectManager.MeanGroupPosition;
                         }
                         else
                         {

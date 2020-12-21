@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                 {
                     if (wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid)
                     {
-                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(BotUtils.GetMeanGroupPosition(), MidPosition), 8.0f);
+                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
                         float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
 
                         // flee from the corrupted souls target

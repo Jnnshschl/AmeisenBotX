@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == CombatClassRole.Tank)
                 {
-                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(BotUtils.GetMeanGroupPosition(), MidPosition), 8.0f);
+                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
                     float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
 
                     if (wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid)

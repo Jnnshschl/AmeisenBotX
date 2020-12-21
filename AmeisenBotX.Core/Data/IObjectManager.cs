@@ -25,6 +25,8 @@ namespace AmeisenBotX.Core.Data
 
         MapId MapId { get; }
 
+        Vector3 MeanGroupPosition { get; }
+
         int ObjectCount { get; }
 
         WowUnit Partyleader { get; }
@@ -63,18 +65,19 @@ namespace AmeisenBotX.Core.Data
 
         string ZoneSubName { get; }
 
+        IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f);
+
         WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds);
 
         WowUnit GetClosestWowUnitByDisplayId(IEnumerable<int> displayIds, bool onlyQuestgiver = true);
-        WowUnit GetClosestWowUnitByNpcId(IEnumerable<int> npcIds, bool onlyQuestgiver = true);
 
-        IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit;
+        WowUnit GetClosestWowUnitByNpcId(IEnumerable<int> npcIds, bool onlyQuestgiver = true);
 
         IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, double distance) where T : WowUnit;
 
-        IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit;
 
-        IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f);
+        IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit;
 
         IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
 

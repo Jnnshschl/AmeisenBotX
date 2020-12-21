@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                 {
                     if (wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid)
                     {
-                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(BotUtils.GetMeanGroupPosition(), MidPosition), 8.0f);
+                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
                         float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
 
                         if (distanceToMid > 5.0f && WowInterface.I.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)

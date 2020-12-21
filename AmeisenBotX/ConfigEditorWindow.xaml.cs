@@ -153,6 +153,7 @@ namespace AmeisenBotX
                 Config.SellGreenItems = checkboxSellGreenItems.IsChecked.GetValueOrDefault(false);
                 Config.SellPurpleItems = checkboxSellPurpleItems.IsChecked.GetValueOrDefault(false);
                 Config.SellWhiteItems = checkboxSellWhiteItems.IsChecked.GetValueOrDefault(false);
+                Config.StayCloseToGroupInCombat = checkboxStayCloseToGroupInCombat.IsChecked.GetValueOrDefault(false);
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
                 Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text, CultureInfo.InvariantCulture);
                 Config.SupportRange = sliderAssistRange.Value;
@@ -395,6 +396,7 @@ namespace AmeisenBotX
             checkboxSellGreenItems.IsChecked = Config.SellGreenItems;
             checkboxSellPurpleItems.IsChecked = Config.SellPurpleItems;
             checkboxSellWhiteItems.IsChecked = Config.SellWhiteItems;
+            checkboxStayCloseToGroupInCombat.IsChecked = Config.StayCloseToGroupInCombat;
             checkboxUseMounts.IsChecked = Config.UseMounts;
             checkboxUseMountsInParty.IsChecked = Config.UseMountsInParty;
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
