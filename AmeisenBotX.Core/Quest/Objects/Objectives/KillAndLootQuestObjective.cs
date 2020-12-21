@@ -112,7 +112,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 }
             }
 
-            if (WowUnit != null && WowInterface.CombatClass.IsTargetAttackable(WowUnit))
+            if (WowUnit != null)
             {
                 SearchAreas.NotifyDetour();
                 WowInterface.CombatClass.AttackTarget();
