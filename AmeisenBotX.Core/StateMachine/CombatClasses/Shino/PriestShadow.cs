@@ -3,14 +3,15 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
-using System;
 using System.Collections.Generic;
 using AmeisenBotX.Core.Character;
+using AmeisenBotX.Core.Character.Spells.Objects;
+using AmeisenBotX.Core.StateMachine.CombatClasses.Shino;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 
-namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
+namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 {
-    public class PriestShadow : BasicCombatClass
+    public class PriestShadow : TemplateCombatClass
     {
         public PriestShadow(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
@@ -39,9 +40,21 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => false;
-        
-        public override IWowItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<ArmorType>() { ArmorType.SHIELDS }, new List<WeaponType>() { WeaponType.ONEHANDED_SWORDS, WeaponType.ONEHANDED_MACES, WeaponType.ONEHANDED_AXES });
 
+        public override IWowItemComparator ItemComparator
+        {
+            get =>
+                new SimpleItemComparator((CharacterManager)WowInterface.CharacterManager, new Dictionary<string, double>()
+                {
+                    { StatType.INTELLECT, 2.5 },
+                    { StatType.SPELL_POWER, 2.5 },
+                    { StatType.ARMOR, 2.0 },
+                    { StatType.MP5, 2.0 },
+                    { StatType.HASTE, 2.0 },
+                });
+            set { }
+        }
+        
         public override CombatClassRole Role => CombatClassRole.Dps;
 
         public override TalentTree Talents { get; } = new TalentTree()
@@ -83,65 +96,65 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public override bool UseAutoAttacks => true;
 
-        public override string Version => "1.1";
+        public override string Version => "1.2";
 
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Priest;
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
         public override void Execute()
         {
             base.Execute();
-
-            if (SelectTarget(TargetManagerDps))
-            {
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 90
-                    && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
-                {
-                    return;
-                }
-
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 30
-                    && TryCastSpell(hymnOfHopeSpell, 0))
-                {
-                    return;
-                }
-
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                    && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
-                }
-
-                if (WowInterface.ObjectManager.Player.ManaPercentage >= 50 
-                    && TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
-                {
-                    return;
-                }
-
-                if (!WowInterface.ObjectManager.Player.IsCasting
-                    && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
-                }
-
-                if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
-                {
-                    return;
-                }
-            }
-        }
-
-        public override void OutOfCombatExecute()
-        {
-            base.OutOfCombatExecute();
-
-            if (HandleDeadPartymembers(resurrectionSpell))
+            
+            if (WowInterface.ObjectManager.Target == null)
             {
                 return;
             }
+            
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
+                && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+                && TryCastSpell(hymnOfHopeSpell, 0))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.ManaPercentage >= 50 
+                && TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
+            {
+                return;
+            }
+
+            if (!WowInterface.ObjectManager.Player.IsCasting
+                && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
+            {
+                return;
+            }
+
+            if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+            {
+                return;
+            }
+        }
+
+        protected override Spell GetOpeningSpell()
+        {
+            Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(shadowWordPainSpell);
+            if (spell != null)
+            {
+                return spell;
+            }
+            return WowInterface.CharacterManager.SpellBook.GetSpellByName(smiteSpell);
         }
     }
 }

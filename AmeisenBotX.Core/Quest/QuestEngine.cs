@@ -7,9 +7,7 @@ using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs;
 
 namespace AmeisenBotX.Core.Quest
 {
@@ -70,11 +68,9 @@ namespace AmeisenBotX.Core.Quest
                     && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 60.0).Any())
                 {
                     // wait or eat something
-
                     if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
                     {
-                        // TODO: This causes a Nullpointer!
-                        //StateMachine.SetState(BotState.Eating);
+                        StateMachine.SetState(BotState.Eating);
                         return;
                     }
                 }

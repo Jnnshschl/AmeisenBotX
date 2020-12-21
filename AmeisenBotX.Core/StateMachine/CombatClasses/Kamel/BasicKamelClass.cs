@@ -5,6 +5,8 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
@@ -71,6 +73,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public abstract void ExecuteCC();
 
         public abstract void OutOfCombatExecute();
+        public void AttackTarget()
+        {
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if (target == null)
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            {
+                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.MovementEngine.Reset();
+                WowInterface.HookManager.WowUnitRightClick(target);
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+            }
+        }
 
         public override string ToString()
         {

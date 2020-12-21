@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using static AmeisenBotX.Core.Statemachine.Utils.AuraManager;
 using static AmeisenBotX.Core.Statemachine.Utils.InterruptManager;
 

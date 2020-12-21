@@ -379,6 +379,8 @@ namespace AmeisenBotX.Core
                 new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface),
                 new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface),
                 new Statemachine.CombatClasses.ToadLump.Rogue(StateMachine),
+                new Statemachine.CombatClasses.Shino.PriestShadow(StateMachine),
+                new Statemachine.CombatClasses.Shino.MageFrost(StateMachine),
             };
         }
 

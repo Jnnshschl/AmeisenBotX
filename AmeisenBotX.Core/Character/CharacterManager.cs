@@ -138,6 +138,13 @@ namespace AmeisenBotX.Core.Character
             };
         }
 
+        public bool IsAbleToUseItem(IWowItem item)
+        {
+            return (string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) &&
+                    IsAbleToUseArmor((WowArmor) item)) || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) &&
+                       IsAbleToUseWeapon((WowWeapon) item));
+        }
+
         public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)
         {
             itemToReplace = null;
@@ -147,8 +154,7 @@ namespace AmeisenBotX.Core.Character
                 return false;
             }
 
-            if ((string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item))
-                || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item)))
+            if (IsAbleToUseItem(item))
             {
                 if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out _))
                 {
