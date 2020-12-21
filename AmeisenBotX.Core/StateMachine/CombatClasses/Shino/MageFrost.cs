@@ -197,8 +197,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 
         public override void OutOfCombatExecute()
         {
-            base.OutOfCombatExecute();
-
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureWaterSpell))
             {
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureWaterSpell);
@@ -340,6 +338,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 
             }
 
+            base.OutOfCombatExecute();
         }
 
         protected override Spell GetOpeningSpell()
