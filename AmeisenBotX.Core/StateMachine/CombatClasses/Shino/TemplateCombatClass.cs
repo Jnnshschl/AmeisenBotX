@@ -7,7 +7,6 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using AmeisenBotX.Core.Statemachine;
 using AmeisenBotX.Core.Statemachine.CombatClasses.Jannis;
 
@@ -17,6 +16,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
     {
         public TemplateCombatClass(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
+            WowInterface.EventHookManager.Subscribe("UI_ERROR_MESSAGE", (t, a) => OnUIErrorMessage(a[0]));
         }
 
         public string Author { get; } = "Shino";
@@ -44,12 +44,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
                 WowInterface.HookManager.WowStopClickToMove();
                 WowInterface.MovementEngine.StopMovement();
                 WowInterface.MovementEngine.Reset();
-                var res = TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
-                if (WowInterface.ObjectManager.Player.ManaPercentage >= 20.0 && !res)
-                {
-                    // TODO: Also listen to UI fail events!
-                    LastFailedOpener = DateTime.Now;
-                }
+                TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
             }
             else if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == MovementAction.None)
             {
@@ -109,12 +104,20 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
             posYLeft.Y -= posOffset;
 
             return IsInRange(openingSpell, target)
-                    && DateTime.Now.Subtract(LastFailedOpener).TotalMilliseconds > 500.0
+                    && DateTime.Now.Subtract(LastFailedOpener).TotalSeconds > 3
                     && WowInterface.HookManager.WowIsInLineOfSight(currentPos, target.Position)
                     && WowInterface.HookManager.WowIsInLineOfSight(posXLeft, target.Position)
                     && WowInterface.HookManager.WowIsInLineOfSight(posXRight, target.Position)
                     && WowInterface.HookManager.WowIsInLineOfSight(posYRight, target.Position)
                     && WowInterface.HookManager.WowIsInLineOfSight(posYLeft, target.Position);
+        }
+
+        public void OnUIErrorMessage(string message)
+        {
+            if (string.Equals(message, "target not in line of sight", StringComparison.InvariantCultureIgnoreCase))
+            {
+                LastFailedOpener = DateTime.Now;
+            }
         }
     }
 }
