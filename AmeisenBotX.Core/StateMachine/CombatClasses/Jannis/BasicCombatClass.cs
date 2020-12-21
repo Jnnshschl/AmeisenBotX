@@ -184,6 +184,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string frostNovaSpell = "Frost Nova";
         protected const string blinkSpell = "Blink";
         protected const string freezeSpell = "Freeze";
+        protected const string polymorphSpell = "Polymorph";
 
         #endregion Mage
 
@@ -506,6 +507,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.ObjectManager.Player.IsCasting)
             {
+                // TODO: Where is that set?
                 if (!TargetInLineOfSight)
                 {
                     WowInterface.HookManager.LuaSpellStopCasting();
@@ -639,6 +641,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
             }
+        }
+
+        public virtual bool IsTargetAttackable(WowUnit target)
+        {
+            return true;
         }
 
         public override string ToString()

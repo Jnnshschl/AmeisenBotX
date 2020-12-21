@@ -1,9 +1,12 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using System;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.StateMachine.CombatClasses.Shino;
@@ -94,10 +97,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Mage;
+        
+        private DateTime LastSheep { get; set; } = DateTime.Now;
 
         public override void Execute()
         {
             base.Execute();
+
+            if (WowInterface.ObjectManager.Player.IsCasting)
+            {
+                return;
+            }
 
             if (SelectTarget(out WowUnit target))
             {
@@ -117,16 +127,43 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 9.0 
+                var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 64.0);
+                if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0
-                    && TryCastSpell(blinkSpell, 0, true))
+                if (DateTime.Now.Subtract(LastSheep).TotalMilliseconds >= 3000.0)
                 {
-                    return;
+                    if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => aura.Name == polymorphSpell)))
+                    {
+                        var targetInDistance = nearbyTargets
+                            .Where(e => e.Guid != WowInterface.ObjectManager.TargetGuid)
+                            .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                            .FirstOrDefault();
+                        WowInterface.HookManager.WowTargetGuid(targetInDistance.Guid);
+                        if (TryCastSpell(polymorphSpell, targetInDistance.Guid, true))
+                        {
+                            WowInterface.HookManager.WowTargetGuid(target.Guid);
+                            LastSheep = DateTime.Now;
+                            return;
+                        }
+                    }
+                }
+
+                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0)
+                {
+                    // TODO: Logic to check if the target blink location is dangerous
+                    if (!TryCastSpell(blinkSpell, 0, true))
+                    {
+
+                    }
+                    else
+                    {
+                        // TODO: Go away somehow if the enemy is freezed?
+                        return;
+                    }
                 }
 
                 if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0 
@@ -153,12 +190,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
                 {
                     return;
                 }
-
-                if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(frostBoltSpell))
-                {
-                    TryCastSpell(fireballSpell, target.Guid, true);
-                }
-
+                
+                TryCastSpell(fireballSpell, target.Guid, true);
             }
         }
 

@@ -77,6 +77,8 @@ namespace AmeisenBotX.Core.Data
         IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f);
 
         IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
+        
+        IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, double distance) where T : WowUnit;
 
         IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
 

@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         public Vector3 GetNextSearchPosition()
         {
-            if (Area.Count == 1)
+            if (Area.Count == 1 || SearchPath.Count == 0)
             {
                 return Area[0];
             }
@@ -152,6 +152,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         {
             if (Area.Count <= 1)
             {
+                SearchPath = Area;
                 return;
             }
             

@@ -63,9 +63,25 @@ namespace AmeisenBotX.Core.Statemachine.States
                     .Where(e => e.IsLootable)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
-
+                
                 if (selectedUnit != null)
                 {
+                    // If enemies are nearby kill them first  
+                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, 
+                        WowInterface.ObjectManager.Player.Position, selectedUnit.Position);
+                    if (path != null)
+                    {
+                        IEnumerable<WowUnit> nearbyEnemies =
+                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0);
+                        if (nearbyEnemies.Any())
+                        {
+                            var enemy = nearbyEnemies.FirstOrDefault();
+                            WowInterface.HookManager.WowTargetGuid(enemy.Guid);
+                            WowInterface.CombatClass.AttackTarget();
+                            return;
+                        }
+                    }
+
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
                     if (LastOpenLootTry.Run())

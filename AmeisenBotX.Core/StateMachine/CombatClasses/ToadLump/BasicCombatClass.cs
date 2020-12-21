@@ -631,6 +631,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.ToadLump
             }
         }
 
+        public bool IsTargetAttackable(WowUnit target)
+        {
+            return true;
+        }
+
         public override string ToString()
         {
             return $"[{WowClass}] [{Role}] {Displayname} ({Author})";

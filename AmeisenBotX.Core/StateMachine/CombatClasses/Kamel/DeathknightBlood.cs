@@ -105,6 +105,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
         }
 
+        public bool IsTargetAttackable(WowUnit target)
+        {
+            return true;
+        }
+
         private void HandleAttacking(WowUnit target)
         {
             if (TargetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))

@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
@@ -76,8 +77,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         public void Execute()
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
-            
-            if (!WowInterface.ObjectManager.Player.IsInCombat && DateTime.Now.Subtract(LastUnitCheck).TotalMilliseconds >= 2500.0)
+
+            if (!WowInterface.ObjectManager.Player.IsInCombat && DateTime.Now.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
             {
                 LastUnitCheck = DateTime.Now;
                 WowUnit = WowInterface.ObjectManager.WowObjects
@@ -85,30 +86,24 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)) && !e.IsNotAttackable 
                                 && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                    .Take(6)
+                    .Take(3)
                     .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, e.Position))
                     .FirstOrDefault();
-
+                
                 // Kill enemies in the path
-                var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
-                    WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Target.Position);
-
-                if (path != null)
+                if (WowUnit != null && !WowInterface.CombatClass.IsTargetAttackable(WowUnit))
                 {
-                    if (WowInterface.PathfindingHandler.GetPathDistance(path, WowInterface.ObjectManager.Target.Position) > 40.0)
+                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
+                    WowInterface.ObjectManager.Player.Position, WowUnit.Position);
+                    if (path != null)
                     {
-                        foreach (Vector3 pathPosition in path)
+                        var nearEnemies =
+                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0);
+                        if (nearEnemies.Any())
                         {
-                            var nearEnemies =
-                                WowInterface.ObjectManager.GetNearEnemies<WowUnit>(pathPosition, 15.0);
-                            if (nearEnemies.Any())
-                            {
-                                WowUnit = nearEnemies.FirstOrDefault();
-                                break;
-                            }
+                            WowUnit = nearEnemies.FirstOrDefault();
                         }
                     }
-
                 }
 
                 if (WowUnit != null)
@@ -117,12 +112,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 }
             }
 
-            if (WowUnit != null)
+            if (WowUnit != null && WowInterface.CombatClass.IsTargetAttackable(WowUnit))
             {
                 SearchAreas.NotifyDetour();
                 WowInterface.CombatClass.AttackTarget();
             }
-            else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath())
+            else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath() || WowInterface.MovementEngine.MovementAction == MovementAction.None)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving,
                     SearchAreas.GetNextPosition(WowInterface));

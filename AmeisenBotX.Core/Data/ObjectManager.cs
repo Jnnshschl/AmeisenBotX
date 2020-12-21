@@ -145,7 +145,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat && e.TargetGuid == WowInterface.ObjectManager.Player.Guid);
+                    .Where(e => e.IsInCombat && (e.IsTaggedByMe || e.TargetGuid == WowInterface.ObjectManager.PlayerGuid));
             }
         }
 
@@ -179,8 +179,24 @@ namespace AmeisenBotX.Core.Data
                     .Where(e => !e.IsDead
                          && !e.IsNotAttackable
                          && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                         && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Neutral
                          && e.Position.GetDistance(position) < distance);
             }
+        }
+
+        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, double distance) where T : WowUnit
+        {
+            foreach (Vector3 pathPosition in path)
+            {
+                var nearEnemies =
+                    WowInterface.ObjectManager.GetNearEnemies<T>(pathPosition, distance);
+                if (nearEnemies.Any())
+                {
+                    return nearEnemies;
+                }
+            }
+
+            return new List<T>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -245,6 +245,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             }
         }
 
+        public bool IsTargetAttackable(WowUnit target)
+        {
+            return true;
+        }
+
         private void HandleAttacking(WowUnit target)
         {
             WowInterface.HookManager.WowTargetGuid(target.Guid);
