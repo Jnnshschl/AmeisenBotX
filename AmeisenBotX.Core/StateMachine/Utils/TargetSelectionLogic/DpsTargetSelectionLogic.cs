@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 return true;
             }
 
-            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0);
+            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Where(e => e.IsInCombat);
 
             if (nearEnemies.Any())
             {

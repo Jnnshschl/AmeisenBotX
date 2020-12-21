@@ -156,8 +156,8 @@ namespace AmeisenBotX.Core.Data
             {
                 return GetNearEnemies<T>(position, distance)
                     .Where(e => e.IsInCombat 
-                        && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)
-                        && WowInterface.ObjectManager.PartyPetGuids.Contains(e.TargetGuid));
+                        && (WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)
+                        || WowInterface.ObjectManager.PartyPetGuids.Contains(e.TargetGuid)));
             }
         }
 
