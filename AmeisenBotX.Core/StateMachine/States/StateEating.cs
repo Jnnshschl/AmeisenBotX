@@ -25,8 +25,10 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            if (DateTime.Now - LastAction > TimeSpan.FromSeconds(1))
+            if (DateTime.Now.Subtract(LastAction).TotalMilliseconds >= 250.0)
             {
+                LastAction = DateTime.Now;
+                
                 Type t = default;
                 if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
                     && WowInterface.ObjectManager.Player.MaxMana > 0
@@ -66,10 +68,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     // exit if we have no more food left or are near full hp/power
                     StateMachine.SetState(BotState.Idle);
+                    WowInterface.CharacterManager.Jump();
                     return;
                 }
-
-                LastAction = DateTime.Now;
+                
                 string itemName = WowInterface.CharacterManager.Inventory.Items.First(e => Enum.IsDefined(t, e.Id)).Name;
                 WowInterface.HookManager.LuaUseItemByName(itemName);
                 WowInterface.MovementEngine.StopMovement();

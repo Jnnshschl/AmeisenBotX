@@ -263,8 +263,10 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             }
         }
 
-        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false)
+        public void SetMovementAction(MovementAction movementAction, Vector3 positionToGoTo, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false, float zCorrection = 2.5f)
         {
+            positionToGoTo.Z += zCorrection;
+
             if (Config.AutoDodgeAoeSpells && !forceDirectMove)
             {
                 IEnumerable<WowDynobject> aoeSpells = WowInterface.ObjectManager.GetAoeSpells(positionToGoTo);

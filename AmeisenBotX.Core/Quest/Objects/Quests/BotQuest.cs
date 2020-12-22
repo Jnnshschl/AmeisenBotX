@@ -109,16 +109,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else
                     {
-                        var acceptGossipId = GossipId;
-                        if (WowInterface.HookManager.LuaGetGossipIdByAvailableQuestTitle(Name, out int gossipId))
-                        {
-                            acceptGossipId = gossipId;
-                        }
-
-                        WowInterface.HookManager.LuaSelectGossipAvailableQuest(acceptGossipId);
+                        WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, true);
                         Thread.Sleep(250);
                         WowInterface.HookManager.LuaAcceptQuest();
-
                         Accepted = true;
                     }
 
@@ -160,14 +153,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else if (ActionEvent.Run())
                     {
-                        var turnInGossipId = GossipId;
-                        if (WowInterface.HookManager.LuaGetGossipIdByActiveQuestTitle(Name, out int gossipId))
-                        {
-                            turnInGossipId = gossipId;
-                        }
-
-
-                        WowInterface.HookManager.LuaSelectGossipActiveQuest(turnInGossipId);
+                        WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, false);
                         Thread.Sleep(250);
                         WowInterface.HookManager.LuaCompleteQuest();
                         Thread.Sleep(250);

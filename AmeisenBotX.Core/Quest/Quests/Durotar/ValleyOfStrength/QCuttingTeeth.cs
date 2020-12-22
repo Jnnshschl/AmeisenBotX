@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Quest.Quests.StartArea.ValleyOfStrength
+namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
     class QCuttingTeeth : BotQuest
     {

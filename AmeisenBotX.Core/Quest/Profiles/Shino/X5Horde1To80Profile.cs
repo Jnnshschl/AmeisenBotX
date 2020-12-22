@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
-using AmeisenBotX.Core.Quest.Quests.StartArea.ValleyOfStrength;
+using AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill;
+using AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength;
 
 namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
@@ -19,6 +20,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
             });
             Quests.Enqueue(new List<IBotQuest>() {
                 new QStingOfTheScorpid(wowInterface),
+                new QVileFamiliars(wowInterface),
                 new QGalgarCactusAppleSurprise(wowInterface)
             });
             Quests.Enqueue(new List<IBotQuest>() {
@@ -26,6 +28,13 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
             });
             Quests.Enqueue(new List<IBotQuest>() {
                 new QSarkoth2(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QAPeonBurden(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QVanquishTheBetrayers(wowInterface),
+                new QEncroachment(wowInterface)
             });
         }
         public override string ToString()
