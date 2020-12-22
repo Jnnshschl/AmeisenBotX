@@ -84,8 +84,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             else if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == MovementAction.None)
             {
                 Vector3 playerPosition = WowInterface.ObjectManager.Player.Position;
-                Vector3 nearestVendorPosition = StaticDB.Vendors.OrderBy(e => playerPosition.GetDistance(e.Position))
-                    .First().Position;
+                Vector3 nearestVendorPosition = StaticDB.Vendors.Where(e => e.LikesUnit(WowInterface.ObjectManager.Player))
+                    .OrderBy(e => playerPosition.GetDistance(e.Position)).First().Position;
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestVendorPosition);
             }
         }
