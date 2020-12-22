@@ -50,5 +50,7 @@ namespace AmeisenBotX.Core.Character
         void UpdateAll();
 
         void UpdateCharacterGear();
+
+        void UpdateCharacterBags();
     }
 }

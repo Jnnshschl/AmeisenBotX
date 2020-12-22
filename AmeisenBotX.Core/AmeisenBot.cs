@@ -502,6 +502,7 @@ namespace AmeisenBotX.Core
                 WowInterface.CharacterManager.Equipment.Update();
 
                 WowInterface.CharacterManager.UpdateCharacterGear();
+                WowInterface.CharacterManager.UpdateCharacterBags();
 
                 WowInterface.CharacterManager.Inventory.Update();
             }
