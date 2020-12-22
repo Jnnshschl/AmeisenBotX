@@ -7,6 +7,8 @@ using AmeisenBotX.Core.StateMachine.Routines;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Data.Db.Objects;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -40,6 +42,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (!NeedToSell())
             {
+                WowInterface.HookManager.LuaClickUiElement("MerchantFrameCloseButton");
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
@@ -78,10 +81,13 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
             }
-            else
+            else if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == MovementAction.None)
             {
-                WowInterface.HookManager.LuaClickUiElement("MerchantFrameCloseButton");
-                StateMachine.SetState(BotState.Idle);
+                int playerMapId = (int)WowInterface.ObjectManager.MapId;
+                Vector3 playerPosition = WowInterface.ObjectManager.Player.Position;
+                Vector3 nearestVendorPosition = StaticDB.Vendors.Where(e => playerMapId == e.MapId && e.LikesUnit(WowInterface.ObjectManager.Player))
+                    .OrderBy(e => playerPosition.GetDistance(e.Position)).First().Position;
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestVendorPosition);
             }
         }
 
