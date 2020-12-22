@@ -80,8 +80,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
 
             if (nearAttackingEnemies.Any())
             {
-                target = nearAttackingEnemies.FirstOrDefault();
-                WowInterface.HookManager.WowTargetGuid(target.Guid);
+                var potTarget = nearAttackingEnemies.FirstOrDefault();
+                target = potTarget;
+                WowInterface.HookManager.WowTargetGuid(potTarget.Guid);
                 return true;
             }
             
