@@ -126,7 +126,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void CombatLogChanged(BasicCombatLogEntry entry)
         {
-            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGUID.NpcId(entry.DestinationGuid)))
+            var wowUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
+            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGUID.NpcId(entry.DestinationGuid)) 
+                                                            && wowUnit != null && wowUnit.IsTaggedByMe)
             {
                 ++Killed;
             }

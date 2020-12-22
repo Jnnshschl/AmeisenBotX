@@ -14,6 +14,7 @@ using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -207,6 +208,24 @@ namespace AmeisenBotX.Core.Character
                 () => UpdateMoney(),
                 () => UpdateMounts()
             );
+        }
+
+        public void UpdateCharacterBags()
+        {
+            var container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
+            if (container.Any())
+            {
+                // TODO: Replace worse container
+                var item = container.FirstOrDefault();
+                for (int i = 20; i <= 23; ++i)
+                {
+                    if (Equipment.Items.All(keyPair => keyPair.Key != (EquipmentSlot) i))
+                    {
+                        WowInterface.HookManager.LuaEquipItem(item);
+                        break;
+                    }
+                }
+            }
         }
 
         public void UpdateCharacterGear()

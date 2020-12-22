@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else
                     {
                         WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, true);
-                        Thread.Sleep(250);
+                        Thread.Sleep(500);
                         WowInterface.HookManager.LuaAcceptQuest();
                         Accepted = true;
                     }
@@ -154,9 +154,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else if (ActionEvent.Run())
                     {
                         WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, false);
-                        Thread.Sleep(250);
+                        Thread.Sleep(500);
                         WowInterface.HookManager.LuaCompleteQuest();
-                        Thread.Sleep(250);
+                        Thread.Sleep(500);
 
                         bool selectedReward = false;
                         // TODO: This only works for the english locale!
