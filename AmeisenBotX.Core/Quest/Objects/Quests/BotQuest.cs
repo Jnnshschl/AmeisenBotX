@@ -110,9 +110,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else
                     {
                         WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, true);
-                        Thread.Sleep(500);
+                        Thread.Sleep(1000);
                         WowInterface.HookManager.LuaAcceptQuest();
-                        Accepted = true;
+                        Thread.Sleep(250);
+                        if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
+                        {
+                            Accepted = true;
+                        }
                     }
 
                     ActionToggle = !ActionToggle;
@@ -154,9 +158,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     else if (ActionEvent.Run())
                     {
                         WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, false);
-                        Thread.Sleep(500);
+                        Thread.Sleep(1000);
                         WowInterface.HookManager.LuaCompleteQuest();
-                        Thread.Sleep(500);
+                        Thread.Sleep(1000);
 
                         bool selectedReward = false;
                         // TODO: This only works for the english locale!
@@ -197,6 +201,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                                             out IWowItem itemToReplace))
                                         {
                                             WowInterface.HookManager.LuaGetQuestReward(i);
+                                            WowInterface.HookManager.LuaGetQuestReward(i);
+                                            WowInterface.HookManager.LuaGetQuestReward(i);
                                             selectedReward = true;
                                             break;
                                         }
@@ -213,7 +219,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                         {
                             WowInterface.HookManager.LuaGetQuestReward(1);
                         }
-
+                        
+                        Thread.Sleep(250);
                         Returned = true;
                         return true;
                     }
