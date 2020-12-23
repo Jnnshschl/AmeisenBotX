@@ -10,7 +10,7 @@
 
         public float MaxAccelerationCombat { get; set; } = 2f;
 
-        public double MaxDistanceMovedJumpUnstuck { get; set; } = 0.5;
+        public double MaxDistanceMovedJumpUnstuck { get; set; } = 1.5;
 
         public float MaxSteering { get; set; } = 0.7f;
 
