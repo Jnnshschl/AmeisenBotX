@@ -1,10 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Data.Db.Structs
 {
-    public struct StaticVendor
+    public struct StaticVendor : ILikeUnit
     {
 
         public StaticVendor(int entry, int mapId, float posX, float posY, float posZ, bool ammo, bool food, bool poison, bool reagent, bool repairer, bool likesHorde, bool likesAlliance)
@@ -40,15 +38,5 @@ namespace AmeisenBotX.Core.Data.Db.Structs
         public bool LikesHorde { get; set; }
         
         public bool LikesAlliance { get; set; }
-
-        public bool LikesUnit(WowUnit wowUnit)
-        {
-            return (LikesAlliance && (wowUnit.Race == WowRace.Human || wowUnit.Race == WowRace.Gnome ||
-                                      wowUnit.Race == WowRace.Draenei || wowUnit.Race == WowRace.Dwarf ||
-                                      wowUnit.Race == WowRace.Nightelf)) ||
-                   (LikesHorde && (wowUnit.Race == WowRace.Orc || wowUnit.Race == WowRace.Troll ||
-                                      wowUnit.Race == WowRace.Bloodelf || wowUnit.Race == WowRace.Undead ||
-                                      wowUnit.Race == WowRace.Tauren));
-        }
     }
 }
