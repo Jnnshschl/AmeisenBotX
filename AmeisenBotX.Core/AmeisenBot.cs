@@ -413,7 +413,8 @@ namespace AmeisenBotX.Core
             QuestProfiles = new List<IQuestProfile>
             {
                 new DeathknightStartAreaQuestProfile(WowInterface),
-                new X5Horde1To80Profile(WowInterface)
+                new X5Horde1To80Profile(WowInterface),
+                new Horde1To60GrinderProfile(WowInterface)
             };
         }
 
