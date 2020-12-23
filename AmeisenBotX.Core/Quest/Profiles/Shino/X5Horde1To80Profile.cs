@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill;
 using AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength;
+using AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads;
+using AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostBridge;
+using AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostStonetalon;
 
 namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
@@ -34,7 +37,50 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
             });
             Quests.Enqueue(new List<IBotQuest>() {
                 new QVanquishTheBetrayers(wowInterface),
+                new QCarryYourWeight(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
                 new QEncroachment(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QConscriptOfTheHorde(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QCrossroadsConscription(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QDisruptTheAttacks(wowInterface)
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QTheDisruptionEnds(wowInterface),
+                new QSuppliesForTheCrossroads(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QPlainstriderMenace(wowInterface),
+                new QRaptorThieves(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QSouthseaFreebooters(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QTheZhevra(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QProwlersOfTheBarrens(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QHarpyRaiders(wowInterface),
+                new QCentaurBracers(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QKolkarLeaders(wowInterface),
+                new QHarpyLieutenants(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QSerenaBloodfeather(wowInterface),
+            });
+            Quests.Enqueue(new List<IBotQuest>() {
+                new QLetterToJinZil(wowInterface),
             });
         }
         public override string ToString()
