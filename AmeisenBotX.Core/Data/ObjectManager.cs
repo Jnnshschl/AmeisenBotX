@@ -542,7 +542,7 @@ namespace AmeisenBotX.Core.Data
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                 .Where(e => e.Position.GetDistance(position) < e.Radius + extends
-                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Neutral));
+                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
         }
 
         private IEnumerable<ulong> ReadPartymemberGuids()

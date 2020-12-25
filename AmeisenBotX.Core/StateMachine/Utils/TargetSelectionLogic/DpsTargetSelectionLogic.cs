@@ -20,8 +20,6 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         private WowInterface WowInterface { get; }
 
-        private AmeisenBotConfig Config { get; }
-
         public void Reset()
         {
         }
@@ -39,7 +37,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 return false;
             }
 
-            Vector3 position = Config.StayCloseToGroupInCombat ? WowInterface.ObjectManager.MeanGroupPosition : WowInterface.ObjectManager.Player.Position;
+            Vector3 position = WowInterface.ObjectManager.PartyleaderGuid != 0 ? WowInterface.ObjectManager.MeanGroupPosition : WowInterface.ObjectManager.Player.Position;
 
             if (PriorityTargets != null && PriorityTargets.Any())
             {

@@ -28,6 +28,7 @@ namespace AmeisenBotX.Core.Data.Db
         public ConcurrentDictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
 
         public ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>> CombatLogEntries { get; private set; }
+
         public BasicCombatLogEntrySubject CombatLogSubject { get; }
 
         public ConcurrentDictionary<MapId, Dictionary<HerbNode, List<Vector3>>> HerbNodes { get; private set; }
@@ -259,6 +260,11 @@ namespace AmeisenBotX.Core.Data.Db
             PlayerRelationships = new ConcurrentDictionary<ulong, Relationship>();
         }
 
+        public BasicCombatLogEntrySubject GetCombatLogSubject()
+        {
+            return CombatLogSubject;
+        }
+
         public bool IsPlayerKnown(WowPlayer player)
         {
             return PlayerRelationships.ContainsKey(player.Guid);
@@ -356,11 +362,6 @@ namespace AmeisenBotX.Core.Data.Db
             {
                 PlayerRelationships[player.Guid].Poll(player);
             }
-        }
-
-        public BasicCombatLogEntrySubject GetCombatLogSubject()
-        {
-            return CombatLogSubject;
         }
     }
 }
