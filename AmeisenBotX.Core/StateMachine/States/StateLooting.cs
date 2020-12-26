@@ -23,6 +23,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private Queue<ulong> UnitLootQueue { get; set; }
 
+        private float LootTryCount { get; set; }
+
         private const float MaxLootDistance = 5.0f;
 
         public override void Enter()
@@ -63,11 +65,11 @@ namespace AmeisenBotX.Core.Statemachine.States
                     .Where(e => e.IsLootable)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
-                
-                if (selectedUnit != null)
+
+                if (selectedUnit != null || LootTryCount >= 3)
                 {
                     // If enemies are nearby kill them first  
-                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, 
+                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
                         WowInterface.ObjectManager.Player.Position, selectedUnit.Position);
                     if (path != null)
                     {
@@ -90,6 +92,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                         {
                             WowInterface.HookManager.WowStopClickToMove();
                             Loot(selectedUnit);
+                            ++LootTryCount;
                         }
                     }
                 }
@@ -97,6 +100,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 {
                     if (UnitLootQueue.Count > 0)
                     {
+                        LootTryCount = 0;
                         UnitLootQueue.Dequeue();
                     }
                 }
