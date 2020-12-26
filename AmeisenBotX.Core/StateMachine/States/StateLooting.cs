@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
 
-                if (selectedUnit != null || LootTryCount >= 3)
+                if (selectedUnit != null && LootTryCount < 3)
                 {
                     // If enemies are nearby kill them first  
                     // var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
