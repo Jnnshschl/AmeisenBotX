@@ -69,20 +69,20 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (selectedUnit != null || LootTryCount >= 3)
                 {
                     // If enemies are nearby kill them first  
-                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
-                        WowInterface.ObjectManager.Player.Position, selectedUnit.Position);
-                    if (path != null)
-                    {
-                        IEnumerable<WowUnit> nearbyEnemies =
-                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0);
-                        if (nearbyEnemies.Any())
-                        {
-                            var enemy = nearbyEnemies.FirstOrDefault();
-                            WowInterface.HookManager.WowTargetGuid(enemy.Guid);
-                            WowInterface.CombatClass.AttackTarget();
-                            return;
-                        }
-                    }
+                    // var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
+                    //     WowInterface.ObjectManager.Player.Position, selectedUnit.Position);
+                    // if (path != null)
+                    // {
+                    //     IEnumerable<WowUnit> nearbyEnemies =
+                    //         WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0);
+                    //     if (nearbyEnemies.Any())
+                    //     {
+                    //         var enemy = nearbyEnemies.FirstOrDefault();
+                    //         WowInterface.HookManager.WowTargetGuid(enemy.Guid);
+                    //         WowInterface.CombatClass.AttackTarget();
+                    //         return;
+                    //     }
+                    // }
 
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
 
