@@ -42,8 +42,9 @@ namespace AmeisenBotX.Core.Statemachine.States
                         // exit if we are near full hp/power
                         StateMachine.SetState(BotState.Idle);
                         WowInterface.CharacterManager.Jump();
-                        return;
                     }
+
+                    return;
                 }
                 else if(!NeedToEat())
                 {
