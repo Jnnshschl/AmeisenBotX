@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Character.Inventory.Objects;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
@@ -23,6 +25,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             PriorityTargetDisplayIds = new List<int>();
         }
+
+        private readonly int[] useableHealingItems = new int[]
+        {
+            // potions
+            118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
+            // healthstones
+            5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889, 36892,
+        };
+
+        private readonly int[] useableManaItems = new int[]
+        {
+            // potions
+            2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
+        };
 
         public abstract string Author { get; }
 
@@ -68,6 +84,29 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         public void Execute()
         {
             ExecuteCC();
+
+            // Useable items, potions, etc.
+            // ---------------------------- >
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 20)
+            {
+                IWowItem healthItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+
+                if (healthItem != null)
+                {
+                    WowInterface.HookManager.LuaUseItemByName(healthItem.Name);
+                }
+            }
+
+            if (WowInterface.ObjectManager.Player.ManaPercentage < 20)
+            {
+                IWowItem manaItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
+
+                if (manaItem != null)
+                {
+                    WowInterface.HookManager.LuaUseItemByName(manaItem.Name);
+                }
+            }
         }
 
         public abstract void ExecuteCC();
