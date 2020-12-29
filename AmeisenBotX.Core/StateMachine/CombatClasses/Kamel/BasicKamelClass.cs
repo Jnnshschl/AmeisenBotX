@@ -14,6 +14,20 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 {
     public abstract class BasicKamelClass : ICombatClass
     {
+        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+
+        //Race (Troll)
+        private const string BerserkingSpell = "Berserking";
+
+        //Race (Draenei)
+        private const string giftOfTheNaaruSpell = "Gift of the Naaru";
+
+        //Race (Dwarf)
+        private const string StoneformSpell = "Stoneform";   
+        
+        //Race (Human)
+        private const string EveryManforHimselfSpell = "Every Man for Himself";
+
         protected BasicKamelClass()
         {
             //Basic
@@ -22,6 +36,18 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
             //Mount check
             getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
+
+            //Race (Troll)
+            spellCoolDown.Add(BerserkingSpell, DateTime.Now);
+
+            //Race (Draenei)
+            spellCoolDown.Add(giftOfTheNaaruSpell, DateTime.Now);   
+            
+            //Race (Dwarf)
+            spellCoolDown.Add(StoneformSpell, DateTime.Now);  
+            
+            //Race (Human)
+            spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
 
             PriorityTargetDisplayIds = new List<int>();
         }
@@ -85,6 +111,27 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
         {
             ExecuteCC();
 
+            if (WowInterface.ObjectManager.Player.Race == WowRace.Human
+            && (WowInterface.ObjectManager.Player.IsDazed
+                || WowInterface.ObjectManager.Player.IsFleeing
+                || WowInterface.ObjectManager.Player.IsInfluenced
+                || WowInterface.ObjectManager.Player.IsPossessed))
+            {
+                if (IsSpellReady(EveryManforHimselfSpell))
+                {
+                    WowInterface.HookManager.LuaCastSpell(EveryManforHimselfSpell);
+                }
+            }
+
+            if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0 
+            && (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf ))
+            {
+                if (IsSpellReady(StoneformSpell))
+                {
+                    WowInterface.HookManager.LuaCastSpell(StoneformSpell);
+                }
+            }
+
             // Useable items, potions, etc.
             // ---------------------------- >
 
@@ -130,6 +177,17 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
             }
+        }
+
+        private bool IsSpellReady(string spellName)
+        {
+            if (DateTime.Now > spellCoolDown[spellName])
+            {
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
+                return true;
+            }
+
+            return false;
         }
 
         public bool IsTargetAttackable(WowUnit target)
