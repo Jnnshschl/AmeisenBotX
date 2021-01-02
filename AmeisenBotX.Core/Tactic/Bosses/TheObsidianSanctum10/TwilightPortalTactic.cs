@@ -29,27 +29,30 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
-
-            if (wowUnit != null)
+            if (role == CombatClassRole.Dps)
             {
-                WowGameobject portal = NearestPortal;
+                WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
 
-                if (portal != null)
+                if (wowUnit != null)
                 {
-                    preventMovement = true;
-                    allowAttacking = false;
+                    WowGameobject portal = NearestPortal;
 
-                    if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
+                    if (portal != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
-                    }
-                    else if (PortalClickEvent.Run())
-                    {
-                        WowInterface.HookManager.WowObjectRightClick(portal);
-                    }
+                        preventMovement = true;
+                        allowAttacking = false;
 
-                    return true;
+                        if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
+                        {
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
+                        }
+                        else if (PortalClickEvent.Run())
+                        {
+                            WowInterface.HookManager.WowObjectRightClick(portal);
+                        }
+
+                        return true;
+                    }
                 }
             }
 
