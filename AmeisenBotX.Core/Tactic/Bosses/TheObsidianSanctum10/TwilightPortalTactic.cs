@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Common.Extensions;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
@@ -18,7 +19,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
             PortalClickEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
-        private static List<int> ShadronDisplayId { get; } = new List<int> { 27421 };
+        private static List<int> DragonDisplayId { get; } = new List<int> { 27421, 27039 };
 
         private TimegatedEvent PortalClickEvent { get; }
 
@@ -28,7 +29,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(ShadronDisplayId, false);
+            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -39,7 +40,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
                     preventMovement = true;
                     allowAttacking = false;
 
-                    if (portal.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
+                    if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
                     {
                         WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
                     }
