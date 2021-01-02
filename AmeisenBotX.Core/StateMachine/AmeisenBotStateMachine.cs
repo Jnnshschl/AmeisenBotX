@@ -143,10 +143,7 @@ namespace AmeisenBotX.Core.Statemachine
 
                         if (WowInterface.ObjectManager.Player != null)
                         {
-                            if (!WowInterface.ObjectManager.Player.IsCasting)
-                            {
-                                WowInterface.MovementEngine.Execute();
-                            }
+                            WowInterface.MovementEngine.Execute();
 
                             if (WowInterface.ObjectManager.Player.IsDead)
                             {

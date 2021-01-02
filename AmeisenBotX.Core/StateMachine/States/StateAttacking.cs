@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
+using AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon;
 using AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls;
 using AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron;
 using System;
@@ -61,6 +62,13 @@ namespace AmeisenBotX.Core.Statemachine.States
                 if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(823, 110, 509)) < 150.0)
                 {
                     WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic());
+                }
+            }
+            else if (WowInterface.ObjectManager.MapId == MapId.TheObsidianSanctum)
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3377, 521, 98)) < 100.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new Shadron10Tactic(WowInterface));
                 }
             }
             else if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)

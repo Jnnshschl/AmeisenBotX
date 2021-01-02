@@ -124,7 +124,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                WowUnit target = (WowUnit)WowInterface.ObjectManager.WowObjects.FirstOrDefault(e => e.Guid == WowInterface.ObjectManager.TargetGuid);
+                WowUnit target = (WowUnit)WowInterface.ObjectManager.WowObjects.FirstOrDefault(e => e != null && e.Guid == WowInterface.ObjectManager.TargetGuid);
 
                 if (target != null)
                 {

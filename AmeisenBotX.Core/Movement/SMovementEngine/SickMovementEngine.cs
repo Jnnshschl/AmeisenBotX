@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                             new Leaf(() =>
                             {
                                 var randomPosition = WowInterface.PathfindingHandler.GetRandomPointAround(
-                                    (int) WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, 15.0f);
+                                    (int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, 15.0f);
                                 if (PathfindingStatus != PathfindingStatus.PathIncomplete)
                                 {
                                     StopMovement();
@@ -149,7 +149,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public bool IsGhost { get; set; }
 
         public bool JumpOnNextMove { get; private set; }
-        
+
         public bool GoToRandomPositionOnNextMove { get; private set; }
 
         public Vector3 LastPlayerPosition { get; private set; }
@@ -347,12 +347,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         private BehaviorTreeStatus DodgeAoeSpell()
         {
             Vector3 targetPosition = GetPositionOutsideOfAoeSpells(WowInterface.ObjectManager.Player.Position, NearAoeSpells);
-
-            if (targetPosition.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.5f)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition);
-                return BehaviorTreeStatus.Success;
-            }
+            WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition);
 
             return BehaviorTreeStatus.Success;
         }
@@ -467,7 +462,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 Vector3 meanAoePos = BotMath.GetMeanPosition(aoeSpells.Select(e => e.Position));
                 float distanceToMove = aoeSpells.Max(e => e.Radius);
 
-                // get average ange to produce the outgoing angle
+                // get average angle to produce the outgoing angle
                 float outgoingAngle = aoeSpells.Average(e => BotMath.GetFacingAngle(e.Position, meanAoePos));
 
                 // "repell" the position from the aoe spell
@@ -631,7 +626,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                     if (StuckCounter > 0 && WowInterface.ObjectManager.Player.IsMounted)
                     {
                         WowInterface.HookManager.LuaDismissCompanion();
-                    } 
+                    }
                     else if (StuckCounter > 2)
                     {
                         GoToRandomPositionOnNextMove = true;
