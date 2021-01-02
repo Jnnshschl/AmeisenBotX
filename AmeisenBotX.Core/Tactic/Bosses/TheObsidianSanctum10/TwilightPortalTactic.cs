@@ -41,34 +41,37 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
                         preventMovement = true;
                         allowAttacking = false;
 
-                        if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
-                        {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
-                        }
-                        else if (PortalClickEvent.Run())
-                        {
-                            WowInterface.HookManager.WowObjectRightClick(portal);
-                        }
+                        UsePortal(portal);
 
                         return true;
                     }
                 }
-                else if (portal != null && WowInterface.ObjectManager.Player.HealthPercentage < 20.0)
+                else if (portal != null && WowInterface.ObjectManager.Player.HealthPercentage < 25.0)
                 {
-                    if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
-                    }
-                    else if (PortalClickEvent.Run())
-                    {
-                        WowInterface.HookManager.WowObjectRightClick(portal);
-                    }
+                    preventMovement = true;
+                    allowAttacking = false;
+
+                    UsePortal(portal);
+
+                    return true;
                 }
             }
 
             preventMovement = false;
             allowAttacking = true;
             return false;
+        }
+
+        private void UsePortal(WowGameobject portal)
+        {
+            if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
+            {
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
+            }
+            else if (PortalClickEvent.Run())
+            {
+                WowInterface.HookManager.WowObjectRightClick(portal);
+            }
         }
     }
 }

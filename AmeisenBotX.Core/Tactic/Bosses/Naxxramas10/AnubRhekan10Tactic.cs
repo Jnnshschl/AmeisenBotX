@@ -85,7 +85,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                 allowAttacking = true;
 
                 // Locust Swarm
-                if (wowUnit.CurrentlyCastingSpellId == 28785)
+                if (wowUnit.CurrentlyCastingSpellId > 0 && WowInterface.HookManager.LuaGetSpellNameById(wowUnit.CurrentlyCastingSpellId).Contains("locust", StringComparison.OrdinalIgnoreCase))
                 {
                     LocustSwarmActivated = DateTime.UtcNow;
                     WowInterface.CombatClass.BlacklistedTargetDisplayIds = AnubRhekanDisplayId;
@@ -161,7 +161,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                 allowAttacking = true;
 
                 // Locust Swarm
-                if (wowUnit.CurrentlyCastingSpellId == 28785)
+                if (wowUnit.CurrentlyCastingSpellId > 0 && WowInterface.HookManager.LuaGetSpellNameById(wowUnit.CurrentlyCastingSpellId).Contains("locust", StringComparison.OrdinalIgnoreCase))
                 {
                     TankingIsKiting = true;
                 }
