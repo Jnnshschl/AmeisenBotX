@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects.Structs.SubStructs;
+using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,6 +35,18 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
         public int Xp { get; set; }
 
         public double XpPercentage { get; set; }
+
+        public void Interact(WowInterface wowInterface, WowGameobject gameobject, float minRange = 3.0f)
+        {
+            if (IsInRange(gameobject, minRange))
+            {
+                wowInterface.HookManager.WowObjectRightClick(gameobject);
+            }
+            else
+            {
+                wowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, gameobject.Position);
+            }
+        }
 
         public bool IsAlliance()
         {

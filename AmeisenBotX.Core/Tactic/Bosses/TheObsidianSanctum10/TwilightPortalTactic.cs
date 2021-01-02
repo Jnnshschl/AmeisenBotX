@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Extensions;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;

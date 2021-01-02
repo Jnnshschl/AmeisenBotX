@@ -27,6 +27,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public WowObjectType Type { get; private set; }
 
+        public float DistanceTo(WowObject b) => Position.GetDistance(b.Position);
+
+        public bool IsInRange(WowObject b, float range) => DistanceTo(b) < range;
+
         public override string ToString()
         {
             return $"Object: {Guid}";

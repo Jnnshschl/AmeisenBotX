@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Db;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Grinding;
@@ -78,5 +79,11 @@ namespace AmeisenBotX.Core
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
+
+        public WowPlayer Player => ObjectManager.Player;
+
+        public WowUnit Target => ObjectManager.Target;
+
+        public WowUnit LastTarget => ObjectManager.LastTarget;
     }
 }
