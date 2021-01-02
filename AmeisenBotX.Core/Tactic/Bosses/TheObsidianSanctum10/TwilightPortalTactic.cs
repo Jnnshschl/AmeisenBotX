@@ -32,12 +32,11 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
             if (role == CombatClassRole.Dps)
             {
                 WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
+                WowGameobject portal = NearestPortal;
 
                 if (wowUnit != null)
                 {
-                    WowGameobject portal = NearestPortal;
-
-                    if (portal != null)
+                    if (portal != null && WowInterface.ObjectManager.Player.HealthPercentage > 80.0)
                     {
                         preventMovement = true;
                         allowAttacking = false;
@@ -52,6 +51,17 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
                         }
 
                         return true;
+                    }
+                }
+                else if (portal != null && WowInterface.ObjectManager.Player.HealthPercentage < 20.0)
+                {
+                    if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
+                    }
+                    else if (PortalClickEvent.Run())
+                    {
+                        WowInterface.HookManager.WowObjectRightClick(portal);
                     }
                 }
             }
