@@ -66,6 +66,8 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (WowInterface.ObjectManager.MapId == MapId.TheObsidianSanctum)
             {
+                // Twilight Eggs
+                WowInterface.I.CombatClass.PriorityTargetDisplayIds = new List<int>() { 27396 };
                 WowInterface.TacticEngine.LoadTactics(new TwilightPortalTactic(WowInterface));
             }
             else if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
