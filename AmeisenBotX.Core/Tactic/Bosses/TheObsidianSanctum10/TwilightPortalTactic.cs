@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 {
-    public class Shadron10Tactic : ITactic
+    public class TwilightPortalTactic : ITactic
     {
-        public Shadron10Tactic(WowInterface wowInterface)
+        public TwilightPortalTactic(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
             PortalClickEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
@@ -28,21 +28,6 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
-            if (role == CombatClassRole.Dps)
-            {
-                return DoDps(out preventMovement, out allowAttacking);
-            }
-            else
-            {
-                preventMovement = false;
-                allowAttacking = true;
-                return false;
-            }
-
-        }
-
-        private bool DoDps(out bool handlesMovement, out bool allowAttacking)
-        {
             WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(ShadronDisplayId, false);
 
             if (wowUnit != null)
@@ -51,7 +36,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
                 if (portal != null)
                 {
-                    handlesMovement = true;
+                    preventMovement = true;
                     allowAttacking = false;
 
                     if (portal.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
@@ -67,7 +52,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
                 }
             }
 
-            handlesMovement = false;
+            preventMovement = false;
             allowAttacking = true;
             return false;
         }

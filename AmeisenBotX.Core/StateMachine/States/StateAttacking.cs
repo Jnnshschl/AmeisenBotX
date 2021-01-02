@@ -66,10 +66,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (WowInterface.ObjectManager.MapId == MapId.TheObsidianSanctum)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3377, 521, 98)) < 100.0)
-                {
-                    WowInterface.TacticEngine.LoadTactics(new Shadron10Tactic(WowInterface));
-                }
+                WowInterface.TacticEngine.LoadTactics(new TwilightPortalTactic(WowInterface));
             }
             else if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
             {
