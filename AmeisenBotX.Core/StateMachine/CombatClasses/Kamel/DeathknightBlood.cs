@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             WowInterface = wowInterface;
             ObjectManager = wowInterface.ObjectManager;
             HookManager = wowInterface.HookManager;
-            TargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
+            TargetManager = new TargetManager(new DpsTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
         
         private WowInterface WowInterface { get; }

@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Core.Statemachine.Utils;
@@ -14,10 +15,8 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 {
@@ -156,10 +155,22 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string arcaneBlastSpell = "Arcane Blast";
         protected const string arcaneIntellectSpell = "Arcane Intellect";
         protected const string arcaneMissilesSpell = "Arcane Missiles";
+        protected const string blinkSpell = "Blink";
+        protected const string coldSnapSpell = "Cold Snap";
+        protected const string conjureFoodSpell = "Conjure Food";
+        protected const string conjureRefreshment = "Conjure Refreshment";
+        protected const string conjureWaterSpell = "Conjure Water";
         protected const string counterspellSpell = "Counterspell";
+        protected const string deepFreezeSpell = "Deep Freeze";
         protected const string evocationSpell = "Evocation";
         protected const string fireballSpell = "Fireball";
+        protected const string freezeSpell = "Freeze";
+        protected const string frostArmorSpell = "Frost Armor";
+        protected const string frostBoltSpell = "Frostbolt";
+        protected const string frostNovaSpell = "Frost Nova";
         protected const string hotstreakSpell = "Hot Streak";
+        protected const string iceArmorSpell = "Ice Armor";
+        protected const string iceBarrierSpell = "Ice Barrier";
         protected const string iceBlockSpell = "Ice Block";
         protected const string icyVeinsSpell = "Icy Veins";
         protected const string livingBombSpell = "Living Bomb";
@@ -168,23 +179,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string mirrorImageSpell = "Mirror Image";
         protected const string missileBarrageSpell = "Missile Barrage";
         protected const string moltenArmorSpell = "Molten Armor";
+        protected const string polymorphSpell = "Polymorph";
         protected const string pyroblastSpell = "Pyroblast";
         protected const string scorchSpell = "Scorch";
         protected const string spellStealSpell = "Spellsteal";
-        protected const string iceBarrierSpell = "Ice Barrier";
-        protected const string frostArmorSpell = "Frost Armor";
-        protected const string iceArmorSpell = "Ice Armor";
-        protected const string deepFreezeSpell = "Deep Freeze";
-        protected const string frostBoltSpell = "Frostbolt";
-        protected const string coldSnapSpell = "Cold Snap";
         protected const string summonWaterElementalSpell = "Summon Water Elemental";
-        protected const string conjureWaterSpell = "Conjure Water";
-        protected const string conjureFoodSpell = "Conjure Food";
-        protected const string conjureRefreshment = "Conjure Refreshment";
-        protected const string frostNovaSpell = "Frost Nova";
-        protected const string blinkSpell = "Blink";
-        protected const string freezeSpell = "Freeze";
-        protected const string polymorphSpell = "Polymorph";
 
         #endregion Mage
 
@@ -393,7 +392,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         #region Racials
 
-        protected const string berserkingSpell = "Berserking"; // Troll 
+        protected const string berserkingSpell = "Berserking"; // Troll
         protected const string bloodFurySpell = "Blood Fury"; // Orc
 
         #endregion Racials
@@ -428,9 +427,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
-            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));
+            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));
+            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));
 
             MyAuraManager = new AuraManager(() => WowInterface.ObjectManager.Player?.Auras);
             TargetAuraManager = new AuraManager(() => WowInterface.ObjectManager.Target?.Auras);
@@ -464,6 +463,8 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         public abstract bool HandlesMovement { get; }
 
         public abstract bool IsMelee { get; }
+
+        public bool IsWanding { get; private set; } = false;
 
         public abstract IWowItemComparator ItemComparator { get; set; }
 
@@ -501,7 +502,25 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         private AmeisenBotStateMachine StateMachine { get; }
 
-        public bool IsWanding { get; private set; } = false;
+        public virtual void AttackTarget()
+        {
+            WowUnit target = WowInterface.ObjectManager.Target;
+            if (target == null)
+            {
+                return;
+            }
+
+            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            {
+                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.MovementEngine.Reset();
+                WowInterface.HookManager.WowUnitRightClick(target);
+            }
+            else
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+            }
+        }
 
         public virtual void Execute()
         {
@@ -608,6 +627,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
         }
 
+        public virtual bool IsTargetAttackable(WowUnit target)
+        {
+            return true;
+        }
+
         public virtual void OutOfCombatExecute()
         {
             if ((WowInterface.ObjectManager.Player.HasBuffByName("Food") && WowInterface.ObjectManager.Player.HealthPercentage < 100.0)
@@ -621,31 +645,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             {
                 return;
             }
-        }
-
-        public virtual void AttackTarget()
-        {
-            WowUnit target = WowInterface.ObjectManager.Target;
-            if (target == null)
-            {
-                return;
-            }
-            
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
-            {
-                WowInterface.HookManager.WowStopClickToMove();
-                WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowUnitRightClick(target);
-            }
-            else
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
-            }
-        }
-
-        public virtual bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
         }
 
         public override string ToString()
@@ -712,16 +711,30 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             return false;
         }
 
+        protected bool IsInRange(Spell spell, WowUnit wowUnit)
+        {
+            if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
+            {
+                return WowInterface.ObjectManager.Player.IsInMeleeRange(wowUnit);
+            }
+
+            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
+            return distance >= spell.MinRange && distance <= spell.MaxRange - 1.0;
+        }
+
         protected bool SelectTarget(TargetManager targetManager)
         {
             if (targetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
             {
-                ulong guid = targetToTarget.First().Guid;
-
-                if (WowInterface.ObjectManager.Player.TargetGuid != guid)
+                if (targetToTarget != null && targetToTarget.Any())
                 {
-                    WowInterface.HookManager.WowTargetGuid(guid);
-                    WowInterface.ObjectManager.UpdateWowObjects();
+                    ulong guid = targetToTarget.First().Guid;
+
+                    if (WowInterface.ObjectManager.Player.TargetGuid != guid)
+                    {
+                        WowInterface.HookManager.WowTargetGuid(guid);
+                        WowInterface.ObjectManager.UpdateWowObjects();
+                    }
                 }
             }
 
@@ -777,7 +790,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
                 bool isTargetMyself = guid == 0;
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-                
+
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsResource || spell.Costs < currentResourceAmount)
@@ -1010,17 +1023,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                 needToSwitchTargets = true;
                 return target != null;
             }
-        }
-
-        protected bool IsInRange(Spell spell, WowUnit wowUnit)
-        {
-            if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
-            {
-                return WowInterface.ObjectManager.Player.IsInMeleeRange(wowUnit);
-            }
-
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
-            return distance >= spell.MinRange && distance <= spell.MaxRange - 1.0;
         }
     }
 }

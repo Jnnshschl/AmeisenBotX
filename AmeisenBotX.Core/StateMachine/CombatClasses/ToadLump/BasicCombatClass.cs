@@ -417,9 +417,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.ToadLump
             CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
-            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));
+            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));
+            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(), TimeSpan.FromMilliseconds(250));
 
             MyAuraManager = new AuraManager(() => WowInterface.ObjectManager.Player?.Auras);
             TargetAuraManager = new AuraManager(() => WowInterface.ObjectManager.Target?.Auras);

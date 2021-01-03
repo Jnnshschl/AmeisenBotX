@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 {
     public class TargetManager
     {
-        public TargetManager(ITargetSelectionLogic targetSelectionLogic, TimeSpan minTargetSwitchTime)
+        public TargetManager(BasicTargetSelectionLogic targetSelectionLogic, TimeSpan minTargetSwitchTime)
         {
             TargetSelectionLogic = targetSelectionLogic;
 
@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils
 
         public IEnumerable<int> PriorityTargets { get => TargetSelectionLogic.PriorityTargets; set => TargetSelectionLogic.PriorityTargets = value; }
 
-        public ITargetSelectionLogic TargetSelectionLogic { get; }
+        public BasicTargetSelectionLogic TargetSelectionLogic { get; }
 
         private TimegatedEvent TargetSwitchEvent { get; set; }
 

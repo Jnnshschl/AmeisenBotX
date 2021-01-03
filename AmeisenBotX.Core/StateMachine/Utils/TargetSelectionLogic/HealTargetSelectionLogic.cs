@@ -4,34 +4,19 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 {
-    public class HealTargetSelectionLogic : ITargetSelectionLogic
+    public class HealTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public HealTargetSelectionLogic(WowInterface wowInterface)
+        public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            WowInterface = wowInterface;
-        }
-
-        public IEnumerable<int> BlacklistedTargets { get; set; }
-
-        public IEnumerable<int> PriorityTargets { get; set; }
-
-        private WowInterface WowInterface { get; }
-
-        public void Reset()
-        {
-        }
-
-        public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
-        {
-            List<WowUnit> healableUnits = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            List<WowUnit> healableUnits = new List<WowUnit>(WowInterface.I.ObjectManager.Partymembers)
             {
-                // healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
-                WowInterface.ObjectManager.Player
+                WowInterface.I.ObjectManager.Player
             };
 
-            // order by type id, so that players have priority
+            // healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+
             possibleTargets = healableUnits
-                .Where(e => e.Health < e.MaxHealth && !e.IsDead)
+                .Where(e => !e.IsDead && e.Health < e.MaxHealth)
                 .OrderByDescending(e => e.Type)
                 .ThenByDescending(e => e.MaxHealth - e.Health);
 

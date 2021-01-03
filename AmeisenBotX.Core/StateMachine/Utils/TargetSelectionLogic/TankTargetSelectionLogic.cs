@@ -1,128 +1,83 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using System;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 {
-    public class TankTargetSelectionLogic : ITargetSelectionLogic
+    public class TankTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public TankTargetSelectionLogic(WowInterface wowInterface)
+        public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            WowInterface = wowInterface;
-            PriorityTargets = new List<int>();
-            BlacklistedTargets = new List<int>();
-        }
+            possibleTargets = null;
 
-        public IEnumerable<int> BlacklistedTargets { get; set; }
+            bool hasTarget = WowInterface.I.Target != null
+                && WowInterface.I.ObjectManager.TargetGuid != 0;
 
-        public IEnumerable<int> PriorityTargets { get; set; }
-
-        private WowInterface WowInterface { get; }
-
-        public void Reset()
-        {
-        }
-
-        public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
-        {
-            if (WowInterface.ObjectManager.TargetGuid != 0
-                && WowInterface.ObjectManager.Target != null
-                && (WowInterface.ObjectManager.Target.IsDead
-                || (BlacklistedTargets != null && BlacklistedTargets.Contains(WowInterface.Target.DisplayId))
-                || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly
-                || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
+            if (hasTarget)
             {
-                WowInterface.HookManager.WowClearTarget();
-                possibleTargets = null;
-                return false;
-            }
-
-            Vector3 position = WowInterface.ObjectManager.PartyleaderGuid != 0 ? WowInterface.ObjectManager.MeanGroupPosition : WowInterface.ObjectManager.Player.Position;
-
-            // get all enemies targeting our group
-            IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
-                .GetEnemiesTargetingPartymembers<WowUnit>(position, 64.0)
-                .Where(e => e.IsInCombat
-                    && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId))
-                    && !(WowInterface.ObjectManager.MapId == MapId.PitOfSaron && e.Name == "Rimefang")
-                    && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
-                    && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
-                .OrderBy(e => e.Position.GetDistance(position));
-
-            bool keepCurrentTarget = (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
-                && (WowInterface.ObjectManager.Target?.GetType() == typeof(WowPlayer)
-                || WowInterface.ObjectManager.Target?.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                || !enemies.Any(e => e.TargetGuid != WowInterface.ObjectManager.PlayerGuid));
-
-            if (keepCurrentTarget)
-            {
-                possibleTargets = null;
-                return false;
-            }
-
-            enemies = enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(position, 64.0).Where(e => e.IsInCombat && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId))));
-
-            if (enemies.Any())
-            {
-                // filter out enemies already attacking me (keep players for pvp)
-                IEnumerable<WowUnit> enemiesNotTargetingMe = enemies
-                    .Where(e => e.GetType() == typeof(WowPlayer) || e.TargetGuid != WowInterface.ObjectManager.PlayerGuid);
-
-                if (enemiesNotTargetingMe.Any())
+                if (!IsValidUnit(WowInterface.I.Target))
                 {
-                    IEnumerable<WowUnit> targetUnits = enemiesNotTargetingMe
-                        .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid)
-                        .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
-                        .ThenBy(e => e.Position.GetDistance(position));
-
-                    if (targetUnits != null && targetUnits.Any())
-                    {
-                        // target closest enemy
-                        possibleTargets = targetUnits;
-                        return true;
-                    }
-                }
-                else
-                {
-                    // target the unit with the most health, likely to be the boss
-                    IEnumerable<WowUnit> targetUnits = enemies
-                        .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid
-                            && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId)))
-                        .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
-                        .ThenByDescending(e => e.Health);
-
-                    if (targetUnits != null && targetUnits.Any())
-                    {
-                        // target closest enemy
-                        possibleTargets = targetUnits;
-                        return true;
-                    }
+                    WowInterface.I.HookManager.WowClearTarget();
+                    return true;
                 }
 
-                possibleTargets = enemies.Where(e => e.IsTaggedByMe || !e.IsTaggedByOther).ToList();
-                return true;
-            }
-            else
-            {
-                // get near players and attack them
-                enemies = WowInterface.ObjectManager
-                    .GetNearEnemies<WowPlayer>(position, 64.0)
-                    .Where(e => (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId)))
-                    .OrderBy(e => e.Position.GetDistance(position));
-
-                if (enemies.Any())
+                if (WowInterface.I.Target.Type != WowObjectType.Player
+                    && WowInterface.I.Target.TargetGuid != WowInterface.I.ObjectManager.PlayerGuid
+                    && WowInterface.I.ObjectManager.PartymemberGuids.Contains(WowInterface.I.Target.TargetGuid))
                 {
-                    possibleTargets = enemies;
                     return true;
                 }
             }
 
-            possibleTargets = null;
-            return false;
+            IEnumerable<WowUnit> unitsAroundMe = WowInterface.I.ObjectManager.WowObjects
+                .OfType<WowUnit>()
+                .Where(e => IsValidUnit(e))
+                .OrderByDescending(e => e.Type)
+                .ThenByDescending(e => e.MaxHealth);
+
+            IEnumerable<WowUnit> targetsINeedToTank = unitsAroundMe
+                .Where(e => e.Type != WowObjectType.Player
+                         && e.TargetGuid != WowInterface.I.Player.Guid
+                         && WowInterface.I.ObjectManager.PartymemberGuids.Contains(e.TargetGuid));
+
+            if (targetsINeedToTank.Any())
+            {
+                possibleTargets = targetsINeedToTank;
+                return true;
+            }
+            else
+            {
+                if (WowInterface.I.ObjectManager.Partymembers.Any())
+                {
+                    Dictionary<WowUnit, int> targets = new Dictionary<WowUnit, int>();
+
+                    foreach (WowUnit unit in WowInterface.I.ObjectManager.Partymembers)
+                    {
+                        if (unit.TargetGuid > 0)
+                        {
+                            WowUnit targetUnit = WowInterface.I.ObjectManager.GetWowObjectByGuid<WowUnit>(unit.TargetGuid);
+
+                            if (targetUnit != null && WowInterface.I.HookManager.WowGetUnitReaction(targetUnit, WowInterface.I.Player) != WowUnitReaction.Friendly)
+                            {
+                                if (!targets.ContainsKey(targetUnit))
+                                {
+                                    targets.Add(targetUnit, 1);
+                                }
+                                else
+                                {
+                                    ++targets[targetUnit];
+                                }
+                            }
+                        }
+                    }
+
+                    possibleTargets = targets.OrderBy(e => e.Value).Select(e => e.Key);
+                    return true;
+                }
+
+                possibleTargets = unitsAroundMe;
+                return true;
+            }
         }
     }
 }

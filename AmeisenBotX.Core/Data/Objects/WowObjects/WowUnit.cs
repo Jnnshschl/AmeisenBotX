@@ -209,9 +209,24 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             return Auras != null && Auras.Any(e => e.Name == name);
         }
 
+        public bool IsFriendyTo(WowPlayer player)
+        {
+            return WowInterface.I.HookManager.WowGetUnitReaction(this, player) == WowUnitReaction.Friendly;
+        }
+
+        public bool IsHostileTo(WowPlayer player)
+        {
+            return WowInterface.I.HookManager.WowGetUnitReaction(this, player) == WowUnitReaction.Hostile;
+        }
+
         public bool IsInMeleeRange(WowUnit wowUnit)
         {
             return wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
+        }
+
+        public bool IsNeutralTo(WowPlayer player)
+        {
+            return WowInterface.I.HookManager.WowGetUnitReaction(this, player) == WowUnitReaction.Neutral;
         }
 
         public override string ToString()
