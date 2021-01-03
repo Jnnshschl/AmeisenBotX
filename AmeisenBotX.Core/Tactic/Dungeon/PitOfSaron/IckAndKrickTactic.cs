@@ -11,13 +11,23 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 {
     public class IckAndKrickTactic : ITactic
     {
+        public IckAndKrickTactic()
+        {
+            Configureables = new Dictionary<string, dynamic>()
+            {
+                { "isOffTank", false },
+            };
+        }
+
+        public static Vector3 MidPosition { get; } = new Vector3(823, 110, 509);
+
         public DateTime ChasingActivated { get; private set; }
+
+        public Dictionary<string, dynamic> Configureables { get; private set; }
 
         private static List<int> IckDisplayId { get; } = new List<int> { 30347 };
 
         private bool ChasingActive => (ChasingActivated + TimeSpan.FromSeconds(14)) > DateTime.UtcNow;
-
-        public static Vector3 MidPosition { get; } = new Vector3(823, 110, 509);
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
@@ -43,7 +53,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                 }
 
                 WowUnit unitOrb = WowInterface.I.ObjectManager.WowObjects.OfType<WowUnit>()
-                    .OrderBy(e=>e.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position))
                     .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) < 3.0f);
 
                 if (unitOrb != null) // orbs

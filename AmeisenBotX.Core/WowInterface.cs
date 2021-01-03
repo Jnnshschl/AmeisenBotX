@@ -85,5 +85,7 @@ namespace AmeisenBotX.Core
         public WowUnit Target => ObjectManager.Target;
 
         public WowUnit LastTarget => ObjectManager.LastTarget;
+
+        public WowUnit Pet => ObjectManager.Pet;
     }
 }

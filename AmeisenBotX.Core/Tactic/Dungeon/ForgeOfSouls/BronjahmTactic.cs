@@ -10,9 +10,19 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 {
     public class BronjahmTactic : ITactic
     {
-        private static List<int> BronjahmDisplayId { get; } = new List<int> { 30226 };
+        public BronjahmTactic()
+        {
+            Configureables = new Dictionary<string, dynamic>()
+            {
+                { "isOffTank", false },
+            };
+        }
 
         public static Vector3 MidPosition { get; } = new Vector3(5297, 2506, 686);
+
+        public Dictionary<string, dynamic> Configureables { get; private set; }
+
+        private static List<int> BronjahmDisplayId { get; } = new List<int> { 30226 };
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
@@ -46,7 +56,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                         float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
 
                         // flee from the corrupted souls target
-                        bool needToFlee = wowUnit.CurrentlyChannelingSpellId == 68839 
+                        bool needToFlee = wowUnit.CurrentlyChannelingSpellId == 68839
                             || WowInterface.I.ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
 
                         if (needToFlee)
@@ -96,4 +106,3 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
         }
     }
 }
-

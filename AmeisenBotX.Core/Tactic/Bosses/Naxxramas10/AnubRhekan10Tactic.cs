@@ -14,11 +14,20 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
         {
             WowInterface = wowInterface;
             TankingPathQueue = new Queue<Vector3>();
+
+            Configureables = new Dictionary<string, dynamic>()
+            {
+                { "isOffTank", false },
+            };
         }
+
+        public Dictionary<string, dynamic> Configureables { get; private set; }
 
         public DateTime LocustSwarmActivated { get; private set; }
 
         private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
+
+        private static List<int> AddsDisplayIds { get; } = new List<int> { 14698, 27943 };
 
         private Vector3 ImpaleDodgePos { get; set; }
 
@@ -27,8 +36,6 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
         private bool MeleeDpsIsMovingToMid { get; set; } = false;
 
         private Vector3 MiddleSpot { get; } = new Vector3(3274, -3476, 287);
-
-        private bool TankingIsKiting { get; set; } = false;
 
         private bool TankingIsUsingA { get; set; } = true;
 
@@ -62,6 +69,8 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private Vector3 TankingSpotB { get; } = new Vector3(3222, -3464, 287);
 
+        private bool TankIsKiting { get; set; } = false;
+
         private WowInterface WowInterface { get; }
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
@@ -85,7 +94,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                 allowAttacking = true;
 
                 // Locust Swarm
-                if (wowUnit.CurrentlyCastingSpellId > 0 && WowInterface.HookManager.LuaGetSpellNameById(wowUnit.CurrentlyCastingSpellId).Contains("locust", StringComparison.OrdinalIgnoreCase))
+                if (wowUnit.CurrentlyCastingSpellId == 28785)
                 {
                     LocustSwarmActivated = DateTime.UtcNow;
                     WowInterface.CombatClass.BlacklistedTargetDisplayIds = AnubRhekanDisplayId;
@@ -117,9 +126,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                         ImpaleDodgePos = Vector3.Zero;
                     }
 
-                    Vector3 targetPosition = BotUtils.MoveAhead(MiddleSpot, wowUnit.Position, -30f);
+                    Vector3 targetPosition = BotUtils.MoveAhead(MiddleSpot, wowUnit.Position, -30.0f);
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(MiddleSpot) > 6.0)
+                    if (!LocustSwarmActive && WowInterface.ObjectManager.Player.Position.GetDistance(MiddleSpot) > 6.0)
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, targetPosition);
                         return true;
@@ -157,57 +166,66 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
             if (wowUnit != null && wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
             {
-                handlesMovement = true;
-                allowAttacking = true;
-
-                // Locust Swarm
-                if (wowUnit.CurrentlyCastingSpellId > 0 && WowInterface.HookManager.LuaGetSpellNameById(wowUnit.CurrentlyCastingSpellId).Contains("locust", StringComparison.OrdinalIgnoreCase))
+                if (Configureables["isOffTank"] == true)
                 {
-                    TankingIsKiting = true;
-                }
-
-                if (!TankingIsKiting)
-                {
-                    Vector3 tankingSpot = TankingIsUsingA ? TankingSpotA : TankingSpotB;
-
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance2D(tankingSpot) > 2.0)
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, tankingSpot, 0, false, true);
-                    }
+                    // offtank should only focus adds
+                    WowInterface.CombatClass.BlacklistedTargetDisplayIds = AnubRhekanDisplayId;
                 }
                 else
                 {
-                    allowAttacking = false;
+                    WowInterface.CombatClass.BlacklistedTargetDisplayIds = AddsDisplayIds;
+                    handlesMovement = true;
+                    allowAttacking = true;
 
-                    if (TankingPathQueue.Count == 0)
+                    // Locust Swarm
+                    if (wowUnit.CurrentlyCastingSpellId == 28785)
                     {
-                        foreach (Vector3 v in TankingIsUsingA ? TankingKitingRouteA : TankingKitingRouteB)
+                        TankIsKiting = true;
+                    }
+
+                    if (!TankIsKiting)
+                    {
+                        Vector3 tankingSpot = TankingIsUsingA ? TankingSpotA : TankingSpotB;
+
+                        if (WowInterface.ObjectManager.Player.Position.GetDistance2D(tankingSpot) > 2.0)
                         {
-                            TankingPathQueue.Enqueue(v);
+                            WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, tankingSpot, 0, false, true);
                         }
                     }
                     else
                     {
-                        Vector3 targetPosition = TankingPathQueue.Peek();
+                        allowAttacking = false;
 
-                        if (targetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 2.0)
+                        if (TankingPathQueue.Count == 0)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition, 0, false, true);
+                            foreach (Vector3 v in TankingIsUsingA ? TankingKitingRouteA : TankingKitingRouteB)
+                            {
+                                TankingPathQueue.Enqueue(v);
+                            }
                         }
                         else
                         {
-                            TankingPathQueue.Dequeue();
+                            Vector3 targetPosition = TankingPathQueue.Peek();
 
-                            if (TankingPathQueue.Count == 0)
+                            if (targetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 2.0)
                             {
-                                TankingIsKiting = false;
-                                TankingIsUsingA = !TankingIsUsingA;
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition, 0, false, true);
+                            }
+                            else
+                            {
+                                TankingPathQueue.Dequeue();
+
+                                if (TankingPathQueue.Count == 0)
+                                {
+                                    TankIsKiting = false;
+                                    TankingIsUsingA = !TankingIsUsingA;
+                                }
                             }
                         }
                     }
-                }
 
-                return true;
+                    return true;
+                }
             }
 
             handlesMovement = false;

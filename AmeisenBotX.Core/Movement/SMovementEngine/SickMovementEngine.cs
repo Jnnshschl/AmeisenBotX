@@ -241,8 +241,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 {
                     ShortcutPosition = default;
                 }
-
-                ForceDirectMove = false;
             }
 
             BehaviorTree.Tick();

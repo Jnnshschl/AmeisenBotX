@@ -26,11 +26,12 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
         public bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null
-                && (WowInterface.ObjectManager.Target.IsDead
-                    || WowInterface.ObjectManager.Target.IsNotAttackable
-                    || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
-                    || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly))
+            if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.Target != null
+                && (WowInterface.Target.IsDead
+                    || (BlacklistedTargets != null && BlacklistedTargets.Contains(WowInterface.Target.DisplayId))
+                    || WowInterface.Target.IsNotAttackable
+                    || !BotUtils.IsValidUnit(WowInterface.Target)
+                    || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.Target) == WowUnitReaction.Friendly))
             {
                 WowInterface.HookManager.WowClearTarget();
                 possibleTargets = null;
@@ -42,7 +43,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             if (PriorityTargets != null && PriorityTargets.Any())
             {
                 IEnumerable<WowUnit> nearPriorityEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(position, 64.0)
-                    .Where(e => BotUtils.IsValidUnit(e) && !e.IsDead && e.Health > 0 && e.IsInCombat && PriorityTargets.Any(x => e.DisplayId == x) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0)
+                    .Where(e => BotUtils.IsValidUnit(e) && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId)) && !e.IsDead && e.Health > 0 && e.IsInCombat && PriorityTargets.Any(x => e.DisplayId == x) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
 
                 if (nearPriorityEnemies.Any())
@@ -54,7 +55,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
 
             IEnumerable<WowUnit> nearEnemies = WowInterface.ObjectManager
                 .GetEnemiesInCombatWithGroup<WowUnit>(position, 64.0)
-                .Where(e => !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
+                .Where(e => (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId))
+                         && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                          && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346))) // Novos fix
                 .OrderByDescending(e => e.Type) // make sure players are at the top (pvp)
                 .ThenByDescending(e => e.IsFleeing) // catch fleeing enemies
@@ -69,7 +71,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 return true;
             }
 
-            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(position, 100.0).Where(e => e.IsInCombat);
+            nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(position, 100.0)
+                .Where(e => e.IsInCombat && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId)));
 
             if (nearEnemies.Any())
             {

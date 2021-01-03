@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             if (WowInterface.ObjectManager.TargetGuid != 0
                 && WowInterface.ObjectManager.Target != null
                 && (WowInterface.ObjectManager.Target.IsDead
-                || BlacklistedTargets.Contains(WowInterface.ObjectManager.Target.DisplayId)
+                || (BlacklistedTargets != null && BlacklistedTargets.Contains(WowInterface.Target.DisplayId))
                 || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly
                 || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)))
             {
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
             IEnumerable<WowUnit> enemies = WowInterface.ObjectManager
                 .GetEnemiesTargetingPartymembers<WowUnit>(position, 64.0)
                 .Where(e => e.IsInCombat
-                    && !BlacklistedTargets.Contains(e.DisplayId)
+                    && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId))
                     && !(WowInterface.ObjectManager.MapId == MapId.PitOfSaron && e.Name == "Rimefang")
                     && !(WowInterface.ObjectManager.MapId == MapId.HallsOfReflection && e.Name == "The Lich King")
                     && !(WowInterface.ObjectManager.MapId == MapId.DrakTharonKeep && WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>().Any(e => e.SpellId == 47346) && e.Name.Contains("novos the summoner", StringComparison.OrdinalIgnoreCase)))
@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 return false;
             }
 
-            enemies = enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(position, 64.0).Where(e => e.IsInCombat));
+            enemies = enemies.Concat(WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(position, 64.0).Where(e => e.IsInCombat && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId))));
 
             if (enemies.Any())
             {
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                     // target the unit with the most health, likely to be the boss
                     IEnumerable<WowUnit> targetUnits = enemies
                         .Where(e => WowInterface.ObjectManager.TargetGuid != e.Guid
-                            && !BlacklistedTargets.Contains(e.DisplayId))
+                            && (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId)))
                         .OrderBy(e => e.GetType().Name) // make sure players are at the top (pvp)
                         .ThenByDescending(e => e.Health);
 
@@ -111,6 +111,7 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
                 // get near players and attack them
                 enemies = WowInterface.ObjectManager
                     .GetNearEnemies<WowPlayer>(position, 64.0)
+                    .Where(e => (BlacklistedTargets == null || !BlacklistedTargets.Contains(e.DisplayId)))
                     .OrderBy(e => e.Position.GetDistance(position));
 
                 if (enemies.Any())

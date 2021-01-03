@@ -1,12 +1,9 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 {
@@ -16,15 +13,22 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
         {
             WowInterface = wowInterface;
             PortalClickEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
+            Configureables = new Dictionary<string, dynamic>()
+            {
+                { "isOffTank", false },
+            };
         }
 
+        public Dictionary<string, dynamic> Configureables { get; private set; }
+
         private static List<int> DragonDisplayId { get; } = new List<int> { 27421, 27039 };
+
+        private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
 
         private WowInterface WowInterface { get; }
-
-        private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0);
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {

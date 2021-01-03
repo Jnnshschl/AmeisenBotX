@@ -10,9 +10,19 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 {
     public class DevourerOfSoulsTactic : ITactic
     {
-        private static List<int> DevourerOfSoulsDisplayId { get; } = new List<int> { 30148, 30149, 30150 };
+        public DevourerOfSoulsTactic()
+        {
+            Configureables = new Dictionary<string, dynamic>()
+            {
+                { "isOffTank", false },
+            };
+        }
 
         public static Vector3 MidPosition { get; } = new Vector3(5662, 2507, 709);
+
+        public Dictionary<string, dynamic> Configureables { get; private set; }
+
+        private static List<int> DevourerOfSoulsDisplayId { get; } = new List<int> { 30148, 30149, 30150 };
 
         public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
@@ -63,4 +73,3 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
         }
     }
 }
-
