@@ -330,6 +330,7 @@ namespace AmeisenBotX.Core
             {
                 new UniversalBattlegroundEngine(WowInterface),
                 new KummelEngine(WowInterface),
+                new ArathiBasin(WowInterface),
                 new RunBoyRunEngine(WowInterface)
             };
         }
