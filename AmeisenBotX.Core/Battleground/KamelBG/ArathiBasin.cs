@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
             if (FlagNode != null)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, FlagNode.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, FlagNode.Position);
 
                 if (WowInterface.ObjectManager.Player.Position.GetDistance(FlagNode.Position) <= 4)
                 {
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, FlagNode.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, FlagNode.Position);
                 }
             }
             else
@@ -92,9 +92,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 //CurrentNodeCounter = Path.IndexOf(closestNode) + 1;
 
                 Vector3 currentNode = Path[CurrentNodeCounter];
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
 
-                if (WowInterface.MovementEngine.IsAtTargetPosition)
+                if (WowInterface.Player.Position.GetDistance(currentNode) < 3.0f)
                 {
                     ++CurrentNodeCounter;
 
