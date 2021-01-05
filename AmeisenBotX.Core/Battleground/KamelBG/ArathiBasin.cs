@@ -21,22 +21,18 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private int CurrentNodeCounter { get; set; }
 
-        private Vector3 stable = new Vector3(1166, 1203, -56);
-        private Vector3 Farm = new Vector3(803, 875, -55);
-        private Vector3 LumberMill = new Vector3(852, 1151, 11);
-        private Vector3 Blacksmith = new Vector3(975, 1043, -44);
-        private Vector3 GoldMine = new Vector3(1144, 844, -110);
-
         public List<Vector3> Path { get; } = new List<Vector3>()
         {
-            new Vector3(1166, 1203, -56),
-            new Vector3(803, 875, -55),
-            new Vector3(852, 1151, 11),
-            new Vector3(975, 1043, -44),
-            new Vector3(1144, 844, -110)
+            new Vector3(1166, 1203, -56),//Stable
+            new Vector3(803, 875, -55),//Farm
+            new Vector3(852, 1151, 11),//LumberMill
+            new Vector3(975, 1043, -44),//Blacksmith
+            new Vector3(1144, 844, -110)//GoldMine
         };
 
         private TimegatedEvent CaptureFlagEvent { get; }
+        private TimegatedEvent CombatEvent { get; }
+
 
         private bool IsCirclePath = true;
 
@@ -49,6 +45,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             WowInterface = wowInterface;
 
             CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             FlagsNodelist = new List<Flags>();
         }
 
@@ -59,11 +56,13 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Execute()
         {
+            Combat();
+
             WowGameobject FlagNode = WowInterface.ObjectManager.WowObjects
             .OfType<WowGameobject>()
-            .Where(x => !FlagsNodelist.Contains((Flags)x.DisplayId) 
+            .Where(x => !FlagsNodelist.Contains((Flags)x.DisplayId)
                     && Enum.IsDefined(typeof(Flags), x.DisplayId)
-                    && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 160)
+                    && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80)
             .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
             .FirstOrDefault();
 
@@ -88,8 +87,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             }
             else
             {
-                //Vector3 closestNode = Path.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
-                //CurrentNodeCounter = Path.IndexOf(closestNode) + 1;
 
                 Vector3 currentNode = Path[CurrentNodeCounter];
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
@@ -113,7 +110,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Leave()
         {
-            
+
         }
 
         public void Faction()
@@ -132,7 +129,32 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 FlagsNodelist.Add(Flags.AlliFlags);
                 FlagsNodelist.Add(Flags.AlliFlagsAktivate);
             }
-            
+
+        }
+
+        public void Combat()
+        {
+            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
+
+            if (weakestPlayer != null)
+            {
+                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
+
+                if (distance > threshold)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
+                }
+                else if (CombatEvent.Run())
+                {
+                    WowInterface.Globals.ForceCombat = true;
+                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
+                }
+            }
+            else
+            {
+                
+            }
         }
     }
 }
