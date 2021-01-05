@@ -324,7 +324,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             return;
                         }
-                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();
@@ -341,7 +341,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         //    WowInterface.HookManager.UseItemByName("Talisman of Resuregence");
                         //    return;
                         //}   
-                        
+
                         if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
                         {
                             return;
@@ -436,7 +436,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             return;
                         }
-                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();

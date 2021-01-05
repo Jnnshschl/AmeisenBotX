@@ -518,7 +518,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 

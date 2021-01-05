@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowGameobject.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowGameobject.Position);
                 }
             }
         }

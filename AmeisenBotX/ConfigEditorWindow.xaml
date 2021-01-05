@@ -277,7 +277,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Slider x:Name="sliderMaxFollowDistance" HorizontalAlignment="Left" Margin="4,194,0,0" VerticalAlignment="Top" Width="179" Maximum="256" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Slider x:Name="sliderMaxFollowDistance" HorizontalAlignment="Left" Margin="4,194,0,0" VerticalAlignment="Top" Width="179" Maximum="1024" Minimum="4" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxFollowDistance_ValueChanged" FontFamily="Bahnschrift Light" />
                         <Label x:Name="labelFollowing" Content="Following" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />

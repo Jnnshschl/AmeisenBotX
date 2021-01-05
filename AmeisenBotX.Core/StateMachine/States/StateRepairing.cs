@@ -51,9 +51,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) > 3.5)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
-
-                    if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
+                    if (!WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedUnit.Position))
                     {
                         ++BlacklistCounter;
 
@@ -80,14 +78,6 @@ namespace AmeisenBotX.Core.Statemachine.States
                         SellItemsRoutine.Run(WowInterface, Config);
                     }
                 }
-            }
-            else if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == MovementAction.None)
-            {
-                int playerMapId = (int) WowInterface.ObjectManager.MapId;
-                Vector3 playerPosition = WowInterface.ObjectManager.Player.Position;
-                Vector3 nearestVendorPosition = StaticDB.Vendors.Where(e => playerMapId == e.MapId && e.IsRepairer && (e as ILikeUnit).LikesUnit(WowInterface.ObjectManager.Player))
-                    .OrderBy(e => playerPosition.GetDistance(e.Position)).First().Position;
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestVendorPosition);
             }
         }
 

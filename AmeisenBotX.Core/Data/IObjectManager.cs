@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Data
 
         string ZoneSubName { get; }
 
-        IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f);
+        IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 1.0f);
 
         WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds);
 

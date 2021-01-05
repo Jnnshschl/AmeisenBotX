@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                             if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
                             {
-                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, player.Position);
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Follow, player.Position);
                             }
                         }
                         else
@@ -192,7 +192,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             if (target == null)
             {
                 // just move to our group
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowInterface.ObjectManager.MeanGroupPosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.ObjectManager.MeanGroupPosition);
                 return true;
             }
             else
@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                             positionToGoTo = BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, positionToGoTo, -(DistanceToKeep * 0.8f));
                         }
 
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, positionToGoTo);
                         return true;
                     }
 
@@ -250,7 +250,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                     // just move to the enemies melee/ranged range
                     positionToGoTo = target.Position;
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, positionToGoTo);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, positionToGoTo);
                     return true;
                 }
             }

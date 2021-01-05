@@ -99,6 +99,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
+        public TimegatedEvent MovementEvent { get; set; }
+
         public void Execute()
         {
             // Override states
@@ -154,8 +156,7 @@ namespace AmeisenBotX.Core.Statemachine
                                     return;
                                 }
                             }
-                            else if (GhostCheckEvent.Run(out bool isGhost)
-                                && isGhost
+                            else if (WowInterface.Player.IsGhost
                                 && SetState(BotState.Ghost, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);

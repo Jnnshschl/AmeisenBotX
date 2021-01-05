@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Data
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             RelationshipEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            OutdoorCheck = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            GhostCheck = new TimegatedEvent(TimeSpan.FromSeconds(1));
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
@@ -99,6 +101,10 @@ namespace AmeisenBotX.Core.Data
 
         private TimegatedEvent PoiCacheEvent { get; }
 
+        private TimegatedEvent OutdoorCheck { get; }
+
+        private TimegatedEvent GhostCheck { get; }
+
         private TimegatedEvent RelationshipEvent { get; }
 
         private WowInterface WowInterface { get; }
@@ -158,7 +164,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat 
+                    .Where(e => e.IsInCombat
                         && (WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)
                         || WowInterface.ObjectManager.PartyPetGuids.Contains(e.TargetGuid)));
             }
@@ -284,6 +290,16 @@ namespace AmeisenBotX.Core.Data
                             if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
                             {
                                 ((WowPlayer)obj).ComboPoints = comboPoints;
+                            }
+
+                            if (OutdoorCheck.Run())
+                            {
+                                ((WowPlayer)obj).IsOutdoors = WowInterface.HookManager.LuaIsOutdoors();
+                            }
+
+                            if (GhostCheck.Run())
+                            {
+                                ((WowPlayer)obj).IsGhost = WowInterface.HookManager.LuaIsGhost(WowLuaUnit.Player);
                             }
 
                             Player = (WowPlayer)obj;

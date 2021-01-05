@@ -131,7 +131,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
                     if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
                         || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 3.0))
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Fleeing, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
                     }
 
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 15.0

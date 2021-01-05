@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public class MoveToPositionQuestObjective : IQuestObjective
     {
-        public MoveToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Moving)
+        public MoveToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move)
         {
             WowInterface = wowInterface;
             WantedPosition = position;

@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
         {
             if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
             {
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, portal.Position);
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, portal.Position);
             }
             else if (PortalClickEvent.Run())
             {

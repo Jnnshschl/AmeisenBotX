@@ -213,7 +213,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                 if (distance > threshold)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, weakestPlayer.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
                 }
                 else if (ActionEvent.Run())
                 {
@@ -235,7 +235,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > 16.0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.OwnBasePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WsgDataset.OwnBasePosition);
             }
             else
             {
@@ -247,7 +247,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                     if (distanceToEnemy > 2.0)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearEnemy.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
                     else if (ActionEvent.Run())
                     {
@@ -283,7 +283,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (nearestEnemy != null)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Fleeing, nearestEnemy.Position, nearestEnemy.Rotation);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, nearestEnemy.Position, nearestEnemy.Rotation);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -335,7 +335,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > threshold && !WowInterface.ObjectManager.Player.IsCasting)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
             }
             else if (ActionEvent.Run())
             {
@@ -352,7 +352,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > 2.0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WsgDataset.EnemyBasePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WsgDataset.EnemyBasePosition);
             }
             else
             {
@@ -369,7 +369,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             if (buffObject != null
                 && buffObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, buffObject.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, buffObject.Position);
             }
             else
             {
@@ -390,7 +390,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > 4.0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, JBgBlackboard.MyTeamFlagCarrier.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, JBgBlackboard.MyTeamFlagCarrier.Position);
             }
             else
             {
@@ -403,7 +403,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                     if (distanceToEnemy > threshold)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearEnemy.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
                     else if (ActionEvent.Run())
                     {
@@ -442,7 +442,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, position);
                 }
 
                 return BehaviorTreeStatus.Ongoing;
@@ -541,7 +541,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                 if (distance > 4.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestFlag.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, nearestFlag.Position);
                 }
                 else if (ActionEvent.Run())
                 {

@@ -438,7 +438,7 @@ namespace AmeisenBotX
         private void OverlayRenderCurrentPath()
         {
             if (AmeisenBot.WowInterface.MovementEngine.Path != null
-            && AmeisenBot.WowInterface.MovementEngine.Path.Count > 0)
+                && AmeisenBot.WowInterface.MovementEngine.Path.Any())
             {
                 List<Vector3> currentNodes = AmeisenBot.WowInterface.MovementEngine.Path.ToList();
 

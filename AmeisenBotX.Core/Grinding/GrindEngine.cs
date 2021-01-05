@@ -111,9 +111,7 @@ namespace AmeisenBotX.Core.Grinding
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, nearestUnit.Position);
-
-                        if (WowInterface.MovementEngine.PathfindingStatus == PathfindingStatus.PathIncomplete)
+                        if (!WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, nearestUnit.Position))
                         {
                             ++BlacklistCounter;
 
@@ -134,7 +132,7 @@ namespace AmeisenBotX.Core.Grinding
                         TargetPosition = default;
                         return;
                     }
-                    else if (!WowInterface.MovementEngine.Path.Any() || WowInterface.MovementEngine.IsAtTargetPosition)
+                    else if (!WowInterface.MovementEngine.Path.Any() || WowInterface.Player.Position.GetDistance(TargetPosition) < 3.0f)
                     {
                         MoveToRandomPositionOnSpot();
                     }
@@ -148,7 +146,7 @@ namespace AmeisenBotX.Core.Grinding
                     return;
                 }
 
-                if (!WowInterface.MovementEngine.Path.Any() || WowInterface.MovementEngine.IsAtTargetPosition)
+                if (!WowInterface.MovementEngine.Path.Any() || WowInterface.Player.Position.GetDistance(TargetPosition) < 3.0f)
                 {
                     MoveToRandomPositionOnSpot();
                 }
@@ -172,7 +170,7 @@ namespace AmeisenBotX.Core.Grinding
 
             if (repairNpc.GetDistance(WowInterface.ObjectManager.Player.Position) > 4.0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, repairNpc);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, repairNpc);
             }
             else
             {
@@ -194,7 +192,7 @@ namespace AmeisenBotX.Core.Grinding
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, TargetPosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, TargetPosition);
             }
         }
 

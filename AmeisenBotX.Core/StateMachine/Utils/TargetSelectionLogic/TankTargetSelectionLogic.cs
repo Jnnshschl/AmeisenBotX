@@ -10,10 +10,8 @@ namespace AmeisenBotX.Core.Statemachine.Utils.TargetSelectionLogic
         {
             possibleTargets = null;
 
-            bool hasTarget = WowInterface.I.Target != null
-                && WowInterface.I.ObjectManager.TargetGuid != 0;
-
-            if (hasTarget)
+            if (WowInterface.I.Target != null
+                && WowInterface.I.ObjectManager.TargetGuid != 0)
             {
                 if (!IsValidUnit(WowInterface.I.Target))
                 {

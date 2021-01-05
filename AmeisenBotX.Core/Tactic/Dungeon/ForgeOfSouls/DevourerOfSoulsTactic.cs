@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                     if (angleDiff < 0.5f)
                     {
-                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, BotMath.CalculatePositionAround(wowUnit.Position, wowUnit.Rotation, MathF.PI, isMelee ? 5.0f : 22.0f));
+                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, BotMath.CalculatePositionAround(wowUnit.Position, wowUnit.Rotation, MathF.PI, isMelee ? 5.0f : 22.0f));
 
                         preventMovement = true;
                         allowAttacking = false;
@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                         if (distanceToMid > 5.0f && WowInterface.I.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
-                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, modifiedCenterPosition);
+                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
 
                             preventMovement = true;
                             allowAttacking = false;

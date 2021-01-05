@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                 {
                     if (WowInterface.I.ObjectManager.Player.Position.GetDistance(MidPosition) > 8.0)
                     {
-                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.Player.Position, MidPosition), -5.0f));
+                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.Player.Position, MidPosition), -5.0f));
 
                         preventMovement = true;
                         allowAttacking = true;
@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                         {
                             if (distanceToMid < 16.0f)
                             {
-                                WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Fleeing, modifiedCenterPosition);
+                                WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Flee, modifiedCenterPosition);
 
                                 preventMovement = true;
                                 allowAttacking = false;
@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                         if (distanceToMid > 5.0f && WowInterface.I.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
-                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, modifiedCenterPosition);
+                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
 
                             preventMovement = true;
                             allowAttacking = false;
@@ -93,7 +93,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                     if (!isMelee && distanceToMid < 20.0f)
                     {
                         // move to the outer ring of the arena
-                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.Player.Position, MidPosition), -22.0f));
+                        WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.Player.Position, MidPosition), -22.0f));
 
                         preventMovement = true;
                         allowAttacking = false;

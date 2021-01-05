@@ -241,7 +241,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 
@@ -284,7 +284,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
             if (isAttackingFromBehind)
             {
-                if(WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+                if(WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
                 {
                     WowInterface.MovementEngine.StopMovement();
                 }
@@ -299,7 +299,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             {
                 if (!isAttackingFromBehind && isSneaky && distanceToBehindTarget > 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastBehindTargetPosition);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, LastBehindTargetPosition);
                 }
                 else
                 {
@@ -309,7 +309,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                         WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
                     }
 
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, LastTargetPosition, LastTargetRotation);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, LastTargetPosition, LastTargetRotation);
                 }
             }
         }

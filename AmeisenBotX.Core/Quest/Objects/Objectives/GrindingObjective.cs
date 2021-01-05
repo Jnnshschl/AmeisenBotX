@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
-    class GrindingObjective : IQuestObjective
+    internal class GrindingObjective : IQuestObjective
     {
         public GrindingObjective(WowInterface wowInterface, int targetLevel, List<List<Vector3>> grindingAreas)
         {
@@ -15,24 +14,25 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             WantedLevel = targetLevel;
             SearchAreas = new SearchAreaEnsamble(grindingAreas);
         }
-        
-        private WowInterface WowInterface { get; }
-        
-        private int WantedLevel { get;  }
 
-        private SearchAreaEnsamble SearchAreas { get; }
-
-        private WowUnit WowUnit { get; set; }
+        public Vector3 CurrentNode { get; set; }
 
         public bool Finished => WowInterface.ObjectManager.Player.Level >= WantedLevel;
 
-        public double Progress =>
-            100.0 * (WowInterface.ObjectManager.Player.Level +
-                     WowInterface.ObjectManager.Player.XpPercentage / 100.0) / WantedLevel;
+        public double Progress => 100.0 * (WowInterface.ObjectManager.Player.Level + WowInterface.ObjectManager.Player.XpPercentage / 100.0) / WantedLevel;
+
+        private SearchAreaEnsamble SearchAreas { get; }
+
+        private int WantedLevel { get; }
+
+        private WowInterface WowInterface { get; }
+
+        private WowUnit WowUnit { get; set; }
+
         public void Execute()
         {
             if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
-            
+
             if (!SearchAreas.IsPlayerNearSearchArea(WowInterface))
             {
                 WowInterface.HookManager.WowClearTarget();
@@ -59,10 +59,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 SearchAreas.NotifyDetour();
                 WowInterface.CombatClass.AttackTarget();
             }
-            else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath())
+            else if (WowInterface.Player.Position.GetDistance(CurrentNode) < 3.5f || SearchAreas.HasAbortedPath())
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving,
-                    SearchAreas.GetNextPosition(WowInterface));
+                CurrentNode = SearchAreas.GetNextPosition(WowInterface);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentNode);
             }
         }
     }

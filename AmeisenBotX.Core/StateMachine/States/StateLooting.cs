@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     //     }
                     // }
 
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedUnit.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedUnit.Position);
 
                     if (LastOpenLootTry.Run())
                     {

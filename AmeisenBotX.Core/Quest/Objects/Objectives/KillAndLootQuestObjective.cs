@@ -1,12 +1,11 @@
-﻿using System;
+﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
+using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using AmeisenBotX.Core.Data.CombatLog.Enums;
-using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
@@ -26,18 +25,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             }
         }
 
-        private bool CollectQuestItem => QuestItemId > 0;
-        
-        private int QuestItemId { get; }
-        
-        private List<int> NpcIds { get; }
-        
-        private int CollectOrKillAmount { get; }
-        
-        private SearchAreaEnsamble SearchAreas { get; }
-        
-        private int Killed { get; set; }
-        
         public bool Finished => Math.Abs(Progress - 100.0f) < 0.00001;
 
         public double Progress
@@ -62,17 +49,41 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     {
                         return 0.0;
                     }
-                } 
-                
-                return Math.Min(100.0 * ((float)amount) / ((float) CollectOrKillAmount), 100.0);
+                }
+
+                return Math.Min(100.0 * ((float)amount) / ((float)CollectOrKillAmount), 100.0);
             }
         }
+
+        private int CollectOrKillAmount { get; }
+
+        private bool CollectQuestItem => QuestItemId > 0;
+
+        private Vector3 CurrentSpot { get; set; }
+
+        private int Killed { get; set; }
+
+        private DateTime LastUnitCheck { get; set; } = DateTime.Now;
+
+        private List<int> NpcIds { get; }
+
+        private int QuestItemId { get; }
+
+        private SearchAreaEnsamble SearchAreas { get; }
 
         private WowInterface WowInterface { get; }
 
         private WowUnit WowUnit { get; set; }
-        
-        private DateTime LastUnitCheck { get; set; } = DateTime.Now;
+
+        public void CombatLogChanged(BasicCombatLogEntry entry)
+        {
+            var wowUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
+            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGUID.NpcId(entry.DestinationGuid))
+                                                            && wowUnit != null && wowUnit.IsTaggedByMe)
+            {
+                ++Killed;
+            }
+        }
 
         public void Execute()
         {
@@ -83,13 +94,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 LastUnitCheck = DateTime.Now;
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
-                    .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)) && !e.IsNotAttackable 
+                    .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)) && !e.IsNotAttackable
                                 && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .Take(3)
                     .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, e.Position))
                     .FirstOrDefault();
-                
+
                 // Kill enemies in the path
                 if (WowUnit != null && !WowInterface.CombatClass.IsTargetAttackable(WowUnit))
                 {
@@ -117,20 +128,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 SearchAreas.NotifyDetour();
                 WowInterface.CombatClass.AttackTarget();
             }
-            else if (WowInterface.MovementEngine.IsAtTargetPosition || SearchAreas.HasAbortedPath() || WowInterface.MovementEngine.MovementAction == MovementAction.None)
+            else if (WowInterface.Player.Position.GetDistance(CurrentSpot) < 3.0f || SearchAreas.HasAbortedPath() || WowInterface.MovementEngine.Status == MovementAction.None)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving,
-                    SearchAreas.GetNextPosition(WowInterface));
-            }
-        }
-
-        public void CombatLogChanged(BasicCombatLogEntry entry)
-        {
-            var wowUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
-            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGUID.NpcId(entry.DestinationGuid)) 
-                                                            && wowUnit != null && wowUnit.IsTaggedByMe)
-            {
-                ++Killed;
+                CurrentSpot = SearchAreas.GetNextPosition(WowInterface);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSpot);
             }
         }
     }

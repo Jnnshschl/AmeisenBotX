@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 if (lootableObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 5.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, lootableObject.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, lootableObject.Position);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
                 if (selectedArea != null)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, selectedArea.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedArea.Position);
                 }
             }
         }

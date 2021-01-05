@@ -312,7 +312,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             return;
                         }
-                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();
@@ -410,7 +410,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         {
                             return;
                         }
-                        if (WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None)
+                        if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();

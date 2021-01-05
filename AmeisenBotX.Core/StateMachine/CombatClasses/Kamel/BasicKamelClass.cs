@@ -175,7 +175,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 
