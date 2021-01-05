@@ -46,9 +46,9 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
                 WowInterface.MovementEngine.Reset();
                 TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
             }
-            else if (WowInterface.MovementEngine.IsAtTargetPosition || WowInterface.MovementEngine.MovementAction == MovementAction.None)
+            else if (WowInterface.Player.Position.GetDistance(target.Position) < 3.5f || WowInterface.MovementEngine.Status == MovementAction.None)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 

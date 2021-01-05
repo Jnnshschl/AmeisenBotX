@@ -19,7 +19,7 @@ using System.Timers;
 
 namespace AmeisenBotX.Core.Movement.SMovementEngine
 {
-    public class SickMovementEngine : IMovementEngine
+    public class SickMovementEngine
     {
         public SickMovementEngine(WowInterface wowInterface, AmeisenBotConfig config)
         {
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             Config = config;
 
             PathNodes = new ConcurrentQueue<Vector3>();
-            PlayerVehicle = new BasicVehicle(wowInterface);
+            PlayerVehicle = new BasicVehicle();
 
             Shortcuts = new List<IShortcut>()
             {
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                                 {
                                     StopMovement();
                                     Reset();
-                                    SetMovementAction(MovementAction.Moving, randomPosition);
+                                    SetMovementAction(MovementAction.Move, randomPosition);
                                     GoToRandomPositionOnNextMove = false;
                                 }
 
@@ -246,7 +246,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             BehaviorTree.Tick();
         }
 
-        public bool HasCompletePathToPosition(Vector3 position, double maxDistance)
+        public bool IsPositionReachable(Vector3 position, double maxDistance)
         {
             return WowInterface.ObjectManager.Player.IsSwimming
                 || WowInterface.ObjectManager.Player.IsFlying
@@ -382,7 +382,7 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 && WowInterface.CharacterManager.Mounts.Any()
                 && !WowInterface.ObjectManager.Player.HasBuffByName("Warsong Flag")
                 && !WowInterface.ObjectManager.Player.HasBuffByName("Silverwing Flag")
-                && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0 : 80.0)
+                && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > (WowInterface.Globals.IgnoreMountDistance ? 5.0f : 80.0f)
                 && WowInterface.HookManager.LuaIsOutdoors();
         }
 
@@ -394,18 +394,18 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
                 StuckRotation = WowInterface.ObjectManager.Player.Rotation;
 
                 Vector3 pos = BotMath.CalculatePositionBehind(WowInterface.ObjectManager.Player.Position, StuckRotation, WowInterface.MovementSettings.UnstuckDistance);
-                UnstuckTargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, pos, 4f);
+                UnstuckTargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, pos, 4.0f);
 
                 AmeisenLogger.I.Log("Movement", $"Calculated unstuck position: {UnstuckTargetPosition}");
             }
             else
             {
-                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 0.0
+                if (StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 0.0f
                     && StuckPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.MinUnstuckDistance)
                 {
                     AmeisenLogger.I.Log("Movement", "Unstucking");
 
-                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction.Moving, UnstuckTargetPosition);
+                    PlayerVehicle.Update((p) => WowInterface.CharacterManager.MoveToPosition(p), MovementAction.Move, UnstuckTargetPosition);
                     WowInterface.CharacterManager.Jump();
                 }
                 else
@@ -540,8 +540,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         private bool IsDirectMovingState()
         {
-            return MovementAction != MovementAction.Moving
-                && MovementAction != MovementAction.Following;
+            return MovementAction != MovementAction.Move
+                && MovementAction != MovementAction.Follow;
         }
 
         private BehaviorTreeStatus MountUp()

@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             {
                 if (CurrentSeat.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) > 1.5f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, CurrentSeat.Position);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSeat.Position);
                 }
                 else
                 {

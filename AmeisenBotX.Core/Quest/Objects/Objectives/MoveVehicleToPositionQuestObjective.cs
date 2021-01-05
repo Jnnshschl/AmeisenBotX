@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public class MoveVehicleToPositionQuestObjective : IQuestObjective
     {
-        public MoveVehicleToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Moving, bool forceDirectMove = false)
+        public MoveVehicleToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move, bool forceDirectMove = false)
         {
             WowInterface = wowInterface;
             WantedPosition = position;
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (WantedPosition.GetDistance2D(WowInterface.ObjectManager.Vehicle.Position) > Distance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction, WantedPosition, 0, false, ForceDirectMove);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction, WantedPosition, 0);
             }
         }
     }

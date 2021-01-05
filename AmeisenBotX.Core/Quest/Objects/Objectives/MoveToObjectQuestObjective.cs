@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 if (WowGameobject.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position) > Distance)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, WowGameobject.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowGameobject.Position);
                 }
             }
         }

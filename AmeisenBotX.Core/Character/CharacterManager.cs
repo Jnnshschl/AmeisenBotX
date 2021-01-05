@@ -188,7 +188,7 @@ namespace AmeisenBotX.Core.Character
             Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKey.VKSPACE), 500, 1000));
         }
 
-        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.5f)
+        public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
         {
             ClickToMove(pos, 0, ClickToMoveType.Move, turnSpeed, distance);
         }

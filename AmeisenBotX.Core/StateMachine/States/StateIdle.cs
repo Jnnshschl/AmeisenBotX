@@ -245,7 +245,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > 4.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, possibleQuestgiver.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, possibleQuestgiver.Position);
                     return true;
                 }
                 else

@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                 }
                 else if (ChasingActive && wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid && wowUnit.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) < 7.0f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Fleeing, wowUnit.Position);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Flee, wowUnit.Position);
 
                     preventMovement = true;
                     allowAttacking = false;
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
                 if (unitOrb != null) // orbs
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Fleeing, unitOrb.Position);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Flee, unitOrb.Position);
 
                     preventMovement = true;
                     allowAttacking = false;
@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                         if (distanceToMid > 5.0f && WowInterface.I.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
-                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, modifiedCenterPosition);
+                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
 
                             preventMovement = true;
                             allowAttacking = false;

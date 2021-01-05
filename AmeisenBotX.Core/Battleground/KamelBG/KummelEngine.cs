@@ -106,8 +106,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         WowObject ownFlag = GetFlagObject();
                         if (ownFlag != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ownFlag.Position);
-                            if (WowInterface.MovementEngine.IsAtTargetPosition)
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
+                            if (WowInterface.Player.Position.GetDistance(ownFlag.Position) < 3.5f)
                             {
                                 WowInterface.HookManager.WowObjectRightClick(FlagObject);
                             }
@@ -117,11 +117,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                             WowUnit enemyFlagCarrier = GetFlagCarrier();
                             if (enemyFlagCarrier != null)
                             {
-                                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlagCarrier.Position);
+                                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, enemyFlagCarrier.Position);
                             }
                             else if (startPosition != default)
                             {
-                                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ausgangAlly);
+                                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ausgangAlly);
                             }
                         }
                     }
@@ -130,11 +130,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         FlagCarrier = GetFlagCarrier();
                         if (FlagCarrier != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, FlagCarrier.Position);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, FlagCarrier.Position);
                         }
                         else
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, baseHord);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, baseHord);
                         }
                     }
                 }
@@ -144,26 +144,26 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     FlagCarrier = GetFlagCarrier();
                     if (FlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, FlagCarrier.Position);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, FlagCarrier.Position);
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, baseHord);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, baseHord);
                     }
                 }
             }
             else if (FlagObject != null)
             {
                 // flag lies on the ground
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, FlagObject.Position);
-                if (WowInterface.MovementEngine.IsAtTargetPosition) // limit the executions
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, FlagObject.Position);
+                if (WowInterface.Player.Position.GetDistance(FlagObject.Position) < 3.5f) // limit the executions
                 {
                     WowInterface.HookManager.WowObjectRightClick(FlagObject);
                 }
             }
             else if (startPosition != default)
             {
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ausgangHord);
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ausgangHord);
             }
         }
 

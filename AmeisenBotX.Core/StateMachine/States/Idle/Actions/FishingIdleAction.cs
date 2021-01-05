@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             {
                 if (WowInterface.I.ObjectManager.Player.Position.GetDistance(CurrentSpot) > 3.5f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, CurrentSpot);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSpot);
                     return;
                 }
                 else if (WowInterface.I.HookManager.WowIsClickToMoveActive())

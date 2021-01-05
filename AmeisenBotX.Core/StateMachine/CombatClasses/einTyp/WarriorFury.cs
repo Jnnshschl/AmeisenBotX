@@ -172,7 +172,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
                 if (leaderGuid != 0 && leaderGuid != WowInterface.ObjectManager.PlayerGuid && leader != null && !(leader.IsDead || leader.Health < 1))
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
                 }
                 else if ((WowInterface.ObjectManager.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
@@ -224,7 +224,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 
@@ -250,7 +250,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                 return;
             }
 
-            if(WowInterface.MovementEngine.MovementAction != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
+            if(WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None && distanceToTarget < 0.75f * (WowInterface.ObjectManager.Player.CombatReach + target.CombatReach))
             {
                 WowInterface.MovementEngine.StopMovement();
             }
@@ -262,7 +262,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
                     WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
                 }
 
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, target.Position, target.Rotation);
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, target.Position, target.Rotation);
             }
         }
 

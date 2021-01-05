@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 if (ownFlag != null)
                 {
                     // own flag lies around
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, ownFlag.Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
                     if (isAtPosition(ownFlag.Position))
                     {
                         // own flag reached, save it!
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 else
                 {
                     // bring it outside!
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseHord : baseAlly);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseHord : baseAlly);
                 }
             }
             else if (ownTeamHasFlag && enemyTeamHasFlag)
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                     if (enemyFlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move,
                             BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                         if (isInCombatReach(enemyFlagCarrier.Position))
                         {
@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseAlly : baseHord);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                     }
 
                     WowInterface.CombatClass.OutOfCombatExecute();
@@ -131,15 +131,15 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     {
                         if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotMath.CalculatePositionBehind(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 1f));
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, BotMath.CalculatePositionBehind(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 1f));
                         }
                         else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotUtils.MoveAhead(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 2f));
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, BotUtils.MoveAhead(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 2f));
                         }
                         else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, teamFlagCarrier.Position);
                         }
 
                         if (isEnemyClose())
@@ -154,7 +154,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                         if (enemyFlagCarrier != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move,
                                 BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                             if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal && isInCombatReach(enemyFlagCarrier.Position))
                             {
@@ -169,7 +169,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                         }
                         else
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseHord : baseAlly);
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseHord : baseAlly);
                         }
 
                         WowInterface.CombatClass.OutOfCombatExecute();
@@ -184,15 +184,15 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 {
                     if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotMath.CalculatePositionBehind(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 1f));
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, BotMath.CalculatePositionBehind(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 1f));
                     }
                     else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Tank)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, BotUtils.MoveAhead(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 2f));
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, BotUtils.MoveAhead(teamFlagCarrier.Position, teamFlagCarrier.Rotation, 2f));
                     }
                     else if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Heal)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, teamFlagCarrier.Position);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, teamFlagCarrier.Position);
                     }
 
                     if (isEnemyClose())
@@ -203,7 +203,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseHord : baseAlly);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseHord : baseAlly);
                 }
 
                 if (WowInterface.CombatClass.Role == Statemachine.Enums.CombatClassRole.Dps)
@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     if (enemyFlag != null)
                     {
                         // flag lies around
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlag.Position);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, enemyFlag.Position);
                         if (isAtPosition(enemyFlag.Position))
                         {
                             // flag reached, save it!
@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     else
                     {
                         // go outside!
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseAlly : baseHord);
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                         WowInterface.CombatClass.OutOfCombatExecute();
                     }
                 }
@@ -246,7 +246,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                     WowUnit enemyFlagCarrier = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(EnemyFlagCarrierGuid);
                     if (enemyFlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving,
+                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move,
                             BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)WowInterface.ObjectManager.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                         if (WowInterface.CombatClass.Role != Statemachine.Enums.CombatClassRole.Heal && isInCombatReach(enemyFlagCarrier.Position))
                         {
@@ -270,7 +270,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 if (enemyFlag != null)
                 {
                     // flag lies around
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, enemyFlag.Position);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, enemyFlag.Position);
                     if (isAtPosition(enemyFlag.Position))
                     {
                         // flag reached, save it!
@@ -281,14 +281,14 @@ namespace AmeisenBotX.Core.Battleground.einTyp
                 else
                 {
                     // go outside!
-                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseAlly : baseHord);
+                    WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                     WowInterface.CombatClass.OutOfCombatExecute();
                 }
             }
-            if (WowInterface.MovementEngine.MovementAction == Movement.Enums.MovementAction.None)
+            if (WowInterface.MovementEngine.Status == Movement.Enums.MovementAction.None)
             {
                 hasStateChanged = true;
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, isHorde ? baseAlly : baseHord);
+                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                 if (isEnemyClose())
                 {
                     WowInterface.Globals.ForceCombat = true;

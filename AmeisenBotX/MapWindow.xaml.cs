@@ -327,7 +327,7 @@ namespace AmeisenBotX
                 // Render current movement path
                 // ---------------------------- >
 
-                if (AmeisenBot.Config.MapRenderCurrentPath && AmeisenBot.WowInterface.MovementEngine.Path?.Count > 0)
+                if (AmeisenBot.Config.MapRenderCurrentPath && AmeisenBot.WowInterface.MovementEngine.Path.Any())
                 {
                     RenderCurrentPath(halfWidth, halfHeight, graphics, Scale, playerPosition, playerRotation);
                 }

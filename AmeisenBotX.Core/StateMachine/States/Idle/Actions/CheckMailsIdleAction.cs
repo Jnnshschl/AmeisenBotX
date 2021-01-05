@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             {
                 if (CurrentMailbox.GetDistance(WowInterface.I.ObjectManager.Player.Position) > 3.5f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, CurrentMailbox);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, CurrentMailbox);
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             {
                 if (CurrentMailbox.GetDistance(OriginPosition) > 8.0f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, OriginPosition);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, OriginPosition);
                 }
                 else
                 {

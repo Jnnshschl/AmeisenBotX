@@ -22,6 +22,10 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public bool IsFlying { get; set; }
 
+        public bool IsGhost { get; set; }
+
+        public bool IsOutdoors { get; set; }
+
         public bool IsSwimming { get; set; }
 
         public bool IsUnderwater { get; set; }
@@ -44,7 +48,7 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             }
             else
             {
-                wowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, gameobject.Position);
+                wowInterface.MovementEngine.SetMovementAction(MovementAction.Move, gameobject.Position);
             }
         }
 

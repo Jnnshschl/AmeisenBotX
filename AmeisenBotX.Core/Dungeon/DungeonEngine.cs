@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Dungeon
                         (
                             "IsDungeonLeaderInRange",
                             (b) => WowInterface.ObjectManager.Partyleader != null,
-                            new Leaf<DungeonBlackboard>("FollowLeader", (b) => MoveToPosition(WowInterface.ObjectManager.Partyleader.Position, 0f, MovementAction.Following)),
+                            new Leaf<DungeonBlackboard>("FollowLeader", (b) => MoveToPosition(WowInterface.ObjectManager.Partyleader.Position, 0f, MovementAction.Follow)),
                             new Leaf<DungeonBlackboard>("WaitForLeaderToArrive", (b) => { return BehaviorTreeStatus.Success; })
                         )
                     )
@@ -208,7 +208,7 @@ namespace AmeisenBotX.Core.Dungeon
             return status;
         }
 
-        private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5, MovementAction movementAction = MovementAction.Moving)
+        private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5, MovementAction movementAction = MovementAction.Move)
         {
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
 

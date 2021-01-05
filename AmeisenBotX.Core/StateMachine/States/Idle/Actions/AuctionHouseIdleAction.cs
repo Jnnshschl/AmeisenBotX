@@ -57,7 +57,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             {
                 if (CurrentAuctioneer.GetDistance(WowInterface.I.ObjectManager.Player.Position) > 3.2f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, CurrentAuctioneer);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, CurrentAuctioneer);
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
             {
                 if (CurrentAuctioneer.GetDistance(OriginPosition) > 8.0f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Moving, OriginPosition);
+                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, OriginPosition);
                 }
                 else
                 {

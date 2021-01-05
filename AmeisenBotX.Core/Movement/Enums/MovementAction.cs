@@ -3,13 +3,13 @@
     public enum MovementAction
     {
         None,
-        Moving,
+        Move,
         DirectMove,
-        Following,
-        Fleeing,
-        Chasing,
+        Follow,
+        Flee,
+        Chase,
         Unstuck,
-        Evading,
-        Wandering
+        Evade,
+        Wander
     }
 }

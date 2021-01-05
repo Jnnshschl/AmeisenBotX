@@ -427,7 +427,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
                         if (WowInterface.ObjectManager.Target.Name != "Anub'Rekhan" && WowInterface.ObjectManager.Target.TargetGuid == WowInterface.ObjectManager.PlayerGuid) 
                         {
                             //HandlesMovement = false;
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Moving, new Vector3(3272, -3476, 287));
+                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, new Vector3(3272, -3476, 287));
                         }
                     }
                     else

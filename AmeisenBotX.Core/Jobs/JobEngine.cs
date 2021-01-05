@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Jobs
 
                 if (mailboxNode != null)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, mailboxNode.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, mailboxNode.Position);
 
                     if (WowInterface.ObjectManager.Player.Position.GetDistance(mailboxNode.Position) <= 4)
                     {
@@ -151,13 +151,13 @@ namespace AmeisenBotX.Core.Jobs
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, mailboxNode.Position);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, mailboxNode.Position);
                     }
                 }
                 else
                 {
                     Vector3 currentNode = miningProfile.MailboxNodes.OrderBy(x => x.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
                 }
 
                 return;
@@ -203,9 +203,9 @@ namespace AmeisenBotX.Core.Jobs
                     GeneratedPathToNode = false;
 
                     Vector3 currentNode = miningProfile.Path[CurrentNodeCounter];
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, currentNode);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
 
-                    if (WowInterface.MovementEngine.IsAtTargetPosition)
+                    if (WowInterface.Player.Position.GetDistance(currentNode) < 3.0f)
                     {
                         ++CurrentNodeCounter;
 
@@ -261,19 +261,24 @@ namespace AmeisenBotX.Core.Jobs
                 }
                 else
                 {
-                    if (GeneratedPathToNode && BlacklistEvent.Run() && !WowInterface.MovementEngine.HasCompletePathToPosition(node.Position, 4.0))
+                    if (GeneratedPathToNode && BlacklistEvent.Run())
                     {
-                        if (NodeTryCounter > 2)
+                        if (!WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, node.Position))
                         {
-                            NodeBlacklist.Add(node.Guid);
-                            NodeTryCounter = 0;
-                        }
+                            if (NodeTryCounter > 2)
+                            {
+                                NodeBlacklist.Add(node.Guid);
+                                NodeTryCounter = 0;
+                            }
 
-                        ++NodeTryCounter;
+                            ++NodeTryCounter;
+                        }
+                        else
+                        {
+                            GeneratedPathToNode = true;
+                        }
                     }
 
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, node.Position);
-                    GeneratedPathToNode = true;
                 }
             }
         }

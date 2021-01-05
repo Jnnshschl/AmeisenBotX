@@ -22,6 +22,7 @@ using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
+using AmeisenBotX.Core.Movement.AMovementEngine;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Movement.SMovementEngine;
 using AmeisenBotX.Core.Offsets;
@@ -825,7 +826,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
-            WowInterface.MovementEngine = new SickMovementEngine(WowInterface, Config);
+            WowInterface.MovementEngine = new AMovementEngine(Config);
         }
 
         private void SetupWowInterfacePostStateMachine()

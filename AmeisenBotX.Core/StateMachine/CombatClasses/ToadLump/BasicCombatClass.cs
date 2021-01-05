@@ -627,7 +627,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.ToadLump
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, target.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 

@@ -9,9 +9,9 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(WowInterface wowInterface)
+        public BasicVehicle()
         {
-            WowInterface = wowInterface;
+            WowInterface = WowInterface.I;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
@@ -305,7 +305,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
             switch (movementAction)
             {
-                case MovementAction.Moving:
+                case MovementAction.Move:
                     forces.Add(Seek(targetPosition, 1f));
 
                     if (enablePlayerForces)
@@ -316,27 +316,27 @@ namespace AmeisenBotX.Core.Movement.Objects
                     forces.Add(AvoidObstacles(0.5f));
                     break;
 
-                case MovementAction.Following:
+                case MovementAction.Follow:
                     forces.Add(Seek(targetPosition, 1f));
                     forces.Add(Seperate(0.03f));
                     forces.Add(AvoidObstacles(0.03f));
                     break;
 
-                case MovementAction.Chasing:
+                case MovementAction.Chase:
                     forces.Add(Seek(targetPosition, 1f));
                     break;
 
-                case MovementAction.Fleeing:
+                case MovementAction.Flee:
                     Vector3 fleeForce = Flee(targetPosition, 1f);
                     fleeForce.Z = 0; // set z to zero to avoid going under the terrain
                     forces.Add(fleeForce);
                     break;
 
-                case MovementAction.Evading:
+                case MovementAction.Evade:
                     forces.Add(Evade(targetPosition, 1f, rotation));
                     break;
 
-                case MovementAction.Wandering:
+                case MovementAction.Wander:
                     Vector3 wanderForce = Wander(1f);
                     wanderForce.Z = 0; // set z to zero to avoid going under the terrain
                     forces.Add(wanderForce);

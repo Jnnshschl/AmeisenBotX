@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -8,25 +7,25 @@ namespace AmeisenBotX.Core.Movement
 {
     public interface IMovementEngine
     {
-        bool IsAtTargetPosition { get; }
+        bool IsMoving { get; }
 
-        bool IsGhost { get; set; }
+        IEnumerable<Vector3> Path { get; }
 
-        MovementAction MovementAction { get; }
+        IEnumerable<(Vector3 position, float radius)> PlacesToAvoid { get; }
 
-        List<Vector3> Path { get; }
+        MovementAction Status { get; }
 
-        PathfindingStatus PathfindingStatus { get; }
+        void AvoidPlace(Vector3 position, float radius, TimeSpan timeSpan);
 
         void Execute();
 
-        bool HasCompletePathToPosition(Vector3 position, double maxDistance);
+        bool IsPositionReachable(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 1.0f);
 
         void PreventMovement(TimeSpan timeSpan);
 
         void Reset();
 
-        void SetMovementAction(MovementAction state, Vector3 position, float targetRotation = 0f, bool disableShortcuts = false, bool forceDirectMove = false, float zCorrection = 1.5f);
+        bool SetMovementAction(MovementAction state, Vector3 position, float rotation = 0);
 
         void StopMovement();
     }

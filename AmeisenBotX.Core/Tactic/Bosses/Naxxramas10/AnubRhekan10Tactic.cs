@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                             ImpaleDodgePos = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 2f);
                         }
 
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, ImpaleDodgePos, 0, false, true);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, ImpaleDodgePos, 0);
                         return true;
                     }
                     else
@@ -130,7 +130,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
                     if (!LocustSwarmActive && WowInterface.ObjectManager.Player.Position.GetDistance(MiddleSpot) > 6.0)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, targetPosition);
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, targetPosition);
                         return true;
                     }
                 }
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                     {
                         if (WowInterface.ObjectManager.Player.Position.GetDistance(MiddleSpot) > 24.0)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, MiddleSpot);
+                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, MiddleSpot);
                             return true;
                         }
                         else
@@ -189,7 +189,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
                         if (WowInterface.ObjectManager.Player.Position.GetDistance2D(tankingSpot) > 2.0)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, tankingSpot, 0, false, true);
+                            WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, tankingSpot, 0);
                         }
                     }
                     else
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
                             if (targetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 2.0)
                             {
-                                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition, 0, false, true);
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition, 0);
                             }
                             else
                             {

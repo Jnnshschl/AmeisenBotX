@@ -80,8 +80,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Execute()
         {
-            WowInterface.MovementEngine.IsGhost = true;
-
             if (WowInterface.ObjectManager.Player.Health > 1)
             {
                 StateMachine.SetState(BotState.Idle);
@@ -93,7 +91,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         public override void Leave()
         {
-            WowInterface.MovementEngine.IsGhost = false;
+            WowInterface.Player.IsGhost = false;
             NeedToEnterPortal = false;
         }
 
@@ -103,7 +101,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             if (WowInterface.ObjectManager.Player.Position.GetDistance(player.Position) > Config.MinFollowDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, player.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, player.Position);
             }
 
             return BehaviorTreeStatus.Ongoing;
@@ -162,7 +160,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.ObjectManager.Player.Position.GetDistance(position) > distance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, position);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -176,7 +174,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (WowInterface.ObjectManager.Player.Position.GetDistance(blackboard.CorpsePosition) > Config.GhostResurrectThreshold)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, blackboard.CorpsePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, blackboard.CorpsePosition);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -208,7 +206,7 @@ namespace AmeisenBotX.Core.Statemachine.States
         {
             if (blackboard.NearPortals?.Count > 0)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position, 4f));
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position, 4f));
             }
         }
 

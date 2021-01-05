@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
             double distance = WowInterface.ObjectManager.Player.Position.GetDistance(posToGoTo);
 
-            if (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
+            if (distance < Config.MinFollowDistance)
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
@@ -176,28 +176,31 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
+            // run down cliffs
+            if (WowInterface.ObjectManager.Player.Position.GetDistance2D(posToGoTo) < 24.0)
+            {
+                double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
 
-            if (LosCheckEvent.Run())
-            {
-                if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2f))
+                if (LosCheckEvent.Run())
                 {
-                    InLos = true;
+                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2f))
+                    {
+                        InLos = true;
+                    }
+                    else
+                    {
+                        InLos = false;
+                    }
                 }
-                else
+
+                if (zDiff < -16.0 && InLos) // target is below us and in line of sight, just run down
                 {
-                    InLos = false;
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
+                    return;
                 }
             }
 
-            if (zDiff < -4.0 && InLos) // target is below us and in line of sight, just run down
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
-            }
-            else
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Following, posToGoTo);
-            }
+            WowInterface.MovementEngine.SetMovementAction(MovementAction.Follow, posToGoTo);
         }
 
         public override void Leave()
