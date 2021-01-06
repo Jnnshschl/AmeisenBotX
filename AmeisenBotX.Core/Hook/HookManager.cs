@@ -1317,7 +1317,7 @@ namespace AmeisenBotX.Core.Hook
 
             // isOutdoors
             WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject}");
-            WowInterface.XMemory.Fasm.AddLine($"MOV ECX, EAX");
+            WowInterface.XMemory.Fasm.AddLine("MOV ECX, EAX");
             WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionIsOutdoors}");
             WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{GameInfoAddress}], EAX");
 
@@ -1333,7 +1333,7 @@ namespace AmeisenBotX.Core.Hook
             IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
             WowInterface.XMemory.Fasm.AddLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {0x120171}");
+            WowInterface.XMemory.Fasm.AddLine($"PUSH 0x120171");
             WowInterface.XMemory.Fasm.AddLine($"PUSH {distancePointer}");
             WowInterface.XMemory.Fasm.AddLine($"PUSH {resultPointer}");
             WowInterface.XMemory.Fasm.AddLine($"PUSH {endPointer}");
@@ -1341,7 +1341,7 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionTraceline}");
             WowInterface.XMemory.Fasm.AddLine("ADD ESP, 0x18");
 
-            WowInterface.XMemory.Fasm.AddLine($"XOR AL, 1");
+            WowInterface.XMemory.Fasm.AddLine("XOR AL, 1");
             WowInterface.XMemory.Fasm.AddLine($"MOV BYTE [{GameInfoAddress + 1}], AL");
 
             WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
@@ -1378,7 +1378,7 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress}"); // 5 bytes
 
             // note if you increase the hookSize we need to add more NOP's
-            WowInterface.XMemory.Fasm.AddLine($"NOP"); // 2 bytes
+            WowInterface.XMemory.Fasm.AddLine("NOP"); // 2 bytes
 
             WowInterface.XMemory.Fasm.Inject((uint)CodecaveForGateway + (uint)OriginalEndsceneBytes.Length);
             WowInterface.XMemory.Fasm.Clear();
@@ -1436,7 +1436,7 @@ namespace AmeisenBotX.Core.Hook
 
             if (WowInterface.XMemory.AllocateMemory(40, out IntPtr tracelineCodecave))
             {
-                (float, Vector3, Vector3) tracelineCombo = (1f, start, end);
+                (float, Vector3, Vector3) tracelineCombo = (1.0f, start, end);
 
                 IntPtr distancePointer = tracelineCodecave;
                 IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
