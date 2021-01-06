@@ -53,7 +53,6 @@ namespace AmeisenBotX.Core.Statemachine
             };
 
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
-            EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
             RenderSwitchEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             CurrentState = States.First();
@@ -94,8 +93,6 @@ namespace AmeisenBotX.Core.Statemachine
 
         private AmeisenBotConfig Config { get; }
 
-        private TimegatedEvent EventPullEvent { get; set; }
-
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
         public void Execute()
@@ -117,7 +114,6 @@ namespace AmeisenBotX.Core.Statemachine
 
                     WowInterface.MovementEngine.Reset();
                     WowInterface.EventHookManager.Stop();
-
                     return;
                 }
 
@@ -138,11 +134,13 @@ namespace AmeisenBotX.Core.Statemachine
                     else
                     {
                         WowInterface.ObjectManager.UpdateWowObjects();
-                        EventPullEvent.Run();
 
                         if (WowInterface.ObjectManager.Player != null)
                         {
                             WowInterface.MovementEngine.Execute();
+
+                            // handle event subbing
+                            WowInterface.EventHookManager.ExecutePendingLua();
 
                             if (WowInterface.ObjectManager.Player.IsDead)
                             {

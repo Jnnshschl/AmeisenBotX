@@ -128,18 +128,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                 return;
             }
 
-            Vector3 posToGoTo;
-
-            if (Config.FollowPositionDynamic)
-            {
-                posToGoTo = PlayerToFollow.Position + Offset;
-            }
-            else
-            {
-                posToGoTo = PlayerToFollow.Position;
-            }
-
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(posToGoTo);
+            Vector3 posToGoTo = Config.FollowPositionDynamic ? PlayerToFollow.Position + Offset : PlayerToFollow.Position;
+            double distance = WowInterface.ObjectManager.Player.DistanceTo(posToGoTo);
 
             if (distance < Config.MinFollowDistance)
             {
@@ -154,20 +144,20 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 if (CastMountEvent.Run())
                 {
-                    List<WowMount> filteredMounts;
+                    IEnumerable<WowMount> filteredMounts;
 
                     if (Config.UseOnlySpecificMounts)
                     {
-                        filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name)).ToList();
+                        filteredMounts = WowInterface.CharacterManager.Mounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name));
                     }
                     else
                     {
                         filteredMounts = WowInterface.CharacterManager.Mounts;
                     }
 
-                    if (filteredMounts != null && filteredMounts.Count >= 0)
+                    if (filteredMounts != null && filteredMounts.Any())
                     {
-                        WowMount mount = filteredMounts[new Random().Next(0, filteredMounts.Count)];
+                        WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                         WowInterface.MovementEngine.StopMovement();
                         WowInterface.HookManager.LuaCallCompanion(mount.Index);
                     }
@@ -218,20 +208,15 @@ namespace AmeisenBotX.Core.Statemachine.States
                     pos += StateMachine.GetState<StateFollowing>().Offset;
                 }
 
-                double distance = pos.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distance = WowInterface.Player.DistanceTo(pos);
 
-                if (playerToFollow.IsDead || UnitIsOutOfRange(distance))
+                if (playerToFollow.IsDead || playerToFollow.IsGhost || distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
                 {
                     playerToFollow = null;
                 }
             }
 
             return playerToFollow;
-        }
-
-        private bool UnitIsOutOfRange(double distance)
-        {
-            return (distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance);
         }
     }
 }

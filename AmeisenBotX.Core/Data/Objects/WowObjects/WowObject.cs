@@ -29,7 +29,11 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
 
         public float DistanceTo(WowObject b) => Position.GetDistance(b.Position);
 
+        public float DistanceTo(Vector3 b) => Position.GetDistance(b);
+
         public bool IsInRange(WowObject b, float range) => DistanceTo(b) < range;
+
+        public bool IsInRange(Vector3 b, float range) => DistanceTo(b) < range;
 
         public override string ToString()
         {

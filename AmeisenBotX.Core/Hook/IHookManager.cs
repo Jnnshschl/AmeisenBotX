@@ -15,6 +15,10 @@ namespace AmeisenBotX.Core.Hook
     {
         event Action<GameInfo> OnGameInfoPush;
 
+        event Action<string> OnEventPush;
+
+        string EventFrameName { get; }
+
         ulong HookCallCount { get; }
 
         bool IsWoWHooked { get; }
