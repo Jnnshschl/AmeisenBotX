@@ -99,8 +99,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
             }
         };
 
-        public bool TargetInLineOfSight { get; set; }
-
         public string Version => "1.0";
 
         public bool WalkBehindEnemy => false;

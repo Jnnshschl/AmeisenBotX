@@ -24,7 +24,6 @@ using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
 using AmeisenBotX.Core.Movement.AMovementEngine;
 using AmeisenBotX.Core.Movement.Pathfinding;
-using AmeisenBotX.Core.Movement.SMovementEngine;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Quest;
@@ -800,6 +799,12 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void SetupWowInterfacePostStateMachine()
+        {
+            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
+            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
+        }
+
         private void SetupWowInterfacePreStateMachine()
         {
             WowInterface.Globals = new AmeisenBotGlobals();
@@ -813,25 +818,19 @@ namespace AmeisenBotX.Core
             WowInterface.ChatManager = new ChatManager(Config, Path.Combine(BotDataPath, AccountName));
             WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
 
-            WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
             WowInterface.HookManager = new HookManager(WowInterface);
+            WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
 
             WowInterface.JobEngine = new JobEngine(WowInterface, Config);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface);
-           
+
             WowInterface.TacticEngine = new TacticEngine();
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new AMovementEngine(Config);
-        }
-
-        private void SetupWowInterfacePostStateMachine()
-        {
-            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
-            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
         }
 
         private void StateMachineTimerTick(object state)

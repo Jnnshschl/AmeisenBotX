@@ -4,8 +4,6 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
-using System.Diagnostics;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses
@@ -33,8 +31,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
         CombatClassRole Role { get; }
 
         TalentTree Talents { get; }
-
-        bool TargetInLineOfSight { get; set; }
 
         string Version { get; }
 

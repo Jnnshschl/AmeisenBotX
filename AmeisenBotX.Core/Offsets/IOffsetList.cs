@@ -70,6 +70,8 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr FunctionHandleTerrainClick { get; }
 
+        IntPtr FunctionIsOutdoors { get; }
+
         IntPtr FunctionLuaDoString { get; }
 
         IntPtr FunctionPlayerClickToMove { get; }
@@ -140,11 +142,11 @@ namespace AmeisenBotX.Core.Offsets
 
         IntPtr TickCount { get; }
 
+        IntPtr WowDynobjectPosition { get; }
+
         IntPtr WowGameobjectPosition { get; }
 
         IntPtr WowObjectDescriptor { get; }
-
-        IntPtr WowDynobjectPosition { get; }
 
         IntPtr WowObjectType { get; }
 

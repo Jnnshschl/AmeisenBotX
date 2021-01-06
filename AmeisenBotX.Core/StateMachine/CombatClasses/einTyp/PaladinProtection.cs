@@ -49,8 +49,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.einTyp
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public bool TargetInLineOfSight { get; set; }
-
         public CombatClassRole Role => CombatClassRole.Tank;
 
         public TalentTree Talents { get; } = new TalentTree()

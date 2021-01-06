@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System;
@@ -12,6 +13,8 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
+        event Action<GameInfo> OnGameInfoPush;
+
         ulong HookCallCount { get; }
 
         bool IsWoWHooked { get; }
@@ -20,17 +23,11 @@ namespace AmeisenBotX.Core.Hook
 
         void DisposeHook();
 
+        void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
+
         void LuaAcceptBattlegroundInvite();
 
         void LuaAcceptPartyInvite();
-
-        void LuaSelectGossipActiveQuest(int gossipId);
-        
-        void LuaSelectGossipAvailableQuest(int gossipId);
-        
-        void LuaSelectQuestLogEntry(int gossipId);
-
-        void LuaCompleteQuest();
 
         void LuaAcceptQuest();
 
@@ -39,6 +36,8 @@ namespace AmeisenBotX.Core.Hook
         void LuaAcceptResurrect();
 
         void LuaAcceptSummon();
+
+        bool LuaAutoLootEnabled();
 
         void LuaCallCompanion(int index, string type = "MOUNT");
 
@@ -56,11 +55,15 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaCofirmStaticPopup();
 
+        void LuaCompleteQuest();
+
         void LuaCompleteQuestAndGetReward(int questlogId, int rewardId, int gossipId);
 
         void LuaDeclinePartyInvite();
 
         void LuaDeclineResurrect();
+
+        void LuaDeleteInventoryItemByName(string itemName);
 
         void LuaDismissCompanion(string type = "MOUNT");
 
@@ -73,6 +76,12 @@ namespace AmeisenBotX.Core.Hook
         string LuaGetEquipmentItems();
 
         int LuaGetFreeBagSlotCount();
+
+        bool LuaGetGossipActiveQuestTitleById(int gossipId, out string title);
+
+        bool LuaGetGossipIdByActiveQuestTitle(string title, out int gossipId);
+
+        bool LuaGetGossipIdByAvailableQuestTitle(string title, out int gossipId);
 
         int LuaGetGossipOptionCount();
 
@@ -87,14 +96,16 @@ namespace AmeisenBotX.Core.Hook
         string LuaGetItemStats(string itemLink);
 
         string LuaGetLootRollItemLink(int rollId);
-        
-        bool LuaGetQuestLogChoiceItemLink(int index, out string itemLink);
-        
-        bool LuaGetNumQuestLogChoices(out int numChoices);
 
         string LuaGetMoney();
 
         string LuaGetMounts();
+
+        bool LuaGetNumQuestLogChoices(out int numChoices);
+
+        bool LuaGetQuestLogChoiceItemLink(int index, out string itemLink);
+
+        bool LuaGetQuestLogIdByTitle(string title, out int questLogId);
 
         void LuaGetQuestReward(int id);
 
@@ -149,7 +160,15 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaRollOnLoot(int rollId, RollType rollType);
 
+        void LuaSelectGossipActiveQuest(int gossipId);
+
+        void LuaSelectGossipAvailableQuest(int gossipId);
+
         void LuaSelectGossipOption(int gossipId);
+
+        void LuaSelectQuestByNameOrGossipId(string questName, int gossipId, bool isAvailableQuest);
+
+        void LuaSelectQuestLogEntry(int gossipId);
 
         void LuaSellAllItems();
 
@@ -171,27 +190,11 @@ namespace AmeisenBotX.Core.Hook
 
         bool LuaUiIsVisible(params string[] uiElement);
 
-        bool LuaAutoLootEnabled();
-        
-        void LuaDeleteInventoryItemByName(string itemName);
-
         void LuaUseContainerItem(int bagId, int bagSlot);
 
         void LuaUseInventoryItem(EquipmentSlot equipmentSlot);
 
         void LuaUseItemByName(string itemName);
-
-        void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
-
-        bool LuaGetGossipIdByAvailableQuestTitle(string title, out int gossipId);
-        
-        bool LuaGetGossipIdByActiveQuestTitle(string title, out int gossipId);
-        
-        bool LuaGetGossipActiveQuestTitleById(int gossipId, out string title);
-
-        bool LuaGetQuestLogIdByTitle(string title, out int questLogId);
-
-        void LuaSelectQuestByNameOrGossipId(string questName, int gossipId, bool isAvailableQuest);
 
         void WowClearTarget();
 

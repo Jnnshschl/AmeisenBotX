@@ -154,6 +154,8 @@ namespace AmeisenBotX.Core.Data.Objects.WowObjects
             {
                 IsUnderwater = breathTimer > 0;
             }
+
+            IsGhost = HasBuffById(8326);
         }
 
         private string ReadPlayerName()

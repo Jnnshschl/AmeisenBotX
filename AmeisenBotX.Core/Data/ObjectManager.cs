@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects.Structs;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
 using System;
@@ -39,8 +40,8 @@ namespace AmeisenBotX.Core.Data
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             RelationshipEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            OutdoorCheck = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            GhostCheck = new TimegatedEvent(TimeSpan.FromSeconds(1));
+
+            WowInterface.I.HookManager.OnGameInfoPush += HookManagerOnGameInfoPush;
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
@@ -56,6 +57,8 @@ namespace AmeisenBotX.Core.Data
         public ulong LastTargetGuid { get; private set; }
 
         public MapId MapId { get; private set; }
+
+        public Vector3 MeanGroupPosition { get; private set; }
 
         public int ObjectCount { get; set; }
 
@@ -101,16 +104,19 @@ namespace AmeisenBotX.Core.Data
 
         private TimegatedEvent PoiCacheEvent { get; }
 
-        private TimegatedEvent OutdoorCheck { get; }
-
-        private TimegatedEvent GhostCheck { get; }
-
         private TimegatedEvent RelationshipEvent { get; }
 
         private WowInterface WowInterface { get; }
 
-        public Vector3 MeanGroupPosition { get; private set; }
+        public bool IsTargetInLineOfSight { get; private set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
+        {
+            return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
+                .Where(e => e.Position.GetDistance(position) < e.Radius + extends
+                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds)
@@ -149,16 +155,6 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit
-        {
-            lock (queryLock)
-            {
-                return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat && (e.IsTaggedByMe || e.TargetGuid == WowInterface.ObjectManager.PlayerGuid));
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
@@ -171,25 +167,12 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit
         {
             lock (queryLock)
             {
                 return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat && (PartymemberGuids.Contains(e.TargetGuid) || PartyPetGuids.Contains(e.TargetGuid)));
-            }
-        }
-
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
-        {
-            lock (queryLock)
-            {
-                return wowObjects.OfType<T>()
-                    .Where(e => !e.IsDead
-                         && !e.IsNotAttackable
-                         && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Friendly
-                         && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Neutral
-                         && e.Position.GetDistance(position) < distance);
+                    .Where(e => e.IsInCombat && (e.IsTaggedByMe || e.TargetGuid == WowInterface.ObjectManager.PlayerGuid));
             }
         }
 
@@ -206,6 +189,46 @@ namespace AmeisenBotX.Core.Data
             }
 
             return new List<T>();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
+        {
+            lock (queryLock)
+            {
+                return GetNearEnemies<T>(position, distance)
+                    .Where(e => e.IsInCombat && (PartymemberGuids.Contains(e.TargetGuid) || PartyPetGuids.Contains(e.TargetGuid)));
+            }
+        }
+
+        public Vector3 GetMeanGroupPosition(bool includeSelf = false)
+        {
+            Vector3 meanGroupPosition = new Vector3();
+            float count = 0;
+
+            foreach (WowUnit unit in Partymembers)
+            {
+                if ((includeSelf || unit.Guid != PlayerGuid) && unit.Position.GetDistance(Player.Position) < 100.0f)
+                {
+                    meanGroupPosition += unit.Position;
+                    ++count;
+                }
+            }
+
+            return meanGroupPosition / count;
+        }
+
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
+        {
+            lock (queryLock)
+            {
+                return wowObjects.OfType<T>()
+                    .Where(e => !e.IsDead
+                         && !e.IsNotAttackable
+                         && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Friendly
+                         && WowInterface.HookManager.WowGetUnitReaction(Player, e) != WowUnitReaction.Neutral
+                         && e.Position.GetDistance(position) < distance);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -290,16 +313,6 @@ namespace AmeisenBotX.Core.Data
                             if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
                             {
                                 ((WowPlayer)obj).ComboPoints = comboPoints;
-                            }
-
-                            if (OutdoorCheck.Run())
-                            {
-                                ((WowPlayer)obj).IsOutdoors = WowInterface.HookManager.LuaIsOutdoors();
-                            }
-
-                            if (GhostCheck.Run())
-                            {
-                                ((WowPlayer)obj).IsGhost = WowInterface.HookManager.LuaIsGhost(WowLuaUnit.Player);
                             }
 
                             Player = (WowPlayer)obj;
@@ -435,23 +448,6 @@ namespace AmeisenBotX.Core.Data
             OnObjectUpdateComplete?.Invoke(wowObjects);
         }
 
-        public Vector3 GetMeanGroupPosition(bool includeSelf = false)
-        {
-            Vector3 meanGroupPosition = new Vector3();
-            float count = 0;
-
-            foreach (WowUnit unit in Partymembers)
-            {
-                if ((includeSelf || unit.Guid != PlayerGuid) && unit.Position.GetDistance(Player.Position) < 100.0f)
-                {
-                    meanGroupPosition += unit.Position;
-                    ++count;
-                }
-            }
-
-            return meanGroupPosition / count;
-        }
-
         private void CachePois()
         {
             IEnumerable<WowGameobject> wowGameobjects = wowObjects.OfType<WowGameobject>();
@@ -537,6 +533,16 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        private void HookManagerOnGameInfoPush(GameInfo gameInfo)
+        {
+            if (Player != null)
+            {
+                Player.IsOutdoors = gameInfo.isOutdoors;
+            }
+
+            IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
+        }
+
         private ulong ReadLeaderGuid()
         {
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.RaidLeader, out ulong partyleaderGuid))
@@ -551,14 +557,6 @@ namespace AmeisenBotX.Core.Data
             }
 
             return 0;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
-        {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
-                .Where(e => e.Position.GetDistance(position) < e.Radius + extends
-                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
         }
 
         private IEnumerable<ulong> ReadPartymemberGuids()

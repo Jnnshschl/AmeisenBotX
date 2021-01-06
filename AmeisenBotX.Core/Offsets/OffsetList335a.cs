@@ -70,6 +70,8 @@ namespace AmeisenBotX.Core.Offsets
 
         public IntPtr FunctionHandleTerrainClick { get; } = new IntPtr(0x80C340);
 
+        public IntPtr FunctionIsOutdoors { get; } = new IntPtr(0x71B7F0);
+
         public IntPtr FunctionLuaDoString { get; } = new IntPtr(0x819210);
 
         public IntPtr FunctionPlayerClickToMove { get; } = new IntPtr(0x727400);

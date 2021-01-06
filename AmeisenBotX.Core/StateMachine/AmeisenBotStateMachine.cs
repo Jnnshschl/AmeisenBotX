@@ -54,7 +54,6 @@ namespace AmeisenBotX.Core.Statemachine
 
             AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
             EventPullEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.EventPullMs), WowInterface.EventHookManager.Pull);
-            GhostCheckEvent = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(Config.GhostCheckMs), () => WowInterface.ObjectManager.Player.Health == 1 && WowInterface.HookManager.LuaIsGhost(WowLuaUnit.Player));
             RenderSwitchEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
 
             CurrentState = States.First();
@@ -77,6 +76,8 @@ namespace AmeisenBotX.Core.Statemachine
 
         public BotState LastState { get; protected set; }
 
+        public TimegatedEvent MovementEvent { get; set; }
+
         public string PlayerName { get; internal set; }
 
         public bool ShouldExit { get; set; }
@@ -95,11 +96,7 @@ namespace AmeisenBotX.Core.Statemachine
 
         private TimegatedEvent EventPullEvent { get; set; }
 
-        private TimegatedEvent<bool> GhostCheckEvent { get; set; }
-
         private TimegatedEvent RenderSwitchEvent { get; set; }
-
-        public TimegatedEvent MovementEvent { get; set; }
 
         public void Execute()
         {

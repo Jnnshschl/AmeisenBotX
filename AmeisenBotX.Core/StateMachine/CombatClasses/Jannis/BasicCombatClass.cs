@@ -480,8 +480,6 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         public AuraManager TargetAuraManager { get; private set; }
 
-        public bool TargetInLineOfSight { get; set; }
-
         public InterruptManager TargetInterruptManager { get; private set; }
 
         public TargetManager TargetManagerDps { get; private set; }
@@ -526,8 +524,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         {
             if (WowInterface.ObjectManager.Player.IsCasting)
             {
-                // TODO: Where is that set?
-                if (!TargetInLineOfSight)
+                if (!WowInterface.ObjectManager.IsTargetInLineOfSight)
                 {
                     WowInterface.HookManager.LuaSpellStopCasting();
                 }
@@ -773,7 +770,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !TargetInLineOfSight) { return false; }
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !WowInterface.ObjectManager.IsTargetInLineOfSight) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
@@ -817,7 +814,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool TryCastSpellDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !TargetInLineOfSight) { return false; }
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !WowInterface.ObjectManager.IsTargetInLineOfSight) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
@@ -854,7 +851,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool TryCastSpellRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !TargetInLineOfSight) { return false; }
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !WowInterface.ObjectManager.IsTargetInLineOfSight) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
@@ -888,7 +885,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool TryCastSpellWarrior(string spellName, string requiredStance, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !TargetInLineOfSight) { return false; }
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !WowInterface.ObjectManager.IsTargetInLineOfSight) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {

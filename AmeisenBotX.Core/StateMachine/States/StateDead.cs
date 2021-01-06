@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     WowInterface.HookManager.LuaRepopMe();
                 }
             }
-            else if (WowInterface.HookManager.LuaIsGhost(WowLuaUnit.Player))
+            else if (WowInterface.Player.IsGhost)
             {
                 StateMachine.SetState(BotState.Ghost);
             }

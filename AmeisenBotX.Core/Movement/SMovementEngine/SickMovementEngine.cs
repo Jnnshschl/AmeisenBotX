@@ -13,7 +13,6 @@ using AmeisenBotX.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Timers;
 
@@ -142,6 +141,8 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
 
         public bool ForceDirectMove { get; private set; }
 
+        public bool GoToRandomPositionOnNextMove { get; private set; }
+
         public bool IsAtTargetPosition => TargetPosition != default && TargetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) < WowInterface.MovementSettings.WaypointCheckThreshold;
 
         public bool IsCastingMount { get; set; }
@@ -149,8 +150,6 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
         public bool IsGhost { get; set; }
 
         public bool JumpOnNextMove { get; private set; }
-
-        public bool GoToRandomPositionOnNextMove { get; private set; }
 
         public Vector3 LastPlayerPosition { get; private set; }
 
@@ -246,16 +245,16 @@ namespace AmeisenBotX.Core.Movement.SMovementEngine
             BehaviorTree.Tick();
         }
 
+        public bool IsNearPosition(Vector3 position)
+        {
+            return position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
+        }
+
         public bool IsPositionReachable(Vector3 position, double maxDistance)
         {
             return WowInterface.ObjectManager.Player.IsSwimming
                 || WowInterface.ObjectManager.Player.IsFlying
                 || (Path != null && Path.Count > 0 && Path.Last().GetDistance2D(position) < maxDistance);
-        }
-
-        public bool IsNearPosition(Vector3 position)
-        {
-            return position.GetDistance2D(WowInterface.ObjectManager.Player.Position) < (WowInterface.ObjectManager.Player.IsMounted ? WowInterface.MovementSettings.WaypointCheckThresholdMounted : WowInterface.MovementSettings.WaypointCheckThreshold);
         }
 
         public void PreventMovement(TimeSpan timeSpan)

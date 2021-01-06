@@ -14,7 +14,6 @@ using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -113,6 +112,13 @@ namespace AmeisenBotX.Core.Character
             };
         }
 
+        public bool IsAbleToUseItem(IWowItem item)
+        {
+            return (string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) &&
+                    IsAbleToUseArmor((WowArmor)item)) || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) &&
+                       IsAbleToUseWeapon((WowWeapon)item));
+        }
+
         public bool IsAbleToUseWeapon(WowWeapon item)
         {
             return item != null && item.WeaponType switch
@@ -136,13 +142,6 @@ namespace AmeisenBotX.Core.Character
                 WeaponType.MISCELLANEOUS => true,
                 _ => false,
             };
-        }
-
-        public bool IsAbleToUseItem(IWowItem item)
-        {
-            return (string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) &&
-                    IsAbleToUseArmor((WowArmor) item)) || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) &&
-                       IsAbleToUseWeapon((WowWeapon) item));
         }
 
         public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)
@@ -218,7 +217,7 @@ namespace AmeisenBotX.Core.Character
                 var item = container.FirstOrDefault();
                 for (int i = 20; i <= 23; ++i)
                 {
-                    if (Equipment.Items.All(keyPair => keyPair.Key != (EquipmentSlot) i))
+                    if (Equipment.Items.All(keyPair => keyPair.Key != (EquipmentSlot)i))
                     {
                         WowInterface.HookManager.LuaEquipItem(item);
                         break;

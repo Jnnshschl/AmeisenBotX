@@ -177,13 +177,13 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // run down cliffs
-            if (WowInterface.ObjectManager.Player.Position.GetDistance2D(posToGoTo) < 24.0)
+            if (WowInterface.ObjectManager.Player.Position.GetDistance2D(posToGoTo) < 24.0f)
             {
                 double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
 
                 if (LosCheckEvent.Run())
                 {
-                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2f))
+                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2.0f))
                     {
                         InLos = true;
                     }

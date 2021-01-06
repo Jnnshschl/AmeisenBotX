@@ -162,22 +162,6 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private bool HandleMovement(WowUnit target)
         {
-            // handle the LOS check
-            if (target == null || target.Guid == WowInterface.ObjectManager.PlayerGuid)
-            {
-                TargetInLos = true;
-            }
-            else if (LineOfSightCheck.Run(out bool isInLos, () => WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, target.Position)))
-            {
-                TargetInLos = isInLos;
-            }
-
-            // set LOS in CombatClass
-            if (WowInterface.CombatClass != null)
-            {
-                WowInterface.CombatClass.TargetInLineOfSight = WowInterface.ObjectManager.TargetGuid == 0 || TargetInLos;
-            }
-
             // check if we are facing the unit
             if (target != null
                 && !WowInterface.HookManager.WowIsClickToMoveActive()

@@ -1,50 +1,16 @@
 ﻿using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Movement.AMovementEngine
 {
     public class AMovementEngine : IMovementEngine
     {
-        public bool IsMoving { get; private set; }
-
-        public MovementAction Status { get; private set; }
-
-        private DateTime MovementBlockedUntil { get; set; }
-
-        private bool TriedToMountUp { get; set; }
-
-        private Vector3 LastTargetPosition { get; set; }
-
-        public bool IsAllowedToMove => DateTime.UtcNow > MovementBlockedUntil;
-
-        public IEnumerable<Vector3> Path => PathQueue;
-
-        public IEnumerable<(Vector3 position, float radius)> PlacesToAvoid => PlacesToAvoidList.Where(e => DateTime.UtcNow <= e.until).Select(e => (e.position, e.radius));
-
-        private Queue<Vector3> PathQueue { get; set; }
-
-        private List<(Vector3 position, float radius, DateTime until)> PlacesToAvoidList { get; set; }
-
-        private BasicVehicle PlayerVehicle { get; set; }
-
-        private TimegatedEvent FindPathEvent { get; }
-
-        private TimegatedEvent RefreshPathEvent { get; }
-
-        private TimegatedEvent JumpCheckEvent { get; }
-
-        private AmeisenBotConfig Config { get; }
-
         public AMovementEngine(AmeisenBotConfig config)
         {
             Config = config;
@@ -57,6 +23,44 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             PlacesToAvoidList = new List<(Vector3 position, float radius, DateTime until)>();
 
             PlayerVehicle = new BasicVehicle();
+        }
+
+        public bool IsAllowedToMove => DateTime.UtcNow > MovementBlockedUntil;
+
+        public bool IsMoving { get; private set; }
+
+        public IEnumerable<Vector3> Path => PathQueue;
+
+        public IEnumerable<(Vector3 position, float radius)> PlacesToAvoid => PlacesToAvoidList.Where(e => DateTime.UtcNow <= e.until).Select(e => (e.position, e.radius));
+
+        public MovementAction Status { get; private set; }
+
+        private AmeisenBotConfig Config { get; }
+
+        private TimegatedEvent FindPathEvent { get; }
+
+        private TimegatedEvent JumpCheckEvent { get; }
+
+        private Vector3 LastTargetPosition { get; set; }
+
+        private DateTime MovementBlockedUntil { get; set; }
+
+        private Queue<Vector3> PathQueue { get; set; }
+
+        private List<(Vector3 position, float radius, DateTime until)> PlacesToAvoidList { get; set; }
+
+        private BasicVehicle PlayerVehicle { get; set; }
+
+        private TimegatedEvent RefreshPathEvent { get; }
+
+        private bool TriedToMountUp { get; set; }
+
+        public void AvoidPlace(Vector3 position, float radius, TimeSpan timeSpan)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            PlacesToAvoidList.Add((position, radius, now + timeSpan));
+            PlacesToAvoidList.RemoveAll(e => now > e.until);
         }
 
         public void Execute()
@@ -103,27 +107,6 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
                 if (AvoidAoeStuff(WowInterface.I.Player.Position, out Vector3 newPosition))
                 {
                     SetMovementAction(MovementAction.Move, newPosition);
-                }
-            }
-        }
-
-        private void MoveCharacter(Vector3 positionToGoTo)
-        {
-            Vector3 node = WowInterface.I.PathfindingHandler.MoveAlongSurface((int)WowInterface.I.ObjectManager.MapId, WowInterface.I.Player.Position, positionToGoTo);
-
-            if (node != default)
-            {
-                WowInterface.I.CharacterManager.MoveToPosition(node);
-            }
-
-            if (WowInterface.I.MovementSettings.EnableTracelineJumpCheck
-                && JumpCheckEvent.Run())
-            {
-                Vector3 pos = BotUtils.MoveAhead(WowInterface.I.Player.Position, WowInterface.I.Player.Rotation, WowInterface.I.MovementSettings.ObstacleCheckDistance);
-
-                if (!WowInterface.I.HookManager.WowIsInLineOfSight(WowInterface.I.Player.Position, pos, WowInterface.I.MovementSettings.ObstacleCheckHeight))
-                {
-                    WowInterface.I.CharacterManager.Jump();
                 }
             }
         }
@@ -194,23 +177,6 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             return false;
         }
 
-        private void MountUp()
-        {
-            IEnumerable<WowMount> filteredMounts = WowInterface.I.CharacterManager.Mounts;
-
-            if (Config.UseOnlySpecificMounts)
-            {
-                filteredMounts = filteredMounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Any(x => x.Equals(e.Name.Trim(), StringComparison.OrdinalIgnoreCase)));
-            }
-
-            if (filteredMounts != null && filteredMounts.Any())
-            {
-                WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
-                PreventMovement(TimeSpan.FromSeconds(1));
-                WowInterface.I.HookManager.LuaCallCompanion(mount.Index);
-            }
-        }
-
         public void StopMovement()
         {
             PathQueue.Clear();
@@ -251,12 +217,42 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             return targetPosition;
         }
 
-        public void AvoidPlace(Vector3 position, float radius, TimeSpan timeSpan)
+        private void MountUp()
         {
-            DateTime now = DateTime.UtcNow;
+            IEnumerable<WowMount> filteredMounts = WowInterface.I.CharacterManager.Mounts;
 
-            PlacesToAvoidList.Add((position, radius, now + timeSpan));
-            PlacesToAvoidList.RemoveAll(e => now > e.until);
+            if (Config.UseOnlySpecificMounts)
+            {
+                filteredMounts = filteredMounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Any(x => x.Equals(e.Name.Trim(), StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (filteredMounts != null && filteredMounts.Any())
+            {
+                WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
+                PreventMovement(TimeSpan.FromSeconds(1));
+                WowInterface.I.HookManager.LuaCallCompanion(mount.Index);
+            }
+        }
+
+        private void MoveCharacter(Vector3 positionToGoTo)
+        {
+            Vector3 node = WowInterface.I.PathfindingHandler.MoveAlongSurface((int)WowInterface.I.ObjectManager.MapId, WowInterface.I.Player.Position, positionToGoTo);
+
+            if (node != default)
+            {
+                WowInterface.I.CharacterManager.MoveToPosition(node);
+            }
+
+            if (WowInterface.I.MovementSettings.EnableTracelineJumpCheck
+                && JumpCheckEvent.Run())
+            {
+                Vector3 pos = BotUtils.MoveAhead(WowInterface.I.Player.Position, WowInterface.I.Player.Rotation, WowInterface.I.MovementSettings.ObstacleCheckDistance);
+
+                if (!WowInterface.I.HookManager.WowIsInLineOfSight(WowInterface.I.Player.Position, pos, WowInterface.I.MovementSettings.ObstacleCheckHeight))
+                {
+                    WowInterface.I.CharacterManager.Jump();
+                }
+            }
         }
     }
 }
