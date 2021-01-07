@@ -1706,60 +1706,60 @@ namespace AmeisenBotX.Core.Hook
 
         private unsafe bool WowAllocateCodeCaves()
         {
-            AmeisenLogger.I.Log("HookManager", "Allocating Codecaves for the EndsceneHook", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", "Allocating Codecaves", LogLevel.Verbose);
 
             // integer to check if there is code waiting to be executed
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr codeToExecuteAddress)) { return false; }
 
             CodeToExecuteAddress = codeToExecuteAddress;
             WowInterface.XMemory.Write(CodeToExecuteAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodeToExecuteAddress: 0x{CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"CodeToExecuteAddress",-36} ({4,-4} bytes): 0x{CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
 
             // integer to save the pointer to the return value
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr returnValueAddress)) { return false; }
 
             ReturnValueAddress = returnValueAddress;
             WowInterface.XMemory.Write(ReturnValueAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook ReturnValueAddress: 0x{ReturnValueAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"ReturnValueAddress",-36} ({4,-4} bytes): 0x{ReturnValueAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to override the is ingame check, used at the login
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress)) { return false; }
 
             OverrideWorldCheckAddress = overrideWorldCheckAddress;
             WowInterface.XMemory.Write(OverrideWorldCheckAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook OverrideWorldCheckAddress: 0x{OverrideWorldCheckAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"OverrideWorldCheckAddress",-36} ({4,-4} bytes): 0x{OverrideWorldCheckAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the original endscene code
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out IntPtr codecaveForGateway)) { return false; }
 
             CodecaveForGateway = codecaveForGateway;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForGateway ({MEM_ALLOC_GATEWAY_SIZE} bytes): 0x{CodecaveForGateway.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"CodecaveForGateway",-36} ({MEM_ALLOC_GATEWAY_SIZE,-4} bytes): 0x{CodecaveForGateway.ToInt32():X}", LogLevel.Verbose);
 
             // codecave to check wether we need to execute something
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_CHECK_SIZE, out IntPtr codecaveForCheck)) { return false; }
 
             CodecaveForCheck = codecaveForCheck;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForCheck ({MEM_ALLOC_CHECK_SIZE} bytes): 0x{CodecaveForCheck.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"CodecaveForCheck",-36} ({MEM_ALLOC_CHECK_SIZE,-4} bytes): 0x{CodecaveForCheck.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the code we wan't to execute
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution)) { return false; }
 
             CodecaveForExecution = codecaveForExecution;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook CodecaveForExecution ({MEM_ALLOC_EXECUTION_SIZE} bytes): 0x{CodecaveForExecution.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"CodecaveForExecution",-36} ({MEM_ALLOC_EXECUTION_SIZE,-4} bytes): 0x{CodecaveForExecution.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the gameinfo execution
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr gameInfoExecute)) { return false; }
 
             GameInfoExecuteAddress = gameInfoExecute;
             WowInterface.XMemory.Write(GameInfoExecuteAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook GameInfoExecuteAddress (4 bytes): 0x{GameInfoExecuteAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"GameInfoExecuteAddress",-36} ({4,-4} bytes): 0x{GameInfoExecuteAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the gameinfo executed
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr gameInfoExecuted)) { return false; }
 
             GameInfoExecutedAddress = gameInfoExecuted;
             WowInterface.XMemory.Write(GameInfoExecutedAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook GameInfoExecutedAddress (4 bytes): 0x{GameInfoExecutedAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"GameInfoExecutedAddress",-36} ({4,-4} bytes): 0x{GameInfoExecutedAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the gameinfo struct
             uint gameinfoSize = (uint)sizeof(GameInfo);
@@ -1767,26 +1767,26 @@ namespace AmeisenBotX.Core.Hook
             if (!WowInterface.XMemory.AllocateMemory(gameinfoSize, out IntPtr gameInfo)) { return false; }
 
             GameInfoAddress = gameInfo;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook GameInfoAddress ({gameinfoSize} bytes): 0x{GameInfoAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"GameInfoAddress",-36} ({gameinfoSize,-4} bytes): 0x{GameInfoAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the gameinfo line of sight check
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr executeLosCheck)) { return false; }
 
             GameInfoExecuteLosCheckAddress = executeLosCheck;
             WowInterface.XMemory.Write(GameInfoExecuteLosCheckAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook GameInfoExecuteLosCheckAddress (4 bytes): 0x{GameInfoExecuteLosCheckAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"GameInfoExecuteLosCheckAddress",-36} ({4,-4} bytes): 0x{GameInfoExecuteLosCheckAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the gameinfo line of sight check data
             if (!WowInterface.XMemory.AllocateMemory(40, out IntPtr losCheckData)) { return false; }
 
             GameInfoLosCheckDataAddress = losCheckData;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook GameInfoLosCheckDataAddress (40 bytes): 0x{GameInfoLosCheckDataAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"GameInfoLosCheckDataAddress",-36} ({40,-4} bytes): 0x{GameInfoLosCheckDataAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the event hook
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EVENTHOOK_SIZE, out IntPtr eventHook)) { return false; }
 
             EventHookAddress = eventHook;
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook EventHookAddress ({MEM_ALLOC_EVENTHOOK_SIZE} bytes): 0x{EventHookAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"EventHookAddress",-36} ({MEM_ALLOC_EVENTHOOK_SIZE,-4} bytes): 0x{EventHookAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the event hook var
             byte[] luaVarBytes = Encoding.ASCII.GetBytes(EventHookOutput);
@@ -1795,14 +1795,14 @@ namespace AmeisenBotX.Core.Hook
 
             EventHookLuaVarAddress = eventHookVar;
             WowInterface.XMemory.WriteBytes(EventHookLuaVarAddress, luaVarBytes);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook EventHookLuaVarAddress ({luaVarSize} bytes): 0x{EventHookLuaVarAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"EventHookLuaVarAddress",-36} ({luaVarSize,-4} bytes): 0x{EventHookLuaVarAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the event hook return
             if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr eventHookReturn)) { return false; }
 
             EventHookLuaReturnAddress = eventHookReturn;
             WowInterface.XMemory.Write(EventHookLuaReturnAddress, 0);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook EventHookLuaReturnAddress (4 bytes): 0x{EventHookLuaReturnAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"EventHookLuaReturnAddress",-36} ({4,-4} bytes): 0x{EventHookLuaReturnAddress.ToInt32():X}", LogLevel.Verbose);
 
             // codecave for the eventhook lua
             byte[] luaStringBytes = Encoding.ASCII.GetBytes(EventHookLuaSetUp);
@@ -1812,7 +1812,7 @@ namespace AmeisenBotX.Core.Hook
 
             EventHookLuaAddress = eventHookLua;
             WowInterface.XMemory.WriteBytes(EventHookLuaAddress, luaStringBytes);
-            AmeisenLogger.I.Log("HookManager", $"EndsceneHook EventHookLuaAddress ({luaStringSize} bytes): 0x{EventHookLuaAddress.ToInt32():X}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"{"EventHookLuaAddress",-36} ({luaStringSize,-4} bytes): 0x{EventHookLuaAddress.ToInt32():X}", LogLevel.Verbose);
 
             return true;
         }
