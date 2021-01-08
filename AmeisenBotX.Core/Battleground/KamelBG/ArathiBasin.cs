@@ -6,6 +6,7 @@ using System.Linq;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Common;
 using System.Collections.Generic;
+using AmeisenBotX.Logging;
 
 namespace AmeisenBotX.Core.Battleground.KamelBG
 {
@@ -18,16 +19,17 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         public string Name => "Arathi Basin";
 
         private bool faction { get; set; }
+        private string factionFlagState { get; set; }
 
         private int CurrentNodeCounter { get; set; }
 
         public List<Vector3> Path { get; } = new List<Vector3>()
         {
-            new Vector3(1166, 1203, -56),//Stable
-            new Vector3(803, 875, -55),//Farm
-            new Vector3(852, 1151, 11),//LumberMill
             new Vector3(975, 1043, -44),//Blacksmith
-            new Vector3(1144, 844, -110)//GoldMine
+            new Vector3(803, 875, -55),//Farm
+            new Vector3(1144, 844, -110),//GoldMine
+            new Vector3(852, 1151, 11),//LumberMill
+            new Vector3(1166, 1203, -56)//Stable
         };
 
         private TimegatedEvent CaptureFlagEvent { get; }
@@ -56,6 +58,33 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Execute()
         {
+            //GetMapLandmarkInfo(1)
+            //[1]="Blacksmith",
+            //[2]="Uncontrolled"         
+            //GetMapLandmarkInfo(2)
+            //[1]="Blacksmith",
+            //[2]="Uncontrolled"
+
+            // output = "" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) output = output..base..":"..status..";" end print(output)
+
+            // output = ""
+            // 
+            // for i = 1, GetNumMapLandmarks(), 1 do
+            //    base, status = GetMapLandmarkInfo(i)
+            //    output = output..base..":"..status..";"
+            // end 
+            //
+            // print(output)
+
+
+            // for i = 1, 6, 1 do base, status = GetMapLandmarkInfo(i) print("["..i.."] "..base.." -> "..status) end
+
+            //for variable = 0, 10, 2 do
+            //print(variable)
+            //end
+
+            //name:status;name:status;...
+
             Combat();
 
             WowGameobject FlagNode = WowInterface.ObjectManager.WowObjects
@@ -88,22 +117,58 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             else
             {
 
-                Vector3 currentNode = Path[CurrentNodeCounter];
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
-
-                if (WowInterface.Player.Position.GetDistance(currentNode) < 3.0f)
+                if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) {v:0}= {v:0}..base..\":\"..status..\";\" end"), out string result))
                 {
-                    ++CurrentNodeCounter;
+                    //AmeisenLogger.I.Log("KAMEL_DEBUG", $"time result: {result}");
 
-                    if (CurrentNodeCounter >= Path.Count)
+                    IEnumerable<WowPlayer> enemiesNearFlag = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(FlagNode.Position, 40);
+                    IEnumerable<WowPlayer> friendsNearFlag = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(FlagNode.Position, 40);
+                    IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 20);
+
+                    string[] AllBaseList = result.Split(';');
+
+                    Vector3 currentNode = Path[CurrentNodeCounter];
+
+                    if (AllBaseList[CurrentNodeCounter].Contains("Uncontrolled")
+                        || AllBaseList[CurrentNodeCounter].Contains("In Conflict")
+                        || AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
                     {
-                        if (!IsCirclePath)
-                        {
-                            Path.Reverse();
-                        }
-
-                        CurrentNodeCounter = 0;
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
                     }
+
+                    if (WowInterface.Player.Position.GetDistance(currentNode) < 10.0f)
+                    {
+                        ++CurrentNodeCounter;
+
+                        if (CurrentNodeCounter >= Path.Count)
+                        {
+                            CurrentNodeCounter = 0;
+                        }
+                    }
+                    else if (AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                    {
+                        ++CurrentNodeCounter;
+                        if (CurrentNodeCounter >= Path.Count)
+                        {
+                            CurrentNodeCounter = 0;
+                        }
+                    }
+                    else if (enemiesNearFlag != null)
+                    {
+                        if (enemiesNearFlag.Count() >= 2)
+                        {
+                            if (friendsNearFlag.Count() >= 1 || friendsNearPlayer.Count() >= 1)
+                            {
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                    }
+                    
                 }
             }
         }
@@ -115,17 +180,19 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Faction()
         {
+            //Alliance Controlled
+            //Hord Controlled
             if (WowInterface.ObjectManager.Player.IsHorde())
             {
                 faction = true;
-                //FlagsNodelist.Add(Flags.NeutralFlags);
+                factionFlagState = "Alliance Controlled";
                 FlagsNodelist.Add(Flags.HordFlags);
                 FlagsNodelist.Add(Flags.HordFlagsAktivate);
             }
             else
             {
                 faction = false;
-                //FlagsNodelist.Add(Flags.NeutralFlags);
+                factionFlagState = "Hord Controlled";
                 FlagsNodelist.Add(Flags.AlliFlags);
                 FlagsNodelist.Add(Flags.AlliFlagsAktivate);
             }
@@ -153,7 +220,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             }
             else
             {
-                
+
             }
         }
     }
