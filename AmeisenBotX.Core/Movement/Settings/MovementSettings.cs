@@ -22,9 +22,9 @@
 
         public double MinUnstuckDistance { get; set; } = 8.0;
 
-        public float ObstacleCheckDistance { get; set; } = 1.0f;
+        public float ObstacleCheckDistance { get; set; } = 1.3f;
 
-        public float ObstacleCheckHeight { get; set; } = 0.7f;
+        public float ObstacleCheckHeight { get; set; } = 0.2f;
 
         public float SeperationDistance { get; set; } = 2.0f;
 

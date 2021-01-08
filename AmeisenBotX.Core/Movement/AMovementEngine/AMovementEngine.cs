@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
             FindPathEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             RefreshPathEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            JumpCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            DistanceMovedCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
             PathQueue = new Queue<Vector3>();
             PlacesToAvoidList = new List<(Vector3 position, float radius, DateTime until)>();
@@ -25,9 +26,17 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             PlayerVehicle = new BasicVehicle();
         }
 
+        public float CurrentSpeed { get; private set; }
+
         public bool IsAllowedToMove => DateTime.UtcNow > MovementBlockedUntil;
 
         public bool IsMoving { get; private set; }
+
+        public bool IsUnstucking { get; private set; }
+
+        public DateTime LastMovement { get; private set; }
+
+        public Vector3 LastPosition { get; private set; }
 
         public IEnumerable<Vector3> Path => PathQueue;
 
@@ -35,11 +44,13 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
         public MovementAction Status { get; private set; }
 
+        public Vector3 UnstuckTarget { get; private set; }
+
         private AmeisenBotConfig Config { get; }
 
-        private TimegatedEvent FindPathEvent { get; }
+        private TimegatedEvent DistanceMovedCheckEvent { get; }
 
-        private TimegatedEvent JumpCheckEvent { get; }
+        private TimegatedEvent FindPathEvent { get; }
 
         private Vector3 LastTargetPosition { get; set; }
 
@@ -65,9 +76,14 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
         public void Execute()
         {
+            if (IsUnstucking && UnstuckTarget.GetDistance(WowInterface.I.Player.Position) < 2.0f)
+            {
+                IsUnstucking = false;
+            }
+
             if (PathQueue.Count > 0)
             {
-                Vector3 currentNode = PathQueue.Peek();
+                Vector3 currentNode = IsUnstucking ? UnstuckTarget : PathQueue.Peek();
                 float distanceToNode = WowInterface.I.Player.Position.GetDistance2D(currentNode);
 
                 if (distanceToNode > 1.0f)
@@ -147,10 +163,11 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         {
             if (IsAllowedToMove && (PathQueue.Count == 0 || RefreshPathEvent.Ready))
             {
-                if (state == MovementAction.DirectMove)
+                if (state == MovementAction.DirectMove || WowInterface.I.Player.IsFlying || WowInterface.I.Player.IsUnderwater)
                 {
-                    WowInterface.I.CharacterManager.MoveToPosition(position);
+                    WowInterface.I.CharacterManager.MoveToPosition(IsUnstucking ? UnstuckTarget : position);
                     Status = state;
+                    DistanceMovedJumpCheck();
                 }
                 else if (FindPathEvent.Run() && IsPositionReachable(position, out IEnumerable<Vector3> path))
                 {
@@ -183,22 +200,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             WowInterface.I.HookManager.WowStopClickToMove();
         }
 
-        private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
-        {
-            List<(Vector3 position, float radius)> places = new List<(Vector3 position, float radius)>(PlacesToAvoid);
-            places.AddRange(WowInterface.I.ObjectManager.GetAoeSpells(position, false).Select(e => (e.Position, e.Radius)));
-
-            if (places.Any())
-            {
-                newPosition = GetPositionOutsideOfAoeSpells(position, places);
-                return true;
-            }
-
-            newPosition = position;
-            return false;
-        }
-
-        private Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
+        private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
         {
             if (aoeSpells.Any())
             {
@@ -215,6 +217,60 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             }
 
             return targetPosition;
+        }
+
+        private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
+        {
+            List<(Vector3 position, float radius)> places = new List<(Vector3 position, float radius)>(PlacesToAvoid);
+            places.AddRange(WowInterface.I.ObjectManager.GetAoeSpells(position, false).Select(e => (e.Position, e.Radius)));
+
+            if (places.Any())
+            {
+                newPosition = GetPositionOutsideOfAoeSpells(position, places);
+                return true;
+            }
+
+            newPosition = position;
+            return false;
+        }
+
+        private void DistanceMovedJumpCheck()
+        {
+            if (DistanceMovedCheckEvent.Ready)
+            {
+                if (LastMovement != default && DateTime.UtcNow - LastMovement < TimeSpan.FromSeconds(1))
+                {
+                    CurrentSpeed = LastPosition.GetDistance(WowInterface.I.Player.Position) / (float)(DateTime.UtcNow - LastMovement).TotalSeconds;
+                    AmeisenLogger.I.Log("MOVEMENT", $"metersPerSecond: {CurrentSpeed}");
+
+                    if (IsUnstucking && CurrentSpeed > 1.0f)
+                    {
+                        IsUnstucking = false;
+                    }
+
+                    if (CurrentSpeed == 0.0f && !IsUnstucking)
+                    {
+                        // hard stuck
+                        IsUnstucking = true;
+
+                        // get position behind us
+                        Vector3 positionBehind = BotUtils.MoveAhead(WowInterface.I.Player.Position, WowInterface.I.Player.Rotation, -WowInterface.I.MovementSettings.UnstuckDistance);
+                        UnstuckTarget = WowInterface.I.PathfindingHandler.GetRandomPointAround((int)WowInterface.I.ObjectManager.MapId, positionBehind, 5.0f);
+
+                        Reset();
+                        SetMovementAction(MovementAction.Move, UnstuckTarget);
+                    }
+                    else if (CurrentSpeed < 0.1f)
+                    {
+                        // soft stuck
+                        WowInterface.I.CharacterManager.Jump();
+                    }
+                }
+
+                LastMovement = DateTime.UtcNow;
+                LastPosition = WowInterface.I.Player.Position;
+                DistanceMovedCheckEvent.Run();
+            }
         }
 
         private void MountUp()
@@ -243,15 +299,9 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
                 WowInterface.I.CharacterManager.MoveToPosition(node);
             }
 
-            if (WowInterface.I.MovementSettings.EnableTracelineJumpCheck
-                && JumpCheckEvent.Run())
+            if (Config.MovementSettings.EnableDistanceMovedJumpCheck)
             {
-                Vector3 pos = BotUtils.MoveAhead(WowInterface.I.Player.Position, WowInterface.I.Player.Rotation, WowInterface.I.MovementSettings.ObstacleCheckDistance);
-
-                if (!WowInterface.I.HookManager.WowIsInLineOfSight(WowInterface.I.Player.Position, pos, WowInterface.I.MovementSettings.ObstacleCheckHeight))
-                {
-                    WowInterface.I.CharacterManager.Jump();
-                }
+                DistanceMovedJumpCheck();
             }
         }
     }

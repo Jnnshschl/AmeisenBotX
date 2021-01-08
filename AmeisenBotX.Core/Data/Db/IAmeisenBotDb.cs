@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
 using AmeisenBotX.Core.Personality.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Data.Db
@@ -16,7 +17,7 @@ namespace AmeisenBotX.Core.Data.Db
 
         IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes();
 
-        IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>> AllCombatLogEntries();
+        IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries();
 
         IReadOnlyDictionary<MapId, Dictionary<HerbNode, List<Vector3>>> AllHerbNodes();
 
@@ -50,6 +51,8 @@ namespace AmeisenBotX.Core.Data.Db
 
         void Clear();
 
+        BasicCombatLogEntrySubject GetCombatLogSubject();
+
         bool IsPlayerKnown(WowPlayer player);
 
         void Save(string dbFile);
@@ -67,7 +70,5 @@ namespace AmeisenBotX.Core.Data.Db
         bool TryGetUnitName(ulong guid, out string name);
 
         void UpdatePlayerRelationship(WowPlayer player);
-
-        BasicCombatLogEntrySubject GetCombatLogSubject();
     }
 }

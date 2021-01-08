@@ -167,10 +167,11 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
 
             // run down cliffs
-            if (WowInterface.ObjectManager.Player.Position.GetDistance2D(posToGoTo) < 24.0f)
-            {
-                double zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
+            float zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
 
+            // it goes more down than forward
+            if (zDiff < -16.0)
+            {
                 if (LosCheckEvent.Run())
                 {
                     if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2.0f))
@@ -183,7 +184,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
 
-                if (zDiff < -16.0 && InLos) // target is below us and in line of sight, just run down
+                if (InLos) // target is below us and in line of sight, just run down
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, posToGoTo);
                     return;

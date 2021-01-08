@@ -42,43 +42,6 @@ namespace AmeisenBotX.Core.Statemachine.States
             LoadTactics();
         }
 
-        private void LoadTactics()
-        {
-            if (WowInterface.ObjectManager.MapId == MapId.TheForgeOfSouls)
-            {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5297, 2506, 686)) < 70.0)
-                {
-                    // Corrupted Soul Fragements
-                    WowInterface.I.CombatClass.PriorityTargetDisplayIds = new List<int>() { 30233 };
-                    WowInterface.TacticEngine.LoadTactics(new BronjahmTactic());
-                }
-                else if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5662, 2507, 709)) < 120.0)
-                {
-                    WowInterface.TacticEngine.LoadTactics(new DevourerOfSoulsTactic());
-                }
-            }
-            else if (WowInterface.ObjectManager.MapId == MapId.PitOfSaron)
-            {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(823, 110, 509)) < 150.0)
-                {
-                    WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic());
-                }
-            }
-            else if (WowInterface.ObjectManager.MapId == MapId.TheObsidianSanctum)
-            {
-                // Twilight Eggs
-                WowInterface.I.CombatClass.PriorityTargetDisplayIds = new List<int>() { 27396 };
-                WowInterface.TacticEngine.LoadTactics(new TwilightPortalTactic(WowInterface));
-            }
-            else if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
-            {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3273, -3476, 287)) < 120.0)
-                {
-                    WowInterface.TacticEngine.LoadTactics(new AnubRhekan10Tactic(WowInterface));
-                }
-            }
-        }
-
         public override void Execute()
         {
             if (!(WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || StateMachine.IsAnyPartymemberInCombat()
@@ -242,6 +205,43 @@ namespace AmeisenBotX.Core.Statemachine.States
             // no need to move
             WowInterface.MovementEngine.StopMovement();
             return false;
+        }
+
+        private void LoadTactics()
+        {
+            if (WowInterface.ObjectManager.MapId == MapId.TheForgeOfSouls)
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5297, 2506, 686)) < 70.0)
+                {
+                    // Corrupted Soul Fragements
+                    WowInterface.I.CombatClass.PriorityTargetDisplayIds = new List<int>() { 30233 };
+                    WowInterface.TacticEngine.LoadTactics(new BronjahmTactic());
+                }
+                else if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5662, 2507, 709)) < 120.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new DevourerOfSoulsTactic());
+                }
+            }
+            else if (WowInterface.ObjectManager.MapId == MapId.PitOfSaron)
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(823, 110, 509)) < 150.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic());
+                }
+            }
+            else if (WowInterface.ObjectManager.MapId == MapId.TheObsidianSanctum)
+            {
+                // Twilight Eggs
+                WowInterface.I.CombatClass.PriorityTargetDisplayIds = new List<int>() { 27396 };
+                WowInterface.TacticEngine.LoadTactics(new TwilightPortalTactic(WowInterface));
+            }
+            else if (WowInterface.ObjectManager.MapId == MapId.Naxxramas)
+            {
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3273, -3476, 287)) < 120.0)
+                {
+                    WowInterface.TacticEngine.LoadTactics(new AnubRhekan10Tactic(WowInterface));
+                }
+            }
         }
     }
 }

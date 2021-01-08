@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Event.Objects;
+﻿using AmeisenBotX.Core.Event.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
@@ -37,6 +36,19 @@ namespace AmeisenBotX.Core.Event
         private Queue<string> PendingLuaToExecute { get; set; }
 
         private WowInterface WowInterface { get; }
+
+        public void ExecutePendingLua()
+        {
+            HandleSubEventQueue();
+            HandleUnsubEventQueue();
+
+            // execute the pending lua stuff
+            if (PendingLuaToExecute.Count > 0
+                && WowInterface.HookManager.LuaDoString(PendingLuaToExecute.Peek()))
+            {
+                PendingLuaToExecute.Dequeue();
+            }
+        }
 
         public void HookManagerOnEventPush(string eventJson)
         {
@@ -101,19 +113,6 @@ namespace AmeisenBotX.Core.Event
         {
             AmeisenLogger.I.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
             UnsubscribeQueue.Enqueue((eventName, onEventFired));
-        }
-
-        public void ExecutePendingLua()
-        {
-            HandleSubEventQueue();
-            HandleUnsubEventQueue();
-
-            // execute the pending lua stuff
-            if (PendingLuaToExecute.Count > 0
-                && WowInterface.HookManager.LuaDoString(PendingLuaToExecute.Peek()))
-            {
-                PendingLuaToExecute.Dequeue();
-            }
         }
 
         private void HandleSubEventQueue()

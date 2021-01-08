@@ -14,11 +14,6 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         {
         }
 
-        public bool CastMovementRay(int mapId, Vector3 start, Vector3 end)
-        {
-            return false; // SendCastRayRequest(mapId, start, end, MovementType.CastMovementRay);
-        }
-
         public IEnumerable<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
             return SendPathRequest(mapId, start, end, MovementType.FindPath, out Vector3[] path, PathRequestFlags.CatmullRomSpline) ? path : null;

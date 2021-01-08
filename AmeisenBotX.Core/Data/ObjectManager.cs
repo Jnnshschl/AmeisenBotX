@@ -50,6 +50,8 @@ namespace AmeisenBotX.Core.Data
 
         public string GameState { get; private set; }
 
+        public bool IsTargetInLineOfSight { get; private set; }
+
         public bool IsWorldLoaded { get; private set; }
 
         public WowUnit LastTarget { get; private set; }
@@ -107,8 +109,6 @@ namespace AmeisenBotX.Core.Data
         private TimegatedEvent RelationshipEvent { get; }
 
         private WowInterface WowInterface { get; }
-
-        public bool IsTargetInLineOfSight { get; private set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)

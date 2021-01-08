@@ -1,10 +1,9 @@
-﻿using System;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects.WowObjects;
 using AmeisenBotX.Core.Statemachine.Enums;
 using System.Collections.Generic;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
 
 namespace AmeisenBotX.Core.Statemachine.CombatClasses
 {
@@ -38,12 +37,12 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses
 
         WowClass WowClass { get; }
 
-        void Execute();
-
-        void OutOfCombatExecute();
-
         void AttackTarget();
 
+        void Execute();
+
         bool IsTargetAttackable(WowUnit target);
+
+        void OutOfCombatExecute();
     }
 }

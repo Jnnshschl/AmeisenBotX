@@ -7,6 +7,8 @@ namespace AmeisenBotX.Core.Movement
 {
     public interface IMovementEngine
     {
+        float CurrentSpeed { get; }
+
         bool IsMoving { get; }
 
         IEnumerable<Vector3> Path { get; }
