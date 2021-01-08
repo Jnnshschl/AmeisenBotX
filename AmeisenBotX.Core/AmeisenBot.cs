@@ -819,7 +819,7 @@ namespace AmeisenBotX.Core
             WowInterface.ChatManager = new ChatManager(Config, Path.Combine(BotDataPath, AccountName));
             WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
 
-            WowInterface.HookManager = new HookManager(WowInterface);
+            WowInterface.HookManager = new HookManager(WowInterface, Config);
             WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
             WowInterface.EventHookManager = new EventHook(WowInterface);
@@ -937,7 +937,7 @@ namespace AmeisenBotX.Core
             // Misc Events
             // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+            WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }
     }
 }

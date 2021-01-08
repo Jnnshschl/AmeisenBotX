@@ -13,9 +13,9 @@ namespace AmeisenBotX.Core.Hook
 {
     public interface IHookManager
     {
-        event Action<GameInfo> OnGameInfoPush;
-
         event Action<string> OnEventPush;
+
+        event Action<GameInfo> OnGameInfoPush;
 
         string EventFrameName { get; }
 

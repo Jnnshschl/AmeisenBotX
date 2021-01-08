@@ -8,12 +8,14 @@ using AmeisenBotX.Core.Personality.Enums;
 using AmeisenBotX.Core.Personality.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using MoreLinq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace AmeisenBotX.Core.Data.Db
 {
@@ -23,11 +25,13 @@ namespace AmeisenBotX.Core.Data.Db
         {
             CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
+
+            CleanupTimer = new Timer(CleanupTimerTick, null, 0, 6000);
         }
 
         public ConcurrentDictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
 
-        public ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>> CombatLogEntries { get; private set; }
+        public ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> CombatLogEntries { get; private set; }
 
         public BasicCombatLogEntrySubject CombatLogSubject { get; }
 
@@ -44,6 +48,8 @@ namespace AmeisenBotX.Core.Data.Db
         public ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>> Reactions { get; private set; }
 
         public ConcurrentDictionary<int, string> SpellNames { get; private set; }
+
+        private Timer CleanupTimer { get; }
 
         public static LocalAmeisenBotDb FromJson(string dbFile)
         {
@@ -92,7 +98,7 @@ namespace AmeisenBotX.Core.Data.Db
             return BlacklistNodes;
         }
 
-        public IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>> AllCombatLogEntries()
+        public IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries()
         {
             return CombatLogEntries;
         }
@@ -151,15 +157,15 @@ namespace AmeisenBotX.Core.Data.Db
         {
             if (!CombatLogEntries.ContainsKey(key.Key))
             {
-                CombatLogEntries.TryAdd(key.Key, new Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>() { { key.Value, new List<BasicCombatLogEntry>() } });
+                CombatLogEntries.TryAdd(key.Key, new Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>() { { key.Value, new List<(DateTime, BasicCombatLogEntry)>() } });
             }
             else if (!CombatLogEntries[key.Key].ContainsKey(key.Value))
             {
-                CombatLogEntries[key.Key].Add(key.Value, new List<BasicCombatLogEntry>() { entry });
+                CombatLogEntries[key.Key].Add(key.Value, new List<(DateTime, BasicCombatLogEntry)>() { (DateTime.UtcNow, entry) });
             }
             else
             {
-                CombatLogEntries[key.Key][key.Value].Add(entry);
+                CombatLogEntries[key.Key][key.Value].Add((DateTime.UtcNow, entry));
             }
         }
 
@@ -252,7 +258,7 @@ namespace AmeisenBotX.Core.Data.Db
             Names = new ConcurrentDictionary<ulong, string>();
             Reactions = new ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>>();
             SpellNames = new ConcurrentDictionary<int, string>();
-            CombatLogEntries = new ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<BasicCombatLogEntry>>>();
+            CombatLogEntries = new ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>>();
             BlacklistNodes = new ConcurrentDictionary<int, List<Vector3>>();
             PointsOfInterest = new ConcurrentDictionary<MapId, Dictionary<PoiType, List<Vector3>>>();
             OreNodes = new ConcurrentDictionary<MapId, Dictionary<OreNode, List<Vector3>>>();
@@ -361,6 +367,15 @@ namespace AmeisenBotX.Core.Data.Db
             if (IsPlayerKnown(player))
             {
                 PlayerRelationships[player.Guid].Poll(player);
+            }
+        }
+
+        private void CleanupTimerTick(object state)
+        {
+            if (CombatLogEntries != null && CombatLogEntries.Any())
+            {
+                DateTime ts = DateTime.UtcNow - TimeSpan.FromMinutes(6);
+                CombatLogEntries.Values.ForEach(e => e.Values.ForEach(x => x.RemoveAll(y => y.Item1 < ts)));
             }
         }
     }

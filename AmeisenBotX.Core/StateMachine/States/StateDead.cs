@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
