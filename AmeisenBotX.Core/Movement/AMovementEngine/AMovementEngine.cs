@@ -147,7 +147,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         {
             if (IsAllowedToMove && (PathQueue.Count == 0 || RefreshPathEvent.Ready))
             {
-                if (state == MovementAction.DirectMove)
+                if (state == MovementAction.DirectMove || WowInterface.I.Player.IsFlying || WowInterface.I.Player.IsUnderwater)
                 {
                     WowInterface.I.CharacterManager.MoveToPosition(position);
                     Status = state;
@@ -198,7 +198,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             return false;
         }
 
-        private Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
+        private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
         {
             if (aoeSpells.Any())
             {
