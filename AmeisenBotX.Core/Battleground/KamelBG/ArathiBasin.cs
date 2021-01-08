@@ -68,7 +68,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
             .FirstOrDefault();
 
-
             if (FlagNode != null)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, FlagNode.Position);
@@ -93,10 +92,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) {v:0}= {v:0}..base..\":\"..status..\";\" end"), out string result))
                 {
                     //AmeisenLogger.I.Log("KAMEL_DEBUG", $"time result: {result}");
-                    
-                    //IEnumerable<WowPlayer> enemiesNearFlag = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(FlagNode.Position, 40);
-                    //IEnumerable<WowPlayer> friendsNearFlag = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(FlagNode.Position, 40);
-                    //IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 20);
 
                     string[] AllBaseList = result.Split(';');
 
@@ -126,17 +121,29 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                             CurrentNodeCounter = 0;
                         }
                     }
-                    //else if (enemiesNearFlag != null)
-                    //{
-                    //    if (enemiesNearFlag.Count() >= 2)
-                    //    {
-                    //        if (friendsNearFlag != null && (friendsNearFlag.Count() >= 1 || friendsNearPlayer.Count() >= 1))
-                    //        {
-                    //            WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
-                    //            return;
-                    //        }
-                    //    }
-                    //}
+                    else if (FlagNode != null)
+                    {
+                        IEnumerable<WowPlayer> enemiesNearFlag = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(FlagNode.Position, 40);
+                        IEnumerable<WowPlayer> friendsNearFlag = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(FlagNode.Position, 40);
+                        IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 20);
+
+                        if (enemiesNearFlag != null)
+                        {
+                            if (enemiesNearFlag.Count() >= 2)
+                            {
+                                if (friendsNearFlag != null && (friendsNearFlag.Count() >= 1 || friendsNearPlayer.Count() >= 1))
+                                {
+                                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                                return;
+                            }
+                        }
+                    }
                     else
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
@@ -153,8 +160,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Faction()
         {
-            //Alliance Controlled
-            //Hord Controlled
             if (WowInterface.ObjectManager.Player.IsHorde())
             {
                 faction = true;
