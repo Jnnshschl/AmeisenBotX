@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
 
             if (randomPartymember != null)
             {
-                WowInterface.I.HookManager.WowFacePosition(WowInterface.I.ObjectManager.Player, randomPartymember.Position);
+                WowInterface.I.HookManager.WowFacePosition(WowInterface.I.ObjectManager.Player, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
             }
         }
     }

@@ -11,11 +11,11 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
 
         public bool AutopilotOnly => false;
 
-        public int MaxCooldown => 9 * 1000;
+        public int MaxCooldown => 18 * 1000;
 
         public int MaxDuration => 0;
 
-        public int MinCooldown => 5 * 1000;
+        public int MinCooldown => 11 * 1000;
 
         public int MinDuration => 0;
 
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
 
         public void Execute()
         {
-            float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 8.0f);
+            float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 5.0f);
             WowInterface.I.HookManager.WowSetFacing(WowInterface.I.ObjectManager.Player, WowInterface.I.ObjectManager.Player.Rotation + modificationFactor);
         }
     }

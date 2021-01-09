@@ -41,11 +41,11 @@ namespace AmeisenBotX.Core.StateMachine.States.Idle.Actions
 
         public List<string> EmotesWithInteraction { get; }
 
-        public int MaxCooldown => 6 * 60 * 1000;
+        public int MaxCooldown => 14 * 60 * 1000;
 
         public int MaxDuration => 0;
 
-        public int MinCooldown => 3 * 60 * 1000;
+        public int MinCooldown => 8 * 60 * 1000;
 
         public int MinDuration => 0;
 
