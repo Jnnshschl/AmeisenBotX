@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                             CurrentNodeCounter = 0;
                         }
                     }
-                    else if (AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                    else if (factionFlagState != null && AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
                     {
                         ++CurrentNodeCounter;
                         if (CurrentNodeCounter >= Path.Count)
