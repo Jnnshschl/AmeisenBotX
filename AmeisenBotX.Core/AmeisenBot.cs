@@ -329,8 +329,8 @@ namespace AmeisenBotX.Core
             BattlegroundEngines = new List<IBattlegroundEngine>
             {
                 new UniversalBattlegroundEngine(WowInterface),
-                new KummelEngine(WowInterface),
                 new ArathiBasin(WowInterface),
+                new StrandOfTheAncients(WowInterface),
                 new RunBoyRunEngine(WowInterface)
             };
         }
