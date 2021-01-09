@@ -173,6 +173,8 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > DistanceToKeep || !WowInterface.ObjectManager.IsTargetInLineOfSight)
                 {
+                    return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, targetPosition);
+
                     switch (WowInterface.CombatClass.Role)
                     {
                         case CombatClassRole.Dps:
