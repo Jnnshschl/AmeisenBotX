@@ -16,7 +16,8 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
     {
         public TemplateCombatClass(AmeisenBotStateMachine stateMachine) : base(stateMachine)
         {
-            WowInterface.EventHookManager.Subscribe("UI_ERROR_MESSAGE", (t, a) => OnUIErrorMessage(a[0]));
+            //this line cause a bug because it run out of index
+            //WowInterface.EventHookManager.Subscribe("UI_ERROR_MESSAGE", (t, a) => OnUIErrorMessage(a[0]));
         }
 
         public string Author { get; } = "Shino";

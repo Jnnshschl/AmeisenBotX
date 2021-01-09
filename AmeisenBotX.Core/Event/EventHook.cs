@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Event
                 {
                     foreach (WowEvent x in events)
                     {
-                        if (EventDictionary.ContainsKey(x.Name))
+                        if (x.Name != null && EventDictionary.ContainsKey(x.Name))
                         {
                             List<WowEventAction> actions = EventDictionary[x.Name];
 

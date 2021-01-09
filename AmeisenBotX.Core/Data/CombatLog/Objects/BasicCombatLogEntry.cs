@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
         {
             basicCombatLogEntry = new BasicCombatLogEntry();
 
-            if (eventArgs.Count < 8)
+            if (eventArgs != null && eventArgs.Count < 8)
             {
                 return false;
             }
