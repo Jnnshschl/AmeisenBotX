@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             Vector3 desired = currentPosition;
-            float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
+            float distanceToTarget = currentPosition.GetDistance(position);
 
             desired -= position;
             desired.Normalize2D(desired.GetMagnitude2D());
@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
             Vector3 desired = position;
-            float distanceToTarget = Convert.ToSingle(currentPosition.GetDistance(position));
+            float distanceToTarget = currentPosition.GetDistance(position);
 
             desired -= currentPosition;
             desired.Normalize2D(desired.GetMagnitude2D());
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 steering = desired;
             steering -= Velocity;
 
-            float maxSteering = WowInterface.MovementSettings.MaxSteering;
+            float maxSteering = WowInterface.Player.IsInCombat ? WowInterface.MovementSettings.MaxSteeringCombat : WowInterface.MovementSettings.MaxSteering;
 
             if (WowInterface.ObjectManager.Player.IsMounted)
             {
@@ -178,7 +178,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 acceleration = new Vector3(0, 0, 0);
             acceleration += steering;
 
-            float maxAcceleration = WowInterface.MovementSettings.MaxAcceleration;
+            float maxAcceleration = WowInterface.Player.IsInCombat ? WowInterface.MovementSettings.MaxAccelerationCombat : WowInterface.MovementSettings.MaxAcceleration;
 
             if (WowInterface.ObjectManager.Player.IsMounted)
             {
@@ -257,7 +257,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 currentPosition = WowInterface.ObjectManager.Player.Position;
 
             Vector3 newRandomPosition = new Vector3(0, 0, 0);
-            newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.ObjectManager.Player.Rotation, Convert.ToSingle((rnd.NextDouble() * 4) + 4));
+            newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.ObjectManager.Player.Rotation, ((float)rnd.NextDouble() * 4.0f) + 4.0f);
 
             // rotate the vector by random amount of degrees
             newRandomPosition.Rotate(rnd.Next(-14, 14));
@@ -268,33 +268,33 @@ namespace AmeisenBotX.Core.Movement.Objects
         private static Vector3 CalculateFuturePosition(Vector3 position, float targetRotation, float targetVelocity)
         {
             float rotation = targetRotation;
-            double x = position.X + (Math.Cos(rotation) * targetVelocity);
-            double y = position.Y + (Math.Sin(rotation) * targetVelocity);
+            float x = position.X + (MathF.Cos(rotation) * targetVelocity);
+            float y = position.Y + (MathF.Sin(rotation) * targetVelocity);
 
             return new Vector3()
             {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
+                X = x,
+                Y = y,
                 Z = position.Z
             };
         }
 
         private static Vector3 CalculatPositionBehind(Vector3 position, float targetRotation, float targetVelocity)
         {
-            float rotation = targetRotation + Convert.ToSingle(Math.PI);
+            float rotation = targetRotation + MathF.PI;
 
-            if (rotation > 2 * Math.PI)
+            if (rotation > 2.0f * MathF.PI)
             {
-                rotation -= Convert.ToSingle(2 * Math.PI);
+                rotation -= 2.0f * MathF.PI;
             }
 
-            double x = position.X + (Math.Cos(rotation) * targetVelocity);
-            double y = position.Y + (Math.Sin(rotation) * targetVelocity);
+            float x = position.X + (MathF.Cos(rotation) * targetVelocity);
+            float y = position.Y + (MathF.Sin(rotation) * targetVelocity);
 
             return new Vector3()
             {
-                X = Convert.ToSingle(x),
-                Y = Convert.ToSingle(y),
+                X = x,
+                Y = y,
                 Z = position.Z
             };
         }
@@ -371,7 +371,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 vehiclePosition = WowInterface.ObjectManager.Player.Position;
             int count = 0;
 
-            List<(Vector3, double)> objectDistances = new List<(Vector3, double)>();
+            List<(Vector3, float)> objectDistances = new List<(Vector3, float)>();
 
             // we need to know every objects position and distance
             // to later apply a force pushing us back from it that
@@ -381,7 +381,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             for (int i = 0; i < objects.Count(); ++i)
             {
                 T obj = objects.ElementAt(i);
-                double distance = obj.Position.GetDistance(vehiclePosition);
+                float distance = obj.Position.GetDistance(vehiclePosition);
 
                 if (distance < maxDistance)
                 {
@@ -395,11 +395,11 @@ namespace AmeisenBotX.Core.Movement.Objects
             }
 
             // get the biggest distance to normalize the fleeing forces
-            float normalizingMultiplier = Convert.ToSingle(objectDistances.Max(e => e.Item2));
+            float normalizingMultiplier = objectDistances.Max(e => e.Item2);
 
             for (int i = 0; i < objectDistances.Count; ++i)
             {
-                force += Flee(objectDistances[i].Item1, Convert.ToSingle(objectDistances[i].Item2) * normalizingMultiplier);
+                force += Flee(objectDistances[i].Item1, objectDistances[i].Item2 * normalizingMultiplier);
                 count++;
             }
 
