@@ -173,15 +173,15 @@ namespace AmeisenBotX.Core.Statemachine.States
 
                 if (distance > DistanceToKeep || !WowInterface.ObjectManager.IsTargetInLineOfSight)
                 {
-                    return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
-
                     switch (WowInterface.CombatClass.Role)
                     {
                         case CombatClassRole.Dps:
-                            return HandleDpsMovement(target, targetPosition);
+                            return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
+                            // return HandleDpsMovement(target, targetPosition);
 
                         case CombatClassRole.Tank:
-                            return HandleTankMovement(target, targetPosition);
+                            return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
+                            // return HandleTankMovement(target, targetPosition);
 
                         case CombatClassRole.Heal:
                             return HandleHealMovement(target, targetPosition);

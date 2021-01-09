@@ -222,7 +222,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
             List<(Vector3 position, float radius)> places = new List<(Vector3 position, float radius)>(PlacesToAvoid);
-            places.AddRange(WowInterface.I.ObjectManager.GetAoeSpells(position, false).Select(e => (e.Position, e.Radius)));
+            places.AddRange(WowInterface.I.ObjectManager.GetAoeSpells(position).Select(e => (e.Position, e.Radius)));
 
             if (places.Any())
             {
