@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         private float GetMeeleRange()
         {
-            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5f : MathF.Max(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
+            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5f : MathF.Min(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
         }
 
         private bool HandleDpsMovement(WowUnit target, Vector3 targetPosition)
