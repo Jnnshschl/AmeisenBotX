@@ -33,10 +33,8 @@ namespace AmeisenBotX.Core.Statemachine.States
                     && WowInterface.ObjectManager.Player.HasBuffByName("Food")
                     && WowInterface.ObjectManager.Player.HasBuffByName("Drink"))
                 {
-                    if ((WowInterface.ObjectManager.Player.HealthPercentage >= Config.EatUntilPercent
-                             || WowInterface.ObjectManager.Player.HealthPercentage >= 95.0)
-                         && (WowInterface.ObjectManager.Player.ManaPercentage >= Config.DrinkUntilPercent
-                             || WowInterface.ObjectManager.Player.ManaPercentage >= 95.0)
+                    if (WowInterface.ObjectManager.Player.HealthPercentage >= 95.0
+                        && WowInterface.ObjectManager.Player.ManaPercentage >= 95.0
                         && (WowInterface.ObjectManager.PartyleaderGuid == 0
                             || WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f))
                     {
@@ -49,8 +47,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
                 else if (CurrentlyEating.Length > 0 && WowInterface.ObjectManager.Player.HasBuffByName("Food"))
                 {
-                    if ((WowInterface.ObjectManager.Player.HealthPercentage >= Config.EatUntilPercent
-                             || WowInterface.ObjectManager.Player.HealthPercentage >= 95.0)
+                    if (WowInterface.ObjectManager.Player.HealthPercentage >= 95.0
                         && (WowInterface.ObjectManager.PartyleaderGuid == 0
                             || WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f))
                     {
@@ -63,8 +60,7 @@ namespace AmeisenBotX.Core.Statemachine.States
                 }
                 else if (CurrentlyDrinking.Length > 0 && WowInterface.ObjectManager.Player.HasBuffByName("Drink"))
                 {
-                    if ((WowInterface.ObjectManager.Player.ManaPercentage >= Config.DrinkUntilPercent
-                             || WowInterface.ObjectManager.Player.ManaPercentage >= 95.0)
+                    if (WowInterface.ObjectManager.Player.ManaPercentage >= 95.0
                         && (WowInterface.ObjectManager.PartyleaderGuid == 0
                             || WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f))
                     {

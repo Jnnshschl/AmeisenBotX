@@ -241,7 +241,6 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
                 if (LastMovement != default && DateTime.UtcNow - LastMovement < TimeSpan.FromSeconds(1))
                 {
                     CurrentSpeed = LastPosition.GetDistance(WowInterface.I.Player.Position) / (float)(DateTime.UtcNow - LastMovement).TotalSeconds;
-                    AmeisenLogger.I.Log("MOVEMENT", $"metersPerSecond: {CurrentSpeed}");
 
                     if (IsUnstucking && CurrentSpeed > 1.0f)
                     {
