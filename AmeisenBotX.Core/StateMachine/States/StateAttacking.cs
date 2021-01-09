@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             }
             else if (WowInterface.CombatClass != null)
             {
-                Vector3 targetPosition = BotUtils.MoveAhead(target.Position, target.Rotation, 1.5f);
+                Vector3 targetPosition = BotUtils.MoveAhead(target.Position, target.Rotation, 0.5f);
                 float distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
 
                 if (distance > DistanceToKeep || !WowInterface.ObjectManager.IsTargetInLineOfSight)
