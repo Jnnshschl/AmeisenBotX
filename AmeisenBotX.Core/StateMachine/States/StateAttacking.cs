@@ -207,10 +207,10 @@ namespace AmeisenBotX.Core.Statemachine.States
                 && WowInterface.ObjectManager.Partymembers.Any()) // no need to rotate
             {
                 // rotate the boss away from the group
-                Vector3 meanGroupPosition = WowInterface.ObjectManager.MeanGroupPosition;
-                Vector3 positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle(target.Position, meanGroupPosition));
+                // Vector3 meanGroupPosition = WowInterface.ObjectManager.MeanGroupPosition;
+                // Vector3 positionToGoTo = BotMath.CalculatePositionBehind(target.Position, BotMath.GetFacingAngle(target.Position, meanGroupPosition));
 
-                return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, positionToGoTo);
+                return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, targetPosition);
             }
             else
             {
