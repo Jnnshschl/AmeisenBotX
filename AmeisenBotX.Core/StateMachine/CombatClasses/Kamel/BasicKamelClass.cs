@@ -93,7 +93,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Kamel
 
         public abstract TalentTree Talents { get; }
 
-        public bool TargetInLineOfSight { get; set; }
+        public bool TargetInLineOfSight => WowInterface.ObjectManager.IsTargetInLineOfSight;
 
         public TimegatedEvent TargetSelectEvent { get; private set; }
 
