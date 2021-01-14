@@ -331,6 +331,7 @@ namespace AmeisenBotX.Core
                 new UniversalBattlegroundEngine(WowInterface),
                 new ArathiBasin(WowInterface),
                 new StrandOfTheAncients(WowInterface),
+                new EyeOfTheStorm(WowInterface),
                 new RunBoyRunEngine(WowInterface)
             };
         }
