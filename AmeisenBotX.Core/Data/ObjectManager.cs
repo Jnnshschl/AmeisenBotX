@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Data
 
         private readonly object queryLock = new object();
 
-        private readonly (IntPtr, WowObjectType)[] wowObjectPointers;
+        private readonly IntPtr[] wowObjectPointers;
         private readonly WowObject[] wowObjects;
 
         public ObjectManager(WowInterface wowInterface, AmeisenBotConfig config)
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Data
             WowInterface = wowInterface;
             Config = config;
 
-            wowObjectPointers = new (IntPtr, WowObjectType)[MAX_OBJECT_COUNT];
+            wowObjectPointers = new IntPtr[MAX_OBJECT_COUNT];
             wowObjects = new WowObject[MAX_OBJECT_COUNT];
 
             PartymemberGuids = new List<ulong>();
@@ -284,9 +284,10 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public WowObject ProcessObject(IntPtr ptr, WowObjectType type)
+        public WowObject ProcessObject(IntPtr ptr)
         {
-            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
+            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectType.ToInt32()), out WowObjectType type) 
+                && WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress))
             {
                 WowObject obj = type switch
                 {
@@ -387,27 +388,25 @@ namespace AmeisenBotX.Core.Data
                 if (PartyleaderGuid == 0) { Partyleader = null; }
 
                 WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
-                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, (int)WowInterface.OffsetList.CurrentObjectManager), out IntPtr currentObjectManager);
+                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
 
                 // read the first object
-                WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, (int)WowInterface.OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
-                WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.WowObjectType), out int activeObjectType);
+                WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
 
                 int count = 0;
 
-                while (activeObjectType > 0 && activeObjectType < 8 && count < MAX_OBJECT_COUNT)
+                while (activeObjectBaseAddress.ToInt32() > 0 && count < MAX_OBJECT_COUNT)
                 {
-                    wowObjectPointers[count] = (activeObjectBaseAddress, (WowObjectType)activeObjectType);
+                    wowObjectPointers[count] = activeObjectBaseAddress;
                     ++count;
 
-                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.NextObject), out activeObjectBaseAddress);
-                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.WowObjectType), out activeObjectType);
+                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
                 }
 
                 ObjectCount = count;
 
                 Array.Clear(wowObjects, 0, wowObjects.Length);
-                Parallel.For(0, count, (x, y) => wowObjects[x] = ProcessObject(wowObjectPointers[x].Item1, wowObjectPointers[x].Item2));
+                Parallel.For(0, count, x => wowObjects[x] = ProcessObject(wowObjectPointers[x]));
 
                 if (PlayerGuidIsVehicle)
                 {
