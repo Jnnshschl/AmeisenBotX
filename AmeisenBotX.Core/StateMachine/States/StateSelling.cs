@@ -5,7 +5,10 @@ using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.StateMachine.Routines;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using AmeisenBotX.Core.Data.Db.Objects;
+using AmeisenBotX.Core.Data.Db.Structs;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -31,7 +34,7 @@ namespace AmeisenBotX.Core.Statemachine.States
             {
                 WowInterface.CharacterManager.Inventory.Update();
             }
-
+            
             if (!NeedToSell())
             {
                 WowInterface.HookManager.LuaClickUiElement("MerchantFrameCloseButton");
@@ -60,6 +63,23 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
             }
+            else
+            {
+                var vendors = StaticDB.Vendors.Where(vendor => vendor.MapId == (int) WowInterface.ObjectManager.MapId
+                                                              && ((ILikeUnit) vendor).LikesUnit(WowInterface.Player))
+                    .OrderBy(vendor => vendor.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+
+                if (vendors.Any())
+                {
+                    var vendor = vendors.First();
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, vendor.Position);
+                }
+                else
+                {
+                    StateMachine.SetState(BotState.Idle);
+                    return;
+                }
+            }
         }
 
         public bool IsVendorNpcNear(out WowUnit unit)
@@ -82,15 +102,17 @@ namespace AmeisenBotX.Core.Statemachine.States
 
         internal bool NeedToSell()
         {
-            return WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
-                && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
-                       && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
-                           || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
-                           || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
-                           || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
-                           || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
-                   .Any(e => e.Price > 0)
-                && IsVendorNpcNear(out _);
+            return WowInterface.CharacterManager.Inventory.FreeBagSlots <= Config.BagSlotsToGoSell;
+                /*
+                   && WowInterface.CharacterManager.Inventory.Items.Where(e =>
+                           !Config.ItemSellBlacklist.Contains(e.Name)
+                           && ((Config.SellGrayItems && e.ItemQuality == ItemQuality.Poor)
+                               || (Config.SellWhiteItems && e.ItemQuality == ItemQuality.Common)
+                               || (Config.SellGreenItems && e.ItemQuality == ItemQuality.Uncommon)
+                               || (Config.SellBlueItems && e.ItemQuality == ItemQuality.Rare)
+                               || (Config.SellPurpleItems && e.ItemQuality == ItemQuality.Epic)))
+                       .Any(e => e.Price > 0);
+                */
         }
     }
 }

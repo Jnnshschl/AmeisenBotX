@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 
             TargetInterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
             {
-                { 0, (x) => TryCastSpell(counterspellSpell, x.Guid, true) }
+                //{ 0, (x) => TryCastSpell(counterspellSpell, x.Guid, true) }
             };
         }
 
@@ -117,18 +117,36 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
                 }
 
                 if (CooldownManager.IsSpellOnCooldown(summonWaterElementalSpell) &&
-                    CooldownManager.IsSpellOnCooldown(icyVeinsSpell))
+                    CooldownManager.IsSpellOnCooldown(icyVeinsSpell) 
+                    && !CooldownManager.IsSpellOnCooldown(coldSnapSpell)
+                    && TryCastSpell(coldSnapSpell, 0))
                 {
-                    TryCastSpell(coldSnapSpell, 0);
+                    return;
+                }
+                
+                if (WowInterface.ObjectManager.Pet != null
+                    && !CooldownManager.IsSpellOnCooldown(summonWaterElementalSpell)
+                    && TryCastSpell(summonWaterElementalSpell, target.Guid, true))
+                {
+                    return;
                 }
 
+                if (WowInterface.ObjectManager.Player.HasBuffByName("Fireball!") && TryCastSpell(frostFireBolt, target.Guid, false))
+                {
+                    return;
+                }
+
+                /*
+                 // Thats apparently not how to cast pet spells!
                 if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(freezeSpell))
                 {
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
+                */
 
                 var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 64.0);
-                if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 9.0) == 1
+                if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 8.0) == 1
+                    && !CooldownManager.IsSpellOnCooldown(frostNovaSpell)
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
                     return;
@@ -155,7 +173,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
                 if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0)
                 {
                     // TODO: Logic to check if the target blink location is dangerous
-                    if (!TryCastSpell(blinkSpell, 0, true))
+                    if (!CooldownManager.IsSpellOnCooldown(blinkSpell) && !TryCastSpell(blinkSpell, 0, true))
                     {
 
                     }
@@ -173,31 +191,46 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
                     return;
                 }
 
-                if (TryCastSpell(summonWaterElementalSpell, target.Guid, true))
+                if (!WowInterface.Target.HasBuffByName(frostNovaSpell) && !CooldownManager.IsSpellOnCooldown(deepFreezeSpell) && TryCastSpell(deepFreezeSpell, target.Guid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(deepFreezeSpell, target.Guid, true))
+                if (!CooldownManager.IsSpellOnCooldown(icyVeinsSpell))
                 {
-                    return;
+                    TryCastSpell(icyVeinsSpell, 0);
                 }
 
-                TryCastSpell(icyVeinsSpell, 0, true);
-                TryCastSpell(berserkingSpell, 0, true);
+                if (!CooldownManager.IsSpellOnCooldown(berserkingSpell))
+                {
+                    TryCastSpell(berserkingSpell, 0);
+                }
 
                 if (TryCastSpell(frostBoltSpell, target.Guid, true))
                 {
                     return;
                 }
-                
-                TryCastSpell(fireballSpell, target.Guid, true);
+
+                if (TryCastSpell(fireBlastSpell, target.Guid, true))
+                {
+                    return;
+                }
+
+                if (TryCastSpell(coneOfColdSpell, target.Guid, true))
+                {
+                    return;
+                }
+
+                if (TryCastSpell(fireballSpell, target.Guid, true))
+                {
+                    return;
+                }
             }
         }
 
         public override void OutOfCombatExecute()
         {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureWaterSpell))
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureWaterSpell) && !WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureRefreshment))
             {
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureWaterSpell);
                 spell.GetRank(out int spellRank);
@@ -257,7 +290,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
                 }
             }
 
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureFoodSpell))
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureFoodSpell) && !WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureRefreshment))
             {
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureFoodSpell);
                 spell.GetRank(out int spellRank);
@@ -338,7 +371,11 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Shino
 
             }
 
-            base.OutOfCombatExecute();
+            if (MyAuraManager.Tick()
+                || GroupAuraManager.Tick())
+            {
+                return;
+            }
         }
 
         protected override Spell GetOpeningSpell()

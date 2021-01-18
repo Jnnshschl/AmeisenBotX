@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.StateMachine.Routines
     {
         public static void Run(WowInterface wowInterface, AmeisenBotConfig config)
         {
-            foreach (IWowItem item in wowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0))
+            foreach (IWowItem item in wowInterface.CharacterManager.Inventory.Items.Where(e => e.Price > 0).ToList())
             {
                 IWowItem itemToSell = item;
 

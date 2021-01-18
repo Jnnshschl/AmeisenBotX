@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
                 WowInterface.MovementEngine.Reset();
                 TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
             }
-            else if (WowInterface.Player.Position.GetDistance(target.Position) < 3.5f || WowInterface.MovementEngine.Status == MovementAction.None)
+            else
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core.StateMachine.CombatClasses.Shino
         public override bool IsTargetAttackable(WowUnit target)
         {
             Spell openingSpell = GetOpeningSpell();
-            float posOffset = 0.5f;
+            float posOffset = 1.5f;
             Vector3 currentPos = WowInterface.ObjectManager.Player.Position;
             Vector3 posXLeft = WowInterface.ObjectManager.Player.Position;
             posXLeft.X -= posOffset;

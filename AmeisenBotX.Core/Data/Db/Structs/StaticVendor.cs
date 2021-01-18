@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Data.Db.Structs
     public struct StaticVendor : ILikeUnit
     {
 
-        public StaticVendor(int entry, int mapId, float posX, float posY, float posZ, bool ammo, bool food, bool poison, bool reagent, bool repairer, bool likesHorde, bool likesAlliance)
+        public StaticVendor(int entry, int mapId, float posX, float posY, float posZ, bool ammo, bool food, bool poison, bool reagent, bool repairer, bool likesAlliance, bool likesHorde)
         {
             Entry = entry;
             MapId = mapId;

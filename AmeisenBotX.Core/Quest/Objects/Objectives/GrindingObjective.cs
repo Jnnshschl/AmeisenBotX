@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
@@ -37,6 +38,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 WowInterface.HookManager.WowClearTarget();
                 WowUnit = null;
+
+                if (WowInterface.MovementEngine.Status != MovementAction.Move)
+                {
+                    CurrentNode = SearchAreas.GetNextPosition(WowInterface);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentNode);
+                }
+                return;
             }
 
             if (!WowInterface.ObjectManager.Player.IsInCombat)
@@ -56,10 +64,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (WowUnit != null)
             {
-                SearchAreas.NotifyDetour();
-                WowInterface.CombatClass.AttackTarget();
+                if (!WowInterface.ObjectManager.Player.IsInCombat)
+                {
+                    SearchAreas.NotifyDetour();
+                    WowInterface.CombatClass.AttackTarget();
+                }
             }
-            else if (WowInterface.Player.Position.GetDistance(CurrentNode) < 3.5f || SearchAreas.HasAbortedPath())
+            else if (SearchAreas.HasAbortedPath() || WowInterface.Player.Position.GetDistance(CurrentNode) < 3.5f)
             {
                 CurrentNode = SearchAreas.GetNextPosition(WowInterface);
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentNode);

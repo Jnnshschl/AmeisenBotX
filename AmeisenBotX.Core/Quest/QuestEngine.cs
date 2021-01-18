@@ -8,6 +8,8 @@ using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmeisenBotX.Core.Data.Db.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Quest
 {
@@ -41,6 +43,34 @@ namespace AmeisenBotX.Core.Quest
 
         public void Execute()
         {
+            // do i need to recover my hp
+            if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
+                && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 60.0).Any())
+            {
+                // wait or eat something
+                if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
+                {
+                    StateMachine.SetState(BotState.Eating);
+                    return;
+                }
+            }
+
+            // Do I need to repair?
+            if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0
+                                                                       && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold))
+            {
+                StateMachine.SetState(BotState.Repairing);
+                return;
+            }
+            
+            // Do I need to go selling?
+            if (WowInterface.CharacterManager.Inventory.FreeBagSlots <= Config.BagSlotsToGoSell)
+            {
+                StateMachine.SetState(BotState.Selling);
+                return;
+            }
+            
+
             if (Profile == null)
             {
                 return;
@@ -63,18 +93,6 @@ namespace AmeisenBotX.Core.Quest
 
             if (Profile.Quests.Count > 0)
             {
-                // do i need to recover my hp
-                if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                    && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 60.0).Any())
-                {
-                    // wait or eat something
-                    if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
-                    {
-                        StateMachine.SetState(BotState.Eating);
-                        return;
-                    }
-                }
-
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
                 
                 // Drop all quest that are not selected

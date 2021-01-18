@@ -15,6 +15,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -184,6 +185,9 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
         protected const string scorchSpell = "Scorch";
         protected const string spellStealSpell = "Spellsteal";
         protected const string summonWaterElementalSpell = "Summon Water Elemental";
+        protected const string frostFireBolt = "Frostfire Bolt";
+        protected const string fireBlastSpell = "Fire Blast";
+        protected const string coneOfColdSpell = "Cone of Cold";
 
         #endregion Mage
 
@@ -770,6 +774,7 @@ namespace AmeisenBotX.Core.Statemachine.CombatClasses.Jannis
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
+            Debug.WriteLine("Casting: " + spellName);
             if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || !WowInterface.ObjectManager.IsTargetInLineOfSight) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))

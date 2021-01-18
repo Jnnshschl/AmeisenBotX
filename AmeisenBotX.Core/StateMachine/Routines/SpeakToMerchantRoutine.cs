@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects.WowObjects;
 using System;
+using System.Diagnostics;
 
 namespace AmeisenBotX.Core.StateMachine.Routines
 {
@@ -8,6 +9,7 @@ namespace AmeisenBotX.Core.StateMachine.Routines
     {
         public static bool Run(WowInterface wowInterface, WowUnit selectedUnit)
         {
+            Console.WriteLine("IS CALLED!");
             if (wowInterface == null || selectedUnit == null)
             {
                 return false;
