@@ -4,6 +4,8 @@ using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.StateMachine.Routines;
 using System;
 using System.Linq;
+using AmeisenBotX.Core.Data.Db.Objects;
+using AmeisenBotX.Core.Data.Db.Structs;
 
 namespace AmeisenBotX.Core.Statemachine.States
 {
@@ -58,6 +60,24 @@ namespace AmeisenBotX.Core.Statemachine.States
                     }
                 }
             }
+            else
+            {
+                var vendors = StaticDB.Vendors.Where(vendor => vendor.MapId == (int)WowInterface.ObjectManager.MapId
+                                                               && vendor.IsRepairer
+                                                               && ((ILikeUnit)vendor).LikesUnit(WowInterface.Player))
+                    .OrderBy(vendor => vendor.Position.GetDistance(WowInterface.ObjectManager.Player.Position));
+
+                if (vendors.Any())
+                {
+                    var vendor = vendors.First();
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, vendor.Position);
+                }
+                else
+                {
+                    StateMachine.SetState(BotState.Idle);
+                    return;
+                }
+            }
         }
 
         public bool IsRepairNpcNear(out WowUnit unit)
@@ -79,8 +99,9 @@ namespace AmeisenBotX.Core.Statemachine.States
         internal bool NeedToRepair()
         {
             return WowInterface.CharacterManager.Equipment.Items
-                       .Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
-                   && IsRepairNpcNear(out _);
+                .Any(e => e.Value.MaxDurability > 0 &&
+                          ((double) e.Value.Durability / (double) e.Value.MaxDurability * 100.0) <=
+                          Config.ItemRepairThreshold);
         }
     }
 }
