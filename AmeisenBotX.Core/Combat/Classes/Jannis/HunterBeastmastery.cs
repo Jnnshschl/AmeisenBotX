@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override string Displayname => "Hunter Beastmastery";
 
-        public override bool HandlesMovement => false;
+        public override bool HandlesMovement => true;
 
         public override bool IsMelee => false;
 
@@ -104,7 +104,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool ReadyToDisengage { get; set; } = false;
 
-        private bool SlowTargetWhenPossible { get; set; } = false;
+        private bool RunningAway { get; set; } = false;
+
+        private DateTime LastAction { get; set; }
 
         public override void Execute()
         {
@@ -118,60 +120,58 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 {
                     double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                    // make some distance
-                    if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 10.0)
-                        || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && WowInterface.ObjectManager.TargetGuid != 0 && distanceToTarget < 3.0))
-                    {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
-                    }
-
                     if (WowInterface.ObjectManager.Player.HealthPercentage < 15
                         && TryCastSpell(feignDeathSpell, 0))
                     {
+                        LastAction = DateTime.UtcNow;
                         return;
                     }
 
-                    if (distanceToTarget < 5.0)
+                    if (distanceToTarget < 6.0)
                     {
                         if (ReadyToDisengage
                             && TryCastSpell(disengageSpell, 0, true))
                         {
                             ReadyToDisengage = false;
-                            SlowTargetWhenPossible = true;
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
 
                         if (TryCastSpell(frostTrapSpell, 0, true))
                         {
                             ReadyToDisengage = true;
-                            SlowTargetWhenPossible = true;
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
 
                         if (WowInterface.ObjectManager.Player.HealthPercentage < 30
                             && TryCastSpell(deterrenceSpell, 0, true))
                         {
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
 
                         if (TryCastSpell(raptorStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
                             || TryCastSpell(mongooseBiteSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            return;
                         }
                     }
-                    else
+                    else if (distanceToTarget < 24.0)
                     {
-                        if (SlowTargetWhenPossible
+                        if (distanceToTarget < 16.0
+                            || distanceToTarget > 22.0
+                            && !WowInterface.Target.HasBuffByName(concussiveShotSpell)
+                            && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
                             && TryCastSpell(concussiveShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
-                            SlowTargetWhenPossible = false;
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
 
                         if (WowInterface.ObjectManager.Target.HealthPercentage < 20
                             && TryCastSpell(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
 
@@ -182,14 +182,69 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count() > 2
                             && TryCastSpell(multiShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
 
-                        if (TryCastSpell(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true)
-                            || TryCastSpell(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        if (TryCastSpell(arcaneShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
+                            LastAction = DateTime.UtcNow;
                             return;
                         }
+
+                        // only cast when we are far away and disengage is ready
+                        if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget > 21.0 && !CooldownManager.IsSpellOnCooldown(disengageSpell))
+                            || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget > 5.0))
+                        {
+                            if (TryCastSpell(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                            {
+                                LastAction = DateTime.UtcNow;
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!WowInterface.Target.HasBuffByName(concussiveShotSpell)
+                            && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
+                            && TryCastSpell(concussiveShotSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        {
+                            LastAction = DateTime.UtcNow;
+                            return;
+                        }
+
+                        // move to position
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
+                        return;
+                    }
+
+                    // nothing to do, run away
+                    if (DateTime.UtcNow - TimeSpan.FromMilliseconds(400) > LastAction)
+                    {
+                        if (RunningAway)
+                        {
+                            if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget < 22.0)
+                                || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget < 7.0))
+                            {
+                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
+                            }
+                            else
+                            {
+                                RunningAway = false;
+                            }
+                        }
+                        else
+                        {
+                            if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget < 18.0)
+                                || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget < 5.0))
+                            {
+                                RunningAway = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        WowInterface.MovementEngine.Reset();
                     }
                 }
             }
@@ -198,7 +253,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         public override void OutOfCombatExecute()
         {
             ReadyToDisengage = false;
-            SlowTargetWhenPossible = false;
 
             base.OutOfCombatExecute();
 

@@ -20,6 +20,8 @@ namespace AmeisenBotX.Core.Combat.Classes
 
         bool HandlesMovement { get; }
 
+        bool HandlesFacing { get; }
+
         bool IsMelee { get; }
 
         IItemComparator ItemComparator { get; }

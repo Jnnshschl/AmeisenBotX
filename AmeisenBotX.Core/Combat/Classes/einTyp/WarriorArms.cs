@@ -23,6 +23,7 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
         private double distanceTraveled = 0;
         private bool multipleTargets = false;
         private bool standing = false;
+        public bool HandlesFacing => false;
 
         public WarriorArms(WowInterface wowInterface)
         {

@@ -25,6 +25,7 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
         private bool multipleTargets = false;
         private bool standing = false;
 
+        public bool HandlesFacing => false;
         public WarriorFury(WowInterface wowInterface)
         {
             WowInterface = wowInterface;

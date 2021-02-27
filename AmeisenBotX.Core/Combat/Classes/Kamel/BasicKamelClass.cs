@@ -27,6 +27,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
+        public bool HandlesFacing => false;
+
         private readonly int[] useableHealingItems = new int[]
         {
             // potions

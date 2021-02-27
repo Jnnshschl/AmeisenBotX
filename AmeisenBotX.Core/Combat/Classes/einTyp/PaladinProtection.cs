@@ -26,6 +26,8 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
             WowInterface = wowInterface;
         }
 
+        public bool HandlesFacing => false;
+
         public string Author => "einTyp";
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }

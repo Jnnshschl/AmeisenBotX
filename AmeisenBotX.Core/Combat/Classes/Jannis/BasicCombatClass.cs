@@ -497,6 +497,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public abstract WowClass WowClass { get; }
 
+        public bool HandlesFacing => true;
+
         protected WowInterface WowInterface { get; }
 
         private AmeisenBotFsm StateMachine { get; }
@@ -805,6 +807,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         WowInterface.HookManager.WowTargetGuid(guid);
                     }
 
+                    if (!isTargetMyself
+                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                    {
+                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    }
+
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
@@ -842,6 +850,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         WowInterface.HookManager.WowTargetGuid(guid);
                     }
 
+                    if (!isTargetMyself
+                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                    {
+                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                    }
+
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
@@ -874,6 +888,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
                         WowInterface.HookManager.WowTargetGuid(guid);
+                    }
+
+                    if (!isTargetMyself
+                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                    {
+                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
                     }
 
                     if (spell.CastTime > 0)
@@ -914,6 +934,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         && !CooldownManager.IsSpellOnCooldown(requiredStance))
                     {
                         CastSpell(requiredStance, true);
+                    }
+
+                    if (!isTargetMyself
+                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                    {
+                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
                     }
 
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))

@@ -88,7 +88,11 @@ namespace AmeisenBotX.Core.Fsm.States
                     WowInterface.CharacterManager.UpdateAll();
                 }
 
-                WowInterface.MovementEngine.StopMovement();
+                if (WowInterface.Player != null)
+                {
+                    // prevent endless running
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.Player.Position);
+                }
 
                 IdleActionManager.Reset();
             }

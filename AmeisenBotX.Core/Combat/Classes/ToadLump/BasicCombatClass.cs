@@ -452,6 +452,8 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         public abstract bool HandlesMovement { get; }
 
+        public bool HandlesFacing => false;
+
         public abstract bool IsMelee { get; }
 
         public bool IsWanding { get; private set; } = false;

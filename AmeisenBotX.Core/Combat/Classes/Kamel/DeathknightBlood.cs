@@ -58,6 +58,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public WowClass WowClass => WowClass.Deathknight;
 
+        public bool HandlesFacing => false;
+
         private IHookManager HookManager { get; }
 
         private IObjectManager ObjectManager { get; }

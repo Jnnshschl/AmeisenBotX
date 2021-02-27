@@ -151,7 +151,8 @@ namespace AmeisenBotX.Core.Fsm.States
         private bool HandleMovement(WowUnit target)
         {
             // check if we are facing the unit
-            if (target != null
+            if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesFacing)
+                && target != null
                 && target.Guid != WowInterface.ObjectManager.PlayerGuid
                 && FacingCheck.Run()
                 && !WowInterface.HookManager.WowIsClickToMoveActive()

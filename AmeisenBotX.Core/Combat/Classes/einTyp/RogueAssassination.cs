@@ -31,6 +31,7 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
         private bool standing = false;
 
         private bool wasInStealth = false;
+        public bool HandlesFacing => false;
 
         public RogueAssassination(WowInterface wowInterface)
         {
