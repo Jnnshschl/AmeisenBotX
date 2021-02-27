@@ -1,18 +1,29 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Battleground.KamelBG.Enums;
-using System;
-using System.Linq;
-using AmeisenBotX.Core.Movement.Enums;
+﻿using AmeisenBotX.Core.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
-using AmeisenBotX.Logging;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Battleground.KamelBG
 {
     internal class EyeOfTheStorm : IBattlegroundEngine
     {
+        public EyeOfTheStorm(WowInterface wowInterface)
+        {
+            WowInterface = wowInterface;
 
+            CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+        }
+
+        public string Author => "Lukas";
+
+        public string Description => "Eye of the Storm";
+
+        public string Name => "Eye of the Storm";
 
         public List<Vector3> PathBase { get; } = new List<Vector3>()
         {
@@ -27,24 +38,39 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             new Vector3(2176, 1570, 1159)//Flag
         };
 
-        private string factionFlagState { get; set; }
-        private int CurrentNodeCounter { get; set; }
         private TimegatedEvent CaptureFlagEvent { get; }
+
         private TimegatedEvent CombatEvent { get; }
+
+        private int CurrentNodeCounter { get; set; }
+
+        private string factionFlagState { get; set; }
+
         private WowInterface WowInterface { get; }
-        public EyeOfTheStorm(WowInterface wowInterface)
+
+        public void Combat()
         {
-            WowInterface = wowInterface;
+            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
 
-            CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            if (weakestPlayer != null)
+            {
+                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
+
+                if (distance > threshold)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
+                }
+                else if (CombatEvent.Run())
+                {
+                    WowInterface.Globals.ForceCombat = true;
+                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
+                }
+            }
+            else
+            {
+            }
         }
-
-        public string Author => "Lukas";
-
-        public string Description => "Eye of the Storm";
-
-        public string Name => "Eye of the Storm";
 
         public void Enter()
         {
@@ -82,7 +108,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             }
             else
             {
-
                 if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) {v:0}= {v:0}..base..\":\"..status..\";\" end"), out string result))
                 {
                     Vector3 currentNode = PathBase[CurrentNodeCounter];
@@ -161,11 +186,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             }
         }
 
-        public void Leave()
-        {
-
-        }
-
         public void Faction()
         {
             if (!WowInterface.ObjectManager.Player.IsHorde())
@@ -176,32 +196,10 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             {
                 factionFlagState = "Hord Controlled";
             }
-
         }
 
-        public void Combat()
+        public void Leave()
         {
-            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
-
-            if (weakestPlayer != null)
-            {
-                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
-                double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
-
-                if (distance > threshold)
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
-                }
-                else if (CombatEvent.Run())
-                {
-                    WowInterface.Globals.ForceCombat = true;
-                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
-                }
-            }
-            else
-            {
-
-            }
         }
     }
 }

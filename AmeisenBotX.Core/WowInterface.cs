@@ -1,10 +1,11 @@
 ﻿using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Chat;
+using AmeisenBotX.Core.Combat.Classes;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Db;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Grinding;
@@ -16,7 +17,6 @@ using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Personality;
 using AmeisenBotX.Core.Quest;
-using AmeisenBotX.Core.Statemachine.CombatClasses;
 using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
@@ -26,19 +26,7 @@ namespace AmeisenBotX.Core
 {
     public class WowInterface
     {
-        private static WowInterface i;
-
-        private WowInterface()
-        {
-        }
-
-        public static WowInterface I => i ??= new WowInterface();
-
         public IBattlegroundEngine BattlegroundEngine { get; set; }
-
-        public IAmeisenBotDb Db { get; set; }
-
-        public BotPersonality Personality { get; set; }
 
         public ICharacterManager CharacterManager { get; set; }
 
@@ -47,6 +35,8 @@ namespace AmeisenBotX.Core
         public ICombatClass CombatClass { get; set; }
 
         public CombatLogParser CombatLogParser { get; set; }
+
+        public IAmeisenBotDb Db { get; set; }
 
         public IDungeonEngine DungeonEngine { get; set; }
 
@@ -60,6 +50,8 @@ namespace AmeisenBotX.Core
 
         public JobEngine JobEngine { get; set; }
 
+        public WowUnit LastTarget => ObjectManager.LastTarget;
+
         public IMovementEngine MovementEngine { get; set; }
 
         public MovementSettings MovementSettings { get; set; }
@@ -70,22 +62,22 @@ namespace AmeisenBotX.Core
 
         public IPathfindingHandler PathfindingHandler { get; set; }
 
+        public BotPersonality Personality { get; set; }
+
+        public WowUnit Pet => ObjectManager.Pet;
+
+        public WowPlayer Player => ObjectManager.Player;
+
         public QuestEngine QuestEngine { get; set; }
 
         public AmeisenBotRconClient RconClient { get; set; }
 
         public TacticEngine TacticEngine { get; set; }
 
+        public WowUnit Target => ObjectManager.Target;
+
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
-
-        public WowPlayer Player => ObjectManager.Player;
-
-        public WowUnit Target => ObjectManager.Target;
-
-        public WowUnit LastTarget => ObjectManager.LastTarget;
-
-        public WowUnit Pet => ObjectManager.Pet;
     }
 }

@@ -6,15 +6,15 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class BasicComparator : IWowItemComparator
+    public class BasicComparator : IItemComparator
     {
-        public BasicComparator(List<ArmorType> armorTypeBlacklist, List<WeaponType> weaponTypeBlacklist)
+        public BasicComparator(List<WowArmorType> armorTypeBlacklist, List<WowWeaponType> weaponTypeBlacklist)
         {
             ArmorTypeBlacklist = armorTypeBlacklist;
             WeaponTypeBlacklist = weaponTypeBlacklist;
         }
 
-        public BasicComparator(List<ArmorType> armorTypeBlacklist, List<WeaponType> weaponTypeBlacklist, Dictionary<string, double> statPriorities)
+        public BasicComparator(List<WowArmorType> armorTypeBlacklist, List<WowWeaponType> weaponTypeBlacklist, Dictionary<string, double> statPriorities)
         {
             ArmorTypeBlacklist = armorTypeBlacklist;
             WeaponTypeBlacklist = weaponTypeBlacklist;
@@ -23,9 +23,9 @@ namespace AmeisenBotX.Core.Character.Comparators
 
         protected GearscoreFactory GearscoreFactory { get; set; }
 
-        private List<ArmorType> ArmorTypeBlacklist { get; }
+        private List<WowArmorType> ArmorTypeBlacklist { get; }
 
-        private List<WeaponType> WeaponTypeBlacklist { get; }
+        private List<WowWeaponType> WeaponTypeBlacklist { get; }
 
         public bool IsBetter(IWowItem current, IWowItem item)
         {

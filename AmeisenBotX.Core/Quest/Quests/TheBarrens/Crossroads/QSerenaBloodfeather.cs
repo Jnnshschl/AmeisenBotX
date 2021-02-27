@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QSerenaBloodfeather : BotQuest
+    internal class QSerenaBloodfeather : BotQuest
     {
         public QSerenaBloodfeather(WowInterface wowInterface)
             : base(wowInterface, 876, "Serena Bloodfeather", 12, 1,
@@ -23,6 +23,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

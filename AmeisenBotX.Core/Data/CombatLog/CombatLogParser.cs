@@ -4,7 +4,6 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace AmeisenBotX.Core.Data.CombatLog
 {

@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         public int GroupSize { get; }
 
-        public MapId MapId { get; }
+        public WowMapId MapId { get; }
 
         public int MaxLevel { get; }
 

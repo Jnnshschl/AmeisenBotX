@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostStonetalon
 {
-    class QKolkarLeaders : BotQuest
+    internal class QKolkarLeaders : BotQuest
     {
         public QKolkarLeaders(WowInterface wowInterface)
             : base(wowInterface, 850, "Kolkar Leaders", 11, 1,
@@ -23,6 +23,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostStonetalon
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

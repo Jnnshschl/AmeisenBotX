@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -78,7 +79,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         public void CombatLogChanged(BasicCombatLogEntry entry)
         {
             var wowUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
-            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGUID.NpcId(entry.DestinationGuid))
+            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGuid.ToNpcId(entry.DestinationGuid))
                                                             && wowUnit != null && wowUnit.IsTaggedByMe)
             {
                 ++Killed;
@@ -94,7 +95,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 LastUnitCheck = DateTime.Now;
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
-                    .Where(e => !e.IsDead && NpcIds.Contains(WowGUID.NpcId(e.Guid)) && !e.IsNotAttackable
+                    .Where(e => !e.IsDead && NpcIds.Contains(WowGuid.ToNpcId(e.Guid)) && !e.IsNotAttackable
                                 && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .Take(3)

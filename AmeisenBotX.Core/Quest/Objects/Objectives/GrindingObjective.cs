@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
+﻿using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;

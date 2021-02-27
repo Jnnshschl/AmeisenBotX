@@ -1,13 +1,11 @@
 ﻿using AmeisenBotX.Core.Quest.Objects.Quests;
-using System.Collections.Generic;
 using AmeisenBotX.Core.Quest.Quests.Grinder;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
-    class Horde1To60GrinderProfile : IQuestProfile
+    internal class Horde1To60GrinderProfile : IQuestProfile
     {
-        public Queue<List<IBotQuest>> Quests { get; }
-
         public Horde1To60GrinderProfile(WowInterface wowInterface)
         {
             Quests = new Queue<List<IBotQuest>>();
@@ -54,6 +52,9 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
                 new QSilithusGrindToLevel60(wowInterface)
             });
         }
+
+        public Queue<List<IBotQuest>> Quests { get; }
+
         public override string ToString()
         {
             return $"[1-60] Horde1To60GrinderProfile (Shino)";

@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Utils;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace AmeisenBotX
         {
             AmeisenBot = ameisenBot;
 
-            MapTimer = new Timer(16);
+            MapTimer = new Timer(250);
             MapTimer.Elapsed += MapTimer_Elapsed;
 
             MeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"));
@@ -65,6 +65,8 @@ namespace AmeisenBotX
 
         private AmeisenBot AmeisenBot { get; set; }
 
+        private Bitmap Bitmap { get; set; }
+
         private Brush BlacklistNodeBrush { get; set; }
 
         private Pen BlacklistNodePen { get; set; }
@@ -80,6 +82,8 @@ namespace AmeisenBotX
         private Brush EnemyBrush { get; set; }
 
         private Brush FriendBrush { get; set; }
+
+        private Graphics Graphics { get; set; }
 
         private Brush HerbBrush { get; set; }
 
@@ -97,7 +101,7 @@ namespace AmeisenBotX
 
         private Pen PathNodePen { get; set; }
 
-        private double Scale { get; set; }
+        private float Scale { get; set; }
 
         private Brush SubTextBrush { get; set; }
 
@@ -107,20 +111,20 @@ namespace AmeisenBotX
 
         private Font TextFont { get; set; }
 
-        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, double rotation, int x, int y, double scale = 1.0)
+        private static Point GetRelativePosition(Vector3 posA, Vector3 posB, float rotation, int x, int y, float scale = 1.0f)
         {
             // X and Y swapped intentionally here !
-            double relativeX = x + ((posA.Y - posB.Y) * scale);
-            double relativeY = y + ((posA.X - posB.X) * scale);
+            float relativeX = x + ((posA.Y - posB.Y) * scale);
+            float relativeY = y + ((posA.X - posB.X) * scale);
 
-            double originX = relativeX - x;
-            double originY = relativeY - y;
+            float originX = relativeX - x;
+            float originY = relativeY - y;
 
-            double rSin = Math.Sin(rotation);
-            double cSin = Math.Cos(rotation);
+            float rSin = MathF.Sin(rotation);
+            float cSin = MathF.Cos(rotation);
 
-            double newX = originX * cSin - originY * rSin;
-            double newY = originX * rSin + originY * cSin;
+            float newX = originX * cSin - originY * rSin;
+            float newY = originX * rSin + originY * cSin;
 
             return new Point((int)(newX + x), (int)(newY + y));
         }
@@ -303,18 +307,17 @@ namespace AmeisenBotX
             AmeisenBot.Config.MapRenderUnits = false;
         }
 
-        private BitmapImage GenerateMapImage(int width, int height)
+        private BitmapImage GenerateMapImage(Bitmap bitmap, Graphics graphics, int width, int height)
         {
             int halfWidth = width / 2;
             int halfHeight = height / 2;
 
-            using Bitmap bitmap = new Bitmap(width, height);
-            using Graphics graphics = Graphics.FromImage(bitmap);
+            Graphics.Clear(Color.Transparent);
 
             if (AmeisenBot.WowInterface.ObjectManager.Player != null)
             {
                 Vector3 playerPosition = AmeisenBot.WowInterface.ObjectManager.Player.Position;
-                double playerRotation = AmeisenBot.WowInterface.ObjectManager.Player.Rotation;
+                float playerRotation = AmeisenBot.WowInterface.ObjectManager.Player.Rotation;
 
                 // Render current dungeon nodes
                 // ---------------------------- >
@@ -403,7 +406,7 @@ namespace AmeisenBotX
                         int width = (int)mapCanvasBackground.ActualWidth;
                         int height = (int)mapCanvasBackground.ActualHeight;
 
-                        mapCanvas.Source = GenerateMapImage(width, height);
+                        mapCanvas.Source = GenerateMapImage(Bitmap, Graphics, width, height);
                     });
 
                     NeedToUpdateMap = false;
@@ -415,7 +418,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void RenderCurrentPath(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
+        private void RenderCurrentPath(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
             List<Vector3> path = AmeisenBot.WowInterface.MovementEngine.Path.ToList();
 
@@ -431,7 +434,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void RenderDungeonNodes(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
+        private void RenderDungeonNodes(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
             for (int i = 1; i < AmeisenBot.WowInterface.DungeonEngine.Nodes.Count; ++i)
             {
@@ -445,38 +448,38 @@ namespace AmeisenBotX
             }
         }
 
-        private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
+        private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
             IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
-                .Where(e => Enum.IsDefined(typeof(HerbNode), e.DisplayId));
+                .Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId));
 
             for (int i = 0; i < herbNodes.Count(); ++i)
             {
                 WowGameobject gameobject = herbNodes.ElementAt(i);
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
-                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((HerbNode)gameobject.DisplayId).ToString(), HerbBrush, TextBrush, TextFont, graphics);
+                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((WowHerbId)gameobject.DisplayId).ToString(), HerbBrush, TextBrush, TextFont, graphics);
             }
         }
 
-        private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
+        private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
             List<WowGameobject> oreNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
-                .Where(e => Enum.IsDefined(typeof(OreNode), e.DisplayId))
+                .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId))
                 .ToList();
 
             for (int i = 0; i < oreNodes.Count; ++i)
             {
                 WowGameobject gameobject = oreNodes[i];
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
-                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((OreNode)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
+                RenderGameobject(positionOnMap.X, positionOnMap.Y, ((WowOreId)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
             }
         }
 
-        private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, double scale, Vector3 playerPosition, double playerRotation)
+        private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
             List<WowUnit> wowUnits = AmeisenBot.WowInterface.ObjectManager.WowObjects
                 .OfType<WowUnit>()
@@ -520,9 +523,18 @@ namespace AmeisenBotX
             }
         }
 
+        private void SetupGraphics()
+        {
+            int width = (int)mapCanvasBackground.ActualWidth;
+            int height = (int)mapCanvasBackground.ActualHeight;
+
+            Bitmap = new Bitmap(width, height);
+            Graphics = Graphics.FromImage(Bitmap);
+        }
+
         private void SliderZoom_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Scale = sliderZoom.Value;
+            Scale = (float)sliderZoom.Value;
         }
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -539,6 +551,8 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            SetupGraphics();
+
             MapTimer.Start();
             gridSidemenu.Visibility = Visibility.Collapsed;
 
@@ -558,6 +572,11 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            SetupGraphics();
         }
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)

@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace AmeisenBotX.Core.Character.Spells.Objects
 {

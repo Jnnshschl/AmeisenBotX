@@ -2,7 +2,7 @@
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class ItemLevelComparator : IWowItemComparator
+    public class ItemLevelComparator : IItemComparator
     {
         public bool IsBetter(IWowItem current, IWowItem item)
         {

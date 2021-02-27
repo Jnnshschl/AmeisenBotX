@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
-    class QStingOfTheScorpid : BotQuest
+    internal class QStingOfTheScorpid : BotQuest
     {
         public QStingOfTheScorpid(WowInterface wowInterface)
             : base(wowInterface, 789, "Sting of the Scorpid", 1, 1,
@@ -55,6 +55,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

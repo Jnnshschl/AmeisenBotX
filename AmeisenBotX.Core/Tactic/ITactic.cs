@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Statemachine.Enums;
+﻿using AmeisenBotX.Core.Data.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Tactic
@@ -7,6 +7,6 @@ namespace AmeisenBotX.Core.Tactic
     {
         Dictionary<string, dynamic> Configureables { get; }
 
-        bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking);
+        bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking);
     }
 }

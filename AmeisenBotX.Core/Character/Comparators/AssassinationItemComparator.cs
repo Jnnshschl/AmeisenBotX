@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class AssassinationItemComparator : IWowItemComparator
+    public class AssassinationItemComparator : IItemComparator
     {
         public bool IsBetter(IWowItem current, IWowItem item)
         {
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             return false;
         }
 
-        private double GetRating(IWowItem item, EquipmentSlot slot)
+        private double GetRating(IWowItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
             if (item.Stats.TryGetValue("ITEM_MOD_CRIT_MELEE_RATING_SHORT", out string meleeCritString) && double.TryParse(meleeCritString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double meleeCrit))
@@ -63,10 +63,10 @@ namespace AmeisenBotX.Core.Character.Comparators
                 rating += 0.5f * strength;
             }
 
-            if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
+            if (slot.Equals(WowEquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(WowEquipmentSlot.INVSLOT_MAINHAND))
             {
                 // also 2nd weapons
-                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WeaponType.DAGGERS))
+                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WowWeaponType.DAGGERS))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString) && double.TryParse(dpsString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double dps))
                     {
@@ -78,9 +78,9 @@ namespace AmeisenBotX.Core.Character.Comparators
                     rating = 0;
                 }
             }
-            else if (!(slot.Equals(EquipmentSlot.INVSLOT_NECK) || slot.Equals(EquipmentSlot.INVSLOT_RING1)
-                || slot.Equals(EquipmentSlot.INVSLOT_RING2) || slot.Equals(EquipmentSlot.INVSLOT_TRINKET1)
-                || slot.Equals(EquipmentSlot.INVSLOT_TRINKET2)))
+            else if (!(slot.Equals(WowEquipmentSlot.INVSLOT_NECK) || slot.Equals(WowEquipmentSlot.INVSLOT_RING1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_RING2) || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET2)))
             {
                 // armor stats
                 if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString) && double.TryParse(armorString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double armor))

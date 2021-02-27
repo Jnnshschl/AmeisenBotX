@@ -1,17 +1,23 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Battleground.KamelBG.Enums;
-using System;
-using System.Linq;
-using AmeisenBotX.Core.Movement.Enums;
+﻿using AmeisenBotX.Core.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
-using AmeisenBotX.Logging;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Battleground.KamelBG
 {
     internal class StrandOfTheAncients : IBattlegroundEngine
     {
+        public StrandOfTheAncients(WowInterface wowInterface)
+        {
+            WowInterface = wowInterface;
+
+            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+        }
+
         public string Author => "Lukas";
 
         public string Description => "Strand of the Ancients";
@@ -23,60 +29,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             new Vector3(1403, 69, 30)
         };
 
-        private TimegatedEvent CombatEvent { get; }
-
         public WowInterface WowInterface { get; }
 
-        public StrandOfTheAncients(WowInterface wowInterface)
-        {
-            WowInterface = wowInterface;
-
-            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-        }
-
-        public void Enter()
-        {
-
-        }
-        public void Execute()
-        {
-            Combat();
-
-            if (WowInterface.ObjectManager.Vehicle == null)
-            {
-
-                WowGameobject VehicleNode = WowInterface.ObjectManager.WowObjects
-                    .OfType<WowGameobject>()
-                    .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
-                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20)
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                    .FirstOrDefault();
-
-                if (VehicleNode != null)
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, VehicleNode.Position);
-
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(VehicleNode.Position) <= 4)
-                    {
-                        WowInterface.MovementEngine.StopMovement();
-
-                        WowInterface.HookManager.WowObjectRightClick(VehicleNode);
-
-                    }
-                }
-            }
-            else
-            {
-                Vector3 currentNode = PathRight[0];
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
-            }
-        }
-
-
-        public void Leave()
-        {
-
-        }
+        private TimegatedEvent CombatEvent { get; }
 
         public void Combat()
         {
@@ -99,8 +54,47 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             }
             else
             {
-
             }
+        }
+
+        public void Enter()
+        {
+        }
+
+        public void Execute()
+        {
+            Combat();
+
+            if (WowInterface.ObjectManager.Vehicle == null)
+            {
+                WowGameobject VehicleNode = WowInterface.ObjectManager.WowObjects
+                    .OfType<WowGameobject>()
+                    .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
+                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20)
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault();
+
+                if (VehicleNode != null)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, VehicleNode.Position);
+
+                    if (WowInterface.ObjectManager.Player.Position.GetDistance(VehicleNode.Position) <= 4)
+                    {
+                        WowInterface.MovementEngine.StopMovement();
+
+                        WowInterface.HookManager.WowObjectRightClick(VehicleNode);
+                    }
+                }
+            }
+            else
+            {
+                Vector3 currentNode = PathRight[0];
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+            }
+        }
+
+        public void Leave()
+        {
         }
     }
 }

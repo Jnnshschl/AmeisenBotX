@@ -41,6 +41,17 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         private WowInterface WowInterface { get; }
 
+        public void DestroyItemByName(string name,
+            StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            if (!HasItemByName(name, stringComparison))
+            {
+                return;
+            }
+
+            WowInterface.HookManager.LuaDeleteInventoryItemByName(name);
+        }
+
         public bool HasItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
         {
             return Items.Any(e => e.Name.Equals(name, stringComparison));
@@ -72,17 +83,6 @@ namespace AmeisenBotX.Core.Character.Inventory
             {
                 AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Inventory JSON:\n{resultJson}\n{e}", LogLevel.Error);
             }
-        }
-
-        public void DestroyItemByName(string name,
-            StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
-        {
-            if (!HasItemByName(name, stringComparison))
-            {
-                return;
-            }
-
-            WowInterface.HookManager.LuaDeleteInventoryItemByName(name);
         }
     }
 }

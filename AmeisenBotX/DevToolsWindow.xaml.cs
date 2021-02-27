@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
@@ -80,7 +80,7 @@ namespace AmeisenBotX
             {
                 listviewCachePoi.Items.Clear();
 
-                foreach (KeyValuePair<MapId, Dictionary<PoiType, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllPointsOfInterest().OrderBy(e => e.Key))
+                foreach (KeyValuePair<WowMapId, Dictionary<PoiType, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllPointsOfInterest().OrderBy(e => e.Key))
                 {
                     foreach (KeyValuePair<PoiType, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
@@ -92,9 +92,9 @@ namespace AmeisenBotX
             {
                 listviewCacheOre.Items.Clear();
 
-                foreach (KeyValuePair<MapId, Dictionary<OreNode, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllOreNodes().OrderBy(e => e.Key))
+                foreach (KeyValuePair<WowMapId, Dictionary<WowOreId, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllOreNodes().OrderBy(e => e.Key))
                 {
-                    foreach (KeyValuePair<OreNode, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
+                    foreach (KeyValuePair<WowOreId, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
                         listviewCacheOre.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
                     }
@@ -104,9 +104,9 @@ namespace AmeisenBotX
             {
                 listviewCacheHerb.Items.Clear();
 
-                foreach (KeyValuePair<MapId, Dictionary<HerbNode, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllHerbNodes().OrderBy(e => e.Key))
+                foreach (KeyValuePair<WowMapId, Dictionary<WowHerbId, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllHerbNodes().OrderBy(e => e.Key))
                 {
-                    foreach (KeyValuePair<HerbNode, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
+                    foreach (KeyValuePair<WowHerbId, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
                         listviewCacheHerb.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
                     }

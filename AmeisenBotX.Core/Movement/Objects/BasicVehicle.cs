@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
+﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -9,9 +9,9 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle()
+        public BasicVehicle(WowInterface wowInterface)
         {
-            WowInterface = WowInterface.I;
+            WowInterface = wowInterface;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);

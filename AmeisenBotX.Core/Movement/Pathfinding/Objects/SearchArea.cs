@@ -4,14 +4,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
-    
-    class SearchArea
+    internal class SearchArea
     {
-        private List<Vector3> Area { get; }
-        private float VisibilityRadius { get; } = 30.0f;
-        private List<Vector3> SearchPath { get; set; }
-        private int CurrentSearchPathIndex { get; set; }
-        
         public SearchArea(List<Vector3> searchArea)
         {
             Area = searchArea;
@@ -19,9 +13,37 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             CalculateSearchPath();
         }
 
-        public float GetClosestVertexDistance(Vector3 position)
+        private List<Vector3> Area { get; }
+
+        private int CurrentSearchPathIndex { get; set; }
+
+        private List<Vector3> SearchPath { get; set; }
+
+        private float VisibilityRadius { get; } = 30.0f;
+
+        public bool ContainsPosition(Vector3 position)
         {
-            return Area.Select(pos => pos.GetDistance(position)).Min();
+            if (Area.Count <= 1)
+            {
+                return false;
+            }
+
+            // Ray Casting algorithm
+            float x = position.X;
+            float y = position.Y;
+            bool inside = false;
+            for (int i = 0, j = Area.Count - 1; i < Area.Count; j = i++)
+            {
+                float xi = Area[i].X;
+                float yi = Area[i].Y;
+                float xj = Area[j].X;
+                float yj = Area[j].Y;
+                if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi))
+                {
+                    inside = !inside;
+                }
+            }
+            return inside;
         }
 
         public Vector3 GetClosestEntry(WowInterface wowInterface)
@@ -32,7 +54,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             }
 
             Vector3 currentPosition = wowInterface.ObjectManager.Player.Position;
-            
+
             // This is not optimal but fairly simple
             // We ask for the path for every vertex.
             // It could be optimized by following the edges up or down and stop once the distance increased in both directions.
@@ -55,7 +77,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
                 distances.Add(totalDistance);
             }
-            
+
             int minimumIndex = distances.IndexOf(distances.Min());
             Vector3 entryPosition = Area[minimumIndex];
 
@@ -106,29 +128,9 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             return entryPosition;
         }
 
-        public bool ContainsPosition(Vector3 position)
+        public float GetClosestVertexDistance(Vector3 position)
         {
-            if (Area.Count <= 1)
-            {
-                return false;
-            } 
-            
-            // Ray Casting algorithm
-            float x = position.X;
-            float y = position.Y;
-            bool inside = false;
-            for (int i = 0, j = Area.Count - 1; i < Area.Count; j = i++)
-            {
-                float xi = Area[i].X;
-                float yi = Area[i].Y;
-                float xj = Area[j].X;
-                float yj = Area[j].Y;
-                if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi))
-                {
-                    inside = !inside;
-                }
-            }
-            return inside;
+            return Area.Select(pos => pos.GetDistance(position)).Min();
         }
 
         public Vector3 GetNextSearchPosition()
@@ -137,7 +139,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             {
                 return Area[0];
             }
-            
+
             Vector3 position = SearchPath[CurrentSearchPathIndex];
             CurrentSearchPathIndex = (CurrentSearchPathIndex + 1) % SearchPath.Count;
             return position;
@@ -155,13 +157,12 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
                 SearchPath = Area;
                 return;
             }
-            
-            
+
             // This is not optimal but should be fast
             // We raster the polygon with points apart 2x VisibilityRadius
             // We then remove all points that are not in the polygon
             // Finally we move to one point after another
-            
+
             // First find top, right, left, right
             float top = Area[0].Y;
             float right = Area[0].X;
@@ -178,8 +179,8 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             }
 
             // Raster the rectangle and add fitting points
-            int stepsTopToBottom = (int) Math.Ceiling(Math.Abs(top - bottom) / VisibilityRadius);
-            int stepsLeftToRight = (int) Math.Ceiling(Math.Abs(left - right) / VisibilityRadius);
+            int stepsTopToBottom = (int)Math.Ceiling(Math.Abs(top - bottom) / VisibilityRadius);
+            int stepsLeftToRight = (int)Math.Ceiling(Math.Abs(left - right) / VisibilityRadius);
 
             float leftStart = left - VisibilityRadius / 2;
             float topStart = top + VisibilityRadius / 2;

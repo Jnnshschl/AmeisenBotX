@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Data.Objects
 {
     public class WowChatMessage
     {
-        public WowChatMessage(ChatMessageType type, long timestamp, List<string> args)
+        public WowChatMessage(WowChat type, long timestamp, List<string> args)
         {
             Type = type;
             Timestamp = timestamp;
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public long Timestamp { get; set; }
 
-        public ChatMessageType Type { get; set; }
+        public WowChat Type { get; set; }
 
         public override string ToString()
         {

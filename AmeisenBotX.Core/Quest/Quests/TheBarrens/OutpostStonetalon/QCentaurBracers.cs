@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostStonetalon
 {
-    class QCentaurBracers : BotQuest
+    internal class QCentaurBracers : BotQuest
     {
         public QCentaurBracers(WowInterface wowInterface)
             : base(wowInterface, 855, "Centaur Bracers", 9, 1,
@@ -101,6 +101,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostStonetalon
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

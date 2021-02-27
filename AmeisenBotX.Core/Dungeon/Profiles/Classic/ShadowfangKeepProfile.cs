@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.ShadowfangKeep;
+        public WowMapId MapId { get; } = WowMapId.ShadowfangKeep;
 
         public int MaxLevel { get; } = 30;
 
@@ -268,6 +268,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public Vector3 WorldEntry { get; } = new Vector3(-232, -1569, 77);
 
-        public MapId WorldEntryMapId { get; } = MapId.EasternKingdoms;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.EasternKingdoms;
     }
 }

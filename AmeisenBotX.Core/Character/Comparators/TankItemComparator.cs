@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class TankItemComparator : IWowItemComparator
+    public class TankItemComparator : IItemComparator
     {
         public bool IsBetter(IWowItem current, IWowItem item)
         {
@@ -35,13 +35,13 @@ namespace AmeisenBotX.Core.Character.Comparators
             return false;
         }
 
-        private double GetRating(IWowItem item, EquipmentSlot slot)
+        private double GetRating(IWowItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
-            if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND))
+            if (slot.Equals(WowEquipmentSlot.INVSLOT_OFFHAND))
             {
                 // shields
-                if (item.GetType() == typeof(WowArmor) && ((WowArmor)item).ArmorType.Equals(ArmorType.SHIELDS))
+                if (item.GetType() == typeof(WowArmor) && ((WowArmor)item).ArmorType.Equals(WowArmorType.SHIELDS))
                 {
                     if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString) && double.TryParse(armorString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double armor))
                     {
@@ -69,10 +69,10 @@ namespace AmeisenBotX.Core.Character.Comparators
                     }
                 }
             }
-            else if (slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
+            else if (slot.Equals(WowEquipmentSlot.INVSLOT_MAINHAND))
             {
                 // swords
-                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_SWORDS))
+                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_SWORDS))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
                     {
@@ -95,9 +95,9 @@ namespace AmeisenBotX.Core.Character.Comparators
                     }
                 }
             }
-            else if (slot.Equals(EquipmentSlot.INVSLOT_NECK) || slot.Equals(EquipmentSlot.INVSLOT_RING1)
-                || slot.Equals(EquipmentSlot.INVSLOT_RING2) || slot.Equals(EquipmentSlot.INVSLOT_TRINKET1)
-                || slot.Equals(EquipmentSlot.INVSLOT_TRINKET2))
+            else if (slot.Equals(WowEquipmentSlot.INVSLOT_NECK) || slot.Equals(WowEquipmentSlot.INVSLOT_RING1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_RING2) || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET2))
             {
                 // jewelry stats
                 if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))

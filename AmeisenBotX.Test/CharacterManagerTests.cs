@@ -100,10 +100,10 @@ namespace AmeisenBotX.Test
             Assert.IsInstanceOfType(item1, typeof(WowArmor));
             Assert.IsInstanceOfType(item2, typeof(WowWeapon));
 
-            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item0.EquipSlot);
+            Assert.AreEqual(WowEquipmentSlot.NOT_EQUIPABLE, item0.EquipSlot);
 
-            Assert.AreEqual(ArmorType.CLOTH, ((WowArmor)item1).ArmorType);
-            Assert.AreEqual(WeaponType.GUNS, ((WowWeapon)item2).WeaponType);
+            Assert.AreEqual(WowArmorType.CLOTH, ((WowArmor)item1).ArmorType);
+            Assert.AreEqual(WowWeaponType.GUNS, ((WowWeapon)item2).WeaponType);
         }
 
         [TestMethod]
@@ -117,7 +117,7 @@ namespace AmeisenBotX.Test
 
             Assert.AreEqual(1337, item.Id);
             Assert.AreEqual(1, item.Count);
-            Assert.AreEqual(ItemQuality.Common, item.ItemQuality);
+            Assert.AreEqual(WowItemQuality.Common, item.ItemQuality);
             Assert.AreEqual(10, item.Durability);
             Assert.AreEqual(20, item.MaxDurability);
             Assert.AreEqual("TestItem", item.Name);
@@ -126,7 +126,7 @@ namespace AmeisenBotX.Test
             Assert.AreEqual(64, item.RequiredLevel);
             Assert.AreEqual("NONE", item.Subtype);
             Assert.AreEqual(1, item.MaxStack);
-            Assert.AreEqual(EquipmentSlot.NOT_EQUIPABLE, item.EquipSlot);
+            Assert.AreEqual(WowEquipmentSlot.NOT_EQUIPABLE, item.EquipSlot);
             Assert.AreEqual(650, item.Price);
         }
     }

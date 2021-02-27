@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QSouthseaFreebooters : BotQuest
+    internal class QSouthseaFreebooters : BotQuest
     {
         public QSouthseaFreebooters(WowInterface wowInterface)
             : base(wowInterface, 887, "Southsea Freebooters", 9, 1,
@@ -41,6 +41,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

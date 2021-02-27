@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Data
     {
         event ObjectUpdateComplete OnObjectUpdateComplete;
 
-        CameraInfo Camera { get; }
+        RawCameraInfo Camera { get; }
 
         string GameState { get; }
 
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Data
 
         ulong LastTargetGuid { get; }
 
-        MapId MapId { get; }
+        WowMapId MapId { get; }
 
         Vector3 MeanGroupPosition { get; }
 

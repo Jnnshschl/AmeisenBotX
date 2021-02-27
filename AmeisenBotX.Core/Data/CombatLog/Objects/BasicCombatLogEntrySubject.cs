@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Data.CombatLog.Objects
 {
@@ -16,7 +13,12 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
             _Entry = entry;
             Notify();
         }
-        
+
+        public void Notify()
+        {
+            _Observers.ToList().ForEach(o => o.CombatLogChanged(_Entry));
+        }
+
         public void Register(IObserverBasicCombatLogEntry observer)
         {
             _Observers.Add(observer);
@@ -25,11 +27,6 @@ namespace AmeisenBotX.Core.Data.CombatLog.Objects
         public void Unregister(IObserverBasicCombatLogEntry observer)
         {
             _Observers.Remove(observer);
-        }
-
-        public void Notify()
-        {
-            _Observers.ToList().ForEach(o => o.CombatLogChanged(_Entry));
         }
     }
 }

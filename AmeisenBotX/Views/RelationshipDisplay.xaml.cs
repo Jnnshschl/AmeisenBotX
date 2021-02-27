@@ -14,8 +14,9 @@ namespace AmeisenBotX.Views
         private const int MIN_REL = -4;
         private readonly float relationshipToScale = (MAX_MARGIN - MIN_MARGIN) / (MAX_REL - MIN_REL);
 
-        public RelationshipDisplay(ulong guid, Relationship relationship)
+        public RelationshipDisplay(WowInterface wowInterface, ulong guid, Relationship relationship)
         {
+            WowInterface = wowInterface;
             Guid = guid;
             Relationship = relationship;
 
@@ -26,9 +27,11 @@ namespace AmeisenBotX.Views
 
         private Relationship Relationship { get; }
 
+        private WowInterface WowInterface { get; }
+
         public void Update(ulong guid, Relationship relationship)
         {
-            if (WowInterface.I.Db.TryGetUnitName(guid, out string name))
+            if (WowInterface.Db.TryGetUnitName(guid, out string name))
             {
                 labelName.Content = name;
             }

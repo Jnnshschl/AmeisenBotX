@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
-    class QVileFamiliars : BotQuest
+    internal class QVileFamiliars : BotQuest
     {
         public QVileFamiliars(WowInterface wowInterface)
             : base(wowInterface, 792, "Vile Familiars", 2, 1,
@@ -31,6 +31,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

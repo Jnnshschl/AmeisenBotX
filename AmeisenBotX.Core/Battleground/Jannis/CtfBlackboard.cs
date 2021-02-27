@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.BehaviorTree.Interfaces;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;

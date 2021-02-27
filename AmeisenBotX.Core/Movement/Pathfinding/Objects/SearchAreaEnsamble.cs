@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
-    class SearchAreaEnsamble
+    internal class SearchAreaEnsamble
     {
-        private List<SearchArea> Areas { get; } = new();
-        private int CurrentSearchArea { get; set; }
-        private Vector3 LastSearchPosition { get; set; } = Vector3.Zero;
-        private bool AbortedPath { get; set; } = true;
-
         public SearchAreaEnsamble(List<List<Vector3>> searchAreas)
         {
             CurrentSearchArea = 0;
@@ -22,15 +13,13 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             }
         }
 
-        public void NotifyDetour()
-        {
-            AbortedPath = true;
-        }
+        private bool AbortedPath { get; set; } = true;
 
-        public bool HasAbortedPath()
-        {
-            return AbortedPath;
-        }
+        private List<SearchArea> Areas { get; } = new();
+
+        private int CurrentSearchArea { get; set; }
+
+        private Vector3 LastSearchPosition { get; set; } = Vector3.Zero;
 
         public Vector3 GetNextPosition(WowInterface wowInterface)
         {
@@ -42,10 +31,20 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             return LastSearchPosition;
         }
 
+        public bool HasAbortedPath()
+        {
+            return AbortedPath;
+        }
+
         public bool IsPlayerNearSearchArea(WowInterface wowInterface)
         {
-            return Areas[CurrentSearchArea].ContainsPosition(wowInterface.ObjectManager.Player.Position) 
+            return Areas[CurrentSearchArea].ContainsPosition(wowInterface.ObjectManager.Player.Position)
                    || Areas[CurrentSearchArea].GetClosestVertexDistance(wowInterface.ObjectManager.Player.Position) <= 20.0;
+        }
+
+        public void NotifyDetour()
+        {
+            AbortedPath = true;
         }
 
         private Vector3 GetNextPositionInternal(WowInterface wowInterface)
@@ -63,6 +62,5 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
             return Areas[CurrentSearchArea].GetClosestEntry(wowInterface);
         }
-
     }
 }

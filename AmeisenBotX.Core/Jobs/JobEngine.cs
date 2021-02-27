@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
@@ -171,23 +171,23 @@ namespace AmeisenBotX.Core.Jobs
                 WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
-                             && Enum.IsDefined(typeof(OreNode), e.DisplayId)
-                             && miningProfile.OreTypes.Contains((OreNode)e.DisplayId)
-                             && (((OreNode)e.DisplayId) == OreNode.Copper
-                             || (((OreNode)e.DisplayId) == OreNode.Tin && miningSkill >= 65)
-                             || (((OreNode)e.DisplayId) == OreNode.Silver && miningSkill >= 75)
-                             || (((OreNode)e.DisplayId) == OreNode.Iron && miningSkill >= 125)
-                             || (((OreNode)e.DisplayId) == OreNode.Gold && miningSkill >= 155)
-                             || (((OreNode)e.DisplayId) == OreNode.Mithril && miningSkill >= 175)
-                             || (((OreNode)e.DisplayId) == OreNode.DarkIron && miningSkill >= 230)
-                             || (((OreNode)e.DisplayId) == OreNode.SmallThorium && miningSkill >= 245)
-                             || (((OreNode)e.DisplayId) == OreNode.RichThorium && miningSkill >= 275)
-                             || (((OreNode)e.DisplayId) == OreNode.FelIron && miningSkill >= 300)
-                             || (((OreNode)e.DisplayId) == OreNode.Adamantite && miningSkill >= 325)
-                             || (((OreNode)e.DisplayId) == OreNode.Cobalt && miningSkill >= 350)
-                             || (((OreNode)e.DisplayId) == OreNode.Khorium && miningSkill >= 375)
-                             || (((OreNode)e.DisplayId) == OreNode.Saronite && miningSkill >= 400)
-                             || (((OreNode)e.DisplayId) == OreNode.Titanium && miningSkill >= 450)))
+                             && Enum.IsDefined(typeof(WowOreId), e.DisplayId)
+                             && miningProfile.OreTypes.Contains((WowOreId)e.DisplayId)
+                             && (((WowOreId)e.DisplayId) == WowOreId.Copper
+                             || (((WowOreId)e.DisplayId) == WowOreId.Tin && miningSkill >= 65)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Silver && miningSkill >= 75)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Iron && miningSkill >= 125)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Gold && miningSkill >= 155)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Mithril && miningSkill >= 175)
+                             || (((WowOreId)e.DisplayId) == WowOreId.DarkIron && miningSkill >= 230)
+                             || (((WowOreId)e.DisplayId) == WowOreId.SmallThorium && miningSkill >= 245)
+                             || (((WowOreId)e.DisplayId) == WowOreId.RichThorium && miningSkill >= 275)
+                             || (((WowOreId)e.DisplayId) == WowOreId.FelIron && miningSkill >= 300)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Adamantite && miningSkill >= 325)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Cobalt && miningSkill >= 350)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Khorium && miningSkill >= 375)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Saronite && miningSkill >= 400)
+                             || (((WowOreId)e.DisplayId) == WowOreId.Titanium && miningSkill >= 450)))
                     .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
 
@@ -278,7 +278,6 @@ namespace AmeisenBotX.Core.Jobs
                             GeneratedPathToNode = true;
                         }
                     }
-
                 }
             }
         }

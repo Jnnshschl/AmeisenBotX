@@ -1,13 +1,13 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Common.Enums;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -33,16 +33,16 @@ namespace AmeisenBotX.Core.Character
             ItemComparator = new ItemLevelComparator();
             Skills = new Dictionary<string, (int, int)>();
 
-            ItemSlotsToSkip = new List<EquipmentSlot>();
+            ItemSlotsToSkip = new List<WowEquipmentSlot>();
         }
 
         public CharacterEquipment Equipment { get; }
 
         public CharacterInventory Inventory { get; }
 
-        public IWowItemComparator ItemComparator { get; set; }
+        public IItemComparator ItemComparator { get; set; }
 
-        public List<EquipmentSlot> ItemSlotsToSkip { get; set; }
+        public List<WowEquipmentSlot> ItemSlotsToSkip { get; set; }
 
         public int Money { get; private set; }
 
@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Character
             WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
         }
 
-        public void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
+        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
         {
             if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
                 || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
@@ -98,16 +98,16 @@ namespace AmeisenBotX.Core.Character
         {
             return item != null && item.ArmorType switch
             {
-                ArmorType.PLATE => Skills.Any(e => e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.MAIL => Skills.Any(e => e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.LEATHER => Skills.Any(e => e.Key.Equals("Leather", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Leder", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.CLOTH => Skills.Any(e => e.Key.Equals("Cloth", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stoff", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.TOTEMS => Skills.Any(e => e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.LIBRAMS => Skills.Any(e => e.Key.Equals("Libram", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Buchband", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.IDOLS => Skills.Any(e => e.Key.Equals("Idol", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Götzen", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.SIGILS => Skills.Any(e => e.Key.Equals("Sigil", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Siegel", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.SHIELDS => Skills.Any(e => e.Key.Equals("Shield", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Schild", StringComparison.OrdinalIgnoreCase)),
-                ArmorType.MISCELLANEOUS => true,
+                WowArmorType.PLATE => Skills.Any(e => e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.MAIL => Skills.Any(e => e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.LEATHER => Skills.Any(e => e.Key.Equals("Leather", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Leder", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.CLOTH => Skills.Any(e => e.Key.Equals("Cloth", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stoff", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.TOTEMS => Skills.Any(e => e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.LIBRAMS => Skills.Any(e => e.Key.Equals("Libram", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Buchband", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.IDOLS => Skills.Any(e => e.Key.Equals("Idol", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Götzen", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.SIGILS => Skills.Any(e => e.Key.Equals("Sigil", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Siegel", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.SHIELDS => Skills.Any(e => e.Key.Equals("Shield", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Schild", StringComparison.OrdinalIgnoreCase)),
+                WowArmorType.MISCELLANEOUS => true,
                 _ => false,
             };
         }
@@ -123,23 +123,23 @@ namespace AmeisenBotX.Core.Character
         {
             return item != null && item.WeaponType switch
             {
-                WeaponType.BOWS => Skills.Any(e => e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.CROSSBOWS => Skills.Any(e => e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Armbrüste", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.GUNS => Skills.Any(e => e.Key.Equals("Guns", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Schusswaffen", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.WANDS => Skills.Any(e => e.Key.Equals("Wands", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zauberstäbe", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.THROWN => Skills.Any(e => e.Key.Equals("Thrown", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Wurfwaffe", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.ONEHANDED_AXES => Skills.Any(e => e.Key.Equals("Axes", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandäxte", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.TWOHANDED_AXES => Skills.Any(e => e.Key.Equals("Two-Handed Axes", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandäxte", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.ONEHANDED_MACES => Skills.Any(e => e.Key.Equals("Maces", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandstreitkolben", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.TWOHANDED_MACES => Skills.Any(e => e.Key.Equals("Two-Handed Maces", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandstreitkolben", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.ONEHANDED_SWORDS => Skills.Any(e => e.Key.Equals("Swords", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandschwerter", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.TWOHANDED_SWORDS => Skills.Any(e => e.Key.Equals("Two-Handed Swords", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandschwerter", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.DAGGERS => Skills.Any(e => e.Key.Equals("Daggers", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Dolche", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.FIST_WEAPONS => Skills.Any(e => e.Key.Equals("Fist Weapons", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Faustwaffen", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.POLEARMS => Skills.Any(e => e.Key.Equals("Polearms", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stangenwaffen", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.STAVES => Skills.Any(e => e.Key.Equals("Staves", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stäbe", StringComparison.OrdinalIgnoreCase)),
-                WeaponType.FISHING_POLES => true,
-                WeaponType.MISCELLANEOUS => true,
+                WowWeaponType.BOWS => Skills.Any(e => e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.CROSSBOWS => Skills.Any(e => e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Armbrüste", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.GUNS => Skills.Any(e => e.Key.Equals("Guns", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Schusswaffen", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.WANDS => Skills.Any(e => e.Key.Equals("Wands", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zauberstäbe", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.THROWN => Skills.Any(e => e.Key.Equals("Thrown", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Wurfwaffe", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.ONEHANDED_AXES => Skills.Any(e => e.Key.Equals("Axes", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandäxte", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.TWOHANDED_AXES => Skills.Any(e => e.Key.Equals("Two-Handed Axes", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandäxte", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.ONEHANDED_MACES => Skills.Any(e => e.Key.Equals("Maces", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandstreitkolben", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.TWOHANDED_MACES => Skills.Any(e => e.Key.Equals("Two-Handed Maces", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandstreitkolben", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.ONEHANDED_SWORDS => Skills.Any(e => e.Key.Equals("Swords", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Einhandschwerter", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.TWOHANDED_SWORDS => Skills.Any(e => e.Key.Equals("Two-Handed Swords", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Zweihandschwerter", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.DAGGERS => Skills.Any(e => e.Key.Equals("Daggers", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Dolche", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.FIST_WEAPONS => Skills.Any(e => e.Key.Equals("Fist Weapons", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Faustwaffen", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.POLEARMS => Skills.Any(e => e.Key.Equals("Polearms", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stangenwaffen", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.STAVES => Skills.Any(e => e.Key.Equals("Staves", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Stäbe", StringComparison.OrdinalIgnoreCase)),
+                WowWeaponType.FISHING_POLES => true,
+                WowWeaponType.MISCELLANEOUS => true,
                 _ => false,
             };
         }
@@ -189,7 +189,7 @@ namespace AmeisenBotX.Core.Character
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
         {
-            ClickToMove(pos, 0, ClickToMoveType.Move, turnSpeed, distance);
+            ClickToMove(pos, 0, WowClickToMoveType.Move, turnSpeed, distance);
         }
 
         public void UpdateAll()
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core.Character
                 var item = container.FirstOrDefault();
                 for (int i = 20; i <= 23; ++i)
                 {
-                    if (Equipment.Items.All(keyPair => keyPair.Key != (EquipmentSlot)i))
+                    if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
                     {
                         WowInterface.HookManager.LuaEquipItem(item);
                         break;
@@ -228,19 +228,19 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateCharacterGear()
         {
-            System.Collections.IList list = Enum.GetValues(typeof(EquipmentSlot));
+            System.Collections.IList list = Enum.GetValues(typeof(WowEquipmentSlot));
 
             for (int i = 0; i < list.Count; ++i)
             {
-                EquipmentSlot slot = (EquipmentSlot)list[i];
+                WowEquipmentSlot slot = (WowEquipmentSlot)list[i];
 
                 if (ItemSlotsToSkip.Contains(slot))
                 {
                     continue;
                 }
 
-                if (slot == EquipmentSlot.INVSLOT_OFFHAND
-                    && Equipment.Items.TryGetValue(EquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem)
+                if (slot == WowEquipmentSlot.INVSLOT_OFFHAND
+                    && Equipment.Items.TryGetValue(WowEquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem)
                     && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
@@ -320,32 +320,32 @@ namespace AmeisenBotX.Core.Character
 
             switch (equiplocation)
             {
-                case "INVTYPE_AMMO": TryAddItem(EquipmentSlot.INVSLOT_AMMO, matchedItems); break;
-                case "INVTYPE_HEAD": TryAddItem(EquipmentSlot.INVSLOT_HEAD, matchedItems); break;
-                case "INVTYPE_NECK": TryAddItem(EquipmentSlot.INVSLOT_NECK, matchedItems); break;
-                case "INVTYPE_SHOULDER": TryAddItem(EquipmentSlot.INVSLOT_SHOULDER, matchedItems); break;
-                case "INVTYPE_BODY": TryAddItem(EquipmentSlot.INVSLOT_SHIRT, matchedItems); break;
-                case "INVTYPE_ROBE": TryAddItem(EquipmentSlot.INVSLOT_CHEST, matchedItems); break;
-                case "INVTYPE_CHEST": TryAddItem(EquipmentSlot.INVSLOT_CHEST, matchedItems); break;
-                case "INVTYPE_WAIST": TryAddItem(EquipmentSlot.INVSLOT_WAIST, matchedItems); break;
-                case "INVTYPE_LEGS": TryAddItem(EquipmentSlot.INVSLOT_LEGS, matchedItems); break;
-                case "INVTYPE_FEET": TryAddItem(EquipmentSlot.INVSLOT_FEET, matchedItems); break;
-                case "INVTYPE_WRIST": TryAddItem(EquipmentSlot.INVSLOT_WRIST, matchedItems); break;
-                case "INVTYPE_HAND": TryAddItem(EquipmentSlot.INVSLOT_HANDS, matchedItems); break;
+                case "INVTYPE_AMMO": TryAddItem(WowEquipmentSlot.INVSLOT_AMMO, matchedItems); break;
+                case "INVTYPE_HEAD": TryAddItem(WowEquipmentSlot.INVSLOT_HEAD, matchedItems); break;
+                case "INVTYPE_NECK": TryAddItem(WowEquipmentSlot.INVSLOT_NECK, matchedItems); break;
+                case "INVTYPE_SHOULDER": TryAddItem(WowEquipmentSlot.INVSLOT_SHOULDER, matchedItems); break;
+                case "INVTYPE_BODY": TryAddItem(WowEquipmentSlot.INVSLOT_SHIRT, matchedItems); break;
+                case "INVTYPE_ROBE": TryAddItem(WowEquipmentSlot.INVSLOT_CHEST, matchedItems); break;
+                case "INVTYPE_CHEST": TryAddItem(WowEquipmentSlot.INVSLOT_CHEST, matchedItems); break;
+                case "INVTYPE_WAIST": TryAddItem(WowEquipmentSlot.INVSLOT_WAIST, matchedItems); break;
+                case "INVTYPE_LEGS": TryAddItem(WowEquipmentSlot.INVSLOT_LEGS, matchedItems); break;
+                case "INVTYPE_FEET": TryAddItem(WowEquipmentSlot.INVSLOT_FEET, matchedItems); break;
+                case "INVTYPE_WRIST": TryAddItem(WowEquipmentSlot.INVSLOT_WRIST, matchedItems); break;
+                case "INVTYPE_HAND": TryAddItem(WowEquipmentSlot.INVSLOT_HANDS, matchedItems); break;
                 case "INVTYPE_FINGER": TryAddRings(matchedItems, ref expectedItemCount); break;
-                case "INVTYPE_CLOAK": TryAddItem(EquipmentSlot.INVSLOT_BACK, matchedItems); break;
+                case "INVTYPE_CLOAK": TryAddItem(WowEquipmentSlot.INVSLOT_BACK, matchedItems); break;
                 case "INVTYPE_TRINKET": TryAddTrinkets(matchedItems, ref expectedItemCount); break;
                 case "INVTYPE_WEAPON": TryAddWeapons(matchedItems, ref expectedItemCount); break;
-                case "INVTYPE_SHIELD": TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
-                case "INVTYPE_2HWEAPON": TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems); break;
-                case "INVTYPE_WEAPONMAINHAND": TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems); break;
-                case "INVTYPE_WEAPONOFFHAND": TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
-                case "INVTYPE_HOLDABLE": TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
-                case "INVTYPE_RANGED": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
-                case "INVTYPE_THROWN": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
-                case "INVTYPE_RANGEDRIGHT": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
-                case "INVTYPE_RELIC": TryAddItem(EquipmentSlot.INVSLOT_RANGED, matchedItems); break;
-                case "INVTYPE_TABARD": TryAddItem(EquipmentSlot.INVSLOT_TABARD, matchedItems); break;
+                case "INVTYPE_SHIELD": TryAddItem(WowEquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
+                case "INVTYPE_2HWEAPON": TryAddItem(WowEquipmentSlot.INVSLOT_MAINHAND, matchedItems); break;
+                case "INVTYPE_WEAPONMAINHAND": TryAddItem(WowEquipmentSlot.INVSLOT_MAINHAND, matchedItems); break;
+                case "INVTYPE_WEAPONOFFHAND": TryAddItem(WowEquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
+                case "INVTYPE_HOLDABLE": TryAddItem(WowEquipmentSlot.INVSLOT_OFFHAND, matchedItems); break;
+                case "INVTYPE_RANGED": TryAddItem(WowEquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_THROWN": TryAddItem(WowEquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_RANGEDRIGHT": TryAddItem(WowEquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_RELIC": TryAddItem(WowEquipmentSlot.INVSLOT_RANGED, matchedItems); break;
+                case "INVTYPE_TABARD": TryAddItem(WowEquipmentSlot.INVSLOT_TABARD, matchedItems); break;
                 case "INVTYPE_BAG": TryAddAllBags(matchedItems, ref expectedItemCount); break;
                 case "INVTYPE_QUIVER": TryAddAllBags(matchedItems, ref expectedItemCount); break;
                 default: break;
@@ -356,15 +356,15 @@ namespace AmeisenBotX.Core.Character
 
         private void TryAddAllBags(List<IWowItem> matchedItems, ref int expectedItemCount)
         {
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_1, matchedItems);
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_2, matchedItems);
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_3, matchedItems);
-            TryAddItem(EquipmentSlot.CONTAINER_BAG_4, matchedItems);
+            TryAddItem(WowEquipmentSlot.CONTAINER_BAG_1, matchedItems);
+            TryAddItem(WowEquipmentSlot.CONTAINER_BAG_2, matchedItems);
+            TryAddItem(WowEquipmentSlot.CONTAINER_BAG_3, matchedItems);
+            TryAddItem(WowEquipmentSlot.CONTAINER_BAG_4, matchedItems);
 
             expectedItemCount = 4;
         }
 
-        private void TryAddItem(EquipmentSlot slot, List<IWowItem> matchedItems)
+        private void TryAddItem(WowEquipmentSlot slot, List<IWowItem> matchedItems)
         {
             if (Equipment.Items.TryGetValue(slot, out IWowItem ammoItem))
             {
@@ -374,24 +374,24 @@ namespace AmeisenBotX.Core.Character
 
         private void TryAddRings(List<IWowItem> matchedItems, ref int expectedItemCount)
         {
-            TryAddItem(EquipmentSlot.INVSLOT_RING1, matchedItems);
-            TryAddItem(EquipmentSlot.INVSLOT_RING2, matchedItems);
+            TryAddItem(WowEquipmentSlot.INVSLOT_RING1, matchedItems);
+            TryAddItem(WowEquipmentSlot.INVSLOT_RING2, matchedItems);
 
             expectedItemCount = 2;
         }
 
         private void TryAddTrinkets(List<IWowItem> matchedItems, ref int expectedItemCount)
         {
-            TryAddItem(EquipmentSlot.INVSLOT_TRINKET1, matchedItems);
-            TryAddItem(EquipmentSlot.INVSLOT_TRINKET2, matchedItems);
+            TryAddItem(WowEquipmentSlot.INVSLOT_TRINKET1, matchedItems);
+            TryAddItem(WowEquipmentSlot.INVSLOT_TRINKET2, matchedItems);
 
             expectedItemCount = 2;
         }
 
         private void TryAddWeapons(List<IWowItem> matchedItems, ref int expectedItemCount)
         {
-            TryAddItem(EquipmentSlot.INVSLOT_MAINHAND, matchedItems);
-            TryAddItem(EquipmentSlot.INVSLOT_OFFHAND, matchedItems);
+            TryAddItem(WowEquipmentSlot.INVSLOT_MAINHAND, matchedItems);
+            TryAddItem(WowEquipmentSlot.INVSLOT_OFFHAND, matchedItems);
 
             expectedItemCount = 2;
         }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
 {
-    class QEncroachment : BotQuest
+    internal class QEncroachment : BotQuest
     {
         public QEncroachment(WowInterface wowInterface)
             : base(wowInterface, 837, "Encroachment", 6, 1,
@@ -116,6 +116,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
-    class QSarkoth : BotQuest
+    internal class QSarkoth : BotQuest
     {
         public QSarkoth(WowInterface wowInterface)
             : base(wowInterface, 790, "Sarkoth", 1, 1,
@@ -23,6 +23,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

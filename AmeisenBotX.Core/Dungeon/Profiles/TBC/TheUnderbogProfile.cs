@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.TheUnderbog;
+        public WowMapId MapId { get; } = WowMapId.TheUnderbog;
 
         public int MaxLevel { get; } = 65;
 
@@ -340,6 +340,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public Vector3 WorldEntry { get; } = new Vector3(782, 6746, -73);
 
-        public MapId WorldEntryMapId { get; } = MapId.Outland;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.Outland;
     }
 }

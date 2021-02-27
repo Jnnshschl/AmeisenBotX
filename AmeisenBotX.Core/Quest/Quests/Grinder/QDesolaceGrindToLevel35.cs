@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QDesolaceGrindToLevel35 : GrindingBotQuest
+    internal class QDesolaceGrindToLevel35 : GrindingBotQuest
     {
         public QDesolaceGrindToLevel35(WowInterface wowInterface)
             : base("DesolaceGrindToLevel35",
@@ -30,6 +30,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

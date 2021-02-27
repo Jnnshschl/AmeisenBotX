@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
 using AmeisenBotX.Core.Personality.Objects;
@@ -19,15 +19,15 @@ namespace AmeisenBotX.Core.Data.Db
 
         IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries();
 
-        IReadOnlyDictionary<MapId, Dictionary<HerbNode, List<Vector3>>> AllHerbNodes();
+        IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes();
 
         IReadOnlyDictionary<ulong, string> AllNames();
 
-        IReadOnlyDictionary<MapId, Dictionary<OreNode, List<Vector3>>> AllOreNodes();
+        IReadOnlyDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> AllOreNodes();
 
         IReadOnlyDictionary<ulong, Relationship> AllPlayerRelationships();
 
-        IReadOnlyDictionary<MapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest();
+        IReadOnlyDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest();
 
         IReadOnlyDictionary<int, Dictionary<int, WowUnitReaction>> AllReactions();
 
@@ -37,13 +37,13 @@ namespace AmeisenBotX.Core.Data.Db
 
         void CacheCombatLogEntry(KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key, BasicCombatLogEntry entry);
 
-        void CacheHerb(MapId mapId, HerbNode displayId, Vector3 position);
+        void CacheHerb(WowMapId mapId, WowHerbId displayId, Vector3 position);
 
         void CacheName(ulong guid, string name);
 
-        void CacheOre(MapId mapId, OreNode displayId, Vector3 position);
+        void CacheOre(WowMapId mapId, WowOreId displayId, Vector3 position);
 
-        void CachePoi(MapId mapId, PoiType poiType, Vector3 position);
+        void CachePoi(WowMapId mapId, PoiType poiType, Vector3 position);
 
         void CacheReaction(int a, int b, WowUnitReaction reaction);
 
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Data.Db
 
         bool TryGetPlayerRelationship(WowPlayer player, out Relationship relationship);
 
-        bool TryGetPointsOfInterest(MapId mapId, PoiType poiType, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes);
+        bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes);
 
         bool TryGetReaction(int a, int b, out WowUnitReaction reaction);
 

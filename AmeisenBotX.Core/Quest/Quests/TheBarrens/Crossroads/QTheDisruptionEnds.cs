@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QTheDisruptionEnds : BotQuest
+    internal class QTheDisruptionEnds : BotQuest
     {
         public QTheDisruptionEnds(WowInterface wowInterface)
             : base(wowInterface, 872, "The Disruption Ends", 9, 1,
@@ -78,6 +78,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

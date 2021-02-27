@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QRaptorThieves : BotQuest
+    internal class QRaptorThieves : BotQuest
     {
         public QRaptorThieves(WowInterface wowInterface)
             : base(wowInterface, 869, "Raptor Thieves", 9, 1,
@@ -35,6 +35,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

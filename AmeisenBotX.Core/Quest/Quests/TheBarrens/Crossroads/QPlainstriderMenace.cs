@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QPlainstriderMenace : BotQuest
+    internal class QPlainstriderMenace : BotQuest
     {
         public QPlainstriderMenace(WowInterface wowInterface)
             : base(wowInterface, 844, "Plainstrider Menace", 10, 1,
@@ -36,6 +36,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Db.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Movement.SMovementEngine.Enums;
-using AmeisenBotX.Core.Statemachine;
-using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace AmeisenBotX.Core.Grinding
 {
     public class GrindingEngine
     {
-        public GrindingEngine(WowInterface wowInterface, AmeisenBotConfig config, AmeisenBotStateMachine stateMachine)
+        public GrindingEngine(WowInterface wowInterface, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
         {
             WowInterface = wowInterface;
             Config = config;
@@ -42,7 +41,7 @@ namespace AmeisenBotX.Core.Grinding
 
         private DateTime LookingForEnemiesSince { get; set; }
 
-        private AmeisenBotStateMachine StateMachine { get; }
+        private AmeisenBotFsm StateMachine { get; }
 
         private ulong TargetGuid { get; set; }
 
@@ -54,8 +53,7 @@ namespace AmeisenBotX.Core.Grinding
 
         public void Execute()
         {
-
-            if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0 
+            if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0
             && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
             && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, PoiType.Repair, WowInterface.ObjectManager.Player.Position, 4096.0, out IEnumerable<Vector3> repairNpcs))
             {

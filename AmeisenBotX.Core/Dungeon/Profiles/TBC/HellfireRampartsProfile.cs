@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.HellfireRamparts;
+        public WowMapId MapId { get; } = WowMapId.HellfireRamparts;
 
         public int MaxLevel { get; } = 62;
 
@@ -215,6 +215,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public Vector3 WorldEntry { get; } = new Vector3(-362, 3078, -15);
 
-        public MapId WorldEntryMapId { get; } = MapId.Outland;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.Outland;
     }
 }

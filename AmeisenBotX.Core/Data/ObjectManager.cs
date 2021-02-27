@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
@@ -41,12 +41,12 @@ namespace AmeisenBotX.Core.Data
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             RelationshipEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
 
-            WowInterface.I.HookManager.OnGameInfoPush += HookManagerOnGameInfoPush;
+            WowInterface.HookManager.OnGameInfoPush += HookManagerOnGameInfoPush;
         }
 
         public event ObjectUpdateComplete OnObjectUpdateComplete;
 
-        public CameraInfo Camera { get; private set; }
+        public RawCameraInfo Camera { get; private set; }
 
         public string GameState { get; private set; }
 
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Data
 
         public ulong LastTargetGuid { get; private set; }
 
-        public MapId MapId { get; private set; }
+        public WowMapId MapId { get; private set; }
 
         public Vector3 MeanGroupPosition { get; private set; }
 
@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.Data
             lock (queryLock)
             {
                 return wowObjects.OfType<WowUnit>()
-                    .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && npcIds.Contains(WowGUID.NpcId(e.Guid)))
+                    .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && npcIds.Contains(WowGuid.ToNpcId(e.Guid)))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
                     .FirstOrDefault();
             }
@@ -286,7 +286,7 @@ namespace AmeisenBotX.Core.Data
 
         public WowObject ProcessObject(IntPtr ptr)
         {
-            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectType.ToInt32()), out WowObjectType type) 
+            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectType.ToInt32()), out WowObjectType type)
                 && WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress))
             {
                 WowObject obj = type switch
@@ -301,7 +301,7 @@ namespace AmeisenBotX.Core.Data
                     _ => new WowObject(ptr, type, descriptorAddress),
                 };
 
-                obj.Update();
+                obj.Update(WowInterface);
 
                 if (obj != null && (type == WowObjectType.Unit || type == WowObjectType.Player))
                 {
@@ -362,14 +362,14 @@ namespace AmeisenBotX.Core.Data
                 LastTargetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.LastTargetGuid);
                 PetGuid = UpdateGlobalVar<ulong>(WowInterface.OffsetList.PetGuid);
                 PlayerBase = UpdateGlobalVar<IntPtr>(WowInterface.OffsetList.PlayerBase);
-                MapId = UpdateGlobalVar<MapId>(WowInterface.OffsetList.MapId);
+                MapId = UpdateGlobalVar<WowMapId>(WowInterface.OffsetList.MapId);
                 ZoneId = UpdateGlobalVar<int>(WowInterface.OffsetList.ZoneId);
                 GameState = UpdateGlobalVarString(WowInterface.OffsetList.GameState);
 
                 if (WowInterface.XMemory.Read(WowInterface.OffsetList.CameraPointer, out IntPtr cameraPointer)
                     && WowInterface.XMemory.Read(IntPtr.Add(cameraPointer, (int)WowInterface.OffsetList.CameraOffset), out cameraPointer))
                 {
-                    Camera = UpdateGlobalVar<CameraInfo>(cameraPointer);
+                    Camera = UpdateGlobalVar<RawCameraInfo>(cameraPointer);
                 }
 
                 if (WowInterface.XMemory.Read(WowInterface.OffsetList.ZoneText, out IntPtr zoneNamePointer))
@@ -453,14 +453,14 @@ namespace AmeisenBotX.Core.Data
             IEnumerable<WowUnit> wowUnits = wowObjects.OfType<WowUnit>();
 
             // Remember Ore/Herb positions for farming
-            foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(OreNode), e.DisplayId)))
+            foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId)))
             {
-                WowInterface.Db.CacheOre(MapId, (OreNode)gameobject.DisplayId, gameobject.Position);
+                WowInterface.Db.CacheOre(MapId, (WowOreId)gameobject.DisplayId, gameobject.Position);
             }
 
-            foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(HerbNode), e.DisplayId)))
+            foreach (WowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId)))
             {
-                WowInterface.Db.CacheHerb(MapId, (HerbNode)gameobject.DisplayId, gameobject.Position);
+                WowInterface.Db.CacheHerb(MapId, (WowHerbId)gameobject.DisplayId, gameobject.Position);
             }
 
             // Remember Mailboxes

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QDisruptTheAttacks : BotQuest
+    internal class QDisruptTheAttacks : BotQuest
     {
         public QDisruptTheAttacks(WowInterface wowInterface)
             : base(wowInterface, 871, "Disrupt the Attacks", 9, 1,
@@ -103,6 +103,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

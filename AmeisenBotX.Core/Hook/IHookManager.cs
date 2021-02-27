@@ -1,11 +1,10 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -162,7 +161,7 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaRetrieveCorpse();
 
-        void LuaRollOnLoot(int rollId, RollType rollType);
+        void LuaRollOnLoot(int rollId, WowRollType rollType);
 
         void LuaSelectGossipActiveQuest(int gossipId);
 
@@ -178,13 +177,13 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaSellItemsByName(string itemName);
 
-        void LuaSellItemsByQuality(ItemQuality itemQuality);
+        void LuaSellItemsByQuality(WowItemQuality itemQuality);
 
         void LuaSendChatMessage(string message);
 
         void LuaSendItemMailToCharacter(string itemName, string receiver);
 
-        void LuaSetLfgRole(CombatClassRole combatClassRole);
+        void LuaSetLfgRole(WowRole combatClassRole);
 
         void LuaSpellStopCasting();
 
@@ -196,9 +195,11 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaUseContainerItem(int bagId, int bagSlot);
 
-        void LuaUseInventoryItem(EquipmentSlot equipmentSlot);
+        void LuaUseInventoryItem(WowEquipmentSlot equipmentSlot);
 
         void LuaUseItemByName(string itemName);
+
+        void SetTracelineJumpCheckStatus(bool status);
 
         void WowClearTarget();
 
@@ -216,9 +217,9 @@ namespace AmeisenBotX.Core.Hook
 
         bool WowGetLocalizedText(string variable, out string result);
 
-        Dictionary<RuneType, int> WowGetRunesReady();
+        Dictionary<WowRuneType, int> WowGetRunesReady();
 
-        public void WowGetUnitAuras(IntPtr baseAddress, ref WowAura[] auraTable, out int auraCount);
+        List<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount);
 
         WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
 

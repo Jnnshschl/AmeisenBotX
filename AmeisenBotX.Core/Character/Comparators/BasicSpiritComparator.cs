@@ -6,14 +6,14 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class BasicSpiritComparator : BasicComparator
     {
-        public BasicSpiritComparator(List<ArmorType> armorTypeBlacklist = null, List<WeaponType> weaponTypeBlacklist = null) : base(armorTypeBlacklist, weaponTypeBlacklist)
+        public BasicSpiritComparator(List<WowArmorType> armorTypeBlacklist = null, List<WowWeaponType> weaponTypeBlacklist = null) : base(armorTypeBlacklist, weaponTypeBlacklist)
         {
             GearscoreFactory = new GearscoreFactory(new Dictionary<string, double>() {
-                { "ITEM_MOD_INTELLECT_SHORT", 2.5 },
-                { "ITEM_MOD_SPIRIT_SHORT ", 2.5 },
-                { "ITEM_MOD_SPELL_POWER_SHORT ", 2.5 },
-                { "ITEM_MOD_POWER_REGEN0_SHORT ", 2.0 },
-                { "RESISTANCE0_NAME", 2.0 },
+                { WowStatType.INTELLECT, 2.5 },
+                { WowStatType.SPIRIT, 2.5 },
+                { WowStatType.SPELL_POWER, 2.5 },
+                { WowStatType.MP5, 2.0 },
+                { WowStatType.ARMOR, 2.0 },
             });
         }
     }

@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json.Linq;
 using System;
@@ -105,18 +105,18 @@ namespace AmeisenBotX.Core.Common
             return Convert.ToBase64String(bytes);
         }
 
-        public static string GetColorByQuality(ItemQuality itemQuality)
+        public static string GetColorByQuality(WowItemQuality itemQuality)
         {
             return itemQuality switch
             {
-                ItemQuality.Unique => "#00ccff",
-                ItemQuality.Poor => "#9d9d9d",
-                ItemQuality.Common => "#ffffff",
-                ItemQuality.Uncommon => "#1eff00",
-                ItemQuality.Rare => "#0070dd",
-                ItemQuality.Epic => "#a335ee",
-                ItemQuality.Legendary => "#ff8000",
-                ItemQuality.Artifact => "#e6cc80",
+                WowItemQuality.Unique => "#00ccff",
+                WowItemQuality.Poor => "#9d9d9d",
+                WowItemQuality.Common => "#ffffff",
+                WowItemQuality.Uncommon => "#1eff00",
+                WowItemQuality.Rare => "#0070dd",
+                WowItemQuality.Epic => "#a335ee",
+                WowItemQuality.Legendary => "#ff8000",
+                WowItemQuality.Artifact => "#e6cc80",
                 _ => "#ffffff",
             };
         }

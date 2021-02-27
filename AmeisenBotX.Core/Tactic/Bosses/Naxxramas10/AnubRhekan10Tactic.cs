@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -25,9 +25,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         public DateTime LocustSwarmActivated { get; private set; }
 
-        private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
-
         private static List<int> AddsDisplayIds { get; } = new List<int> { 14698, 27943 };
+
+        private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
 
         private Vector3 ImpaleDodgePos { get; set; }
 
@@ -73,13 +73,13 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private WowInterface WowInterface { get; }
 
-        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
+        public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
             return role switch
             {
-                CombatClassRole.Tank => DoTank(out preventMovement, out allowAttacking),
-                CombatClassRole.Heal => DoDpsHeal(false, out preventMovement, out allowAttacking),
-                CombatClassRole.Dps => DoDpsHeal(isMelee, out preventMovement, out allowAttacking),
+                WowRole.Tank => DoTank(out preventMovement, out allowAttacking),
+                WowRole.Heal => DoDpsHeal(false, out preventMovement, out allowAttacking),
+                WowRole.Dps => DoDpsHeal(isMelee, out preventMovement, out allowAttacking),
                 _ => throw new NotImplementedException(), // should never happen
             };
         }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QDurotarGrindToLevel9 : GrindingBotQuest
+    internal class QDurotarGrindToLevel9 : GrindingBotQuest
     {
         public QDurotarGrindToLevel9(WowInterface wowInterface)
             : base("DurotarGrindToLevel9",
@@ -31,6 +31,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

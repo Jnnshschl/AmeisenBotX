@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QSilithusGrindToLevel60 : GrindingBotQuest
+    internal class QSilithusGrindToLevel60 : GrindingBotQuest
     {
         public QSilithusGrindToLevel60(WowInterface wowInterface)
             : base("SilithusGrindToLevel60",
@@ -32,6 +32,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

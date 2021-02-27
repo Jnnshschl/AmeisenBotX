@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.Structs;
+﻿using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Drawing;
@@ -8,34 +8,27 @@ namespace AmeisenBotX.Overlay.Utils
 {
     public static class OverlayMath
     {
-        public const float DEG_TO_RAD = 0.01745329251f;
+        public const float DEG_TO_RAD = MathF.PI / 180.0f;
 
-        public static bool WorldToScreen(Rect clientRect, CameraInfo cameraInfo, Vector3 position, out Point screenCoordinates)
+        public static bool WorldToScreen(Rect clientRect, RawCameraInfo cameraInfo, Vector3 position, out Point screenCoordinates)
         {
-            Vector3 diff = new Vector3(position) - cameraInfo.Pos;
-            screenCoordinates = new Point(0, 0);
-
-            if ((diff * cameraInfo.ViewMatrix.FirstCol) < Vector3.Zero)
-            {
-                return false;
-            }
-
+            Vector3 diff = position - cameraInfo.Pos;
             Vector3 view = diff * cameraInfo.ViewMatrix.Inverse();
-            Vector3 cam = new Vector3(-view.Y, -view.Z, view.X);
 
-            float windowWidth = (clientRect.Right - clientRect.Left);
-            float windowHeight = (clientRect.Bottom - clientRect.Top);
+            float windowWidth = clientRect.Right - clientRect.Left;
+            float windowHeight = clientRect.Bottom - clientRect.Top;
 
             float screenX = windowWidth / 2.0f;
             float screenY = windowHeight / 2.0f;
+            float screenF = windowWidth / windowHeight;
 
-            float tmpX = screenX / MathF.Tan((cameraInfo.Fov * 180) * DEG_TO_RAD);
-            float tmpY = screenY / MathF.Tan((cameraInfo.Fov * 180) * DEG_TO_RAD);
+            float tmpX = screenX / MathF.Tan((screenF * (screenF >= 1.6f ? 55.0f : 44.0f) / 2.0f) * DEG_TO_RAD);
+            float tmpY = screenY / MathF.Tan((screenF * 35.0f / 2.0f) * DEG_TO_RAD);
 
             screenCoordinates = new Point
             {
-                X = (int)(screenX + cam.X * tmpX / cam.Z),
-                Y = (int)(screenY + cam.Y * tmpY / cam.Z)
+                X = (int)MathF.Abs(screenX + (-view.Y * tmpX / view.X)),
+                Y = (int)MathF.Abs(screenY + (-view.Z * tmpY / view.X)) - 20
             };
 
             return screenCoordinates.X > 0 && screenCoordinates.Y > 0 && screenCoordinates.X < windowWidth && screenCoordinates.Y < windowHeight;

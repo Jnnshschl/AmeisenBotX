@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
+﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -10,27 +10,9 @@ namespace AmeisenBotX.Core.Common
     {
         public static Vector3 CalculatePositionAround(Vector3 position, float rotation, float angle, float distance = 2.0f)
         {
-            float rSin = MathF.Sin(rotation + angle) * distance;
-            float cSin = MathF.Cos(rotation + angle) * distance;
-
-            float x = position.X + cSin;
-            float y = position.Y + rSin;
-
+            float x = position.X + MathF.Cos(rotation + angle) * distance;
+            float y = position.Y + MathF.Sin(rotation + angle) * distance;
             return new Vector3(x, y, position.Z);
-        }
-
-        public static Vector3 GetMeanPosition(IEnumerable<Vector3> positions)
-        {
-            Vector3 meanPosition = new Vector3();
-            float count = 0;
-
-            foreach (Vector3 position in positions)
-            {
-                meanPosition += position;
-                ++count;
-            }
-
-            return meanPosition / count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,15 +38,29 @@ namespace AmeisenBotX.Core.Common
             return rotation;
         }
 
+        public static float GetAngleDiff(Vector3 position, float rotation, Vector3 targetPosition)
+        {
+            return GetFacingAngle(position, targetPosition) - rotation;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
         {
             return ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
         }
 
-        public static float GetAngleDiff(Vector3 position, float rotation, Vector3 targetPosition)
+        public static Vector3 GetMeanPosition(IEnumerable<Vector3> positions)
         {
-            return GetFacingAngle(position, targetPosition) - rotation;
+            Vector3 meanPosition = new Vector3();
+            float count = 0;
+
+            foreach (Vector3 position in positions)
+            {
+                meanPosition += position;
+                ++count;
+            }
+
+            return meanPosition / count;
         }
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)

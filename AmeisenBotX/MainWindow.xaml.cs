@@ -2,9 +2,9 @@
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -321,7 +321,7 @@ namespace AmeisenBotX
                     {
                         WowChatMessage message = AmeisenBot.WowInterface.ChatManager.ChatMessages
                             .Where(e => e.Timestamp > NotificationLastTimestamp)
-                            .FirstOrDefault(e => e.Type == ChatMessageType.WHISPER);
+                            .FirstOrDefault(e => e.Type == WowChat.WHISPER);
 
                         if (message != null)
                         {
@@ -451,7 +451,7 @@ namespace AmeisenBotX
                     System.Drawing.Color startDot = System.Drawing.Color.Cyan;
                     System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == currentNodes.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
-                    Memory.Win32.Rect windowRect = XMemory.GetWindowPosition(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+                    Memory.Win32.Rect windowRect = XMemory.GetClientSize(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
                     if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out System.Drawing.Point startPoint)
                         && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out System.Drawing.Point endPoint))
                     {
@@ -518,9 +518,9 @@ namespace AmeisenBotX
 
             // Tick time label
             // --------------- >
-            double executionMs = AmeisenBot.CurrentExecutionMs;
+            float executionMs = AmeisenBot.CurrentExecutionMs;
 
-            if (double.IsNaN(executionMs) || double.IsInfinity(executionMs))
+            if (float.IsNaN(executionMs) || float.IsInfinity(executionMs))
             {
                 executionMs = 0;
             }
@@ -534,7 +534,7 @@ namespace AmeisenBotX
             else
             {
                 labelCurrentTickTime.Foreground = CurrentTickTimeBadBrush;
-                AmeisenLogger.I.Log("MainWindow", "High executionMs, something blocks our thread or CPU is to slow", LogLevel.Warning);
+                AmeisenLogger.I.Log("MainWindow", $"High executionMs ({executionMs}), something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
             // HookCall label
@@ -559,8 +559,9 @@ namespace AmeisenBotX
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            AmeisenBot?.Stop();
             Overlay?.Exit();
+            AmeisenBot?.Stop();
+
             InfoWindow?.Close();
             MapWindow?.Close();
             DevToolsWindow?.Close();

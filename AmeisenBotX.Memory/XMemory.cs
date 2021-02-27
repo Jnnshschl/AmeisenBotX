@@ -1,10 +1,8 @@
-﻿using AmeisenBotX.Memory.Win32;
-using Fasm;
+﻿using AmeisenBotX.Memory.Structs;
+using AmeisenBotX.Memory.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,8 +11,14 @@ using static AmeisenBotX.Memory.Win32.Win32Imports;
 
 namespace AmeisenBotX.Memory
 {
-    public unsafe class XMemory
+    public unsafe class XMemory : IDisposable
     {
+        private const int FASM_MEMORY_SIZE = 4096;
+        private const int FASM_PASSES = 100;
+
+        // lock needs to be static as FASM isn't thread safe
+        private static readonly object fasmLock = new object();
+
         private readonly object allocLock = new object();
         private ulong rpmCalls;
         private ulong wpmCalls;
@@ -22,25 +26,12 @@ namespace AmeisenBotX.Memory
         public XMemory()
         {
             MemoryAllocations = new Dictionary<IntPtr, uint>();
+            Fasm = new StringBuilder();
         }
 
-        ~XMemory()
-        {
-            CloseHandle(MainThreadHandle);
-            CloseHandle(ProcessHandle);
+        public int AllocationCount => MemoryAllocations.Count;
 
-            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
-
-            for (int i = 0; i < memAllocs.Count; ++i)
-            {
-                FreeMemory(memAllocs[i]);
-            }
-        }
-
-        public int AllocationCount
-            => MemoryAllocations.Count;
-
-        public ManagedFasm Fasm { get; private set; }
+        public StringBuilder Fasm { get; private set; }
 
         public IntPtr MainThreadHandle { get; private set; }
 
@@ -80,6 +71,7 @@ namespace AmeisenBotX.Memory
         public static void BringWindowToFront(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
             WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoActivate;
+
             if (!resizeWindow) { flags |= WindowFlags.NoSize; }
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
@@ -112,6 +104,7 @@ namespace AmeisenBotX.Memory
         public static void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
             WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
+
             if (!resizeWindow) { flags |= WindowFlags.NoSize; }
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
@@ -120,7 +113,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        public static Process StartProcessNoActivate(string processCmd)
+        public static Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
         {
             StartupInfo startupInfo = new StartupInfo
             {
@@ -131,13 +124,14 @@ namespace AmeisenBotX.Memory
 
             if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
-                CloseHandle(processInformation.hProcess);
-                CloseHandle(processInformation.hThread);
-
+                processHandle = processInformation.hProcess;
+                threadHandle = processInformation.hThread;
                 return Process.GetProcessById(processInformation.dwProcessId);
             }
             else
             {
+                processHandle = IntPtr.Zero;
+                threadHandle = IntPtr.Zero;
                 return null;
             }
         }
@@ -160,25 +154,44 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        public bool Attach(Process wowProcess)
+        public bool FasmInject(IntPtr address, bool patchMemProtection = false)
         {
-            Process = wowProcess;
-
-            if (Process == null || Process.HasExited)
+            lock (fasmLock)
             {
-                return false;
+                Fasm.Insert(0, $"org 0x{address:X08}\n");
+                Fasm.Insert(0, $"use32\n");
+
+                fixed (byte* pBytes = stackalloc byte[FASM_MEMORY_SIZE])
+                {
+                    if (FasmAssemble(Fasm.ToString(), pBytes, FASM_MEMORY_SIZE, FASM_PASSES, IntPtr.Zero) == 0)
+                    {
+                        FasmStateOk state = *(FasmStateOk*)pBytes;
+
+                        if (patchMemProtection)
+                        {
+                            if (MemoryProtect(address, state.OutputLength, MemoryProtectionFlags.ExecuteReadWrite, out MemoryProtectionFlags oldMemoryProtection))
+                            {
+                                bool status = !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
+                                MemoryProtect(address, state.OutputLength, oldMemoryProtection, out _);
+
+                                Fasm.Clear();
+                                return status;
+                            }
+                        }
+                        else
+                        {
+                            Fasm.Clear();
+                            return !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
+                        }
+                    }
+
+                    // use this to read the error
+                    // FasmStateError state = *(FasmStateError*)pBytes;
+
+                    Fasm.Clear();
+                    return false;
+                }
             }
-
-            ProcessHandle = OpenProcess(ProcessAccessFlags.All, false, wowProcess.Id);
-
-            if (ProcessHandle == IntPtr.Zero)
-            {
-                return false;
-            }
-
-            Fasm = new ManagedFasm(ProcessHandle);
-            MemoryAllocations.Clear();
-            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,37 +210,30 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        public ProcessThread GetMainThread()
+        public bool Init(Process wowProcess, IntPtr processHandle, IntPtr mainThreadHandle)
         {
-            if (Process?.MainWindowHandle == null) { return null; }
+            Process = wowProcess;
 
-            int id = GetWindowThreadProcessId(Process.MainWindowHandle, 0);
-
-            for (int i = 0; i < Process.Threads.Count; ++i)
+            if (Process == null || Process.HasExited)
             {
-                if (Process.Threads[i].Id == id)
-                {
-                    return Process.Threads[i];
-                }
+                return false;
             }
 
-            return null;
-        }
+            ProcessHandle = processHandle;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Bitmap GetScreenshot()
-        {
-            Rect rc = new Rect();
-            GetWindowRect(Process.MainWindowHandle, ref rc);
-
-            Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
-
-            using (Graphics g = Graphics.FromImage(bmp))
+            if (ProcessHandle == IntPtr.Zero)
             {
-                g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
+                return false;
             }
 
-            return bmp;
+            MainThreadHandle = mainThreadHandle;
+
+            if (MainThreadHandle == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -361,10 +367,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
-            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThread(ThreadAccessFlags.SuspendResume))
-            {
-                NtResumeThread(MainThreadHandle, out _);
-            }
+            NtResumeThread(MainThreadHandle, out _);
         }
 
         public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
@@ -383,10 +386,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
-            if (MainThreadHandle != IntPtr.Zero || TryOpenMainThread(ThreadAccessFlags.SuspendResume))
-            {
-                NtSuspendThread(MainThreadHandle, out _);
-            }
+            NtSuspendThread(MainThreadHandle, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -410,6 +410,12 @@ namespace AmeisenBotX.Memory
             return WriteBytes(address, new byte[size]);
         }
 
+        [DllImport("FASM.dll", EntryPoint = "fasm_Assemble", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        private static extern int FasmAssemble(string szSource, byte* lpMemory, int nSize, int nPassesLimit, IntPtr hDisplayPipe);
+
+        [DllImport("FASM.dll", EntryPoint = "fasm_GetVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        private static extern int FasmGetVersion();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
         {
@@ -417,27 +423,31 @@ namespace AmeisenBotX.Memory
             return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
         }
 
-        private bool TryOpenMainThread(ThreadAccessFlags threadAccess)
-        {
-            try
-            {
-                ProcessThread processThread = GetMainThread();
-
-                if (processThread != null)
-                {
-                    MainThreadHandle = OpenThread(threadAccess, false, (uint)processThread.Id);
-                }
-            }
-            catch { }
-
-            return MainThreadHandle != IntPtr.Zero;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool WpmGateWay(IntPtr baseAddress, void* buffer, int size)
         {
             ++wpmCalls;
             return !NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+        }
+
+        public void Dispose()
+        {
+            CloseHandle(MainThreadHandle);
+            CloseHandle(ProcessHandle);
+
+            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
+
+            for (int i = 0; i < memAllocs.Count; ++i)
+            {
+                FreeMemory(memAllocs[i]);
+            }
+        }
+
+        public static Rect GetClientSize(IntPtr windowHandle)
+        {
+            Rect rect = new Rect();
+            GetClientRect(windowHandle, ref rect);
+            return rect;
         }
     }
 }

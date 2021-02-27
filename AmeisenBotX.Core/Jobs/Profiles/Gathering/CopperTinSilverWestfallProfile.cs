@@ -16,11 +16,11 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
            new Vector3(-10643, 1157, 33),
         };
 
-        public List<OreNode> OreTypes { get; } = new List<OreNode>()
+        public List<WowOreId> OreTypes { get; } = new List<WowOreId>()
         {
-            OreNode.Copper,
-            OreNode.Silver,
-            OreNode.Tin
+            WowOreId.Copper,
+            WowOreId.Silver,
+            WowOreId.Tin
         };
 
         public List<Vector3> Path { get; } = new List<Vector3>()

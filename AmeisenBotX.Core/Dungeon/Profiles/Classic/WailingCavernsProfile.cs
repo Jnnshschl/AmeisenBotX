@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.WailingCaverns;
+        public WowMapId MapId { get; } = WowMapId.WailingCaverns;
 
         public int MaxLevel { get; } = 24;
 
@@ -637,6 +637,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public Vector3 WorldEntry { get; } = new Vector3(-743, -2213, 16);
 
-        public MapId WorldEntryMapId { get; } = MapId.Kalimdor;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.Kalimdor;
     }
 }

@@ -1,13 +1,11 @@
-﻿using AmeisenBotX.Core.Character.Enums;
-using AmeisenBotX.Core.Character.Inventory.Enums;
+﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.Structs;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -351,7 +349,7 @@ namespace AmeisenBotX.Core.Hook
                 return;
             }
 
-            if (currentItem == null || currentItem.EquipSlot == EquipmentSlot.NOT_EQUIPABLE)
+            if (currentItem == null || currentItem.EquipSlot == WowEquipmentSlot.NOT_EQUIPABLE)
             {
                 LuaDoString($"EquipItemByName(\"{newItem.Name}\")");
             }
@@ -755,12 +753,12 @@ namespace AmeisenBotX.Core.Hook
         /// <param name="rollId">The rolls id to roll on</param>
         /// <param name="rollType">Need, Greed or Pass</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LuaRollOnLoot(int rollId, RollType rollType)
+        public void LuaRollOnLoot(int rollId, WowRollType rollType)
         {
-            if (rollType == RollType.Need)
+            if (rollType == WowRollType.Need)
             {
                 // first we need to check wether we can do a need on this, otherwise the bot might not roll at all
-                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, {(int)RollType.Greed}) end");
+                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, {(int)WowRollType.Greed}) end");
             }
             else
             {
@@ -819,7 +817,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LuaSellItemsByQuality(ItemQuality itemQuality)
+        public void LuaSellItemsByQuality(WowItemQuality itemQuality)
         {
             LuaDoString($"local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c and string.find(c,\"{BotUtils.GetColorByQuality(itemQuality)[1..]}\")then b={{GetItemInfo(c)}}a=a+b[11]UseContainerItem(d,e)end end end");
         }
@@ -838,13 +836,13 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LuaSetLfgRole(CombatClassRole combatClassRole)
+        public void LuaSetLfgRole(WowRole combatClassRole)
         {
             int[] roleBools = new int[3]
             {
-                combatClassRole == CombatClassRole.Tank ? 1:0,
-                combatClassRole == CombatClassRole.Heal ? 1:0,
-                combatClassRole == CombatClassRole.Dps ? 1:0
+                combatClassRole == WowRole.Tank ? 1:0,
+                combatClassRole == WowRole.Heal ? 1:0,
+                combatClassRole == WowRole.Dps ? 1:0
             };
 
             LuaDoString($"SetLFGRoles(0, {roleBools[0]}, {roleBools[1]}, {roleBools[2]});LFDRoleCheckPopupAcceptButton:Click()");
@@ -894,7 +892,7 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void LuaUseInventoryItem(EquipmentSlot equipmentSlot)
+        public void LuaUseInventoryItem(WowEquipmentSlot equipmentSlot)
         {
             LuaDoString($"UseInventoryItem({(int)equipmentSlot})");
         }
@@ -903,6 +901,11 @@ namespace AmeisenBotX.Core.Hook
         public void LuaUseItemByName(string itemName)
         {
             LuaSellItemsByName(itemName);
+        }
+
+        public void SetTracelineJumpCheckStatus(bool status)
+        {
+            WowInterface.XMemory.Write(TracelineJumpCheckExecuteAddress, status ? 1 : 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1066,19 +1069,19 @@ namespace AmeisenBotX.Core.Hook
             return false;
         }
 
-        public Dictionary<RuneType, int> WowGetRunesReady()
+        public Dictionary<WowRuneType, int> WowGetRunesReady()
         {
-            Dictionary<RuneType, int> runes = new Dictionary<RuneType, int>()
+            Dictionary<WowRuneType, int> runes = new Dictionary<WowRuneType, int>()
             {
-                { RuneType.Blood, 0 },
-                { RuneType.Frost, 0 },
-                { RuneType.Unholy, 0 },
-                { RuneType.Death, 0 }
+                { WowRuneType.Blood, 0 },
+                { WowRuneType.Frost, 0 },
+                { WowRuneType.Unholy, 0 },
+                { WowRuneType.Death, 0 }
             };
 
             for (int i = 0; i < 6; ++i)
             {
-                if (WowInterface.XMemory.Read(WowInterface.OffsetList.RuneType + (4 * i), out RuneType type)
+                if (WowInterface.XMemory.Read(WowInterface.OffsetList.RuneType + (4 * i), out WowRuneType type)
                     && WowInterface.XMemory.Read(WowInterface.OffsetList.Runes, out byte runeStatus)
                     && ((1 << i) & runeStatus) != 0)
                 {
@@ -1089,7 +1092,7 @@ namespace AmeisenBotX.Core.Hook
             return runes;
         }
 
-        public void WowGetUnitAuras(IntPtr baseAddress, ref WowAura[] auras, out int auraCount)
+        public List<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount)
         {
             if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraCount1), out int auraCount1))
             {
@@ -1100,7 +1103,7 @@ namespace AmeisenBotX.Core.Hook
                         && WowInterface.XMemory.Read(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraTable2), out IntPtr auraTable))
                     {
                         auraCount = auraCount2;
-                        ReadAuraTable(auraTable, auraCount2, ref auras);
+                        return ReadAuraTable(auraTable, auraCount2);
                     }
                     else
                     {
@@ -1110,13 +1113,15 @@ namespace AmeisenBotX.Core.Hook
                 else
                 {
                     auraCount = auraCount1;
-                    ReadAuraTable(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraTable1), auraCount1, ref auras);
+                    return ReadAuraTable(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraTable1), auraCount1);
                 }
             }
             else
             {
                 auraCount = 0;
             }
+
+            return new List<WowAura>();
         }
 
         public WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
@@ -1126,6 +1131,11 @@ namespace AmeisenBotX.Core.Hook
             if (wowUnitA == null || wowUnitB == null)
             {
                 return reaction;
+            }
+
+            if (wowUnitA.FactionTemplate == wowUnitB.FactionTemplate)
+            {
+                return WowUnitReaction.Friendly;
             }
 
             if (WowInterface.Db.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
@@ -1155,9 +1165,9 @@ namespace AmeisenBotX.Core.Hook
         public bool WowIsClickToMoveActive()
         {
             return WowInterface.XMemory.Read(WowInterface.OffsetList.ClickToMoveAction, out int ctmState)
-                && (ClickToMoveType)ctmState != ClickToMoveType.None
-                && (ClickToMoveType)ctmState != ClickToMoveType.Stop
-                && (ClickToMoveType)ctmState != ClickToMoveType.Halted;
+                && (WowClickToMoveType)ctmState != WowClickToMoveType.None
+                && (WowClickToMoveType)ctmState != WowClickToMoveType.Stop
+                && (WowClickToMoveType)ctmState != WowClickToMoveType.Halted;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1271,98 +1281,96 @@ namespace AmeisenBotX.Core.Hook
 
             InjectTracelineJumpCheck();
 
-            WowInterface.XMemory.Fasm.Clear();
-
             // save registers
-            // WowInterface.XMemory.Fasm.AddLine("PUSHAD");
-            // WowInterface.XMemory.Fasm.AddLine("PUSHFD");
+            // WowInterface.XMemory.Fasm.AppendLine("PUSHAD");
+            // WowInterface.XMemory.Fasm.AppendLine("PUSHFD");
 
             // check for code to be executed
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{CodeToExecuteAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @out");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{CodeToExecuteAddress}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @out");
 
             // check if we want to override our is ingame check
             // going to be used while we are in the login screen
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{OverrideWorldCheckAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JNE @ovr");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{OverrideWorldCheckAddress}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JNE @ovr");
 
             // check for world to be loaded
             // we dont want to execute code in
             // the loadingscreen, cause that
             // mostly results in crashes
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{WowInterface.OffsetList.IsWorldLoaded}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @out");
-            WowInterface.XMemory.Fasm.AddLine("@ovr:");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{WowInterface.OffsetList.IsWorldLoaded}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @out");
+            WowInterface.XMemory.Fasm.AppendLine("@ovr:");
 
             // execute our stuff and get return address
-            WowInterface.XMemory.Fasm.AddLine($"CALL {CodecaveForExecution}");
-            WowInterface.XMemory.Fasm.AddLine($"MOV [{ReturnValueAddress}], EAX");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {CodecaveForExecution}");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV [{ReturnValueAddress}], EAX");
 
             // finish up our execution
-            WowInterface.XMemory.Fasm.AddLine("@out:");
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{CodeToExecuteAddress}], 0");
+            WowInterface.XMemory.Fasm.AppendLine("@out:");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{CodeToExecuteAddress}], 0");
 
             // ----------------------------
             // # GameInfo & EventHook stuff
             // ----------------------------
             // world loaded and should execute check
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{WowInterface.OffsetList.IsWorldLoaded}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @skpgi");
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{GameInfoExecuteAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @skpgi");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{WowInterface.OffsetList.IsWorldLoaded}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @skpgi");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{GameInfoExecuteAddress}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @skpgi");
 
             // isOutdoors
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject}");
-            WowInterface.XMemory.Fasm.AddLine("MOV ECX, EAX");
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionIsOutdoors}");
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{GameInfoAddress}], EAX");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject}");
+            WowInterface.XMemory.Fasm.AppendLine("MOV ECX, EAX");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionIsOutdoors}");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoAddress}], EAX");
 
             // isTargetInLineOfSight
-            WowInterface.XMemory.Fasm.AddLine($"MOV BYTE [{GameInfoAddress + 1}], 0");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV BYTE [{GameInfoAddress + 1}], 0");
 
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @loscheck");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @loscheck");
 
             IntPtr distancePointer = GameInfoLosCheckDataAddress;
             IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
             IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
             IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
-            WowInterface.XMemory.Fasm.AddLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AddLine("PUSH 0x120171");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {distancePointer}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {resultPointer}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {endPointer}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {startPointer}");
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionTraceline}");
-            WowInterface.XMemory.Fasm.AddLine("ADD ESP, 0x18");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH 0x120171");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {distancePointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {resultPointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {endPointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {startPointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionTraceline}");
+            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0x18");
 
-            WowInterface.XMemory.Fasm.AddLine("XOR AL, 1");
-            WowInterface.XMemory.Fasm.AddLine($"MOV BYTE [{GameInfoAddress + 1}], AL");
+            WowInterface.XMemory.Fasm.AppendLine("XOR AL, 1");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV BYTE [{GameInfoAddress + 1}], AL");
 
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
-            WowInterface.XMemory.Fasm.AddLine("@loscheck:");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
+            WowInterface.XMemory.Fasm.AppendLine("@loscheck:");
 
             // EventHook
-            WowInterface.XMemory.Fasm.AddLine($"CALL {EventHookAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {EventHookAddress}");
 
             // Traceline Jump Check
-            WowInterface.XMemory.Fasm.AddLine($"CALL {TracelineJumpCheckAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {TracelineJumpCheckAddress}");
 
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{GameInfoExecutedAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("@skpgi:");
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{GameInfoExecuteAddress}], 0");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecutedAddress}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("@skpgi:");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecuteAddress}], 0");
             // ----------------
 
             // call the gateway function
-            WowInterface.XMemory.Fasm.AddLine($"JMP {CodecaveForGateway}");
+            WowInterface.XMemory.Fasm.AppendLine($"JMP {CodecaveForGateway}");
 
             // restore registers
-            // WowInterface.XMemory.Fasm.AddLine("POPFD");
-            // WowInterface.XMemory.Fasm.AddLine("POPAD");
+            // WowInterface.XMemory.Fasm.AppendLine("POPFD");
+            // WowInterface.XMemory.Fasm.AppendLine("POPAD");
 
             // inject the instructions into our codecave
-            WowInterface.XMemory.Fasm.Inject((uint)CodecaveForCheck);
+            WowInterface.XMemory.FasmInject(CodecaveForCheck);
 
             // ---------------------------------------------------
             // End of the code that checks if there is asm to be
@@ -1370,17 +1378,12 @@ namespace AmeisenBotX.Core.Hook
             // ---------------------------------------------------
 
             // original EndScene in the gateway
-            WowInterface.XMemory.Fasm.Clear();
             WowInterface.XMemory.WriteBytes(CodecaveForGateway, OriginalEndsceneBytes);
 
             // return to original function after we're done with our stuff
-            WowInterface.XMemory.Fasm.AddLine($"JMP {EndsceneReturnAddress}"); // 5 bytes
+            WowInterface.XMemory.Fasm.AppendLine($"JMP {EndsceneReturnAddress}"); // 5 bytes
 
-            // note if you increase the hookSize we need to add more NOP's
-            WowInterface.XMemory.Fasm.AddLine("NOP"); // 2 bytes
-
-            WowInterface.XMemory.Fasm.Inject((uint)CodecaveForGateway + (uint)OriginalEndsceneBytes.Length);
-            WowInterface.XMemory.Fasm.Clear();
+            WowInterface.XMemory.FasmInject(CodecaveForGateway + OriginalEndsceneBytes.Length);
 
             // ---------------------------------------------------
             // End of doing the original stuff and returning to
@@ -1388,8 +1391,16 @@ namespace AmeisenBotX.Core.Hook
             // ---------------------------------------------------
 
             // modify original EndScene instructions to start the hook
-            WowInterface.XMemory.Fasm.AddLine($"JMP {CodecaveForCheck}");
-            WowInterface.XMemory.Fasm.Inject((uint)EndsceneAddress);
+            WowInterface.XMemory.Fasm.AppendLine($"JMP {CodecaveForCheck}");
+
+            for (int i = 5; i < hookSize; ++i)
+            {
+                WowInterface.XMemory.Fasm.AppendLine("NOP");
+            }
+
+            WowInterface.XMemory.SuspendMainThread();
+            WowInterface.XMemory.FasmInject(EndsceneAddress, true);
+            WowInterface.XMemory.ResumeMainThread();
 
             AmeisenLogger.I.Log("HookManager", "EndsceneHook Successful", LogLevel.Verbose);
 
@@ -1536,14 +1547,11 @@ namespace AmeisenBotX.Core.Hook
                 if (Config.MovementSettings.EnableTracelineJumpCheck && WowInterface.Player != null)
                 {
                     Vector3 playerPosition = WowInterface.Player.Position;
-                    playerPosition.Z += WowInterface.I.MovementSettings.ObstacleCheckHeight;
+                    playerPosition.Z += WowInterface.MovementSettings.ObstacleCheckHeight;
 
-                    Vector3 pos = BotUtils.MoveAhead(playerPosition, WowInterface.I.Player.Rotation, WowInterface.I.MovementSettings.ObstacleCheckDistance);
+                    Vector3 pos = BotUtils.MoveAhead(playerPosition, WowInterface.Player.Rotation, WowInterface.MovementSettings.ObstacleCheckDistance);
 
-                    if (WowInterface.XMemory.Write(TracelineJumpCheckDataAddress, (1.0f, playerPosition, pos)))
-                    {
-                        WowInterface.XMemory.Write(TracelineJumpCheckExecuteAddress, 1);
-                    }
+                    WowInterface.XMemory.Write(TracelineJumpCheckDataAddress, (1.0f, playerPosition, pos));
                 }
 
                 // run the gameinfo update
@@ -1610,19 +1618,16 @@ namespace AmeisenBotX.Core.Hook
 
                     try
                     {
-                        // preparing to inject the given ASM
-                        WowInterface.XMemory.Fasm.Clear();
-
                         // add all lines
                         for (int i = 0; i < asm.Length; ++i)
                         {
-                            WowInterface.XMemory.Fasm.AddLine(asm[i]);
+                            WowInterface.XMemory.Fasm.AppendLine(asm[i]);
                         }
 
                         // inject it
                         WowInterface.XMemory.SuspendMainThread();
                         frozenMainThread = true;
-                        WowInterface.XMemory.Fasm.Inject((uint)CodecaveForExecution);
+                        WowInterface.XMemory.FasmInject(CodecaveForExecution);
 
                         // now there is code to be executed
                         WowInterface.XMemory.Write(CodeToExecuteAddress, 1);
@@ -1684,60 +1689,58 @@ namespace AmeisenBotX.Core.Hook
 
         private void InjectEventHook()
         {
-            WowInterface.XMemory.Fasm.Clear();
-            WowInterface.XMemory.Fasm.AddLine("RunEventHook:");
+            WowInterface.XMemory.Fasm.AppendLine("RunEventHook:");
 
-            WowInterface.XMemory.Fasm.AddLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {EventHookLuaAddress}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {EventHookLuaAddress}");
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionLuaDoString}");
-            WowInterface.XMemory.Fasm.AddLine("ADD ESP, 0xC");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {EventHookLuaAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {EventHookLuaAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionLuaDoString}");
+            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0xC");
 
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject}");
-            WowInterface.XMemory.Fasm.AddLine("MOV ECX, EAX");
-            WowInterface.XMemory.Fasm.AddLine("PUSH -1");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {EventHookLuaVarAddress}");
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionGetLocalizedText}");
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{EventHookLuaReturnAddress}], EAX");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject}");
+            WowInterface.XMemory.Fasm.AppendLine("MOV ECX, EAX");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH -1");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {EventHookLuaVarAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionGetLocalizedText}");
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{EventHookLuaReturnAddress}], EAX");
 
-            WowInterface.XMemory.Fasm.AddLine($"RET");
-            WowInterface.XMemory.Fasm.Inject((uint)EventHookAddress);
+            WowInterface.XMemory.Fasm.AppendLine($"RET");
+            WowInterface.XMemory.FasmInject(EventHookAddress);
         }
 
         private void InjectTracelineJumpCheck()
         {
-            WowInterface.XMemory.Fasm.Clear();
-            WowInterface.XMemory.Fasm.AddLine("RunTracelineJumpCheck:");
-            WowInterface.XMemory.Fasm.AddLine($"TEST DWORD [{TracelineJumpCheckExecuteAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @out");
+            WowInterface.XMemory.Fasm.AppendLine("RunTracelineJumpCheck:");
+            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{TracelineJumpCheckExecuteAddress}], 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @out");
 
             IntPtr distancePointer = TracelineJumpCheckDataAddress;
             IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
             IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
             IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
-            WowInterface.XMemory.Fasm.AddLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AddLine("PUSH 0x120171");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {distancePointer}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {resultPointer}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {endPointer}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {startPointer}");
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionTraceline}");
-            WowInterface.XMemory.Fasm.AddLine("ADD ESP, 0x18");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH 0x120171");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {distancePointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {resultPointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {endPointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {startPointer}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionTraceline}");
+            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0x18");
 
-            WowInterface.XMemory.Fasm.AddLine("TEST AL, 1");
-            WowInterface.XMemory.Fasm.AddLine("JE @out");
+            WowInterface.XMemory.Fasm.AppendLine("TEST AL, 1");
+            WowInterface.XMemory.Fasm.AppendLine("JE @out");
 
-            WowInterface.XMemory.Fasm.AddLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {TracelineJumpCheckCommandAddress}");
-            WowInterface.XMemory.Fasm.AddLine($"PUSH {TracelineJumpCheckCommandAddress}");
-            WowInterface.XMemory.Fasm.AddLine($"CALL {WowInterface.OffsetList.FunctionLuaDoString}");
-            WowInterface.XMemory.Fasm.AddLine("ADD ESP, 0xC");
+            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {TracelineJumpCheckCommandAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"PUSH {TracelineJumpCheckCommandAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionLuaDoString}");
+            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0xC");
 
-            WowInterface.XMemory.Fasm.AddLine($"MOV DWORD [{TracelineJumpCheckExecuteAddress}], 1");
-            WowInterface.XMemory.Fasm.AddLine("@out:");
-            WowInterface.XMemory.Fasm.AddLine("RET");
-            WowInterface.XMemory.Fasm.Inject((uint)TracelineJumpCheckAddress);
+            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{TracelineJumpCheckExecuteAddress}], 0");
+            WowInterface.XMemory.Fasm.AppendLine("@out:");
+            WowInterface.XMemory.Fasm.AppendLine("RET");
+            WowInterface.XMemory.FasmInject(TracelineJumpCheckAddress);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1747,17 +1750,29 @@ namespace AmeisenBotX.Core.Hook
             return result;
         }
 
-        private void ReadAuraTable(IntPtr buffBase, int auraCount, ref WowAura[] auras)
+        private List<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
         {
+            List<WowAura> auras = new List<WowAura>();
+
             if (auraCount > 40)
             {
-                return;
+                return auras;
             }
 
             for (int i = 0; i < auraCount; ++i)
             {
-                WowInterface.XMemory.Read(buffBase + (0x18 * i), out auras[i]);
+                WowInterface.XMemory.Read(buffBase + (0x18 * i), out RawWowAura rawWowAura);
+
+                if (!WowInterface.Db.TryGetSpellName(rawWowAura.SpellId, out string name))
+                {
+                    name = WowInterface.HookManager.LuaGetSpellNameById(rawWowAura.SpellId);
+                    WowInterface.Db.CacheSpellName(rawWowAura.SpellId, name);
+                }
+
+                auras.Add(new WowAura(rawWowAura, name));
             }
+
+            return auras;
         }
 
         private void SaveOriginalFunctionBytes(IntPtr address)

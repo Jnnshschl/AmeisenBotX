@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.UtgardeKeep;
+        public WowMapId MapId { get; } = WowMapId.UtgardeKeep;
 
         public int MaxLevel { get; } = 80;
 
@@ -326,6 +326,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
 
         public Vector3 WorldEntry { get; } = new Vector3(1238, -4860, 41);
 
-        public MapId WorldEntryMapId { get; } = MapId.Northrend;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.Northrend;
     }
 }

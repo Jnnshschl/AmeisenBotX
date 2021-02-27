@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QProwlersOfTheBarrens : BotQuest
+    internal class QProwlersOfTheBarrens : BotQuest
     {
         public QProwlersOfTheBarrens(WowInterface wowInterface)
             : base(wowInterface, 903, "Prowlers of the Barrens", 10, 1,
@@ -112,6 +112,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

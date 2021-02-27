@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
 {
-    class QVanquishTheBetrayers : BotQuest
+    internal class QVanquishTheBetrayers : BotQuest
     {
         public QVanquishTheBetrayers(WowInterface wowInterface)
             : base(wowInterface, 784, "Vanquish the Betrayers", 3, 1,
@@ -51,6 +51,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

@@ -24,6 +24,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             Z = z;
         }
 
+        public bool AnySubZero()
+        {
+            return X < 0.0f || Y < 0.0f || Z < 0.0f;
+        }
+
         public Vector3(Vector3 position) : this(position.X, position.Y, position.Z)
         {
         }

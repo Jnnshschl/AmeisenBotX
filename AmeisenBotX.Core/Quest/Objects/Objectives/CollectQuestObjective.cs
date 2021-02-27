@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 {
                     return 100.0;
                 }
-                
+
                 var inventoryItem = WowInterface.CharacterManager.Inventory.Items.Find(item => item.Id == ItemId);
                 return inventoryItem != null ? Math.Min(100.0 * ((float)inventoryItem.Count) / ((float)WantedItemAmount), 100.0) : 0.0;
             }
@@ -40,9 +40,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private int CurrentItemAmount => WowInterface.CharacterManager.Inventory.Items.Count(e => e.Id == ItemId);
 
-        private int ItemId { get; }
-
         private List<int> GameObjectIds { get; }
+
+        private int ItemId { get; }
 
         private TimegatedEvent RightClickEvent { get; }
 

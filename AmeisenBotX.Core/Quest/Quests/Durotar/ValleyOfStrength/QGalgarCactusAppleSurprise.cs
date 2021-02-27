@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
-    class QGalgarCactusAppleSurprise : BotQuest
+    internal class QGalgarCactusAppleSurprise : BotQuest
     {
         public QGalgarCactusAppleSurprise(WowInterface wowInterface)
             : base(wowInterface, 4402, "Galgar's Cactus Apple Surprise", 1, 1,
@@ -64,6 +64,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

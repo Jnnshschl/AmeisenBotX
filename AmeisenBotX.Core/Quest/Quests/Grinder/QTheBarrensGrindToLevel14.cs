@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QTheBarrensGrindToLevel14 : GrindingBotQuest
+    internal class QTheBarrensGrindToLevel14 : GrindingBotQuest
     {
         public QTheBarrensGrindToLevel14(WowInterface wowInterface)
             : base("TheBarrensGrindToLevel14",
@@ -28,6 +28,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

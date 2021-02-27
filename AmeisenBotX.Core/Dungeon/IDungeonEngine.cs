@@ -22,6 +22,6 @@ namespace AmeisenBotX.Core.Dungeon
 
         void OnDeath();
 
-        IDungeonProfile TryGetProfileByMapId(MapId mapId);
+        IDungeonProfile TryGetProfileByMapId(WowMapId mapId);
     }
 }

@@ -1,14 +1,13 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+﻿using AmeisenBotX.Core.Character.Inventory;
+using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using AmeisenBotX.Core.Character.Inventory;
-using AmeisenBotX.Core.Character.Inventory.Objects;
 
 namespace AmeisenBotX.Core.Quest.Objects.Quests
 {
@@ -72,9 +71,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool Returned { get; set; }
 
-        private WowInterface WowInterface { get; }
-
         private bool CheckedIfAccepted { get; set; } = false;
+
+        private WowInterface WowInterface { get; }
 
         public void AcceptQuest()
         {
@@ -87,7 +86,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
                 CheckedIfAccepted = true;
             }
-            
+
             if (Accepted)
             {
                 return;
@@ -189,9 +188,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                                         {
                                             // get the item id and try again
                                             itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(
-                                                itemLink.Split(new string[] {"Hitem:"},
+                                                itemLink.Split(new string[] { "Hitem:" },
                                                         StringSplitOptions.RemoveEmptyEntries)[1]
-                                                    .Split(new string[] {":"},
+                                                    .Split(new string[] { ":" },
                                                         StringSplitOptions.RemoveEmptyEntries)[0]);
 
                                             item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
@@ -214,12 +213,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                                 }
                             }
                         }
-                        
+
                         if (!selectedReward)
                         {
                             WowInterface.HookManager.LuaGetQuestReward(1);
                         }
-                        
+
                         Thread.Sleep(250);
                         Returned = true;
                         return true;

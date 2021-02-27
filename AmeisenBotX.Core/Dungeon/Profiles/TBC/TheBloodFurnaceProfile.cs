@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.TheBloodFurnace;
+        public WowMapId MapId { get; } = WowMapId.TheBloodFurnace;
 
         public int MaxLevel { get; } = 63;
 
@@ -271,6 +271,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.TBC
 
         public Vector3 WorldEntry { get; } = new Vector3(-305, 3167, 31);
 
-        public MapId WorldEntryMapId { get; } = MapId.Outland;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.Outland;
     }
 }

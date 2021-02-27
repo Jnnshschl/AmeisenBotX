@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         public string EquipLocation { get; set; }
 
         [JsonProperty("equipslot")]
-        public EquipmentSlot EquipSlot { get; set; } = EquipmentSlot.NOT_EQUIPABLE;
+        public WowEquipmentSlot EquipSlot { get; set; } = WowEquipmentSlot.NOT_EQUIPABLE;
 
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         public string ItemLink { get; set; }
 
         [JsonProperty("quality")]
-        public ItemQuality ItemQuality { get; set; }
+        public WowItemQuality ItemQuality { get; set; }
 
         [JsonProperty("maxDurability")]
         public int MaxDurability { get; set; }

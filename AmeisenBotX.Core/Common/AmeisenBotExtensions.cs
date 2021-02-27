@@ -4,49 +4,49 @@ namespace AmeisenBotX.Core.Common
 {
     public static class AmeisenBotExtensions
     {
-        internal static bool IsBattlegroundMap(this MapId map)
+        internal static bool IsBattlegroundMap(this WowMapId map)
         {
-            return map == MapId.AlteracValley
-                || map == MapId.WarsongGulch
-                || map == MapId.ArathiBasin
-                || map == MapId.EyeOfTheStorm
-                || map == MapId.StrandOfTheAncients;
+            return map == WowMapId.AlteracValley
+                || map == WowMapId.WarsongGulch
+                || map == WowMapId.ArathiBasin
+                || map == WowMapId.EyeOfTheStorm
+                || map == WowMapId.StrandOfTheAncients;
         }
 
-        internal static bool IsCapitalCityZone(this ZoneId zone, bool isAlliance)
+        internal static bool IsCapitalCityZone(this WowZoneId zone, bool isAlliance)
         {
             if (isAlliance)
             {
-                return zone == ZoneId.StormwindCity
-                    || zone == ZoneId.Ironforge
-                    || zone == ZoneId.Teldrassil
-                    || zone == ZoneId.TheExodar;
+                return zone == WowZoneId.StormwindCity
+                    || zone == WowZoneId.Ironforge
+                    || zone == WowZoneId.Teldrassil
+                    || zone == WowZoneId.TheExodar;
             }
             else
             {
-                return zone == ZoneId.Orgrimmar
-                    || zone == ZoneId.Undercity
-                    || zone == ZoneId.ThunderBluff
-                    || zone == ZoneId.SilvermoonCity;
+                return zone == WowZoneId.Orgrimmar
+                    || zone == WowZoneId.Undercity
+                    || zone == WowZoneId.ThunderBluff
+                    || zone == WowZoneId.SilvermoonCity;
             }
         }
 
-        internal static bool IsDungeonMap(this MapId map)
+        internal static bool IsDungeonMap(this WowMapId map)
         {
-            return map == MapId.RagefireChasm
-                || map == MapId.WailingCaverns
-                || map == MapId.Deadmines
-                || map == MapId.ShadowfangKeep
-                || map == MapId.StormwindStockade
+            return map == WowMapId.RagefireChasm
+                || map == WowMapId.WailingCaverns
+                || map == WowMapId.Deadmines
+                || map == WowMapId.ShadowfangKeep
+                || map == WowMapId.StormwindStockade
 
-                || map == MapId.HellfireRamparts
-                || map == MapId.TheBloodFurnace
-                || map == MapId.TheSlavePens
-                || map == MapId.TheUnderbog
-                || map == MapId.TheSteamvault
+                || map == WowMapId.HellfireRamparts
+                || map == WowMapId.TheBloodFurnace
+                || map == WowMapId.TheSlavePens
+                || map == WowMapId.TheUnderbog
+                || map == WowMapId.TheSteamvault
 
-                || map == MapId.UtgardeKeep
-                || map == MapId.AzjolNerub;
+                || map == WowMapId.UtgardeKeep
+                || map == WowMapId.AzjolNerub;
         }
     }
 }

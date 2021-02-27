@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class ArmsItemComparator : IWowItemComparator
+    public class ArmsItemComparator : IItemComparator
     {
         private readonly WowInterface WowInterface;
 
@@ -12,6 +12,7 @@ namespace AmeisenBotX.Core.Character.Comparators
         {
             WowInterface = wowInterface;
         }
+
         public bool IsBetter(IWowItem current, IWowItem item)
         {
             if (item == null)
@@ -41,18 +42,18 @@ namespace AmeisenBotX.Core.Character.Comparators
             return false;
         }
 
-        private double GetRating(IWowItem item, EquipmentSlot slot)
+        private double GetRating(IWowItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
-            if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND))
+            if (slot.Equals(WowEquipmentSlot.INVSLOT_OFFHAND))
             {
                 // don't use shields or 2nd weapons
                 return 0;
             }
-            else if (slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
+            else if (slot.Equals(WowEquipmentSlot.INVSLOT_MAINHAND))
             {
                 // axes
-                if (item.GetType() == typeof(WowWeapon) && WowInterface.ObjectManager.Player.IsAlliance() ? (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)) : (((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_MACES) || ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_MACES)))
+                if (item.GetType() == typeof(WowWeapon) && WowInterface.ObjectManager.Player.IsAlliance() ? (((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_AXES)) : (((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_MACES) || ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_MACES)))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
                     {
@@ -70,9 +71,9 @@ namespace AmeisenBotX.Core.Character.Comparators
                     }
                 }
             }
-            else if (slot.Equals(EquipmentSlot.INVSLOT_NECK) || slot.Equals(EquipmentSlot.INVSLOT_RING1)
-                || slot.Equals(EquipmentSlot.INVSLOT_RING2) || slot.Equals(EquipmentSlot.INVSLOT_TRINKET1)
-                || slot.Equals(EquipmentSlot.INVSLOT_TRINKET2))
+            else if (slot.Equals(WowEquipmentSlot.INVSLOT_NECK) || slot.Equals(WowEquipmentSlot.INVSLOT_RING1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_RING2) || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET2))
             {
                 // jewelry stats
                 if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))

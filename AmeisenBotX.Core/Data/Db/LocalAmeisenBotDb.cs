@@ -2,13 +2,12 @@
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
 using AmeisenBotX.Core.Personality.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using MoreLinq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -21,8 +20,10 @@ namespace AmeisenBotX.Core.Data.Db
 {
     public class LocalAmeisenBotDb : IAmeisenBotDb
     {
-        public LocalAmeisenBotDb()
+        public LocalAmeisenBotDb(WowInterface wowInterface)
         {
+            WowInterface = wowInterface;
+
             CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
 
@@ -35,23 +36,25 @@ namespace AmeisenBotX.Core.Data.Db
 
         public BasicCombatLogEntrySubject CombatLogSubject { get; }
 
-        public ConcurrentDictionary<MapId, Dictionary<HerbNode, List<Vector3>>> HerbNodes { get; private set; }
+        public ConcurrentDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> HerbNodes { get; private set; }
 
         public ConcurrentDictionary<ulong, string> Names { get; private set; }
 
-        public ConcurrentDictionary<MapId, Dictionary<OreNode, List<Vector3>>> OreNodes { get; private set; }
+        public ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> OreNodes { get; private set; }
 
         public ConcurrentDictionary<ulong, Relationship> PlayerRelationships { get; private set; }
 
-        public ConcurrentDictionary<MapId, Dictionary<PoiType, List<Vector3>>> PointsOfInterest { get; private set; }
+        public ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> PointsOfInterest { get; private set; }
 
         public ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>> Reactions { get; private set; }
 
         public ConcurrentDictionary<int, string> SpellNames { get; private set; }
 
+        public WowInterface WowInterface { get; }
+
         private Timer CleanupTimer { get; }
 
-        public static LocalAmeisenBotDb FromJson(string dbFile)
+        public static LocalAmeisenBotDb FromJson(WowInterface wowInterface, string dbFile)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -71,7 +74,7 @@ namespace AmeisenBotX.Core.Data.Db
                 }
             }
 
-            LocalAmeisenBotDb db = new LocalAmeisenBotDb();
+            LocalAmeisenBotDb db = new LocalAmeisenBotDb(wowInterface);
             db.Clear();
 
             return db;
@@ -85,12 +88,12 @@ namespace AmeisenBotX.Core.Data.Db
                 {
                     Score = (float)initialRelationship,
                     FirstSeen = DateTime.Now,
-                    FirstSeenMapId = WowInterface.I.ObjectManager.MapId,
+                    FirstSeenMapId = WowInterface.ObjectManager.MapId,
                     FirstSeenPosition = player.Position
                 });
             }
 
-            PlayerRelationships[player.Guid].Poll(player);
+            PlayerRelationships[player.Guid].Poll(WowInterface, player);
         }
 
         public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
@@ -103,7 +106,7 @@ namespace AmeisenBotX.Core.Data.Db
             return CombatLogEntries;
         }
 
-        public IReadOnlyDictionary<MapId, Dictionary<HerbNode, List<Vector3>>> AllHerbNodes()
+        public IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes()
         {
             return HerbNodes;
         }
@@ -113,7 +116,7 @@ namespace AmeisenBotX.Core.Data.Db
             return Names;
         }
 
-        public IReadOnlyDictionary<MapId, Dictionary<OreNode, List<Vector3>>> AllOreNodes()
+        public IReadOnlyDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> AllOreNodes()
         {
             return OreNodes;
         }
@@ -123,7 +126,7 @@ namespace AmeisenBotX.Core.Data.Db
             return PlayerRelationships;
         }
 
-        public IReadOnlyDictionary<MapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest()
+        public IReadOnlyDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest()
         {
             return PointsOfInterest;
         }
@@ -169,11 +172,11 @@ namespace AmeisenBotX.Core.Data.Db
             }
         }
 
-        public void CacheHerb(MapId mapId, HerbNode displayId, Vector3 position)
+        public void CacheHerb(WowMapId mapId, WowHerbId displayId, Vector3 position)
         {
             if (!HerbNodes.ContainsKey(mapId))
             {
-                HerbNodes.TryAdd(mapId, new Dictionary<HerbNode, List<Vector3>>() { { displayId, new List<Vector3>() { position } } });
+                HerbNodes.TryAdd(mapId, new Dictionary<WowHerbId, List<Vector3>>() { { displayId, new List<Vector3>() { position } } });
             }
             else if (!HerbNodes[mapId].ContainsKey(displayId))
             {
@@ -197,11 +200,11 @@ namespace AmeisenBotX.Core.Data.Db
             }
         }
 
-        public void CacheOre(MapId mapId, OreNode displayId, Vector3 position)
+        public void CacheOre(WowMapId mapId, WowOreId displayId, Vector3 position)
         {
             if (!OreNodes.ContainsKey(mapId))
             {
-                OreNodes.TryAdd(mapId, new Dictionary<OreNode, List<Vector3>>() { { displayId, new List<Vector3>() { position } } });
+                OreNodes.TryAdd(mapId, new Dictionary<WowOreId, List<Vector3>>() { { displayId, new List<Vector3>() { position } } });
             }
             else if (!OreNodes[mapId].ContainsKey(displayId))
             {
@@ -213,7 +216,7 @@ namespace AmeisenBotX.Core.Data.Db
             }
         }
 
-        public void CachePoi(MapId mapId, PoiType poiType, Vector3 position)
+        public void CachePoi(WowMapId mapId, PoiType poiType, Vector3 position)
         {
             if (!PointsOfInterest.ContainsKey(mapId))
             {
@@ -260,9 +263,9 @@ namespace AmeisenBotX.Core.Data.Db
             SpellNames = new ConcurrentDictionary<int, string>();
             CombatLogEntries = new ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>>();
             BlacklistNodes = new ConcurrentDictionary<int, List<Vector3>>();
-            PointsOfInterest = new ConcurrentDictionary<MapId, Dictionary<PoiType, List<Vector3>>>();
-            OreNodes = new ConcurrentDictionary<MapId, Dictionary<OreNode, List<Vector3>>>();
-            HerbNodes = new ConcurrentDictionary<MapId, Dictionary<HerbNode, List<Vector3>>>();
+            PointsOfInterest = new ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>>();
+            OreNodes = new ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>>();
+            HerbNodes = new ConcurrentDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>>();
             PlayerRelationships = new ConcurrentDictionary<ulong, Relationship>();
         }
 
@@ -283,7 +286,14 @@ namespace AmeisenBotX.Core.Data.Db
                 Directory.CreateDirectory(Path.GetDirectoryName(dbFile));
             }
 
-            File.WriteAllText(dbFile, JsonConvert.SerializeObject(this));
+            try
+            {
+                File.WriteAllText(dbFile, JsonConvert.SerializeObject(this));
+            }
+            catch
+            {
+                File.Delete(dbFile);
+            }
         }
 
         public bool TryGetBlacklistPosition(int mapId, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes)
@@ -310,9 +320,9 @@ namespace AmeisenBotX.Core.Data.Db
             return false;
         }
 
-        public bool TryGetPointsOfInterest(MapId mapId, PoiType poiType, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes)
+        public bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes)
         {
-            KeyValuePair<MapId, PoiType> KeyValuePair = new KeyValuePair<MapId, PoiType>(mapId, poiType);
+            KeyValuePair<WowMapId, PoiType> KeyValuePair = new KeyValuePair<WowMapId, PoiType>(mapId, poiType);
 
             if (PointsOfInterest.ContainsKey(mapId)
                 && PointsOfInterest[mapId].ContainsKey(poiType))
@@ -366,7 +376,7 @@ namespace AmeisenBotX.Core.Data.Db
         {
             if (IsPlayerKnown(player))
             {
-                PlayerRelationships[player.Guid].Poll(player);
+                PlayerRelationships[player.Guid].Poll(WowInterface, player);
             }
         }
 
@@ -375,7 +385,14 @@ namespace AmeisenBotX.Core.Data.Db
             if (CombatLogEntries != null && CombatLogEntries.Any())
             {
                 DateTime ts = DateTime.UtcNow - TimeSpan.FromMinutes(6);
-                CombatLogEntries.Values.ForEach(e => e.Values.ForEach(x => x.RemoveAll(y => y.Item1 < ts)));
+
+                foreach (Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>> e in CombatLogEntries.Values)
+                {
+                    foreach (List<(DateTime, BasicCombatLogEntry)> x in e.Values)
+                    {
+                        x.RemoveAll(y => y.Item1 < ts);
+                    }
+                }
             }
         }
     }

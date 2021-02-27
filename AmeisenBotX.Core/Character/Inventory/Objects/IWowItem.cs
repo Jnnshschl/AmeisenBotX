@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         string EquipLocation { get; }
 
-        EquipmentSlot EquipSlot { get; }
+        WowEquipmentSlot EquipSlot { get; }
 
         int Id { get; }
 
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
 
         string ItemLink { get; }
 
-        ItemQuality ItemQuality { get; }
+        WowItemQuality ItemQuality { get; }
 
         int MaxDurability { get; }
 

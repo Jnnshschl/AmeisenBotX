@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
 {
-    class QCarryYourWeight : BotQuest
+    internal class QCarryYourWeight : BotQuest
     {
         public QCarryYourWeight(WowInterface wowInterface)
             : base(wowInterface, 791, "Carry Your Weight", 4, 1,
@@ -42,6 +42,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

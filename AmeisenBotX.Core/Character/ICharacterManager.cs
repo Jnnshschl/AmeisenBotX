@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
-using AmeisenBotX.Core.Character.Enums;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
@@ -17,9 +17,9 @@ namespace AmeisenBotX.Core.Character
 
         CharacterInventory Inventory { get; }
 
-        IWowItemComparator ItemComparator { get; set; }
+        IItemComparator ItemComparator { get; set; }
 
-        List<EquipmentSlot> ItemSlotsToSkip { get; set; }
+        List<WowEquipmentSlot> ItemSlotsToSkip { get; set; }
 
         int Money { get; }
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Character
 
         void AntiAfk();
 
-        void ClickToMove(Vector3 pos, ulong guid, ClickToMoveType clickToMoveType = ClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
+        void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
 
         bool HasItemTypeInBag<T>(bool needsToBeUseable = false);
 

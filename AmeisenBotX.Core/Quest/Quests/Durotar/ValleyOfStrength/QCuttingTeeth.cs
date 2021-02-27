@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
-    class QCuttingTeeth : BotQuest
+    internal class QCuttingTeeth : BotQuest
     {
         public QCuttingTeeth(WowInterface wowInterface)
             : base(wowInterface, 788, "Cutting Teeth", 1, 1,
@@ -40,6 +40,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

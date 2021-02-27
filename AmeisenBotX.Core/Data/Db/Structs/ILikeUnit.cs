@@ -1,13 +1,13 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 
 namespace AmeisenBotX.Core.Data.Db.Structs
 {
-    interface ILikeUnit
+    internal interface ILikeUnit
     {
-        public bool LikesHorde { get; set; }
-
         public bool LikesAlliance { get; set; }
+
+        public bool LikesHorde { get; set; }
 
         public bool LikesUnit(WowUnit wowUnit)
         {

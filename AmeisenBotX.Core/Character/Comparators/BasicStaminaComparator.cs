@@ -6,12 +6,12 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class BasicStaminaComparator : BasicComparator
     {
-        public BasicStaminaComparator(List<ArmorType> armorTypeBlacklist = null, List<WeaponType> weaponTypeBlacklist = null) : base(armorTypeBlacklist, weaponTypeBlacklist)
+        public BasicStaminaComparator(List<WowArmorType> armorTypeBlacklist = null, List<WowWeaponType> weaponTypeBlacklist = null) : base(armorTypeBlacklist, weaponTypeBlacklist)
         {
             GearscoreFactory = new GearscoreFactory(new Dictionary<string, double>() {
-                { "ITEM_MOD_STAMINA_SHORT", 4.0 },
-                { "ITEM_MOD_STRENGHT_SHORT", 2.5 },
-                { "RESISTANCE0_NAME", 2.0 },
+                { WowStatType.STAMINA, 4.0 },
+                { WowStatType.STRENGTH, 2.5 },
+                { WowStatType.ARMOR, 2.0 },
             });
         }
     }

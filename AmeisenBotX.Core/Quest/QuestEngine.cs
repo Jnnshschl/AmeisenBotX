@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Profiles;
-using AmeisenBotX.Core.Statemachine;
-using AmeisenBotX.Core.Statemachine.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Quest
 {
     public class QuestEngine
     {
-        public QuestEngine(WowInterface wowInterface, AmeisenBotConfig config, AmeisenBotStateMachine stateMachine)
+        public QuestEngine(WowInterface wowInterface, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
         {
             WowInterface = wowInterface;
             Config = config;
@@ -31,13 +31,13 @@ namespace AmeisenBotX.Core.Quest
 
         private AmeisenBotConfig Config { get; }
 
+        private DateTime LastAbandonQuestTime { get; set; } = DateTime.Now;
+
         private TimegatedEvent QueryCompletedQuestsEvent { get; }
 
-        private AmeisenBotStateMachine StateMachine { get; }
+        private AmeisenBotFsm StateMachine { get; }
 
         private WowInterface WowInterface { get; }
-        
-        private DateTime LastAbandonQuestTime { get; set; } = DateTime.Now;
 
         public void Execute()
         {
@@ -76,8 +76,8 @@ namespace AmeisenBotX.Core.Quest
                 }
 
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
-                
-                // Drop all quest that are not selected
+
+                // drop all quest that are not selected
                 if (WowInterface.ObjectManager.Player.QuestlogEntries.Count() == 25 && DateTime.Now.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
                 {
                     WowInterface.HookManager.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class SimpleItemComparator : IWowItemComparator
+    public class SimpleItemComparator : IItemComparator
     {
         public SimpleItemComparator(CharacterManager characterManager, Dictionary<string, double> statPriorities)
         {
@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Character.Comparators
         }
 
         protected GearscoreFactory GearscoreFactory { get; set; }
-        
+
         private CharacterManager CharacterManager { get; }
-        
+
         public bool IsBetter(IWowItem current, IWowItem item)
         {
             if (!CharacterManager.IsAbleToUseItem(item))

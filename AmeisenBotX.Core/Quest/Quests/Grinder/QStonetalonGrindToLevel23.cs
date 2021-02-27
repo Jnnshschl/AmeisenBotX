@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QStonetalonGrindToLevel23 : GrindingBotQuest
+    internal class QStonetalonGrindToLevel23 : GrindingBotQuest
     {
         public QStonetalonGrindToLevel23(WowInterface wowInterface)
             : base("StonetalonGrindToLevel23",
@@ -43,6 +43,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

@@ -3,7 +3,7 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Dungeon.Profiles.Classic;
 using AmeisenBotX.Core.Dungeon.Profiles.TBC;
@@ -26,55 +26,54 @@ namespace AmeisenBotX.Core.Dungeon
             CurrentNodes = new Queue<DungeonNode>();
             ExitDungeonEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
 
-            RootSelector = new Selector<DungeonBlackboard>
+            RootSelector = new Selector
             (
                 "HasFinishedDungeon",
-                (b) => Progress == 100.0,
-                new Leaf<DungeonBlackboard>("LeaveDungeon", (b) => ExitDungeon()),
-                new Selector<DungeonBlackboard>
+                () => Progress == 100.0,
+                new Leaf("LeaveDungeon", () => ExitDungeon()),
+                new Selector
                 (
                     "IDied",
-                    (b) => IDied,
-                    new Sequence<DungeonBlackboard>
+                    () => IDied,
+                    new Sequence
                     (
-                        new Leaf<DungeonBlackboard>("RecoverDeathPosition", (b) => MoveToPosition(DeathPosition)),
-                        new Leaf<DungeonBlackboard>("SetIDiedToFalse", (b) =>
+                        new Leaf("RecoverDeathPosition", () => MoveToPosition(DeathPosition)),
+                        new Leaf("SetIDiedToFalse", () =>
                         {
                             IDied = false;
                             return BehaviorTreeStatus.Success;
                         })
                     ),
-                    new Selector<DungeonBlackboard>
+                    new Selector
                     (
                         "AmITheLeader",
-                        (b) => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
-                        new Selector<DungeonBlackboard>
+                        () => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
+                        new Selector
                         (
                             "AreAllPlayersPresent",
-                            (b) => AreAllPlayersPresent(48.0),
-                            new Leaf<DungeonBlackboard>("FollowNodePath", (b) => FollowNodePath()),
-                            new Leaf<DungeonBlackboard>("WaitForPlayersToArrive", (b) => { return BehaviorTreeStatus.Success; })
+                            () => AreAllPlayersPresent(48.0),
+                            new Leaf("FollowNodePath", () => FollowNodePath()),
+                            new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; })
                         ),
-                        new Selector<DungeonBlackboard>
+                        new Selector
                         (
                             "IsDungeonLeaderInRange",
-                            (b) => WowInterface.ObjectManager.Partyleader != null,
-                            new Leaf<DungeonBlackboard>("FollowLeader", (b) => MoveToPosition(WowInterface.ObjectManager.Partyleader.Position, 0f, MovementAction.Follow)),
-                            new Leaf<DungeonBlackboard>("WaitForLeaderToArrive", (b) => { return BehaviorTreeStatus.Success; })
+                            () => WowInterface.ObjectManager.Partyleader != null,
+                            new Leaf("FollowLeader", () => MoveToPosition(WowInterface.ObjectManager.Partyleader.Position + LeaderFollowOffset, 0f, MovementAction.Follow)),
+                            new Leaf("WaitForLeaderToArrive", () => { return BehaviorTreeStatus.Success; })
                         )
                     )
                 )
             );
 
-            BehaviorTree = new AmeisenBotBehaviorTree<DungeonBlackboard>
+            BehaviorTree = new AmeisenBotBehaviorTree
             (
                 "DungeonBehaviorTree",
-                RootSelector,
-                DungeonBlackboard
+                RootSelector
             );
         }
 
-        public AmeisenBotBehaviorTree<DungeonBlackboard> BehaviorTree { get; }
+        public AmeisenBotBehaviorTree BehaviorTree { get; }
 
         public Queue<DungeonNode> CurrentNodes { get; private set; }
 
@@ -82,9 +81,9 @@ namespace AmeisenBotX.Core.Dungeon
 
         public Vector3 DeathPosition { get; private set; }
 
-        public DungeonBlackboard DungeonBlackboard { get; }
-
         public bool IDied { get; private set; }
+
+        public Vector3 LeaderFollowOffset { get; set; }
 
         public List<DungeonNode> Nodes => CurrentNodes?.ToList();
 
@@ -92,7 +91,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         public double Progress { get; private set; }
 
-        public Selector<DungeonBlackboard> RootSelector { get; }
+        public Selector RootSelector { get; }
 
         public int TotalNodes { get; private set; }
 
@@ -103,6 +102,15 @@ namespace AmeisenBotX.Core.Dungeon
         public void Enter()
         {
             Reset();
+
+            Random rnd = new Random();
+
+            LeaderFollowOffset = new Vector3
+            {
+                X = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
+                Y = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
+                Z = 0f
+            };
         }
 
         public void Execute()
@@ -149,24 +157,24 @@ namespace AmeisenBotX.Core.Dungeon
             Profile = null;
         }
 
-        public IDungeonProfile TryGetProfileByMapId(MapId mapId)
+        public IDungeonProfile TryGetProfileByMapId(WowMapId mapId)
         {
             return mapId switch
             {
-                MapId.RagefireChasm => new RagefireChasmProfile(),
-                MapId.WailingCaverns => new WailingCavernsProfile(),
-                MapId.Deadmines => new DeadminesProfile(),
-                MapId.ShadowfangKeep => new ShadowfangKeepProfile(),
-                MapId.StormwindStockade => new StockadeProfile(),
+                WowMapId.RagefireChasm => new RagefireChasmProfile(),
+                WowMapId.WailingCaverns => new WailingCavernsProfile(),
+                WowMapId.Deadmines => new DeadminesProfile(),
+                WowMapId.ShadowfangKeep => new ShadowfangKeepProfile(),
+                WowMapId.StormwindStockade => new StockadeProfile(),
 
-                MapId.HellfireRamparts => new HellfireRampartsProfile(),
-                MapId.TheBloodFurnace => new TheBloodFurnaceProfile(),
-                MapId.TheSlavePens => new TheSlavePensProfile(),
-                MapId.TheUnderbog => new TheUnderbogProfile(),
-                MapId.TheSteamvault => new TheSteamvaultProfile(),
+                WowMapId.HellfireRamparts => new HellfireRampartsProfile(),
+                WowMapId.TheBloodFurnace => new TheBloodFurnaceProfile(),
+                WowMapId.TheSlavePens => new TheSlavePensProfile(),
+                WowMapId.TheUnderbog => new TheUnderbogProfile(),
+                WowMapId.TheSteamvault => new TheSteamvaultProfile(),
 
-                MapId.UtgardeKeep => new UtgardeKeepProfile(),
-                MapId.AzjolNerub => new AzjolNerubProfile(),
+                WowMapId.UtgardeKeep => new UtgardeKeepProfile(),
+                WowMapId.AzjolNerub => new AzjolNerubProfile(),
 
                 _ => null
             };

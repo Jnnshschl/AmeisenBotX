@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
                 WowInterface.HookManager.LuaCastSpell("Runeforging");
                 WowInterface.HookManager.LuaClickUiElement("TradeSkillCreateButton");
-                WowInterface.HookManager.LuaUseInventoryItem(EquipmentSlot.INVSLOT_MAINHAND);
+                WowInterface.HookManager.LuaUseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
                 WowInterface.HookManager.LuaClickUiElement("StaticPopup1Button1");
             }
         }

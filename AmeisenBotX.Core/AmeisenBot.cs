@@ -6,14 +6,18 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Chat;
+using AmeisenBotX.Core.Combat.Classes;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Db;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Event;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Core.Grinding;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group;
@@ -30,10 +34,6 @@ using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Quest.Profiles;
 using AmeisenBotX.Core.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
-using AmeisenBotX.Core.Statemachine;
-using AmeisenBotX.Core.Statemachine.CombatClasses;
-using AmeisenBotX.Core.Statemachine.Enums;
-using AmeisenBotX.Core.Statemachine.States;
 using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core
 {
     public class AmeisenBot
     {
-        private double currentExecutionMs;
+        private float currentExecutionMs;
         private int rconTimerBusy;
         private int stateMachineTimerBusy;
 
@@ -84,10 +84,9 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
-            // TODO: refactor this
-            WowInterface = WowInterface.I;
+            WowInterface = new WowInterface();
             SetupWowInterfacePreStateMachine();
-            StateMachine = new AmeisenBotStateMachine(BotDataPath, Config, WowInterface);
+            StateMachine = new AmeisenBotFsm(BotDataPath, Config, WowInterface);
             SetupWowInterfacePostStateMachine();
 
             StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
@@ -124,11 +123,11 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotConfig Config { get; set; }
 
-        public double CurrentExecutionMs
+        public float CurrentExecutionMs
         {
             get
             {
-                double avgTickTime = Math.Round(currentExecutionMs / CurrentExecutionCount, 2);
+                float avgTickTime = MathF.Round(currentExecutionMs / (float)CurrentExecutionCount, 2);
                 CurrentExecutionCount = 0;
                 return avgTickTime;
             }
@@ -152,7 +151,7 @@ namespace AmeisenBotX.Core
 
         public TimegatedEvent RconScreenshotEvent { get; }
 
-        public AmeisenBotStateMachine StateMachine { get; set; }
+        public AmeisenBotFsm StateMachine { get; set; }
 
         public WowInterface WowInterface { get; set; }
 
@@ -248,6 +247,7 @@ namespace AmeisenBotX.Core
             }
 
             WowInterface.HookManager.DisposeHook();
+            WowInterface.XMemory.Dispose();
 
             WowInterface.Db.Save(Path.Combine(BotDataPath, AccountName, "db.json"));
 
@@ -342,47 +342,47 @@ namespace AmeisenBotX.Core
             // ------------------------------------ >
             CombatClasses = new List<ICombatClass>
             {
-                new Statemachine.CombatClasses.Jannis.DeathknightBlood(StateMachine),
-                new Statemachine.CombatClasses.Jannis.DeathknightFrost(StateMachine),
-                new Statemachine.CombatClasses.Jannis.DeathknightUnholy(StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidBalance(StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidFeralBear(StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidFeralCat(StateMachine),
-                new Statemachine.CombatClasses.Jannis.DruidRestoration(StateMachine),
-                new Statemachine.CombatClasses.Jannis.HunterBeastmastery(StateMachine),
-                new Statemachine.CombatClasses.Jannis.HunterMarksmanship(StateMachine),
-                new Statemachine.CombatClasses.Jannis.HunterSurvival(StateMachine),
-                new Statemachine.CombatClasses.Jannis.MageArcane(StateMachine),
-                new Statemachine.CombatClasses.Jannis.MageFire(StateMachine),
-                new Statemachine.CombatClasses.Jannis.PaladinHoly(StateMachine),
-                new Statemachine.CombatClasses.Jannis.PaladinProtection(StateMachine),
-                new Statemachine.CombatClasses.Jannis.PaladinRetribution(StateMachine),
-                new Statemachine.CombatClasses.Jannis.PriestDiscipline(StateMachine),
-                new Statemachine.CombatClasses.Jannis.PriestHoly(StateMachine),
-                new Statemachine.CombatClasses.Jannis.PriestShadow(StateMachine),
-                new Statemachine.CombatClasses.Jannis.RogueAssassination(StateMachine),
-                new Statemachine.CombatClasses.Jannis.ShamanElemental(StateMachine),
-                new Statemachine.CombatClasses.Jannis.ShamanEnhancement(StateMachine),
-                new Statemachine.CombatClasses.Jannis.ShamanRestoration(StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarlockAffliction(StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarlockDemonology(StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarlockDestruction(StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarriorArms(StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarriorFury(StateMachine),
-                new Statemachine.CombatClasses.Jannis.WarriorProtection(StateMachine),
-                new Statemachine.CombatClasses.Kamel.DeathknightBlood(WowInterface),
-                new Statemachine.CombatClasses.Kamel.RestorationShaman (WowInterface),
-                new Statemachine.CombatClasses.Kamel.PaladinProtection (WowInterface),
-                new Statemachine.CombatClasses.Kamel.PriestHoly (WowInterface),
-                new Statemachine.CombatClasses.Kamel.WarriorFury(WowInterface),
-                new Statemachine.CombatClasses.Kamel.WarriorArms(WowInterface),
-                new Statemachine.CombatClasses.einTyp.PaladinProtection(WowInterface),
-                new Statemachine.CombatClasses.einTyp.RogueAssassination(WowInterface),
-                new Statemachine.CombatClasses.einTyp.WarriorArms(WowInterface),
-                new Statemachine.CombatClasses.einTyp.WarriorFury(WowInterface),
-                new Statemachine.CombatClasses.ToadLump.Rogue(StateMachine),
-                new Statemachine.CombatClasses.Shino.PriestShadow(StateMachine),
-                new Statemachine.CombatClasses.Shino.MageFrost(StateMachine),
+                new Combat.Classes.Jannis.DeathknightBlood(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DeathknightFrost(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DeathknightUnholy(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DruidBalance(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DruidFeralBear(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DruidFeralCat(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DruidRestoration(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.HunterBeastmastery(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.HunterMarksmanship(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.HunterSurvival(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.MageArcane(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.MageFire(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.PaladinHoly(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.PaladinProtection(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.PaladinRetribution(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.PriestDiscipline(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.PriestHoly(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.PriestShadow(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.RogueAssassination(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.ShamanElemental(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.ShamanEnhancement(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.ShamanRestoration(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.WarlockAffliction(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.WarlockDemonology(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.WarlockDestruction(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.WarriorArms(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.WarriorFury(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.WarriorProtection(WowInterface, StateMachine),
+                new Combat.Classes.Kamel.DeathknightBlood(WowInterface),
+                new Combat.Classes.Kamel.RestorationShaman (WowInterface),
+                new Combat.Classes.Kamel.PaladinProtection (WowInterface),
+                new Combat.Classes.Kamel.PriestHoly (WowInterface),
+                new Combat.Classes.Kamel.WarriorFury(WowInterface),
+                new Combat.Classes.Kamel.WarriorArms(WowInterface),
+                new Combat.Classes.einTyp.PaladinProtection(WowInterface),
+                new Combat.Classes.einTyp.RogueAssassination(WowInterface),
+                new Combat.Classes.einTyp.WarriorArms(WowInterface),
+                new Combat.Classes.einTyp.WarriorFury(WowInterface),
+                new Combat.Classes.ToadLump.Rogue(WowInterface, StateMachine),
+                new Combat.Classes.Shino.PriestShadow(WowInterface, StateMachine),
+                new Combat.Classes.Shino.MageFrost(WowInterface, StateMachine),
             };
         }
 
@@ -541,7 +541,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.HookManager.LuaSetLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : CombatClassRole.Dps);
+                WowInterface.HookManager.LuaSetLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : WowRole.Dps);
             }
         }
 
@@ -568,12 +568,12 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    WowInterface.HookManager.LuaRollOnLoot(rollId, RollType.Need);
+                    WowInterface.HookManager.LuaRollOnLoot(rollId, WowRollType.Need);
                     return;
                 }
             }
 
-            WowInterface.HookManager.LuaRollOnLoot(rollId, RollType.Pass);
+            WowInterface.HookManager.LuaRollOnLoot(rollId, WowRollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
@@ -734,7 +734,12 @@ namespace AmeisenBotX.Core
 
                             if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
                             {
-                                Bitmap bmp = WowInterface.XMemory.GetScreenshot();
+                                Rect rc = new Rect();
+                                Win32Imports.GetWindowRect(WowInterface.XMemory.Process.MainWindowHandle, ref rc);
+                                Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
+
+                                using (Graphics g = Graphics.FromImage(bmp))
+                                    g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
 
                                 using MemoryStream ms = new MemoryStream();
                                 bmp.Save(ms, ImageFormat.Png);
@@ -814,7 +819,7 @@ namespace AmeisenBotX.Core
             WowInterface.OffsetList = new OffsetList335a();
             WowInterface.XMemory = new XMemory();
 
-            WowInterface.Db = LocalAmeisenBotDb.FromJson(Path.Combine(BotDataPath, AccountName, "db.json"));
+            WowInterface.Db = LocalAmeisenBotDb.FromJson(WowInterface, Path.Combine(BotDataPath, AccountName, "db.json"));
             WowInterface.Personality = new BotPersonality();
 
             WowInterface.ChatManager = new ChatManager(Config, Path.Combine(BotDataPath, AccountName));
@@ -832,7 +837,7 @@ namespace AmeisenBotX.Core
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
-            WowInterface.MovementEngine = new AMovementEngine(Config);
+            WowInterface.MovementEngine = new AMovementEngine(WowInterface, Config);
         }
 
         private void StateMachineTimerTick(object state)
@@ -909,31 +914,31 @@ namespace AmeisenBotX.Core
 
             // Chat Events
             // ----------- >
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_ADDON", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.ADDON, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_CHANNEL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.CHANNEL, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_FILTERED", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.FILTERED, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.GUILD, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.GUILD_ACHIEVEMENT, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_IGNORED", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.IGNORED, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_PARTY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_SAY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_WHISPER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.MONSTER_YELL, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_OFFICER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.OFFICER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.PARTY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.PARTY_LEADER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_BOSS_EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_BOSS_WHISPER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_LEADER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.RAID_WARNING, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.SAY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SYSTEM", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.SYSTEM, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.TEXT_EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.WHISPER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(ChatMessageType.YELL, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_ADDON", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.ADDON, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_CHANNEL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.CHANNEL, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_FILTERED", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.FILTERED, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.GUILD, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_IGNORED", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.IGNORED, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_SAY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_YELL, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_OFFICER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.OFFICER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.PARTY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.PARTY_LEADER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_LEADER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_WARNING, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.SAY, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SYSTEM", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.SYSTEM, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.WHISPER, t, a));
+            WowInterface.EventHookManager.Subscribe("CHAT_MSG_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.YELL, t, a));
 
             // Misc Events
             // ----------- >

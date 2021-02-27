@@ -13,12 +13,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis
 
         public List<Vector3> MailboxNodes { get; } = new List<Vector3>() { new Vector3(-9456, 47, 57), new Vector3(-9250, -2145, 64) };
 
-        public List<OreNode> OreTypes { get; } = new List<OreNode>() { OreNode.Copper, OreNode.Tin, OreNode.Silver, OreNode.Iron };
-
-        public override string ToString()
-        {
-            return "[20+][Mining] Elwynn Forest - Redridge Mountains (Jannis)";
-        }
+        public List<WowOreId> OreTypes { get; } = new List<WowOreId>() { WowOreId.Copper, WowOreId.Tin, WowOreId.Silver, WowOreId.Iron };
 
         public List<Vector3> Path { get; } = new List<Vector3>()
         {
@@ -1002,5 +997,10 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis
             new Vector3(-9267, -181, 70),
             new Vector3(-9278, -189, 69),
         };
+
+        public override string ToString()
+        {
+            return "[20+][Mining] Elwynn Forest - Redridge Mountains (Jannis)";
+        }
     }
 }

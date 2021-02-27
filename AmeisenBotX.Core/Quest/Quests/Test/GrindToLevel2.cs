@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.StartArea.ValleyOfStrength
 {
-    class GrindToLevel2 : GrindingBotQuest
+    internal class GrindToLevel2 : GrindingBotQuest
     {
         public GrindToLevel2(WowInterface wowInterface)
             : base("Test Grind Boars in Valley of Strength",

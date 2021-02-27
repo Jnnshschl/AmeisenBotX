@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public int GroupSize { get; } = 5;
 
-        public MapId MapId { get; } = MapId.RagefireChasm;
+        public WowMapId MapId { get; } = WowMapId.RagefireChasm;
 
         public int MaxLevel { get; } = 18;
 
@@ -219,6 +219,6 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.Classic
 
         public Vector3 WorldEntry { get; } = new Vector3(1816, -4422, -19);
 
-        public MapId WorldEntryMapId { get; } = MapId.Kalimdor;
+        public WowMapId WorldEntryMapId { get; } = WowMapId.Kalimdor;
     }
 }

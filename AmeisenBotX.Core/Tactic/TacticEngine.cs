@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Statemachine.Enums;
+﻿using AmeisenBotX.Core.Data.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Tactic
@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Tactic
 
         private SortedList<int, ITactic> Tactics { get; set; }
 
-        public bool Execute(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
+        public bool Execute(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
             if (Tactics.Count > 0)
             {
@@ -30,6 +30,11 @@ namespace AmeisenBotX.Core.Tactic
             return false;
         }
 
+        public bool HasTactics()
+        {
+            return Tactics.Count > 0;
+        }
+
         public void LoadTactics(params ITactic[] tactics)
         {
             Tactics = new SortedList<int, ITactic>();
@@ -43,11 +48,6 @@ namespace AmeisenBotX.Core.Tactic
         public void Reset()
         {
             Tactics.Clear();
-        }
-        
-        public bool HasTactics()
-        {
-            return Tactics.Count > 0;
         }
     }
 }

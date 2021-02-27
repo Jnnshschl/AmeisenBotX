@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         int GroupSize { get; }
 
-        MapId MapId { get; }
+        WowMapId MapId { get; }
 
         int MaxLevel { get; }
 
@@ -32,6 +32,6 @@ namespace AmeisenBotX.Core.Jobs.Profiles
 
         Vector3 WorldEntry { get; }
 
-        MapId WorldEntryMapId { get; }
+        WowMapId WorldEntryMapId { get; }
     }
 }

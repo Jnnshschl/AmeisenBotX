@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Statemachine.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +11,10 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 {
     public class IckAndKrickTactic : ITactic
     {
-        public IckAndKrickTactic()
+        public IckAndKrickTactic(WowInterface wowInterface)
         {
+            WowInterface = wowInterface;
+
             Configureables = new Dictionary<string, dynamic>()
             {
                 { "isOffTank", false },
@@ -29,12 +31,14 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
         private bool ChasingActive => (ChasingActivated + TimeSpan.FromSeconds(14)) > DateTime.UtcNow;
 
-        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
+        private WowInterface WowInterface { get; }
+
+        public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = WowInterface.I.ObjectManager.GetClosestWowUnitByDisplayId(IckDisplayId, false);
+            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(IckDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -43,39 +47,39 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                     ChasingActivated = DateTime.UtcNow;
                     return true;
                 }
-                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid && wowUnit.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) < 7.0f)
+                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid && wowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 7.0f)
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Flee, wowUnit.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, wowUnit.Position);
 
                     preventMovement = true;
                     allowAttacking = false;
                     return true;
                 }
 
-                WowUnit unitOrb = WowInterface.I.ObjectManager.WowObjects.OfType<WowUnit>()
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position))
-                    .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.I.ObjectManager.Player.Position) < 3.0f);
+                WowUnit unitOrb = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0f);
 
                 if (unitOrb != null) // orbs
                 {
-                    WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Flee, unitOrb.Position);
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, unitOrb.Position);
 
                     preventMovement = true;
                     allowAttacking = false;
                     return true;
                 }
 
-                if (role == CombatClassRole.Tank)
+                if (role == WowRole.Tank)
                 {
-                    if (wowUnit.TargetGuid == WowInterface.I.ObjectManager.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
                     {
-                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.I.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
-                        float distanceToMid = WowInterface.I.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
+                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
+                        float distanceToMid = WowInterface.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
 
-                        if (distanceToMid > 5.0f && WowInterface.I.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
+                        if (distanceToMid > 5.0f && WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
-                            WowInterface.I.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
+                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
 
                             preventMovement = true;
                             allowAttacking = false;

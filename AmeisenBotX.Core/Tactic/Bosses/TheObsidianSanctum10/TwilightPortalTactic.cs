@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Statemachine.Enums;
+using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Core.Data.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,9 +30,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private WowInterface WowInterface { get; }
 
-        public bool ExecuteTactic(CombatClassRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
+        public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
-            if (role == CombatClassRole.Dps)
+            if (role == WowRole.Dps)
             {
                 WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
                 WowGameobject portal = NearestPortal;

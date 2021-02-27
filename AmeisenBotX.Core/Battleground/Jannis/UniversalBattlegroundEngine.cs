@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis
         {
             switch (WowInterface.ObjectManager.MapId)
             {
-                case MapId.WarsongGulch:
+                case WowMapId.WarsongGulch:
                     Profile = new WarsongGulchProfile(WowInterface);
                     return true;
 

@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace AmeisenBotX.Core.Character.Comparators
 {
-    public class FuryItemComparator : IWowItemComparator
+    public class FuryItemComparator : IItemComparator
     {
         public FuryItemComparator(WowInterface wowInterface)
         {
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Character.Comparators
             return false;
         }
 
-        private double GetRating(IWowItem item, EquipmentSlot slot)
+        private double GetRating(IWowItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
             if (item.Stats.TryGetValue("ITEM_MOD_CRIT_MELEE_RATING_SHORT", out string meleeCritString)
@@ -75,13 +75,13 @@ namespace AmeisenBotX.Core.Character.Comparators
                 rating += 1f * strength;
             }
 
-            if (slot.Equals(EquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(EquipmentSlot.INVSLOT_MAINHAND))
+            if (slot.Equals(WowEquipmentSlot.INVSLOT_OFFHAND) || slot.Equals(WowEquipmentSlot.INVSLOT_MAINHAND))
             {
                 // also 2nd weapons
                 if (item.GetType() == typeof(WowWeapon)
-                    && (WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WeaponType.ONEHANDED_AXES)
+                    && (WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_AXES)
                     || (WowInterface.CharacterManager.SpellBook.IsSpellKnown("Titan's Grip")
-                    && WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WeaponType.TWOHANDED_AXES))))
+                    && WowInterface.ObjectManager.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_AXES))))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString)
                         && double.TryParse(dpsString, NumberStyles.Any, CultureInfo.InvariantCulture, out double dps))
@@ -90,9 +90,9 @@ namespace AmeisenBotX.Core.Character.Comparators
                     }
                 }
             }
-            else if (!(slot.Equals(EquipmentSlot.INVSLOT_NECK) || slot.Equals(EquipmentSlot.INVSLOT_RING1)
-                || slot.Equals(EquipmentSlot.INVSLOT_RING2) || slot.Equals(EquipmentSlot.INVSLOT_TRINKET1)
-                || slot.Equals(EquipmentSlot.INVSLOT_TRINKET2)))
+            else if (!(slot.Equals(WowEquipmentSlot.INVSLOT_NECK) || slot.Equals(WowEquipmentSlot.INVSLOT_RING1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_RING2) || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET1)
+                || slot.Equals(WowEquipmentSlot.INVSLOT_TRINKET2)))
             {
                 // armor stats
                 if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString)

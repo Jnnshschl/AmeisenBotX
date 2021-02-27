@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QHarpyLieutenants : BotQuest
+    internal class QHarpyLieutenants : BotQuest
     {
         public QHarpyLieutenants(WowInterface wowInterface)
             : base(wowInterface, 875, "Harpy Lieutenants", 12, 1,
@@ -33,6 +33,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

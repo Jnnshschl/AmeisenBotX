@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QTheZhevra : BotQuest
+    internal class QTheZhevra : BotQuest
     {
         public QTheZhevra(WowInterface wowInterface)
             : base(wowInterface, 845, "The Zhevra", 10, 1,
@@ -33,6 +33,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

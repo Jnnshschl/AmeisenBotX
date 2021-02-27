@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -12,18 +12,18 @@ namespace AmeisenBotX.Core.Character.Inventory
     public class CharacterEquipment
     {
         private readonly object queryLock = new object();
-        private Dictionary<EquipmentSlot, IWowItem> items;
+        private Dictionary<WowEquipmentSlot, IWowItem> items;
 
         public CharacterEquipment(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
 
-            Items = new Dictionary<EquipmentSlot, IWowItem>();
+            Items = new Dictionary<WowEquipmentSlot, IWowItem>();
         }
 
         public double AverageItemLevel { get; private set; }
 
-        public Dictionary<EquipmentSlot, IWowItem> Items
+        public Dictionary<WowEquipmentSlot, IWowItem> Items
         {
             get
             {
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         private WowInterface WowInterface { get; }
 
-        public bool HasEnchantment(EquipmentSlot slot, int enchantmentId)
+        public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
             if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
             {
@@ -109,19 +109,19 @@ namespace AmeisenBotX.Core.Character.Inventory
             double itemLevel = 0.0;
             int count = 0;
 
-            System.Collections.IList enumValues = Enum.GetValues(typeof(EquipmentSlot));
+            System.Collections.IList enumValues = Enum.GetValues(typeof(WowEquipmentSlot));
 
             for (int i = 0; i < enumValues.Count; ++i)
             {
-                EquipmentSlot slot = (EquipmentSlot)enumValues[i];
-                if (slot == EquipmentSlot.CONTAINER_BAG_1
-                    || slot == EquipmentSlot.CONTAINER_BAG_2
-                    || slot == EquipmentSlot.CONTAINER_BAG_3
-                    || slot == EquipmentSlot.CONTAINER_BAG_4
-                    || slot == EquipmentSlot.INVSLOT_OFFHAND
-                    || slot == EquipmentSlot.INVSLOT_TABARD
-                    || slot == EquipmentSlot.INVSLOT_AMMO
-                    || slot == EquipmentSlot.NOT_EQUIPABLE)
+                WowEquipmentSlot slot = (WowEquipmentSlot)enumValues[i];
+                if (slot == WowEquipmentSlot.CONTAINER_BAG_1
+                    || slot == WowEquipmentSlot.CONTAINER_BAG_2
+                    || slot == WowEquipmentSlot.CONTAINER_BAG_3
+                    || slot == WowEquipmentSlot.CONTAINER_BAG_4
+                    || slot == WowEquipmentSlot.INVSLOT_OFFHAND
+                    || slot == WowEquipmentSlot.INVSLOT_TABARD
+                    || slot == WowEquipmentSlot.INVSLOT_AMMO
+                    || slot == WowEquipmentSlot.NOT_EQUIPABLE)
                 {
                     continue;
                 }

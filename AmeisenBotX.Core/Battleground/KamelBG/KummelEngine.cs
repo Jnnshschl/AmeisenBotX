@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
@@ -186,11 +186,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private WowObject GetFlagObject()
         {
-            GameobjectDisplayId targetFlag = hasFlag ? (WowInterface.ObjectManager.Player.IsHorde() ? GameobjectDisplayId.WsgHordeFlag : GameobjectDisplayId.WsgAllianceFlag) : (WowInterface.ObjectManager.Player.IsHorde() ? GameobjectDisplayId.WsgAllianceFlag : GameobjectDisplayId.WsgHordeFlag);
+            WowGameobjectDisplayId targetFlag = hasFlag ? (WowInterface.ObjectManager.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (WowInterface.ObjectManager.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
             List<WowGameobject> flagObjectList = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>() // only WowGameobjects
-                .Where(x => Enum.IsDefined(typeof(GameobjectDisplayId), x.DisplayId)
-                         && targetFlag == (GameobjectDisplayId)x.DisplayId).ToList();
+                .Where(x => Enum.IsDefined(typeof(WowGameobjectDisplayId), x.DisplayId)
+                         && targetFlag == (WowGameobjectDisplayId)x.DisplayId).ToList();
             if (flagObjectList.Count > 0)
             {
                 return flagObjectList[0];

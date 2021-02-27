@@ -134,6 +134,12 @@ namespace AmeisenBotX.Memory.Win32
             WS_EX_TRANSPARENT = 0x00000020,
         }
 
+        [DllImport("user32", SetLastError = true)]
+        public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
+
+        [DllImport("user32", SetLastError = true)]
+        public static extern bool GetClientRect(IntPtr windowHandle, ref Rect rectangle);
+
         [DllImport("kernel32", SetLastError = true)]
         internal static extern bool CloseHandle(IntPtr threadHandle);
 
@@ -157,9 +163,6 @@ namespace AmeisenBotX.Memory.Win32
 
         [DllImport("user32", SetLastError = true)]
         internal static extern int GetWindowLong(IntPtr windowHandle, int index);
-
-        [DllImport("user32", SetLastError = true)]
-        internal static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
 
         [DllImport("user32", SetLastError = true)]
         internal static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);

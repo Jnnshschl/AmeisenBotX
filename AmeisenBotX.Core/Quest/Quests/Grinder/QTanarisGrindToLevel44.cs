@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QTanarisGrindToLevel44 : GrindingBotQuest
+    internal class QTanarisGrindToLevel44 : GrindingBotQuest
     {
         public QTanarisGrindToLevel44(WowInterface wowInterface)
             : base("TanarisGrindToLevel44",
@@ -70,6 +70,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
-    class QSuppliesForTheCrossroads : BotQuest
+    internal class QSuppliesForTheCrossroads : BotQuest
     {
         public QSuppliesForTheCrossroads(WowInterface wowInterface)
             : base(wowInterface, 5041, "Supplies for the Crossroads", 9, 1,
@@ -23,6 +23,6 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                         }),
                     })
                 })
-        {}
+        { }
     }
 }

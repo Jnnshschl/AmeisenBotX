@@ -4,7 +4,6 @@ namespace AmeisenBotX.Core.Data.Db.Structs
 {
     public struct StaticMailbox : ILikeUnit
     {
-
         public StaticMailbox(int entry, int mapId, float posX, float posY, float posZ, bool likesHorde, bool likesAlliance)
         {
             Entry = entry;
@@ -13,15 +12,15 @@ namespace AmeisenBotX.Core.Data.Db.Structs
             LikesHorde = likesHorde;
             LikesAlliance = likesAlliance;
         }
-        
+
         public int Entry { get; set; }
-        
-        public int MapId { get; set; }
-        
-        public Vector3 Position { get; set; }
-        
-        public bool LikesHorde { get; set; }
-        
+
         public bool LikesAlliance { get; set; }
+
+        public bool LikesHorde { get; set; }
+
+        public int MapId { get; set; }
+
+        public Vector3 Position { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Chat
             return $"{DataPath}\\\\chatprotocols\\\\chat-{type}-{DateTime.Now:dd-M-yyyy}.txt";
         }
 
-        public bool TryParseMessage(ChatMessageType type, long timestamp, List<string> args)
+        public bool TryParseMessage(WowChat type, long timestamp, List<string> args)
         {
             if (args.Count < 6)
             {
@@ -44,21 +44,21 @@ namespace AmeisenBotX.Core.Chat
                 {
                     string typeName = chatMessage.Type switch
                     {
-                        ChatMessageType.ADDON => "misc",
-                        ChatMessageType.CHANNEL => "channel",
-                        ChatMessageType.DND => "misc",
-                        ChatMessageType.FILTERED => "filtered",
-                        ChatMessageType.GUILD => "guild",
-                        ChatMessageType.GUILD_ACHIEVEMENT => "guild",
-                        ChatMessageType.IGNORED => "misc",
-                        ChatMessageType.MONSTER_EMOTE => "npc",
-                        ChatMessageType.MONSTER_PARTY => "npc",
-                        ChatMessageType.MONSTER_SAY => "npc",
-                        ChatMessageType.MONSTER_WHISPER => "npc",
-                        ChatMessageType.MONSTER_YELL => "npc",
-                        ChatMessageType.RAID_BOSS_EMOTE => "npc",
-                        ChatMessageType.RAID_BOSS_WHISPER => "npc",
-                        ChatMessageType.SYSTEM => "system",
+                        WowChat.ADDON => "misc",
+                        WowChat.CHANNEL => "channel",
+                        WowChat.DND => "misc",
+                        WowChat.FILTERED => "filtered",
+                        WowChat.GUILD => "guild",
+                        WowChat.GUILD_ACHIEVEMENT => "guild",
+                        WowChat.IGNORED => "misc",
+                        WowChat.MONSTER_EMOTE => "npc",
+                        WowChat.MONSTER_PARTY => "npc",
+                        WowChat.MONSTER_SAY => "npc",
+                        WowChat.MONSTER_WHISPER => "npc",
+                        WowChat.MONSTER_YELL => "npc",
+                        WowChat.RAID_BOSS_EMOTE => "npc",
+                        WowChat.RAID_BOSS_WHISPER => "npc",
+                        WowChat.SYSTEM => "system",
                         _ => "normal",
                     };
 

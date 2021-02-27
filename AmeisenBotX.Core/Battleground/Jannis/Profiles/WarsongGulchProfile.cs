@@ -3,7 +3,7 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects.WowObjects;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json;
@@ -524,7 +524,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                     JBgBlackboard.NearFlags = WowInterface.ObjectManager.WowObjects
                                                   .OfType<WowGameobject>()
-                                                  .Where(e => e.DisplayId == (int)GameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)GameobjectDisplayId.WsgHordeFlag)
+                                                  .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)WowGameobjectDisplayId.WsgHordeFlag)
                                                   .ToList();
                 }
             }

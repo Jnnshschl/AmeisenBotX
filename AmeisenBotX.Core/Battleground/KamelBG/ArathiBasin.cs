@@ -1,27 +1,34 @@
-﻿using AmeisenBotX.Core.Data.Objects.WowObjects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using AmeisenBotX.Core.Battleground.KamelBG.Enums;
-using System;
-using System.Linq;
-using AmeisenBotX.Core.Movement.Enums;
+﻿using AmeisenBotX.Core.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using System;
 using System.Collections.Generic;
-using AmeisenBotX.Logging;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Battleground.KamelBG
 {
     internal class ArathiBasin : IBattlegroundEngine
     {
+        private bool IsCirclePath = true;
+
+        public ArathiBasin(WowInterface wowInterface)
+        {
+            WowInterface = wowInterface;
+
+            CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            FlagsNodelist = new List<Flags>();
+        }
+
         public string Author => "Lukas";
 
         public string Description => "Arathi Basin";
 
+        public List<Flags> FlagsNodelist { get; set; }
+
         public string Name => "Arathi Basin";
-
-        private bool faction { get; set; }
-        private string factionFlagState { get; set; }
-
-        private int CurrentNodeCounter { get; set; }
 
         public List<Vector3> Path { get; } = new List<Vector3>()
         {
@@ -33,22 +40,39 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         };
 
         private TimegatedEvent CaptureFlagEvent { get; }
+
         private TimegatedEvent CombatEvent { get; }
 
+        private int CurrentNodeCounter { get; set; }
 
-        private bool IsCirclePath = true;
+        private bool faction { get; set; }
 
-        public List<Flags> FlagsNodelist { get; set; }
+        private string factionFlagState { get; set; }
 
         private WowInterface WowInterface { get; }
 
-        public ArathiBasin(WowInterface wowInterface)
+        public void Combat()
         {
-            WowInterface = wowInterface;
+            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
 
-            CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            FlagsNodelist = new List<Flags>();
+            if (weakestPlayer != null)
+            {
+                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
+
+                if (distance > threshold)
+                {
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
+                }
+                else if (CombatEvent.Run())
+                {
+                    WowInterface.Globals.ForceCombat = true;
+                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
+                }
+            }
+            else
+            {
+            }
         }
 
         public void Enter()
@@ -88,7 +112,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             }
             else
             {
-
                 if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) {v:0}= {v:0}..base..\":\"..status..\";\" end"), out string result))
                 {
                     //AmeisenLogger.I.Log("KAMEL_DEBUG", $"time result: {result}");
@@ -148,14 +171,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
                     }
-                    
                 }
             }
-        }
-
-        public void Leave()
-        {
-
         }
 
         public void Faction()
@@ -174,32 +191,10 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 FlagsNodelist.Add(Flags.AlliFlags);
                 FlagsNodelist.Add(Flags.AlliFlagsAktivate);
             }
-
         }
 
-        public void Combat()
+        public void Leave()
         {
-            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
-
-            if (weakestPlayer != null)
-            {
-                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
-                double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
-
-                if (distance > threshold)
-                {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
-                }
-                else if (CombatEvent.Run())
-                {
-                    WowInterface.Globals.ForceCombat = true;
-                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
-                }
-            }
-            else
-            {
-
-            }
         }
     }
 }

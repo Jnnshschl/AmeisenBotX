@@ -69,8 +69,8 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
                                 new MoveToObjectQuestObjective(wowInterface, 8175, 8.0),
-                                new RuneforgingQuestObjective(wowInterface, () => wowInterface.CharacterManager.Equipment.HasEnchantment(EquipmentSlot.INVSLOT_MAINHAND, 3369)
-                                                                               || wowInterface.CharacterManager.Equipment.HasEnchantment(EquipmentSlot.INVSLOT_MAINHAND, 3370))
+                                new RuneforgingQuestObjective(wowInterface, () => wowInterface.CharacterManager.Equipment.HasEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, 3369)
+                                                                               || wowInterface.CharacterManager.Equipment.HasEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, 3370))
                             })
                         }
                     )

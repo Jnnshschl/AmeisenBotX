@@ -22,9 +22,9 @@ namespace AmeisenBotX.Core.Jobs.Profiles.Gathering
         //    MailBox.MailboxGoldShire
         //};
 
-        public List<OreNode> OreTypes { get; } = new List<OreNode>()
+        public List<WowOreId> OreTypes { get; } = new List<WowOreId>()
         {
-            OreNode.Copper
+            WowOreId.Copper
         };
 
         public List<Vector3> Path { get; } = new List<Vector3>()

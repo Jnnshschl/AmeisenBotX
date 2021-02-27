@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
-    class QUngoroGrindToLevel54 : GrindingBotQuest
+    internal class QUngoroGrindToLevel54 : GrindingBotQuest
     {
         public QUngoroGrindToLevel54(WowInterface wowInterface)
             : base("UngoroGrindToLevel54",
@@ -33,6 +33,6 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
                         }),
                     })
                 })
-        {}
+        { }
     }
 }
