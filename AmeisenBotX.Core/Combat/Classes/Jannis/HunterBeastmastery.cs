@@ -117,9 +117,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (WowInterface.ObjectManager.Target != null)
                 {
-                    double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                    float distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 15
+                    if (WowInterface.ObjectManager.Player.HealthPercentage < 15.0
                         && TryCastSpell(feignDeathSpell, 0))
                     {
                         LastAction = DateTime.UtcNow;
@@ -155,10 +155,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         {
                         }
                     }
-                    else if (distanceToTarget < 24.0)
+                    else if (distanceToTarget < 24.0f)
                     {
-                        if (distanceToTarget < 16.0
-                            || distanceToTarget > 22.0
+                        if (distanceToTarget < 16.0f
+                            || distanceToTarget > 22.0f
                             && !WowInterface.Target.HasBuffByName(concussiveShotSpell)
                             && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
                             && TryCastSpell(concussiveShotSpell, WowInterface.ObjectManager.TargetGuid, true))
@@ -167,7 +167,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 20
+                        if (WowInterface.ObjectManager.Target.HealthPercentage < 20.0
                             && TryCastSpell(killShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                         {
                             LastAction = DateTime.UtcNow;
@@ -192,8 +192,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         }
 
                         // only cast when we are far away and disengage is ready
-                        if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget > 21.0 && !CooldownManager.IsSpellOnCooldown(disengageSpell))
-                            || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget > 5.0))
+                        if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget > 21.0f && !CooldownManager.IsSpellOnCooldown(disengageSpell))
+                            || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget > 5.0f))
                         {
                             if (TryCastSpell(steadyShotSpell, WowInterface.ObjectManager.TargetGuid, true))
                             {
@@ -222,8 +222,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     {
                         if (RunningAway)
                         {
-                            if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget < 22.0)
-                                || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget < 7.0))
+                            if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget < 22.0f)
+                                || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget < 7.0f))
                             {
                                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, WowInterface.ObjectManager.Target.Position, WowInterface.ObjectManager.Target.Rotation);
                             }
@@ -234,8 +234,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         }
                         else
                         {
-                            if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget < 18.0)
-                                || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget < 5.0))
+                            if ((WowInterface.ObjectManager.Target.Type == WowObjectType.Player && distanceToTarget < 18.0f)
+                                || (WowInterface.ObjectManager.Target.Type == WowObjectType.Unit && distanceToTarget < 5.0f))
                             {
                                 RunningAway = true;
                             }

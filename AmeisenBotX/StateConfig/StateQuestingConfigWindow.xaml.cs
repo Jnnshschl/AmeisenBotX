@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -28,9 +29,9 @@ namespace AmeisenBotX.StateConfig
         {
             comboboxProfile.Items.Add("None");
 
-            for (int i = 0; i < AmeisenBot.QuestProfiles.Count; ++i)
+            for (int i = 0; i < AmeisenBot.QuestProfiles.Count(); ++i)
             {
-                comboboxProfile.Items.Add(AmeisenBot.QuestProfiles[i].ToString());
+                comboboxProfile.Items.Add(AmeisenBot.QuestProfiles.ElementAt(i).ToString());
             }
 
             comboboxProfile.SelectedIndex = 0;

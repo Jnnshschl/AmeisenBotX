@@ -58,9 +58,9 @@ namespace AmeisenBotX
         {
             comboboxBattlegroundEngine.Items.Add("None");
 
-            for (int i = 0; i < AmeisenBot.BattlegroundEngines.Count; ++i)
+            for (int i = 0; i < AmeisenBot.BattlegroundEngines.Count(); ++i)
             {
-                comboboxBattlegroundEngine.Items.Add(AmeisenBot.BattlegroundEngines[i].ToString());
+                comboboxBattlegroundEngine.Items.Add(AmeisenBot.BattlegroundEngines.ElementAt(i).ToString());
             }
 
             comboboxBattlegroundEngine.SelectedIndex = 0;
@@ -70,9 +70,9 @@ namespace AmeisenBotX
         {
             comboboxBuiltInCombatClass.Items.Add("None");
 
-            for (int i = 0; i < AmeisenBot.CombatClasses.Count; ++i)
+            for (int i = 0; i < AmeisenBot.CombatClasses.Count(); ++i)
             {
-                comboboxBuiltInCombatClass.Items.Add(AmeisenBot.CombatClasses[i].ToString());
+                comboboxBuiltInCombatClass.Items.Add(AmeisenBot.CombatClasses.ElementAt(i).ToString());
             }
 
             comboboxBuiltInCombatClass.SelectedIndex = 0;
