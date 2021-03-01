@@ -6,9 +6,7 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -21,7 +19,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpell(windShearSpell, x.Guid, true) },
                 { 1, (x) => TryCastSpell(hexSpell, x.Guid, true) }
@@ -36,44 +34,44 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(null, new List<WowWeaponType>() { WowWeaponType.TWOHANDED_AXES, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_SWORDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(null, new() { WowWeaponType.TWOHANDED_AXES, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_SWORDS });
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 3) },
-                { 2, new Talent(1, 2, 5) },
-                { 3, new Talent(1, 3, 3) },
-                { 7, new Talent(1, 7, 1) },
-                { 8, new Talent(1, 8, 5) },
-                { 9, new Talent(1, 9, 2) },
-                { 10, new Talent(1, 10, 3) },
-                { 11, new Talent(1, 11, 2) },
-                { 12, new Talent(1, 12, 1) },
-                { 13, new Talent(1, 13, 3) },
-                { 14, new Talent(1, 14, 3) },
-                { 15, new Talent(1, 15, 5) },
-                { 16, new Talent(1, 16, 1) },
-                { 17, new Talent(1, 17, 3) },
-                { 18, new Talent(1, 18, 2) },
-                { 19, new Talent(1, 19, 2) },
-                { 20, new Talent(1, 20, 3) },
-                { 22, new Talent(1, 22, 1) },
-                { 23, new Talent(1, 23, 3) },
-                { 24, new Talent(1, 24, 5) },
-                { 25, new Talent(1, 25, 1) },
+                { 1, new(1, 1, 3) },
+                { 2, new(1, 2, 5) },
+                { 3, new(1, 3, 3) },
+                { 7, new(1, 7, 1) },
+                { 8, new(1, 8, 5) },
+                { 9, new(1, 9, 2) },
+                { 10, new(1, 10, 3) },
+                { 11, new(1, 11, 2) },
+                { 12, new(1, 12, 1) },
+                { 13, new(1, 13, 3) },
+                { 14, new(1, 14, 3) },
+                { 15, new(1, 15, 5) },
+                { 16, new(1, 16, 1) },
+                { 17, new(1, 17, 3) },
+                { 18, new(1, 18, 2) },
+                { 19, new(1, 19, 2) },
+                { 20, new(1, 20, 3) },
+                { 22, new(1, 22, 1) },
+                { 23, new(1, 23, 3) },
+                { 24, new(1, 24, 5) },
+                { 25, new(1, 25, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 3, new Talent(2, 3, 5) },
-                { 5, new Talent(2, 5, 5) },
-                { 8, new Talent(2, 8, 3) },
-                { 9, new Talent(2, 9, 1) },
+                { 3, new(2, 3, 5) },
+                { 5, new(2, 5, 5) },
+                { 8, new(2, 8, 3) },
+                { 9, new(2, 9, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree3 = new(),
         };
 
         public override bool UseAutoAttacks => false;

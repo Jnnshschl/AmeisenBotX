@@ -4,8 +4,6 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
-using System.Collections.Generic;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -19,7 +17,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true)));
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpellDk(mindFreezeSpell, x.Guid, true) },
                 { 1, (x) => TryCastSpellDk(strangulateSpell, x.Guid, false, true) }
@@ -34,43 +32,43 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<WowArmorType>() { WowArmorType.SHIELDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.SHIELDS });
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 2) },
-                { 2, new Talent(1, 2, 3) },
-                { 4, new Talent(1, 4, 5) },
-                { 6, new Talent(1, 6, 2) },
-                { 8, new Talent(1, 8, 5) },
+                { 1, new(1, 1, 2) },
+                { 2, new(1, 2, 3) },
+                { 4, new(1, 4, 5) },
+                { 6, new(1, 6, 2) },
+                { 8, new(1, 8, 5) },
             },
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>()
+            Tree2 = new(),
+            Tree3 = new()
             {
-                { 1, new Talent(3, 1, 2) },
-                { 2, new Talent(3, 2, 3) },
-                { 4, new Talent(3, 4, 2) },
-                { 7, new Talent(3, 7, 3) },
-                { 8, new Talent(3, 8, 3) },
-                { 9, new Talent(3, 9, 5) },
-                { 12, new Talent(3, 12, 3) },
-                { 13, new Talent(3, 13, 2) },
-                { 14, new Talent(3, 14, 1) },
-                { 15, new Talent(3, 15, 5) },
-                { 16, new Talent(3, 16, 2) },
-                { 20, new Talent(3, 20, 1) },
-                { 21, new Talent(3, 21, 5) },
-                { 25, new Talent(3, 25, 3) },
-                { 26, new Talent(3, 26, 1) },
-                { 27, new Talent(3, 27, 3) },
-                { 28, new Talent(3, 28, 3) },
-                { 29, new Talent(3, 29, 1) },
-                { 30, new Talent(3, 30, 5) },
-                { 31, new Talent(3, 31, 1) },
+                { 1, new(3, 1, 2) },
+                { 2, new(3, 2, 3) },
+                { 4, new(3, 4, 2) },
+                { 7, new(3, 7, 3) },
+                { 8, new(3, 8, 3) },
+                { 9, new(3, 9, 5) },
+                { 12, new(3, 12, 3) },
+                { 13, new(3, 13, 2) },
+                { 14, new(3, 14, 1) },
+                { 15, new(3, 15, 5) },
+                { 16, new(3, 16, 2) },
+                { 20, new(3, 20, 1) },
+                { 21, new(3, 21, 5) },
+                { 25, new(3, 25, 3) },
+                { 26, new(3, 26, 1) },
+                { 27, new(3, 27, 3) },
+                { 28, new(3, 28, 3) },
+                { 29, new(3, 29, 1) },
+                { 30, new(3, 30, 5) },
+                { 31, new(3, 31, 1) },
             },
         };
 

@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
             null,
-            new List<WowWeaponType>() { WowWeaponType.TWOHANDED_AXES, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_SWORDS },
+            new() { WowWeaponType.TWOHANDED_AXES, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_SWORDS },
             new Dictionary<string, double>()
             {
                 { "ITEM_MOD_CRIT_RATING_SHORT", 0.88 },
@@ -53,39 +53,39 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override WowRole Role => WowRole.Heal;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 5) },
-                { 3, new Talent(1, 3, 3) },
-                { 4, new Talent(1, 4, 5) },
-                { 6, new Talent(1, 6, 1) },
-                { 7, new Talent(1, 7, 5) },
-                { 8, new Talent(1, 8, 1) },
-                { 10, new Talent(1, 10, 2) },
-                { 13, new Talent(1, 13, 1) },
-                { 14, new Talent(1, 14, 3) },
-                { 16, new Talent(1, 16, 5) },
-                { 17, new Talent(1, 17, 3) },
-                { 18, new Talent(1, 18, 1) },
-                { 21, new Talent(1, 21, 5) },
-                { 22, new Talent(1, 22, 1) },
-                { 23, new Talent(1, 23, 5) },
-                { 24, new Talent(1, 24, 2) },
-                { 25, new Talent(1, 25, 2) },
-                { 26, new Talent(1, 26, 1) },
+                { 1, new(1, 1, 5) },
+                { 3, new(1, 3, 3) },
+                { 4, new(1, 4, 5) },
+                { 6, new(1, 6, 1) },
+                { 7, new(1, 7, 5) },
+                { 8, new(1, 8, 1) },
+                { 10, new(1, 10, 2) },
+                { 13, new(1, 13, 1) },
+                { 14, new(1, 14, 3) },
+                { 16, new(1, 16, 5) },
+                { 17, new(1, 17, 3) },
+                { 18, new(1, 18, 1) },
+                { 21, new(1, 21, 5) },
+                { 22, new(1, 22, 1) },
+                { 23, new(1, 23, 5) },
+                { 24, new(1, 24, 2) },
+                { 25, new(1, 25, 2) },
+                { 26, new(1, 26, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 1, new Talent(2, 1, 5) },
+                { 1, new(2, 1, 5) },
             },
-            Tree3 = new Dictionary<int, Talent>()
+            Tree3 = new()
             {
-                { 2, new Talent(3, 2, 5) },
-                { 4, new Talent(3, 4, 3) },
-                { 5, new Talent(3, 5, 2) },
-                { 7, new Talent(3, 7, 5) },
+                { 2, new(3, 2, 5) },
+                { 4, new(3, 4, 3) },
+                { 5, new(3, 5, 2) },
+                { 7, new(3, 7, 5) },
             },
         };
 

@@ -23,10 +23,10 @@ namespace AmeisenBotX.Core.Dungeon
         {
             WowInterface = wowInterface;
 
-            CurrentNodes = new Queue<DungeonNode>();
-            ExitDungeonEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            CurrentNodes = new();
+            ExitDungeonEvent = new(TimeSpan.FromMilliseconds(1000));
 
-            RootSelector = new Selector
+            RootSelector = new
             (
                 "HasFinishedDungeon",
                 () => Progress == 100.0,
@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Dungeon
                 )
             );
 
-            BehaviorTree = new AmeisenBotBehaviorTree
+            BehaviorTree = new
             (
                 "DungeonBehaviorTree",
                 RootSelector
@@ -103,9 +103,8 @@ namespace AmeisenBotX.Core.Dungeon
         {
             Reset();
 
-            Random rnd = new Random();
-
-            LeaderFollowOffset = new Vector3
+            Random rnd = new();
+            LeaderFollowOffset = new()
             {
                 X = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
                 Y = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,

@@ -23,7 +23,6 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
         private double distanceTraveled = 0;
         private bool multipleTargets = false;
         private bool standing = false;
-        public bool HandlesFacing => false;
 
         public WarriorArms(WowInterface wowInterface)
         {
@@ -41,6 +40,8 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
 
         public string Displayname => "Arms Warrior";
 
+        public bool HandlesFacing => false;
+
         public bool HandlesMovement => true;
 
         public bool HandlesTargetSelection => true;
@@ -53,43 +54,43 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
 
         public WowRole Role => WowRole.Dps;
 
-        public TalentTree Talents { get; } = new TalentTree()
+        public TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 3) },
-                { 3, new Talent(1, 3, 2) },
-                { 4, new Talent(1, 4, 2) },
-                { 6, new Talent(1, 6, 3) },
-                { 7, new Talent(1, 7, 2) },
-                { 8, new Talent(1, 8, 1) },
-                { 9, new Talent(1, 9, 2) },
-                { 10, new Talent(1, 10, 3) },
-                { 11, new Talent(1, 11, 3) },
-                { 12, new Talent(1, 12, 3) },
-                { 13, new Talent(1, 13, 5) },
-                { 14, new Talent(1, 14, 1) },
-                { 17, new Talent(1, 17, 2) },
-                { 21, new Talent(1, 21, 1) },
-                { 22, new Talent(1, 22, 2) },
-                { 24, new Talent(1, 24, 1) },
-                { 25, new Talent(1, 25, 3) },
-                { 26, new Talent(1, 26, 2) },
-                { 27, new Talent(1, 27, 3) },
-                { 28, new Talent(1, 28, 1) },
-                { 29, new Talent(1, 29, 2) },
-                { 30, new Talent(1, 30, 5) },
-                { 31, new Talent(1, 31, 1) }
+                { 1, new(1, 1, 3) },
+                { 3, new(1, 3, 2) },
+                { 4, new(1, 4, 2) },
+                { 6, new(1, 6, 3) },
+                { 7, new(1, 7, 2) },
+                { 8, new(1, 8, 1) },
+                { 9, new(1, 9, 2) },
+                { 10, new(1, 10, 3) },
+                { 11, new(1, 11, 3) },
+                { 12, new(1, 12, 3) },
+                { 13, new(1, 13, 5) },
+                { 14, new(1, 14, 1) },
+                { 17, new(1, 17, 2) },
+                { 21, new(1, 21, 1) },
+                { 22, new(1, 22, 2) },
+                { 24, new(1, 24, 1) },
+                { 25, new(1, 25, 3) },
+                { 26, new(1, 26, 2) },
+                { 27, new(1, 27, 3) },
+                { 28, new(1, 28, 1) },
+                { 29, new(1, 29, 2) },
+                { 30, new(1, 30, 5) },
+                { 31, new(1, 31, 1) }
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 1, new Talent(2, 1, 3) },
-                { 2, new Talent(2, 2, 2) },
-                { 3, new Talent(2, 3, 5) },
-                { 5, new Talent(2, 5, 5) },
-                { 11, new Talent(2, 11, 1) }
+                { 1, new(2, 1, 3) },
+                { 2, new(2, 2, 2) },
+                { 3, new(2, 3, 5) },
+                { 5, new(2, 5, 5) },
+                { 11, new(2, 11, 1) }
             },
-            Tree3 = new Dictionary<int, Talent>()
+            Tree3 = new()
         };
 
         public string Version => "1.0";

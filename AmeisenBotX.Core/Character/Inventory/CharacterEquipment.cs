@@ -11,14 +11,14 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public class CharacterEquipment
     {
-        private readonly object queryLock = new object();
+        private readonly object queryLock = new();
         private Dictionary<WowEquipmentSlot, IWowItem> items;
 
         public CharacterEquipment(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
 
-            Items = new Dictionary<WowEquipmentSlot, IWowItem>();
+            Items = new();
         }
 
         public double AverageItemLevel { get; private set; }

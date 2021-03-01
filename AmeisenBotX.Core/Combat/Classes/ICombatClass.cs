@@ -18,9 +18,9 @@ namespace AmeisenBotX.Core.Combat.Classes
 
         string Displayname { get; }
 
-        bool HandlesMovement { get; }
-
         bool HandlesFacing { get; }
+
+        bool HandlesMovement { get; }
 
         bool IsMelee { get; }
 

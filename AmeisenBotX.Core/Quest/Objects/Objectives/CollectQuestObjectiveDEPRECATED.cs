@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             ObjectDisplayId = objectDisplayId;
             Area = area;
 
-            RightClickEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            RightClickEvent = new(TimeSpan.FromSeconds(1));
         }
 
         public List<AreaNode> Area { get; set; }

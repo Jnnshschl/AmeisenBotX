@@ -10,7 +10,6 @@ using AmeisenBotX.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -37,7 +36,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, WowInterface.ObjectManager.TargetGuid, true)));
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(serpentStingSpell, () => TryCastSpell(serpentStingSpell, WowInterface.ObjectManager.TargetGuid, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpell(scatterShotSpell, x.Guid, true) },
                 { 1, (x) => TryCastSpell(intimidationSpell, x.Guid, true) }
@@ -52,44 +51,44 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<WowArmorType>() { WowArmorType.SHIELDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS });
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 5) },
-                { 2, new Talent(1, 2, 1) },
-                { 3, new Talent(1, 3, 2) },
-                { 6, new Talent(1, 6, 2) },
-                { 8, new Talent(1, 8, 1) },
-                { 9, new Talent(1, 9, 5) },
-                { 11, new Talent(1, 11, 5) },
-                { 12, new Talent(1, 12, 1) },
-                { 13, new Talent(1, 13, 1) },
-                { 14, new Talent(1, 14, 2) },
-                { 15, new Talent(1, 15, 2) },
-                { 16, new Talent(1, 16, 5) },
-                { 17, new Talent(1, 17, 3) },
-                { 18, new Talent(1, 18, 1) },
-                { 21, new Talent(1, 21, 5) },
-                { 22, new Talent(1, 22, 3) },
-                { 23, new Talent(1, 23, 1) },
-                { 24, new Talent(1, 24, 3) },
-                { 25, new Talent(1, 25, 5) },
-                { 26, new Talent(1, 26, 1) },
+                { 1, new(1, 1, 5) },
+                { 2, new(1, 2, 1) },
+                { 3, new(1, 3, 2) },
+                { 6, new(1, 6, 2) },
+                { 8, new(1, 8, 1) },
+                { 9, new(1, 9, 5) },
+                { 11, new(1, 11, 5) },
+                { 12, new(1, 12, 1) },
+                { 13, new(1, 13, 1) },
+                { 14, new(1, 14, 2) },
+                { 15, new(1, 15, 2) },
+                { 16, new(1, 16, 5) },
+                { 17, new(1, 17, 3) },
+                { 18, new(1, 18, 1) },
+                { 21, new(1, 21, 5) },
+                { 22, new(1, 22, 3) },
+                { 23, new(1, 23, 1) },
+                { 24, new(1, 24, 3) },
+                { 25, new(1, 25, 5) },
+                { 26, new(1, 26, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 2, new Talent(1, 2, 1) },
-                { 3, new Talent(1, 3, 5) },
-                { 4, new Talent(1, 4, 3) },
-                { 6, new Talent(1, 6, 5) },
-                { 8, new Talent(1, 8, 3) },
+                { 2, new(1, 2, 1) },
+                { 3, new(1, 3, 5) },
+                { 4, new(1, 4, 3) },
+                { 6, new(1, 6, 5) },
+                { 8, new(1, 8, 3) },
             },
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree3 = new(),
         };
 
         public override bool UseAutoAttacks => true;
@@ -100,13 +99,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override WowClass WowClass => WowClass.Hunter;
 
+        private DateTime LastAction { get; set; }
+
         private PetManager PetManager { get; set; }
 
         private bool ReadyToDisengage { get; set; } = false;
 
         private bool RunningAway { get; set; } = false;
-
-        private DateTime LastAction { get; set; }
 
         public override void Execute()
         {

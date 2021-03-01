@@ -25,7 +25,7 @@ namespace AmeisenBotX.Overlay.Utils
             float tmpX = screenX / MathF.Tan((screenF * (screenF >= 1.6f ? 55.0f : 44.0f) / 2.0f) * DEG_TO_RAD);
             float tmpY = screenY / MathF.Tan((screenF * 35.0f / 2.0f) * DEG_TO_RAD);
 
-            screenCoordinates = new Point
+            screenCoordinates = new()
             {
                 X = (int)MathF.Abs(screenX + (-view.Y * tmpX / view.X)),
                 Y = (int)MathF.Abs(screenY + (-view.Z * tmpY / view.X)) - 20

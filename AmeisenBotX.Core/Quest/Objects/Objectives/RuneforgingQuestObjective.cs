@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             WowInterface = wowInterface;
             Condition = condition;
 
-            EnchantEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            EnchantEvent = new(TimeSpan.FromSeconds(1));
         }
 
         public bool Finished => Progress == 100.0;

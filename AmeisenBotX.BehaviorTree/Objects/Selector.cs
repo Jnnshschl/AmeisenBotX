@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
@@ -9,13 +8,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
         public Selector(Func<bool> condition, Node nodeA, Node nodeB) : base("")
         {
             Condition = condition;
-            Children = new List<Node>() { nodeA, nodeB };
+            Children = new() { nodeA, nodeB };
         }
 
         public Selector(string name, Func<bool> condition, Node nodeA, Node nodeB) : base(name)
         {
             Condition = condition;
-            Children = new List<Node>() { nodeA, nodeB };
+            Children = new() { nodeA, nodeB };
         }
 
         public Func<bool> Condition { get; set; }
@@ -43,13 +42,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
         public Selector(Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base("")
         {
             Condition = condition;
-            Children = new List<Node<T>>() { nodeA, nodeB };
+            Children = new() { nodeA, nodeB };
         }
 
         public Selector(string name, Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base(name)
         {
             Condition = condition;
-            Children = new List<Node<T>>() { nodeA, nodeB };
+            Children = new() { nodeA, nodeB };
         }
 
         public Func<T, bool> Condition { get; set; }

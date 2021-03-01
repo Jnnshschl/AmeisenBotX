@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         public StateFollowing(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            OffsetCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(20000));
-            CastMountEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
+            LosCheckEvent = new(TimeSpan.FromMilliseconds(1000));
+            OffsetCheckEvent = new(TimeSpan.FromMilliseconds(20000));
+            CastMountEvent = new(TimeSpan.FromMilliseconds(3000));
         }
 
         public bool InLos { get; private set; }
@@ -39,8 +39,9 @@ namespace AmeisenBotX.Core.Fsm.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            List<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
-            if (wowPlayers.Count > 0)
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+
+            if (wowPlayers.Any())
             {
                 if (Config.FollowSpecificCharacter)
                 {
@@ -85,9 +86,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 // Vector3 rndPos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance * 0.2f);
                 // Offset = PlayerToFollow.Position - rndPos;
 
-                Random rnd = new Random();
-
-                Offset = new Vector3
+                Random rnd = new();
+                Offset = new()
                 {
                     X = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
                     Y = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,

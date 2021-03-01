@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Character.Comparators
         {
             // This introduces a cyclic dependency. Are we fine with that?
             CharacterManager = characterManager;
-            GearscoreFactory = new GearscoreFactory(statPriorities);
+            GearscoreFactory = new(statPriorities);
         }
 
         protected GearscoreFactory GearscoreFactory { get; set; }

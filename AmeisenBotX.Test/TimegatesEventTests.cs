@@ -12,7 +12,7 @@ namespace AmeisenBotX.Test
         public void TimegateGenericTest()
         {
             int counter = 0;
-            TimegatedEvent<bool> eventA = new TimegatedEvent<bool>(TimeSpan.FromMilliseconds(1), () => { return true; });
+            TimegatedEvent<bool> eventA = new(TimeSpan.FromMilliseconds(1), () => { return true; });
 
             for (int i = 0; i < 6; ++i)
             {
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Test
         public void TimegateTest()
         {
             int counter = 0;
-            TimegatedEvent eventA = new TimegatedEvent(TimeSpan.FromMilliseconds(1), () => { ++counter; });
+            TimegatedEvent eventA = new(TimeSpan.FromMilliseconds(1), () => { ++counter; });
 
             for (int i = 0; i < 6; ++i)
             {

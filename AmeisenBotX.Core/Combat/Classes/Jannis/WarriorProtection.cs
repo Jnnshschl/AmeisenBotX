@@ -7,9 +7,7 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -21,13 +19,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(demoralizingShoutSpell, () => TryCastSpell(demoralizingShoutSpell, WowInterface.ObjectManager.TargetGuid, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => (TryCastSpellWarrior(shieldBashSpell, defensiveStanceSpell, x.Guid, true)) },
                 { 1, (x) => TryCastSpell(concussionBlowSpell, x.Guid, true) }
             };
 
-            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            HeroicStrikeEvent = new(TimeSpan.FromSeconds(2));
         }
 
         public override string Description => "Leveling ready CombatClass for the Protection Warrior spec. For Dungeons and Questing";
@@ -38,15 +36,15 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new List<WowArmorType>()
+        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new()
         {
-             WowArmorType.IDOLS,
-             WowArmorType.LIBRAMS,
-             WowArmorType.SIGILS,
-             WowArmorType.TOTEMS,
-             WowArmorType.CLOTH,
-             WowArmorType.LEATHER
-        }, new List<WowWeaponType>()
+            WowArmorType.IDOLS,
+            WowArmorType.LIBRAMS,
+            WowArmorType.SIGILS,
+            WowArmorType.TOTEMS,
+            WowArmorType.CLOTH,
+            WowArmorType.LEATHER
+        }, new()
         {
             WowWeaponType.TWOHANDED_SWORDS,
             WowWeaponType.TWOHANDED_MACES,
@@ -61,43 +59,43 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override WowRole Role => WowRole.Tank;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 3) },
-                { 2, new Talent(1, 2, 5) },
-                { 4, new Talent(1, 4, 2) },
-                { 9, new Talent(1, 9, 2) },
-                { 10, new Talent(1, 10, 3) },
+                { 1, new(1, 1, 3) },
+                { 2, new(1, 2, 5) },
+                { 4, new(1, 4, 2) },
+                { 9, new(1, 9, 2) },
+                { 10, new(1, 10, 3) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 1, new Talent(2, 1, 3) },
+                { 1, new(2, 1, 3) },
             },
-            Tree3 = new Dictionary<int, Talent>()
+            Tree3 = new()
             {
-                { 2, new Talent(3, 2, 5) },
-                { 3, new Talent(3, 3, 3) },
-                { 4, new Talent(3, 4, 3) },
-                { 5, new Talent(3, 5, 5) },
-                { 6, new Talent(3, 6, 1) },
-                { 7, new Talent(3, 7, 2) },
-                { 8, new Talent(3, 8, 2) },
-                { 9, new Talent(3, 9, 5) },
-                { 13, new Talent(3, 13, 2) },
-                { 14, new Talent(3, 14, 1) },
-                { 15, new Talent(3, 15, 2) },
-                { 16, new Talent(3, 16, 5) },
-                { 17, new Talent(3, 17, 2) },
-                { 18, new Talent(3, 18, 1) },
-                { 20, new Talent(3, 20, 3) },
-                { 22, new Talent(3, 22, 1) },
-                { 23, new Talent(3, 23, 1) },
-                { 24, new Talent(3, 24, 3) },
-                { 25, new Talent(3, 25, 3) },
-                { 26, new Talent(3, 26, 2) },
-                { 27, new Talent(3, 27, 1) },
+                { 2, new(3, 2, 5) },
+                { 3, new(3, 3, 3) },
+                { 4, new(3, 4, 3) },
+                { 5, new(3, 5, 5) },
+                { 6, new(3, 6, 1) },
+                { 7, new(3, 7, 2) },
+                { 8, new(3, 8, 2) },
+                { 9, new(3, 9, 5) },
+                { 13, new(3, 13, 2) },
+                { 14, new(3, 14, 1) },
+                { 15, new(3, 15, 2) },
+                { 16, new(3, 16, 5) },
+                { 17, new(3, 17, 2) },
+                { 18, new(3, 18, 1) },
+                { 20, new(3, 20, 3) },
+                { 22, new(3, 22, 1) },
+                { 23, new(3, 23, 1) },
+                { 24, new(3, 24, 3) },
+                { 25, new(3, 25, 3) },
+                { 26, new(3, 26, 2) },
+                { 27, new(3, 27, 1) },
             },
         };
 

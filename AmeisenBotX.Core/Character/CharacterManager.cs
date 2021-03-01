@@ -26,14 +26,14 @@ namespace AmeisenBotX.Core.Character
             WowInterface = wowInterface;
             Config = config;
 
-            Inventory = new CharacterInventory(WowInterface);
-            Equipment = new CharacterEquipment(WowInterface);
-            SpellBook = new SpellBook(WowInterface);
-            TalentManager = new TalentManager(WowInterface);
+            Inventory = new(WowInterface);
+            Equipment = new(WowInterface);
+            SpellBook = new(WowInterface);
+            TalentManager = new(WowInterface);
             ItemComparator = new ItemLevelComparator();
-            Skills = new Dictionary<string, (int, int)>();
+            Skills = new();
 
-            ItemSlotsToSkip = new List<WowEquipmentSlot>();
+            ItemSlotsToSkip = new();
         }
 
         public CharacterEquipment Equipment { get; }
@@ -184,7 +184,7 @@ namespace AmeisenBotX.Core.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new IntPtr((int)VirtualKey.VKSPACE), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
@@ -210,11 +210,13 @@ namespace AmeisenBotX.Core.Character
 
         public void UpdateCharacterBags()
         {
-            var container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
+            IEnumerable<IWowItem> container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
+
             if (container.Any())
             {
                 // TODO: Replace worse container
-                var item = container.FirstOrDefault();
+                IWowItem item = container.FirstOrDefault();
+
                 for (int i = 20; i <= 23; ++i)
                 {
                     if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
@@ -316,7 +318,7 @@ namespace AmeisenBotX.Core.Character
         private bool GetItemsByEquiplocation(string equiplocation, out List<IWowItem> matchedItems, out int expectedItemCount)
         {
             expectedItemCount = 1;
-            matchedItems = new List<IWowItem>();
+            matchedItems = new();
 
             switch (equiplocation)
             {

@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Character.Spells
         {
             WowInterface = wowInterface;
 
-            Spells = new List<Spell>();
+            Spells = new();
 
-            JsonSerializerSettings = new JsonSerializerSettings()
+            JsonSerializerSettings = new()
             {
                 Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
             };

@@ -21,10 +21,10 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         {
             WowInterface = wowInterface;
 
-            ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            LosCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            ActionEvent = new(TimeSpan.FromMilliseconds(500));
+            LosCheckEvent = new(TimeSpan.FromMilliseconds(1000));
 
-            JBgBlackboard = new CtfBlackboard(UpdateBattlegroundInfo);
+            JBgBlackboard = new(UpdateBattlegroundInfo);
 
             KillEnemyFlagCarrierSelector = new Selector<CtfBlackboard>
             (
@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                  new Leaf<CtfBlackboard>("MoveToGatePosition", (b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
-            BehaviorTree = new AmeisenBotBehaviorTree<CtfBlackboard>
+            BehaviorTree = new
             (
                 "JBgWarsongGulchBehaviorTree",
                 MainSelector,
@@ -474,14 +474,14 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                         JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.allianceState, CultureInfo.InvariantCulture) == 2;
                         JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.hordeState, CultureInfo.InvariantCulture) == 2;
 
-                        JBgBlackboard.MyTeamFlagPos = new Vector3
+                        JBgBlackboard.MyTeamFlagPos = new
                         (
                             float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
                             float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
                             0f
                         );
 
-                        JBgBlackboard.EnemyTeamFlagPos = new Vector3
+                        JBgBlackboard.EnemyTeamFlagPos = new
                         (
                             float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
                             float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
@@ -504,14 +504,14 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                         JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.hordeState, CultureInfo.InvariantCulture) == 2;
                         JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.allianceState, CultureInfo.InvariantCulture) == 2;
 
-                        JBgBlackboard.MyTeamFlagPos = new Vector3
+                        JBgBlackboard.MyTeamFlagPos = new
                         (
                             float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
                             float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
                             0f
                         );
 
-                        JBgBlackboard.EnemyTeamFlagPos = new Vector3
+                        JBgBlackboard.EnemyTeamFlagPos = new
                         (
                             float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
                             float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
@@ -558,32 +558,32 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private class AllianceWsgDataset : IWsgDataset
         {
-            public Vector3 EnemyBasePosition { get; } = new Vector3(916, 1434, 346);
+            public Vector3 EnemyBasePosition { get; } = new(916, 1434, 346);
 
-            public Vector3 EnemyBasePositionMapCoords { get; } = new Vector3(53, 90, 0);
+            public Vector3 EnemyBasePositionMapCoords { get; } = new(53, 90, 0);
 
-            public Vector3 FlagHidingSpot { get; } = new Vector3(1519, 1467, 374);
+            public Vector3 FlagHidingSpot { get; } = new(1519, 1467, 374);
 
-            public Vector3 GatePosition { get; } = new Vector3(1494, 1457, 343);
+            public Vector3 GatePosition { get; } = new(1494, 1457, 343);
 
-            public Vector3 OwnBasePosition { get; } = new Vector3(1539, 1481, 352);
+            public Vector3 OwnBasePosition { get; } = new(1539, 1481, 352);
 
-            public Vector3 OwnBasePositionMapCoords { get; } = new Vector3(49, 15, 0);
+            public Vector3 OwnBasePositionMapCoords { get; } = new(49, 15, 0);
         }
 
         private class HordeWsgDataset : IWsgDataset
         {
-            public Vector3 EnemyBasePosition { get; } = new Vector3(1539, 1481, 352);
+            public Vector3 EnemyBasePosition { get; } = new(1539, 1481, 352);
 
-            public Vector3 EnemyBasePositionMapCoords { get; } = new Vector3(49, 15, 0);
+            public Vector3 EnemyBasePositionMapCoords { get; } = new(49, 15, 0);
 
-            public Vector3 FlagHidingSpot { get; } = new Vector3(949, 1449, 367);
+            public Vector3 FlagHidingSpot { get; } = new(949, 1449, 367);
 
-            public Vector3 GatePosition { get; } = new Vector3(951, 1459, 342);
+            public Vector3 GatePosition { get; } = new(951, 1459, 342);
 
-            public Vector3 OwnBasePosition { get; } = new Vector3(916, 1434, 346);
+            public Vector3 OwnBasePosition { get; } = new(916, 1434, 346);
 
-            public Vector3 OwnBasePositionMapCoords { get; } = new Vector3(53, 90, 0);
+            public Vector3 OwnBasePositionMapCoords { get; } = new(53, 90, 0);
         }
     }
 }

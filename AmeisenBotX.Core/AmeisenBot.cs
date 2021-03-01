@@ -5,41 +5,32 @@ using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Combat.Classes;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.CombatLog;
 using AmeisenBotX.Core.Data.Db;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon;
-using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Grinding;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group;
 using AmeisenBotX.Core.Hook;
-using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
 using AmeisenBotX.Core.Movement.AMovementEngine;
 using AmeisenBotX.Core.Movement.Pathfinding;
 using AmeisenBotX.Core.Offsets;
-using AmeisenBotX.Core.Personality;
-using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Quest.Profiles;
 using AmeisenBotX.Core.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
-using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
-using AmeisenBotX.RconClient;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
 using Microsoft.CSharp;
@@ -54,6 +45,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Timer = System.Threading.Timer;
 
 namespace AmeisenBotX.Core
@@ -71,7 +63,7 @@ namespace AmeisenBotX.Core
             BotDataPath = botDataPath;
             MainWindowHandle = mainWindowHandle;
 
-            ExecutionMsStopwatch = new Stopwatch();
+            ExecutionMsStopwatch = new();
 
             if (!Directory.Exists(BotDataPath))
             {
@@ -84,14 +76,14 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
             AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
 
-            WowInterface = new WowInterface();
+            WowInterface = new();
             SetupWowInterfacePreStateMachine();
-            StateMachine = new AmeisenBotFsm(BotDataPath, Config, WowInterface);
+            StateMachine = new(BotDataPath, Config, WowInterface);
             SetupWowInterfacePostStateMachine();
 
             StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
 
-            RconScreenshotEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
+            RconScreenshotEvent = new(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
 
             AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
 
@@ -182,7 +174,7 @@ namespace AmeisenBotX.Core
 
         public void ReloadConfig()
         {
-            StateMachineTimer = new Timer(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
+            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
             LoadProfiles();
         }
 
@@ -200,7 +192,7 @@ namespace AmeisenBotX.Core
             if (Config.RconEnabled)
             {
                 AmeisenLogger.I.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
-                RconClientTimer = new Timer(RconClientTimerTick, null, 0, (int)Config.RconTickMs);
+                RconClientTimer = new(RconClientTimerTick, null, 0, (int)Config.RconTickMs);
             }
 
             SubscribeToWowEvents();
@@ -210,7 +202,7 @@ namespace AmeisenBotX.Core
                 LoadWindowPosition(Config.BotWindowRect, MainWindowHandle);
             }
 
-            StateMachineTimer = new Timer(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
+            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
             stateMachineTimerBusy = 0;
             IsRunning = true;
 
@@ -241,9 +233,26 @@ namespace AmeisenBotX.Core
 
             WowInterface.EventHookManager.Stop();
 
-            if (Config.AutocloseWow)
+            if (Config.AutocloseWow || Config.AutoPositionWow)
             {
                 WowInterface.HookManager.LuaDoString("ForceQuit()");
+
+                // wait 5 sec for wow to exit, otherwise we kill it
+                TimeSpan timeToWait = TimeSpan.FromSeconds(5);
+                DateTime exited = DateTime.UtcNow;
+
+                while (!WowInterface.WowProcess.HasExited)
+                {
+                    if (DateTime.UtcNow - exited > timeToWait)
+                    {
+                        WowInterface.WowProcess.Kill();
+                        break;
+                    }
+                    else
+                    {
+                        Task.Delay(50).Wait();
+                    }
+                }
             }
 
             WowInterface.HookManager.DisposeHook();
@@ -291,7 +300,7 @@ namespace AmeisenBotX.Core
 
         private ICombatClass CompileCustomCombatClass()
         {
-            CompilerParameters parameters = new CompilerParameters
+            CompilerParameters parameters = new()
             {
                 GenerateInMemory = true,
                 GenerateExecutable = false
@@ -302,12 +311,12 @@ namespace AmeisenBotX.Core
                 parameters.ReferencedAssemblies.Add(Config.CustomCombatClassDependencies[i]);
             }
 
-            using CSharpCodeProvider codeProvider = new CSharpCodeProvider();
+            using CSharpCodeProvider codeProvider = new();
             CompilerResults results = codeProvider.CompileAssemblyFromSource(parameters, File.ReadAllText(Config.CustomCombatClassFile));
 
             if (results.Errors.HasErrors)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 CompilerErrorCollection list = results.Errors;
 
                 for (int i = 0; i < list.Count; ++i)
@@ -316,7 +325,7 @@ namespace AmeisenBotX.Core
                     sb.AppendLine($"Error {error.ErrorNumber} Line: {error.Line}: {error.ErrorText}");
                 }
 
-                throw new InvalidOperationException(sb.ToString());
+                throw new(sb.ToString());
             }
 
             return (ICombatClass)results.CompiledAssembly.CreateInstance(typeof(ICombatClass).ToString());
@@ -324,9 +333,8 @@ namespace AmeisenBotX.Core
 
         private void InitBattlegroundEngines()
         {
-            // Add your custom battleground engines here!
-            // ------------------------------------------ >
-            BattlegroundEngines = new List<IBattlegroundEngine>
+            // add battleground engines here
+            BattlegroundEngines = new()
             {
                 new UniversalBattlegroundEngine(WowInterface),
                 new ArathiBasin(WowInterface),
@@ -338,9 +346,8 @@ namespace AmeisenBotX.Core
 
         private void InitCombatClasses()
         {
-            // Add your custom combat classes here!
-            // ------------------------------------ >
-            CombatClasses = new List<ICombatClass>
+            // add combat classes here
+            CombatClasses = new()
             {
                 new Combat.Classes.Jannis.DeathknightBlood(WowInterface, StateMachine),
                 new Combat.Classes.Jannis.DeathknightFrost(WowInterface, StateMachine),
@@ -371,9 +378,9 @@ namespace AmeisenBotX.Core
                 new Combat.Classes.Jannis.WarriorFury(WowInterface, StateMachine),
                 new Combat.Classes.Jannis.WarriorProtection(WowInterface, StateMachine),
                 new Combat.Classes.Kamel.DeathknightBlood(WowInterface),
-                new Combat.Classes.Kamel.RestorationShaman (WowInterface),
-                new Combat.Classes.Kamel.PaladinProtection (WowInterface),
-                new Combat.Classes.Kamel.PriestHoly (WowInterface),
+                new Combat.Classes.Kamel.RestorationShaman(WowInterface),
+                new Combat.Classes.Kamel.PaladinProtection(WowInterface),
+                new Combat.Classes.Kamel.PriestHoly(WowInterface),
                 new Combat.Classes.Kamel.WarriorFury(WowInterface),
                 new Combat.Classes.Kamel.WarriorArms(WowInterface),
                 new Combat.Classes.einTyp.PaladinProtection(WowInterface),
@@ -388,9 +395,8 @@ namespace AmeisenBotX.Core
 
         private void InitGrindingProfiles()
         {
-            // Add your custom grinding profiles here!
-            // --------------------------------------- >
-            GrindingProfiles = new List<IGrindingProfile>
+            // add grinding profiles here
+            GrindingProfiles = new()
             {
                 new UltimateGrinding1To80(),
             };
@@ -398,9 +404,8 @@ namespace AmeisenBotX.Core
 
         private void InitJobProfiles()
         {
-            // Add your custom job profiles here!
-            // ---------------------------------- >
-            JobProfiles = new List<IJobProfile>
+            // add job profiles here
+            JobProfiles = new()
             {
                 new CopperElwynnForestProfile(),
                 new CopperTinSilverWestfallProfile(),
@@ -410,9 +415,8 @@ namespace AmeisenBotX.Core
 
         private void InitQuestProfiles()
         {
-            // Add your custom quest profiles here!
-            // ------------------------------------ >
-            QuestProfiles = new List<IQuestProfile>
+            // add quest profiles here
+            QuestProfiles = new()
             {
                 new DeathknightStartAreaQuestProfile(WowInterface),
                 new X5Horde1To80Profile(WowInterface),
@@ -423,6 +427,7 @@ namespace AmeisenBotX.Core
         private void LoadCustomCombatClass()
         {
             AmeisenLogger.I.Log("AmeisenBot", $"Loading custom CombatClass: {Config.CustomCombatClassFile}", LogLevel.Verbose);
+
             if (Config.CustomCombatClassFile.Length == 0
                 || !File.Exists(Config.CustomCombatClassFile))
             {
@@ -483,17 +488,7 @@ namespace AmeisenBotX.Core
             if (!NeedToSetupRconClient && WowInterface.ObjectManager.Player != null)
             {
                 NeedToSetupRconClient = true;
-                WowInterface.RconClient = new AmeisenBotRconClient
-                (
-                    Config.RconServerAddress,
-                    WowInterface.ObjectManager.Player.Name,
-                    WowInterface.ObjectManager.Player.Race.ToString(),
-                    WowInterface.ObjectManager.Player.Gender.ToString(),
-                    WowInterface.ObjectManager.Player.Class.ToString(),
-                    WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps",
-                    Config.RconServerImage,
-                    Config.RconServerGuid
-                );
+                WowInterface.RconClient = new(Config.RconServerAddress, WowInterface.ObjectManager.Player.Name, WowInterface.ObjectManager.Player.Race.ToString(), WowInterface.ObjectManager.Player.Gender.ToString(), WowInterface.ObjectManager.Player.Class.ToString(), WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps", Config.RconServerImage, Config.RconServerGuid);
             }
         }
 
@@ -734,14 +729,14 @@ namespace AmeisenBotX.Core
 
                             if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
                             {
-                                Rect rc = new Rect();
+                                Rect rc = new();
                                 Win32Imports.GetWindowRect(WowInterface.XMemory.Process.MainWindowHandle, ref rc);
-                                Bitmap bmp = new Bitmap(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
+                                Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
 
                                 using (Graphics g = Graphics.FromImage(bmp))
-                                    g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new Size(rc.Right - rc.Left, rc.Bottom - rc.Top));
+                                    g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new(rc.Right - rc.Left, rc.Bottom - rc.Top));
 
-                                using MemoryStream ms = new MemoryStream();
+                                using MemoryStream ms = new();
                                 bmp.Save(ms, ImageFormat.Png);
 
                                 WowInterface.RconClient.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}");
@@ -808,32 +803,32 @@ namespace AmeisenBotX.Core
 
         private void SetupWowInterfacePostStateMachine()
         {
-            WowInterface.QuestEngine = new QuestEngine(WowInterface, Config, StateMachine);
-            WowInterface.GrindingEngine = new GrindingEngine(WowInterface, Config, StateMachine);
+            WowInterface.QuestEngine = new(WowInterface, Config, StateMachine);
+            WowInterface.GrindingEngine = new(WowInterface, Config, StateMachine);
         }
 
         private void SetupWowInterfacePreStateMachine()
         {
-            WowInterface.Globals = new AmeisenBotGlobals();
+            WowInterface.Globals = new();
 
             WowInterface.OffsetList = new OffsetList335a();
-            WowInterface.XMemory = new XMemory();
+            WowInterface.XMemory = new();
 
             WowInterface.Db = LocalAmeisenBotDb.FromJson(WowInterface, Path.Combine(BotDataPath, AccountName, "db.json"));
-            WowInterface.Personality = new BotPersonality();
+            WowInterface.Personality = new();
 
-            WowInterface.ChatManager = new ChatManager(Config, Path.Combine(BotDataPath, AccountName));
-            WowInterface.CombatLogParser = new CombatLogParser(WowInterface);
+            WowInterface.ChatManager = new(Config, Path.Combine(BotDataPath, AccountName));
+            WowInterface.CombatLogParser = new(WowInterface);
 
             WowInterface.HookManager = new HookManager(WowInterface, Config);
             WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
             WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
-            WowInterface.EventHookManager = new EventHook(WowInterface);
+            WowInterface.EventHookManager = new(WowInterface);
 
-            WowInterface.JobEngine = new JobEngine(WowInterface, Config);
+            WowInterface.JobEngine = new(WowInterface, Config);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface);
 
-            WowInterface.TacticEngine = new TacticEngine();
+            WowInterface.TacticEngine = new();
 
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
@@ -864,8 +859,8 @@ namespace AmeisenBotX.Core
 
         private void SubscribeToWowEvents()
         {
-            BagUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            EquipmentUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            BagUpdateEvent = new(TimeSpan.FromSeconds(1));
+            EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
 
             // Request Events
             // -------------- >

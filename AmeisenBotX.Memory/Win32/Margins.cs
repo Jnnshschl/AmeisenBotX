@@ -1,10 +1,9 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Margins : IEquatable<Margins>
+    public struct Margins
     {
         public int Left { get; set; }
 
@@ -40,11 +39,6 @@ namespace AmeisenBotX.Memory.Win32
         public static bool operator !=(Margins left, Margins right)
         {
             return !(left == right);
-        }
-
-        public bool Equals(Margins other)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

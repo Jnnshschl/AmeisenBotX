@@ -18,9 +18,9 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Blackboard = new GhostBlackboard(wowInterface);
+            Blackboard = new(wowInterface);
 
-            DungeonSelector = new Selector<GhostBlackboard>
+            DungeonSelector = new
             (
                 (b) => Config.DungeonUsePartyMode,
                 new Selector<GhostBlackboard>
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 )
             );
 
-            BehaviorTree = new AmeisenBotBehaviorTree<GhostBlackboard>
+            BehaviorTree = new
             (
                 new Selector<GhostBlackboard>
                 (
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            Blackboard = new GhostBlackboard(WowInterface);
+            Blackboard = new(WowInterface);
         }
 
         public override void Execute()
@@ -116,10 +116,10 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private bool IsUnitToFollowNear(out ulong guid)
         {
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
             guid = 0;
-            List<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().ToList();
 
-            if (wowPlayers.Count > 0)
+            if (wowPlayers.Any())
             {
                 if (Config.FollowSpecificCharacter)
                 {
@@ -205,7 +205,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void RunToNearestPortal(GhostBlackboard blackboard)
         {
-            if (blackboard.NearPortals?.Count > 0)
+            if (blackboard.NearPortals.Any())
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position, 4f));
             }
@@ -222,7 +222,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             public Vector3 CorpsePosition { get; private set; }
 
-            public List<WowGameobject> NearPortals { get; private set; }
+            public IEnumerable<WowGameobject> NearPortals { get; private set; }
 
             public WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
 
@@ -233,8 +233,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 NearPortals = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
                     .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
-                             || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
-                    .ToList();
+                             || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
 
                 if (WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))
                 {

@@ -419,28 +419,27 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             WowInterface = wowInterface;
             StateMachine = stateMachine;
 
-            Configureables = new Dictionary<string, dynamic>()
+            Configureables = new()
             {
                 { "HealingItemHealthThreshold", 30.0 },
                 { "HealingItemManaThreshold", 30.0 }
             };
 
-            CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
-            RessurrectionTargets = new Dictionary<string, DateTime>();
+            CooldownManager = new(WowInterface.CharacterManager.SpellBook.Spells);
+            RessurrectionTargets = new();
 
-            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerDps = new(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerTank = new(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerHeal = new(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
 
-            MyAuraManager = new AuraManager(WowInterface);
-            TargetAuraManager = new AuraManager(WowInterface);
+            MyAuraManager = new(WowInterface);
+            TargetAuraManager = new(WowInterface);
+            GroupAuraManager = new(WowInterface);
 
-            GroupAuraManager = new GroupAuraManager(WowInterface);
+            InterruptManager = new();
 
-            InterruptManager = new InterruptManager();
-
-            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            EventCheckFacing = new(TimeSpan.FromMilliseconds(500));
+            EventAutoAttack = new(TimeSpan.FromMilliseconds(500));
         }
 
         public string Author { get; } = "Jannis";
@@ -460,6 +459,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         public TimegatedEvent EventCheckFacing { get; set; }
 
         public GroupAuraManager GroupAuraManager { get; private set; }
+
+        public bool HandlesFacing => true;
 
         public abstract bool HandlesMovement { get; }
 
@@ -497,8 +498,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public abstract WowClass WowClass { get; }
 
-        public bool HandlesFacing => true;
-
         protected WowInterface WowInterface { get; }
 
         private AmeisenBotFsm StateMachine { get; }
@@ -506,6 +505,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         public virtual void AttackTarget()
         {
             WowUnit target = WowInterface.ObjectManager.Target;
+
             if (target == null)
             {
                 return;

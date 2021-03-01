@@ -428,8 +428,8 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             TargetInterruptManager = new InterruptManager();
 
-            EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            EventCheckFacing = new(TimeSpan.FromMilliseconds(500));
+            EventAutoAttack = new(TimeSpan.FromMilliseconds(500));
         }
 
         public string Author { get; } = "ToadLump";
@@ -450,9 +450,9 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         public GroupAuraManager GroupAuraManager { get; private set; }
 
-        public abstract bool HandlesMovement { get; }
-
         public bool HandlesFacing => false;
+
+        public abstract bool HandlesMovement { get; }
 
         public abstract bool IsMelee { get; }
 

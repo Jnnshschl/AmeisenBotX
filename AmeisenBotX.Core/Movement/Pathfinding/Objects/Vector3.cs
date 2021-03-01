@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector3 : IEquatable<Vector3>
     {
-        public static Vector3 Zero { get; } = new Vector3(0, 0, 0);
+        public static Vector3 Zero { get; } = new(0, 0, 0);
 
         public Vector3(float a)
         {
@@ -42,19 +42,19 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 FromArray(float[] array)
         {
-            return new Vector3(array[0], array[1], array[2]);
+            return new(array[0], array[1], array[2]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator -(Vector3 a, Vector3 b)
         {
-            return new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+            return new(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator -(Vector3 a, float b)
         {
-            return new Vector3(a.X - b, a.Y - b, a.Z - b);
+            return new(a.X - b, a.Y - b, a.Z - b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -68,37 +68,37 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator *(Vector3 a, float b)
         {
-            return new Vector3(a.X * b, a.Y * b, a.Z * b);
+            return new(a.X * b, a.Y * b, a.Z * b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator *(Vector3 a, Vector3 b)
         {
-            return new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+            return new(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator /(Vector3 a, Vector3 b)
         {
-            return new Vector3(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
+            return new(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator /(Vector3 a, float b)
         {
-            return new Vector3(a.X / b, a.Y / b, a.Z / b);
+            return new(a.X / b, a.Y / b, a.Z / b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator +(Vector3 a, float b)
         {
-            return new Vector3(a.X + b, a.Y + b, a.Z + b);
+            return new(a.X + b, a.Y + b, a.Z + b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator +(Vector3 a, Vector3 b)
         {
-            return new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+            return new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

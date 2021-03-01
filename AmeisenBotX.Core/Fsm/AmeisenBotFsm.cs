@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Fsm
 
             LastState = BotState.None;
 
-            States = new Dictionary<BotState, BasicState>()
+            States = new()
             {
                 { BotState.None, new StateNone(this, config, WowInterface) },
                 { BotState.Attacking, new StateAttacking(this, config, WowInterface) },
@@ -49,8 +49,8 @@ namespace AmeisenBotX.Core.Fsm
                 { BotState.StartWow, new StateStartWow(this, config, WowInterface) }
             };
 
-            AntiAfkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
-            RenderSwitchEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            AntiAfkEvent = new(TimeSpan.FromMilliseconds(Config.AntiAfkMs), WowInterface.CharacterManager.AntiAfk);
+            RenderSwitchEvent = new(TimeSpan.FromSeconds(1));
 
             CurrentState = States.First();
             CurrentState.Value.Enter();

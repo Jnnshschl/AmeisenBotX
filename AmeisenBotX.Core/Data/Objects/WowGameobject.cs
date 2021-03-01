@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Data.Objects
                 Bytes0 = objPtr.GameobjectBytes0;
                 DisplayId = objPtr.DisplayId;
                 Faction = objPtr.Faction;
-                Flags = new BitVector32(objPtr.Flags);
+                Flags = new(objPtr.Flags);
                 Level = objPtr.Level;
                 Position = position;
             }

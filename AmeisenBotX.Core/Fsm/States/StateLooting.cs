@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public StateLooting(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            UnitLootQueue = new Queue<ulong>();
-            UnitsAlreadyLootedList = new List<ulong>();
-            LastOpenLootTry = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            UnitLootQueue = new();
+            UnitsAlreadyLootedList = new();
+            LastOpenLootTry = new(TimeSpan.FromSeconds(1));
         }
 
         public List<ulong> UnitsAlreadyLootedList { get; private set; }
@@ -86,23 +86,18 @@ namespace AmeisenBotX.Core.Fsm.States
 
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedUnit.Position);
 
-                    if (LastOpenLootTry.Run())
+                    if (LastOpenLootTry.Run()
+                        && WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
                     {
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
-                        {
-                            WowInterface.HookManager.WowStopClickToMove();
-                            Loot(selectedUnit);
-                            ++LootTryCount;
-                        }
+                        WowInterface.HookManager.WowStopClickToMove();
+                        Loot(selectedUnit);
+                        ++LootTryCount;
                     }
                 }
-                else
+                else if (UnitLootQueue.Count > 0)
                 {
-                    if (UnitLootQueue.Count > 0)
-                    {
-                        LootTryCount = 0;
-                        UnitLootQueue.Dequeue();
-                    }
+                    LootTryCount = 0;
+                    UnitLootQueue.Dequeue();
                 }
             }
         }

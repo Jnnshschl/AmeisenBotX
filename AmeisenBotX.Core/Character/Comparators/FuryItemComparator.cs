@@ -45,6 +45,7 @@ namespace AmeisenBotX.Core.Character.Comparators
         private double GetRating(IWowItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
+
             if (item.Stats.TryGetValue("ITEM_MOD_CRIT_MELEE_RATING_SHORT", out string meleeCritString)
                 && double.TryParse(meleeCritString, NumberStyles.Any, CultureInfo.InvariantCulture, out double meleeCrit))
             {

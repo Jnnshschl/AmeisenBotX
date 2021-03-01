@@ -9,13 +9,13 @@ namespace AmeisenBotX.Core.Character.Inventory
 {
     public class CharacterInventory
     {
-        private readonly object queryLock = new object();
+        private readonly object queryLock = new();
         private List<IWowItem> items;
 
         public CharacterInventory(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Items = new List<IWowItem>();
+            Items = new();
         }
 
         public int FreeBagSlots { get; private set; }
@@ -41,8 +41,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         private WowInterface WowInterface { get; }
 
-        public void DestroyItemByName(string name,
-            StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        public void DestroyItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
         {
             if (!HasItemByName(name, stringComparison))
             {

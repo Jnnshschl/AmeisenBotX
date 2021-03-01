@@ -7,9 +7,9 @@ namespace AmeisenBotX.Core.Character.Talents.Objects
     {
         public TalentTree(string talentString)
         {
-            Tree1 = new Dictionary<int, Talent>();
-            Tree2 = new Dictionary<int, Talent>();
-            Tree3 = new Dictionary<int, Talent>();
+            Tree1 = new();
+            Tree2 = new();
+            Tree3 = new();
 
             string[] talentSplits = talentString.Split('|');
 
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Character.Talents.Objects
 
                 if (items.Length < 5) { continue; }
 
-                Talent t = new Talent(items[0], int.Parse(items[1]), int.Parse(items[2]), int.Parse(items[3]), int.Parse(items[4]));
+                Talent t = new(items[0], int.Parse(items[1]), int.Parse(items[2]), int.Parse(items[3]), int.Parse(items[4]));
 
                 if (items[1].Equals("1", StringComparison.OrdinalIgnoreCase))
                 {
@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Character.Talents.Objects
 
         public Dictionary<int, Dictionary<int, Talent>> AsDict()
         {
-            return new Dictionary<int, Dictionary<int, Talent>>()
+            return new()
             {
                 { 1, Tree1 },
                 { 2, Tree2 },

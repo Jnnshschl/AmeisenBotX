@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         public StateLogin(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            LoginAttemptEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
         private TimegatedEvent LoginAttemptEvent { get; set; }

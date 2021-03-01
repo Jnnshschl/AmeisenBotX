@@ -17,7 +17,6 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
-using Rectangle = System.Drawing.Rectangle;
 using Timer = System.Timers.Timer;
 
 namespace AmeisenBotX
@@ -30,7 +29,7 @@ namespace AmeisenBotX
         {
             AmeisenBot = ameisenBot;
 
-            MapTimer = new Timer(250);
+            MapTimer = new(250);
             MapTimer.Elapsed += MapTimer_Elapsed;
 
             MeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"));
@@ -132,14 +131,14 @@ namespace AmeisenBotX
         private static void RenderBlacklistNode(int x, int y, Brush blacklistNodeBrush, Pen blacklistNodePen, Graphics graphics, int size, int radius)
         {
             int offsetStart = (int)(size / 2.0);
-            graphics.FillRectangle(blacklistNodeBrush, new Rectangle(x - offsetStart, y - offsetStart, size, size));
-            graphics.DrawEllipse(blacklistNodePen, new Rectangle(x - radius, y - radius, radius * 2, radius * 2));
+            graphics.FillRectangle(blacklistNodeBrush, new(x - offsetStart, y - offsetStart, size, size));
+            graphics.DrawEllipse(blacklistNodePen, new(x - radius, y - radius, radius * 2, radius * 2));
         }
 
         private static void RenderGameobject(int width, int height, string name, Brush dotBrush, Brush textBrush, Font textFont, Graphics graphics, int size = 3)
         {
             int offsetStart = (int)(size / 2.0);
-            graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
+            graphics.FillRectangle(dotBrush, new(width - offsetStart, height - offsetStart, size, size));
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -151,15 +150,15 @@ namespace AmeisenBotX
         private static void RenderNode(int x1, int y1, int x2, int y2, Brush dotBrush, Pen linePen, Graphics graphics, int size)
         {
             int offsetStart = (int)(size / 2.0);
-            graphics.FillRectangle(dotBrush, new Rectangle(x1 - offsetStart, y1 - offsetStart, size, size));
-            graphics.FillRectangle(dotBrush, new Rectangle(x2 - offsetStart, y2 - offsetStart, size, size));
+            graphics.FillRectangle(dotBrush, new(x1 - offsetStart, y1 - offsetStart, size, size));
+            graphics.FillRectangle(dotBrush, new(x2 - offsetStart, y2 - offsetStart, size, size));
             graphics.DrawLine(linePen, x1, y1, x2, y2);
         }
 
         private static void RenderUnit(int width, int height, string name, string subtext, Brush dotBrush, Brush textBrush, Font textFont, Font subtextFont, Brush subTextBrush, Graphics graphics, int size = 3)
         {
             int offsetStart = (int)(size / 2.0);
-            graphics.FillRectangle(dotBrush, new Rectangle(width - offsetStart, height - offsetStart, size, size));
+            graphics.FillRectangle(dotBrush, new(width - offsetStart, height - offsetStart, size, size));
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -528,7 +527,7 @@ namespace AmeisenBotX
             int width = (int)mapCanvasBackground.ActualWidth;
             int height = (int)mapCanvasBackground.ActualHeight;
 
-            Bitmap = new Bitmap(width, height);
+            Bitmap = new(width, height);
             Graphics = Graphics.FromImage(Bitmap);
         }
 

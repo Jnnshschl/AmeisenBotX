@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             ObjectDisplayIds = new List<int>() { objectDisplayId };
             Condition = condition;
 
-            UseEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            UseEvent = new(TimeSpan.FromSeconds(1));
         }
 
         public UseObjectQuestObjective(WowInterface wowInterface, List<int> objectDisplayIds, UseObjectQuestObjectiveCondition condition)
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             ObjectDisplayIds = objectDisplayIds;
             Condition = condition;
 
-            UseEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            UseEvent = new(TimeSpan.FromSeconds(1));
         }
 
         public bool Finished => Progress == 100.0;

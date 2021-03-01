@@ -5,8 +5,6 @@ using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
-using System.Collections.Generic;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -20,7 +18,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             // TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.ObjectManager.TargetGuid, true);
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpell(counterspellSpell, x.Guid, true) }
             };
@@ -36,48 +34,48 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<WowArmorType>() { WowArmorType.SHIELDS }, new List<WowWeaponType>() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
 
         public DateTime LastSpellstealCheck { get; private set; }
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 2) },
-                { 2, new Talent(1, 2, 3) },
-                { 3, new Talent(1, 3, 5) },
-                { 6, new Talent(1, 6, 5) },
-                { 8, new Talent(1, 8, 2) },
-                { 9, new Talent(1, 9, 1) },
-                { 10, new Talent(1, 10, 1) },
-                { 13, new Talent(1, 13, 2) },
-                { 14, new Talent(1, 14, 3) },
-                { 16, new Talent(1, 16, 1) },
-                { 17, new Talent(1, 17, 5) },
-                { 19, new Talent(1, 19, 3) },
-                { 20, new Talent(1, 20, 2) },
-                { 23, new Talent(1, 23, 3) },
-                { 24, new Talent(1, 24, 1) },
-                { 25, new Talent(1, 25, 5) },
-                { 27, new Talent(1, 27, 5) },
-                { 28, new Talent(1, 28, 3) },
-                { 29, new Talent(1, 29, 2) },
-                { 30, new Talent(1, 30, 1) },
+                { 1, new(1, 1, 2) },
+                { 2, new(1, 2, 3) },
+                { 3, new(1, 3, 5) },
+                { 6, new(1, 6, 5) },
+                { 8, new(1, 8, 2) },
+                { 9, new(1, 9, 1) },
+                { 10, new(1, 10, 1) },
+                { 13, new(1, 13, 2) },
+                { 14, new(1, 14, 3) },
+                { 16, new(1, 16, 1) },
+                { 17, new(1, 17, 5) },
+                { 19, new(1, 19, 3) },
+                { 20, new(1, 20, 2) },
+                { 23, new(1, 23, 3) },
+                { 24, new(1, 24, 1) },
+                { 25, new(1, 25, 5) },
+                { 27, new(1, 27, 5) },
+                { 28, new(1, 28, 3) },
+                { 29, new(1, 29, 2) },
+                { 30, new(1, 30, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 2, new Talent(2, 2, 3) },
+                { 2, new(2, 2, 3) },
             },
-            Tree3 = new Dictionary<int, Talent>()
+            Tree3 = new()
             {
-                { 1, new Talent(3, 1, 2) },
-                { 3, new Talent(3, 3, 3) },
-                { 5, new Talent(3, 5, 2) },
-                { 6, new Talent(3, 6, 3) },
-                { 9, new Talent(3, 9, 1) },
+                { 1, new(3, 1, 2) },
+                { 3, new(3, 3, 3) },
+                { 5, new(3, 5, 2) },
+                { 6, new(3, 6, 3) },
+                { 9, new(3, 9, 1) },
             },
         };
 

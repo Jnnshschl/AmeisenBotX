@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             GossipIds = gossipIds;
             Condition = condition;
 
-            TalkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            TalkEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
         public TalkToUnitQuestObjective(WowInterface wowInterface, List<int> displayIds, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             GossipIds = gossipIds;
             Condition = condition;
 
-            TalkEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            TalkEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
         public bool Finished => Progress == 100.0;

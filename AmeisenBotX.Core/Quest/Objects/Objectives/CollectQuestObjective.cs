@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             WantedItemAmount = itemAmount;
             GameObjectIds = gameObjectIds;
             Area = positions.Select(pos => new AreaNode(pos, 10.0)).ToList();
-            RightClickEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1500));
+            RightClickEvent = new(TimeSpan.FromMilliseconds(1500));
         }
 
         public List<AreaNode> Area { get; set; }

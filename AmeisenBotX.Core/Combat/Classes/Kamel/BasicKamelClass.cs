@@ -27,8 +27,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
-        public bool HandlesFacing => false;
-
         private readonly int[] useableHealingItems = new int[]
         {
             // potions
@@ -46,11 +44,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         protected BasicKamelClass()
         {
             //Basic
-            AutoAttackEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            TargetSelectEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            AutoAttackEvent = new(TimeSpan.FromSeconds(1));
+            TargetSelectEvent = new(TimeSpan.FromSeconds(1));
 
             //Mount check
-            getonthemount = new TimegatedEvent(TimeSpan.FromSeconds(4));
+            getonthemount = new(TimeSpan.FromSeconds(4));
 
             //Race (Troll)
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
@@ -81,6 +79,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public abstract string Displayname { get; }
 
         public TimegatedEvent getonthemount { get; private set; }
+
+        public bool HandlesFacing => false;
 
         public abstract bool HandlesMovement { get; }
 

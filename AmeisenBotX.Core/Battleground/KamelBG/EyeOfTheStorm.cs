@@ -15,8 +15,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             WowInterface = wowInterface;
 
-            CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
+            CombatEvent = new(TimeSpan.FromSeconds(2));
         }
 
         public string Author => "Lukas";

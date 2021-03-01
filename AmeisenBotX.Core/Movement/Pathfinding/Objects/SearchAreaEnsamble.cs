@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             CurrentSearchArea = 0;
             foreach (List<Vector3> area in searchAreas)
             {
-                Areas.Add(new SearchArea(area));
+                Areas.Add(new(area));
             }
         }
 
@@ -27,6 +27,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             {
                 LastSearchPosition = GetNextPositionInternal(wowInterface);
             }
+
             AbortedPath = false;
             return LastSearchPosition;
         }
@@ -50,13 +51,16 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
         private Vector3 GetNextPositionInternal(WowInterface wowInterface)
         {
             Vector3 currentPosition = wowInterface.ObjectManager.Player.Position;
+
             if (Areas[CurrentSearchArea].ContainsPosition(currentPosition))
             {
                 Vector3 position = Areas[CurrentSearchArea].GetNextSearchPosition();
+
                 if (Areas[CurrentSearchArea].IsAtTheBeginning())
                 {
                     CurrentSearchArea = (CurrentSearchArea + 1) % Areas.Count;
                 }
+
                 return position;
             }
 

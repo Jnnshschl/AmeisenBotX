@@ -7,9 +7,7 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -23,13 +21,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true)));
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpellDk(mindFreezeSpell, x.Guid, true) },
                 { 1, (x) => TryCastSpellDk(strangulateSpell, x.Guid, false, true) }
             };
 
-            BloodBoilEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            BloodBoilEvent = new(TimeSpan.FromSeconds(2));
         }
 
         public override string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
@@ -40,44 +38,44 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<WowArmorType>() { WowArmorType.SHIELDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.SHIELDS });
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 2, new Talent(1, 2, 3) },
-                { 3, new Talent(1, 3, 5) },
-                { 4, new Talent(1, 4, 5) },
-                { 5, new Talent(1, 5, 2) },
-                { 6, new Talent(1, 6, 2) },
-                { 7, new Talent(1, 7, 1) },
-                { 8, new Talent(1, 8, 5) },
-                { 9, new Talent(1, 9, 3) },
-                { 13, new Talent(1, 13, 3) },
-                { 14, new Talent(1, 14, 3) },
-                { 16, new Talent(1, 16, 3) },
-                { 17, new Talent(1, 17, 2) },
-                { 18, new Talent(1, 18, 3) },
-                { 19, new Talent(1, 19, 1) },
-                { 21, new Talent(1, 21, 2) },
-                { 23, new Talent(1, 23, 1) },
-                { 24, new Talent(1, 24, 3) },
-                { 25, new Talent(1, 25, 1) },
-                { 26, new Talent(1, 26, 3) },
-                { 27, new Talent(1, 27, 5) },
+                { 2, new(1, 2, 3) },
+                { 3, new(1, 3, 5) },
+                { 4, new(1, 4, 5) },
+                { 5, new(1, 5, 2) },
+                { 6, new(1, 6, 2) },
+                { 7, new(1, 7, 1) },
+                { 8, new(1, 8, 5) },
+                { 9, new(1, 9, 3) },
+                { 13, new(1, 13, 3) },
+                { 14, new(1, 14, 3) },
+                { 16, new(1, 16, 3) },
+                { 17, new(1, 17, 2) },
+                { 18, new(1, 18, 3) },
+                { 19, new(1, 19, 1) },
+                { 21, new(1, 21, 2) },
+                { 23, new(1, 23, 1) },
+                { 24, new(1, 24, 3) },
+                { 25, new(1, 25, 1) },
+                { 26, new(1, 26, 3) },
+                { 27, new(1, 27, 5) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 1, new Talent(2, 1, 3) },
-                { 3, new Talent(2, 3, 5) },
+                { 1, new(2, 1, 3) },
+                { 3, new(2, 3, 5) },
             },
-            Tree3 = new Dictionary<int, Talent>()
+            Tree3 = new()
             {
-                { 3, new Talent(3, 3, 5) },
-                { 4, new Talent(3, 4, 2) },
+                { 3, new(3, 3, 5) },
+                { 4, new(3, 4, 2) },
             },
         };
 

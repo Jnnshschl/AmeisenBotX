@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Event
 
             Setup();
 
-            JsonSerializerSettings = new JsonSerializerSettings()
+            JsonSerializerSettings = new()
             {
                 Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
             };
@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Event
         {
             if (IsActive && SubscribeQueue.Count > 0)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
 
                 while (SubscribeQueue.Count > 0)
                 {
@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Event
         {
             if (IsActive && UnsubscribeQueue.Count > 0)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
 
                 while (SubscribeQueue.Count > 0)
                 {
@@ -167,10 +167,10 @@ namespace AmeisenBotX.Core.Event
 
         private void Setup()
         {
-            EventDictionary = new Dictionary<string, List<WowEventAction>>();
-            SubscribeQueue = new Queue<(string, WowEventAction)>();
-            UnsubscribeQueue = new Queue<(string, WowEventAction)>();
-            PendingLuaToExecute = new Queue<string>();
+            EventDictionary = new();
+            SubscribeQueue = new();
+            UnsubscribeQueue = new();
+            PendingLuaToExecute = new();
         }
     }
 }

@@ -45,46 +45,46 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<WowArmorType>() { WowArmorType.SHIELDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS });
 
         public PetManager PetManager { get; private set; }
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>(),
-            Tree2 = new Dictionary<int, Talent>()
+            Tree1 = new(),
+            Tree2 = new()
             {
-                { 2, new Talent(2, 2, 3) },
-                { 3, new Talent(2, 3, 3) },
-                { 4, new Talent(2, 4, 1) },
-                { 7, new Talent(2, 7, 3) },
-                { 9, new Talent(2, 9, 1) },
-                { 10, new Talent(2, 10, 1) },
-                { 11, new Talent(2, 11, 3) },
-                { 12, new Talent(2, 12, 3) },
+                { 2, new(2, 2, 3) },
+                { 3, new(2, 3, 3) },
+                { 4, new(2, 4, 1) },
+                { 7, new(2, 7, 3) },
+                { 9, new(2, 9, 1) },
+                { 10, new(2, 10, 1) },
+                { 11, new(2, 11, 3) },
+                { 12, new(2, 12, 3) },
             },
-            Tree3 = new Dictionary<int, Talent>()
+            Tree3 = new()
             {
-                { 2, new Talent(3, 2, 5) },
-                { 3, new Talent(3, 3, 2) },
-                { 5, new Talent(3, 5, 3) },
-                { 6, new Talent(3, 6, 2) },
-                { 8, new Talent(3, 8, 5) },
-                { 9, new Talent(3, 9, 2) },
-                { 10, new Talent(3, 10, 1) },
-                { 12, new Talent(3, 12, 3) },
-                { 13, new Talent(3, 13, 3) },
-                { 14, new Talent(3, 14, 1) },
-                { 16, new Talent(3, 16, 5) },
-                { 17, new Talent(3, 17, 1) },
-                { 19, new Talent(3, 19, 3) },
-                { 20, new Talent(3, 20, 5) },
-                { 22, new Talent(3, 22, 3) },
-                { 24, new Talent(3, 24, 3) },
-                { 25, new Talent(3, 25, 5) },
-                { 26, new Talent(3, 26, 1) },
+                { 2, new(3, 2, 5) },
+                { 3, new(3, 3, 2) },
+                { 5, new(3, 5, 3) },
+                { 6, new(3, 6, 2) },
+                { 8, new(3, 8, 5) },
+                { 9, new(3, 9, 2) },
+                { 10, new(3, 10, 1) },
+                { 12, new(3, 12, 3) },
+                { 13, new(3, 13, 3) },
+                { 14, new(3, 14, 1) },
+                { 16, new(3, 16, 5) },
+                { 17, new(3, 17, 1) },
+                { 19, new(3, 19, 3) },
+                { 20, new(3, 20, 5) },
+                { 22, new(3, 22, 3) },
+                { 24, new(3, 24, 3) },
+                { 25, new(3, 25, 5) },
+                { 26, new(3, 26, 1) },
             },
         };
 

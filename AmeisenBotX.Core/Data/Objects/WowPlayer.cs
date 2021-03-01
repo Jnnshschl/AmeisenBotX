@@ -171,29 +171,29 @@ namespace AmeisenBotX.Core.Data.Objects
             uint shortGuid = (uint)Guid & 0xfffffff;
             uint offset = 12 * (nameMask & shortGuid);
 
-            wowInterface.XMemory.Read(new IntPtr(nameBase + offset + 8), out uint current);
-            wowInterface.XMemory.Read(new IntPtr(nameBase + offset), out offset);
+            wowInterface.XMemory.Read(new(nameBase + offset + 8), out uint current);
+            wowInterface.XMemory.Read(new(nameBase + offset), out offset);
 
             if ((current & 0x1) == 0x1)
             {
                 return string.Empty;
             }
 
-            wowInterface.XMemory.Read(new IntPtr(current), out uint testGuid);
+            wowInterface.XMemory.Read(new(current), out uint testGuid);
 
             while (testGuid != shortGuid)
             {
-                wowInterface.XMemory.Read(new IntPtr(current + offset + 4), out current);
+                wowInterface.XMemory.Read(new(current + offset + 4), out current);
 
                 if ((current & 0x1) == 0x1)
                 {
                     return string.Empty;
                 }
 
-                wowInterface.XMemory.Read(new IntPtr(current), out testGuid);
+                wowInterface.XMemory.Read(new(current), out testGuid);
             }
 
-            wowInterface.XMemory.ReadString(new IntPtr(current + (int)wowInterface.OffsetList.NameString), Encoding.UTF8, out string name, 16);
+            wowInterface.XMemory.ReadString(new(current + (int)wowInterface.OffsetList.NameString), Encoding.UTF8, out string name, 16);
 
             if (name.Length > 0)
             {

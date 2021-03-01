@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Utils
     {
         public CooldownManager(List<Spell> spells)
         {
-            Cooldowns = new Dictionary<string, DateTime>();
+            Cooldowns = new();
 
             if (spells != null)
             {

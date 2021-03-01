@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Tactic
     {
         public TacticEngine()
         {
-            Tactics = new SortedList<int, ITactic>();
+            Tactics = new();
         }
 
         private SortedList<int, ITactic> Tactics { get; set; }
@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Tactic
 
         public void LoadTactics(params ITactic[] tactics)
         {
-            Tactics = new SortedList<int, ITactic>();
+            Tactics = new();
 
             for (int i = 0; i < tactics.Length; ++i)
             {

@@ -29,11 +29,12 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
         {
             if (path == null)
             {
-                return Double.MaxValue;
+                return double.MaxValue;
             }
 
             double totalDistance = 0.0;
             Vector3 lastPosition = start;
+
             foreach (Vector3 pathPosition in path)
             {
                 totalDistance += pathPosition.GetDistance(lastPosition);

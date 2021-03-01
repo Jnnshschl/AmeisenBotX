@@ -16,14 +16,14 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             WowInterface = wowInterface;
             Config = config;
 
-            FindPathEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            RefreshPathEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
-            DistanceMovedCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            FindPathEvent = new(TimeSpan.FromMilliseconds(500));
+            RefreshPathEvent = new(TimeSpan.FromMilliseconds(500));
+            DistanceMovedCheckEvent = new(TimeSpan.FromMilliseconds(500));
 
-            PathQueue = new Queue<Vector3>();
-            PlacesToAvoidList = new List<(Vector3 position, float radius, DateTime until)>();
+            PathQueue = new();
+            PlacesToAvoidList = new();
 
-            PlayerVehicle = new BasicVehicle(wowInterface);
+            PlayerVehicle = new(wowInterface);
         }
 
         public float CurrentSpeed { get; private set; }
@@ -225,7 +225,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
-            List<(Vector3 position, float radius)> places = new List<(Vector3 position, float radius)>(PlacesToAvoid);
+            List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
             places.AddRange(WowInterface.ObjectManager.GetAoeSpells(position).Select(e => (e.Position, e.Radius)));
 
             if (places.Any())

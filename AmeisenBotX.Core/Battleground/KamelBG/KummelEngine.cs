@@ -11,13 +11,13 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
     {
         private const int OWN_TEAM_FLAG = 2;
         private const int PICKED_UP = 1;
-        private Vector3 ausgangAlly = new Vector3(1055, 1395, 340);
+        private Vector3 ausgangAlly = new(1055, 1395, 340);
 
-        private Vector3 ausgangHord = new Vector3(1051, 1398, 340);
+        private Vector3 ausgangHord = new(1051, 1398, 340);
 
-        private Vector3 baseAlly = new Vector3(1539, 1481, 352);
+        private Vector3 baseAlly = new(1539, 1481, 352);
 
-        private Vector3 baseHord = new Vector3(916, 1434, 346);
+        private Vector3 baseHord = new(916, 1434, 346);
 
         private WowUnit FlagCarrier;
 

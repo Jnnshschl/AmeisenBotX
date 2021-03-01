@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
         {
             WowInterface = wowInterface;
 
-            Configureables = new Dictionary<string, dynamic>()
+            Configureables = new()
             {
                 { "isOffTank", false },
             };

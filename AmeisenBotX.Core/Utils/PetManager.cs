@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Utils
 {
     public class PetManager
     {
-        public PetManager(WowInterface wowInterface, TimeSpan healPetCooldown, CastMendPetFunction castMendPetFunction, CastCallPetFunction castCallPetFunction, CastRevivePetFunction castRevivePetFunction)
+        public PetManager(WowInterface wowInterface, TimeSpan healPetCooldown, Func<bool> castMendPetFunction, Func<bool> castCallPetFunction, Func<bool> castRevivePetFunction)
         {
             WowInterface = wowInterface;
             HealPetCooldown = healPetCooldown;
@@ -13,20 +13,14 @@ namespace AmeisenBotX.Core.Utils
             CastCallPet = castCallPetFunction;
             CastRevivePet = castRevivePetFunction;
 
-            CallPetEvent = new TimegatedEvent(TimeSpan.FromSeconds(8));
+            CallPetEvent = new(TimeSpan.FromSeconds(8));
         }
 
-        public delegate bool CastCallPetFunction();
+        public Func<bool> CastCallPet { get; set; }
 
-        public delegate bool CastMendPetFunction();
+        public Func<bool> CastMendPet { get; set; }
 
-        public delegate bool CastRevivePetFunction();
-
-        public CastCallPetFunction CastCallPet { get; set; }
-
-        public CastMendPetFunction CastMendPet { get; set; }
-
-        public CastRevivePetFunction CastRevivePet { get; set; }
+        public Func<bool> CastRevivePet { get; set; }
 
         public TimeSpan HealPetCooldown { get; set; }
 

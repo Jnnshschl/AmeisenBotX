@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Common
             Z3 = z3;
         }
 
-        public Vector3 FirstCol => new Vector3(X1, Y1, Z1);
+        public Vector3 FirstCol => new(X1, Y1, Z1);
 
         public float X1 { get; set; }
 
@@ -53,9 +53,9 @@ namespace AmeisenBotX.Core.Common
         public Matrix3x3 Inverse()
         {
             float d = 1 / Dot();
-            return new Matrix3x3(d * (Y2 * Z3 - Y3 * Z2), d * (X3 * Z2 - X2 * Z3), d * (X2 * Y3 - X3 * Y2),
-                                 d * (Y3 * Z1 - Y1 * Z3), d * (X1 * Z3 - X3 * Z1), d * (X3 * Y1 - X1 * Y3),
-                                 d * (Y1 * Z2 - Y2 * Z1), d * (X2 * Z1 - X1 * Z2), d * (X1 * Y2 - X2 * Y1));
+            return new(d * (Y2 * Z3 - Y3 * Z2), d * (X3 * Z2 - X2 * Z3), d * (X2 * Y3 - X3 * Y2),
+                       d * (Y3 * Z1 - Y1 * Z3), d * (X1 * Z3 - X3 * Z1), d * (X3 * Y1 - X1 * Y3),
+                       d * (Y1 * Z2 - Y2 * Z1), d * (X2 * Z1 - X1 * Z2), d * (X1 * Y2 - X2 * Y1));
         }
     }
 }

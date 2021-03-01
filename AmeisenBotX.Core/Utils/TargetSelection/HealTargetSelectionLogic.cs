@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 
         public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            List<WowUnit> healableUnits = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            List<WowUnit> healableUnits = new(WowInterface.ObjectManager.Partymembers)
             {
                 WowInterface.ObjectManager.Player
             };

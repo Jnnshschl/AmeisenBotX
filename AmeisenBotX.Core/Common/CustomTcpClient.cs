@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Common
             {
                 if (TcpClient == null)
                 {
-                    TcpClient = new TcpClient() { NoDelay = true };
+                    TcpClient = new() { NoDelay = true };
                     TcpClient.ConnectAsync(Ip, Port).Wait();
 
                     if (TcpClient.Client.Connected)
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Common
                         Stream.ReadTimeout = 1000;
                         Stream.WriteTimeout = 1000;
 
-                        Reader = new BinaryReader(Stream);
+                        Reader = new(Stream);
 
                         ConnectionFailedCounter = 0;
                     }
@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Common
             Ip = ip;
             Port = port;
 
-            ConnectionWatchdog = new Timer(watchdogPollMs);
+            ConnectionWatchdog = new(watchdogPollMs);
             ConnectionWatchdog.Elapsed += ConnectionWatchdogTick;
             ConnectionWatchdog.Start();
         }

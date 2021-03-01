@@ -37,45 +37,45 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new List<WowArmorType>() { WowArmorType.SHIELDS }, new List<WowWeaponType>() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
+        public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
 
         public override WowRole Role => WowRole.Heal;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 2, new Talent(1, 2, 5) },
-                { 4, new Talent(1, 4, 3) },
-                { 5, new Talent(1, 5, 2) },
-                { 7, new Talent(1, 7, 3) },
-                { 8, new Talent(1, 8, 1) },
-                { 9, new Talent(1, 9, 3) },
-                { 11, new Talent(1, 11, 3) },
-                { 14, new Talent(1, 14, 5) },
-                { 15, new Talent(1, 15, 1) },
-                { 16, new Talent(1, 16, 2) },
-                { 17, new Talent(1, 17, 3) },
-                { 18, new Talent(1, 18, 3) },
-                { 19, new Talent(1, 19, 1) },
-                { 20, new Talent(1, 20, 3) },
-                { 21, new Talent(1, 21, 2) },
-                { 22, new Talent(1, 22, 3) },
-                { 23, new Talent(1, 23, 2) },
-                { 24, new Talent(1, 24, 3) },
-                { 25, new Talent(1, 25, 1) },
-                { 26, new Talent(1, 26, 2) },
-                { 27, new Talent(1, 27, 5) },
-                { 28, new Talent(1, 28, 1) },
+                { 2, new(1, 2, 5) },
+                { 4, new(1, 4, 3) },
+                { 5, new(1, 5, 2) },
+                { 7, new(1, 7, 3) },
+                { 8, new(1, 8, 1) },
+                { 9, new(1, 9, 3) },
+                { 11, new(1, 11, 3) },
+                { 14, new(1, 14, 5) },
+                { 15, new(1, 15, 1) },
+                { 16, new(1, 16, 2) },
+                { 17, new(1, 17, 3) },
+                { 18, new(1, 18, 3) },
+                { 19, new(1, 19, 1) },
+                { 20, new(1, 20, 3) },
+                { 21, new(1, 21, 2) },
+                { 22, new(1, 22, 3) },
+                { 23, new(1, 23, 2) },
+                { 24, new(1, 24, 3) },
+                { 25, new(1, 25, 1) },
+                { 26, new(1, 26, 2) },
+                { 27, new(1, 27, 5) },
+                { 28, new(1, 28, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 3, new Talent(2, 3, 5) },
-                { 4, new Talent(2, 4, 5) },
-                { 6, new Talent(2, 6, 1) },
-                { 8, new Talent(2, 8, 3) },
+                { 3, new(2, 3, 5) },
+                { 4, new(2, 4, 5) },
+                { 6, new(2, 6, 1) },
+                { 8, new(2, 8, 3) },
             },
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree3 = new(),
         };
 
         public override bool UseAutoAttacks => false;

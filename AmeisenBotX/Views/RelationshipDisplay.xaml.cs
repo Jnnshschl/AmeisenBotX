@@ -44,7 +44,7 @@ namespace AmeisenBotX.Views
             labelLastSeen.Content = relationship.LastSeen;
 
             double leftMargin = MIN_MARGIN + ((Math.Min(Math.Max(relationship.Score, MIN_REL), MAX_REL) + Math.Abs(MIN_REL)) * relationshipToScale);
-            rectIndicator.Margin = new Thickness(leftMargin, rectIndicator.Margin.Top, rectIndicator.Margin.Right, rectIndicator.Margin.Bottom);
+            rectIndicator.Margin = new(leftMargin, rectIndicator.Margin.Top, rectIndicator.Margin.Right, rectIndicator.Margin.Bottom);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

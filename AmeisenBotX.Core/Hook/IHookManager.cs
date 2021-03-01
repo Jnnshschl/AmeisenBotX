@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaEquipItem(IWowItem newItem, IWowItem currentItem = null);
 
-        List<int> LuaGetCompletedQuests();
+        IEnumerable<int> LuaGetCompletedQuests();
 
         string LuaGetEquipmentItems();
 
@@ -219,7 +219,7 @@ namespace AmeisenBotX.Core.Hook
 
         Dictionary<WowRuneType, int> WowGetRunesReady();
 
-        List<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount);
+        IEnumerable<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount);
 
         WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
 

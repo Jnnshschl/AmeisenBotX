@@ -19,8 +19,8 @@ namespace AmeisenBotX.Core.Quest
             Config = config;
             StateMachine = stateMachine;
 
-            CompletedQuests = new List<int>();
-            QueryCompletedQuestsEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            CompletedQuests = new();
+            QueryCompletedQuestsEvent = new(TimeSpan.FromSeconds(2));
         }
 
         public List<int> CompletedQuests { get; private set; }

@@ -45,8 +45,8 @@ namespace AmeisenBotX
             DarkBackgroundBrush.Freeze();
             TextAccentBrush.Freeze();
 
-            LabelUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            NotificationEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            LabelUpdateEvent = new(TimeSpan.FromSeconds(1));
+            NotificationEvent = new(TimeSpan.FromSeconds(1));
 
             RenderState = true;
         }
@@ -140,7 +140,7 @@ namespace AmeisenBotX
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            ConfigEditorWindow configWindow = new ConfigEditorWindow(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            ConfigEditorWindow configWindow = new(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
             configWindow.ShowDialog();
 
             if (configWindow.SaveConfig)
@@ -153,7 +153,7 @@ namespace AmeisenBotX
 
         private void ButtonDevTools_Click(object sender, RoutedEventArgs e)
         {
-            DevToolsWindow ??= new DevToolsWindow(AmeisenBot);
+            DevToolsWindow ??= new(AmeisenBot);
             DevToolsWindow.Show();
         }
 
@@ -211,13 +211,13 @@ namespace AmeisenBotX
 
         private void ButtonToggleInfoWindow_Click(object sender, RoutedEventArgs e)
         {
-            InfoWindow ??= new InfoWindow(AmeisenBot);
+            InfoWindow ??= new(AmeisenBot);
             InfoWindow.Show();
         }
 
         private void ButtonToggleMapWindow_Click(object sender, RoutedEventArgs e)
         {
-            MapWindow ??= new MapWindow(AmeisenBot);
+            MapWindow ??= new(AmeisenBot);
             MapWindow.Show();
         }
 
@@ -229,7 +229,7 @@ namespace AmeisenBotX
 
         private void ButtonToggleRelationshipWindow_Click(object sender, RoutedEventArgs e)
         {
-            RelationshipWindow ??= new RelationshipWindow(AmeisenBot);
+            RelationshipWindow ??= new(AmeisenBot);
             RelationshipWindow.Show();
         }
 
@@ -263,7 +263,7 @@ namespace AmeisenBotX
                 MessageBox.Show("You need to move the content of your \"\\\\data\\\\\" folder to \"%AppData%\\\\Roaming\\\\AmeisenbotX\\\\profiles\\\\\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
-            LoadConfigWindow loadConfigWindow = new LoadConfigWindow(DataPath);
+            LoadConfigWindow loadConfigWindow = new(DataPath);
             loadConfigWindow.ShowDialog();
 
             if (loadConfigWindow.ConfigToLoad.Length > 0)
@@ -275,7 +275,7 @@ namespace AmeisenBotX
                 }
                 else
                 {
-                    config = new AmeisenBotConfig();
+                    config = new();
                 }
 
                 ConfigPath = loadConfigWindow.ConfigToLoad;
@@ -413,7 +413,7 @@ namespace AmeisenBotX
                 // --------------- >
                 if (DrawOverlay)
                 {
-                    Overlay ??= new AmeisenBotOverlay(AmeisenBot.WowInterface.XMemory);
+                    Overlay ??= new(AmeisenBot.WowInterface.XMemory);
                     OverlayRenderCurrentPath();
 
                     Overlay?.Draw();
@@ -452,6 +452,7 @@ namespace AmeisenBotX
                     System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == currentNodes.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
                     Memory.Win32.Rect windowRect = XMemory.GetClientSize(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+
                     if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, start, out System.Drawing.Point startPoint)
                         && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.ObjectManager.Camera, end, out System.Drawing.Point endPoint))
                     {
@@ -582,7 +583,7 @@ namespace AmeisenBotX
         {
             // Init GUI stuff
             // -------------- >
-            InteropHelper = new WindowInteropHelper(this);
+            InteropHelper = new(this);
 
             PresentationSource presentationSource = PresentationSource.FromVisual(this);
             M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
@@ -610,17 +611,17 @@ namespace AmeisenBotX
 
             // Init the bot
             // ------------ >
-            AmeisenBot = new AmeisenBot(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
+            AmeisenBot = new(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
 
             AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
             AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
             AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += MainWindow_OnWoWStarted;
 
-            StateConfigWindows = new Dictionary<BotState, Window>()
+            StateConfigWindows = new()
             {
-                { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config)},
-                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config)},
-                { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config)},
+                { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
             };
 
             AmeisenBot.Start();

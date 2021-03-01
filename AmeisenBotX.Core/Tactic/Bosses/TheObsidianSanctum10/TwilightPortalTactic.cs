@@ -12,9 +12,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
         public TwilightPortalTactic(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            PortalClickEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            PortalClickEvent = new(TimeSpan.FromSeconds(1));
 
-            Configureables = new Dictionary<string, dynamic>()
+            Configureables = new()
             {
                 { "isOffTank", false },
             };
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         public Dictionary<string, dynamic> Configureables { get; private set; }
 
-        private static List<int> DragonDisplayId { get; } = new List<int> { 27421, 27039 };
+        private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
 
         private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0);
 

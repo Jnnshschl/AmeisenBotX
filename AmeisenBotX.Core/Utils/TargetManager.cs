@@ -11,9 +11,7 @@ namespace AmeisenBotX.Core.Utils
         public TargetManager(BasicTargetSelectionLogic targetSelectionLogic, TimeSpan minTargetSwitchTime)
         {
             TargetSelectionLogic = targetSelectionLogic;
-
-            TargetSwitchEvent = new TimegatedEvent(minTargetSwitchTime);
-
+            TargetSwitchEvent = new(minTargetSwitchTime);
             PriorityTargets = new List<int>();
         }
 
@@ -27,14 +25,15 @@ namespace AmeisenBotX.Core.Utils
 
         public bool GetUnitToTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out IEnumerable<WowUnit> possibleTargetsFromLogic))
+            if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out possibleTargets))
             {
-                possibleTargets = possibleTargetsFromLogic;
                 return true;
             }
-
-            possibleTargets = null;
-            return false;
+            else
+            {
+                possibleTargets = null;
+                return false;
+            }
         }
     }
 }

@@ -14,30 +14,30 @@ namespace AmeisenBotX.RconClient
         {
             Endpoint = endpoint;
 
-            KeepaliveEnpoint = new Uri($"{Endpoint}/api/keepalive");
-            RegisterEnpoint = new Uri($"{Endpoint}/api/register");
-            DataEnpoint = new Uri($"{Endpoint}/api/data");
-            ImageEnpoint = new Uri($"{Endpoint}/api/image");
-            ActionEnpoint = new Uri($"{Endpoint}/api/action");
+            KeepaliveEnpoint = new($"{Endpoint}/api/keepalive");
+            RegisterEnpoint = new($"{Endpoint}/api/register");
+            DataEnpoint = new($"{Endpoint}/api/data");
+            ImageEnpoint = new($"{Endpoint}/api/image");
+            ActionEnpoint = new($"{Endpoint}/api/action");
 
             if (!validateCertificate)
             {
-                HttpClientHandler handler = new HttpClientHandler
+                HttpClientHandler handler = new()
                 {
                     ClientCertificateOptions = ClientCertificateOption.Manual,
                     ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
                 };
 
-                HttpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(1) };
+                HttpClient = new(handler) { Timeout = TimeSpan.FromSeconds(1) };
             }
             else
             {
-                HttpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(1) };
+                HttpClient = new() { Timeout = TimeSpan.FromSeconds(1) };
             }
 
             Guid = guid.Length > 0 ? guid : System.Guid.NewGuid().ToString();
 
-            RegisterMessage = new RegisterMessage()
+            RegisterMessage = new()
             {
                 Guid = Guid,
                 Name = name,
@@ -55,7 +55,7 @@ namespace AmeisenBotX.RconClient
 
         public bool NeedToRegister { get; private set; } = true;
 
-        public List<ActionType> PendingActions { get; private set; } = new List<ActionType>();
+        public List<ActionType> PendingActions { get; private set; } = new();
 
         public RegisterMessage RegisterMessage { get; }
 
@@ -73,7 +73,7 @@ namespace AmeisenBotX.RconClient
 
         public bool KeepAlive()
         {
-            using StringContent content = new StringContent(JsonConvert.SerializeObject(new KeepAliveMessage() { Guid = Guid }), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonConvert.SerializeObject(new KeepAliveMessage() { Guid = Guid }), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(KeepaliveEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
@@ -105,7 +105,7 @@ namespace AmeisenBotX.RconClient
 
         public bool Register()
         {
-            using StringContent content = new StringContent(JsonConvert.SerializeObject(RegisterMessage), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonConvert.SerializeObject(RegisterMessage), Encoding.UTF8, "application/json");
             HttpResponseMessage registerResponse = HttpClient.PostAsync(RegisterEnpoint, content).Result;
 
             NeedToRegister = false;
@@ -129,7 +129,7 @@ namespace AmeisenBotX.RconClient
 
             dataMessage.Guid = Guid;
 
-            using StringContent content = new StringContent(JsonConvert.SerializeObject(dataMessage), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonConvert.SerializeObject(dataMessage), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(DataEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
@@ -145,7 +145,7 @@ namespace AmeisenBotX.RconClient
 
         public bool SendImage(string image)
         {
-            using StringContent content = new StringContent(JsonConvert.SerializeObject(new ImageMessage() { Guid = Guid, Image = image }), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonConvert.SerializeObject(new ImageMessage() { Guid = Guid, Image = image }), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(ImageEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)

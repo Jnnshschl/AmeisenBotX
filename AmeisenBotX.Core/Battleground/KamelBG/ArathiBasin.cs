@@ -17,9 +17,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             WowInterface = wowInterface;
 
-            CaptureFlagEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            FlagsNodelist = new List<Flags>();
+            CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
+            CombatEvent = new(TimeSpan.FromSeconds(2));
+            FlagsNodelist = new();
         }
 
         public string Author => "Lukas";
@@ -30,13 +30,13 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public string Name => "Arathi Basin";
 
-        public List<Vector3> Path { get; } = new List<Vector3>()
+        public List<Vector3> Path { get; } = new()
         {
-            new Vector3(975, 1043, -44),//Blacksmith
-            new Vector3(803, 875, -55),//Farm
-            new Vector3(1144, 844, -110),//GoldMine
-            new Vector3(852, 1151, 11),//LumberMill
-            new Vector3(1166, 1203, -56)//Stable
+            new(975, 1043, -44),    // Blacksmith
+            new(803, 875, -55),     // Farm
+            new(1144, 844, -110),   // GoldMine
+            new(852, 1151, 11),     // LumberMill
+            new(1166, 1203, -56)    // Stable
         };
 
         private TimegatedEvent CaptureFlagEvent { get; }
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private bool faction { get; set; }
 
-        private string factionFlagState { get; set; }
+        private string FactionFlagState { get; set; }
 
         private WowInterface WowInterface { get; }
 
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
                     if (AllBaseList[CurrentNodeCounter].Contains("Uncontrolled")
                         || AllBaseList[CurrentNodeCounter].Contains("In Conflict")
-                        || AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                        || AllBaseList[CurrentNodeCounter].Contains(FactionFlagState))
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
                     }
@@ -136,7 +136,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                             CurrentNodeCounter = 0;
                         }
                     }
-                    else if (factionFlagState != null && AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                    else if (FactionFlagState != null && AllBaseList[CurrentNodeCounter].Contains(FactionFlagState))
                     {
                         ++CurrentNodeCounter;
                         if (CurrentNodeCounter >= Path.Count)
@@ -154,7 +154,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         {
                             if (enemiesNearFlag.Count() >= 2)
                             {
-                                if (friendsNearFlag != null && (friendsNearFlag.Count() >= 1 || friendsNearPlayer.Count() >= 1))
+                                if (friendsNearFlag != null && (friendsNearFlag.Any() || friendsNearPlayer.Any()))
                                 {
                                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
                                     return;
@@ -180,14 +180,14 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             if (WowInterface.ObjectManager.Player.IsHorde())
             {
                 faction = true;
-                factionFlagState = "Alliance Controlled";
+                FactionFlagState = "Alliance Controlled";
                 FlagsNodelist.Add(Flags.HordFlags);
                 FlagsNodelist.Add(Flags.HordFlagsAktivate);
             }
             else
             {
                 faction = false;
-                factionFlagState = "Hord Controlled";
+                FactionFlagState = "Hord Controlled";
                 FlagsNodelist.Add(Flags.AlliFlags);
                 FlagsNodelist.Add(Flags.AlliFlagsAktivate);
             }

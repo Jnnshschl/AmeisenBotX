@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
@@ -10,14 +9,14 @@ namespace AmeisenBotX.BehaviorTree.Objects
         {
             ConditionA = conditionA;
             ConditionB = conditionB;
-            Children = new List<Node>() { nodeNone, nodeA, nodeB, nodeBoth };
+            Children = new() { nodeNone, nodeA, nodeB, nodeBoth };
         }
 
         public DualSelector(string name, Func<bool> conditionA, Func<bool> conditionB, Node nodeNone, Node nodeA, Node nodeB, Node nodeBoth) : base(name)
         {
             ConditionA = conditionA;
             ConditionB = conditionB;
-            Children = new List<Node>() { nodeNone, nodeA, nodeB, nodeBoth };
+            Children = new() { nodeNone, nodeA, nodeB, nodeBoth };
         }
 
         public Func<bool> ConditionA { get; set; }
@@ -56,14 +55,14 @@ namespace AmeisenBotX.BehaviorTree.Objects
         {
             ConditionA = conditionA;
             ConditionB = conditionB;
-            Children = new List<Node<T>>() { nodeNone, nodeA, nodeB, nodeBoth };
+            Children = new() { nodeNone, nodeA, nodeB, nodeBoth };
         }
 
         public DualSelector(string name, Func<T, bool> conditionA, Func<T, bool> conditionB, Node<T> nodeNone, Node<T> nodeA, Node<T> nodeB, Node<T> nodeBoth) : base(name)
         {
             ConditionA = conditionA;
             ConditionB = conditionB;
-            Children = new List<Node<T>>() { nodeNone, nodeA, nodeB, nodeBoth };
+            Children = new() { nodeNone, nodeA, nodeB, nodeBoth };
         }
 
         public Func<T, bool> ConditionA { get; set; }

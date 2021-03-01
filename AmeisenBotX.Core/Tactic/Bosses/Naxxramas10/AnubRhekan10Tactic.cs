@@ -13,9 +13,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
         public AnubRhekan10Tactic(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            TankingPathQueue = new Queue<Vector3>();
+            TankingPathQueue = new();
 
-            Configureables = new Dictionary<string, dynamic>()
+            Configureables = new()
             {
                 { "isOffTank", false },
             };

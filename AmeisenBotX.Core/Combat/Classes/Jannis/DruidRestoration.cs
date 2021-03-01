@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
-            SwiftmendEvent = new TimegatedEvent(TimeSpan.FromSeconds(15));
+            SwiftmendEvent = new(TimeSpan.FromSeconds(15));
         }
 
         public override string Description => "FCFS based CombatClass for the Druid Restoration spec.";
@@ -34,8 +34,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
-            new List<WowArmorType>() { WowArmorType.SHIELDS },
-            new List<WowWeaponType>() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES },
+            new() { WowArmorType.SHIELDS },
+            new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES },
             new Dictionary<string, double>()
             {
                 { "ITEM_MOD_CRIT_RATING_SHORT", 1.2 },
@@ -49,40 +49,40 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override WowRole Role => WowRole.Heal;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 2, new Talent(1, 2, 5) },
-                { 3, new Talent(1, 3, 3) },
-                { 4, new Talent(1, 4, 2) },
-                { 8, new Talent(1, 8, 1) },
+                { 2, new(1, 2, 5) },
+                { 3, new(1, 3, 3) },
+                { 4, new(1, 4, 2) },
+                { 8, new(1, 8, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>()
+            Tree2 = new(),
+            Tree3 = new()
             {
-                { 1, new Talent(3, 1, 2) },
-                { 2, new Talent(3, 2, 3) },
-                { 5, new Talent(3, 5, 3) },
-                { 6, new Talent(3, 6, 3) },
-                { 7, new Talent(3, 7, 3) },
-                { 8, new Talent(3, 8, 1) },
-                { 9, new Talent(3, 9, 2) },
-                { 11, new Talent(3, 11, 3) },
-                { 12, new Talent(3, 12, 1) },
-                { 13, new Talent(3, 13, 5) },
-                { 14, new Talent(3, 14, 2) },
-                { 16, new Talent(3, 16, 5) },
-                { 17, new Talent(3, 17, 3) },
-                { 18, new Talent(3, 18, 1) },
-                { 20, new Talent(3, 20, 5) },
-                { 21, new Talent(3, 21, 3) },
-                { 22, new Talent(3, 22, 3) },
-                { 23, new Talent(3, 23, 1) },
-                { 24, new Talent(3, 24, 3) },
-                { 25, new Talent(3, 25, 2) },
-                { 26, new Talent(3, 26, 5) },
-                { 27, new Talent(3, 27, 1) },
+                { 1, new(3, 1, 2) },
+                { 2, new(3, 2, 3) },
+                { 5, new(3, 5, 3) },
+                { 6, new(3, 6, 3) },
+                { 7, new(3, 7, 3) },
+                { 8, new(3, 8, 1) },
+                { 9, new(3, 9, 2) },
+                { 11, new(3, 11, 3) },
+                { 12, new(3, 12, 1) },
+                { 13, new(3, 13, 5) },
+                { 14, new(3, 14, 2) },
+                { 16, new(3, 16, 5) },
+                { 17, new(3, 17, 3) },
+                { 18, new(3, 18, 1) },
+                { 20, new(3, 20, 5) },
+                { 21, new(3, 21, 3) },
+                { 22, new(3, 22, 3) },
+                { 23, new(3, 23, 1) },
+                { 24, new(3, 24, 3) },
+                { 25, new(3, 25, 2) },
+                { 26, new(3, 26, 5) },
+                { 27, new(3, 27, 1) },
             },
         };
 

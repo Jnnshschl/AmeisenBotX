@@ -12,9 +12,9 @@ namespace AmeisenBotX.Core.Utils.Aura
         public GroupAuraManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            SpellsToKeepActiveOnParty = new List<(string, CastSpellOnUnit)>();
-            RemoveBadAurasSpells = new List<((string, WowDispelTypes), CastSpellOnUnit)>();
-            LastBuffed = new Dictionary<ulong, TimegatedEvent>();
+            SpellsToKeepActiveOnParty = new();
+            RemoveBadAurasSpells = new();
+            LastBuffed = new();
         }
 
         public delegate bool CastSpellOnUnit(string spellName, ulong guid);
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Utils.Aura
                         {
                             if (!LastBuffed.ContainsKey(wowUnit.Guid))
                             {
-                                LastBuffed.Add(wowUnit.Guid, new TimegatedEvent(TimeSpan.FromSeconds(30)));
+                                LastBuffed.Add(wowUnit.Guid, new(TimeSpan.FromSeconds(30)));
                             }
                             else if (LastBuffed[wowUnit.Guid].Run())
                             {

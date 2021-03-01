@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Common
 
         public static Vector3 GetMeanPosition(IEnumerable<Vector3> positions)
         {
-            Vector3 meanPosition = new Vector3();
+            Vector3 meanPosition = new();
             float count = 0;
 
             foreach (Vector3 position in positions)

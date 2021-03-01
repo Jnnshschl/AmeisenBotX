@@ -14,8 +14,8 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         public StateRepairing(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            InteractionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            EquipmentUpdateEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            InteractionEvent = new(TimeSpan.FromMilliseconds(1000));
+            EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
         }
 
         private TimegatedEvent EquipmentUpdateEvent { get; }

@@ -17,16 +17,16 @@ namespace AmeisenBotX.Memory
         private const int FASM_PASSES = 100;
 
         // lock needs to be static as FASM isn't thread safe
-        private static readonly object fasmLock = new object();
+        private static readonly object fasmLock = new();
 
-        private readonly object allocLock = new object();
+        private readonly object allocLock = new();
         private ulong rpmCalls;
         private ulong wpmCalls;
 
         public XMemory()
         {
-            MemoryAllocations = new Dictionary<IntPtr, uint>();
-            Fasm = new StringBuilder();
+            MemoryAllocations = new();
+            Fasm = new();
         }
 
         public int AllocationCount => MemoryAllocations.Count;
@@ -80,6 +80,13 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        public static Rect GetClientSize(IntPtr windowHandle)
+        {
+            Rect rect = new();
+            GetClientRect(windowHandle, ref rect);
+            return rect;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr GetForegroundWindow()
         {
@@ -89,7 +96,7 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
-            Rect rect = new Rect();
+            Rect rect = new();
             GetWindowRect(windowHandle, ref rect);
             return rect;
         }
@@ -115,7 +122,7 @@ namespace AmeisenBotX.Memory
 
         public static Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
         {
-            StartupInfo startupInfo = new StartupInfo
+            StartupInfo startupInfo = new()
             {
                 cb = Marshal.SizeOf<StartupInfo>(),
                 dwFlags = STARTF_USESHOWWINDOW,
@@ -151,6 +158,19 @@ namespace AmeisenBotX.Memory
 
                 address = IntPtr.Zero;
                 return false;
+            }
+        }
+
+        public void Dispose()
+        {
+            CloseHandle(MainThreadHandle);
+            CloseHandle(ProcessHandle);
+
+            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
+
+            for (int i = 0; i < memAllocs.Count; ++i)
+            {
+                FreeMemory(memAllocs[i]);
             }
         }
 
@@ -308,11 +328,12 @@ namespace AmeisenBotX.Memory
             {
                 if (RpmGateWay(address, pBuffer, lenght))
                 {
-                    List<byte> strBuffer = new List<byte>(lenght);
+                    List<byte> strBuffer = new(lenght);
 
                     for (int i = 0; i < lenght; ++i)
                     {
                         if (pBuffer[i] == 0) { break; }
+
                         strBuffer.Add(pBuffer[i]);
                     }
 
@@ -428,26 +449,6 @@ namespace AmeisenBotX.Memory
         {
             ++wpmCalls;
             return !NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
-        }
-
-        public void Dispose()
-        {
-            CloseHandle(MainThreadHandle);
-            CloseHandle(ProcessHandle);
-
-            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
-
-            for (int i = 0; i < memAllocs.Count; ++i)
-            {
-                FreeMemory(memAllocs[i]);
-            }
-        }
-
-        public static Rect GetClientSize(IntPtr windowHandle)
-        {
-            Rect rect = new Rect();
-            GetClientRect(windowHandle, ref rect);
-            return rect;
         }
     }
 }

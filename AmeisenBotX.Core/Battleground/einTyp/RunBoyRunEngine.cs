@@ -11,8 +11,8 @@ namespace AmeisenBotX.Core.Battleground.einTyp
     public class RunBoyRunEngine : IBattlegroundEngine
     {
         private readonly WowInterface WowInterface;
-        private Vector3 baseAlly = new Vector3(1539, 1481, 352);
-        private Vector3 baseHord = new Vector3(916, 1434, 346);
+        private Vector3 baseAlly = new(1539, 1481, 352);
+        private Vector3 baseHord = new(916, 1434, 346);
         private WowObject enemyFlag;
         private ulong EnemyFlagCarrierGuid;
         private bool enemyTeamHasFlag = false;

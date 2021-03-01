@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Character.Talents
             Dictionary<int, Dictionary<int, Talent>> talentTrees = TalentTree.AsDict();
             Dictionary<int, Dictionary<int, Talent>> wantedTalentTrees = wantedTalents.AsDict();
 
-            List<(int, int, int)> talentsToSpend = new List<(int, int, int)>();
+            List<(int, int, int)> talentsToSpend = new();
 
             // order the trees to skill the main tree first
             foreach (KeyValuePair<int, Dictionary<int, Talent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count))
@@ -41,12 +41,12 @@ namespace AmeisenBotX.Core.Character.Talents
 
         public void Update()
         {
-            TalentTree = new TalentTree(WowInterface.HookManager.LuaGetTalents());
+            TalentTree = new(WowInterface.HookManager.LuaGetTalents());
         }
 
         private static bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree, out List<(int, int, int)> talentsToSpend)
         {
-            talentsToSpend = new List<(int, int, int)>();
+            talentsToSpend = new();
 
             if (talentPoints == 0)
             {
@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Character.Talents
 
         private void SpendTalents(List<(int, int, int)> talentsToSpend)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             for (int i = 0; i < talentsToSpend.Count; ++i)
             {

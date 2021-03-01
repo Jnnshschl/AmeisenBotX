@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Data
     {
         private const int MAX_OBJECT_COUNT = 4096;
 
-        private readonly object queryLock = new object();
+        private readonly object queryLock = new();
 
         private readonly IntPtr[] wowObjectPointers;
         private readonly WowObject[] wowObjects;
@@ -38,8 +38,8 @@ namespace AmeisenBotX.Core.Data
             Partymembers = new List<WowUnit>();
             PartyPets = new List<WowUnit>();
 
-            PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            RelationshipEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            PoiCacheEvent = new(TimeSpan.FromSeconds(2));
+            RelationshipEvent = new(TimeSpan.FromSeconds(2));
 
             WowInterface.HookManager.OnGameInfoPush += HookManagerOnGameInfoPush;
         }
@@ -180,15 +180,15 @@ namespace AmeisenBotX.Core.Data
         {
             foreach (Vector3 pathPosition in path)
             {
-                var nearEnemies =
-                    WowInterface.ObjectManager.GetNearEnemies<T>(pathPosition, distance);
+                IEnumerable<T> nearEnemies = WowInterface.ObjectManager.GetNearEnemies<T>(pathPosition, distance);
+
                 if (nearEnemies.Any())
                 {
                     return nearEnemies;
                 }
             }
 
-            return new List<T>();
+            return Array.Empty<T>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -203,7 +203,7 @@ namespace AmeisenBotX.Core.Data
 
         public Vector3 GetMeanGroupPosition(bool includeSelf = false)
         {
-            Vector3 meanGroupPosition = new Vector3();
+            Vector3 meanGroupPosition = new();
             float count = 0;
 
             foreach (WowUnit unit in Partymembers)
@@ -560,7 +560,7 @@ namespace AmeisenBotX.Core.Data
 
         private IEnumerable<ulong> ReadPartymemberGuids()
         {
-            List<ulong> partymemberGuids = new List<ulong>();
+            List<ulong> partymemberGuids = new();
 
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.PartyLeader, out ulong partyLeader)
                 && partyLeader != 0
@@ -574,7 +574,7 @@ namespace AmeisenBotX.Core.Data
                 && WowInterface.XMemory.Read(WowInterface.OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
                 IEnumerable<IntPtr> raidPointers = raidStruct.GetPointers();
-                ConcurrentBag<ulong> guids = new ConcurrentBag<ulong>();
+                ConcurrentBag<ulong> guids = new();
 
                 Parallel.ForEach(raidPointers, x =>
                 {

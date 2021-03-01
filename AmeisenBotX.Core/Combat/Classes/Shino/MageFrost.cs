@@ -8,9 +8,7 @@ using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.CombatClasses.Shino;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Shino
 {
@@ -24,7 +22,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(iceBarrierSpell, () => TryCastSpell(iceBarrierSpell, 0, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpell(counterspellSpell, x.Guid, true) }
             };
@@ -38,45 +36,45 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<WowArmorType>() { WowArmorType.SHIELDS }, new List<WowWeaponType>() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 2, new Talent(1, 2, 3) },
+                { 2, new(1, 2, 3) },
             },
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>()
+            Tree2 = new(),
+            Tree3 = new()
             {
-                { 1, new Talent(3, 1, 3) },
-                { 2, new Talent(3, 2, 5) },
-                { 3, new Talent(3, 3, 3) },
-                { 4, new Talent(3, 4, 3) },
-                { 5, new Talent(3, 5, 2) },
-                { 6, new Talent(3, 6, 3) },
-                { 7, new Talent(3, 7, 3) },
-                { 8, new Talent(3, 8, 3) },
-                { 9, new Talent(3, 9, 1) },
-                { 11, new Talent(3, 11, 2) },
-                { 12, new Talent(3, 12, 3) },
-                { 13, new Talent(3, 13, 3) },
-                { 14, new Talent(3, 14, 1) },
-                { 15, new Talent(3, 15, 3) },
-                { 17, new Talent(3, 17, 2) },
-                { 18, new Talent(3, 18, 3) },
-                { 19, new Talent(3, 19, 2) },
-                { 20, new Talent(3, 20, 1) },
-                { 21, new Talent(3, 21, 5) },
-                { 22, new Talent(3, 22, 2) },
-                { 23, new Talent(3, 23, 2) },
-                { 24, new Talent(3, 24, 3) },
-                { 25, new Talent(3, 25, 1) },
-                { 26, new Talent(3, 26, 3) },
-                { 27, new Talent(3, 27, 5) },
-                { 28, new Talent(3, 28, 1) },
+                { 1, new(3, 1, 3) },
+                { 2, new(3, 2, 5) },
+                { 3, new(3, 3, 3) },
+                { 4, new(3, 4, 3) },
+                { 5, new(3, 5, 2) },
+                { 6, new(3, 6, 3) },
+                { 7, new(3, 7, 3) },
+                { 8, new(3, 8, 3) },
+                { 9, new(3, 9, 1) },
+                { 11, new(3, 11, 2) },
+                { 12, new(3, 12, 3) },
+                { 13, new(3, 13, 3) },
+                { 14, new(3, 14, 1) },
+                { 15, new(3, 15, 3) },
+                { 17, new(3, 17, 2) },
+                { 18, new(3, 18, 3) },
+                { 19, new(3, 19, 2) },
+                { 20, new(3, 20, 1) },
+                { 21, new(3, 21, 5) },
+                { 22, new(3, 22, 2) },
+                { 23, new(3, 23, 2) },
+                { 24, new(3, 24, 3) },
+                { 25, new(3, 25, 1) },
+                { 26, new(3, 26, 3) },
+                { 27, new(3, 27, 5) },
+                { 28, new(3, 28, 1) },
             },
         };
 
@@ -189,7 +187,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureWaterSpell))
             {
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureWaterSpell);
-                spell.GetRank(out int spellRank);
+                spell.TryGetRank(out int spellRank);
                 if (spellRank >= 2)
                 {
                     WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Water");
@@ -249,7 +247,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureFoodSpell))
             {
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureFoodSpell);
-                spell.GetRank(out int spellRank);
+                spell.TryGetRank(out int spellRank);
                 if (spellRank >= 2)
                 {
                     WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Muffin");
@@ -309,7 +307,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureRefreshment))
             {
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureRefreshment);
-                spell.GetRank(out int spellRank);
+                spell.TryGetRank(out int spellRank);
 
                 if (spellRank >= 2)
                 {

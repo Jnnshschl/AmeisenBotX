@@ -38,8 +38,8 @@ namespace AmeisenBotX.Core.Fsm.States
                     WowInterface.WowProcess = XMemory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
 
                     AmeisenLogger.I.Log("StartWow", "Waiting for input idle");
-                    WowInterface.WowProcess.WaitForInputIdle(); 
-                    
+                    WowInterface.WowProcess.WaitForInputIdle();
+
                     try
                     {
                         AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {WowInterface.WowProcess.ProcessName}:{WowInterface.WowProcess.Id}");

@@ -6,9 +6,7 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using static AmeisenBotX.Core.Utils.InterruptManager;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
@@ -23,7 +21,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true)));
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, WowInterface.ObjectManager.TargetGuid, true)));
 
-            InterruptManager.InterruptSpells = new SortedList<int, CastInterruptFunction>()
+            InterruptManager.InterruptSpells = new()
             {
                 { 0, (x) => TryCastSpell(faerieFireSpell, x.Guid, true) },
             };
@@ -42,7 +40,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new List<WowArmorType>() { WowArmorType.SHIELDS }, new List<WowWeaponType>() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
 
         public DateTime LastEclipseCheck { get; private set; }
 
@@ -52,42 +50,42 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public bool SolarEclipse { get; set; }
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 5) },
-                { 3, new Talent(1, 3, 1) },
-                { 4, new Talent(1, 4, 2) },
-                { 5, new Talent(1, 5, 2) },
-                { 7, new Talent(1, 7, 3) },
-                { 8, new Talent(1, 8, 1) },
-                { 9, new Talent(1, 9, 2) },
-                { 10, new Talent(1, 10, 5) },
-                { 11, new Talent(1, 11, 3) },
-                { 12, new Talent(1, 12, 3) },
-                { 13, new Talent(1, 13, 1) },
-                { 16, new Talent(1, 16, 3) },
-                { 17, new Talent(1, 17, 2) },
-                { 18, new Talent(1, 18, 1) },
-                { 19, new Talent(1, 19, 3) },
-                { 20, new Talent(1, 20, 3) },
-                { 22, new Talent(1, 22, 5) },
-                { 23, new Talent(1, 23, 3) },
-                { 25, new Talent(1, 25, 1) },
-                { 26, new Talent(1, 26, 2) },
-                { 27, new Talent(1, 27, 3) },
-                { 28, new Talent(1, 28, 1) },
+                { 1, new(1, 1, 5) },
+                { 3, new(1, 3, 1) },
+                { 4, new(1, 4, 2) },
+                { 5, new(1, 5, 2) },
+                { 7, new(1, 7, 3) },
+                { 8, new(1, 8, 1) },
+                { 9, new(1, 9, 2) },
+                { 10, new(1, 10, 5) },
+                { 11, new(1, 11, 3) },
+                { 12, new(1, 12, 3) },
+                { 13, new(1, 13, 1) },
+                { 16, new(1, 16, 3) },
+                { 17, new(1, 17, 2) },
+                { 18, new(1, 18, 1) },
+                { 19, new(1, 19, 3) },
+                { 20, new(1, 20, 3) },
+                { 22, new(1, 22, 5) },
+                { 23, new(1, 23, 3) },
+                { 25, new(1, 25, 1) },
+                { 26, new(1, 26, 2) },
+                { 27, new(1, 27, 3) },
+                { 28, new(1, 28, 1) },
             },
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>()
+            Tree2 = new(),
+            Tree3 = new()
             {
-                { 1, new Talent(3, 1, 2) },
-                { 3, new Talent(3, 3, 5) },
-                { 6, new Talent(3, 6, 3) },
-                { 7, new Talent(3, 7, 3) },
-                { 8, new Talent(3, 8, 1) },
-                { 9, new Talent(3, 9, 2) },
+                { 1, new(3, 1, 2) },
+                { 3, new(3, 3, 5) },
+                { 6, new(3, 6, 3) },
+                { 7, new(3, 7, 3) },
+                { 8, new(3, 8, 1) },
+                { 9, new(3, 9, 2) },
             },
         };
 

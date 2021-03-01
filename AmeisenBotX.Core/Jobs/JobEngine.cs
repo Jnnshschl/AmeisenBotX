@@ -23,11 +23,11 @@ namespace AmeisenBotX.Core.Jobs
             WowInterface = wowInterface;
             Config = config;
 
-            MiningEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            BlacklistEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
-            MailSentEvent = new TimegatedEvent(TimeSpan.FromSeconds(3));
+            MiningEvent = new(TimeSpan.FromSeconds(1));
+            BlacklistEvent = new(TimeSpan.FromSeconds(1));
+            MailSentEvent = new(TimeSpan.FromSeconds(3));
 
-            NodeBlacklist = new List<ulong>();
+            NodeBlacklist = new();
         }
 
         public AmeisenBotConfig Config { get; set; }

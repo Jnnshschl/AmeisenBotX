@@ -34,6 +34,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public string Displayname => "[WIP] Blood Deathknight";
 
+        public bool HandlesFacing => false;
+
         public bool HandlesMovement => false;
 
         public bool HandlesTargetSelection => false;
@@ -57,8 +59,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public bool WalkBehindEnemy => false;
 
         public WowClass WowClass => WowClass.Deathknight;
-
-        public bool HandlesFacing => false;
 
         private IHookManager HookManager { get; }
 

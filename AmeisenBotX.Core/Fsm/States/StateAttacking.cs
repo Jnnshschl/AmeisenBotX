@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         public StateAttacking(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            FacingCheck = new TimegatedEvent(TimeSpan.FromMilliseconds(100));
+            FacingCheck = new(TimeSpan.FromMilliseconds(100));
         }
 
         public float DistanceToKeep => WowInterface.CombatClass == null || WowInterface.CombatClass.IsMelee ? GetMeeleRange() : 28f;
@@ -226,20 +226,20 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (WowInterface.ObjectManager.MapId == WowMapId.TheForgeOfSouls)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5297, 2506, 686)) < 70.0f)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new(5297, 2506, 686)) < 70.0f)
                 {
                     // Corrupted Soul Fragements
                     WowInterface.CombatClass.PriorityTargetDisplayIds = new List<int>() { 30233 };
                     WowInterface.TacticEngine.LoadTactics(new BronjahmTactic(WowInterface));
                 }
-                else if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(5662, 2507, 709)) < 120.0f)
+                else if (WowInterface.ObjectManager.Player.Position.GetDistance(new(5662, 2507, 709)) < 120.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new DevourerOfSoulsTactic(WowInterface));
                 }
             }
             else if (WowInterface.ObjectManager.MapId == WowMapId.PitOfSaron)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(823, 110, 509)) < 150.0f)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new(823, 110, 509)) < 150.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic(WowInterface));
                 }
@@ -252,7 +252,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else if (WowInterface.ObjectManager.MapId == WowMapId.Naxxramas)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new Vector3(3273, -3476, 287)) < 120.0f)
+                if (WowInterface.ObjectManager.Player.Position.GetDistance(new(3273, -3476, 287)) < 120.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new AnubRhekan10Tactic(WowInterface));
                 }

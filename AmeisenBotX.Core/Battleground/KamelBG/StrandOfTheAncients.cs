@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             WowInterface = wowInterface;
 
-            CombatEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            CombatEvent = new(TimeSpan.FromSeconds(2));
         }
 
         public string Author => "Lukas";
@@ -24,9 +24,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public string Name => "Strand of the Ancients";
 
-        public List<Vector3> PathRight { get; } = new List<Vector3>()
+        public List<Vector3> PathRight { get; } = new()
         {
-            new Vector3(1403, 69, 30)
+            new(1403, 69, 30)
         };
 
         public WowInterface WowInterface { get; }

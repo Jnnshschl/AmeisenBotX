@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Character.Inventory.Objects
         public int RequiredLevel { get; set; }
 
         [JsonProperty("stats")]
-        public Dictionary<string, string> Stats { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Stats { get; set; } = new();
 
         [JsonProperty("subtype")]
         public string Subtype { get; set; }

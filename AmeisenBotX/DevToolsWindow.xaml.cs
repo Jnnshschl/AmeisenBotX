@@ -146,7 +146,7 @@ namespace AmeisenBotX
             {
                 listviewNearWowObjects.Items.Clear();
 
-                List<(WowObject, double)> wowObjects = new List<(WowObject, double)>();
+                List<(WowObject, double)> wowObjects = new();
 
                 foreach (WowObject x in AmeisenBot.WowInterface.ObjectManager.WowObjects)
                 {

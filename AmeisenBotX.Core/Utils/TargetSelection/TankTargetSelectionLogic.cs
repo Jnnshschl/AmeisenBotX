@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
             {
                 if (WowInterface.ObjectManager.Partymembers.Any())
                 {
-                    Dictionary<WowUnit, int> targets = new Dictionary<WowUnit, int>();
+                    Dictionary<WowUnit, int> targets = new();
 
                     foreach (WowUnit unit in WowInterface.ObjectManager.Partymembers)
                     {

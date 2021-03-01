@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
         {
             WowInterface = wowInterface;
 
-            Configureables = new Dictionary<string, dynamic>()
+            Configureables = new()
             {
                 { "isOffTank", false },
             };

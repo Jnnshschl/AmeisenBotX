@@ -26,14 +26,14 @@ namespace AmeisenBotX
 
             DataDir = dataDir;
             NewConfig = initialConfig == null;
-            Config = initialConfig ?? new AmeisenBotConfig();
+            Config = initialConfig ?? new();
             AmeisenBot = ameisenBot;
             ConfigName = initialConfigName;
 
             SaveConfig = NewConfig;
 
-            normalBorderBrush = new SolidColorBrush((Color)FindResource("DarkBorder"));
-            errorBorderBrush = new SolidColorBrush((Color)FindResource("DarkError"));
+            normalBorderBrush = new((Color)FindResource("DarkBorder"));
+            errorBorderBrush = new((Color)FindResource("DarkError"));
         }
 
         public AmeisenBot AmeisenBot { get; private set; }
@@ -115,7 +115,7 @@ namespace AmeisenBotX
                 Config.IgnoreCombatWhileMounted = checkboxIgnoreCombatMounted.IsChecked.GetValueOrDefault(false);
                 Config.IdleActions = checkboxIdleActions.IsChecked.GetValueOrDefault(false);
                 Config.ItemRepairThreshold = sliderRepair.Value;
-                Config.ItemSellBlacklist = new List<string>(textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries));
+                Config.ItemSellBlacklist = new(textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries));
                 Config.JobEngineMailHeader = textboxMailHeader.Text;
                 Config.JobEngineMailReceiver = textboxMailReceiver.Text;
                 Config.JobEngineMailText = textboxMailText.Text;
@@ -183,7 +183,7 @@ namespace AmeisenBotX
         {
             if (ChangedSomething)
             {
-                ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
+                ConfirmWindow confirmWindow = new("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
                 confirmWindow.ShowDialog();
 
                 if (!confirmWindow.OkayPressed)
@@ -198,7 +198,7 @@ namespace AmeisenBotX
 
         private void ButtonOpenCombatClassFile_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            OpenFileDialog openFileDialog = new()
             {
                 Filter = "C# Files|*.cs"
             };
@@ -212,7 +212,7 @@ namespace AmeisenBotX
 
         private void ButtonOpenImage_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            OpenFileDialog openFileDialog = new()
             {
                 Filter = "PNG|*.png|JPEG|*.jpg;"
             };
@@ -453,7 +453,7 @@ namespace AmeisenBotX
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
+            Regex regex = new("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
 
@@ -689,7 +689,7 @@ namespace AmeisenBotX
 
         private bool ValidateConfigName(bool failed)
         {
-            Regex regex = new Regex("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$");
+            Regex regex = new("^([a-zA-Z]:)?(\\\\[^<>:\"/\\\\|?*]+)+\\\\?$");
 
             if (textboxConfigName.Text.Length == 0
                 || regex.IsMatch(textboxConfigName.Text))

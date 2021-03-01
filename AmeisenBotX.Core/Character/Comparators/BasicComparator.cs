@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Character.Comparators
         {
             ArmorTypeBlacklist = armorTypeBlacklist;
             WeaponTypeBlacklist = weaponTypeBlacklist;
-            GearscoreFactory = new GearscoreFactory(statPriorities);
+            GearscoreFactory = new(statPriorities);
         }
 
         protected GearscoreFactory GearscoreFactory { get; set; }

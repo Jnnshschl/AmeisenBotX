@@ -38,6 +38,7 @@ namespace AmeisenBotX.Core.Character.Comparators
         private double GetRating(IWowItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
+
             if (slot.Equals(WowEquipmentSlot.INVSLOT_OFFHAND))
             {
                 // shields

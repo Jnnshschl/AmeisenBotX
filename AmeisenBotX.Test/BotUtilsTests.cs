@@ -48,7 +48,7 @@ namespace AmeisenBotX.Test
         [TestMethod]
         public void FastRandomStringOnlyLettersTest()
         {
-            List<char> numbers = new List<char>() { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+            List<char> numbers = new() { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
             for (int i = 0; i < 16; ++i)
             {

@@ -29,14 +29,14 @@ namespace AmeisenBotX.Core.Fsm.States
                 new SitToChairIdleAction(wowInterface, stateMachine, Config.MinFollowDistance),
             });
 
-            BagSlotCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
-            EatCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
-            LootCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
-            RepairCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(5000));
-            QuestgiverCheckEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(2000));
-            QuestgiverRightClickEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(3000));
-            RefreshCharacterEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
-            IdleActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(1000));
+            BagSlotCheckEvent = new(TimeSpan.FromMilliseconds(5000));
+            EatCheckEvent = new(TimeSpan.FromMilliseconds(2000));
+            LootCheckEvent = new(TimeSpan.FromMilliseconds(2000));
+            RepairCheckEvent = new(TimeSpan.FromMilliseconds(5000));
+            QuestgiverCheckEvent = new(TimeSpan.FromMilliseconds(2000));
+            QuestgiverRightClickEvent = new(TimeSpan.FromMilliseconds(3000));
+            RefreshCharacterEvent = new(TimeSpan.FromMilliseconds(1000));
+            IdleActionEvent = new(TimeSpan.FromMilliseconds(1000));
         }
 
         public bool FirstStart { get; set; }

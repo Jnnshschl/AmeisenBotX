@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public List<string> GetEnchantmentStrings()
         {
-            List<string> enchantments = new List<string>();
+            List<string> enchantments = new();
 
             for (int i = 0; i < ItemEnchantments.Count; ++i)
             {
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Data.Objects
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;
 
-                ItemEnchantments = new List<ItemEnchantment>()
+                ItemEnchantments = new()
                 {
                     objPtr.Enchantment1,
                     objPtr.Enchantment2,

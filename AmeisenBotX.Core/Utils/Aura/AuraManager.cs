@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Utils.Aura
         public AuraManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Jobs = new List<IAuraJob>();
+            Jobs = new();
         }
 
         public List<IAuraJob> Jobs { get; set; }

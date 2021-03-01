@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Hook
         private const int MEM_ALLOC_EXECUTION_SIZE = 4096;
         private const int MEM_ALLOC_GATEWAY_SIZE = 12;
         private const int MEM_ALLOC_TRACELINE_JUMP_CHECK_SIZE = 128;
-        private readonly object hookLock = new object();
+        private readonly object hookLock = new();
 
         private ulong hookCalls;
 
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Hook
         {
             WowInterface = wowInterface;
             Config = config;
-            OriginalFunctionBytes = new Dictionary<IntPtr, byte>();
+            OriginalFunctionBytes = new();
 
             string handlerName = BotUtils.FastRandomStringOnlyLetters();
             string tableName = BotUtils.FastRandomStringOnlyLetters();
@@ -160,6 +160,14 @@ namespace AmeisenBotX.Core.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteLuaInt((string, string) cmdVar)
+        {
+            return WowExecuteLuaAndRead(cmdVar, out string s)
+                && int.TryParse(s, out int i)
+                 ? i : 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaAbandonQuestsNotIn(IEnumerable<string> questNames)
         {
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogEntries()"), out string r1)
@@ -217,9 +225,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaAutoLootEnabled()
         {
-            string r = LuaGetCVar("autoLootDefault");
-            int.TryParse(r, out int result);
-            return result == 1;
+            return int.TryParse(LuaGetCVar("autoLootDefault"), out int result) && result == 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -361,7 +367,7 @@ namespace AmeisenBotX.Core.Hook
             LuaCofirmStaticPopup();
         }
 
-        public List<int> LuaGetCompletedQuests()
+        public IEnumerable<int> LuaGetCompletedQuests()
         {
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=''for a,b in pairs(GetQuestsCompleted())do if b then {{v:0}}={{v:0}}..a..';'end end;"), out string result))
             {
@@ -370,12 +376,11 @@ namespace AmeisenBotX.Core.Hook
                     return result.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(e => int.TryParse(e, out int n) ? n : (int?)null)
                         .Where(e => e.HasValue)
-                        .Select(e => e.Value)
-                        .ToList();
+                        .Select(e => e.Value);
                 }
             }
 
-            return new List<int>();
+            return Array.Empty<int>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -395,11 +400,11 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaGetGossipActiveQuestTitleById(int gossipId, out string title)
         {
-            title = "";
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,g2,_,_,_,g3,_,_,_,g4,_,_,_,g5,_,_,_,g6 = GetGossipActiveQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; {{v:0}}=gps[{gossipId}]"), out string r1))
             {
                 if (r1 == "nil")
                 {
+                    title = string.Empty;
                     return false;
                 }
 
@@ -407,6 +412,7 @@ namespace AmeisenBotX.Core.Hook
                 return true;
             }
 
+            title = string.Empty;
             return false;
         }
 
@@ -414,6 +420,7 @@ namespace AmeisenBotX.Core.Hook
         public bool LuaGetGossipIdByActiveQuestTitle(string title, out int gossipId)
         {
             gossipId = 0;
+
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,g2,_,_,_,g3,_,_,_,g4,_,_,_,g5,_,_,_,g6 = GetGossipActiveQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k; break end; end;"), out string r1)
                 && int.TryParse(r1, out int foundGossipId))
             {
@@ -427,7 +434,6 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaGetGossipIdByAvailableQuestTitle(string title, out int gossipId)
         {
-            gossipId = 0;
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"local g1,_,_,_,_,g2,_,_,_,_,g3,_,_,_,_,g4,_,_,_,_,g5,_,_,_,_,g6 = GetGossipAvailableQuests(); local gps={{g1,g2,g3,g4,g5,g6}}; for k,v in pairs(gps) do if v == \"{title}\" then {{v:0}}=k; break end; end;"), out string r1)
                 && int.TryParse(r1, out int foundGossipId))
             {
@@ -435,15 +441,14 @@ namespace AmeisenBotX.Core.Hook
                 return true;
             }
 
+            gossipId = 0;
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int LuaGetGossipOptionCount()
         {
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetNumGossipOptions()"), out string sresult)
-                && int.TryParse(sresult, out int gossipCount)
-                 ? gossipCount : 0;
+            return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetNumGossipOptions()"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -504,26 +509,26 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaGetNumQuestLogChoices(out int numChoices)
         {
-            numChoices = 0;
-            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogChoices();"),
-                out string result) && int.TryParse(result, out int num))
+            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogChoices();"), out string result)
+                && int.TryParse(result, out int num))
             {
                 numChoices = num;
                 return true;
             }
 
+            numChoices = 0;
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaGetQuestLogChoiceItemLink(int index, out string itemLink)
         {
-            itemLink = "";
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetQuestLogItemLink(\"choice\", {index});"),
                 out string result))
             {
                 if (result == "nil")
                 {
+                    itemLink = string.Empty;
                     return false;
                 }
 
@@ -531,13 +536,13 @@ namespace AmeisenBotX.Core.Hook
                 return true;
             }
 
+            itemLink = string.Empty;
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaGetQuestLogIdByTitle(string title, out int questLogId)
         {
-            questLogId = 0;
             if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"for i=1,GetNumQuestLogEntries() do if GetQuestLogTitle(i) == \"{title}\" then {{v:0}}=i; break end; end;"), out string r1)
                 && int.TryParse(r1, out int foundQuestLogId))
             {
@@ -545,6 +550,7 @@ namespace AmeisenBotX.Core.Hook
                 return true;
             }
 
+            questLogId = 0;
             return false;
         }
 
@@ -556,13 +562,13 @@ namespace AmeisenBotX.Core.Hook
 
         public Dictionary<string, (int, int)> LuaGetSkills()
         {
-            Dictionary<string, (int, int)> parsedSkills = new Dictionary<string, (int, int)>();
+            Dictionary<string, (int, int)> parsedSkills = new();
 
             try
             {
                 if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"), out string result))
                 {
-                    List<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim()).ToList();
+                    IEnumerable<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim());
 
                     foreach (string x in skills)
                     {
@@ -642,33 +648,25 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int LuaGetUnspentTalentPoints()
         {
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetUnspentTalentPoints()"), out string sresult)
-                && int.TryParse(sresult, out int talentPoints)
-                 ? talentPoints : 0;
+            return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetUnspentTalentPoints()"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaHasUnitStealableBuffs(WowLuaUnit luaUnit)
         {
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,{{v:1}}=UnitAura(\"{luaUnit}\",i);if {{v:1}}==1 then {{v:0}}=1;end end"), out string sresult)
-                && int.TryParse(sresult, out int result)
-                && result == 1;
+            return ExecuteLuaIntResult(BotUtils.ObfuscateLua($"{{v:0}}=0;local y=0;for i=1,40 do local n,_,_,_,_,_,_,_,{{v:1}}=UnitAura(\"{luaUnit}\",i);if {{v:1}}==1 then {{v:0}}=1;end end"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaIsBgInviteReady()
         {
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end"), out string sresult)
-                && int.TryParse(sresult, out int result)
-                && result == 1;
+            return ExecuteLuaIntResult(BotUtils.ObfuscateLua("{v:0}=0;for i=1,2 do local x=GetBattlefieldPortExpiration(i) if x>0 then {v:0}=1 end end"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaIsGhost(WowLuaUnit luaUnit)
         {
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=UnitIsGhost(\"{luaUnit}\");"), out string sresult)
-                && int.TryParse(sresult, out int isGhost)
-                && isGhost == 1;
+            return ExecuteLuaIntResult(BotUtils.ObfuscateLua($"{{v:0}}=UnitIsGhost(\"{luaUnit}\");"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -682,9 +680,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LuaIsOutdoors()
         {
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()"), out string sresult)
-                && int.TryParse(sresult, out int result)
-                && result == 1;
+            return ExecuteLuaIntResult(BotUtils.ObfuscateLua("{v:0}=IsOutdoors()"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -868,7 +864,7 @@ namespace AmeisenBotX.Core.Hook
 
         public bool LuaUiIsVisible(params string[] uiElements)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             for (int i = 0; i < uiElements.Length; ++i)
             {
@@ -880,9 +876,7 @@ namespace AmeisenBotX.Core.Hook
                 }
             }
 
-            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=0 if {sb} then {{v:0}}=1 end"), out string r)
-                && int.TryParse(r, out int result)
-                && result == 1;
+            return ExecuteLuaIntResult(BotUtils.ObfuscateLua($"{{v:0}}=0 if {sb} then {{v:0}}=1 end"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1071,7 +1065,7 @@ namespace AmeisenBotX.Core.Hook
 
         public Dictionary<WowRuneType, int> WowGetRunesReady()
         {
-            Dictionary<WowRuneType, int> runes = new Dictionary<WowRuneType, int>()
+            Dictionary<WowRuneType, int> runes = new()
             {
                 { WowRuneType.Blood, 0 },
                 { WowRuneType.Frost, 0 },
@@ -1092,7 +1086,7 @@ namespace AmeisenBotX.Core.Hook
             return runes;
         }
 
-        public List<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount)
+        public IEnumerable<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount)
         {
             if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraCount1), out int auraCount1))
             {
@@ -1121,7 +1115,7 @@ namespace AmeisenBotX.Core.Hook
                 auraCount = 0;
             }
 
-            return new List<WowAura>();
+            return Array.Empty<WowAura>();
         }
 
         public WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
@@ -1187,22 +1181,12 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowObjectRightClick(WowObject wowObject)
         {
-            if (wowObject == null)
-            {
-                return;
-            }
-
             WowCallObjectFunction(wowObject.BaseAddress, WowInterface.OffsetList.FunctionGameobjectOnRightClick);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowSetFacing(WowUnit unit, float angle)
         {
-            if (unit == null)
-            {
-                return;
-            }
-
             WowCallObjectFunction(unit.BaseAddress, WowInterface.OffsetList.FunctionUnitSetFacing, new List<object>() { angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'), Environment.TickCount });
         }
 
@@ -1404,7 +1388,7 @@ namespace AmeisenBotX.Core.Hook
 
             AmeisenLogger.I.Log("HookManager", "EndsceneHook Successful", LogLevel.Verbose);
 
-            GameInfoTimer = new Timer(GameInfoTimerTick, null, 0, 100);
+            GameInfoTimer = new(GameInfoTimerTick, null, 0, 100);
 
             // we should've hooked WoW now
             return IsWoWHooked;
@@ -1468,15 +1452,14 @@ namespace AmeisenBotX.Core.Hook
                         "RETN",
                     };
 
-                    if (InjectAndExecute(asm, true, out byte[] bytes))
+                    if (InjectAndExecute(asm, true, out byte[] bytes)
+                        && bytes != null && bytes.Length > 0)
                     {
                         WowInterface.XMemory.FreeMemory(tracelineCodecave);
-
-                        if (bytes != null && bytes.Length > 0)
-                        {
-                            return bytes[0];
-                        }
+                        return bytes[0];
                     }
+
+                    WowInterface.XMemory.FreeMemory(tracelineCodecave);
                 }
             }
 
@@ -1486,11 +1469,6 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WowUnitRightClick(WowUnit wowUnit)
         {
-            if (wowUnit == null)
-            {
-                return;
-            }
-
             WowCallObjectFunction(wowUnit.BaseAddress, WowInterface.OffsetList.FunctionUnitOnRightClick);
         }
 
@@ -1514,6 +1492,14 @@ namespace AmeisenBotX.Core.Hook
             {
                 WowInterface.XMemory.PatchMemory(address, OriginalFunctionBytes[address]);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool ExecuteLuaIntResult((string, string) cmdVar)
+        {
+            return WowExecuteLuaAndRead(cmdVar, out string s)
+                && int.TryParse(s, out int i)
+                && i == 1;
         }
 
         private void GameInfoTimerTick(object state)
@@ -1607,7 +1593,7 @@ namespace AmeisenBotX.Core.Hook
                 return false;
             }
 
-            List<byte> returnBytes = readReturnBytes ? new List<byte>() : null;
+            List<byte> returnBytes = readReturnBytes ? new() : null;
 
             lock (hookLock)
             {
@@ -1645,7 +1631,7 @@ namespace AmeisenBotX.Core.Hook
                         if (readReturnBytes)
                         {
                             WowInterface.XMemory.Read(ReturnValueAddress, out uint dwAddress);
-                            IntPtr addrPointer = new IntPtr(dwAddress);
+                            IntPtr addrPointer = new(dwAddress);
 
                             // read all parameter-bytes until we the buffer is 0
                             WowInterface.XMemory.Read(addrPointer, out byte buffer);
@@ -1746,13 +1732,12 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string LuaGetCVar(string CVar)
         {
-            WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetCVar(\"{CVar}\");"), out string result);
-            return result;
+            return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetCVar(\"{CVar}\");"), out string s) ? s : string.Empty;
         }
 
-        private List<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
+        private IEnumerable<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
         {
-            List<WowAura> auras = new List<WowAura>();
+            List<WowAura> auras = new();
 
             if (auraCount > 40)
             {
@@ -1769,7 +1754,7 @@ namespace AmeisenBotX.Core.Hook
                     WowInterface.Db.CacheSpellName(rawWowAura.SpellId, name);
                 }
 
-                auras.Add(new WowAura(rawWowAura, name));
+                auras.Add(new(rawWowAura, name));
             }
 
             return auras;
@@ -1942,7 +1927,7 @@ namespace AmeisenBotX.Core.Hook
 
         private byte[] WowCallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null, bool readReturnBytes = false)
         {
-            List<string> asm = new List<string> { $"MOV ECX, {objectBaseAddress}" };
+            List<string> asm = new() { $"MOV ECX, {objectBaseAddress}" };
 
             if (args != null)
             {

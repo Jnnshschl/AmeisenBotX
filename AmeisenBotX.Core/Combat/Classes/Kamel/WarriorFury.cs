@@ -93,10 +93,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(battleShoutSpell, DateTime.Now);
 
             //Time event
-            HeroicStrikeEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            VictoryRushEvent = new TimegatedEvent(TimeSpan.FromSeconds(5));
-            RendEvent = new TimegatedEvent(TimeSpan.FromSeconds(6));
-            ExecuteEvent = new TimegatedEvent(TimeSpan.FromSeconds(1));
+            HeroicStrikeEvent = new(TimeSpan.FromSeconds(2));
+            VictoryRushEvent = new(TimeSpan.FromSeconds(5));
+            RendEvent = new(TimeSpan.FromSeconds(6));
+            ExecuteEvent = new(TimeSpan.FromSeconds(1));
         }
 
         public override string Author => "Lukas";
@@ -115,47 +115,47 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new List<WowArmorType>() { WowArmorType.SHIELDS }, new List<WowWeaponType>() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES, WowWeaponType.STAVES, WowWeaponType.DAGGERS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES, WowWeaponType.STAVES, WowWeaponType.DAGGERS });
 
         //Time event
         public TimegatedEvent RendEvent { get; private set; }
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new TalentTree()
+        public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>()
+            Tree1 = new()
             {
-                { 1, new Talent(1, 1, 3) },
-                { 3, new Talent(1, 3, 2) },
-                { 5, new Talent(1, 5, 2) },
-                { 6, new Talent(1, 6, 3) },
-                { 9, new Talent(1, 9, 2) },
-                { 10, new Talent(1, 10, 3) },
-                { 11, new Talent(1, 11, 3) },
+                { 1, new(1, 1, 3) },
+                { 3, new(1, 3, 2) },
+                { 5, new(1, 5, 2) },
+                { 6, new(1, 6, 3) },
+                { 9, new(1, 9, 2) },
+                { 10, new(1, 10, 3) },
+                { 11, new(1, 11, 3) },
             },
-            Tree2 = new Dictionary<int, Talent>()
+            Tree2 = new()
             {
-                { 1, new Talent(2, 1, 3) },
-                { 3, new Talent(2, 3, 5) },
-                { 5, new Talent(2, 5, 5) },
-                { 6, new Talent(2, 6, 3) },
-                { 10, new Talent(2, 10, 5) },
-                { 13, new Talent(2, 13, 3) },
-                { 14, new Talent(2, 14, 1) },
-                { 16, new Talent(2, 16, 1) },
-                { 17, new Talent(2, 17, 5) },
-                { 18, new Talent(2, 18, 3) },
-                { 19, new Talent(2, 19, 1) },
-                { 20, new Talent(2, 20, 2) },
-                { 22, new Talent(2, 22, 5) },
-                { 23, new Talent(2, 23, 1) },
-                { 24, new Talent(2, 24, 1) },
-                { 25, new Talent(2, 25, 3) },
-                { 26, new Talent(2, 26, 5) },
-                { 27, new Talent(2, 27, 1) },
+                { 1, new(2, 1, 3) },
+                { 3, new(2, 3, 5) },
+                { 5, new(2, 5, 5) },
+                { 6, new(2, 6, 3) },
+                { 10, new(2, 10, 5) },
+                { 13, new(2, 13, 3) },
+                { 14, new(2, 14, 1) },
+                { 16, new(2, 16, 1) },
+                { 17, new(2, 17, 5) },
+                { 18, new(2, 18, 3) },
+                { 19, new(2, 19, 1) },
+                { 20, new(2, 20, 2) },
+                { 22, new(2, 22, 5) },
+                { 23, new(2, 23, 1) },
+                { 24, new(2, 24, 1) },
+                { 25, new(2, 25, 3) },
+                { 26, new(2, 26, 5) },
+                { 27, new(2, 27, 1) },
             },
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree3 = new(),
         };
 
         public override bool UseAutoAttacks => true;

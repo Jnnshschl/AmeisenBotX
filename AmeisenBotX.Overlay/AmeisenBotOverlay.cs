@@ -10,10 +10,10 @@ namespace AmeisenBotX.Overlay
         public AmeisenBotOverlay(XMemory xMemory)
         {
             XMemory = xMemory;
-            LinesToRender = new List<(SolidBrush, (Point, Point))>();
-            RectanglesToRender = new List<(SolidBrush, (Point, Point))>();
+            LinesToRender = new();
+            RectanglesToRender = new();
 
-            OverlayWindow = new StickyWindow(xMemory.Process.MainWindowHandle)
+            OverlayWindow = new(xMemory.Process.MainWindowHandle)
             {
                 IsTopmost = true,
                 IsVisible = true,
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Overlay
 
             OverlayWindow.Create();
 
-            Gfx = new Graphics(OverlayWindow.Handle, OverlayWindow.Width, OverlayWindow.Height);
+            Gfx = new(OverlayWindow.Handle, OverlayWindow.Width, OverlayWindow.Height);
             Gfx.Setup();
         }
 
@@ -77,7 +77,7 @@ namespace AmeisenBotX.Overlay
 
                 for (int i = 0; i < LinesToRender.Count; ++i)
                 {
-                    Gfx.DrawLine(LinesToRender[i].Item1, new Line(LinesToRender[i].Item2.Item1, LinesToRender[i].Item2.Item2), 2f);
+                    Gfx.DrawLine(LinesToRender[i].Item1, new(LinesToRender[i].Item2.Item1, LinesToRender[i].Item2.Item2), 2f);
                 }
 
                 for (int i = 0; i < RectanglesToRender.Count; ++i)

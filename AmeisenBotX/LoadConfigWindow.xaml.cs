@@ -35,7 +35,7 @@ namespace AmeisenBotX
 
             if ((string)comboboxSelectedConfig.SelectedItem == "New Config")
             {
-                ConfigEditorWindow configEditor = new ConfigEditorWindow(BotDataPath, null);
+                ConfigEditorWindow configEditor = new(BotDataPath, null);
                 configEditor.ShowDialog();
 
                 if (configEditor.Cancel)
@@ -79,6 +79,7 @@ namespace AmeisenBotX
             }
 
             string[] args = Environment.GetCommandLineArgs();
+
             if (args.Length > 1)
             {
                 string botnameParam = args[1];

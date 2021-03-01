@@ -21,8 +21,8 @@ namespace AmeisenBotX.Core.Grinding
             Config = config;
             StateMachine = stateMachine;
 
-            Blacklist = new List<ulong>();
-            TargetInLosEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
+            Blacklist = new();
+            TargetInLosEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
         public GrindingSpot GrindingSpot { get; private set; }
@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Grinding
             {
                 Vector3 pos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, 100f);
 
-                return new GrindingSpot()
+                return new()
                 {
                     Position = pos != default ? pos : WowInterface.ObjectManager.Player.Position,
                     Radius = 100.0
@@ -216,7 +216,7 @@ namespace AmeisenBotX.Core.Grinding
 
             if (Profile.RandomizeSpots)
             {
-                Random rnd = new Random();
+                Random rnd = new();
                 return spots[rnd.Next(0, spots.Count)];
             }
             else

@@ -20,9 +20,9 @@ namespace AmeisenBotX.Logging
 
         private AmeisenLogger(bool deleteOldLogs = true)
         {
-            LogBuilder = new ConcurrentQueue<LogEntry>();
+            LogBuilder = new();
 
-            LogFileWriter = new Timer(1000);
+            LogFileWriter = new(1000);
             LogFileWriter.Elapsed += LogFileWriter_Elapsed;
 
             Enabled = true;
@@ -43,11 +43,7 @@ namespace AmeisenBotX.Logging
             {
                 lock (padlock)
                 {
-                    if (instance == null)
-                    {
-                        instance = new AmeisenLogger();
-                    }
-
+                    instance ??= new();
                     return instance;
                 }
             }
@@ -68,6 +64,7 @@ namespace AmeisenBotX.Logging
         public void ChangeLogFolder(string logFolderPath, bool createFolder = true, bool deleteOldLogs = true)
         {
             LogFileFolder = logFolderPath;
+
             if (createFolder && !Directory.Exists(logFolderPath))
             {
                 Directory.CreateDirectory(logFolderPath);
@@ -90,7 +87,7 @@ namespace AmeisenBotX.Logging
                 for (int i = 0; i < files.Length; ++i)
                 {
                     string file = files[i];
-                    FileInfo fileInfo = new FileInfo(file);
+                    FileInfo fileInfo = new(file);
 
                     if (fileInfo.LastAccessTime < DateTime.Now.AddDays(daysToKeep * -1))
                     {
@@ -106,7 +103,7 @@ namespace AmeisenBotX.Logging
             {
                 if (logLevel <= ActiveLogLevel)
                 {
-                    LogBuilder.Enqueue(new LogEntry(logLevel, $"{$"[{tag}]",-24} {log}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+                    LogBuilder.Enqueue(new(logLevel, $"{$"[{tag}]",-24} {log}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
                 }
             });
         }
@@ -134,7 +131,7 @@ namespace AmeisenBotX.Logging
 
             try
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
 
                 while (!LogBuilder.IsEmpty && LogBuilder.TryDequeue(out LogEntry logEntry))
                 {

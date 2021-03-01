@@ -17,9 +17,9 @@ namespace AmeisenBotX.Test
             int treeResult01 = 0;
             int treeResult11 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard();
+            TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new DualSelector<TestBlackboard>
                 (
@@ -107,12 +107,12 @@ namespace AmeisenBotX.Test
             int treeResult0 = 0;
             int treeResult1 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard()
+            TestBlackboard testBlackboard = new()
             {
                 FirstNode = true
             };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -158,13 +158,13 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult01 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard()
+            TestBlackboard testBlackboard = new()
             {
                 FirstNode = true,
                 SecondFirstNode = true
             };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Selector<TestBlackboard>
                 (
@@ -231,9 +231,9 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard();
+            TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -329,9 +329,9 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard();
+            TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -447,9 +447,9 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard();
+            TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -520,12 +520,12 @@ namespace AmeisenBotX.Test
             int treeResult0 = 0;
             int treeResult1 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard()
+            TestBlackboard testBlackboard = new()
             {
                 FirstNode = true
             };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Selector<TestBlackboard>
                 (
@@ -571,9 +571,9 @@ namespace AmeisenBotX.Test
             int treeResult1 = 0;
             int treeResult2 = 0;
 
-            TestBlackboard testBlackboard = new TestBlackboard() { };
+            TestBlackboard testBlackboard = new() { };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new AmeisenBotBehaviorTree<TestBlackboard>
+            AmeisenBotBehaviorTree<TestBlackboard> tree = new
             (
                 new Waterfall<TestBlackboard>
                 (

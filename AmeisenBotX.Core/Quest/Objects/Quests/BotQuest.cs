@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             GetEndObject = end;
             Objectives = objectives;
 
-            ActionEvent = new TimegatedEvent(TimeSpan.FromMilliseconds(250));
+            ActionEvent = new(TimeSpan.FromMilliseconds(250));
         }
 
         public bool Accepted { get; set; }
@@ -112,6 +112,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                         Thread.Sleep(1000);
                         WowInterface.HookManager.LuaAcceptQuest();
                         Thread.Sleep(250);
+
                         if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
                         {
                             Accepted = true;
@@ -170,14 +171,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                             {
                                 for (int i = 1; i <= numChoices; ++i)
                                 {
-                                    if (WowInterface.HookManager.LuaGetQuestLogChoiceItemLink(i,
-                                        out string itemLink))
+                                    if (WowInterface.HookManager.LuaGetQuestLogChoiceItemLink(i, out string itemLink))
                                     {
-                                        string itemJson =
-                                            WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
-
-                                        WowBasicItem item =
-                                            ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
+                                        string itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
+                                        WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                                         if (item == null)
                                         {
@@ -188,16 +185,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                                         {
                                             // get the item id and try again
                                             itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(
-                                                itemLink.Split(new string[] { "Hitem:" },
-                                                        StringSplitOptions.RemoveEmptyEntries)[1]
-                                                    .Split(new string[] { ":" },
-                                                        StringSplitOptions.RemoveEmptyEntries)[0]);
+                                                itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
+                                                    .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
 
                                             item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                                         }
 
-                                        if (WowInterface.CharacterManager.IsItemAnImprovement(item,
-                                            out IWowItem itemToReplace))
+                                        if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                                         {
                                             WowInterface.HookManager.LuaGetQuestReward(i);
                                             WowInterface.HookManager.LuaGetQuestReward(i);
