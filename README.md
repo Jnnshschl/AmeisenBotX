@@ -20,7 +20,7 @@ This software is intended for educational purposes only!
 
 ❤️ TrinityCore - https://github.com/TrinityCore/TrinityCore
 
-❤️ FASM - https://flatassembler.net/
+❤️ flat assembler - https://flatassembler.net/
 
 # Tutorials
 
