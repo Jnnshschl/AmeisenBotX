@@ -242,7 +242,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
             {
-                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(possibleQuestgiver.Position);
+                double distance = WowInterface.Player.Position.GetDistance(possibleQuestgiver.Position);
 
                 if (distance > 32.0)
                 {
@@ -258,9 +258,9 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (QuestgiverRightClickEvent.Run())
                     {
-                        if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, possibleQuestgiver.Position))
+                        if (!BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, possibleQuestgiver.Position))
                         {
-                            WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, possibleQuestgiver.Position);
+                            WowInterface.HookManager.WowFacePosition(WowInterface.Player, possibleQuestgiver.Position);
                         }
 
                         WowInterface.HookManager.WowUnitRightClick(possibleQuestgiver);
@@ -283,7 +283,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     pos += StateMachine.GetState<StateFollowing>().Offset;
                 }
 
-                double distance = pos.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distance = pos.GetDistance(WowInterface.Player.Position);
 
                 if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
                 {

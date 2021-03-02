@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public PaladinRetribution(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, WowInterface.ObjectManager.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, WowInterface.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(retributionAuraSpell, () => TryCastSpell(retributionAuraSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
 
@@ -88,32 +88,32 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 20.0
-                        && TryCastSpell(layOnHandsSpell, WowInterface.ObjectManager.PlayerGuid))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 60.0
-                        && TryCastSpell(holyLightSpell, WowInterface.ObjectManager.PlayerGuid, true)))
+                if ((WowInterface.Player.HealthPercentage < 20.0
+                        && TryCastSpell(layOnHandsSpell, WowInterface.PlayerGuid))
+                    || (WowInterface.Player.HealthPercentage < 60.0
+                        && TryCastSpell(holyLightSpell, WowInterface.PlayerGuid, true)))
                 {
                     return;
                 }
 
-                if (((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell))
-                        && TryCastSpell(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
+                        && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
                     || TryCastSpell(avengingWrathSpell, 0, true)
-                    || (WowInterface.ObjectManager.Player.ManaPercentage < 80.0
+                    || (WowInterface.Player.ManaPercentage < 80.0
                         && TryCastSpell(divinePleaSpell, 0, true)))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if ((WowInterface.ObjectManager.Player.HealthPercentage < 20.0
-                            && TryCastSpell(hammerOfWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || TryCastSpell(crusaderStrikeSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || TryCastSpell(divineStormSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || TryCastSpell(consecrationSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || TryCastSpell(exorcismSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || TryCastSpell(holyWrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if ((WowInterface.Player.HealthPercentage < 20.0
+                            && TryCastSpell(hammerOfWrathSpell, WowInterface.TargetGuid, true))
+                        || TryCastSpell(crusaderStrikeSpell, WowInterface.TargetGuid, true)
+                        || TryCastSpell(divineStormSpell, WowInterface.TargetGuid, true)
+                        || TryCastSpell(consecrationSpell, WowInterface.TargetGuid, true)
+                        || TryCastSpell(exorcismSpell, WowInterface.TargetGuid, true)
+                        || TryCastSpell(holyWrathSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }

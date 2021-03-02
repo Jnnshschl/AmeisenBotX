@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Data
         {
             return WowInterface.ObjectManager.WowObjects.OfType<WowDynobject>()
                 .Where(e => e.Position.GetDistance(position) < e.Radius + extends
-                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
+                    && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Data
             {
                 return wowObjects.OfType<WowGameobject>()
                     .Where(e => displayIds.Contains(e.DisplayId))
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
             }
         }
@@ -137,7 +137,7 @@ namespace AmeisenBotX.Core.Data
             {
                 return wowObjects.OfType<WowUnit>()
                     .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && displayIds.Contains(e.DisplayId))
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
             }
         }
@@ -149,13 +149,13 @@ namespace AmeisenBotX.Core.Data
             {
                 return wowObjects.OfType<WowUnit>()
                     .Where(e => (e.IsQuestgiver || !onlyQuestgiver) && npcIds.Contains(WowGuid.ToNpcId(e.Guid)))
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -167,16 +167,16 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
                 return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat && (e.IsTaggedByMe || e.TargetGuid == WowInterface.ObjectManager.PlayerGuid));
+                    .Where(e => e.IsInCombat && (e.IsTaggedByMe || e.TargetGuid == WowInterface.PlayerGuid));
             }
         }
 
-        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, double distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) where T : WowUnit
         {
             foreach (Vector3 pathPosition in path)
             {
@@ -192,7 +192,7 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -218,7 +218,7 @@ namespace AmeisenBotX.Core.Data
             return meanGroupPosition / count;
         }
 
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -232,7 +232,7 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -245,7 +245,7 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, double distance) where T : WowUnit
+        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -258,7 +258,7 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance)
+        public IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, float distance)
         {
             lock (queryLock)
             {
@@ -482,7 +482,7 @@ namespace AmeisenBotX.Core.Data
 
                 // dont cache positions too close to eachother
                 if (originUnit != null
-                    && !WowInterface.Db.TryGetPointsOfInterest(MapId, PoiType.FishingSpot, originUnit.Position, 5.0, out IEnumerable<Vector3> pois))
+                    && !WowInterface.Db.TryGetPointsOfInterest(MapId, PoiType.FishingSpot, originUnit.Position, 5.0f, out IEnumerable<Vector3> pois))
                 {
                     WowInterface.Db.CachePoi(MapId, PoiType.FishingSpot, originUnit.Position);
                 }

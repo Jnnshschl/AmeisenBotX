@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
         {
             List<WowUnit> healableUnits = new(WowInterface.ObjectManager.Partymembers)
             {
-                WowInterface.ObjectManager.Player
+                WowInterface.Player
             };
 
             // healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);

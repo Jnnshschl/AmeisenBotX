@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(commandingShoutSpell, () => TryCastSpell(commandingShoutSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(demoralizingShoutSpell, () => TryCastSpell(demoralizingShoutSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(demoralizingShoutSpell, () => TryCastSpell(demoralizingShoutSpell, WowInterface.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -115,82 +115,82 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerTank))
             {
-                if ((WowInterface.ObjectManager.Player.IsFleeing
-                    || WowInterface.ObjectManager.Player.IsDazed
-                    || WowInterface.ObjectManager.Player.IsDisarmed)
+                if ((WowInterface.Player.IsFleeing
+                    || WowInterface.Player.IsDazed
+                    || WowInterface.Player.IsDisarmed)
                     && TryCastSpell(berserkerRageSpell, 0, false))
                 {
                     return;
                 }
 
-                double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
 
                 if (distanceToTarget > 8.0)
                 {
-                    if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
                 }
                 else
                 {
-                    if (WowInterface.ObjectManager.Player.Rage > 40
+                    if (WowInterface.Player.Rage > 40
                         && HeroicStrikeEvent.Run()
-                        && TryCastSpell(heroicStrikeSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        && TryCastSpell(heroicStrikeSpell, WowInterface.Target.Guid, true))
                     {
                         // do not return, hehe xd
                     }
 
-                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10.0).Count();
+                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 10.0f).Count();
 
-                    if ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
-                        && TryCastSpellWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    if ((nearEnemies > 2 || WowInterface.Player.Rage > 40)
+                        && TryCastSpellWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                        && (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
+                    if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                        && (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
                             && TryCastSpell(challengingShoutSpell, 0, true))
-                        || TryCastSpellWarrior(tauntSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid))
+                        || TryCastSpellWarrior(tauntSpell, defensiveStanceSpell, WowInterface.Target.Guid))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 25.0
+                    if (WowInterface.Player.HealthPercentage < 25.0
                         && TryCastSpellWarrior(retaliationSpell, battleStanceSpell, 0))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage < 40.0
+                    if (WowInterface.Player.HealthPercentage < 40.0
                         && (TryCastSpell(lastStandSpell, 0)
                             || TryCastSpellWarrior(shieldWallSpell, defensiveStanceSpell, 0)
-                            || TryCastSpellWarrior(shieldBlockSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                            || TryCastSpellWarrior(shieldBlockSpell, defensiveStanceSpell, WowInterface.Target.Guid, true)))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Target.IsCasting
-                        && (TryCastSpellWarrior(shieldBashSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid)
+                    if (WowInterface.Target.IsCasting
+                        && (TryCastSpellWarrior(shieldBashSpell, defensiveStanceSpell, WowInterface.Target.Guid)
                             || TryCastSpellWarrior(spellReflectionSpell, defensiveStanceSpell, 0)))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage > 50.0
+                    if (WowInterface.Player.HealthPercentage > 50.0
                         && TryCastSpell(bloodrageSpell, 0))
                     {
                         return;
                     }
 
                     if (TryCastSpell(berserkerRageSpell, 0, true)
-                        || TryCastSpell(shieldSlamSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || TryCastSpell(mockingBlowSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || ((nearEnemies > 2 || WowInterface.ObjectManager.Player.Rage > 40)
-                            && TryCastSpell(shockwaveSpell, WowInterface.ObjectManager.Target.Guid, true))
-                        || TryCastSpell(devastateSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || TryCastSpellWarrior(revengeSpell, defensiveStanceSpell, WowInterface.ObjectManager.Target.Guid, true))
+                        || TryCastSpell(shieldSlamSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(mockingBlowSpell, WowInterface.Target.Guid, true)
+                        || ((nearEnemies > 2 || WowInterface.Player.Rage > 40)
+                            && TryCastSpell(shockwaveSpell, WowInterface.Target.Guid, true))
+                        || TryCastSpell(devastateSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpellWarrior(revengeSpell, defensiveStanceSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }

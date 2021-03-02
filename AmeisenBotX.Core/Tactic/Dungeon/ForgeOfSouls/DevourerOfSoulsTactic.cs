@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                 {
                     // make sure we avoid the lazer
                     // we only care about being on the reight side of him because the lazer spins clockwise
-                    float angleDiff = BotMath.GetAngleDiff(wowUnit.Position, wowUnit.Rotation, WowInterface.ObjectManager.Player.Position);
+                    float angleDiff = BotMath.GetAngleDiff(wowUnit.Position, wowUnit.Rotation, WowInterface.Player.Position);
 
                     if (angleDiff < 0.5f)
                     {
@@ -56,11 +56,11 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                 if (role == WowRole.Tank)
                 {
                     Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
-                    float distanceToMid = WowInterface.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
+                    float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
 
-                    if (wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
                     {
-                        if (distanceToMid > 5.0f && WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
+                        if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
                             WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);

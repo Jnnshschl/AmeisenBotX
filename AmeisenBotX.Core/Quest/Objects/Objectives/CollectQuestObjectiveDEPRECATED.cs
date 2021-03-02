@@ -44,12 +44,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             WowGameobject lootableObject = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
                 .Where(e => e.DisplayId == ObjectDisplayId)
-                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
 
             if (lootableObject != null)
             {
-                if (lootableObject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.0)
+                if (lootableObject.Position.GetDistance(WowInterface.Player.Position) > 3.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, lootableObject.Position);
                 }
@@ -66,8 +66,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             else
             {
                 AreaNode selectedArea = Area
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                    .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < e.Radius);
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                    .FirstOrDefault(e => e.Position.GetDistance(WowInterface.Player.Position) < e.Radius);
 
                 if (selectedArea != null)
                 {

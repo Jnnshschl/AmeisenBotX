@@ -14,8 +14,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(unholyPresenceSpell, () => TryCastSpellDk(unholyPresenceSpell, 0)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(hornOfWinterSpell, () => TryCastSpellDk(hornOfWinterSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, false, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.TargetGuid, false, false, false, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.TargetGuid, false, false, false, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -86,21 +86,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                   && TryCastSpellDk(darkCommandSpell, WowInterface.ObjectManager.TargetGuid))
+                if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                   && TryCastSpellDk(darkCommandSpell, WowInterface.TargetGuid))
                 {
                     return;
                 }
 
-                if (!WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
-                    && WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 2.0
-                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                if (!WowInterface.Target.HasBuffByName(chainsOfIceSpell)
+                    && WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) > 2.0
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.TargetGuid, false, false, true))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target.HasBuffByName(chainsOfIceSpell)
-                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                if (WowInterface.Target.HasBuffByName(chainsOfIceSpell)
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.TargetGuid, false, false, true))
                 {
                     return;
                 }
@@ -110,14 +110,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 60
-                        && TryCastSpellDk(iceboundFortitudeSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || TryCastSpellDk(bloodStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, true)
-                    || TryCastSpellDk(scourgeStrikeSpell, WowInterface.ObjectManager.TargetGuid, false, false, true, true)
-                    || TryCastSpellDk(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || TryCastSpellDk(summonGargoyleSpell, WowInterface.ObjectManager.TargetGuid, true)
-                    || (WowInterface.ObjectManager.Player.Runeenergy > 60
-                        && TryCastSpellDk(runeStrikeSpell, WowInterface.ObjectManager.TargetGuid)))
+                if ((WowInterface.Player.HealthPercentage < 60
+                        && TryCastSpellDk(iceboundFortitudeSpell, WowInterface.TargetGuid, true))
+                    || TryCastSpellDk(bloodStrikeSpell, WowInterface.TargetGuid, false, true)
+                    || TryCastSpellDk(scourgeStrikeSpell, WowInterface.TargetGuid, false, false, true, true)
+                    || TryCastSpellDk(deathCoilSpell, WowInterface.TargetGuid, true)
+                    || TryCastSpellDk(summonGargoyleSpell, WowInterface.TargetGuid, true)
+                    || (WowInterface.Player.Runeenergy > 60
+                        && TryCastSpellDk(runeStrikeSpell, WowInterface.TargetGuid)))
                 {
                     return;
                 }

@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Author => "Lukas";
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "Warrior Arms";
 
@@ -188,14 +188,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
-                double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+                double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
                 Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
-                if ((WowInterface.ObjectManager.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
                 {
                     if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                     {
-                        if (!WowInterface.ObjectManager.Player.HasBuffByName(stance))
+                        if (!WowInterface.Player.HasBuffByName(stance))
                         {
                             WowInterface.HookManager.LuaCastSpell(stance);
                             return true;
@@ -225,22 +225,22 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
+            if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
             {
-                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) == WowUnitReaction.Friendly)
+                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
                 {
                     WowInterface.HookManager.WowClearTarget();
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
                 {
-                    if (!WowInterface.ObjectManager.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
                         WowInterface.HookManager.LuaStartAutoAttack();
                     }
 
-                    if (WowInterface.ObjectManager.Target.IsCasting && CustomCastSpell(pummelSpell))
+                    if (WowInterface.Target.IsCasting && CustomCastSpell(pummelSpell))
                     {
                         return;
                     }
@@ -260,27 +260,27 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
+                    if (WowInterface.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 60 && CustomCastSpell(retaliationSpell, battleStanceSpell))
+                    if (WowInterface.Player.HealthPercentage <= 60 && CustomCastSpell(retaliationSpell, battleStanceSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HealthPercentage <= 50 && WowInterface.ObjectManager.Player.HasBuffByName("Enrage") && CustomCastSpell(enragedregenerationSpell))
+                    if (WowInterface.Player.HealthPercentage <= 50 && WowInterface.Player.HasBuffByName("Enrage") && CustomCastSpell(enragedregenerationSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
+                    if (WowInterface.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer) && !WowInterface.ObjectManager.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
+                    if (WowInterface.Target.GetType() == typeof(WowPlayer) && !WowInterface.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
                     }
@@ -290,17 +290,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if ((WowInterface.ObjectManager.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell)) || (WowInterface.ObjectManager.Player.HasBuffByName("Sudden Death") && CustomCastSpell(executeSpell)))
+                    if ((WowInterface.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell)) || (WowInterface.Player.HasBuffByName("Sudden Death") && CustomCastSpell(executeSpell)))
                     {
                         return;
                     }
 
-                    if (RendEvent.Run() && !WowInterface.ObjectManager.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
+                    if (RendEvent.Run() && !WowInterface.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.ObjectManager.Player.HasBuffByName("Taste for Blood") && CustomCastSpell(OverpowerSpell))
+                    if (WowInterface.Player.HasBuffByName("Taste for Blood") && CustomCastSpell(OverpowerSpell))
                     {
                         return;
                     }
@@ -315,7 +315,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (!WowInterface.ObjectManager.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
+                    if (!WowInterface.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
                     {
                         return;
                     }
@@ -346,9 +346,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 40)
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 40)
                 .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
 
                 if (nearTarget != null)

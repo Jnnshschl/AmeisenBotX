@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting)
+            if (Finished || WowInterface.Player.IsCasting)
             {
                 WowInterface.HookManager.LuaClickUiElement("TradeSkillFrameCloseButton"); return;
             }

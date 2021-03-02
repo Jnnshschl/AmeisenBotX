@@ -94,13 +94,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.ObjectManager.Target.HasBuffByName(flameShockSpell)
-                    && TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.Target.HasBuffByName(flameShockSpell)
+                    && TryCastSpell(flameShockSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpell(lightningBoltSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
@@ -128,33 +128,33 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 WowInterface.HookManager.WowTargetGuid(unitsToHeal.First().Guid);
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if (WowInterface.ObjectManager.Target.HealthPercentage < 25
+                    if (WowInterface.Target.HealthPercentage < 25
                         && TryCastSpell(earthShieldSpell, 0, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 4
-                        && TryCastSpell(chainHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(chainHealSpell, WowInterface.TargetGuid, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 6
                         && (TryCastSpell(naturesSwiftnessSpell, 0, true)
-                        || TryCastSpell(tidalForceSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        || TryCastSpell(tidalForceSpell, WowInterface.TargetGuid, true)))
                     {
                         return true;
                     }
 
-                    double healthDifference = WowInterface.ObjectManager.Target.MaxHealth - WowInterface.ObjectManager.Target.Health;
+                    double healthDifference = WowInterface.Target.MaxHealth - WowInterface.Target.Health;
                     List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (TryCastSpell(keyValuePair.Value, WowInterface.ObjectManager.TargetGuid, true))
+                        if (TryCastSpell(keyValuePair.Value, WowInterface.TargetGuid, true))
                         {
                             return true;
                         }

@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
             possibleTargets = null;
 
             if (WowInterface.Target != null
-                && WowInterface.ObjectManager.TargetGuid != 0)
+                && WowInterface.TargetGuid != 0)
             {
                 if (!IsValidUnit(WowInterface.Target))
                 {
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                 }
 
                 if (WowInterface.Target.Type != WowObjectType.Player
-                    && WowInterface.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                    && WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
                     && WowInterface.ObjectManager.PartymemberGuids.Contains(WowInterface.Target.TargetGuid))
                 {
                     return true;

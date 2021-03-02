@@ -53,11 +53,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
-                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distance = weakestPlayer.Position.GetDistance(WowInterface.Player.Position);
                 double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
 
                 if (distance > threshold)
@@ -88,15 +88,15 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             .OfType<WowGameobject>()
             .Where(x => !FlagsNodelist.Contains((Flags)x.DisplayId)
                     && Enum.IsDefined(typeof(Flags), x.DisplayId)
-                    && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15)
-            .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    && x.Position.GetDistance(WowInterface.Player.Position) < 15)
+            .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
             .FirstOrDefault();
 
             if (FlagNode != null)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, FlagNode.Position);
 
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(FlagNode.Position) <= 4)
+                if (WowInterface.Player.Position.GetDistance(FlagNode.Position) <= 4)
                 {
                     WowInterface.MovementEngine.StopMovement();
 
@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     {
                         IEnumerable<WowPlayer> enemiesNearFlag = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(FlagNode.Position, 40);
                         IEnumerable<WowPlayer> friendsNearFlag = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(FlagNode.Position, 40);
-                        IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 20);
+                        IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.Player.Position, 20);
 
                         if (enemiesNearFlag != null)
                         {
@@ -177,7 +177,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Faction()
         {
-            if (WowInterface.ObjectManager.Player.IsHorde())
+            if (WowInterface.Player.IsHorde())
             {
                 faction = true;
                 FactionFlagState = "Alliance Controlled";

@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private int Killed { get; set; }
 
-        private DateTime LastUnitCheck { get; set; } = DateTime.Now;
+        private DateTime LastUnitCheck { get; set; } = DateTime.UtcNow;
 
         private List<int> NpcIds { get; }
 
@@ -88,29 +88,29 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
-            if (!WowInterface.ObjectManager.Player.IsInCombat && DateTime.Now.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
+            if (!WowInterface.Player.IsInCombat && DateTime.UtcNow.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
             {
-                LastUnitCheck = DateTime.Now;
+                LastUnitCheck = DateTime.UtcNow;
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && NpcIds.Contains(WowGuid.ToNpcId(e.Guid)) && !e.IsNotAttackable
-                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .Take(3)
-                    .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, e.Position))
+                    .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, e.Position))
                     .FirstOrDefault();
 
                 // Kill enemies in the path
                 if (WowUnit != null && !WowInterface.CombatClass.IsTargetAttackable(WowUnit))
                 {
                     var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
-                    WowInterface.ObjectManager.Player.Position, WowUnit.Position);
+                    WowInterface.Player.Position, WowUnit.Position);
                     if (path != null)
                     {
                         var nearEnemies =
-                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0);
+                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0f);
                         if (nearEnemies.Any())
                         {
                             WowUnit = nearEnemies.FirstOrDefault();

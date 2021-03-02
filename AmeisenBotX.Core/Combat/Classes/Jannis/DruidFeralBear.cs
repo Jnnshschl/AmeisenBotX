@@ -13,10 +13,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public DruidFeralBear(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(direBearFormSpell, () => TryCastSpell(direBearFormSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleBearSpell, () => TryCastSpell(mangleBearSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleBearSpell, () => TryCastSpell(mangleBearSpell, WowInterface.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -92,21 +92,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
 
                 if (distanceToTarget > 9.0
-                    && TryCastSpell(feralChargeBearSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    && TryCastSpell(feralChargeBearSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+                if (WowInterface.Player.HealthPercentage < 40
                     && TryCastSpell(survivalInstinctsSpell, 0, true))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
+                if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
                     && TryCastSpell(growlSpell, 0, true))
                 {
                     return;
@@ -122,18 +122,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 10).Count();
+                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 10).Count();
 
-                if ((WowInterface.ObjectManager.Player.HealthPercentage > 80
+                if ((WowInterface.Player.HealthPercentage > 80
                         && TryCastSpell(enrageSpell, 0, true))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    || (WowInterface.Player.HealthPercentage < 70
                         && TryCastSpell(barkskinSpell, 0, true))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 75
+                    || (WowInterface.Player.HealthPercentage < 75
                         && TryCastSpell(frenziedRegenerationSpell, 0, true))
                     || (nearEnemies > 2 && TryCastSpell(challengingRoarSpell, 0, true))
-                    || TryCastSpell(lacerateSpell, WowInterface.ObjectManager.TargetGuid, true)
+                    || TryCastSpell(lacerateSpell, WowInterface.TargetGuid, true)
                     || (nearEnemies > 2 && TryCastSpell(swipeSpell, 0, true))
-                    || TryCastSpell(mangleBearSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || TryCastSpell(mangleBearSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
@@ -152,14 +152,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealMySelf()
         {
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                && !WowInterface.ObjectManager.Player.HasBuffByName(rejuvenationSpell)
+            if (WowInterface.Player.HealthPercentage < 60
+                && !WowInterface.Player.HasBuffByName(rejuvenationSpell)
                 && TryCastSpell(rejuvenationSpell, 0, true))
             {
                 return true;
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+            if (WowInterface.Player.HealthPercentage < 40
                 && TryCastSpell(healingTouchSpell, 0, true))
             {
                 return true;

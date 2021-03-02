@@ -32,9 +32,39 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public float DistanceTo(Vector3 b) => Position.GetDistance(b);
 
+        public bool IsContainer()
+        {
+            return Type == WowObjectType.Container;
+        }
+
+        public bool IsCorpse()
+        {
+            return Type == WowObjectType.Corpse;
+        }
+
+        public bool IsDynoject()
+        {
+            return Type == WowObjectType.Dynobject;
+        }
+
+        public bool IsGameobject()
+        {
+            return Type == WowObjectType.Gameobject;
+        }
+
         public bool IsInRange(WowObject b, float range) => DistanceTo(b) < range;
 
         public bool IsInRange(Vector3 b, float range) => DistanceTo(b) < range;
+
+        public bool IsPlayer()
+        {
+            return Type == WowObjectType.Player;
+        }
+
+        public bool IsUnit()
+        {
+            return Type == WowObjectType.Unit;
+        }
 
         public override string ToString()
         {

@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Grinding.Objects
         {
         }
 
-        public GrindingSpot(Vector3 position, double radius, int minLevel, int maxLevel)
+        public GrindingSpot(Vector3 position, float radius, int minLevel, int maxLevel)
         {
             Position = position;
             Radius = radius;
@@ -22,6 +22,6 @@ namespace AmeisenBotX.Core.Grinding.Objects
 
         public Vector3 Position { get; set; }
 
-        public double Radius { get; set; }
+        public float Radius { get; set; }
     }
 }

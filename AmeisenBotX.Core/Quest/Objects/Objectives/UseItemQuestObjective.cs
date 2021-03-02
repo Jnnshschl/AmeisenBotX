@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
             IWowItem item = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == ItemId);
 

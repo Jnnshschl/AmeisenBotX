@@ -35,11 +35,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.ObjectManager.Player.Position, 30.0).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
-                double distance = weakestPlayer.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distance = weakestPlayer.Position.GetDistance(WowInterface.Player.Position);
                 double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
 
                 if (distance > threshold)
@@ -70,15 +70,15 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 WowGameobject VehicleNode = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
-                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20)
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                            && x.Position.GetDistance(WowInterface.Player.Position) < 20)
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
                 if (VehicleNode != null)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, VehicleNode.Position);
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(VehicleNode.Position) <= 4)
+                    if (WowInterface.Player.Position.GetDistance(VehicleNode.Position) <= 4)
                     {
                         WowInterface.MovementEngine.StopMovement();
 

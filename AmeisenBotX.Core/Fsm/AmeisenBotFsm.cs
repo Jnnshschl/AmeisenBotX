@@ -132,14 +132,14 @@ namespace AmeisenBotX.Core.Fsm
                     {
                         WowInterface.ObjectManager.UpdateWowObjects();
 
-                        if (WowInterface.ObjectManager.Player != null)
+                        if (WowInterface.Player != null)
                         {
                             WowInterface.MovementEngine.Execute();
 
                             // handle event subbing
                             WowInterface.EventHookManager.ExecutePendingLua();
 
-                            if (WowInterface.ObjectManager.Player.IsDead)
+                            if (WowInterface.Player.IsDead)
                             {
                                 // we are dead, state needs to release the spirit
                                 if (SetState(BotState.Dead, true))
@@ -159,9 +159,9 @@ namespace AmeisenBotX.Core.Fsm
                             if (CurrentState.Key != BotState.Dead
                                 && CurrentState.Key != BotState.Ghost
                                 && !WowInterface.Globals.IgnoreCombat
-                                && !(Config.IgnoreCombatWhileMounted && WowInterface.ObjectManager.Player.IsMounted)
-                                && (WowInterface.Globals.ForceCombat || WowInterface.ObjectManager.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
+                                && !(Config.IgnoreCombatWhileMounted && WowInterface.Player.IsMounted)
+                                && (WowInterface.Globals.ForceCombat || WowInterface.Player.IsInCombat || IsAnyPartymemberInCombat()
+                                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
                             {
                                 if (SetState(BotState.Attacking, true))
                                 {
@@ -222,13 +222,13 @@ namespace AmeisenBotX.Core.Fsm
             return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
                        .Where(e => e.IsLootable
                            && !GetState<StateLooting>().UnitsAlreadyLootedList.Contains(e.Guid)
-                           && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.LootUnitsRadius);
+                           && e.Position.GetDistance(WowInterface.Player.Position) < Config.LootUnitsRadius);
         }
 
         internal bool IsAnyPartymemberInCombat()
         {
             return !Config.OnlySupportMaster && WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
-                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.SupportRange)
+                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.Player.Position) < Config.SupportRange)
                        .Any(r => r.IsInCombat);
         }
     }

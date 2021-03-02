@@ -40,10 +40,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.ObjectManager.Target != null && !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hauntSpell, () => TryCastSpell(hauntSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hauntSpell, () => TryCastSpell(hauntSpell, WowInterface.TargetGuid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Affliction Warlock spec.";
@@ -112,46 +112,46 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 90
-                        && WowInterface.ObjectManager.Player.HealthPercentage > 60
+                if (WowInterface.Player.ManaPercentage < 90
+                        && WowInterface.Player.HealthPercentage > 60
                         && TryCastSpell(lifeTapSpell, 0)
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 80
-                        && TryCastSpell(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                    || (WowInterface.Player.HealthPercentage < 80
+                        && TryCastSpell(deathCoilSpell, WowInterface.TargetGuid, true)))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
+                    if (WowInterface.Target.GetType() == typeof(WowPlayer))
                     {
-                        if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(5)
-                            && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6
+                        if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
+                            && ((WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 6.0f
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
-                            || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12
-                                && TryCastSpell(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
+                            || (WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 12.0f
+                                && TryCastSpell(fearSpell, WowInterface.TargetGuid, true))))
                         {
-                            LastFearAttempt = DateTime.Now;
+                            LastFearAttempt = DateTime.UtcNow;
                             return;
                         }
                     }
 
                     if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                        && WowInterface.ObjectManager.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && WowInterface.Target.HealthPercentage < 25.0
+                        && TryCastSpell(drainSoulSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }
                 }
 
-                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count() > 2
-                    && !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
+                    && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell)
+                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(shadowBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpell(shadowBoltSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }

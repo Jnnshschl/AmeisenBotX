@@ -166,12 +166,7 @@ namespace AmeisenBotX.Memory
             CloseHandle(MainThreadHandle);
             CloseHandle(ProcessHandle);
 
-            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
-
-            for (int i = 0; i < memAllocs.Count; ++i)
-            {
-                FreeMemory(memAllocs[i]);
-            }
+            FreeAllMemory();
         }
 
         public bool FasmInject(IntPtr address, bool patchMemProtection = false)
@@ -211,6 +206,16 @@ namespace AmeisenBotX.Memory
                     Fasm.Clear();
                     return false;
                 }
+            }
+        }
+
+        public void FreeAllMemory()
+        {
+            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
+
+            for (int i = 0; i < memAllocs.Count; ++i)
+            {
+                FreeMemory(memAllocs[i]);
             }
         }
 

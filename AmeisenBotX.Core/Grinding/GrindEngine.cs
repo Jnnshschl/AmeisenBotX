@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Grinding
         {
             if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0
             && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
-            && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, PoiType.Repair, WowInterface.ObjectManager.Player.Position, 4096.0, out IEnumerable<Vector3> repairNpcs))
+            && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, PoiType.Repair, WowInterface.Player.Position, 4096.0f, out IEnumerable<Vector3> repairNpcs))
             {
                 GoToNpcAndRepair(repairNpcs);
                 return;
@@ -67,16 +67,16 @@ namespace AmeisenBotX.Core.Grinding
                 return;
             }
 
-            double distanceToSpot = GrindingSpot.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+            double distanceToSpot = GrindingSpot.Position.GetDistance(WowInterface.Player.Position);
 
             IEnumerable<WowUnit> nearUnits = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
                 .Where(e => e.Level >= GrindingSpot.MinLevel
                          && e.Level <= GrindingSpot.MaxLevel
                          && !Blacklist.Contains(e.Guid)
                          && e.Position.GetDistance(GrindingSpot.Position) < GrindingSpot.Radius)
-                .OrderBy(e => e.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position));
+                .OrderBy(e => e.Position.GetDistance2D(WowInterface.Player.Position));
 
-            if (WowInterface.ObjectManager.Player.IsInCombat && WowInterface.ObjectManager.Player.IsMounted)
+            if (WowInterface.Player.IsInCombat && WowInterface.Player.IsMounted)
             {
                 WowInterface.HookManager.LuaDismissCompanion();
             }
@@ -99,10 +99,10 @@ namespace AmeisenBotX.Core.Grinding
 
                     if (TargetInLosEvent.Run() || switchedTarget)
                     {
-                        TargetInLos = WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, nearestUnit.Position);
+                        TargetInLos = WowInterface.HookManager.WowIsInLineOfSight(WowInterface.Player.Position, nearestUnit.Position);
                     }
 
-                    if (nearestUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 20.0 && TargetInLos)
+                    if (nearestUnit.Position.GetDistance(WowInterface.Player.Position) < 20.0f && TargetInLos)
                     {
                         WowInterface.HookManager.WowTargetGuid(nearestUnit.Guid);
                         WowInterface.Globals.ForceCombat = true;
@@ -124,7 +124,7 @@ namespace AmeisenBotX.Core.Grinding
                 }
                 else
                 {
-                    if (DateTime.Now - LookingForEnemiesSince > TimeSpan.FromSeconds(30))
+                    if (DateTime.UtcNow - LookingForEnemiesSince > TimeSpan.FromSeconds(30))
                     {
                         GrindingSpot = SelectNextGrindingSpot();
                         TargetPosition = default;
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Grinding
             }
             else
             {
-                if (WowInterface.ObjectManager.Partymembers.Any(e => e.IsDead || e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 30.0))
+                if (WowInterface.ObjectManager.Partymembers.Any(e => e.IsDead || e.Position.GetDistance(WowInterface.Player.Position) > 30.0f))
                 {
                     WowInterface.MovementEngine.StopMovement();
                     return;
@@ -164,9 +164,9 @@ namespace AmeisenBotX.Core.Grinding
 
         private void GoToNpcAndRepair(IEnumerable<Vector3> repairNpcs)
         {
-            Vector3 repairNpc = repairNpcs.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
+            Vector3 repairNpc = repairNpcs.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First();
 
-            if (repairNpc.GetDistance(WowInterface.ObjectManager.Player.Position) > 4.0)
+            if (repairNpc.GetDistance(WowInterface.Player.Position) > 4.0f)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, repairNpc);
             }
@@ -184,7 +184,7 @@ namespace AmeisenBotX.Core.Grinding
                 TargetPosition = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, GrindingSpot.Position, (float)GrindingSpot.Radius * 0.2f);
             }
 
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(TargetPosition) < 4.0)
+            if (WowInterface.Player.Position.GetDistance(TargetPosition) < 4.0f)
             {
                 TargetPosition = default;
             }
@@ -198,16 +198,16 @@ namespace AmeisenBotX.Core.Grinding
         {
             if (Profile == null)
             {
-                Vector3 pos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, WowInterface.ObjectManager.Player.Position, 100f);
+                Vector3 pos = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, 100.0f);
 
                 return new()
                 {
-                    Position = pos != default ? pos : WowInterface.ObjectManager.Player.Position,
-                    Radius = 100.0
+                    Position = pos != default ? pos : WowInterface.Player.Position,
+                    Radius = 100.0f
                 };
             }
 
-            List<GrindingSpot> spots = Profile.Spots.Where(e => WowInterface.ObjectManager.Player.Level >= e.MinLevel && WowInterface.ObjectManager.Player.Level <= e.MaxLevel).ToList();
+            List<GrindingSpot> spots = Profile.Spots.Where(e => WowInterface.Player.Level >= e.MinLevel && WowInterface.Player.Level <= e.MaxLevel).ToList();
 
             if (spots.Count == 0)
             {

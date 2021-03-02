@@ -89,18 +89,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerTank))
             {
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 10.0
+                if (WowInterface.Player.HealthPercentage < 10.0
                     && TryCastSpell(layOnHandsSpell, 0, true))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 20.0
+                if (WowInterface.Player.HealthPercentage < 20.0
                     && TryCastSpell(flashOfLightSpell, 0, true))
                 {
                     return;
                 }
-                else if (WowInterface.ObjectManager.Player.HealthPercentage < 35.0
+                else if (WowInterface.Player.HealthPercentage < 35.0
                     && TryCastSpell(holyLightSpell, 0, true))
                 {
                     return;
@@ -112,31 +112,31 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if (WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                        && TryCastSpell(handOfReckoningSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                        && TryCastSpell(handOfReckoningSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(avengersShieldSpell, WowInterface.ObjectManager.Target.Guid, true)
-                        || (WowInterface.ObjectManager.Target.HealthPercentage < 20.0 && TryCastSpell(hammerOfWrathSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                    if (TryCastSpell(avengersShieldSpell, WowInterface.Target.Guid, true)
+                        || (WowInterface.Target.HealthPercentage < 20.0 && TryCastSpell(hammerOfWrathSpell, WowInterface.Target.Guid, true)))
                     {
                         return;
                     }
 
                     if (Use9SecSpell
-                        && (((WowInterface.ObjectManager.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.ObjectManager.Player.HasBuffByName(sealOfWisdomSpell))
-                                && TryCastSpell(judgementOfLightSpell, WowInterface.ObjectManager.TargetGuid, true))
-                            || TryCastSpell(consecrationSpell, WowInterface.ObjectManager.Target.Guid, true)
-                            || TryCastSpell(holyShieldSpell, WowInterface.ObjectManager.Target.Guid, true)))
+                        && (((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
+                                && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
+                            || TryCastSpell(consecrationSpell, WowInterface.Target.Guid, true)
+                            || TryCastSpell(holyShieldSpell, WowInterface.Target.Guid, true)))
                     {
                         Use9SecSpell = false;
                         return;
                     }
-                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, WowInterface.ObjectManager.TargetGuid, true)
-                             || TryCastSpell(hammerOfTheRighteousSpell, WowInterface.ObjectManager.Target.Guid, true))
+                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, WowInterface.TargetGuid, true)
+                             || TryCastSpell(hammerOfTheRighteousSpell, WowInterface.Target.Guid, true))
                     {
                         Use9SecSpell = true;
                         return;

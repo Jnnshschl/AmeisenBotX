@@ -38,14 +38,14 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
-            if (WowInterface.ObjectManager.Target != null
-                && !WowInterface.ObjectManager.Target.IsDead
-                && !WowInterface.ObjectManager.Target.IsNotAttackable
-                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Target) != WowUnitReaction.Friendly)
+            if (WowInterface.Target != null
+                && !WowInterface.Target.IsDead
+                && !WowInterface.Target.IsNotAttackable
+                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) != WowUnitReaction.Friendly)
             {
-                WowUnit = WowInterface.ObjectManager.Target;
+                WowUnit = WowInterface.Target;
             }
             else
             {
@@ -54,14 +54,14 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .OrderBy(e => ObjectDisplayIds.First(x => x.Value == e.DisplayId).Key)
                     .FirstOrDefault();
             }
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
                 {
                     WowInterface.HookManager.WowStopClickToMove();
                     WowInterface.MovementEngine.Reset();

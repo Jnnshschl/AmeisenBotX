@@ -16,10 +16,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(moonkinFormSpell, () => TryCastSpell(moonkinFormSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(thornsSpell, () => TryCastSpell(thornsSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, WowInterface.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -110,11 +110,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                double distance = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                double distance = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
 
                 if (distance < 12.0
-                    && WowInterface.ObjectManager.Target.HasBuffByName(entanglingRootsSpell)
-                    && TryCastSpellDk(entanglingRootsSpell, WowInterface.ObjectManager.TargetGuid, false, false, true))
+                    && WowInterface.Target.HasBuffByName(entanglingRootsSpell)
+                    && TryCastSpellDk(entanglingRootsSpell, WowInterface.TargetGuid, false, false, true))
                 {
                     return;
                 }
@@ -124,23 +124,23 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if ((WowInterface.ObjectManager.Player.ManaPercentage < 30
+                if ((WowInterface.Player.ManaPercentage < 30
                         && TryCastSpell(innervateSpell, 0))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 70
+                    || (WowInterface.Player.HealthPercentage < 70
                         && TryCastSpell(barkskinSpell, 0, true))
                     || (LunarEclipse
-                        && TryCastSpell(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && TryCastSpell(starfireSpell, WowInterface.TargetGuid, true))
                     || (SolarEclipse
-                        && TryCastSpell(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.ObjectManager.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                        && TryCastSpell(starfallSpell, WowInterface.ObjectManager.TargetGuid, true)))
+                        && TryCastSpell(wrathSpell, WowInterface.TargetGuid, true))
+                    || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.Player.Position.GetDistance(e.Position) < 35).Count() < 4
+                        && TryCastSpell(starfallSpell, WowInterface.TargetGuid, true)))
                 {
                     return;
                 }
 
                 if (TryCastSpell(forceOfNatureSpell, 0, true))
                 {
-                    WowInterface.HookManager.WowClickOnTerrain(WowInterface.ObjectManager.Player.Position);
+                    WowInterface.HookManager.WowClickOnTerrain(WowInterface.Player.Position);
                 }
             }
         }
@@ -157,12 +157,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool CheckForEclipseProcs()
         {
-            if (WowInterface.ObjectManager.Player.HasBuffByName(eclipseLunarSpell))
+            if (WowInterface.Player.HasBuffByName(eclipseLunarSpell))
             {
                 SolarEclipse = false;
                 LunarEclipse = true;
             }
-            else if (WowInterface.ObjectManager.Player.HasBuffByName(eclipseSolarSpell))
+            else if (WowInterface.Player.HasBuffByName(eclipseSolarSpell))
             {
                 SolarEclipse = true;
                 LunarEclipse = false;
@@ -174,14 +174,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealMySelf()
         {
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                && !WowInterface.ObjectManager.Player.HasBuffByName(rejuvenationSpell)
+            if (WowInterface.Player.HealthPercentage < 60
+                && !WowInterface.Player.HasBuffByName(rejuvenationSpell)
                 && TryCastSpell(rejuvenationSpell, 0, true))
             {
                 return true;
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 40
+            if (WowInterface.Player.HealthPercentage < 40
                 && TryCastSpell(healingTouchSpell, 0, true))
             {
                 return true;

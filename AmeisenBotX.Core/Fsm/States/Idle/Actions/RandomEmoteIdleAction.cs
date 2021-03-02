@@ -62,17 +62,17 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public void Execute()
         {
-            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.ObjectManager.Player.Position, 24.0)
-                .Where(e => e.Guid != WowInterface.ObjectManager.PlayerGuid && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid));
+            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.Player.Position, 24.0f)
+                .Where(e => e.Guid != WowInterface.PlayerGuid && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid));
 
             if (friendsAroundMe.Any() && Rnd.NextDouble() > 0.5)
             {
                 WowPlayer player = friendsAroundMe.ElementAt(Rnd.Next(0, friendsAroundMe.Count()));
 
-                if (WowInterface.ObjectManager.TargetGuid != player.Guid)
+                if (WowInterface.TargetGuid != player.Guid)
                 {
                     WowInterface.HookManager.WowTargetGuid(player.Guid);
-                    WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, player.Position);
+                    WowInterface.HookManager.WowFacePosition(WowInterface.Player, player.Position);
                 }
 
                 WowInterface.HookManager.LuaSendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");

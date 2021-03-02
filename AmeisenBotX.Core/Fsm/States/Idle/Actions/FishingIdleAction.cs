@@ -49,14 +49,14 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             bool fishingPoleEquipped = IsFishingRodEquipped();
             bool status =  // we cant fish while swimming
-                    !WowInterface.ObjectManager.Player.IsSwimming && !WowInterface.ObjectManager.Player.IsFlying
+                    !WowInterface.Player.IsSwimming && !WowInterface.Player.IsFlying
                     // do i have the fishing skill
                     && WowInterface.CharacterManager.Skills.Any(e => e.Key.Contains("fishing", StringComparison.OrdinalIgnoreCase))
                     // do i have a fishing pole in my inventory or equipped
                     && (WowInterface.CharacterManager.Inventory.Items.OfType<WowWeapon>().Any(e => e.WeaponType == WowWeaponType.FISHING_POLES)
                         || IsFishingRodEquipped())
                     // do i know any fishing spot around here
-                    && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.ObjectManager.Player.Position, 256.0, out IEnumerable<Vector3> pois);
+                    && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois);
 
             if (status)
             {
@@ -70,8 +70,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public void Execute()
         {
             if ((CurrentSpot == default || SpotSelected + SpotDuration <= DateTime.UtcNow)
-                && !WowInterface.ObjectManager.Player.IsCasting
-                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.ObjectManager.Player.Position, 256.0, out IEnumerable<Vector3> pois))
+                && !WowInterface.Player.IsCasting
+                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois))
             {
                 CurrentSpot = pois.ElementAt(Rnd.Next(0, pois.Count() - 1));
                 SpotSelected = DateTime.UtcNow;
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (CurrentSpot != default)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(CurrentSpot) > 3.5f)
+                if (WowInterface.Player.Position.GetDistance(CurrentSpot) > 3.5f)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSpot);
                     return;
@@ -91,9 +91,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                     return;
                 }
 
-                if (!BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, CurrentSpot))
+                if (!BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, CurrentSpot))
                 {
-                    WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, CurrentSpot);
+                    WowInterface.HookManager.WowFacePosition(WowInterface.Player, CurrentSpot);
                     return;
                 }
             }
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             }
 
             WowGameobject fishingBobber = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == WowInterface.ObjectManager.Player.Guid);
+                .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == WowInterface.Player.Guid);
 
             if (!Started)
             {
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 return;
             }
 
-            if (!WowInterface.ObjectManager.Player.IsCasting || fishingBobber == null)
+            if (!WowInterface.Player.IsCasting || fishingBobber == null)
             {
                 WowInterface.HookManager.LuaCastSpell("Fishing");
             }

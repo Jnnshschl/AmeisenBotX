@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
             if (objectPositionCombo.Item1 != null)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 5.0)
+                if (WowInterface.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, objectPositionCombo.Item1.Position);
                 }
@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             else if (objectPositionCombo.Item2 != default)
             {
                 // move to position
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 5.0)
+                if (WowInterface.Player.Position.GetDistance(objectPositionCombo.Item2) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, objectPositionCombo.Item2);
                 }
@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             if (objectPositionCombo.Item1 != null)
             {
                 // move to unit / object
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 5.0)
+                if (WowInterface.Player.Position.GetDistance(objectPositionCombo.Item1.Position) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, objectPositionCombo.Item1.Position);
                 }
@@ -224,7 +224,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
             else if (objectPositionCombo.Item2 != default)
             {
                 // move to position
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(objectPositionCombo.Item2) > 5.0)
+                if (WowInterface.Player.Position.GetDistance(objectPositionCombo.Item2) > 5.0)
                 {
                     WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, objectPositionCombo.Item2);
                 }

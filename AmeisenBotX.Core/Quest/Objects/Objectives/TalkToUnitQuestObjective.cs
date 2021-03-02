@@ -51,17 +51,17 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
             WowUnit = WowInterface.ObjectManager.WowObjects
                 .OfType<WowUnit>()
                 .Where(e => e.IsGossip && !e.IsDead && DisplayIds.Contains(e.DisplayId))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
                 {
                     if (TalkEvent.Run())
                     {

@@ -15,14 +15,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
     {
         public PriestShadow(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowformSpell, () => TryCastSpell(shadowformSpell, WowInterface.ObjectManager.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.ObjectManager.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricEmbraceSpell, () => TryCastSpell(vampiricEmbraceSpell, WowInterface.ObjectManager.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowformSpell, () => TryCastSpell(shadowformSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricEmbraceSpell, () => TryCastSpell(vampiricEmbraceSpell, WowInterface.PlayerGuid, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(devouringPlagueSpell, () => TryCastSpell(devouringPlagueSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowWordPainSpell, () => TryCastSpell(shadowWordPainSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mindBlastSpell, () => TryCastSpell(mindBlastSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(devouringPlagueSpell, () => TryCastSpell(devouringPlagueSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowWordPainSpell, () => TryCastSpell(shadowWordPainSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mindBlastSpell, () => TryCastSpell(mindBlastSpell, WowInterface.TargetGuid, true)));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
@@ -100,42 +100,42 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
         {
             base.Execute();
 
-            if (WowInterface.ObjectManager.Target == null)
+            if (WowInterface.Target == null)
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 90
-                && TryCastSpell(shadowfiendSpell, WowInterface.ObjectManager.TargetGuid))
+            if (WowInterface.Player.ManaPercentage < 90
+                && TryCastSpell(shadowfiendSpell, WowInterface.TargetGuid))
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 30
+            if (WowInterface.Player.ManaPercentage < 30
                 && TryCastSpell(hymnOfHopeSpell, 0))
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 70
-                && TryCastSpell(flashHealSpell, WowInterface.ObjectManager.TargetGuid, true))
+            if (WowInterface.Player.HealthPercentage < 70
+                && TryCastSpell(flashHealSpell, WowInterface.TargetGuid, true))
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage >= 50
-                && TryCastSpell(berserkingSpell, WowInterface.ObjectManager.TargetGuid))
+            if (WowInterface.Player.ManaPercentage >= 50
+                && TryCastSpell(berserkingSpell, WowInterface.TargetGuid))
             {
                 return;
             }
 
-            if (!WowInterface.ObjectManager.Player.IsCasting
-                && TryCastSpell(mindFlaySpell, WowInterface.ObjectManager.TargetGuid, true))
+            if (!WowInterface.Player.IsCasting
+                && TryCastSpell(mindFlaySpell, WowInterface.TargetGuid, true))
             {
                 return;
             }
 
-            if (TryCastSpell(smiteSpell, WowInterface.ObjectManager.TargetGuid, true))
+            if (TryCastSpell(smiteSpell, WowInterface.TargetGuid, true))
             {
                 return;
             }

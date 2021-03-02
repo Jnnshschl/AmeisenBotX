@@ -75,21 +75,21 @@ namespace AmeisenBotX.Core.Data
 
         WowUnit GetClosestWowUnitByNpcId(IEnumerable<int> npcIds, bool onlyQuestgiver = true);
 
-        IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, float distance) where T : WowUnit;
 
-        IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, float distance) where T : WowUnit;
 
-        IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, double distance) where T : WowUnit;
+        IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) where T : WowUnit;
 
-        IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) where T : WowUnit;
 
-        IEnumerable<T> GetNearEnemies<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) where T : WowUnit;
 
-        IEnumerable<T> GetNearFriends<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance) where T : WowUnit;
 
-        IEnumerable<T> GetNearPartymembers<T>(Vector3 position, double distance) where T : WowUnit;
+        IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) where T : WowUnit;
 
-        IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, double distance);
+        IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, float distance);
 
         T GetWowObjectByGuid<T>(ulong guid) where T : WowObject;
 

@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
         public override void AttackTarget()
         {
-            WowUnit target = WowInterface.ObjectManager.Target;
+            WowUnit target = WowInterface.Target;
             if (target == null)
             {
                 return;
@@ -49,14 +49,14 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
         {
             Spell openingSpell = GetOpeningSpell();
             float posOffset = 0.5f;
-            Vector3 currentPos = WowInterface.ObjectManager.Player.Position;
-            Vector3 posXLeft = WowInterface.ObjectManager.Player.Position;
+            Vector3 currentPos = WowInterface.Player.Position;
+            Vector3 posXLeft = WowInterface.Player.Position;
             posXLeft.X -= posOffset;
-            Vector3 posXRight = WowInterface.ObjectManager.Player.Position;
+            Vector3 posXRight = WowInterface.Player.Position;
             posXRight.X += posOffset;
-            Vector3 posYRight = WowInterface.ObjectManager.Player.Position;
+            Vector3 posYRight = WowInterface.Player.Position;
             posYRight.Y += posOffset;
-            Vector3 posYLeft = WowInterface.ObjectManager.Player.Position;
+            Vector3 posYLeft = WowInterface.Player.Position;
             posYLeft.Y -= posOffset;
 
             return IsInRange(openingSpell, target)
@@ -85,9 +85,9 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
         protected bool SelectTarget(out WowUnit target)
         {
-            WowUnit currentTarget = WowInterface.ObjectManager.Target;
+            WowUnit currentTarget = WowInterface.Target;
             IEnumerable<WowUnit> nearAttackingEnemies = WowInterface.ObjectManager
-                .GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 64.0)
+                .GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 64.0f)
                 .Where(e => !e.IsDead && !e.IsNotAttackable)
                 .OrderBy(e => e.Auras.All(aura => aura.Name != polymorphSpell));
 
@@ -97,8 +97,8 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
                    || (currentTarget.Auras.Any(e => e.Name == polymorphSpell) &&
                        nearAttackingEnemies.Where(e => e.Auras.All(aura => aura.Name != polymorphSpell)).Any(e => e.Guid != currentTarget.Guid))
                    || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
-                   || !BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
-                   || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, currentTarget) == WowUnitReaction.Friendly))
+                   || !BotUtils.IsValidUnit(WowInterface.Target)
+                   || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, currentTarget) == WowUnitReaction.Friendly))
             {
                 currentTarget = null;
                 target = null;

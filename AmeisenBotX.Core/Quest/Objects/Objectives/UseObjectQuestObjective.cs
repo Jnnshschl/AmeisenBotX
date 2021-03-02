@@ -45,17 +45,17 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
             WowGameobject = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => ObjectDisplayIds.Contains(e.DisplayId))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
 
             if (WowGameobject != null)
             {
-                if (WowGameobject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                if (WowGameobject.Position.GetDistance(WowInterface.Player.Position) < 3.0)
                 {
                     if (UseEvent.Run())
                     {

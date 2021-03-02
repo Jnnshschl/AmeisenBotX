@@ -40,16 +40,16 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Execute()
         {
             if (!(WowInterface.Globals.ForceCombat
-                || WowInterface.ObjectManager.Player.IsInCombat
+                || WowInterface.Player.IsInCombat
                 || StateMachine.IsAnyPartymemberInCombat()
-                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 100.0).Any()))
+                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
             // we can do nothing until the ObjectManager is initialzed
-            if (WowInterface.ObjectManager != null && WowInterface.ObjectManager.Player != null)
+            if (WowInterface.ObjectManager != null && WowInterface.Player != null)
             {
                 bool tacticsMovement = false;
                 bool tacticsAllowAttacking = false;
@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (!tacticsMovement)
                     {
-                        if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.ObjectManager.Target == null)
+                        if (WowInterface.TargetGuid == 0 || WowInterface.Target == null)
                         {
                             if (WowInterface.Globals.ForceCombat)
                             {
@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.Fsm.States
                         }
                         else
                         {
-                            HandleMovement(WowInterface.ObjectManager.Target);
+                            HandleMovement(WowInterface.Target);
                         }
                     }
                 }
@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (WowInterface.CombatClass == null)
                     {
-                        if (!WowInterface.ObjectManager.Player.IsAutoAttacking)
+                        if (!WowInterface.Player.IsAutoAttacking)
                         {
                             WowInterface.HookManager.LuaStartAutoAttack();
                         }
@@ -115,15 +115,15 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private float GetMeeleRange()
         {
-            return WowInterface.ObjectManager.Target.Type == WowObjectType.Player ? 1.5f : MathF.Min(3.0f, (WowInterface.ObjectManager.Player.CombatReach + WowInterface.ObjectManager.Target.CombatReach) * 0.9f);
+            return WowInterface.Target.Type == WowObjectType.Player ? 1.5f : MathF.Min(3.0f, (WowInterface.Player.CombatReach + WowInterface.Target.CombatReach) * 0.9f);
         }
 
         private bool HandleDpsMovement(WowUnit target, Vector3 targetPosition)
         {
             // handle special movement needs
             if (WowInterface.CombatClass.WalkBehindEnemy
-                && WowInterface.ObjectManager.Target.TargetGuid != WowInterface.ObjectManager.PlayerGuid
-                || WowInterface.ObjectManager.Target.Type == WowObjectType.Player) // prevent spinning
+                && WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                || WowInterface.Target.Type == WowObjectType.Player) // prevent spinning
             {
                 // walk behind enemy
                 Vector3 positionToGoTo = BotMath.CalculatePositionBehind(target.Position, target.Rotation);
@@ -153,12 +153,12 @@ namespace AmeisenBotX.Core.Fsm.States
             // check if we are facing the unit
             if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesFacing)
                 && target != null
-                && target.Guid != WowInterface.ObjectManager.PlayerGuid
+                && target.Guid != WowInterface.PlayerGuid
                 && FacingCheck.Run()
                 && !WowInterface.HookManager.WowIsClickToMoveActive()
-                && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                && !BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, target.Position))
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
             }
 
             // do we need to move
@@ -170,7 +170,7 @@ namespace AmeisenBotX.Core.Fsm.States
             else if (WowInterface.CombatClass != null)
             {
                 Vector3 targetPosition = BotUtils.MoveAhead(target.Position, target.Rotation, 0.5f);
-                float distance = WowInterface.ObjectManager.Player.Position.GetDistance(target.Position);
+                float distance = WowInterface.Player.Position.GetDistance(target.Position);
 
                 if (distance > DistanceToKeep || !WowInterface.ObjectManager.IsTargetInLineOfSight)
                 {
@@ -226,20 +226,20 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (WowInterface.ObjectManager.MapId == WowMapId.TheForgeOfSouls)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new(5297, 2506, 686)) < 70.0f)
+                if (WowInterface.Player.Position.GetDistance(new(5297, 2506, 686)) < 70.0f)
                 {
                     // Corrupted Soul Fragements
                     WowInterface.CombatClass.PriorityTargetDisplayIds = new List<int>() { 30233 };
                     WowInterface.TacticEngine.LoadTactics(new BronjahmTactic(WowInterface));
                 }
-                else if (WowInterface.ObjectManager.Player.Position.GetDistance(new(5662, 2507, 709)) < 120.0f)
+                else if (WowInterface.Player.Position.GetDistance(new(5662, 2507, 709)) < 120.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new DevourerOfSoulsTactic(WowInterface));
                 }
             }
             else if (WowInterface.ObjectManager.MapId == WowMapId.PitOfSaron)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new(823, 110, 509)) < 150.0f)
+                if (WowInterface.Player.Position.GetDistance(new(823, 110, 509)) < 150.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic(WowInterface));
                 }
@@ -252,7 +252,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else if (WowInterface.ObjectManager.MapId == WowMapId.Naxxramas)
             {
-                if (WowInterface.ObjectManager.Player.Position.GetDistance(new(3273, -3476, 287)) < 120.0f)
+                if (WowInterface.Player.Position.GetDistance(new(3273, -3476, 287)) < 120.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new AnubRhekan10Tactic(WowInterface));
                 }

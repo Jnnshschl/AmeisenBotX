@@ -92,14 +92,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
         {
             base.Execute();
 
-            if (WowInterface.ObjectManager.Player.IsCasting)
+            if (WowInterface.Player.IsCasting)
             {
                 return;
             }
 
             if (SelectTarget(out WowUnit target))
             {
-                if (WowInterface.ObjectManager.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
+                if (WowInterface.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
                 {
                     return;
                 }
@@ -115,8 +115,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.ObjectManager.Player.Position, 64.0);
-                if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 9.0) == 1
+                var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 64.0f);
+                if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
                     return;
@@ -127,8 +127,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => aura.Name == polymorphSpell)))
                     {
                         var targetInDistance = nearbyTargets
-                            .Where(e => e.Guid != WowInterface.ObjectManager.TargetGuid)
-                            .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                            .Where(e => e.Guid != WowInterface.TargetGuid)
+                            .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                             .FirstOrDefault();
                         WowInterface.HookManager.WowTargetGuid(targetInDistance.Guid);
                         if (TryCastSpell(polymorphSpell, targetInDistance.Guid, true))
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     }
                 }
 
-                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0)
+                if (WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) <= 4.0)
                 {
                     // TODO: Logic to check if the target blink location is dangerous
                     if (!TryCastSpell(blinkSpell, 0, true))
@@ -153,8 +153,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     }
                 }
 
-                if (WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) <= 4.0
-                    && WowInterface.ObjectManager.Player.HealthPercentage <= 50.0
+                if (WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) <= 4.0
+                    && WowInterface.Player.HealthPercentage <= 50.0
                     && CooldownManager.IsSpellOnCooldown(blinkSpell) && TryCastSpell(iceBlockSpell, 0, true))
                 {
                     return;

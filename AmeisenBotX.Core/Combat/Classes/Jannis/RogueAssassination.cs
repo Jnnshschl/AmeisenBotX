@@ -81,23 +81,23 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if ((WowInterface.ObjectManager.Player.HealthPercentage < 20
+                if ((WowInterface.Player.HealthPercentage < 20
                         && TryCastSpellRogue(cloakOfShadowsSpell, 0, true)))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) > 16
+                    if ((WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) > 16
                             && TryCastSpellRogue(sprintSpell, 0, true)))
                     {
                         return;
                     }
                 }
 
-                if (TryCastSpellRogue(eviscerateSpell, WowInterface.ObjectManager.TargetGuid, true, true, 5)
-                    || TryCastSpellRogue(mutilateSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (TryCastSpellRogue(eviscerateSpell, WowInterface.TargetGuid, true, true, 5)
+                    || TryCastSpellRogue(mutilateSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }

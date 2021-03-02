@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Utils.Aura
         {
             if (SpellsToKeepActiveOnParty?.Count > 0)
             {
-                foreach (WowUnit wowUnit in WowInterface.ObjectManager.Partymembers.Where(e => e.Guid != WowInterface.ObjectManager.PlayerGuid && !e.IsDead))
+                foreach (WowUnit wowUnit in WowInterface.ObjectManager.Partymembers.Where(e => e.Guid != WowInterface.PlayerGuid && !e.IsDead))
                 {
                     foreach ((string, CastSpellOnUnit) auraCombo in SpellsToKeepActiveOnParty)
                     {

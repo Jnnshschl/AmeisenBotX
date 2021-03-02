@@ -504,10 +504,10 @@ namespace AmeisenBotX.Core
 
         private void ObjectManager_OnObjectUpdateComplete(IEnumerable<WowObject> wowObjects)
         {
-            if (!NeedToSetupRconClient && WowInterface.ObjectManager.Player != null)
+            if (!NeedToSetupRconClient && WowInterface.Player != null)
             {
                 NeedToSetupRconClient = true;
-                WowInterface.RconClient = new(Config.RconServerAddress, WowInterface.ObjectManager.Player.Name, WowInterface.ObjectManager.Player.Race.ToString(), WowInterface.ObjectManager.Player.Gender.ToString(), WowInterface.ObjectManager.Player.Class.ToString(), WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps", Config.RconServerImage, Config.RconServerGuid);
+                WowInterface.RconClient = new(Config.RconServerAddress, WowInterface.Player.Name, WowInterface.Player.Race.ToString(), WowInterface.Player.Gender.ToString(), WowInterface.Player.Class.ToString(), WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps", Config.RconServerImage, Config.RconServerGuid);
             }
         }
 
@@ -707,20 +707,20 @@ namespace AmeisenBotX.Core
                         }
                         else
                         {
-                            int currentResource = WowInterface.ObjectManager.Player.Class switch
+                            int currentResource = WowInterface.Player.Class switch
                             {
-                                WowClass.Deathknight => WowInterface.ObjectManager.Player.Runeenergy,
-                                WowClass.Rogue => WowInterface.ObjectManager.Player.Energy,
-                                WowClass.Warrior => WowInterface.ObjectManager.Player.Rage,
-                                _ => WowInterface.ObjectManager.Player.Mana,
+                                WowClass.Deathknight => WowInterface.Player.Runeenergy,
+                                WowClass.Rogue => WowInterface.Player.Energy,
+                                WowClass.Warrior => WowInterface.Player.Rage,
+                                _ => WowInterface.Player.Mana,
                             };
 
-                            int maxResource = WowInterface.ObjectManager.Player.Class switch
+                            int maxResource = WowInterface.Player.Class switch
                             {
-                                WowClass.Deathknight => WowInterface.ObjectManager.Player.MaxRuneenergy,
-                                WowClass.Rogue => WowInterface.ObjectManager.Player.MaxEnergy,
-                                WowClass.Warrior => WowInterface.ObjectManager.Player.MaxRage,
-                                _ => WowInterface.ObjectManager.Player.MaxMana,
+                                WowClass.Deathknight => WowInterface.Player.MaxRuneenergy,
+                                WowClass.Rogue => WowInterface.Player.MaxEnergy,
+                                WowClass.Warrior => WowInterface.Player.MaxRage,
+                                _ => WowInterface.Player.MaxMana,
                             };
 
                             WowInterface.RconClient.SendData(new DataMessage()
@@ -729,18 +729,18 @@ namespace AmeisenBotX.Core
                                 CombatClass = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "NoCombatClass",
                                 CurrentProfile = "",
                                 Energy = currentResource,
-                                Exp = WowInterface.ObjectManager.Player.Xp,
-                                Health = WowInterface.ObjectManager.Player.Health,
+                                Exp = WowInterface.Player.Xp,
+                                Health = WowInterface.Player.Health,
                                 ItemLevel = (int)Math.Round(WowInterface.CharacterManager.Equipment.AverageItemLevel),
-                                Level = WowInterface.ObjectManager.Player.Level,
+                                Level = WowInterface.Player.Level,
                                 MapName = WowInterface.ObjectManager.MapId.ToString(),
                                 MaxEnergy = maxResource,
-                                MaxExp = WowInterface.ObjectManager.Player.NextLevelXp,
-                                MaxHealth = WowInterface.ObjectManager.Player.MaxHealth,
+                                MaxExp = WowInterface.Player.NextLevelXp,
+                                MaxHealth = WowInterface.Player.MaxHealth,
                                 Money = WowInterface.CharacterManager.Money,
-                                PosX = WowInterface.ObjectManager.Player.Position.X,
-                                PosY = WowInterface.ObjectManager.Player.Position.Y,
-                                PosZ = WowInterface.ObjectManager.Player.Position.Z,
+                                PosX = WowInterface.Player.Position.X,
+                                PosY = WowInterface.Player.Position.Y,
+                                PosZ = WowInterface.Player.Position.Z,
                                 State = StateMachine.CurrentState.Key.ToString(),
                                 SubZoneName = WowInterface.ObjectManager.ZoneSubName,
                                 ZoneName = WowInterface.ObjectManager.ZoneName,

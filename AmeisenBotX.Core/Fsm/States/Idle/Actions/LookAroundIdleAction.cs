@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public void Execute()
         {
             float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 5.0f);
-            WowInterface.HookManager.WowSetFacing(WowInterface.ObjectManager.Player, WowInterface.ObjectManager.Player.Rotation + modificationFactor);
+            WowInterface.HookManager.WowSetFacing(WowInterface.Player, WowInterface.Player.Rotation + modificationFactor);
         }
     }
 }

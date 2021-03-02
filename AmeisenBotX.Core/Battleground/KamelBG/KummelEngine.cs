@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         public void Execute()
         {
             WowInterface.CombatClass.OutOfCombatExecute();
-            if (WowInterface.ObjectManager.Player.IsCasting)
+            if (WowInterface.Player.IsCasting)
             {
                 return;
             }
@@ -65,8 +65,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             {
                 hasStateChanged = false;
                 //hasFlag = WowInterface.HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("flag") || e.Contains("Flag"));
-                hasFlag = WowInterface.ObjectManager.Player.Auras != null && WowInterface.ObjectManager.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
-                FlagCarrier = hasFlag ? WowInterface.ObjectManager.Player : GetFlagCarrier();
+                hasFlag = WowInterface.Player.Auras != null && WowInterface.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
+                FlagCarrier = hasFlag ? WowInterface.Player : GetFlagCarrier();
                 if (FlagCarrier == null)
                 {
                     FlagObject = GetFlagObject();
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 else
                 {
                     FlagState = PICKED_UP;
-                    if (hasFlag || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, FlagCarrier) == WowUnitReaction.Friendly || WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, FlagCarrier) == WowUnitReaction.Neutral)
+                    if (hasFlag || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, FlagCarrier) == WowUnitReaction.Friendly || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, FlagCarrier) == WowUnitReaction.Neutral)
                     {
                         FlagState |= OWN_TEAM_FLAG;
                         WowInterface.HookManager.LuaSendChatMessage("/y We got it!");
@@ -173,7 +173,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private WowUnit GetFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.Guid != WowInterface.ObjectManager.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
+            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.Guid != WowInterface.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
             {
                 return flagCarrierList[0];
@@ -186,7 +186,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private WowObject GetFlagObject()
         {
-            WowGameobjectDisplayId targetFlag = hasFlag ? (WowInterface.ObjectManager.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (WowInterface.ObjectManager.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
+            WowGameobjectDisplayId targetFlag = hasFlag ? (WowInterface.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (WowInterface.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
             List<WowGameobject> flagObjectList = WowInterface.ObjectManager.WowObjects
                 .OfType<WowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(WowGameobjectDisplayId), x.DisplayId)
@@ -206,7 +206,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             hasStateChanged = true;
             if (startPosition == default)
             {
-                startPosition = WowInterface.ObjectManager.Player.Position;
+                startPosition = WowInterface.Player.Position;
             }
         }
     }

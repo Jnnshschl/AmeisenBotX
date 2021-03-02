@@ -357,7 +357,7 @@ namespace AmeisenBotX
 
                 // Update the main view
                 // -------------------- >
-                WowPlayer player = AmeisenBot.WowInterface.ObjectManager.Player;
+                WowPlayer player = AmeisenBot.WowInterface.Player;
 
                 switch (player.Class)
                 {
@@ -445,7 +445,7 @@ namespace AmeisenBotX
                 for (int i = 0; i < currentNodes.Count; ++i)
                 {
                     Vector3 start = currentNodes[i];
-                    Vector3 end = i == 0 ? AmeisenBot.WowInterface.ObjectManager.Player.Position : currentNodes[i - 1];
+                    Vector3 end = i == 0 ? AmeisenBot.WowInterface.Player.Position : currentNodes[i - 1];
 
                     System.Drawing.Color lineColor = System.Drawing.Color.White;
                     System.Drawing.Color startDot = System.Drawing.Color.Cyan;
@@ -478,23 +478,23 @@ namespace AmeisenBotX
         {
             // Generic labels
             // ------------- >
-            labelPlayerName.Content = AmeisenBot.WowInterface.ObjectManager.Player.Name;
+            labelPlayerName.Content = AmeisenBot.WowInterface.Player.Name;
 
             labelMapName.Content = AmeisenBot.WowInterface.ObjectManager.MapId.ToString();
             labelZoneName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneName;
             labelZoneSubName.Content = AmeisenBot.WowInterface.ObjectManager.ZoneSubName;
 
-            labelCurrentLevel.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Level} (iLvl. {Math.Round(AmeisenBot.WowInterface.CharacterManager.Equipment.AverageItemLevel)})";
-            labelCurrentRace.Content = $"{AmeisenBot.WowInterface.ObjectManager.Player.Race} {AmeisenBot.WowInterface.ObjectManager.Player.Gender}";
-            labelCurrentClass.Content = AmeisenBot.WowInterface.ObjectManager.Player.Class;
+            labelCurrentLevel.Content = $"{AmeisenBot.WowInterface.Player.Level} (iLvl. {Math.Round(AmeisenBot.WowInterface.CharacterManager.Equipment.AverageItemLevel)})";
+            labelCurrentRace.Content = $"{AmeisenBot.WowInterface.Player.Race} {AmeisenBot.WowInterface.Player.Gender}";
+            labelCurrentClass.Content = AmeisenBot.WowInterface.Player.Class;
 
-            progressbarExp.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.NextLevelXp;
-            progressbarExp.Value = AmeisenBot.WowInterface.ObjectManager.Player.Xp;
-            labelCurrentExp.Content = $"{Math.Round(AmeisenBot.WowInterface.ObjectManager.Player.XpPercentage)}%";
+            progressbarExp.Maximum = AmeisenBot.WowInterface.Player.NextLevelXp;
+            progressbarExp.Value = AmeisenBot.WowInterface.Player.Xp;
+            labelCurrentExp.Content = $"{Math.Round(AmeisenBot.WowInterface.Player.XpPercentage)}%";
 
-            progressbarHealth.Maximum = AmeisenBot.WowInterface.ObjectManager.Player.MaxHealth;
-            progressbarHealth.Value = AmeisenBot.WowInterface.ObjectManager.Player.Health;
-            labelCurrentHealth.Content = BotUtils.BigValueToString(AmeisenBot.WowInterface.ObjectManager.Player.Health);
+            progressbarHealth.Maximum = AmeisenBot.WowInterface.Player.MaxHealth;
+            progressbarHealth.Value = AmeisenBot.WowInterface.Player.Health;
+            labelCurrentHealth.Content = BotUtils.BigValueToString(AmeisenBot.WowInterface.Player.Health);
 
             labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.ToString();
 
@@ -542,7 +542,7 @@ namespace AmeisenBotX
             // -------------- >
             labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
 
-            if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.ObjectManager.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
+            if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
             {
                 labelHookCallCount.Foreground = CurrentTickTimeGoodBrush;
             }

@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (WowInterface.ObjectManager.Player.IsCasting)
+            if (WowInterface.Player.IsCasting)
             {
                 return;
             }
@@ -63,14 +63,14 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
                     .Where(e => e.IsLootable)
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
 
                 if (selectedUnit != null && LootTryCount < 3)
                 {
                     // If enemies are nearby kill them first
                     // var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
-                    //     WowInterface.ObjectManager.Player.Position, selectedUnit.Position);
+                    //     WowInterface.Player.Position, selectedUnit.Position);
                     // if (path != null)
                     // {
                     //     IEnumerable<WowUnit> nearbyEnemies =
@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedUnit.Position);
 
                     if (LastOpenLootTry.Run()
-                        && WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
+                        && WowInterface.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
                     {
                         WowInterface.HookManager.WowStopClickToMove();
                         Loot(selectedUnit);

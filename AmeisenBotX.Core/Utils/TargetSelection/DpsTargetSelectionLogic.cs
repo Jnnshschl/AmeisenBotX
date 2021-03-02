@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
         {
             possibleTargets = null;
 
-            if (WowInterface.ObjectManager.TargetGuid == 0 || WowInterface.Target == null)
+            if (WowInterface.TargetGuid == 0 || WowInterface.Target == null)
             {
                 IEnumerable<WowUnit> priorityTargets = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()

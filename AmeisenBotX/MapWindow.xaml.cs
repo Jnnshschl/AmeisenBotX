@@ -313,10 +313,10 @@ namespace AmeisenBotX
 
             Graphics.Clear(Color.Transparent);
 
-            if (AmeisenBot.WowInterface.ObjectManager.Player != null)
+            if (AmeisenBot.WowInterface.Player != null)
             {
-                Vector3 playerPosition = AmeisenBot.WowInterface.ObjectManager.Player.Position;
-                float playerRotation = AmeisenBot.WowInterface.ObjectManager.Player.Rotation;
+                Vector3 playerPosition = AmeisenBot.WowInterface.Player.Position;
+                float playerRotation = AmeisenBot.WowInterface.Player.Rotation;
 
                 // Render current dungeon nodes
                 // ---------------------------- >
@@ -371,7 +371,7 @@ namespace AmeisenBotX
 
                 if (AmeisenBot.Config.MapRenderMe)
                 {
-                    RenderUnit(halfWidth, halfHeight, AmeisenBot.WowInterface.ObjectManager.Player.Name, "<Me>", MeBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics, 7);
+                    RenderUnit(halfWidth, halfHeight, AmeisenBot.WowInterface.Player.Name, "<Me>", MeBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics, 7);
                 }
             }
 
@@ -488,7 +488,7 @@ namespace AmeisenBotX
             {
                 WowUnit unit = wowUnits[i];
 
-                Brush selectedBrush = unit.IsDead ? DeadBrush : (AmeisenBot.WowInterface.HookManager.WowGetUnitReaction(AmeisenBot.WowInterface.ObjectManager.Player, unit)) switch
+                Brush selectedBrush = unit.IsDead ? DeadBrush : (AmeisenBot.WowInterface.HookManager.WowGetUnitReaction(AmeisenBot.WowInterface.Player, unit)) switch
                 {
                     WowUnitReaction.HostileGuard => EnemyBrush,
                     WowUnitReaction.Hostile => EnemyBrush,

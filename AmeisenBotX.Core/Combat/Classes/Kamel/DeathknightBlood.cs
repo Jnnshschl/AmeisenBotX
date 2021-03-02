@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
 
         public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
@@ -68,13 +68,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public void AttackTarget()
         {
-            WowUnit target = WowInterface.ObjectManager.Target;
+            WowUnit target = WowInterface.Target;
             if (target == null)
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            if (WowInterface.Player.Position.GetDistance(target.Position) <= 3.0)
             {
                 WowInterface.HookManager.WowStopClickToMove();
                 WowInterface.MovementEngine.Reset();

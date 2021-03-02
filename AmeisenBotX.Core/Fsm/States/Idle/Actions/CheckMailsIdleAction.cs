@@ -44,11 +44,11 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             CheckedMails = false;
             MailboxCheckTime = default;
-            OriginPosition = WowInterface.ObjectManager.Player.Position;
+            OriginPosition = WowInterface.Player.Position;
 
-            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Mailbox, WowInterface.ObjectManager.Player.Position, 256.0, out IEnumerable<Vector3> mailboxes))
+            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Mailbox, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> mailboxes))
             {
-                CurrentMailbox = mailboxes.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
+                CurrentMailbox = mailboxes.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First();
                 return true;
             }
 
@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             if (!CheckedMails)
             {
-                if (CurrentMailbox.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.5f)
+                if (CurrentMailbox.GetDistance(WowInterface.Player.Position) > 3.5f)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentMailbox);
                 }

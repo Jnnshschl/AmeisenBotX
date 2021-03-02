@@ -296,7 +296,7 @@ namespace AmeisenBotX.Core.Data.Db
             }
         }
 
-        public bool TryGetBlacklistPosition(int mapId, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes)
+        public bool TryGetBlacklistPosition(int mapId, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes)
         {
             if (BlacklistNodes.ContainsKey(mapId))
             {
@@ -320,7 +320,7 @@ namespace AmeisenBotX.Core.Data.Db
             return false;
         }
 
-        public bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes)
+        public bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes)
         {
             KeyValuePair<WowMapId, PoiType> KeyValuePair = new KeyValuePair<WowMapId, PoiType>(mapId, poiType);
 

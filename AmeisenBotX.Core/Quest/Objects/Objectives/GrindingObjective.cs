@@ -18,9 +18,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public Vector3 CurrentNode { get; set; }
 
-        public bool Finished => WowInterface.ObjectManager.Player.Level >= WantedLevel;
+        public bool Finished => WowInterface.Player.Level >= WantedLevel;
 
-        public double Progress => 100.0 * (WowInterface.ObjectManager.Player.Level + WowInterface.ObjectManager.Player.XpPercentage / 100.0) / WantedLevel;
+        public double Progress => 100.0 * (WowInterface.Player.Level + WowInterface.Player.XpPercentage / 100.0) / WantedLevel;
 
         private SearchAreaEnsamble SearchAreas { get; }
 
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
             if (!SearchAreas.IsPlayerNearSearchArea(WowInterface))
             {
@@ -40,13 +40,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 WowUnit = null;
             }
 
-            if (!WowInterface.ObjectManager.Player.IsInCombat)
+            if (!WowInterface.Player.IsInCombat)
             {
                 WowUnit = WowInterface.ObjectManager.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && !e.IsNotAttackable
-                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Friendly)
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
                 if (WowUnit != null)

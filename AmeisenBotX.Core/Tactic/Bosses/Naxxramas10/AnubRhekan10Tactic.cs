@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                         if (ImpaleDodgePos == Vector3.Zero)
                         {
                             float angle = new Random().NextDouble() > 0.5 ? MathF.PI + (MathF.PI / 2f) : MathF.PI - (MathF.PI / 2f);
-                            ImpaleDodgePos = BotMath.CalculatePositionAround(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, angle, 2f);
+                            ImpaleDodgePos = BotMath.CalculatePositionAround(WowInterface.Player.Position, WowInterface.Player.Rotation, angle, 2f);
                         }
 
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, ImpaleDodgePos, 0);
@@ -128,7 +128,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
                     Vector3 targetPosition = BotUtils.MoveAhead(MiddleSpot, wowUnit.Position, -30.0f);
 
-                    if (!LocustSwarmActive && WowInterface.ObjectManager.Player.Position.GetDistance(MiddleSpot) > 6.0)
+                    if (!LocustSwarmActive && WowInterface.Player.Position.GetDistance(MiddleSpot) > 6.0)
                     {
                         WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, targetPosition);
                         return true;
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                 {
                     if (MeleeDpsIsMovingToMid)
                     {
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance(MiddleSpot) > 24.0)
+                        if (WowInterface.Player.Position.GetDistance(MiddleSpot) > 24.0)
                         {
                             WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, MiddleSpot);
                             return true;
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
         {
             WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
 
-            if (wowUnit != null && wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
+            if (wowUnit != null && wowUnit.TargetGuid == WowInterface.PlayerGuid)
             {
                 if (Configureables["isOffTank"] == true)
                 {
@@ -187,7 +187,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                     {
                         Vector3 tankingSpot = TankingIsUsingA ? TankingSpotA : TankingSpotB;
 
-                        if (WowInterface.ObjectManager.Player.Position.GetDistance2D(tankingSpot) > 2.0)
+                        if (WowInterface.Player.Position.GetDistance2D(tankingSpot) > 2.0)
                         {
                             WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, tankingSpot, 0);
                         }
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
                         {
                             Vector3 targetPosition = TankingPathQueue.Peek();
 
-                            if (targetPosition.GetDistance2D(WowInterface.ObjectManager.Player.Position) > 2.0)
+                            if (targetPosition.GetDistance2D(WowInterface.Player.Position) > 2.0)
                             {
                                 WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, targetPosition, 0);
                             }

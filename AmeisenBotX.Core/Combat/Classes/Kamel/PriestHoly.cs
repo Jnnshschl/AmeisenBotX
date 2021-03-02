@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Author => "Lukas";
 
-        public override Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
 
         public override string Description => "Priest Holy";
 
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
             {
-                WowInterface.ObjectManager.Player
+                WowInterface.Player
             };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
@@ -203,7 +203,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
                 {
-                    WowInterface.ObjectManager.Player
+                    WowInterface.Player
                 };
 
                 CastBuff = CastBuff.Where(e => (!e.HasBuffByName("Prayer of Fortitude") || !e.HasBuffByName("Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
@@ -212,45 +212,45 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     if (CastBuff.Count > 0)
                     {
-                        if (WowInterface.ObjectManager.TargetGuid != CastBuff.FirstOrDefault().Guid)
+                        if (WowInterface.TargetGuid != CastBuff.FirstOrDefault().Guid)
                         {
                             WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
                         }
                     }
-                    if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
+                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
                     {
                         if (!TargetInLineOfSight)
                         {
                             return;
                         }
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Prayer of Fortitude") && CustomCastSpell(PrayerofFortitude))
+                        if (!WowInterface.Target.HasBuffByName("Prayer of Fortitude") && CustomCastSpell(PrayerofFortitude))
                         {
                             return;
                         }
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Prayer of Shadow Protection") && CustomCastSpell(PrayerofShadowProtection))
+                        if (!WowInterface.Target.HasBuffByName("Prayer of Shadow Protection") && CustomCastSpell(PrayerofShadowProtection))
                         {
                             return;
                         }
                     }
                 }
             }
-            //if ((!WowInterface.ObjectManager.Player.HasBuffByName("Power Word: Fortitude") || !WowInterface.ObjectManager.Target.HasBuffByName("Power Word: Fortitude")) && CustomCastSpell(PowerWordFortitudeSpell))
+            //if ((!WowInterface.Player.HasBuffByName("Power Word: Fortitude") || !WowInterface.Target.HasBuffByName("Power Word: Fortitude")) && CustomCastSpell(PowerWordFortitudeSpell))
             //{
             //    return;
             //}
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell, true))
+            if (!WowInterface.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell, true))
             {
                 return;
             }
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell, true))
+            if (!WowInterface.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell, true))
             {
                 return;
             }
-            if (!WowInterface.ObjectManager.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell, true))
+            if (!WowInterface.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell, true))
             {
                 return;
             }
-            //if (!WowInterface.ObjectManager.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
+            //if (!WowInterface.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
             //{
             //    return;
             //}
@@ -260,13 +260,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
                     Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
-                    if ((WowInterface.ObjectManager.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
                     {
-                        double distance = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position);
+                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
 
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
@@ -277,11 +277,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 }
                 else
                 {
-                    WowInterface.HookManager.WowTargetGuid(WowInterface.ObjectManager.PlayerGuid);
+                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
 
                     Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
-                    if ((WowInterface.ObjectManager.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
                     {
                         WowInterface.HookManager.LuaCastSpell(spellName);
                         return true;
@@ -308,21 +308,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
             {
                 //healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
-                WowInterface.ObjectManager.Player
+                WowInterface.Player
             };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
             if (partyMemberToHeal.Count > 0)
             {
-                if (WowInterface.ObjectManager.TargetGuid != partyMemberToHeal.FirstOrDefault().Guid)
+                if (WowInterface.TargetGuid != partyMemberToHeal.FirstOrDefault().Guid)
                 {
                     WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 }
 
-                if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null)
+                if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
                 {
-                    targetIsInRange = WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
+                    targetIsInRange = WowInterface.Player.Position.GetDistance(WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
                     if (targetIsInRange)
                     {
                         if (!TargetInLineOfSight)
@@ -335,73 +335,73 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                             WowInterface.MovementEngine.Reset();
                         }
 
-                        if (WowInterface.ObjectManager.Target != null && WowInterface.ObjectManager.Target.HealthPercentage >= 90)
+                        if (WowInterface.Target != null && WowInterface.Target.HealthPercentage >= 90)
                         {
                             WowInterface.HookManager.LuaDoString("SpellStopCasting()");
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && (WowInterface.ObjectManager.Player.IsConfused || WowInterface.ObjectManager.Player.IsSilenced || WowInterface.ObjectManager.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
+                        if (UseSpellOnlyInCombat && (WowInterface.Player.IsConfused || WowInterface.Player.IsSilenced || WowInterface.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage <= 20 && CustomCastSpell(HymnofHopeSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Player.ManaPercentage <= 20 && CustomCastSpell(HymnofHopeSpell))
                         {
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 5 && WowInterface.ObjectManager.Target.HealthPercentage < 50 && CustomCastSpell(DivineHymnSpell))
+                        if (partyMemberToHeal.Count >= 5 && WowInterface.Target.HealthPercentage < 50 && CustomCastSpell(DivineHymnSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.HealthPercentage < 50 && CustomCastSpell(FadeSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Player.HealthPercentage < 50 && CustomCastSpell(FadeSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 30 && CustomCastSpell(GuardianSpiritSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Target.HealthPercentage < 30 && CustomCastSpell(GuardianSpiritSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Target.HealthPercentage < 30 && CustomCastSpell(DesperatePrayerSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Target.HealthPercentage < 30 && CustomCastSpell(DesperatePrayerSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 55 && CustomCastSpell(GreaterHealSpell))
+                        if (WowInterface.Target.HealthPercentage < 55 && CustomCastSpell(GreaterHealSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(FlashHealSpell))
+                        if (WowInterface.Target.HealthPercentage < 80 && CustomCastSpell(FlashHealSpell))
                         {
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(CircleOfHealingSpell))
+                        if (partyMemberToHeal.Count >= 3 && WowInterface.Target.HealthPercentage < 80 && CustomCastSpell(CircleOfHealingSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && partyMemberToHeal.Count >= 2 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(PrayerofMendingSpell))
+                        if (UseSpellOnlyInCombat && partyMemberToHeal.Count >= 2 && WowInterface.Target.HealthPercentage < 80 && CustomCastSpell(PrayerofMendingSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && partyMemberToHeal.Count >= 3 && WowInterface.ObjectManager.Target.HealthPercentage < 80 && CustomCastSpell(PrayerofHealingSpell))
+                        if (UseSpellOnlyInCombat && partyMemberToHeal.Count >= 3 && WowInterface.Target.HealthPercentage < 80 && CustomCastSpell(PrayerofHealingSpell))
                         {
                             return;
                         }
 
-                        if (!WowInterface.ObjectManager.Target.HasBuffByName("Renew") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(RenewSpell))
+                        if (!WowInterface.Target.HasBuffByName("Renew") && WowInterface.Target.HealthPercentage < 90 && CustomCastSpell(RenewSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && !WowInterface.ObjectManager.Target.HasBuffByName("Weakened Soul") && !WowInterface.ObjectManager.Target.HasBuffByName("Power Word: Shield") && WowInterface.ObjectManager.Target.HealthPercentage < 90 && CustomCastSpell(PowerWordShieldSpell))
+                        if (UseSpellOnlyInCombat && !WowInterface.Target.HasBuffByName("Weakened Soul") && !WowInterface.Target.HasBuffByName("Power Word: Shield") && WowInterface.Target.HealthPercentage < 90 && CustomCastSpell(PowerWordShieldSpell))
                         {
                             return;
                         }
@@ -412,12 +412,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 if (TargetSelectEvent.Run())
                 {
-                    WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 30)
+                    WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 30)
                     .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))//&& e.IsCasting
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
-                    if (WowInterface.ObjectManager.TargetGuid != 0 && WowInterface.ObjectManager.Target != null && nearTarget != null)
+                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null && nearTarget != null)
                     {
                         WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
 
@@ -430,11 +430,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                             WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();
                         }
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 80 && CustomCastSpell(HolyFireSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Player.ManaPercentage >= 80 && CustomCastSpell(HolyFireSpell))
                         {
                             return;
                         }
-                        if (UseSpellOnlyInCombat && WowInterface.ObjectManager.Player.ManaPercentage >= 80 && CustomCastSpell(SmiteSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Player.ManaPercentage >= 80 && CustomCastSpell(SmiteSpell))
                         {
                             return;
                         }

@@ -39,9 +39,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
             {
                 if (wowUnit.CurrentlyCastingSpellId == 68872 || wowUnit.CurrentlyChannelingSpellId == 68872 || wowUnit.HasBuffById(68872)) // soulstorm
                 {
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(MidPosition) > 8.0)
+                    if (WowInterface.Player.Position.GetDistance(MidPosition) > 8.0)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, MidPosition), -5.0f));
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.Player.Position, MidPosition), -5.0f));
 
                         preventMovement = true;
                         allowAttacking = true;
@@ -54,10 +54,10 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == WowRole.Tank)
                 {
-                    if (wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
                     {
                         Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
-                        float distanceToMid = WowInterface.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
+                        float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
 
                         // flee from the corrupted souls target
                         bool needToFlee = wowUnit.CurrentlyChannelingSpellId == 68839
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                             return false;
                         }
 
-                        if (distanceToMid > 5.0f && WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
+                        if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
                             WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
@@ -92,12 +92,12 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                 }
                 else if (role == WowRole.Dps || role == WowRole.Heal)
                 {
-                    float distanceToMid = WowInterface.ObjectManager.Player.Position.GetDistance(MidPosition);
+                    float distanceToMid = WowInterface.Player.Position.GetDistance(MidPosition);
 
                     if (!isMelee && distanceToMid < 20.0f)
                     {
                         // move to the outer ring of the arena
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, MidPosition), -22.0f));
+                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.Player.Position, MidPosition), -22.0f));
 
                         preventMovement = true;
                         allowAttacking = false;

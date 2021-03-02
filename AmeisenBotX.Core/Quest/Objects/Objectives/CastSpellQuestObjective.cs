@@ -23,7 +23,7 @@
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
             WowInterface.MovementEngine.Reset();
             WowInterface.HookManager.WowStopClickToMove();

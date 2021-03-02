@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Quest
 
         private AmeisenBotConfig Config { get; }
 
-        private DateTime LastAbandonQuestTime { get; set; } = DateTime.Now;
+        private DateTime LastAbandonQuestTime { get; set; } = DateTime.UtcNow;
 
         private TimegatedEvent QueryCompletedQuestsEvent { get; }
 
@@ -64,8 +64,8 @@ namespace AmeisenBotX.Core.Quest
             if (Profile.Quests.Count > 0)
             {
                 // do i need to recover my hp
-                if (WowInterface.ObjectManager.Player.HealthPercentage < Config.EatUntilPercent
-                    && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, 60.0).Any())
+                if (WowInterface.Player.HealthPercentage < Config.EatUntilPercent
+                    && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 60.0f).Any())
                 {
                     // wait or eat something
                     if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
@@ -78,10 +78,10 @@ namespace AmeisenBotX.Core.Quest
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
 
                 // drop all quest that are not selected
-                if (WowInterface.ObjectManager.Player.QuestlogEntries.Count() == 25 && DateTime.Now.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
+                if (WowInterface.Player.QuestlogEntries.Count() == 25 && DateTime.UtcNow.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
                 {
                     WowInterface.HookManager.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
-                    LastAbandonQuestTime = DateTime.Now;
+                    LastAbandonQuestTime = DateTime.UtcNow;
                 }
 
                 if (selectedQuests.Any())

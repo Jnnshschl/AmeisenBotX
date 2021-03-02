@@ -40,9 +40,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.ObjectManager.Target != null && !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.TargetGuid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Demonology Warlock spec.";
@@ -112,65 +112,65 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (WowInterface.ObjectManager.Player.ManaPercentage < 50.0
-                        && WowInterface.ObjectManager.Player.HealthPercentage > 60.0
+                if (WowInterface.Player.ManaPercentage < 50.0
+                        && WowInterface.Player.HealthPercentage > 60.0
                         && TryCastSpell(lifeTapSpell, 0)
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 80.0
-                        && TryCastSpell(deathCoilSpell, WowInterface.ObjectManager.TargetGuid, true))
-                    || (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
-                        && TryCastSpell(drainLifeSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    || (WowInterface.Player.HealthPercentage < 80.0
+                        && TryCastSpell(deathCoilSpell, WowInterface.TargetGuid, true))
+                    || (WowInterface.Player.HealthPercentage < 50.0
+                        && TryCastSpell(drainLifeSpell, WowInterface.TargetGuid, true))
                     || TryCastSpell(metamorphosisSpell, 0)
                     || (WowInterface.ObjectManager.Pet?.Health > 0 && TryCastSpell(demonicEmpowermentSpell, 0)))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if (WowInterface.ObjectManager.Target.GetType() == typeof(WowPlayer))
+                    if (WowInterface.Target.GetType() == typeof(WowPlayer))
                     {
-                        if (DateTime.Now - LastFearAttempt > TimeSpan.FromSeconds(5)
-                            && ((WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 6.0
+                        if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
+                            && ((WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 6.0f
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
-                            || (WowInterface.ObjectManager.Player.Position.GetDistance(WowInterface.ObjectManager.Target.Position) < 12.0
-                                && TryCastSpell(fearSpell, WowInterface.ObjectManager.TargetGuid, true))))
+                            || (WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 12.0f
+                                && TryCastSpell(fearSpell, WowInterface.TargetGuid, true))))
                         {
-                            LastFearAttempt = DateTime.Now;
+                            LastFearAttempt = DateTime.UtcNow;
                             return;
                         }
                     }
 
                     if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5.0
-                        && WowInterface.ObjectManager.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        && WowInterface.Target.HealthPercentage < 25.0
+                        && TryCastSpell(drainSoulSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }
                 }
 
-                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Target.Position, 16.0).Count() > 2
-                    && !WowInterface.ObjectManager.Target.HasBuffByName(seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
+                    && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell)
+                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
 
-                bool hasDecimation = WowInterface.ObjectManager.Player.HasBuffByName(decimationSpell);
-                bool hasMoltenCore = WowInterface.ObjectManager.Player.HasBuffByName(moltenCoreSpell);
+                bool hasDecimation = WowInterface.Player.HasBuffByName(decimationSpell);
+                bool hasMoltenCore = WowInterface.Player.HasBuffByName(moltenCoreSpell);
 
-                if (hasDecimation && hasMoltenCore && TryCastSpell(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (hasDecimation && hasMoltenCore && TryCastSpell(soulfireSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
-                else if (hasDecimation && TryCastSpell(soulfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                else if (hasDecimation && TryCastSpell(soulfireSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
-                else if (hasMoltenCore && TryCastSpell(incinerateSpell, WowInterface.ObjectManager.TargetGuid, true))
+                else if (hasMoltenCore && TryCastSpell(incinerateSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }
-                else if (TryCastSpell(shadowBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                else if (TryCastSpell(shadowBoltSpell, WowInterface.TargetGuid, true))
                 {
                     return;
                 }

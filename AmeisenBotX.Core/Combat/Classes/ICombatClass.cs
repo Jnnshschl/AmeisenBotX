@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Combat.Classes
 
         IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        Dictionary<string, dynamic> Configureables { get; set; }
+        Dictionary<string, dynamic> C { get; set; }
 
         string Description { get; }
 

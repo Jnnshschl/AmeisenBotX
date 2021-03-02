@@ -66,7 +66,11 @@ namespace AmeisenBotX.Core
 
         public WowUnit Pet => ObjectManager.Pet;
 
+        public ulong PetGuid => ObjectManager.PetGuid;
+
         public WowPlayer Player => ObjectManager.Player;
+
+        public ulong PlayerGuid => ObjectManager.PlayerGuid;
 
         public QuestEngine QuestEngine { get; set; }
 
@@ -75,6 +79,8 @@ namespace AmeisenBotX.Core
         public TacticEngine TacticEngine { get; set; }
 
         public WowUnit Target => ObjectManager.Target;
+
+        public ulong TargetGuid => ObjectManager.TargetGuid;
 
         public Process WowProcess { get; set; }
 

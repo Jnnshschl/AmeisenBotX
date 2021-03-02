@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool Enter()
         {
-            NearPartymembers = WowInterface.ObjectManager.Partymembers.Where(e => e.Guid != WowInterface.ObjectManager.PlayerGuid && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 16.0f);
+            NearPartymembers = WowInterface.ObjectManager.Partymembers.Where(e => e.Guid != WowInterface.PlayerGuid && e.Position.GetDistance(WowInterface.Player.Position) < 16.0f);
             return NearPartymembers.Any();
         }
 
@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (randomPartymember != null)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
+                WowInterface.HookManager.WowFacePosition(WowInterface.Player, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
             }
         }
     }

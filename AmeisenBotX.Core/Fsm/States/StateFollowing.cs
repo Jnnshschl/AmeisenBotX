@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Execute()
         {
             // dont follow when casting, or player is dead/ghost
-            if (WowInterface.ObjectManager.Player.IsCasting
+            if (WowInterface.Player.IsCasting
                 || (PlayerToFollow != null
                 && (PlayerToFollow.IsDead
                 || PlayerToFollow.Health == 1)))
@@ -114,11 +114,11 @@ namespace AmeisenBotX.Core.Fsm.States
                     .OfType<WowGameobject>()
                     .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                              || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
-                    .FirstOrDefault(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 12.0);
+                    .FirstOrDefault(e => e.Position.GetDistance(WowInterface.Player.Position) < 12.0);
 
                 if (nearestPortal != null)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, nearestPortal.Position, 6f));
+                    WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, BotUtils.MoveAhead(WowInterface.Player.Position, nearestPortal.Position, 6f));
                 }
                 else
                 {
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             Vector3 posToGoTo = Config.FollowPositionDynamic ? PlayerToFollow.Position + Offset : PlayerToFollow.Position;
-            double distance = WowInterface.ObjectManager.Player.DistanceTo(posToGoTo);
+            double distance = WowInterface.Player.DistanceTo(posToGoTo);
 
             if (distance < Config.MinFollowDistance)
             {
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (Config.UseMountsInParty
                 && WowInterface.CharacterManager.Mounts?.Count > 0
                 && PlayerToFollow != null
-                && PlayerToFollow.IsMounted && !WowInterface.ObjectManager.Player.IsMounted)
+                && PlayerToFollow.IsMounted && !WowInterface.Player.IsMounted)
             {
                 if (CastMountEvent.Run())
                 {
@@ -167,14 +167,14 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // run down cliffs
-            float zDiff = posToGoTo.Z - WowInterface.ObjectManager.Player.Position.Z;
+            float zDiff = posToGoTo.Z - WowInterface.Player.Position.Z;
 
             // it goes more down than forward
             if (zDiff < -16.0)
             {
                 if (LosCheckEvent.Run())
                 {
-                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.ObjectManager.Player.Position, posToGoTo, 2.0f))
+                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.Player.Position, posToGoTo, 2.0f))
                     {
                         InLos = true;
                     }

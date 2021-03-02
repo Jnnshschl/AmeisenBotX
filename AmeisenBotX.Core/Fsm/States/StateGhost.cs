@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (WowInterface.ObjectManager.Player.Health > 1)
+            if (WowInterface.Player.Health > 1)
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             WowPlayer player = blackboard.PlayerToFollow;
 
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(player.Position) > Config.MinFollowDistance)
+            if (WowInterface.Player.Position.GetDistance(player.Position) > Config.MinFollowDistance)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, player.Position);
             }
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private bool IsUnitOutOfRange(WowPlayer playerToFollow)
         {
-            double distance = playerToFollow.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+            double distance = playerToFollow.Position.GetDistance(WowInterface.Player.Position);
             return distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance;
         }
 
@@ -159,7 +159,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToAndExecute(Vector3 position, Action action, double distance = 20.0)
         {
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(position) > distance)
+            if (WowInterface.Player.Position.GetDistance(position) > distance)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, position);
                 return BehaviorTreeStatus.Ongoing;
@@ -173,7 +173,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToCorpseAndRetrieveIt(GhostBlackboard blackboard)
         {
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(blackboard.CorpsePosition) > Config.GhostResurrectThreshold)
+            if (WowInterface.Player.Position.GetDistance(blackboard.CorpsePosition) > Config.GhostResurrectThreshold)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, blackboard.CorpsePosition);
                 return BehaviorTreeStatus.Ongoing;
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (blackboard.NearPortals.Any())
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.ObjectManager.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).First().Position, 4f));
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).First().Position, 4f));
             }
         }
 

@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
 
-        private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 80.0);
+        private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
 
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
                 if (wowUnit != null)
                 {
-                    if (portal != null && WowInterface.ObjectManager.Player.HealthPercentage > 80.0)
+                    if (portal != null && WowInterface.Player.HealthPercentage > 80.0)
                     {
                         preventMovement = true;
                         allowAttacking = false;
@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
                         return true;
                     }
                 }
-                else if (portal != null && WowInterface.ObjectManager.Player.HealthPercentage < 25.0)
+                else if (portal != null && WowInterface.Player.HealthPercentage < 25.0)
                 {
                     preventMovement = true;
                     allowAttacking = false;
@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private void UsePortal(WowGameobject portal)
         {
-            if (!WowInterface.ObjectManager.Player.IsInRange(portal, 3.0f))
+            if (!WowInterface.Player.IsInRange(portal, 3.0f))
             {
                 WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, portal.Position);
             }

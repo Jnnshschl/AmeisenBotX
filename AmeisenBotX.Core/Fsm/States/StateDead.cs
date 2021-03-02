@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (WowInterface.ObjectManager.Player.IsDead)
+            if (WowInterface.Player.IsDead)
             {
                 if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
                 {
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     }
                     else
                     {
-                        StateMachine.LastDiedPosition = WowInterface.ObjectManager.Player.Position;
+                        StateMachine.LastDiedPosition = WowInterface.Player.Position;
                     }
                 }
 

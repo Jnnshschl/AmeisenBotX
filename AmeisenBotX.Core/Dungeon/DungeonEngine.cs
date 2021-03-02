@@ -47,11 +47,11 @@ namespace AmeisenBotX.Core.Dungeon
                     new Selector
                     (
                         "AmITheLeader",
-                        () => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.ObjectManager.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
+                        () => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
                         new Selector
                         (
                             "AreAllPlayersPresent",
-                            () => AreAllPlayersPresent(48.0),
+                            () => AreAllPlayersPresent(48.0f),
                             new Leaf("FollowNodePath", () => FollowNodePath()),
                             new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; })
                         ),
@@ -132,7 +132,7 @@ namespace AmeisenBotX.Core.Dungeon
         {
             Profile = profile;
 
-            // DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+            // DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
             // int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
 
             for (int i = 0; i < profile.Nodes.Count; ++i)
@@ -147,7 +147,7 @@ namespace AmeisenBotX.Core.Dungeon
         public void OnDeath()
         {
             IDied = true;
-            DeathPosition = WowInterface.ObjectManager.Player.Position;
+            DeathPosition = WowInterface.Player.Position;
             DeathEntrancePosition = Profile.WorldEntry;
         }
 
@@ -179,10 +179,10 @@ namespace AmeisenBotX.Core.Dungeon
             };
         }
 
-        private bool AreAllPlayersPresent(double distance)
+        private bool AreAllPlayersPresent(float distance)
         {
             return !WowInterface.ObjectManager.Partymembers.Any()
-                || WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.ObjectManager.Player.Position, distance)
+                || WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.Player.Position, distance)
                    .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count() - 1;
         }
 
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5, MovementAction movementAction = MovementAction.Move)
         {
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(position);
+            double distance = WowInterface.Player.Position.GetDistance(position);
 
             if (distance > minDistance)
             {

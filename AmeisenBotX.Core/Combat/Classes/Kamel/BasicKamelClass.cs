@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public abstract Dictionary<string, dynamic> Configureables { get; set; }
+        public abstract Dictionary<string, dynamic> C { get; set; }
 
         public abstract string Description { get; }
 
@@ -110,13 +110,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public void AttackTarget()
         {
-            WowUnit target = WowInterface.ObjectManager.Target;
+            WowUnit target = WowInterface.Target;
             if (target == null)
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            if (WowInterface.Player.Position.GetDistance(target.Position) <= 3.0)
             {
                 WowInterface.HookManager.WowStopClickToMove();
                 WowInterface.MovementEngine.Reset();
@@ -132,11 +132,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             ExecuteCC();
 
-            if (WowInterface.ObjectManager.Player.Race == WowRace.Human
-            && (WowInterface.ObjectManager.Player.IsDazed
-                || WowInterface.ObjectManager.Player.IsFleeing
-                || WowInterface.ObjectManager.Player.IsInfluenced
-                || WowInterface.ObjectManager.Player.IsPossessed))
+            if (WowInterface.Player.Race == WowRace.Human
+            && (WowInterface.Player.IsDazed
+                || WowInterface.Player.IsFleeing
+                || WowInterface.Player.IsInfluenced
+                || WowInterface.Player.IsPossessed))
             {
                 if (IsSpellReady(EveryManforHimselfSpell))
                 {
@@ -144,8 +144,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 }
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
-            && (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf))
+            if (WowInterface.Player.HealthPercentage < 50.0
+            && (WowInterface.Player.Race == WowRace.Dwarf))
             {
                 if (IsSpellReady(StoneformSpell))
                 {
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             // Useable items, potions, etc.
             // ---------------------------- >
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 20)
+            if (WowInterface.Player.HealthPercentage < 20)
             {
                 IWowItem healthItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 }
             }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 20)
+            if (WowInterface.Player.ManaPercentage < 20)
             {
                 IWowItem manaItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 

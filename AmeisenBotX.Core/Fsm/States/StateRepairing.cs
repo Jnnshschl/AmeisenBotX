@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             if (IsRepairNpcNear(out WowUnit selectedUnit))
             {
-                float distance = WowInterface.ObjectManager.Player.Position.GetDistance(selectedUnit.Position);
+                float distance = WowInterface.Player.Position.GetDistance(selectedUnit.Position);
 
                 if (distance > 3.0f)
                 {
@@ -72,8 +72,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
                     && !e.IsDead
                     && e.IsRepairVendor
-                    && WowInterface.HookManager.WowGetUnitReaction(WowInterface.ObjectManager.Player, e) != WowUnitReaction.Hostile
-                    && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Config.RepairNpcSearchRadius);
+                    && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Hostile
+                    && e.Position.GetDistance(WowInterface.Player.Position) < Config.RepairNpcSearchRadius);
 
             return unit != null;
         }
@@ -92,7 +92,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void OnMerchantShow(long timestamp, List<string> args)
         {
-            if (Config.AutoRepair && WowInterface.ObjectManager.Target.IsRepairVendor)
+            if (Config.AutoRepair && WowInterface.Target.IsRepairVendor)
             {
                 WowInterface.HookManager.LuaRepairAllItems();
             }

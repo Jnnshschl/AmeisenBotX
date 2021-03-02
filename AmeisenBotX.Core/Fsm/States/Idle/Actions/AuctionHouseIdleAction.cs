@@ -43,11 +43,11 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             TalkedToAuctioneer = false;
             AuctioneerTalkTime = default;
-            OriginPosition = WowInterface.ObjectManager.Player.Position;
+            OriginPosition = WowInterface.Player.Position;
 
-            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Auctioneer, WowInterface.ObjectManager.Player.Position, 256.0, out IEnumerable<Vector3> auctioneers))
+            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Auctioneer, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> auctioneers))
             {
-                CurrentAuctioneer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, auctioneers.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First(), 2.5f);
+                CurrentAuctioneer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, auctioneers.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First(), 2.5f);
                 return true;
             }
 
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             if (!TalkedToAuctioneer)
             {
-                if (CurrentAuctioneer.GetDistance(WowInterface.ObjectManager.Player.Position) > 3.2f)
+                if (CurrentAuctioneer.GetDistance(WowInterface.Player.Position) > 3.2f)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentAuctioneer);
                 }
@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                     if (auctioneer != null)
                     {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, auctioneer.Position);
+                        WowInterface.HookManager.WowFacePosition(WowInterface.Player, auctioneer.Position);
                         WowInterface.HookManager.WowUnitRightClick(auctioneer);
                     }
 

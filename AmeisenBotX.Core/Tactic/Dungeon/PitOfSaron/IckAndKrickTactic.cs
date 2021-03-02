@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                     ChasingActivated = DateTime.UtcNow;
                     return true;
                 }
-                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid && wowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 7.0f)
+                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.PlayerGuid && wowUnit.Position.GetDistance(WowInterface.Player.Position) < 7.0f)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, wowUnit.Position);
 
@@ -57,8 +57,8 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                 }
 
                 WowUnit unitOrb = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
-                    .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0f);
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                    .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.Player.Position) < 3.0f);
 
                 if (unitOrb != null) // orbs
                 {
@@ -71,12 +71,12 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
                 if (role == WowRole.Tank)
                 {
-                    if (wowUnit.TargetGuid == WowInterface.ObjectManager.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
                     {
                         Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
-                        float distanceToMid = WowInterface.ObjectManager.Player.Position.GetDistance(modifiedCenterPosition);
+                        float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
 
-                        if (distanceToMid > 5.0f && WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position) < 3.5)
+                        if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
                             WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);

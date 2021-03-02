@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Utils
                 {
                     if (!Cooldowns.ContainsKey(spell.Name))
                     {
-                        Cooldowns.Add(spell.Name, DateTime.Now);
+                        Cooldowns.Add(spell.Name, DateTime.UtcNow);
                     }
                 }
             }
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Utils
 
             if (Cooldowns.ContainsKey(spellname))
             {
-                return (int)(Cooldowns[spellname] - DateTime.Now).TotalMilliseconds;
+                return (int)(Cooldowns[spellname] - DateTime.UtcNow).TotalMilliseconds;
             }
 
             return 0;
@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Utils
 
             if (Cooldowns.TryGetValue(spellname.ToUpperInvariant(), out DateTime dateTime))
             {
-                return dateTime > DateTime.Now;
+                return dateTime > DateTime.UtcNow;
             }
 
             return false;
@@ -67,11 +67,11 @@ namespace AmeisenBotX.Core.Utils
 
             if (!Cooldowns.ContainsKey(spellname))
             {
-                Cooldowns.Add(spellname, DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs));
+                Cooldowns.Add(spellname, DateTime.UtcNow + TimeSpan.FromMilliseconds(cooldownLeftMs));
             }
             else
             {
-                Cooldowns[spellname] = DateTime.Now + TimeSpan.FromMilliseconds(cooldownLeftMs);
+                Cooldowns[spellname] = DateTime.UtcNow + TimeSpan.FromMilliseconds(cooldownLeftMs);
             }
 
             return true;

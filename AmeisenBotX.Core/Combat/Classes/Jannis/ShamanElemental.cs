@@ -14,10 +14,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public ShamanElemental(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(lightningShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(waterShieldSpell, () => WowInterface.ObjectManager.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(lightningShieldSpell, () => WowInterface.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(waterShieldSpell, () => WowInterface.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -92,35 +92,35 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 30
-                && WowInterface.ObjectManager.Target.Type == WowObjectType.Player
-                && TryCastSpell(hexSpell, WowInterface.ObjectManager.TargetGuid, true))
+                if (WowInterface.Player.HealthPercentage < 30
+                && WowInterface.Target.Type == WowObjectType.Player
+                && TryCastSpell(hexSpell, WowInterface.TargetGuid, true))
                 {
                     HexedTarget = true;
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 60
-                    && TryCastSpell(healingWaveSpell, WowInterface.ObjectManager.PlayerGuid, true))
+                if (WowInterface.Player.HealthPercentage < 60
+                    && TryCastSpell(healingWaveSpell, WowInterface.PlayerGuid, true))
                 {
                     return;
                 }
 
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if ((WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 6
-                            && TryCastSpell(thunderstormSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (WowInterface.ObjectManager.Target.MaxHealth > 10000000
-                            && WowInterface.ObjectManager.Target.HealthPercentage < 25
+                    if ((WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) < 6
+                            && TryCastSpell(thunderstormSpell, WowInterface.TargetGuid, true))
+                        || (WowInterface.Target.MaxHealth > 10000000
+                            && WowInterface.Target.HealthPercentage < 25
                             && TryCastSpell(heroismSpell, 0))
-                        || TryCastSpell(lavaBurstSpell, WowInterface.ObjectManager.TargetGuid, true)
+                        || TryCastSpell(lavaBurstSpell, WowInterface.TargetGuid, true)
                         || TryCastSpell(elementalMasterySpell, 0))
                     {
                         return;
                     }
 
-                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.ObjectManager.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(chainLightningSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || TryCastSpell(lightningBoltSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(chainLightningSpell, WowInterface.TargetGuid, true))
+                        || TryCastSpell(lightningBoltSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }

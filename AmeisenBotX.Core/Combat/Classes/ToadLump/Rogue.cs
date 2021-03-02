@@ -18,8 +18,8 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { hamstringSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.ObjectManager.TargetGuid, true) },
-                { rendSpell, () => WowInterface.ObjectManager.Target.Type == WowObjectType.Player && WowInterface.ObjectManager.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.ObjectManager.TargetGuid, true) }
+                { hamstringSpell, () => WowInterface.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.TargetGuid, true) },
+                { rendSpell, () => WowInterface.Target.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new()
@@ -96,14 +96,14 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    double distanceToTarget = WowInterface.ObjectManager.Target.Position.GetDistance(WowInterface.ObjectManager.Player.Position);
+                    double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
 
-                    if ((WowInterface.ObjectManager.Player.IsDazed
-                        || WowInterface.ObjectManager.Player.IsConfused
-                        || WowInterface.ObjectManager.Player.IsPossessed
-                        || WowInterface.ObjectManager.Player.IsFleeing)
+                    if ((WowInterface.Player.IsDazed
+                        || WowInterface.Player.IsConfused
+                        || WowInterface.Player.IsPossessed
+                        || WowInterface.Player.IsFleeing)
                         && TryCastSpell(heroicFurySpell, 0))
                     {
                         return;
@@ -115,11 +115,11 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
                     }
                     else
                     {
-                        if (TryCastSpellRogue(eviscerateSpell, WowInterface.ObjectManager.Target.Guid, needsEnergy: true, needsCombopoints: true, requiredCombopoints: 5))
+                        if (TryCastSpellRogue(eviscerateSpell, WowInterface.Target.Guid, needsEnergy: true, needsCombopoints: true, requiredCombopoints: 5))
                         {
                             return;
                         }
-                        if (TryCastSpellRogue(sinisterStrikeSpell, WowInterface.ObjectManager.Target.Guid, needsEnergy: true))
+                        if (TryCastSpellRogue(sinisterStrikeSpell, WowInterface.Target.Guid, needsEnergy: true))
                         {
                             return;
                         }

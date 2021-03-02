@@ -85,14 +85,14 @@ namespace AmeisenBotX.Core.Jobs
 
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.ObjectManager.Player.IsCasting)
+            if (WowInterface.Player.IsCasting)
             {
                 return;
             }
 
             if (CheckForPathRecovering)
             {
-                Vector3 closestNode = miningProfile.Path.OrderBy(e => e.GetDistance(WowInterface.ObjectManager.Player.Position)).First();
+                Vector3 closestNode = miningProfile.Path.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First();
                 CurrentNodeCounter = miningProfile.Path.IndexOf(closestNode) + 1;
                 CheckForPathRecovering = false;
                 NodeTryCounter = 0;
@@ -109,15 +109,15 @@ namespace AmeisenBotX.Core.Jobs
                 WowGameobject mailboxNode = WowInterface.ObjectManager.WowObjects
                     .OfType<WowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
-                            && x.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 15)
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                            && x.Position.GetDistance(WowInterface.Player.Position) < 15)
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
                 if (mailboxNode != null)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, mailboxNode.Position);
 
-                    if (WowInterface.ObjectManager.Player.Position.GetDistance(mailboxNode.Position) <= 4)
+                    if (WowInterface.Player.Position.GetDistance(mailboxNode.Position) <= 4)
                     {
                         WowInterface.MovementEngine.StopMovement();
 
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Jobs
                 }
                 else
                 {
-                    Vector3 currentNode = miningProfile.MailboxNodes.OrderBy(x => x.GetDistance(WowInterface.ObjectManager.Player.Position)).FirstOrDefault();
+                    Vector3 currentNode = miningProfile.MailboxNodes.OrderBy(x => x.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
                 }
 
@@ -188,7 +188,7 @@ namespace AmeisenBotX.Core.Jobs
                              || (((WowOreId)e.DisplayId) == WowOreId.Khorium && miningSkill >= 375)
                              || (((WowOreId)e.DisplayId) == WowOreId.Saronite && miningSkill >= 400)
                              || (((WowOreId)e.DisplayId) == WowOreId.Titanium && miningSkill >= 450)))
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.ObjectManager.Player.Position))
+                    .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
                 if (nearestNode != null)
@@ -224,12 +224,12 @@ namespace AmeisenBotX.Core.Jobs
             else
             {
                 // move to the node
-                double distanceToNode = WowInterface.ObjectManager.Player.Position.GetDistance(SelectedPosition);
+                double distanceToNode = WowInterface.Player.Position.GetDistance(SelectedPosition);
                 WowGameobject node = WowInterface.ObjectManager.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
 
                 if (distanceToNode < 3)
                 {
-                    if (WowInterface.ObjectManager.Player.IsMounted)
+                    if (WowInterface.Player.IsMounted)
                     {
                         WowInterface.HookManager.LuaDismissCompanion();
                         return;

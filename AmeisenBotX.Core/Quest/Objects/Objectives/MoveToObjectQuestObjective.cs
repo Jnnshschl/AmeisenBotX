@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => WowGameobject != null && WowGameobject.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => WowGameobject != null && WowGameobject.Position.GetDistance(WowInterface.Player.Position) < Distance ? 100.0 : 0.0;
 
         private double Distance { get; }
 
@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (WowGameobject != null)
             {
-                if (WowGameobject.Position.GetDistance2D(WowInterface.ObjectManager.Player.Position) > Distance)
+                if (WowGameobject.Position.GetDistance2D(WowInterface.Player.Position) > Distance)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowGameobject.Position);
                 }

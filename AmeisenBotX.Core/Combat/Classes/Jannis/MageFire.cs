@@ -11,14 +11,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public MageFire(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.ObjectManager.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(moltenArmorSpell, () => TryCastSpell(moltenArmorSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(scorchSpell, () => TryCastSpell(scorchSpell, WowInterface.ObjectManager.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(livingBombSpell, () => TryCastSpell(livingBombSpell, WowInterface.ObjectManager.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(scorchSpell, () => TryCastSpell(scorchSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(livingBombSpell, () => TryCastSpell(livingBombSpell, WowInterface.TargetGuid, true)));
 
-            // TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.ObjectManager.TargetGuid, true);
+            // TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.TargetGuid, true);
 
             InterruptManager.InterruptSpells = new()
             {
@@ -89,15 +89,15 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.ObjectManager.Target != null)
+                if (WowInterface.Target != null)
                 {
-                    if (TryCastSpell(mirrorImageSpell, WowInterface.ObjectManager.TargetGuid, true)
-                        || (WowInterface.ObjectManager.Player.HealthPercentage < 16
+                    if (TryCastSpell(mirrorImageSpell, WowInterface.TargetGuid, true)
+                        || (WowInterface.Player.HealthPercentage < 16
                             && TryCastSpell(iceBlockSpell, 0, true))
-                        || (WowInterface.ObjectManager.Player.HasBuffByName(hotstreakSpell.ToLowerInvariant()) && TryCastSpell(pyroblastSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || (WowInterface.ObjectManager.Player.ManaPercentage < 40
-                            && TryCastSpell(evocationSpell, WowInterface.ObjectManager.TargetGuid, true))
-                        || TryCastSpell(fireballSpell, WowInterface.ObjectManager.TargetGuid, true))
+                        || (WowInterface.Player.HasBuffByName(hotstreakSpell.ToLowerInvariant()) && TryCastSpell(pyroblastSpell, WowInterface.TargetGuid, true))
+                        || (WowInterface.Player.ManaPercentage < 40
+                            && TryCastSpell(evocationSpell, WowInterface.TargetGuid, true))
+                        || TryCastSpell(fireballSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }

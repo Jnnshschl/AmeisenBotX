@@ -155,7 +155,7 @@ namespace AmeisenBotX
                         break;
                     }
 
-                    wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.WowInterface.ObjectManager.Player.Position), 2)));
+                    wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.WowInterface.Player.Position), 2)));
                 }
 
                 foreach ((WowObject, double) x in wowObjects.OrderBy(e => e.Item2))

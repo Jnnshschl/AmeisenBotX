@@ -39,13 +39,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Player.IsCasting) { return; }
+            if (Finished || WowInterface.Player.IsCasting) { return; }
 
             WowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(ObjectDisplayIds, QuestgiversOnly);
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(WowInterface.ObjectManager.Player.Position) < 3.0)
+                if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
                 {
                     WowInterface.HookManager.WowStopClickToMove();
                     WowInterface.MovementEngine.Reset();

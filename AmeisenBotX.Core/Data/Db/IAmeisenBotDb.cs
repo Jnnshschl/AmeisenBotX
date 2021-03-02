@@ -57,11 +57,11 @@ namespace AmeisenBotX.Core.Data.Db
 
         void Save(string dbFile);
 
-        bool TryGetBlacklistPosition(int mapId, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes);
+        bool TryGetBlacklistPosition(int mapId, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes);
 
         bool TryGetPlayerRelationship(WowPlayer player, out Relationship relationship);
 
-        bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, double maxRadius, out IEnumerable<Vector3> nodes);
+        bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes);
 
         bool TryGetReaction(int a, int b, out WowUnitReaction reaction);
 

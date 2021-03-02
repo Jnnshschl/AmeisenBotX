@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (nearCampfire != null && !SatDown)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, nearCampfire.Position);
+                WowInterface.HookManager.WowFacePosition(WowInterface.Player, nearCampfire.Position);
                 WowInterface.HookManager.LuaSendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
                 SatDown = true;
             }

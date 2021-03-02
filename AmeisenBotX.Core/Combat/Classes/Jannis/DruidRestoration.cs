@@ -16,8 +16,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public DruidRestoration(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, WowInterface.ObjectManager.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.ObjectManager.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true)));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
@@ -100,13 +100,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage < 30.0
+            if (WowInterface.Player.ManaPercentage < 30.0
                 && TryCastSpell(innervateSpell, 0, true))
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
+            if (WowInterface.Player.HealthPercentage < 50.0
                 && TryCastSpell(barkskinSpell, 0, true))
             {
                 return;
@@ -122,25 +122,25 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             else
             {
                 // when we're solo, we don't need to heal as much as we would do in a dungeon group
-                if (WowInterface.ObjectManager.Player.HealthPercentage < 75.0 && NeedToHealSomeone())
+                if (WowInterface.Player.HealthPercentage < 75.0 && NeedToHealSomeone())
                 {
                     return;
                 }
 
                 if (SelectTarget(TargetManagerDps))
                 {
-                    if (!WowInterface.ObjectManager.Target.HasBuffByName(moonfireSpell)
-                        && TryCastSpell(moonfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if (!WowInterface.Target.HasBuffByName(moonfireSpell)
+                        && TryCastSpell(moonfireSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(starfireSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if (TryCastSpell(starfireSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(wrathSpell, WowInterface.ObjectManager.TargetGuid, true))
+                    if (TryCastSpell(wrathSpell, WowInterface.TargetGuid, true))
                     {
                         return;
                     }

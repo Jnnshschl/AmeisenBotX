@@ -398,7 +398,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         #endregion Racials
 
-        private readonly float maxAngle = (float)(Math.PI * 2.0);
+        private const float MAX_ANGLE = MathF.PI * 2.0f;
 
         private readonly int[] useableHealingItems = new int[]
         {
@@ -419,10 +419,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             WowInterface = wowInterface;
             StateMachine = stateMachine;
 
-            Configureables = new()
+            C = new()
             {
-                { "HealingItemHealthThreshold", 30.0 },
-                { "HealingItemManaThreshold", 30.0 }
+                { "HealthItemThreshold", 30.0 },
+                { "ManaItemThreshold", 30.0 }
             };
 
             CooldownManager = new(WowInterface.CharacterManager.SpellBook.Spells);
@@ -446,7 +446,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetManagerDps.BlacklistedTargets; set => TargetManagerDps.BlacklistedTargets = value; }
 
-        public Dictionary<string, dynamic> Configureables { get; set; }
+        public Dictionary<string, dynamic> C { get; set; }
 
         public CooldownManager CooldownManager { get; private set; }
 
@@ -502,16 +502,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private AmeisenBotFsm StateMachine { get; }
 
+        protected DateTime LastSpellCast { get; private set; }
+
         public virtual void AttackTarget()
         {
-            WowUnit target = WowInterface.ObjectManager.Target;
+            WowUnit target = WowInterface.Target;
 
             if (target == null)
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.Position.GetDistance(target.Position) <= 3.0)
+            if (WowInterface.Player.Position.GetDistance(target.Position) <= 3.0)
             {
                 WowInterface.HookManager.WowStopClickToMove();
                 WowInterface.MovementEngine.Reset();
@@ -525,7 +527,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public virtual void Execute()
         {
-            if (WowInterface.ObjectManager.Player.IsCasting)
+            if (WowInterface.Player.IsCasting)
             {
                 if (!WowInterface.ObjectManager.IsTargetInLineOfSight)
                 {
@@ -535,9 +537,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 return;
             }
 
-            if (WowInterface.ObjectManager.Target != null && EventCheckFacing.Run())
+            if (WowInterface.Target != null && EventCheckFacing.Run())
             {
-                CheckFacing(WowInterface.ObjectManager.Target);
+                CheckFacing(WowInterface.Target);
             }
 
             // Update Priority Units
@@ -558,12 +560,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 IsWanding = WowInterface.CharacterManager.SpellBook.IsSpellKnown("Shoot")
                     && WowInterface.CharacterManager.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED)
                     && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
-                    && (IsWanding || TryCastSpell("Shoot", WowInterface.ObjectManager.TargetGuid));
+                    && (IsWanding || TryCastSpell("Shoot", WowInterface.TargetGuid));
 
                 if (!IsWanding
                     && EventAutoAttack.Run()
-                    && !WowInterface.ObjectManager.Player.IsAutoAttacking
-                    && WowInterface.ObjectManager.Player.IsInMeleeRange(WowInterface.ObjectManager.Target))
+                    && !WowInterface.Player.IsAutoAttacking
+                    && WowInterface.Player.IsInMeleeRange(WowInterface.Target))
                 {
                     WowInterface.HookManager.LuaStartAutoAttack();
                 }
@@ -584,7 +586,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 return;
             }
 
-            if (InterruptManager.Tick(WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.ObjectManager.Player.Position, IsMelee ? 5.0 : 30.0)))
+            if (InterruptManager.Tick(WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, IsMelee ? 5.0f : 30.0f)))
             {
                 return;
             }
@@ -592,7 +594,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             // Useable items, potions, etc.
             // ---------------------------- >
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < Configureables["HealingItemHealthThreshold"])
+            if (WowInterface.Player.HealthPercentage < C["HealthItemThreshold"])
             {
                 IWowItem healthItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
@@ -602,7 +604,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 }
             }
 
-            if (WowInterface.ObjectManager.Player.ManaPercentage < Configureables["HealingItemManaThreshold"])
+            if (WowInterface.Player.ManaPercentage < C["ManaItemThreshold"])
             {
                 IWowItem manaItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 
@@ -615,19 +617,19 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             // Race abilities
             // -------------- >
 
-            if (WowInterface.ObjectManager.Player.Race == WowRace.Human
-                && (WowInterface.ObjectManager.Player.IsDazed
-                    || WowInterface.ObjectManager.Player.IsFleeing
-                    || WowInterface.ObjectManager.Player.IsInfluenced
-                    || WowInterface.ObjectManager.Player.IsPossessed)
+            if (WowInterface.Player.Race == WowRace.Human
+                && (WowInterface.Player.IsDazed
+                    || WowInterface.Player.IsFleeing
+                    || WowInterface.Player.IsInfluenced
+                    || WowInterface.Player.IsPossessed)
                 && TryCastSpell("Every Man for Himself", 0))
             {
                 return;
             }
 
-            if (WowInterface.ObjectManager.Player.HealthPercentage < 50.0
-                && ((WowInterface.ObjectManager.Player.Race == WowRace.Draenei && TryCastSpell("Gift of the Naaru", 0))
-                    || (WowInterface.ObjectManager.Player.Race == WowRace.Dwarf && TryCastSpell("Stoneform", 0))))
+            if (WowInterface.Player.HealthPercentage < 50.0
+                && ((WowInterface.Player.Race == WowRace.Draenei && TryCastSpell("Gift of the Naaru", 0))
+                    || (WowInterface.Player.Race == WowRace.Dwarf && TryCastSpell("Stoneform", 0))))
             {
                 return;
             }
@@ -640,8 +642,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public virtual void OutOfCombatExecute()
         {
-            if ((WowInterface.ObjectManager.Player.HasBuffByName("Food") && WowInterface.ObjectManager.Player.HealthPercentage < 100.0)
-                || (WowInterface.ObjectManager.Player.HasBuffByName("Drink") && WowInterface.ObjectManager.Player.ManaPercentage < 100.0))
+            if ((WowInterface.Player.HasBuffByName("Food") && WowInterface.Player.HealthPercentage < 100.0)
+                || (WowInterface.Player.HasBuffByName("Drink") && WowInterface.Player.ManaPercentage < 100.0))
             {
                 return;
             }
@@ -686,7 +688,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (spell != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && spell.Costs < WowInterface.ObjectManager.Player.Mana)
+                && spell.Costs < WowInterface.Player.Mana)
             {
                 IEnumerable<WowPlayer> groupPlayers = WowInterface.ObjectManager.Partymembers
                     .OfType<WowPlayer>()
@@ -721,10 +723,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
             {
-                return WowInterface.ObjectManager.Player.IsInMeleeRange(wowUnit);
+                return WowInterface.Player.IsInMeleeRange(wowUnit);
             }
 
-            double distance = WowInterface.ObjectManager.Player.Position.GetDistance(wowUnit.Position);
+            double distance = WowInterface.Player.Position.GetDistance(wowUnit.Position);
             return distance >= spell.MinRange && distance <= spell.MaxRange - 1.0;
         }
 
@@ -736,7 +738,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 {
                     ulong guid = targetToTarget.First().Guid;
 
-                    if (WowInterface.ObjectManager.Player.TargetGuid != guid)
+                    if (WowInterface.Player.TargetGuid != guid)
                     {
                         WowInterface.HookManager.WowTargetGuid(guid);
                         WowInterface.ObjectManager.UpdateWowObjects();
@@ -744,9 +746,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 }
             }
 
-            return WowInterface.ObjectManager.Target != null
-                && BotUtils.IsValidUnit(WowInterface.ObjectManager.Target)
-                && !WowInterface.ObjectManager.Target.IsDead;
+            return WowInterface.Target != null
+                && BotUtils.IsValidUnit(WowInterface.Target)
+                && !WowInterface.Target.IsDead;
         }
 
         protected bool TryCastAoeSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
@@ -756,6 +758,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 if (GetValidTarget(guid, out WowUnit target, out bool _))
                 {
                     WowInterface.HookManager.WowClickOnTerrain(target.Position);
+                    LastSpellCast = DateTime.UtcNow;
                     return true;
                 }
             }
@@ -770,6 +773,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 if (GetValidTarget(guid, out WowUnit target, out bool _))
                 {
                     WowInterface.HookManager.WowClickOnTerrain(target.Position);
+                    LastSpellCast = DateTime.UtcNow;
                     return true;
                 }
             }
@@ -785,12 +789,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (currentResourceAmount == 0)
                 {
-                    currentResourceAmount = WowInterface.ObjectManager.Player.Class switch
+                    currentResourceAmount = WowInterface.Player.Class switch
                     {
-                        WowClass.Deathknight => WowInterface.ObjectManager.Player.Runeenergy,
-                        WowClass.Rogue => WowInterface.ObjectManager.Player.Energy,
-                        WowClass.Warrior => WowInterface.ObjectManager.Player.Rage,
-                        _ => WowInterface.ObjectManager.Player.Mana,
+                        WowClass.Deathknight => WowInterface.Player.Runeenergy,
+                        WowClass.Rogue => WowInterface.Player.Energy,
+                        WowClass.Warrior => WowInterface.Player.Rage,
+                        _ => WowInterface.Player.Mana,
                     };
                 }
 
@@ -808,9 +812,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     }
 
                     if (!isTargetMyself
-                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                        && !BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, target.Position))
                     {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                        WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
                     }
 
                     if (spell.CastTime > 0)
@@ -820,6 +824,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         CheckFacing(target);
                     }
 
+                    LastSpellCast = DateTime.UtcNow;
                     return CastSpell(spellName, isTargetMyself);
                 }
             }
@@ -839,7 +844,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
-                    && (!needsRuneenergy || spell.Costs < WowInterface.ObjectManager.Player.Runeenergy)
+                    && (!needsRuneenergy || spell.Costs < WowInterface.Player.Runeenergy)
                     && (!needsBloodrune || (runes[WowRuneType.Blood] > 0 || runes[WowRuneType.Death] > 0))
                     && (!needsFrostrune || (runes[WowRuneType.Frost] > 0 || runes[WowRuneType.Death] > 0))
                     && (!needsUnholyrune || (runes[WowRuneType.Unholy] > 0 || runes[WowRuneType.Death] > 0))
@@ -851,9 +856,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     }
 
                     if (!isTargetMyself
-                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                        && !BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, target.Position))
                     {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                        WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
                     }
 
                     if (spell.CastTime > 0)
@@ -863,6 +868,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         CheckFacing(target);
                     }
 
+                    LastSpellCast = DateTime.UtcNow;
                     return CastSpell(spellName, isTargetMyself);
                 }
             }
@@ -881,8 +887,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
-                    && (!needsEnergy || spell.Costs < WowInterface.ObjectManager.Player.Energy)
-                    && (!needsCombopoints || WowInterface.ObjectManager.Player.ComboPoints >= requiredCombopoints)
+                    && (!needsEnergy || spell.Costs < WowInterface.Player.Energy)
+                    && (!needsCombopoints || WowInterface.Player.ComboPoints >= requiredCombopoints)
                     && (target == null || IsInRange(spell, target)))
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
@@ -891,9 +897,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     }
 
                     if (!isTargetMyself
-                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                        && !BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, target.Position))
                     {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                        WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
                     }
 
                     if (spell.CastTime > 0)
@@ -903,6 +909,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         CheckFacing(target);
                     }
 
+                    LastSpellCast = DateTime.UtcNow;
                     return CastSpell(spellName, isTargetMyself);
                 }
             }
@@ -918,7 +925,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (currentResourceAmount == 0)
                 {
-                    currentResourceAmount = WowInterface.ObjectManager.Player.Rage;
+                    currentResourceAmount = WowInterface.Player.Rage;
                 }
 
                 bool isTargetMyself = guid == 0;
@@ -929,7 +936,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     && (!needsResource || spell.Costs < currentResourceAmount)
                     && (target == null || IsInRange(spell, target)))
                 {
-                    if (!WowInterface.ObjectManager.Player.HasBuffByName(requiredStance)
+                    if (!WowInterface.Player.HasBuffByName(requiredStance)
                         && WowInterface.CharacterManager.SpellBook.IsSpellKnown(requiredStance)
                         && !CooldownManager.IsSpellOnCooldown(requiredStance))
                     {
@@ -937,9 +944,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     }
 
                     if (!isTargetMyself
-                        && !BotMath.IsFacing(WowInterface.ObjectManager.Player.Position, WowInterface.ObjectManager.Player.Rotation, target.Position))
+                        && !BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, target.Position))
                     {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                        WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
                     }
 
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
@@ -954,6 +961,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         CheckFacing(target);
                     }
 
+                    LastSpellCast = DateTime.UtcNow;
                     return CastSpell(spellName, isTargetMyself);
                 }
             }
@@ -992,7 +1000,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     if (castSuccessful == 1)
                     {
-                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.ObjectManager.Target?.Name}\"", LogLevel.Verbose);
+                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.Target?.Name}\"", LogLevel.Verbose);
                         IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }
@@ -1009,27 +1017,27 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private void CheckFacing(WowUnit target)
         {
-            if (target == null || target.Guid == WowInterface.ObjectManager.PlayerGuid)
+            if (target == null || target.Guid == WowInterface.PlayerGuid)
             {
                 return;
             }
 
-            float facingAngle = BotMath.GetFacingAngle(WowInterface.ObjectManager.Player.Position, target.Position);
-            float angleDiff = facingAngle - WowInterface.ObjectManager.Player.Rotation;
+            float facingAngle = BotMath.GetFacingAngle(WowInterface.Player.Position, target.Position);
+            float angleDiff = facingAngle - WowInterface.Player.Rotation;
 
             if (angleDiff < 0)
             {
-                angleDiff += maxAngle;
+                angleDiff += MAX_ANGLE;
             }
 
-            if (angleDiff > maxAngle)
+            if (angleDiff > MAX_ANGLE)
             {
-                angleDiff -= maxAngle;
+                angleDiff -= MAX_ANGLE;
             }
 
             if (angleDiff > 1.0)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.ObjectManager.Player, target.Position);
+                WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
             }
         }
 
@@ -1037,13 +1045,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             if (guid == 0)
             {
-                target = WowInterface.ObjectManager.Player;
+                target = WowInterface.Player;
                 needToSwitchTargets = false;
                 return true;
             }
-            else if (guid == WowInterface.ObjectManager.TargetGuid)
+            else if (guid == WowInterface.TargetGuid)
             {
-                target = WowInterface.ObjectManager.Target;
+                target = WowInterface.Target;
                 needToSwitchTargets = false;
                 return true;
             }
