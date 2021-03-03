@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.Raw;
+using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
@@ -20,13 +21,9 @@ namespace AmeisenBotX.Core.Hook
 {
     public class HookManager : IHookManager
     {
-        private const int MEM_ALLOC_BATTLEGROUND_STATUS_CHECK_SIZE = 128;
         private const int MEM_ALLOC_CHECK_SIZE = 128;
-        private const int MEM_ALLOC_EVENTHOOK_SIZE = 128;
         private const int MEM_ALLOC_EXECUTION_SIZE = 4096;
         private const int MEM_ALLOC_GATEWAY_SIZE = 12;
-        private const int MEM_ALLOC_STATIC_POPUP_CHECK_SIZE = 128;
-        private const int MEM_ALLOC_TRACELINE_JUMP_CHECK_SIZE = 128;
         private readonly object hookLock = new();
 
         private ulong hookCalls;
@@ -39,15 +36,19 @@ namespace AmeisenBotX.Core.Hook
             Config = config;
             OriginalFunctionBytes = new();
 
+            TracelineJumpHookModule = new(wowInterface);
+
+            string staticPopupsVarName = BotUtils.FastRandomStringOnlyLetters();
+            StaticPopupsHookModule = new(wowInterface, $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end", staticPopupsVarName);
+
+            string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
+            BattlegroundStatusHookModule = new(wowInterface, $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end", battlegroundStatusVarName);
+
             string handlerName = BotUtils.FastRandomStringOnlyLetters();
             string tableName = BotUtils.FastRandomStringOnlyLetters();
-            EventHookOutput = BotUtils.FastRandomStringOnlyLetters();
+            string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
             EventFrameName = BotUtils.FastRandomStringOnlyLetters();
-
-            EventHookLuaSetUp = $"{EventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {EventFrameName}==nil then {tableName}={{}}{EventFrameName}=CreateFrame(\"FRAME\"){EventFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {EventHookOutput}={EventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {EventHookOutput}={EventHookOutput}..'\"args\": ['for f,g in pairs(e)do {EventHookOutput}={EventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {EventHookOutput}={EventHookOutput}..','end end {EventHookOutput}={EventHookOutput}..']}}'if b<table.getn({tableName})then {EventHookOutput}={EventHookOutput}..','end else if type(e)==\"string\"then {EventHookOutput}={EventHookOutput}..'\"event\": \"'..e..'\",'else {EventHookOutput}={EventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {EventHookOutput}={EventHookOutput}..']'{tableName}={{}}";
-
-            LuaStaticPopupsVarName = BotUtils.FastRandomStringOnlyLetters();
-            LuaBattlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
+            EventHookHookModule = new(wowInterface, $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {EventFrameName}==nil then {tableName}={{}}{EventFrameName}=CreateFrame(\"FRAME\"){EventFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}", eventHookOutput);
         }
 
         public event Action<int, string, string> OnEventBattlegroundStatusPush;
@@ -71,14 +72,6 @@ namespace AmeisenBotX.Core.Hook
         public IntPtr EndsceneReturnAddress { get; private set; }
 
         public string EventFrameName { get; private set; }
-
-        public IntPtr EventHookAddress { get; private set; }
-
-        public IntPtr EventHookLuaAddress { get; private set; }
-
-        public IntPtr EventHookLuaReturnAddress { get; private set; }
-
-        public IntPtr EventHookLuaVarAddress { get; private set; }
 
         public IntPtr GameInfoAddress { get; private set; }
 
@@ -105,27 +98,13 @@ namespace AmeisenBotX.Core.Hook
 
         public bool IsWoWHooked => WowInterface.XMemory.Read(EndsceneAddress, out byte c) && c == 0xE9;
 
-        public DateTime LastGeneralInfoStuffPerformed { get; private set; }
+        public RunLuaHookModule BattlegroundStatusHookModule { get; set; }
 
-        public IntPtr LuaBattlegroundStatusAddress { get; private set; }
+        public RunLuaHookModule EventHookHookModule { get; set; }
 
-        public IntPtr LuaBattlegroundStatusDataAddress { get; private set; }
+        public RunLuaHookModule StaticPopupsHookModule { get; set; }
 
-        public IntPtr LuaBattlegroundStatusReturnAddress { get; private set; }
-
-        public IntPtr LuaBattlegroundStatusVarAddress { get; private set; }
-
-        public string LuaBattlegroundStatusVarName { get; private set; }
-
-        public IntPtr LuaStaticPopupsAddress { get; private set; }
-
-        public IntPtr LuaStaticPopupsDataAddress { get; private set; }
-
-        public IntPtr LuaStaticPopupsReturnAddress { get; private set; }
-
-        public IntPtr LuaStaticPopupsVarAddress { get; private set; }
-
-        public string LuaStaticPopupsVarName { get; private set; }
+        public TracelineJumpHookModule TracelineJumpHookModule { get; set; }
 
         public int OldRenderFlags { get; private set; }
 
@@ -133,23 +112,9 @@ namespace AmeisenBotX.Core.Hook
 
         public IntPtr OverrideWorldCheckAddress { get; private set; }
 
-        public bool PerformGeneralInfoStuff { get; private set; }
-
         public IntPtr ReturnValueAddress { get; private set; }
 
-        public IntPtr TracelineJumpCheckAddress { get; private set; }
-
-        public IntPtr TracelineJumpCheckCommandAddress { get; private set; }
-
-        public IntPtr TracelineJumpCheckDataAddress { get; private set; }
-
-        public IntPtr TracelineJumpCheckExecuteAddress { get; private set; }
-
         private AmeisenBotConfig Config { get; set; }
-
-        private string EventHookLuaSetUp { get; set; }
-
-        private string EventHookOutput { get; set; }
 
         private Timer GameInfoTimer { get; set; }
 
@@ -923,7 +888,7 @@ namespace AmeisenBotX.Core.Hook
 
         public void SetTracelineJumpCheckStatus(bool status)
         {
-            WowInterface.XMemory.Write(TracelineJumpCheckExecuteAddress, status ? 1 : 0);
+            WowInterface.XMemory.Write(TracelineJumpHookModule.ExecuteAddress, status ? 1 : 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1285,11 +1250,25 @@ namespace AmeisenBotX.Core.Hook
                 return false;
             }
 
-            InjectLuaExecuteAsm(EventHookLuaAddress, EventHookLuaVarAddress, EventHookLuaReturnAddress, EventHookAddress);
-            InjectLuaExecuteAsm(LuaStaticPopupsDataAddress, LuaStaticPopupsVarAddress, LuaStaticPopupsReturnAddress, LuaStaticPopupsAddress);
-            InjectLuaExecuteAsm(LuaBattlegroundStatusDataAddress, LuaBattlegroundStatusVarAddress, LuaBattlegroundStatusReturnAddress, LuaBattlegroundStatusAddress);
+            if (!BattlegroundStatusHookModule.Inject())
+            {
+                AmeisenLogger.I.Log("HookManager", "Failed to inject BattlegroundStatus module...", LogLevel.Error);
+            }
 
-            InjectTracelineJumpCheck();
+            if (!EventHookHookModule.Inject())
+            {
+                AmeisenLogger.I.Log("HookManager", "Failed to inject EventHook module...", LogLevel.Error);
+            }
+
+            if (!StaticPopupsHookModule.Inject())
+            {
+                AmeisenLogger.I.Log("HookManager", "Failed to inject StaticPopups module...", LogLevel.Error);
+            }
+
+            if (!TracelineJumpHookModule.Inject())
+            {
+                AmeisenLogger.I.Log("HookManager", "Failed to inject TracelineJump module...", LogLevel.Error);
+            }
 
             // save registers
             // WowInterface.XMemory.Fasm.AppendLine("PUSHAD");
@@ -1361,17 +1340,11 @@ namespace AmeisenBotX.Core.Hook
             WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
             WowInterface.XMemory.Fasm.AppendLine("@loscheck:");
 
-            // EventHook
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {EventHookAddress}");
-
-            // Traceline Jump Check
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {TracelineJumpCheckAddress}");
-
             // lua battleground status check
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {LuaBattlegroundStatusAddress}");
-
-            // lua static popups check
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {LuaStaticPopupsAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {BattlegroundStatusHookModule.AsmAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {EventHookHookModule.AsmAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {StaticPopupsHookModule.AsmAddress}");
+            WowInterface.XMemory.Fasm.AppendLine($"CALL {TracelineJumpHookModule.AsmAddress}");
 
             WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecutedAddress}], 1");
             WowInterface.XMemory.Fasm.AppendLine("@skpgi:");
@@ -1398,7 +1371,6 @@ namespace AmeisenBotX.Core.Hook
 
             // return to original function after we're done with our stuff
             WowInterface.XMemory.Fasm.AppendLine($"JMP {EndsceneReturnAddress}"); // 5 bytes
-
             WowInterface.XMemory.FasmInject(CodecaveForGateway + originalEndsceneBytes.Length);
 
             // setup the lua stuff
@@ -1571,7 +1543,7 @@ namespace AmeisenBotX.Core.Hook
 
                     Vector3 pos = BotUtils.MoveAhead(playerPosition, WowInterface.Player.Rotation, WowInterface.MovementSettings.ObstacleCheckDistance);
 
-                    WowInterface.XMemory.Write(TracelineJumpCheckDataAddress, (1.0f, playerPosition, pos));
+                    WowInterface.XMemory.Write(TracelineJumpHookModule.DataAddress, (1.0f, playerPosition, pos));
                 }
 
                 // run the gameinfo update
@@ -1589,35 +1561,20 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Write(GameInfoExecutedAddress, 0);
 
                 // process events
-                if (WowInterface.XMemory.Read(EventHookLuaReturnAddress, out IntPtr pEventJson)
-                    && WowInterface.XMemory.ReadString(pEventJson, Encoding.UTF8, out string eventJson, 1024)
-                    && eventJson.Length > 2)
-                {
-                    OnEventPush?.Invoke(eventJson);
-                }
+                OnEventPush?.Invoke(EventHookHookModule.Read());
 
                 // process static popups
-                if (WowInterface.XMemory.Read(LuaStaticPopupsReturnAddress, out IntPtr pStaticPopups)
-                    && WowInterface.XMemory.ReadString(pStaticPopups, Encoding.UTF8, out string staticPopups, 256)
-                    && staticPopups.Length > 0)
+                foreach (string s in StaticPopupsHookModule.Read().Split(";", StringSplitOptions.RemoveEmptyEntries))
                 {
-                    foreach (string s in staticPopups.Split(";", StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        string[] x = s.Split(":");
-                        OnEventStaticPopupsPush?.Invoke(int.Parse(x[0]), x[1]);
-                    }
+                    string[] x = s.Split(":");
+                    OnEventStaticPopupsPush?.Invoke(int.Parse(x[0]), x[1]);
                 }
 
                 // process battleground status
-                if (WowInterface.XMemory.Read(LuaBattlegroundStatusReturnAddress, out IntPtr pBattlegroundStatus)
-                    && WowInterface.XMemory.ReadString(pBattlegroundStatus, Encoding.UTF8, out string battlegroundStatus, 256)
-                    && battlegroundStatus.Length > 0)
+                foreach (string s in EventHookHookModule.Read().Split(";", StringSplitOptions.RemoveEmptyEntries))
                 {
-                    foreach (string s in battlegroundStatus.Split(";", StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        string[] x = s.Split(":");
-                        OnEventBattlegroundStatusPush?.Invoke(int.Parse(x[0]), x[1], x[0]);
-                    }
+                    string[] x = s.Split(":");
+                    OnEventBattlegroundStatusPush?.Invoke(int.Parse(x[0]), x[1], x[0]);
                 }
             }
         }
@@ -1725,62 +1682,6 @@ namespace AmeisenBotX.Core.Hook
             ++hookCalls;
             bytes = readReturnBytes ? returnBytes.ToArray() : null;
             return true;
-        }
-
-        private void InjectLuaExecuteAsm(IntPtr dataAddress, IntPtr varAddress, IntPtr returnAddress, IntPtr codecave)
-        {
-            WowInterface.XMemory.Fasm.AppendLine("X:");
-
-            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {dataAddress}");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {dataAddress}");
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionLuaDoString}");
-            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0xC");
-
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionGetActivePlayerObject}");
-            WowInterface.XMemory.Fasm.AppendLine("MOV ECX, EAX");
-            WowInterface.XMemory.Fasm.AppendLine("PUSH -1");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {varAddress}");
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionGetLocalizedText}");
-            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{returnAddress}], EAX");
-
-            WowInterface.XMemory.Fasm.AppendLine($"RET");
-            WowInterface.XMemory.FasmInject(codecave);
-        }
-
-        private void InjectTracelineJumpCheck()
-        {
-            WowInterface.XMemory.Fasm.AppendLine("X:");
-            WowInterface.XMemory.Fasm.AppendLine($"TEST DWORD [{TracelineJumpCheckExecuteAddress}], 1");
-            WowInterface.XMemory.Fasm.AppendLine("JE @out");
-
-            IntPtr distancePointer = TracelineJumpCheckDataAddress;
-            IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
-            IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
-            IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
-
-            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AppendLine("PUSH 0x120171");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {distancePointer}");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {resultPointer}");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {endPointer}");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {startPointer}");
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionTraceline}");
-            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0x18");
-
-            WowInterface.XMemory.Fasm.AppendLine("TEST AL, 1");
-            WowInterface.XMemory.Fasm.AppendLine("JE @out");
-
-            WowInterface.XMemory.Fasm.AppendLine("PUSH 0");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {TracelineJumpCheckCommandAddress}");
-            WowInterface.XMemory.Fasm.AppendLine($"PUSH {TracelineJumpCheckCommandAddress}");
-            WowInterface.XMemory.Fasm.AppendLine($"CALL {WowInterface.OffsetList.FunctionLuaDoString}");
-            WowInterface.XMemory.Fasm.AppendLine("ADD ESP, 0xC");
-
-            WowInterface.XMemory.Fasm.AppendLine($"MOV DWORD [{TracelineJumpCheckExecuteAddress}], 0");
-            WowInterface.XMemory.Fasm.AppendLine("@out:");
-            WowInterface.XMemory.Fasm.AppendLine("RET");
-            WowInterface.XMemory.FasmInject(TracelineJumpCheckAddress);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1904,121 +1805,6 @@ namespace AmeisenBotX.Core.Hook
 
             #endregion GameInfo
 
-            #region EventHook
-
-            // | EVENT HOOK
-            // codecave for the event hook
-            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_EVENTHOOK_SIZE, out IntPtr eventHook)) { return false; }
-
-            EventHookAddress = eventHook;
-
-            // codecave for the event hook var
-            byte[] luaVarBytes = Encoding.ASCII.GetBytes(EventHookOutput);
-            int luaVarSize = luaVarBytes.Length + 1;
-            if (!WowInterface.XMemory.AllocateMemory((uint)luaVarSize, out IntPtr eventHookVar)) { return false; }
-
-            EventHookLuaVarAddress = eventHookVar;
-            WowInterface.XMemory.WriteBytes(EventHookLuaVarAddress, luaVarBytes);
-
-            // codecave for the event hook return
-            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr eventHookReturn)) { return false; }
-
-            EventHookLuaReturnAddress = eventHookReturn;
-            WowInterface.XMemory.Write(EventHookLuaReturnAddress, 0);
-
-            // codecave for the eventhook lua
-            byte[] luaStringBytes = Encoding.ASCII.GetBytes(EventHookLuaSetUp);
-            int luaStringSize = luaStringBytes.Length + 1;
-
-            if (!WowInterface.XMemory.AllocateMemory((uint)luaStringSize, out IntPtr eventHookLua)) { return false; }
-
-            EventHookLuaAddress = eventHookLua;
-            WowInterface.XMemory.WriteBytes(EventHookLuaAddress, luaStringBytes);
-
-            #endregion EventHook
-
-            #region Traceline Jump Check
-
-            // | TRACELINE JUMP CHECK
-            // codecave for the traceline jump check
-            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_TRACELINE_JUMP_CHECK_SIZE, out IntPtr tracelineJumpCheck)) { return false; }
-
-            TracelineJumpCheckAddress = tracelineJumpCheck;
-            WowInterface.XMemory.Write(EventHookLuaReturnAddress, 0);
-
-            // codecave for the traceline jump check execute
-            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr tracelineJumpCheckExecute)) { return false; }
-
-            TracelineJumpCheckExecuteAddress = tracelineJumpCheckExecute;
-
-            // codecave for the traceline jump check data
-            if (!WowInterface.XMemory.AllocateMemory(40, out IntPtr tracelineJumpCheckData)) { return false; }
-
-            TracelineJumpCheckDataAddress = tracelineJumpCheckData;
-
-            // codecave for the traceline jump check command lua
-            byte[] luaJumpBytes = Encoding.ASCII.GetBytes("JumpOrAscendStart();AscendStop()");
-            int luaJumpSize = luaJumpBytes.Length + 1;
-
-            if (!WowInterface.XMemory.AllocateMemory((uint)luaJumpSize, out IntPtr tracelineJumpCheckCommand)) { return false; }
-
-            TracelineJumpCheckCommandAddress = tracelineJumpCheckCommand;
-            WowInterface.XMemory.WriteBytes(TracelineJumpCheckCommandAddress, luaJumpBytes);
-
-            #endregion Traceline Jump Check
-
-            #region Static Popup Check
-
-            // variable
-            byte[] luaStaticPopupVarBytes = Encoding.ASCII.GetBytes(LuaStaticPopupsVarName);
-            int luaStaticPopupVarSize = luaStaticPopupVarBytes.Length + 1;
-
-            if (!WowInterface.XMemory.AllocateMemory((uint)luaStaticPopupVarSize, out IntPtr luaStaticPopupVar)) { return false; }
-            LuaStaticPopupsVarAddress = luaStaticPopupVar;
-            WowInterface.XMemory.WriteBytes(LuaStaticPopupsVarAddress, luaStaticPopupVarBytes);
-
-            // lua
-            byte[] luaStaticPopupsBytes = Encoding.ASCII.GetBytes($"{LuaStaticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {LuaStaticPopupsVarName}={LuaStaticPopupsVarName}..b..\":\"..c.which..\"; \"end end");
-            if (!WowInterface.XMemory.AllocateMemory((uint)(luaStaticPopupsBytes.Length + 1), out IntPtr luaStaticPopupsDataAlloc)) { return false; }
-            LuaStaticPopupsDataAddress = luaStaticPopupsDataAlloc;
-            WowInterface.XMemory.WriteBytes(LuaStaticPopupsDataAddress, luaStaticPopupsBytes);
-
-            // return address
-            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr luaStaticPopupsReturn)) { return false; }
-            LuaStaticPopupsReturnAddress = luaStaticPopupsReturn;
-
-            // asm
-            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_STATIC_POPUP_CHECK_SIZE, out IntPtr luaStaticPopupsAlloc)) { return false; }
-            LuaStaticPopupsAddress = luaStaticPopupsAlloc;
-
-            #endregion Static Popup Check
-
-            #region Battleground Status Check
-
-            // variable
-            byte[] luaBattlegroundStatusVarBytes = Encoding.ASCII.GetBytes(LuaBattlegroundStatusVarName);
-            int luaBattlegroundStatusVarSize = luaBattlegroundStatusVarBytes.Length + 1;
-
-            if (!WowInterface.XMemory.AllocateMemory((uint)luaBattlegroundStatusVarSize, out IntPtr luaBattlegroundStatusVar)) { return false; }
-            LuaBattlegroundStatusVarAddress = luaBattlegroundStatusVar;
-            WowInterface.XMemory.WriteBytes(LuaBattlegroundStatusVarAddress, luaBattlegroundStatusVarBytes);
-
-            // lua
-            byte[] luaBattlegroundStatusBytes = Encoding.ASCII.GetBytes($"{LuaBattlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{LuaBattlegroundStatusVarName}={LuaBattlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end");
-            if (!WowInterface.XMemory.AllocateMemory((uint)(luaBattlegroundStatusBytes.Length + 1), out IntPtr luaBattlegroundStatusDataAlloc)) { return false; }
-            LuaBattlegroundStatusDataAddress = luaBattlegroundStatusDataAlloc;
-            WowInterface.XMemory.WriteBytes(LuaBattlegroundStatusDataAddress, luaBattlegroundStatusBytes);
-
-            // return address
-            if (!WowInterface.XMemory.AllocateMemory(4, out IntPtr luaBattlegroundStatusReturn)) { return false; }
-            LuaBattlegroundStatusReturnAddress = luaBattlegroundStatusReturn;
-
-            // asm
-            if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_BATTLEGROUND_STATUS_CHECK_SIZE, out IntPtr luaBattlegroundStatusAlloc)) { return false; }
-            LuaBattlegroundStatusAddress = luaBattlegroundStatusAlloc;
-
-            #endregion Battleground Status Check
-
             #region Allocations Logging
 
             AmeisenLogger.I.Log("HookManager", $"{"CodeToExecuteAddress",-36} ({4,-4} bytes): 0x{CodeToExecuteAddress.ToInt32():X}", LogLevel.Verbose);
@@ -2032,22 +1818,6 @@ namespace AmeisenBotX.Core.Hook
             AmeisenLogger.I.Log("HookManager", $"{"GameInfoAddress",-36} ({gameinfoSize,-4} bytes): 0x{GameInfoAddress.ToInt32():X}", LogLevel.Verbose);
             AmeisenLogger.I.Log("HookManager", $"{"GameInfoExecuteLosCheckAddress",-36} ({4,-4} bytes): 0x{GameInfoExecuteLosCheckAddress.ToInt32():X}", LogLevel.Verbose);
             AmeisenLogger.I.Log("HookManager", $"{"GameInfoLosCheckDataAddress",-36} ({40,-4} bytes): 0x{GameInfoLosCheckDataAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"EventHookAddress",-36} ({MEM_ALLOC_EVENTHOOK_SIZE,-4} bytes): 0x{EventHookAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"EventHookLuaVarAddress",-36} ({luaVarSize,-4} bytes): 0x{EventHookLuaVarAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"EventHookLuaReturnAddress",-36} ({4,-4} bytes): 0x{EventHookLuaReturnAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"EventHookLuaAddress",-36} ({luaStringSize,-4} bytes): 0x{EventHookLuaAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"TracelineJumpCheckAddress",-36} ({MEM_ALLOC_TRACELINE_JUMP_CHECK_SIZE,-4} bytes): 0x{TracelineJumpCheckAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"TracelineJumpCheckExecuteAddress",-36} ({4,-4} bytes): 0x{TracelineJumpCheckExecuteAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"TracelineJumpCheckDataAddress",-36} ({40,-4} bytes): 0x{TracelineJumpCheckDataAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"TracelineJumpCheckCommandAddress",-36} ({luaJumpSize,-4} bytes): 0x{TracelineJumpCheckCommandAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaStaticPopupsVarAddress",-36} ({luaStaticPopupVarSize,-4} bytes): 0x{LuaStaticPopupsVarAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaStaticPopupsReturnAddress",-36} ({4,-4} bytes): 0x{LuaStaticPopupsReturnAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaStaticPopupsAddress",-36} ({MEM_ALLOC_STATIC_POPUP_CHECK_SIZE,-4} bytes): 0x{LuaStaticPopupsAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaStaticPopupsDataAddress",-36} ({luaStaticPopupsBytes.Length + 1,-4} bytes): 0x{LuaStaticPopupsDataAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaBattlegroundStatusVarAddress",-36} ({luaBattlegroundStatusVarSize,-4} bytes): 0x{LuaBattlegroundStatusVarAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaBattlegroundStatusReturnAddress",-36} ({4,-4} bytes): 0x{LuaBattlegroundStatusReturnAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaBattlegroundStatusAddress",-36} ({MEM_ALLOC_BATTLEGROUND_STATUS_CHECK_SIZE,-4} bytes): 0x{LuaBattlegroundStatusAddress.ToInt32():X}", LogLevel.Verbose);
-            AmeisenLogger.I.Log("HookManager", $"{"LuaBattlegroundStatusDataAddress",-36} ({luaBattlegroundStatusBytes.Length + 1,-4} bytes): 0x{LuaBattlegroundStatusDataAddress.ToInt32():X}", LogLevel.Verbose);
 
             #endregion Allocations Logging
 

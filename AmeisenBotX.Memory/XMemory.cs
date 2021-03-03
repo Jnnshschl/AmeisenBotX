@@ -13,7 +13,7 @@ namespace AmeisenBotX.Memory
 {
     public unsafe class XMemory : IDisposable
     {
-        private const int FASM_MEMORY_SIZE = 4096;
+        private const int FASM_MEMORY_SIZE = 8192;
         private const int FASM_PASSES = 100;
 
         // lock needs to be static as FASM isn't thread safe
@@ -201,7 +201,7 @@ namespace AmeisenBotX.Memory
                     }
 
                     // use this to read the error
-                    // FasmStateError state = *(FasmStateError*)pBytes;
+                    FasmStateError stateError = *(FasmStateError*)pBytes;
 
                     Fasm.Clear();
                     return false;

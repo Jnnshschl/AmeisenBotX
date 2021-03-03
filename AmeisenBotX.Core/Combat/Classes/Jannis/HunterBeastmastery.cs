@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             C.Add("SteadyShotMinDistanceUnit", 12.0f);
             C.Add("ChaseDistanceUnit", 20.0f);
 
-            C.Add("KitingStartDistancePlayer", 6.0f);
+            C.Add("KitingStartDistancePlayer", 8.0f);
             C.Add("KitingEndDistancePlayer", 22.0f);
             C.Add("SteadyShotMinDistancePlayer", 22.0f);
             C.Add("ChaseDistancePlayer", 24.0f);
