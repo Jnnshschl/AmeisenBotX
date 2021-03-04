@@ -25,6 +25,8 @@ namespace AmeisenBotX.Core.Event
 
         public Dictionary<string, List<WowEventAction>> EventDictionary { get; private set; }
 
+        public string EventHookFrameName { get; set; }
+
         public bool IsActive { get; private set; }
 
         public Queue<(string, WowEventAction)> SubscribeQueue { get; private set; }
@@ -50,7 +52,7 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
-        public void HookManagerOnEventPush(string eventJson)
+        public void OnEventPush(string eventJson)
         {
             if (eventJson.Length > 2)
             {
@@ -80,8 +82,6 @@ namespace AmeisenBotX.Core.Event
             if (!IsActive)
             {
                 AmeisenLogger.I.Log("EventHook", $"Starting EventHookManager", LogLevel.Verbose);
-
-                WowInterface.HookManager.OnEventPush += HookManagerOnEventPush;
                 IsActive = true;
             }
         }
@@ -97,8 +97,8 @@ namespace AmeisenBotX.Core.Event
 
                 if (WowInterface.HookManager.IsWoWHooked)
                 {
-                    WowInterface.HookManager.LuaDoString($"{WowInterface.HookManager.EventFrameName}:UnregisterAllEvents();");
-                    WowInterface.HookManager.LuaDoString($"{WowInterface.HookManager.EventFrameName}:SetScript(\"OnEvent\", nil);");
+                    WowInterface.HookManager.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();");
+                    WowInterface.HookManager.LuaDoString($"{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace AmeisenBotX.Core.Event
                     if (!EventDictionary.ContainsKey(queueElement.Item1))
                     {
                         EventDictionary.Add(queueElement.Item1, new List<WowEventAction>() { queueElement.Item2 });
-                        sb.Append($"{WowInterface.HookManager.EventFrameName}:RegisterEvent(\"{queueElement.Item1}\");");
+                        sb.Append($"{EventHookFrameName}:RegisterEvent(\"{queueElement.Item1}\");");
                     }
                     else
                     {
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Event
 
                         if (EventDictionary[queueElement.Item1].Count == 0)
                         {
-                            sb.Append($"{WowInterface.HookManager.EventFrameName}:UnregisterEvent(\"{queueElement.Item1}\");");
+                            sb.Append($"{EventHookFrameName}:UnregisterEvent(\"{queueElement.Item1}\");");
                         }
                     }
                 }

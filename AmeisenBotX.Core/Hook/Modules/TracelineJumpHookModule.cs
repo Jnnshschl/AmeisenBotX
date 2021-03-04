@@ -1,28 +1,27 @@
 ﻿using AmeisenBotX.Memory;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook.Modules
 {
-    public class TracelineJumpHookModule : RunAsmHookModule<int>
+    public class TracelineJumpHookModule : RunAsmHookModule
     {
-        public IntPtr ExecuteAddress { get; private set; }
-        public IntPtr CommandAddress { get; private set; }
-        public IntPtr DataAddress { get; private set; }
-
-        private WowInterface WowInterface { get; }
-
-        public TracelineJumpHookModule(WowInterface wowInterface) : base(wowInterface.XMemory, 256)
+        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action tick, WowInterface wowInterface) : base(onUpdate, tick, wowInterface.XMemory, 256)
         {
             WowInterface = wowInterface;
         }
 
-        public override int Read()
+        public IntPtr CommandAddress { get; private set; }
+
+        public IntPtr DataAddress { get; private set; }
+
+        public IntPtr ExecuteAddress { get; private set; }
+
+        private WowInterface WowInterface { get; }
+
+        public override IntPtr GetDataPointer()
         {
-            return 0;
+            return IntPtr.Zero;
         }
 
         protected override bool PrepareAsm()

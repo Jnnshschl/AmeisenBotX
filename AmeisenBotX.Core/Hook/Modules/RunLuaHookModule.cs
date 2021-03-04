@@ -1,42 +1,40 @@
 ﻿using AmeisenBotX.Memory;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook.Modules
 {
-    public class RunLuaHookModule : RunAsmHookModule<string>
+    public class RunLuaHookModule : RunAsmHookModule
     {
-        private string Lua { get; }
-
-        private string VarName { get; }
-
-        public IntPtr ReturnAddress { get; private set; }
+        public RunLuaHookModule(Action<IntPtr> onUpdate, Action tick, WowInterface wowInterface, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, wowInterface.XMemory, allocSize)
+        {
+            WowInterface = wowInterface;
+            Lua = lua;
+            VarName = varName;
+        }
 
         public IntPtr CommandAddress { get; private set; }
 
+        public IntPtr ReturnAddress { get; private set; }
+
         public IntPtr VarAddress { get; private set; }
+
+        private string Lua { get; }
+
+        private Action TickAction { get; }
+
+        private string VarName { get; }
 
         private WowInterface WowInterface { get; }
 
-        public RunLuaHookModule(WowInterface wowInterface, string lua, string varName, uint allocSize = 128) : base(wowInterface.XMemory, allocSize)
+        public override IntPtr GetDataPointer()
         {
-            Lua = lua;
-            VarName = varName;
-            WowInterface = wowInterface;
-        }
-
-        public override string Read()
-        {
-            if (WowInterface.XMemory.Read(ReturnAddress, out IntPtr pString)
-                && XMemory.ReadString(pString, Encoding.UTF8, out string s, 8192 * 8))
+            if (WowInterface.XMemory.Read(ReturnAddress, out IntPtr pString))
             {
-                return s;
+                return pString;
             }
 
-            return string.Empty;
+            return IntPtr.Zero;
         }
 
         protected override bool PrepareAsm()

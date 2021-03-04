@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Data.Objects.Raw;
+using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -10,21 +11,33 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Hook
 {
+    /// <summary>
+    /// This is the main interactionpoint with the wow game it
+    /// handles function calling, execution of asm code and
+    /// hooking the EndScene.
+    /// </summary>
     public interface IHookManager
     {
-        event Action<string> OnEventPush;
-
+        /// <summary>
+        /// This event will to push the lastest GameInfo struct.
+        /// </summary>
         event Action<GameInfo> OnGameInfoPush;
 
-        string EventFrameName { get; }
-
+        /// <summary>
+        /// Returns the amount of hook calls since the last time
+        /// this variable was retrieved.
+        /// </summary>
         ulong HookCallCount { get; }
 
+        /// <summary>
+        /// Reads the first byte of the EndScene hook, this
+        /// should be a JMP instruction if wow is hooked.
+        /// </summary>
         bool IsWoWHooked { get; }
 
         void BotOverrideWorldLoadedCheck(bool status);
 
-        void DisposeHook();
+        bool Hook(int hookSize, List<IHookModule> hookModules);
 
         void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
 
@@ -199,7 +212,7 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaUseItemByName(string itemName);
 
-        void SetTracelineJumpCheckStatus(bool status);
+        void Unhook();
 
         void WowClearTarget();
 
@@ -234,8 +247,6 @@ namespace AmeisenBotX.Core.Hook
         void WowSetFacing(WowUnit unit, float angle);
 
         void WowSetRenderState(bool renderingEnabled);
-
-        bool WowSetupEndsceneHook();
 
         void WowStopClickToMove();
 

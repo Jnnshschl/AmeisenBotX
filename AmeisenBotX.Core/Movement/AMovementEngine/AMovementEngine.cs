@@ -85,7 +85,6 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
             if (PathQueue.Count > 0)
             {
-                WowInterface.HookManager.SetTracelineJumpCheckStatus(true);
                 Vector3 currentNode = IsUnstucking ? UnstuckTarget : PathQueue.Peek();
                 float distanceToNode = WowInterface.Player.Position.GetDistance2D(currentNode);
 
@@ -201,7 +200,6 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         {
             Reset();
             WowInterface.HookManager.WowStopClickToMove();
-            WowInterface.HookManager.SetTracelineJumpCheckStatus(false);
         }
 
         private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)

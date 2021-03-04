@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Utils
                 if (CastCallPet != null
                     && ((WowInterface.ObjectManager.Pet.Guid == 0 && CastCallPet.Invoke())
                     || CastRevivePet != null
-                    && WowInterface.ObjectManager.Pet != null 
+                    && WowInterface.ObjectManager.Pet != null
                     && (WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead) && CastRevivePet()))
                 {
                     return true;

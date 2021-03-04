@@ -274,7 +274,7 @@ namespace AmeisenBotX.Core
                 }
             }
 
-            WowInterface.HookManager.DisposeHook();
+            WowInterface.HookManager.Unhook();
             WowInterface.XMemory.Dispose();
 
             WowInterface.Db.Save(Path.Combine(BotDataPath, AccountName, "db.json"));

@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Hook.Modules
 {
-    public interface IHookModule<T>
+    public interface IHookModule
     {
-        bool Inject();
+        IntPtr AsmAddress { get; }
 
-        T Read();
+        Action<IntPtr> OnDataUpdate { get; set; }
+
+        Action Tick { get; set; }
+
+        IntPtr GetDataPointer();
+
+        bool Inject();
     }
 }

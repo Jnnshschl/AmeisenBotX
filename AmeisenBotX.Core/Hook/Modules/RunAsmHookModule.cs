@@ -3,19 +3,27 @@ using System;
 
 namespace AmeisenBotX.Core.Hook.Modules
 {
-    public abstract class RunAsmHookModule<T> : IHookModule<T>
+    public abstract class RunAsmHookModule : IHookModule
     {
-        public RunAsmHookModule(XMemory xMemory, uint allocSize)
+        public RunAsmHookModule(Action<IntPtr> onUpdate, Action tick, XMemory xMemory, uint allocSize)
         {
             XMemory = xMemory;
             AllocSize = allocSize;
+            OnDataUpdate = onUpdate;
+            Tick = tick;
         }
-
-        protected uint AllocSize { get; }
 
         public IntPtr AsmAddress { get; set; }
 
+        public Action<IntPtr> OnDataUpdate { get; set; }
+
+        public Action Tick { get; set; }
+
+        protected uint AllocSize { get; }
+
         protected XMemory XMemory { get; }
+
+        public abstract IntPtr GetDataPointer();
 
         public virtual bool Inject()
         {
@@ -30,8 +38,6 @@ namespace AmeisenBotX.Core.Hook.Modules
                 return false;
             }
         }
-
-        public abstract T Read();
 
         protected abstract bool PrepareAsm();
     }
