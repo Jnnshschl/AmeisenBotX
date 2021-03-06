@@ -454,12 +454,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         //}
                     }
                 }
-                //target gui id is bigger than null
-                //{
-                //WowInterface.HookManager.ClearTarget();
-                //return;
-                //}
-                //Attacken
             }
         }
 
