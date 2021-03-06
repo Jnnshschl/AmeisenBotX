@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     internal class WarriorFury : BasicKamelClass
     {
+        private const string ShootSpell = "Shoot";
+
         private const string battleShoutSpell = "Battle Shout";
 
         private const string battleStanceSpell = "Battle Stance";
@@ -44,6 +47,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string heroicFurySpell = "Heroic Fury";
         private const string heroicStrikeSpell = "Heroic Strike";
         private const string heroicThrowSpell = "Heroic Throw";
+        private const string ShatteringThrowSpell = "Shattering Throw";
         private const string interceptSpell = "Intercept";
         private const string intimidatingShoutSpell = "Intimidating Shout";
         private const string pummelSpell = "Pummel";
@@ -56,11 +60,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
         private const string whirlwindSpell = "Whirlwind";
-        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        //private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public WarriorFury(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
+            spellCoolDown.Add(ShootSpell, DateTime.Now);
             //Stances
             spellCoolDown.Add(defensiveStanceSpell, DateTime.Now);
             spellCoolDown.Add(battleStanceSpell, DateTime.Now);
@@ -69,6 +74,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(heroicStrikeSpell, DateTime.Now);
             spellCoolDown.Add(interceptSpell, DateTime.Now);
             spellCoolDown.Add(heroicThrowSpell, DateTime.Now);
+            spellCoolDown.Add(ShatteringThrowSpell, DateTime.Now);
             spellCoolDown.Add(executeSpell, DateTime.Now);
             spellCoolDown.Add(pummelSpell, DateTime.Now);
             spellCoolDown.Add(bloodthirstSpell, DateTime.Now);
@@ -160,7 +166,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override bool UseAutoAttacks => true;
 
-        public override string Version => "2.0";
+        public override string Version => "3.0";
 
         public TimegatedEvent VictoryRushEvent { get; private set; }
 
@@ -176,6 +182,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public override void OutOfCombatExecute()
         {
             Targetselection();
+            StartAttack();
         }
 
         private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
@@ -213,18 +220,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
             return false;
         }
-
-        private bool IsSpellReady(string spellName)
-        {
-            if (DateTime.Now > spellCoolDown[spellName])
-            {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
-        }
-
         private void StartAttack()
         {
             if (WowInterface.TargetGuid != 0)
@@ -280,7 +275,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         }
                     }
 
-                    if (WowInterface.Player.HealthPercentage <= 50 && CustomCastSpell(intimidatingShoutSpell))
+                    if ((WowInterface.Player.HealthPercentage <= 30) || (WowInterface.Target.GetType() == typeof(WowPlayer)) && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
                     }
@@ -342,6 +337,40 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 }
                 else//Range
                 {
+                    if ((WowInterface.Player.IsDazed
+                        || WowInterface.Player.IsFleeing
+                        || WowInterface.Player.IsInfluenced
+                        || WowInterface.Player.IsPossessed)
+                        || WowInterface.Player.HasBuffByName("Frost Nova")
+                        || WowInterface.Player.HasBuffByName("Frost Trap Aura")
+                        || WowInterface.Player.HasBuffByName("Hamstring")
+                        || WowInterface.Player.HasBuffByName("Concussive Shot")
+                        || WowInterface.Player.HasBuffByName("Frostbolt")
+                        || WowInterface.Player.HasBuffByName("Frost Shock")
+                        || WowInterface.Player.HasBuffByName("Frostfire Bolt")
+                        || WowInterface.Player.HasBuffByName("Slow")
+                        || WowInterface.Player.HasBuffByName("Entangling Roots"))
+                    {
+                        if (CustomCastSpell(heroicFurySpell))
+                        {
+                            return;
+                        }
+                        if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
+                        {
+                            WowInterface.HookManager.WowStopClickToMove();
+                            WowInterface.MovementEngine.Reset();
+                        }
+
+                        if (CustomCastSpell(ShootSpell))
+                        {
+                            return;
+                        }
+
+                        if (CustomCastSpell(ShatteringThrowSpell, battleStanceSpell))
+                        {
+                            return;
+                        }
+                    }
                     if (CustomCastSpell(interceptSpell))
                     {
                         return;
@@ -359,27 +388,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             else
             {
                 Targetselection();
-            }
-        }
-
-        private void Targetselection()
-        {
-            if (TargetSelectEvent.Run())
-            {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 50)
-                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                .FirstOrDefault();//&& e.Type(Player)
-
-                if (nearTarget != null)
-                {
-                    WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
-
-                    if (!TargetInLineOfSight)
-                    {
-                        return;
-                    }
-                }
             }
         }
     }

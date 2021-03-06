@@ -13,6 +13,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     public abstract class BasicKamelClass : ICombatClass
     {
+        #region Race Spells
         //Race (Troll)
         private const string BerserkingSpell = "Berserking";
 
@@ -24,8 +25,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         //Race (Dwarf)
         private const string StoneformSpell = "Stoneform";
+        #endregion
 
-        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        #region Warrior
+
+        #endregion
+
+
+        public readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         private readonly int[] useableHealingItems = new int[]
         {
@@ -127,6 +134,35 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
+        public void Targetselection()
+        {
+            if (TargetSelectEvent.Run())
+            {
+                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 50)
+                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && e.IsPvpFlagged && !e.IsFriendyTo(WowInterface, WowInterface.Player)) || (e.IsInCombat && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                .FirstOrDefault();//&& e.Type(Player)
+
+                if (nearTarget != null)
+                {
+                    WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
+
+                    if (!TargetInLineOfSight)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    AttackTarget();
+                }
+
+                //WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 50)
+                //.Where(e => !e.IsNotAttackable && e.IsInCombat && (e.Type == WowObjectType.Player && e.IsPvpFlagged) || (e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
+                //.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                //.FirstOrDefault();//&& e.Type(Player)
+            }
+        }
 
         public void Execute()
         {
@@ -191,7 +227,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
         }
 
-        private bool IsSpellReady(string spellName)
+        public bool IsSpellReady(string spellName)
         {
             if (DateTime.Now > spellCoolDown[spellName])
             {
