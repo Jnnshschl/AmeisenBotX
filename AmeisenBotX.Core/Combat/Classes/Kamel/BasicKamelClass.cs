@@ -115,6 +115,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public WowInterface WowInterface { get; internal set; }
 
+        //follow the target
         public void AttackTarget()
         {
             WowUnit target = WowInterface.Target;
@@ -139,7 +140,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             if (TargetSelectEvent.Run())
             {
                 WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 50)
-                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && e.IsPvpFlagged && !e.IsFriendyTo(WowInterface, WowInterface.Player)) || (e.IsInCombat && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
+                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && (e.IsPvpFlagged && !e.IsFriendyTo(WowInterface, WowInterface.Player)) || (e.IsInCombat)) || (e.IsInCombat && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();//&& e.Type(Player)
 
@@ -156,14 +157,24 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     AttackTarget();
                 }
-
-                //WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 50)
-                //.Where(e => !e.IsNotAttackable && e.IsInCombat && (e.Type == WowObjectType.Player && e.IsPvpFlagged) || (e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
-                //.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                //.FirstOrDefault();//&& e.Type(Player)
             }
         }
+        //Change target if target to far away
+        public void ChangeTargetToAttack() 
+        {
+            IEnumerable<WowPlayer> PlayerNearPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 15);
 
+            WowUnit target = WowInterface.Target;
+            if (target == null)
+            {
+                return;
+            }
+            if (PlayerNearPlayer.Count() >= 1 && WowInterface.ObjectManager.Target.HealthPercentage >= 60 && WowInterface.Player.Position.GetDistance(target.Position) >= 20)
+            {
+                WowInterface.HookManager.WowClearTarget();
+                return;
+            }
+        }
         public void Execute()
         {
             ExecuteCC();

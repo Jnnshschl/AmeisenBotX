@@ -224,6 +224,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (WowInterface.TargetGuid != 0)
             {
+                ChangeTargetToAttack();
+
                 if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
                 {
                     WowInterface.HookManager.WowClearTarget();
@@ -355,6 +357,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         {
                             return;
                         }
+                    }
+                    if (WowInterface.Player.HasBuffByName("Entangling Roots")
+                        || WowInterface.Player.HasBuffByName("Frost Nova")) 
+                    {
                         if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
                         {
                             WowInterface.HookManager.WowStopClickToMove();
