@@ -284,12 +284,14 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public WowObject ProcessObject(IntPtr ptr)
+        public void ProcessObject(int i)
         {
-            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectType.ToInt32()), out WowObjectType type)
-                && WowInterface.XMemory.Read(IntPtr.Add(ptr, WowInterface.OffsetList.WowObjectDescriptor.ToInt32()), out IntPtr descriptorAddress))
+            IntPtr ptr = wowObjectPointers[i];
+
+            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectType), out WowObjectType type)
+                && WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
-                WowObject obj = type switch
+                WowObject obj = type == wowObjects[i]?.Type ? wowObjects[i] : type switch
                 {
                     WowObjectType.Container => new WowContainer(ptr, type, descriptorAddress),
                     WowObjectType.Corpse => new WowCorpse(ptr, type, descriptorAddress),
@@ -331,10 +333,8 @@ namespace AmeisenBotX.Core.Data
                     if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
                 }
 
-                return obj;
+                wowObjects[i] = obj;
             }
-
-            return null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -388,25 +388,21 @@ namespace AmeisenBotX.Core.Data
                 if (PartyleaderGuid == 0) { Partyleader = null; }
 
                 WowInterface.XMemory.Read(WowInterface.OffsetList.ClientConnection, out IntPtr clientConnection);
-                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, WowInterface.OffsetList.CurrentObjectManager.ToInt32()), out IntPtr currentObjectManager);
+                WowInterface.XMemory.Read(IntPtr.Add(clientConnection, (int)WowInterface.OffsetList.CurrentObjectManager), out IntPtr currentObjectManager);
 
                 // read the first object
-                WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, WowInterface.OffsetList.FirstObject.ToInt32()), out IntPtr activeObjectBaseAddress);
+                WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, (int)WowInterface.OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
 
-                int count = 0;
+                int c = 0;
 
-                while (activeObjectBaseAddress.ToInt32() > 0 && count < MAX_OBJECT_COUNT)
+                for (; (int)activeObjectBaseAddress > 0 && c < MAX_OBJECT_COUNT; ++c)
                 {
-                    wowObjectPointers[count] = activeObjectBaseAddress;
-                    ++count;
-
-                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, WowInterface.OffsetList.NextObject.ToInt32()), out activeObjectBaseAddress);
+                    wowObjectPointers[c] = activeObjectBaseAddress;
+                    WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.NextObject), out activeObjectBaseAddress);
                 }
 
-                ObjectCount = count;
-
-                Array.Clear(wowObjects, 0, wowObjects.Length);
-                Parallel.For(0, count, x => wowObjects[x] = ProcessObject(wowObjectPointers[x]));
+                ObjectCount = c;
+                Parallel.For(0, c, x => ProcessObject(x));
 
                 if (PlayerGuidIsVehicle)
                 {
@@ -576,13 +572,13 @@ namespace AmeisenBotX.Core.Data
                 IEnumerable<IntPtr> raidPointers = raidStruct.GetPointers();
                 ConcurrentBag<ulong> guids = new();
 
-                Parallel.ForEach(raidPointers, x =>
+                foreach (IntPtr raidPointer in raidPointers)
                 {
-                    if (WowInterface.XMemory.Read(x, out ulong guid) && guid != 0)
+                    if (WowInterface.XMemory.Read(raidPointer, out ulong guid) && guid != 0)
                     {
                         guids.Add(guid);
                     }
-                });
+                }
 
                 partymemberGuids.AddRange(guids);
             }
