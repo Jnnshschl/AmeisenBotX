@@ -402,6 +402,7 @@ namespace AmeisenBotX.Core
                 new Combat.Classes.Kamel.PriestHoly(WowInterface),
                 new Combat.Classes.Kamel.WarriorFury(WowInterface),
                 new Combat.Classes.Kamel.WarriorArms(WowInterface),
+                new Combat.Classes.Kamel.RogueAssassination(WowInterface),
                 new Combat.Classes.einTyp.PaladinProtection(WowInterface),
                 new Combat.Classes.einTyp.RogueAssassination(WowInterface),
                 new Combat.Classes.einTyp.WarriorArms(WowInterface),

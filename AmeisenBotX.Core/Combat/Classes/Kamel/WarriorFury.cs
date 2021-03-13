@@ -104,6 +104,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             RendEvent = new(TimeSpan.FromSeconds(6));
             ExecuteEvent = new(TimeSpan.FromSeconds(1));
         }
+        //Time event
+        public TimegatedEvent RendEvent { get; private set; }
+        public TimegatedEvent ExecuteEvent { get; private set; }
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
+        public TimegatedEvent VictoryRushEvent { get; private set; }
 
         public override string Author => "Lukas";
 
@@ -113,18 +118,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Displayname => "Warrior Fury Final";
 
-        public TimegatedEvent ExecuteEvent { get; private set; }
-
         public override bool HandlesMovement => false;
-
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
 
         public override bool IsMelee => true;
 
         public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES, WowWeaponType.STAVES, WowWeaponType.DAGGERS });
-
-        //Time event
-        public TimegatedEvent RendEvent { get; private set; }
 
         public override WowRole Role => WowRole.Dps;
 
@@ -167,8 +165,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public override bool UseAutoAttacks => true;
 
         public override string Version => "3.0";
-
-        public TimegatedEvent VictoryRushEvent { get; private set; }
 
         public override bool WalkBehindEnemy => false;
 
