@@ -13,10 +13,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     internal class RestorationShaman : BasicKamelClass
     {
-        private const string ancestralSpiritSpell = "Ancestral Spirit";
-
-        //Race (Troll)
-        private const string BerserkingSpell = "Berserking";
 
         private const string Bloodlust = "Bloodlust";
 
@@ -62,15 +58,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string WindfuryTotemSpell = "Windfury Totem";
 
         private const string windShearSpell = "Wind Shear";
-        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
-        private bool hasTotemItems = false;
 
         public RestorationShaman(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
 
             //Race
-            spellCoolDown.Add(giftOfTheNaaruSpell, DateTime.Now);
+            //spellCoolDown.Add(giftOfTheNaaruSpell, DateTime.Now);
 
             //Spells / DMG
             spellCoolDown.Add(LightningBoltSpell, DateTime.Now);
@@ -83,7 +77,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(riptideSpell, DateTime.Now);
             spellCoolDown.Add(watershieldSpell, DateTime.Now);
             spellCoolDown.Add(LightningShieldSpell, DateTime.Now);
-            spellCoolDown.Add(ancestralSpiritSpell, DateTime.Now);
             spellCoolDown.Add(chainHealSpell, DateTime.Now);
             spellCoolDown.Add(earthlivingBuff, DateTime.Now);
             spellCoolDown.Add(earthlivingWeaponSpell, DateTime.Now);
@@ -92,7 +85,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             //CD|Buffs
             spellCoolDown.Add(naturesswiftSpell, DateTime.Now);
             spellCoolDown.Add(heroismSpell, DateTime.Now);
-            spellCoolDown.Add(BerserkingSpell, DateTime.Now);
             spellCoolDown.Add(Bloodlust, DateTime.Now);
             spellCoolDown.Add(tidalForceSpell, DateTime.Now);
             spellCoolDown.Add(earthShieldSpell, DateTime.Now);
@@ -106,7 +98,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
             //Time event
             earthShieldEvent = new(TimeSpan.FromSeconds(7));
-            revivePlayerEvent = new(TimeSpan.FromSeconds(4));
             manaTideTotemEvent = new(TimeSpan.FromSeconds(12));
             totemcastEvent = new(TimeSpan.FromSeconds(4));
         }
@@ -129,12 +120,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
 
         public TimegatedEvent manaTideTotemEvent { get; private set; }
-
-        public TimegatedEvent naturesswiftEvent { get; private set; }
-
-        public TimegatedEvent revivePlayerEvent { get; private set; }
-
-        public TimegatedEvent riptideSpellEvent { get; private set; }
 
         public override WowRole Role => WowRole.Heal;
 
@@ -196,18 +181,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-            {
-                WowInterface.Player
-            };
-
-            partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
-
-            if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
-            {
-                WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
-                WowInterface.HookManager.LuaCastSpell(ancestralSpiritSpell);
-            }
+            revivePartyMember(ancestralSpiritSpell);
 
             if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
@@ -216,83 +190,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             UseSpellOnlyInCombat = false;
             Shield();
             StartHeal();
-        }
-
-        protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
-        {
-            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
-            {
-                int itemId = WowInterface.CharacterManager.Equipment.Items[slot].Id;
-
-                if (itemId > 0)
-                {
-                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
-
-                    if (item != null
-                        && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
-                        && CustomCastSpell(spellToCastEnchantment))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private bool CustomCastSpell(string spellName, bool castOnSelf = false)
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                if (WowInterface.Target != null)
-                {
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-
-                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                        {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
-
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        WowInterface.HookManager.LuaCastSpell(spellName);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsSpellReady(string spellName)
-        {
-            if (DateTime.Now > spellCoolDown[spellName])
-            {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
-        }
-
-        private void Shield()
-        {
-            if (!WowInterface.Player.HasBuffByName("Water Shield") && CustomCastSpell(watershieldSpell))
-            {
-                return;
-            }
         }
 
         private void StartHeal()
@@ -334,12 +231,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                             WowInterface.HookManager.LuaDoString("SpellStopCasting()");
                             return;
                         }
-
-                        //if (UseSpellOnlyInCombat)
-                        //{
-                        //    WowInterface.HookManager.UseItemByName("Talisman of Resuregence");
-                        //    return;
-                        //}
 
                         if (UseSpellOnlyInCombat && WowInterface.Player.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
                         {
@@ -392,9 +283,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         }
                     }
 
-                    totemItemCheck();
-
-                    if (totemcastEvent.Run() && hasTotemItems)
+                    if (totemcastEvent.Run() && totemItemCheck())
                     {
                         if (WowInterface.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
                         {
@@ -407,7 +296,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 totemItemCheck();
 
-                if (totemcastEvent.Run() && hasTotemItems)
+                if (totemcastEvent.Run() && totemItemCheck())
                 {
                     if (WowInterface.Player.ManaPercentage >= 50
                         && !WowInterface.Player.HasBuffByName("Windfury Totem")
@@ -426,7 +315,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
-                    //if (nearTarget != null )
                     if (WowInterface.TargetGuid != 0 && WowInterface.Target != null && nearTarget != null)
                     {
                         WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
@@ -457,16 +345,47 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             }
         }
 
-        private void totemItemCheck()
+        private bool CustomCastSpell(string spellName, bool castOnSelf = false)
         {
-            if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
-             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
-             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
-             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)) ||
-             (WowInterface.CharacterManager.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED) &&
-             WowInterface.CharacterManager.Equipment.Items[WowEquipmentSlot.INVSLOT_RANGED] != null))
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
-                hasTotemItems = true;
+                if (WowInterface.Target != null)
+                {
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
+
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        WowInterface.HookManager.LuaCastSpell(spellName);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void Shield()
+        {
+            if (!WowInterface.Player.HasBuffByName("Water Shield") && CustomCastSpell(watershieldSpell))
+            {
+                return;
             }
         }
     }

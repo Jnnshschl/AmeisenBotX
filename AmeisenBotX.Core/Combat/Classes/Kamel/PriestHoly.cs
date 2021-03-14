@@ -55,29 +55,23 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private const string RenewSpell = "Renew";
 
-        //Spells / heal
-        private const string ResurrectionSpell = "Resurrection";
-
         private const string ShadowProtectionSpell = "Shadow Protection";
 
         //Spells / dmg
         private const string SmiteSpell = "Smite";
-
-        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public PriestHoly(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
 
             //Spells Race
-            spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
+            //spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
 
             //Spells / dmg
             spellCoolDown.Add(SmiteSpell, DateTime.Now);
             spellCoolDown.Add(HolyFireSpell, DateTime.Now);
 
             //Spells
-            spellCoolDown.Add(ResurrectionSpell, DateTime.Now);
             spellCoolDown.Add(RenewSpell, DateTime.Now);
             spellCoolDown.Add(FlashHealSpell, DateTime.Now);
             spellCoolDown.Add(GreaterHealSpell, DateTime.Now);
@@ -99,9 +93,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(ShadowProtectionSpell, DateTime.Now);
             spellCoolDown.Add(PrayerofFortitude, DateTime.Now);
             spellCoolDown.Add(PrayerofShadowProtection, DateTime.Now);
-
-            //Time event
-            revivePlayerEvent = new(TimeSpan.FromSeconds(4));
         }
 
         public override string Author => "Lukas";
@@ -117,9 +108,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public override bool IsMelee => false;
 
         public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
-
-        //Time event
-        public TimegatedEvent revivePlayerEvent { get; private set; }
 
         public override WowRole Role => WowRole.Heal;
 
@@ -179,128 +167,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-            {
-                WowInterface.Player
-            };
-
-            partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
-
-            if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
-            {
-                WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
-                WowInterface.HookManager.LuaCastSpell(ResurrectionSpell);
-            }
-
+            revivePartyMember(resurrectionSpell);
             UseSpellOnlyInCombat = false;
             BuffManager();
             StartHeal();
-        }
-
-        private void BuffManager()
-        {
-            if (TargetSelectEvent.Run())
-            {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-                {
-                    WowInterface.Player
-                };
-
-                CastBuff = CastBuff.Where(e => (!e.HasBuffByName("Prayer of Fortitude") || !e.HasBuffByName("Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
-
-                if (CastBuff != null)
-                {
-                    if (CastBuff.Count > 0)
-                    {
-                        if (WowInterface.TargetGuid != CastBuff.FirstOrDefault().Guid)
-                        {
-                            WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
-                        }
-                    }
-                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
-                    {
-                        if (!TargetInLineOfSight)
-                        {
-                            return;
-                        }
-                        if (!WowInterface.Target.HasBuffByName("Prayer of Fortitude") && CustomCastSpell(PrayerofFortitude))
-                        {
-                            return;
-                        }
-                        if (!WowInterface.Target.HasBuffByName("Prayer of Shadow Protection") && CustomCastSpell(PrayerofShadowProtection))
-                        {
-                            return;
-                        }
-                    }
-                }
-            }
-            //if ((!WowInterface.Player.HasBuffByName("Power Word: Fortitude") || !WowInterface.Target.HasBuffByName("Power Word: Fortitude")) && CustomCastSpell(PowerWordFortitudeSpell))
-            //{
-            //    return;
-            //}
-            if (!WowInterface.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell, true))
-            {
-                return;
-            }
-            if (!WowInterface.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell, true))
-            {
-                return;
-            }
-            if (!WowInterface.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell, true))
-            {
-                return;
-            }
-            //if (!WowInterface.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
-            //{
-            //    return;
-            //}
-        }
-
-        private bool CustomCastSpell(string spellName, bool castOnSelf = false)
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                if (WowInterface.Target != null)
-                {
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-
-                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                        {
-                            WowInterface.HookManager.LuaCastSpell(spellName, castOnSelf);
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
-
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        WowInterface.HookManager.LuaCastSpell(spellName);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsSpellReady(string spellName)
-        {
-            if (DateTime.Now > spellCoolDown[spellName])
-            {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
         }
 
         private void StartHeal()
@@ -447,6 +317,101 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 //}
                 //Attacken
             }
+        }
+
+        private void BuffManager()
+        {
+            if (TargetSelectEvent.Run())
+            {
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+                {
+                    WowInterface.Player
+                };
+
+                CastBuff = CastBuff.Where(e => (!e.HasBuffByName("Prayer of Fortitude") || !e.HasBuffByName("Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+
+                if (CastBuff != null)
+                {
+                    if (CastBuff.Count > 0)
+                    {
+                        if (WowInterface.TargetGuid != CastBuff.FirstOrDefault().Guid)
+                        {
+                            WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
+                        }
+                    }
+                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
+                    {
+                        if (!TargetInLineOfSight)
+                        {
+                            return;
+                        }
+                        if (!WowInterface.Target.HasBuffByName("Prayer of Fortitude") && CustomCastSpell(PrayerofFortitude))
+                        {
+                            return;
+                        }
+                        if (!WowInterface.Target.HasBuffByName("Prayer of Shadow Protection") && CustomCastSpell(PrayerofShadowProtection))
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
+            //if ((!WowInterface.Player.HasBuffByName("Power Word: Fortitude") || !WowInterface.Target.HasBuffByName("Power Word: Fortitude")) && CustomCastSpell(PowerWordFortitudeSpell))
+            //{
+            //    return;
+            //}
+            if (!WowInterface.Player.HasBuffByName("Divine Spirit") && CustomCastSpell(DivineSpiritSpell, true))
+            {
+                return;
+            }
+            if (!WowInterface.Player.HasBuffByName("Inner Fire") && CustomCastSpell(InnerFireSpell, true))
+            {
+                return;
+            }
+            if (!WowInterface.Player.HasBuffByName("Fear Ward") && CustomCastSpell(FearWardSpell, true))
+            {
+                return;
+            }
+            //if (!WowInterface.Player.HasBuffByName("Shadow Protection") && CustomCastSpell(ShadowProtectionSpell))
+            //{
+            //    return;
+            //}
+        }
+
+        private bool CustomCastSpell(string spellName, bool castOnSelf = false)
+        {
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                if (WowInterface.Target != null)
+                {
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            WowInterface.HookManager.LuaCastSpell(spellName, castOnSelf);
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
+
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        WowInterface.HookManager.LuaCastSpell(spellName);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

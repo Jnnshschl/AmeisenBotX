@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
@@ -31,6 +33,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         #endregion
 
+        #region Shaman
+        public const string ancestralSpiritSpell = "Ancestral Spirit";
+        #endregion
+
+        #region Paladin
+        public const string redemptionSpell = "Redemption";
+        #endregion
+
+        #region Priest
+        public const string resurrectionSpell = "Resurrection";
+        #endregion
 
         public readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
@@ -50,12 +63,15 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         protected BasicKamelClass()
         {
+            //Revive Spells
+            spellCoolDown.Add(ancestralSpiritSpell, DateTime.Now);
+            spellCoolDown.Add(redemptionSpell, DateTime.Now);
+            spellCoolDown.Add(resurrectionSpell, DateTime.Now);
+
             //Basic
             AutoAttackEvent = new(TimeSpan.FromSeconds(1));
             TargetSelectEvent = new(TimeSpan.FromSeconds(1));
-
-            //Mount check
-            getonthemount = new(TimeSpan.FromSeconds(4));
+            revivePlayerEvent = new(TimeSpan.FromSeconds(4));
 
             //Race (Troll)
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
@@ -74,9 +90,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public abstract string Author { get; }
 
-        //Basic
-        public TimegatedEvent AutoAttackEvent { get; private set; }
-
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         public abstract Dictionary<string, dynamic> C { get; set; }
@@ -84,8 +97,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public abstract string Description { get; }
 
         public abstract string Displayname { get; }
-
-        public TimegatedEvent getonthemount { get; private set; }
 
         public bool HandlesFacing => false;
 
@@ -103,8 +114,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public bool TargetInLineOfSight => WowInterface.ObjectManager.IsTargetInLineOfSight;
 
-        public TimegatedEvent TargetSelectEvent { get; private set; }
-
         public abstract bool UseAutoAttacks { get; }
 
         public abstract string Version { get; }
@@ -114,6 +123,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public abstract WowClass WowClass { get; }
 
         public WowInterface WowInterface { get; internal set; }
+        public TimegatedEvent AutoAttackEvent { get; private set; }
+        public TimegatedEvent TargetSelectEvent { get; private set; }
+        public TimegatedEvent revivePlayerEvent { get; private set; }
 
         //follow the target
         public void AttackTarget()
@@ -156,6 +168,52 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 else
                 {
                     AttackTarget();
+                }
+            }
+        }
+        public void TargetselectionTank()
+        {
+            if (TargetSelectEvent.Run())
+            {
+
+                WowUnit nearTargetToTank = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.Player.Position, 60)
+                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name != "The Lich King" && e.Name != "Anub'Rekhan" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
+                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                .FirstOrDefault();
+
+                if (nearTargetToTank != null)
+                {
+                    WowInterface.HookManager.WowTargetGuid(nearTargetToTank.Guid);
+
+                    if (!TargetInLineOfSight)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        AttackTarget();
+                    }
+                }
+                else
+                {
+                    WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 80)
+                    .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type == WowObjectType.Player)
+                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                    .FirstOrDefault();//&& e.Type(Player)
+
+                    if (nearTarget != null)
+                    {
+                        WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
+
+                        if (!TargetInLineOfSight)
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        AttackTarget();
+                    }
                 }
             }
         }
@@ -247,6 +305,109 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             }
 
             return false;
+        }
+
+        public bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
+        {
+            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            {
+                int itemId = WowInterface.CharacterManager.Equipment.Items[slot].Id;
+
+                if (itemId > 0)
+                {
+                    if (slot == WowEquipmentSlot.INVSLOT_MAINHAND)
+                    {
+                        WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+
+                        if (item != null
+                            && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
+                            && CustomCastSpellMana(spellToCastEnchantment))
+                        {
+                            return true;
+                        }
+                    }
+                    else if (slot == WowEquipmentSlot.INVSLOT_OFFHAND)
+                    {
+                        WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().LastOrDefault(e => e.EntryId == itemId);
+
+                        if (item != null
+                            && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
+                            && CustomCastSpellMana(spellToCastEnchantment))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        //Mana Spells
+        public bool CustomCastSpellMana(string spellName, bool castOnSelf = false)
+        {
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                if (WowInterface.Target != null)
+                {
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
+
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        WowInterface.HookManager.LuaCastSpell(spellName);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public bool totemItemCheck()
+        {
+            if (WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
+             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
+             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
+             WowInterface.CharacterManager.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)) ||
+             (WowInterface.CharacterManager.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED) &&
+             WowInterface.CharacterManager.Equipment.Items[WowEquipmentSlot.INVSLOT_RANGED] != null))
+            { 
+                return true;
+            }
+
+            return false;
+        }
+
+        public void revivePartyMember(string reviveSpellName)
+        {
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            {
+                WowInterface.Player
+            };
+
+            partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+
+            if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
+            {
+                WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                CustomCastSpellMana(reviveSpellName);
+            }
         }
     }
 }

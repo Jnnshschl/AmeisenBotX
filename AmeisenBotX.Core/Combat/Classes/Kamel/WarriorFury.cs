@@ -60,7 +60,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
         private const string whirlwindSpell = "Whirlwind";
-        //private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public WarriorFury(WowInterface wowInterface) : base()
         {
@@ -181,41 +180,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             StartAttack();
         }
 
-        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
-        {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(stance))
-            {
-                stance = "Battle Stance";
-            }
-
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                if (WowInterface.Target != null)
-                {
-                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                        {
-                            if (!WowInterface.Player.HasBuffByName(stance))
-                            {
-                                WowInterface.HookManager.LuaCastSpell(stance);
-                                return true;
-                            }
-                            else
-                            {
-                                WowInterface.HookManager.LuaCastSpell(spellName);
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
         private void StartAttack()
         {
             if (WowInterface.TargetGuid != 0)
@@ -355,7 +319,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         }
                     }
                     if (WowInterface.Player.HasBuffByName("Entangling Roots")
-                        || WowInterface.Player.HasBuffByName("Frost Nova")) 
+                        || WowInterface.Player.HasBuffByName("Frost Nova"))
                     {
                         if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
                         {
@@ -391,6 +355,41 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 Targetselection();
             }
+        }
+        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
+        {
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(stance))
+            {
+                stance = "Battle Stance";
+            }
+
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                if (WowInterface.Target != null)
+                {
+                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            if (!WowInterface.Player.HasBuffByName(stance))
+                            {
+                                WowInterface.HookManager.LuaCastSpell(stance);
+                                return true;
+                            }
+                            else
+                            {
+                                WowInterface.HookManager.LuaCastSpell(spellName);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

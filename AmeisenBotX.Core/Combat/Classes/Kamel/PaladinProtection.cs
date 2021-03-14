@@ -42,19 +42,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string holyShieldSpell = "Holy Shield";
         private const string judgementofLightSpell = "Judgement of Light";
         private const string layonHandsSpell = "Lay on Hands";
-        private const string redemptionSpell = "Redemption";
         private const string righteousFurySpell = "Righteous Fury";
         private const string SacredShieldSpell = "Sacred Shield";
         private const string sealofLightSpell = "Seal of Light";
         private const string sealofWisdomSpell = "Seal of Wisdom";
-        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public PaladinProtection(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;
 
             //Spells Race
-            spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
+            //spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
 
             //Spell
             spellCoolDown.Add(avengersShieldSpell, DateTime.Now);
@@ -69,7 +67,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(hammerofJusticeSpell, DateTime.Now);
             spellCoolDown.Add(layonHandsSpell, DateTime.Now);
             spellCoolDown.Add(holyLightSpell, DateTime.Now);
-            spellCoolDown.Add(redemptionSpell, DateTime.Now);
             spellCoolDown.Add(AvengingWrathSpell, DateTime.Now);
             spellCoolDown.Add(DivinePleaSpell, DateTime.Now);
             spellCoolDown.Add(SacredShieldSpell, DateTime.Now);
@@ -82,7 +79,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(righteousFurySpell, DateTime.Now);
 
             //Time event
-            revivePlayerEvent = new(TimeSpan.FromSeconds(4));
             ShieldEvent = new(TimeSpan.FromSeconds(8));
         }
 
@@ -102,12 +98,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES, WowWeaponType.STAVES, WowWeaponType.DAGGERS });
 
-        public bool OffTank { get; private set; }
-
-        //Time event
-        public TimegatedEvent revivePlayerEvent { get; private set; }
-
-        //public override bool HandlesMovement { get; }
         public override WowRole Role => WowRole.Tank;
 
         public TimegatedEvent ShieldEvent { get; private set; }
@@ -153,119 +143,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Version => "1.0";
 
-        public TimegatedEvent VictoryRushEvent { get; private set; }
-
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Paladin;
 
-        //private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
-
         public override void ExecuteCC()
         {
-            //OffTank = true;
-            OffTank = false;
             StartAttack();
         }
 
         public override void OutOfCombatExecute()
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-            {
-                WowInterface.Player
-            };
-
-            partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
-
-            if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
-            {
-                WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
-                WowInterface.HookManager.LuaCastSpell(redemptionSpell);
-            }
-
+            revivePartyMember(redemptionSpell);
             BuffManager();
-            Targetselection();
-        }
-
-        private void BuffManager()
-        {
-            if (TargetSelectEvent.Run())
-            {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
-                {
-                    WowInterface.Player
-                };
-
-                CastBuff = CastBuff.Where(e => !e.HasBuffByName("Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
-
-                if (CastBuff != null)
-                {
-                    if (CastBuff.Count > 0)
-                    {
-                        if (WowInterface.TargetGuid != CastBuff.FirstOrDefault().Guid)
-                        {
-                            WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
-                        }
-                    }
-                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
-                    {
-                        if (!TargetInLineOfSight)
-                        {
-                            return;
-                        }
-                        if (!WowInterface.Target.HasBuffByName("Blessing of Kings") && CustomCastSpell(blessingofKingsSpell))
-                        {
-                            return;
-                        }
-                    }
-                }
-            }
-            if (!WowInterface.Player.HasBuffByName("Seal of Wisdom") && CustomCastSpell(sealofWisdomSpell))
-            {
-                return;
-            }
-            if (!WowInterface.Player.HasBuffByName("Devotion Aura") && CustomCastSpell(devotionAuraSpell))
-            {
-                return;
-            }
-            if (!WowInterface.Player.HasBuffByName("Righteous Fury") && CustomCastSpell(righteousFurySpell))
-            {
-                return;
-            }
-        }
-
-        private bool CustomCastSpell(string spellName)
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                if (WowInterface.Target != null)
-                {
-                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                        {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsSpellReady(string spellName)
-        {
-            if (DateTime.Now > spellCoolDown[spellName])
-            {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
+            TargetselectionTank();
+            StartAttack();
         }
 
         private void StartAttack()
@@ -276,7 +168,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 if (WowInterface.TargetGuid != WowInterface.PlayerGuid)
                 {
-                    Targetselection();
+                    TargetselectionTank();
                 }
 
                 if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
@@ -367,88 +259,78 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             }
             else
             {
-                Targetselection();
+                TargetselectionTank();
             }
         }
 
-        private void Targetselection()
+        private void BuffManager()
         {
             if (TargetSelectEvent.Run())
             {
-                if (!OffTank)
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
                 {
-                    WowUnit nearTargetToTank = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.Player.Position, 60)
-                    .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name != "The Lich King" && e.Name != "Anub'Rekhan" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                    .FirstOrDefault();
+                    WowInterface.Player
+                };
 
-                    if (nearTargetToTank != null)
+                CastBuff = CastBuff.Where(e => !e.HasBuffByName("Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+
+                if (CastBuff != null)
+                {
+                    if (CastBuff.Count > 0)
                     {
-                        WowInterface.HookManager.WowTargetGuid(nearTargetToTank.Guid);
-
+                        if (WowInterface.TargetGuid != CastBuff.FirstOrDefault().Guid)
+                        {
+                            WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
+                        }
+                    }
+                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
+                    {
                         if (!TargetInLineOfSight)
                         {
                             return;
                         }
-                    }
-                    else
-                    {
-                        WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 80)
-                        .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type == WowObjectType.Player)
-                        .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                        .FirstOrDefault();//&& e.Type(Player)
-
-                        if (nearTarget != null)
-                        {
-                            WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
-
-                            if (!TargetInLineOfSight)
-                            {
-                                return;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    WowUnit nearTargetToTank = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.Player.Position, 80)
-                    .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name != "Anub'Rekhan")
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                    .FirstOrDefault();
-
-                    if (nearTargetToTank != null)
-                    {
-                        WowInterface.HookManager.WowTargetGuid(nearTargetToTank.Guid);
-
-                        if (!TargetInLineOfSight)
+                        if (!WowInterface.Target.HasBuffByName("Blessing of Kings") && CustomCastSpell(blessingofKingsSpell))
                         {
                             return;
-                        }
-                        if (WowInterface.Target.Name != "Anub'Rekhan" && WowInterface.Target.TargetGuid == WowInterface.PlayerGuid)
-                        {
-                            //HandlesMovement = false;
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, new Vector3(3272, -3476, 287));
-                        }
-                    }
-                    else
-                    {
-                        WowUnit nearTargetToTankOffTank = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.Player.Position, 80)
-                        .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name == "Anub'Rekhan")
-                        .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                        .FirstOrDefault();
-
-                        if (nearTargetToTank != null)
-                        {
-                            WowInterface.HookManager.WowTargetGuid(nearTargetToTank.Guid);
-
-                            if (!TargetInLineOfSight)
-                            {
-                                return;
-                            }
                         }
                     }
                 }
             }
+            if (!WowInterface.Player.HasBuffByName("Seal of Wisdom") && CustomCastSpell(sealofWisdomSpell))
+            {
+                return;
+            }
+            if (!WowInterface.Player.HasBuffByName("Devotion Aura") && CustomCastSpell(devotionAuraSpell))
+            {
+                return;
+            }
+            if (!WowInterface.Player.HasBuffByName("Righteous Fury") && CustomCastSpell(righteousFurySpell))
+            {
+                return;
+            }
+        }
+
+        private bool CustomCastSpell(string spellName)
+        {
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                if (WowInterface.Target != null)
+                {
+                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

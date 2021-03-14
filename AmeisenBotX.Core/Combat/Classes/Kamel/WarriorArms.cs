@@ -57,7 +57,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
-        private readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
 
         public WarriorArms(WowInterface wowInterface) : base()
         {
@@ -109,11 +108,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Displayname => "Warrior Arms Beta";
 
-        public TimegatedEvent ExecuteEvent { get; private set; }
-
         public override bool HandlesMovement => false;
-
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
 
         public override bool IsMelee => true;
 
@@ -168,11 +163,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Version => "1.0";
 
-        public TimegatedEvent VictoryRushEvent { get; private set; }
-
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Warrior;
+
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
+        public TimegatedEvent VictoryRushEvent { get; private set; }
+        public TimegatedEvent ExecuteEvent { get; private set; }
 
         public override void ExecuteCC()
         {
@@ -182,45 +179,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public override void OutOfCombatExecute()
         {
             Targetselection();
-        }
-
-        private bool CustomCastSpell(string spellName, string stance = "Battle Stance")
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
-                {
-                    if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                    {
-                        if (!WowInterface.Player.HasBuffByName(stance))
-                        {
-                            WowInterface.HookManager.LuaCastSpell(stance);
-                            return true;
-                        }
-                        else
-                        {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsSpellReady(string spellName)
-        {
-            if (DateTime.Now > spellCoolDown[spellName])
-            {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
-                return true;
-            }
-
-            return false;
+            StartAttack();
         }
 
         private void StartAttack()
@@ -341,26 +300,32 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 Targetselection();
             }
         }
-
-        private void Targetselection()
+        private bool CustomCastSpell(string spellName, string stance = "Battle Stance")
         {
-            if (TargetSelectEvent.Run())
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 40)
-                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                .FirstOrDefault();
+                double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
-                if (nearTarget != null)
+                if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
                 {
-                    WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
-
-                    if (!TargetInLineOfSight)
+                    if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                     {
-                        return;
+                        if (!WowInterface.Player.HasBuffByName(stance))
+                        {
+                            WowInterface.HookManager.LuaCastSpell(stance);
+                            return true;
+                        }
+                        else
+                        {
+                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            return true;
+                        }
                     }
                 }
             }
+
+            return false;
         }
     }
 }
