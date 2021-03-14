@@ -14,7 +14,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     class RogueAssassination : BasicKamelClass
     {
-
         public RogueAssassination(WowInterface wowInterface) : base()
         {
             WowInterface = wowInterface;

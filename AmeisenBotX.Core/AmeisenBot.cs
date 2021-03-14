@@ -398,6 +398,7 @@ namespace AmeisenBotX.Core
                 new Combat.Classes.Jannis.WarriorProtection(WowInterface, StateMachine),
                 new Combat.Classes.Kamel.DeathknightBlood(WowInterface),
                 new Combat.Classes.Kamel.RestorationShaman(WowInterface),
+                new Combat.Classes.Kamel.ShamanEnhancement(WowInterface),
                 new Combat.Classes.Kamel.PaladinProtection(WowInterface),
                 new Combat.Classes.Kamel.PriestHoly(WowInterface),
                 new Combat.Classes.Kamel.WarriorFury(WowInterface),
