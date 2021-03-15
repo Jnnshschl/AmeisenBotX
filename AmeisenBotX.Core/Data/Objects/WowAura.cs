@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Data.Objects.Raw
 
         public int SpellId => RawWowAura.SpellId;
 
-        public byte StackCount => RawWowAura.x;
+        public byte StackCount => RawWowAura.StackCount;
 
         private RawWowAura RawWowAura { get; }
 
