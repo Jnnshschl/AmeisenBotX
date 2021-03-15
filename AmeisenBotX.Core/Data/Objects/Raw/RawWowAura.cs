@@ -9,7 +9,8 @@ namespace AmeisenBotX.Core.Data.Objects.Raw
         public int SpellId;
         public byte Flags;
         public byte Level;
-        public ushort StackCount;
+        public byte StackCount;
+        public byte Unknown;
         public uint Duration;
         public uint EndTime;
     }

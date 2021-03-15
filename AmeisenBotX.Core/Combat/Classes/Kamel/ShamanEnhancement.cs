@@ -206,8 +206,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (WowInterface.Player.HasBuffByName("Maelstrom Weapon")
-                    && WowInterface.Player.Auras.FirstOrDefault(e => e.Name == "Maelstrom Weapon").StackCount >= 5
+                    if (WowInterface.Player.Auras.FirstOrDefault(e => e.Name == "Maelstrom Weapon")?.StackCount >= 5
                     && ((WowInterface.Player.HealthPercentage >= 50 && CustomCastSpellMana(lightningBoltSpell)) || CustomCastSpellMana(healingWaveSpell)))
                     {
                         return;
