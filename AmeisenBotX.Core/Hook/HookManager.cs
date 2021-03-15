@@ -1707,7 +1707,7 @@ namespace AmeisenBotX.Core.Hook
             return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetCVar(\"{CVar}\");"), out string s) ? s : string.Empty;
         }
 
-        private IEnumerable<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
+        private unsafe IEnumerable<WowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
         {
             List<WowAura> auras = new();
 
@@ -1718,7 +1718,7 @@ namespace AmeisenBotX.Core.Hook
 
             for (int i = 0; i < auraCount; ++i)
             {
-                WowInterface.XMemory.Read(buffBase + (0x18 * i), out RawWowAura rawWowAura);
+                WowInterface.XMemory.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
 
                 if (!WowInterface.Db.TryGetSpellName(rawWowAura.SpellId, out string name))
                 {
