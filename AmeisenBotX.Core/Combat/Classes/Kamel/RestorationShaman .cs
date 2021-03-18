@@ -232,17 +232,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.Player.HealthPercentage < 20 && CustomCastSpell(heroismSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Player.HealthPercentage < 20 && CustomCastSpellMana(heroismSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.Target.HealthPercentage < 20 && CustomCastSpell(naturesswiftSpell) && CustomCastSpell(healingWaveSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Target.HealthPercentage < 20 && CustomCastSpellMana(naturesswiftSpell) && CustomCastSpellMana(healingWaveSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && WowInterface.Target.HealthPercentage < 40 && CustomCastSpell(tidalForceSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Target.HealthPercentage < 40 && CustomCastSpellMana(tidalForceSpell))
                         {
                             return;
                         }
@@ -252,32 +252,32 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         //    return;
                         //}
                         //Race Draenei
-                        if (WowInterface.Player.Race == WowRace.Draenei && WowInterface.Target.HealthPercentage < 50 && CustomCastSpell(giftOfTheNaaruSpell))
+                        if (WowInterface.Player.Race == WowRace.Draenei && WowInterface.Target.HealthPercentage < 50 && CustomCastSpellMana(giftOfTheNaaruSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.Target.HealthPercentage <= 50 && CustomCastSpell(healingWaveSpell))
+                        if (WowInterface.Target.HealthPercentage <= 50 && CustomCastSpellMana(healingWaveSpell))
                         {
                             return;
                         }
 
-                        if (WowInterface.Target.HealthPercentage <= 75 && CustomCastSpell(lesserHealingWaveSpell))
+                        if (WowInterface.Target.HealthPercentage <= 75 && CustomCastSpellMana(lesserHealingWaveSpell))
                         {
                             return;
                         }
 
-                        if (partyMemberToHeal.Count >= 4 && WowInterface.Target.HealthPercentage >= 80 && CustomCastSpell(chainHealSpell))
+                        if (partyMemberToHeal.Count >= 4 && WowInterface.Target.HealthPercentage >= 80 && CustomCastSpellMana(chainHealSpell))
                         {
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && earthShieldEvent.Run() && !WowInterface.Target.HasBuffByName("Earth Shield") && !WowInterface.Target.HasBuffByName("Water Shield") && WowInterface.Target.HealthPercentage < 90 && CustomCastSpell(earthShieldSpell))
+                        if (UseSpellOnlyInCombat && earthShieldEvent.Run() && !WowInterface.Target.HasBuffByName("Earth Shield") && !WowInterface.Target.HasBuffByName("Water Shield") && WowInterface.Target.HealthPercentage < 90 && CustomCastSpellMana(earthShieldSpell))
                         {
                             return;
                         }
 
-                        if (!WowInterface.Target.HasBuffByName("Riptide") && WowInterface.Target.HealthPercentage < 90 && CustomCastSpell(riptideSpell))
+                        if (!WowInterface.Target.HasBuffByName("Riptide") && WowInterface.Target.HealthPercentage < 90 && CustomCastSpellMana(riptideSpell))
                         {
                             return;
                         }
@@ -285,7 +285,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
                     if (totemcastEvent.Run() && totemItemCheck())
                     {
-                        if (WowInterface.Player.ManaPercentage <= 10 && CustomCastSpell(ManaTideTotemSpell))
+                        if (WowInterface.Player.ManaPercentage <= 10 && CustomCastSpellMana(ManaTideTotemSpell))
                         {
                             return;
                         }
@@ -302,7 +302,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         && !WowInterface.Player.HasBuffByName("Windfury Totem")
                         && !WowInterface.Player.HasBuffByName("Stoneskin")
                         && !WowInterface.Player.HasBuffByName("Flametongue Totem")
-                        && CustomCastSpell(CalloftheElementsSpell))
+                        && CustomCastSpellMana(CalloftheElementsSpell))
                     {
                         return;
                     }
@@ -328,11 +328,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                             WowInterface.HookManager.WowStopClickToMove();
                             WowInterface.MovementEngine.Reset();
                         }
-                        if (UseSpellOnlyInCombat && WowInterface.Target.IsCasting && CustomCastSpell(windShearSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Target.IsCasting && CustomCastSpellMana(windShearSpell))
                         {
                             return;
                         }
-                        if (UseSpellOnlyInCombat && WowInterface.Player.ManaPercentage >= 80 && CustomCastSpell(flameShockSpell))
+                        if (UseSpellOnlyInCombat && WowInterface.Player.ManaPercentage >= 80 && CustomCastSpellMana(flameShockSpell))
                         {
                             return;
                         }
@@ -345,45 +345,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             }
         }
 
-        private bool CustomCastSpell(string spellName, bool castOnSelf = false)
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                if (WowInterface.Target != null)
-                {
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-
-                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                        {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
-
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        WowInterface.HookManager.LuaCastSpell(spellName);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         private void Shield()
         {
-            if (!WowInterface.Player.HasBuffByName("Water Shield") && CustomCastSpell(watershieldSpell))
+            if (!WowInterface.Player.HasBuffByName("Water Shield") && CustomCastSpellMana(watershieldSpell))
             {
                 return;
             }
