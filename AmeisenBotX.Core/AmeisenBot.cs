@@ -109,7 +109,7 @@ namespace AmeisenBotX.Core
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new AMovementEngine(WowInterface, Config);
 
-            StateMachine = new(DataFolder, Config, WowInterface);
+            StateMachine = new(Config, WowInterface);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
             {
                 if (Config.SaveWowWindowPosition)

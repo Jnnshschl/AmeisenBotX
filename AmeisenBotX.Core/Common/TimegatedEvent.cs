@@ -2,25 +2,51 @@
 
 namespace AmeisenBotX.Core.Common
 {
+    /// <summary>
+    /// Utility class to limit the execution of actions. It is able to
+    /// run code only when x seconds/minutes/... passed. Useful when
+    /// you dont want high cost code to be spammed.
+    /// </summary>
     public class TimegatedEvent
     {
+        /// <summary>
+        /// Create a new timegated event.
+        /// </summary>
+        /// <param name="timegate">Minimun time to pass until next execution</param>
         public TimegatedEvent(TimeSpan timegate)
         {
             Timegate = timegate;
         }
 
+        /// <summary>
+        /// Create a new timegated event.
+        /// </summary>
+        /// <param name="timegate">Minimun time to pass until next execution</param>
+        /// <param name="function">Code to execute</param>
         public TimegatedEvent(TimeSpan timegate, Action function)
         {
             Timegate = timegate;
             Function = function;
         }
 
+        /// <summary>
+        /// Last time the code was executed.
+        /// </summary>
         public DateTime LastExecution { get; set; }
 
+        /// <summary>
+        /// Whether code can be executed or not.
+        /// </summary>
         public bool Ready => DateTime.Now - LastExecution > Timegate;
 
+        /// <summary>
+        /// Minimum time to pass between executions.
+        /// </summary>
         public TimeSpan Timegate { get; set; }
 
+        /// <summary>
+        /// Code to execute.
+        /// </summary>
         private Action Function { get; set; }
 
         /// <summary>
@@ -46,59 +72,6 @@ namespace AmeisenBotX.Core.Common
                 return true;
             }
 
-            return false;
-        }
-    }
-
-    public class TimegatedEvent<T>
-    {
-        public TimegatedEvent(TimeSpan timegate)
-        {
-            Timegate = timegate;
-        }
-
-        public TimegatedEvent(TimeSpan timegate, Func<T> function)
-        {
-            Timegate = timegate;
-            Function = function;
-        }
-
-        public DateTime LastExecution { get; set; }
-
-        public TimeSpan Timegate { get; set; }
-
-        private Func<T> Function { get; set; }
-
-        /// <summary>
-        /// Executes the provided function if the last execution is longer than the specified TimeSpan
-        /// </summary>
-        /// <param name="value">The return value of your supplied function</param>
-        /// <returns>True when the function is executed, false if not</returns>
-        public bool Run(out T value, Func<T> function)
-        {
-            return CallFunction(out value, function);
-        }
-
-        /// <summary>
-        /// Executes the provided function if the last execution is longer than the specified TimeSpan
-        /// </summary>
-        /// <param name="value">The return value of your supplied function</param>
-        /// <returns>True when the function is executed, false if not</returns>
-        public bool Run(out T value)
-        {
-            return CallFunction(out value, Function);
-        }
-
-        private bool CallFunction(out T value, Func<T> function)
-        {
-            if (DateTime.Now - LastExecution > Timegate)
-            {
-                LastExecution = DateTime.Now;
-                value = function != null ? function() : default;
-                return true;
-            }
-
-            value = default;
             return false;
         }
     }

@@ -11,6 +11,13 @@ namespace AmeisenBotX.Core.Hook.Modules
             WowInterface = wowInterface;
         }
 
+        ~TracelineJumpHookModule()
+        {
+            if(CommandAddress != IntPtr.Zero) { WowInterface.XMemory.FreeMemory(CommandAddress); }
+            if (DataAddress != IntPtr.Zero) { WowInterface.XMemory.FreeMemory(DataAddress); }
+            if (ExecuteAddress != IntPtr.Zero) { WowInterface.XMemory.FreeMemory(ExecuteAddress); }
+        }
+
         public IntPtr CommandAddress { get; private set; }
 
         public IntPtr DataAddress { get; private set; }

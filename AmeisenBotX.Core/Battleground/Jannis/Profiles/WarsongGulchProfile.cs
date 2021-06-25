@@ -191,7 +191,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 return false;
             }
 
-            // check wether i'm part of the closest x (memberCount) members to the flag carrier
+            // check whether i'm part of the closest x (memberCount) members to the flag carrier
             int index = WowInterface.ObjectManager.Partymembers
                             .OfType<WowPlayer>()
                             .Where(e => e.Guid != blackboard.MyTeamFlagCarrier.Guid)

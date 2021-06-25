@@ -13,6 +13,13 @@ namespace AmeisenBotX.Core.Hook.Modules
             VarName = varName;
         }
 
+        ~RunLuaHookModule()
+        {
+            if (CommandAddress != IntPtr.Zero) { WowInterface.XMemory.FreeMemory(CommandAddress); }
+            if (ReturnAddress != IntPtr.Zero) { WowInterface.XMemory.FreeMemory(ReturnAddress); }
+            if (VarAddress != IntPtr.Zero) { WowInterface.XMemory.FreeMemory(VarAddress); }
+        }
+
         public IntPtr CommandAddress { get; private set; }
 
         public IntPtr ReturnAddress { get; private set; }
@@ -20,8 +27,6 @@ namespace AmeisenBotX.Core.Hook.Modules
         public IntPtr VarAddress { get; private set; }
 
         private string Lua { get; }
-
-        private Action TickAction { get; }
 
         private string VarName { get; }
 

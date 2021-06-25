@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public override unsafe void Update(WowInterface wowInterface)
+        public override void Update(WowInterface wowInterface)
         {
             base.Update(wowInterface);
 

@@ -32,8 +32,6 @@ namespace AmeisenBotX.Core.Hook
         public HookManager(WowInterface wowInterface, AmeisenBotConfig config)
         {
             WowInterface = wowInterface;
-            Config = config;
-
             OriginalFunctionBytes = new();
         }
 
@@ -67,10 +65,8 @@ namespace AmeisenBotX.Core.Hook
         /// </summary>
         private IntPtr CGateway { get; set; }
 
-        private AmeisenBotConfig Config { get; set; }
-
         /// <summary>
-        /// Codecave used to check wether the bot want's to execute
+        /// Codecave used to check whether the bot want's to execute
         /// code and run the IHookModule's.
         /// </summary>
         private IntPtr CRoutine { get; set; }
@@ -93,10 +89,21 @@ namespace AmeisenBotX.Core.Hook
         /// </summary>
         private IntPtr GameInfoExecutedAddress { get; set; }
 
+        /// <summary>
+        /// Integer tha will be set to 1 when we want to 
+        /// execute the LOS check.
+        /// </summary>
         private IntPtr GameInfoExecuteLosCheckAddress { get; set; }
 
+        /// <summary>
+        /// Integer tha will be set to 1 when we're able
+        /// to perform the LOS check.
+        /// </summary>
         private IntPtr GameInfoLosCheckDataAddress { get; set; }
 
+        /// <summary>
+        /// Timer used to poll the gamedata returned by wow.
+        /// </summary>
         private Timer GameInfoTimer { get; set; }
 
         /// <summary>
@@ -317,6 +324,7 @@ namespace AmeisenBotX.Core.Hook
                 WowInterface.XMemory.Fasm.AppendLine("NOP");
             }
 
+            // suspend wows main thread and inject
             WowInterface.XMemory.SuspendMainThread();
 
             if (!WowInterface.XMemory.FasmInject(WowEndSceneAddress, true))
@@ -328,6 +336,7 @@ namespace AmeisenBotX.Core.Hook
 
             WowInterface.XMemory.ResumeMainThread();
 
+            // try to update the GameInfo struct every 100ms
             GameInfoTimer = new(GameInfoTimerTick, null, 0, 100);
 
             AmeisenLogger.I.Log("HookManager", "EndsceneHook successful", LogLevel.Verbose);
@@ -918,7 +927,7 @@ namespace AmeisenBotX.Core.Hook
         {
             if (rollType == WowRollType.Need)
             {
-                // first we need to check wether we can do a need on this, otherwise the bot might not roll at all
+                // first we need to check whether we can do a need on this, otherwise the bot might not roll at all
                 LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, {(int)WowRollType.Greed}) end");
             }
             else
@@ -1267,15 +1276,15 @@ namespace AmeisenBotX.Core.Hook
             return runes;
         }
 
-        public IEnumerable<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount)
+        public IEnumerable<WowAura> WowGetUnitAuras(WowUnit unit, out int auraCount)
         {
-            if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraCount1), out int auraCount1))
+            if (WowInterface.XMemory.Read(IntPtr.Add(unit.BaseAddress, (int)WowInterface.OffsetList.AuraCount1), out int auraCount1))
             {
                 if (auraCount1 == -1)
                 {
-                    if (WowInterface.XMemory.Read(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraCount2), out int auraCount2)
+                    if (WowInterface.XMemory.Read(IntPtr.Add(unit.BaseAddress, (int)WowInterface.OffsetList.AuraCount2), out int auraCount2)
                         && auraCount2 > 0
-                        && WowInterface.XMemory.Read(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraTable2), out IntPtr auraTable))
+                        && WowInterface.XMemory.Read(IntPtr.Add(unit.BaseAddress, (int)WowInterface.OffsetList.AuraTable2), out IntPtr auraTable))
                     {
                         auraCount = auraCount2;
                         return ReadAuraTable(auraTable, auraCount2);
@@ -1288,7 +1297,7 @@ namespace AmeisenBotX.Core.Hook
                 else
                 {
                     auraCount = auraCount1;
-                    return ReadAuraTable(IntPtr.Add(baseAddress, (int)WowInterface.OffsetList.AuraTable1), auraCount1);
+                    return ReadAuraTable(IntPtr.Add(unit.BaseAddress, (int)WowInterface.OffsetList.AuraTable1), auraCount1);
                 }
             }
             else
@@ -1486,7 +1495,7 @@ namespace AmeisenBotX.Core.Hook
 
         private void DisableFunction(IntPtr address)
         {
-            // check wether we already replaced the function or not
+            // check whether we already replaced the function or not
             if (WowInterface.XMemory.Read(address, out byte opcode)
                 && opcode != 0xC3)
             {
@@ -1773,7 +1782,7 @@ namespace AmeisenBotX.Core.Hook
 
             CGateway = codecaveForGateway;
 
-            // codecave to check wether we need to execute something
+            // codecave to check whether we need to execute something
             if (!WowInterface.XMemory.AllocateMemory(MEM_ALLOC_ROUTINE_SIZE, out IntPtr codecaveForCheck)) { return false; }
 
             CRoutine = codecaveForCheck;

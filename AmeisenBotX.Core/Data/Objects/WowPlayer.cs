@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Player: [{Guid}] {Name} lvl. {Level}";
         }
 
-        public override unsafe void Update(WowInterface wowInterface)
+        public override void Update(WowInterface wowInterface)
         {
             base.Update(wowInterface);
 

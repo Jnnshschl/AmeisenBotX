@@ -13,6 +13,11 @@ namespace AmeisenBotX.Core.Hook.Modules
             Tick = tick;
         }
 
+        ~RunAsmHookModule()
+        {
+            if (AsmAddress != IntPtr.Zero) { XMemory.FreeMemory(AsmAddress); }
+        }
+
         public IntPtr AsmAddress { get; set; }
 
         public Action<IntPtr> OnDataUpdate { get; set; }

@@ -9,25 +9,6 @@ namespace AmeisenBotX.Test
     public class TimegatesEventTests
     {
         [TestMethod]
-        public void TimegateGenericTest()
-        {
-            int counter = 0;
-            TimegatedEvent<bool> eventA = new(TimeSpan.FromMilliseconds(1), () => { return true; });
-
-            for (int i = 0; i < 6; ++i)
-            {
-                if (eventA.Run(out bool _))
-                {
-                    ++counter;
-                }
-
-                Thread.Sleep(1);
-            }
-
-            Assert.AreEqual(6, counter);
-        }
-
-        [TestMethod]
         public void TimegateTest()
         {
             int counter = 0;

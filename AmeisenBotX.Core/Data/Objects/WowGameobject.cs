@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(WowGameobjectDisplayId), DisplayId) ? ((WowGameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
-        public override unsafe void Update(WowInterface wowInterface)
+        public override void Update(WowInterface wowInterface)
         {
             base.Update(wowInterface);
 

@@ -29,6 +29,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         //Totem
         private const string fireElementalTotem = "Fire Elemental Totem";
         private const string earthElementalTotem = "Earth Elemental Totem";
+        private const string groundingTotem = "Grounding Totem";
+        private const string earthbindTotem = "Earthbind Totem";
 
         //Attack Spells
         private const string lightningBoltSpell = "Lightning Bolt";
@@ -41,6 +43,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         //Stunns|Interrupting
         private const string windShearSpell = "Wind Shear";
+        private const string purgeSpell = "Purge";
 
         //Buff
         private const string shamanisticRageSpell = "Shamanistic Rage";
@@ -64,6 +67,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             //Totem
             spellCoolDown.Add(fireElementalTotem, DateTime.Now);
             spellCoolDown.Add(earthElementalTotem, DateTime.Now);
+            spellCoolDown.Add(groundingTotem, DateTime.Now);
+            spellCoolDown.Add(earthbindTotem, DateTime.Now);
 
             //Attack Spells
             spellCoolDown.Add(lightningBoltSpell, DateTime.Now);
@@ -76,10 +81,19 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
             //Stunns|Interrupting
             spellCoolDown.Add(windShearSpell, DateTime.Now);
+            spellCoolDown.Add(purgeSpell, DateTime.Now);
 
             //Buff
             spellCoolDown.Add(shamanisticRageSpell, DateTime.Now);
+
+            //Event
+            EnhancementEvent = new(TimeSpan.FromSeconds(2));
+            PurgeEvent = new(TimeSpan.FromSeconds(1));
         }
+        //Event
+        public TimegatedEvent EnhancementEvent { get; private set; }
+        public TimegatedEvent PurgeEvent { get; private set; }
+
         public override string Author => "Lukas";
 
         public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
@@ -173,7 +187,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         WowInterface.HookManager.LuaStartAutoAttack();
                     }
 
+                    if (WowInterface.Player.Auras.FirstOrDefault(e => e.Name == "Maelstrom Weapon")?.StackCount >= 5
+                    && ((WowInterface.Player.HealthPercentage >= 50 && CustomCastSpellMana(lightningBoltSpell)) || CustomCastSpellMana(healingWaveSpell)))
+                    {
+                        return;
+                    }
                     if (WowInterface.Target.IsCasting && CustomCastSpellMana(windShearSpell))
+                    {
+                        return;
+                    }           
+                    if (PurgeEvent.Run() &&
+                        (WowInterface.Target.HasBuffByName("Mana Shield")
+                      || WowInterface.Target.HasBuffByName("Power Word: Shield")
+                      || WowInterface.Target.HasBuffByName("Renew")
+                      || WowInterface.Target.HasBuffByName("Riptide")
+                      || WowInterface.Target.HasBuffByName("Earth Shield")) && CustomCastSpellMana(purgeSpell))
                     {
                         return;
                     }    
@@ -205,12 +233,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     {
                         return;
                     }
-
-                    if (WowInterface.Player.Auras.FirstOrDefault(e => e.Name == "Maelstrom Weapon")?.StackCount >= 5
-                    && ((WowInterface.Player.HealthPercentage >= 50 && CustomCastSpellMana(lightningBoltSpell)) || CustomCastSpellMana(healingWaveSpell)))
-                    {
-                        return;
-                    }
                 }
             }
             else
@@ -226,17 +248,19 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 return;
             }
         }
-
         private void WeaponEnhancement()
         {
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, windfuryBuff, windfurySpell))
+            if (EnhancementEvent.Run())
             {
-                return;
-            }
+                if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, windfuryBuff, windfurySpell))
+                {
+                    return;
+                }
 
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, flametongueBuff, flametongueSpell))
-            {
-                return;
+                if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, flametongueBuff, flametongueSpell))
+                {
+                    return;
+                }
             }
         }
     }

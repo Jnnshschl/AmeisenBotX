@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
         {
             WowUnit currentTarget = WowInterface.Target;
             IEnumerable<WowUnit> nearAttackingEnemies = WowInterface.ObjectManager
-                .GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 64.0f)
+                .GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 64.0f)
                 .Where(e => !e.IsDead && !e.IsNotAttackable)
                 .OrderBy(e => e.Auras.All(aura => aura.Name != polymorphSpell));
 
