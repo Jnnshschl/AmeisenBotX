@@ -21,34 +21,57 @@ namespace AmeisenBotX.Core.Common
             return CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
         }
 
+        /// <summary>
+        /// Clamps an angle to 0 - 2*PI
+        /// </summary>
+        /// <param name="angle">Current angle</param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float ClampAngles(float rotation)
+        public static float ClampAngles(float angle)
         {
-            float rMax = MathF.PI * 2.0f;
+            const float MAX_ANGLE = MathF.PI * 2.0f;
 
-            if (rotation < 0.0f)
+            if (angle < 0.0f)
             {
-                rotation += rMax;
+                angle += MAX_ANGLE;
             }
-            else if (rotation > rMax)
+            else if (angle > MAX_ANGLE)
             {
-                rotation -= rMax;
+                angle -= MAX_ANGLE;
             }
 
-            return rotation;
+            return angle;
         }
 
+        /// <summary>
+        /// Get the amount of rotation needed to face the target position.
+        /// </summary>
+        /// <param name="position">Current position</param>
+        /// <param name="rotation">Current rotation</param>
+        /// <param name="targetPosition">Target position</param>
+        /// <returns>Amount of rotation needed to face the target position</returns>
         public static float GetAngleDiff(Vector3 position, float rotation, Vector3 targetPosition)
         {
             return GetFacingAngle(position, targetPosition) - rotation;
         }
 
+        /// <summary>
+        /// Get the angle from a position to a target position.
+        /// </summary>
+        /// <param name="position">Current position</param>
+        /// <param name="targetPosition">Target position</param>
+        /// <returns>Angle of position to target position</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
         {
             return ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
         }
 
+        /// <summary>
+        /// Get the center position of a position list.
+        /// </summary>
+        /// <param name="positions">Positions to get the center of</param>
+        /// <returns>Center of the positions</returns>
         public static Vector3 GetMeanPosition(IEnumerable<Vector3> positions)
         {
             Vector3 meanPosition = new();
@@ -68,19 +91,12 @@ namespace AmeisenBotX.Core.Common
             return MathF.Abs(GetAngleDiff(position, rotation, targetPosition)) < maxAngleDiff;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInRange(float a, float min, float max)
-        {
-            return a < min && a > max;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInRange(WowObject a, WowObject b, double maxDistance)
-        {
-            double distance = a.Position.GetDistance(b.Position);
-            return distance < maxDistance && distance > maxDistance;
-        }
-
+        /// <summary>
+        /// Calculate the percentage value.
+        /// </summary>
+        /// <param name="value">Current value</param>
+        /// <param name="max">Max value</param>
+        /// <returns>Percentage</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Percentage(int value, int max)
         {

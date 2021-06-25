@@ -231,7 +231,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Unit: [{Guid}] {Name} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
         }
 
-        public override unsafe void Update(WowInterface wowInterface)
+        public override void Update(WowInterface wowInterface)
         {
             base.Update(wowInterface);
 
@@ -277,7 +277,7 @@ namespace AmeisenBotX.Core.Data.Objects
                 Name = ReadUnitName(wowInterface);
             }
 
-            Auras = wowInterface.HookManager.WowGetUnitAuras(BaseAddress, out int auraCount);
+            Auras = wowInterface.HookManager.WowGetUnitAuras(this, out int auraCount);
             AuraCount = auraCount;
 
             if (wowInterface.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowUnitPosition), out Vector3 position))

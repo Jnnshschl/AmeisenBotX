@@ -2,11 +2,15 @@
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace AmeisenBotX.Core.Event
 {
+    /// <summary>
+    /// This class is an interface to wow's ingame event system.
+    /// </summary>
     public class EventHook
     {
         public EventHook(WowInterface wowInterface)
@@ -21,17 +25,27 @@ namespace AmeisenBotX.Core.Event
             };
         }
 
-        public delegate void WowEventAction(long timestamp, List<string> args);
+        /// <summary>
+        /// Contains all the subscribed events and functions.
+        /// </summary>
+        public Dictionary<string, List<Action<long, List<string>>>> EventDictionary { get; private set; }
 
-        public Dictionary<string, List<WowEventAction>> EventDictionary { get; private set; }
-
+        /// <summary>
+        /// The current wow event frame name.
+        /// </summary>
         public string EventHookFrameName { get; set; }
 
         public bool IsActive { get; private set; }
 
-        public Queue<(string, WowEventAction)> SubscribeQueue { get; private set; }
+        /// <summary>
+        /// Pending subscribe actions.
+        /// </summary>
+        public Queue<(string, Action<long, List<string>>)> SubscribeQueue { get; private set; }
 
-        public Queue<(string, WowEventAction)> UnsubscribeQueue { get; private set; }
+        /// <summary>
+        /// Pending unsubscribe actions.
+        /// </summary>
+        public Queue<(string, Action<long, List<string>>)> UnsubscribeQueue { get; private set; }
 
         private JsonSerializerSettings JsonSerializerSettings { get; }
 
@@ -39,6 +53,9 @@ namespace AmeisenBotX.Core.Event
 
         private WowInterface WowInterface { get; }
 
+        /// <summary>
+        /// Call this periodically to handle the subscription and unsubscription queues.
+        /// </summary>
         public void ExecutePendingLua()
         {
             HandleSubEventQueue();
@@ -52,6 +69,10 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
+        /// <summary>
+        /// Call this with the new event string received from the hook module.
+        /// </summary>
+        /// <param name="eventJson">JSON events string</param>
         public void OnEventPush(string eventJson)
         {
             if (eventJson.Length > 2)
@@ -65,7 +86,7 @@ namespace AmeisenBotX.Core.Event
                     {
                         if (x.Name != null && EventDictionary.ContainsKey(x.Name))
                         {
-                            List<WowEventAction> actions = EventDictionary[x.Name];
+                            List<Action<long, List<string>>> actions = EventDictionary[x.Name];
 
                             for (int i = 0; i < actions.Count; ++i)
                             {
@@ -77,6 +98,9 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
+        /// <summary>
+        /// Initializes the event hookand sets it to active.
+        /// </summary>
         public void Start()
         {
             if (!IsActive)
@@ -86,6 +110,9 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
+        /// <summary>
+        /// Unloads the event hook and unregisters all events ingame.
+        /// </summary>
         public void Stop()
         {
             if (IsActive)
@@ -103,13 +130,23 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
-        public void Subscribe(string eventName, WowEventAction onEventFired)
+        /// <summary>
+        /// Subscribe to a wow event.
+        /// </summary>
+        /// <param name="eventName">Wow event name</param>
+        /// <param name="onEventFired">Callback</param>
+        public void Subscribe(string eventName, Action<long, List<string>> onEventFired)
         {
             AmeisenLogger.I.Log("EventHook", $"Subscribing to event: {eventName}", LogLevel.Verbose);
             SubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
-        public void Unsubscribe(string eventName, WowEventAction onEventFired)
+        /// <summary>
+        /// Unsubscribe from a wow event.
+        /// </summary>
+        /// <param name="eventName">Wow event name</param>
+        /// <param name="onEventFired">Callback to remove</param>
+        public void Unsubscribe(string eventName, Action<long, List<string>> onEventFired)
         {
             AmeisenLogger.I.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
             UnsubscribeQueue.Enqueue((eventName, onEventFired));
@@ -123,11 +160,11 @@ namespace AmeisenBotX.Core.Event
 
                 while (SubscribeQueue.Count > 0)
                 {
-                    (string, WowEventAction) queueElement = SubscribeQueue.Dequeue();
+                    (string, Action<long, List<string>>) queueElement = SubscribeQueue.Dequeue();
 
                     if (!EventDictionary.ContainsKey(queueElement.Item1))
                     {
-                        EventDictionary.Add(queueElement.Item1, new List<WowEventAction>() { queueElement.Item2 });
+                        EventDictionary.Add(queueElement.Item1, new List<Action<long, List<string>>>() { queueElement.Item2 });
                         sb.Append($"{EventHookFrameName}:RegisterEvent(\"{queueElement.Item1}\");");
                     }
                     else
@@ -148,7 +185,7 @@ namespace AmeisenBotX.Core.Event
 
                 while (SubscribeQueue.Count > 0)
                 {
-                    (string, WowEventAction) queueElement = UnsubscribeQueue.Dequeue();
+                    (string, Action<long, List<string>>) queueElement = UnsubscribeQueue.Dequeue();
 
                     if (EventDictionary.ContainsKey(queueElement.Item1))
                     {

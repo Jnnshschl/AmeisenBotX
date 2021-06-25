@@ -17,11 +17,10 @@ namespace AmeisenBotX.Core.Fsm
 
     public class AmeisenBotFsm
     {
-        public AmeisenBotFsm(string botDataPath, AmeisenBotConfig config, WowInterface wowInterface)
+        public AmeisenBotFsm(AmeisenBotConfig config, WowInterface wowInterface)
         {
             AmeisenLogger.I.Log("StateMachine", "Starting AmeisenBotStateMachine", LogLevel.Verbose);
 
-            BotDataPath = botDataPath;
             Config = config;
             WowInterface = wowInterface;
 
@@ -61,8 +60,6 @@ namespace AmeisenBotX.Core.Fsm
         public event Action OnStateMachineTick;
 
         public event StateMachineOverride OnStateOverride;
-
-        public string BotDataPath { get; }
 
         public KeyValuePair<BotState, BasicState> CurrentState { get; protected set; }
 
@@ -161,7 +158,7 @@ namespace AmeisenBotX.Core.Fsm
                                 && !WowInterface.Globals.IgnoreCombat
                                 && !(Config.IgnoreCombatWhileMounted && WowInterface.Player.IsMounted)
                                 && (WowInterface.Globals.ForceCombat || WowInterface.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
+                                || WowInterface.ObjectManager.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
                             {
                                 if (SetState(BotState.Attacking, true))
                                 {

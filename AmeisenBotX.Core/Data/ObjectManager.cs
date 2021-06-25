@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Data
             WowInterface.HookManager.OnGameInfoPush += HookManagerOnGameInfoPush;
         }
 
-        public event ObjectUpdateComplete OnObjectUpdateComplete;
+        public event Action<IEnumerable<WowObject>> OnObjectUpdateComplete;
 
         public RawCameraInfo Camera { get; private set; }
 
@@ -167,7 +167,7 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithUs<T>(Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
             {
@@ -505,7 +505,7 @@ namespace AmeisenBotX.Core.Data
             {
                 if (player.Guid != PlayerGuid)
                 {
-                    // check wether its a new player old someone we know
+                    // check whether its a new player old someone we know
                     if (!WowInterface.Db.IsPlayerKnown(player))
                     {
                         WowInterface.Db.AddPlayerRelationship(player,

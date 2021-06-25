@@ -15,6 +15,12 @@ namespace AmeisenBotX.Core.Hook
     /// This is the main interactionpoint with the wow game it
     /// handles function calling, execution of asm code and
     /// hooking the EndScene.
+    /// 
+    /// Functions starting with Lua are mostly shortcut calls
+    /// of LuaDostring(). Many of them reflect wows lua API.
+    /// 
+    /// Functions starting with Wow are native functions of
+    /// wows engine, for example TraceLine().
     /// </summary>
     public interface IHookManager
     {
@@ -35,8 +41,23 @@ namespace AmeisenBotX.Core.Hook
         /// </summary>
         bool IsWoWHooked { get; }
 
+        /// <summary>
+        /// Use this function to disable the is world loaded 
+        /// safety check. Useful when you want to execute
+        /// asm in the main menu or character selection.
+        /// </summary>
+        /// <param name="status">True will disable the check, false will enable it</param>
         void BotOverrideWorldLoadedCheck(bool status);
 
+        /// <summary>
+        /// Hook wows EndScene function to execute asm on its
+        /// main thread. This is needed for the majority of
+        /// functions inside this class. Make sure to call
+        /// it only once.
+        /// </summary>
+        /// <param name="hookSize">How many byte the hook should overwrite, needs to be aleast 5 (JMP instruction + Address)</param>
+        /// <param name="hookModules">List of HookModules to load</param>
+        /// <returns>True when the hook was successful, false if not</returns>
         bool Hook(int hookSize, List<IHookModule> hookModules);
 
         void LuaAbandonQuestsNotIn(IEnumerable<string> questNames);
@@ -128,10 +149,10 @@ namespace AmeisenBotX.Core.Hook
         Dictionary<string, (int, int)> LuaGetSkills();
 
         /// <summary>
-        /// Get the spells cooldown left in milliseconds
+        /// Get the spells cooldown left in milliseconds.
         /// </summary>
-        /// <param name="spellName"></param>
-        /// <returns>ms cooldown left</returns>
+        /// <param name="spellName">Name of the spell you want to check</param>
+        /// <returns>Ms cooldown left</returns>
         int LuaGetSpellCooldown(string spellName);
 
         string LuaGetSpellNameById(int spellId);
@@ -212,48 +233,156 @@ namespace AmeisenBotX.Core.Hook
 
         void LuaUseItemByName(string itemName);
 
+        /// <summary>
+        /// Use this function to dispose the hook.
+        /// </summary>
         void Unhook();
 
+        /// <summary>
+        /// Clears the current target by calling SetTarget(0);
+        /// </summary>
         void WowClearTarget();
 
+        /// <summary>
+        /// Use this function to place AEO spells on the ground.
+        /// </summary>
+        /// <param name="position"></param>
         void WowClickOnTerrain(Vector3 position);
 
+        /// <summary>
+        /// Call the click to move function for a player, only call this with the local player.
+        /// </summary>
+        /// <param name="player">Local player</param>
+        /// <param name="position">Position to move</param>
         void WowClickToMove(WowPlayer player, Vector3 position);
 
+        /// <summary>
+        /// Enable the CTM function of wow.
+        /// </summary>
         void WowEnableClickToMove();
 
+        /// <summary>
+        /// This function executes the given command and reads the 
+        /// returned value from the supplied variable
+        /// </summary>
+        /// <param name="commandVariableTuple">Tuple of command and variable</param>
+        /// <param name="result">Return value</param>
+        /// <returns>True when the command execution was successful, false if not</returns>
         bool WowExecuteLuaAndRead((string, string) commandVariableTuple, out string result);
 
+        /// <summary>
+        /// This function executes the given command and reads the 
+        /// returned value from the supplied variable
+        /// </summary>
+        /// <param name="command">Lua command to execute</param
+        /// <param name="variable">Variable to read the return value from</param>
+        /// <param name="result">Return value</param>
+        /// <returns>True when the command execution was successful, false if not</returns>
         bool WowExecuteLuaAndRead(string command, string variable, out string result);
 
+        /// <summary>
+        /// Face a specific position, only call this with the local player.
+        /// </summary>
+        /// <param name="player">Local Player</param>
+        /// <param name="positionToFace">Position to face</param>
         void WowFacePosition(WowPlayer player, Vector3 positionToFace);
 
+        /// <summary>
+        /// Read a LUA variable from wow.
+        /// </summary>
+        /// <param name="variable">Variable to read</param>
+        /// <param name="result">Variable value</param>
+        /// <returns>True if the variable reading was successful, false if not</returns>
         bool WowGetLocalizedText(string variable, out string result);
 
+        /// <summary>
+        /// Returns a dict containing all rune types and how many of them are ready.
+        /// </summary>
+        /// <returns></returns>
         Dictionary<WowRuneType, int> WowGetRunesReady();
 
-        IEnumerable<WowAura> WowGetUnitAuras(IntPtr baseAddress, out int auraCount);
+        /// <summary>
+        /// Read the aura table of a unit.
+        /// </summary>
+        /// <param name="unit">Unit to read the aura table from</param>
+        /// <param name="auraCount">Size of the aura table</param>
+        /// <returns>The aura table as a list</returns>
+        IEnumerable<WowAura> WowGetUnitAuras(WowUnit unit, out int auraCount);
 
+        /// <summary>
+        /// Get the reaction of a unit to another.
+        /// </summary>
+        /// <param name="wowUnitA">Unit a</param>
+        /// <param name="wowUnitB">Unit b</param>
+        /// <returns>The reaction of unit a to unit b</returns>
         WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
 
+        /// <summary>
+        /// Checks the CTM status.
+        /// </summary>
+        /// <returns>Wether it is active or not</returns>
         bool WowIsClickToMoveActive();
 
+        /// <summary>
+        /// Check whether the start position can see the end position.
+        /// </summary>
+        /// <param name="start">Start position</param>
+        /// <param name="end">Target position</param>
+        /// <param name="heightAdjust">1.5f is default for units</param>
+        /// <returns>True is it is in LOS, false is not</returns>
         bool WowIsInLineOfSight(Vector3 start, Vector3 end, float heightAdjust = 1.5f);
 
+        /// <summary>
+        /// Check whether a specific rune is ready.
+        /// </summary>
+        /// <param name="runeId">Ranges from 0 to 5</param>
+        /// <returns>Wether the rune is ready or not</returns>
         bool WowIsRuneReady(int runeId);
 
+        /// <summary>
+        /// Perform a right click on a WoWObject. Only us this for Gameobjects
+        /// </summary>
+        /// <param name="gObject"></param>
         void WowObjectRightClick(WowObject gObject);
 
+        /// <summary>
+        /// Rotate localplayer to a given angle, only call this with the local player.
+        /// </summary>
+        /// <param name="unit">Local player</param>
+        /// <param name="angle">0 to (2 * PI)</param>
         void WowSetFacing(WowUnit unit, float angle);
 
+        /// <summary>
+        /// Disable/Enable the rendering of wows engine, may cause graphics.
+        /// </summary>
+        /// <param name="renderingEnabled">Wether wow should render stuff or not</param>
         void WowSetRenderState(bool renderingEnabled);
 
+        /// <summary>
+        /// Stops the current click to move execution. Makes the player stop.
+        /// </summary>
         void WowStopClickToMove();
 
+        /// <summary>
+        /// Target a specific unit by its guid.
+        /// </summary>
+        /// <param name="guid">Unit guid</param>
         void WowTargetGuid(ulong guid);
 
+        /// <summary>
+        /// Trace a line in the wow 3d space and see whether it collides with an object or not.
+        /// </summary>
+        /// <param name="start">Start position</param>
+        /// <param name="end">End position</param>
+        /// <param name="result">Hit position</param>
+        /// <param name="flags">Collision flags</param>
+        /// <returns>Trace line result</returns>
         byte WowTraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171);
 
+        /// <summary>
+        /// Right click a Unit, only call this on Units and Players, not objects.
+        /// </summary>
+        /// <param name="wowUnit">Unit to perform rightclick on</param>
         void WowUnitRightClick(WowUnit wowUnit);
     }
 }

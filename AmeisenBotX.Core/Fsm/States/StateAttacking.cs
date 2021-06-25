@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (!(WowInterface.Globals.ForceCombat
                 || WowInterface.Player.IsInCombat
                 || StateMachine.IsAnyPartymemberInCombat()
-                || WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
+                || WowInterface.ObjectManager.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;

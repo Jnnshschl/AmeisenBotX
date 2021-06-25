@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new AMovementEngine(WowInterface, Config);
 
-            StateMachine = new(BotDataPath, Config, WowInterface);
+            StateMachine = new(Config, WowInterface);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
 
             WowInterface.QuestEngine = new(WowInterface, Config, StateMachine);

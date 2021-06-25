@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public override unsafe void Update(WowInterface wowInterface)
+        public override void Update(WowInterface wowInterface)
         {
             base.Update(wowInterface);
 

@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Object: {Guid}";
         }
 
-        public virtual unsafe void Update(WowInterface wowInterface)
+        public virtual void Update(WowInterface wowInterface)
         {
             if (wowInterface.XMemory.ReadStruct(DescriptorAddress, out RawWowObject objPtr))
             {

@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithUs<WowUnit>(WowInterface.Player.Position, 64.0f);
+                var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 64.0f);
                 if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
