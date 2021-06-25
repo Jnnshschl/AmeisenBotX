@@ -21,10 +21,9 @@ namespace AmeisenBotX.Core.Character
 {
     public class CharacterManager : ICharacterManager
     {
-        public CharacterManager(AmeisenBotConfig config, WowInterface wowInterface)
+        public CharacterManager(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            Config = config;
 
             Inventory = new(WowInterface);
             Equipment = new(WowInterface);
@@ -53,8 +52,6 @@ namespace AmeisenBotX.Core.Character
         public SpellBook SpellBook { get; }
 
         public TalentManager TalentManager { get; }
-
-        private AmeisenBotConfig Config { get; }
 
         private WowInterface WowInterface { get; }
 
@@ -214,14 +211,11 @@ namespace AmeisenBotX.Core.Character
 
             if (container.Any())
             {
-                // TODO: Replace worse container
-                IWowItem item = container.FirstOrDefault();
-
                 for (int i = 20; i <= 23; ++i)
                 {
                     if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
                     {
-                        WowInterface.HookManager.LuaEquipItem(item);
+                        WowInterface.HookManager.LuaEquipItem(container.FirstOrDefault());
                         break;
                     }
                 }

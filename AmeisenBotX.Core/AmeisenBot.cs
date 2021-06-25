@@ -10,7 +10,6 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Db;
 using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -56,38 +55,52 @@ namespace AmeisenBotX.Core
         private int rconTimerBusy;
         private int stateMachineTimerBusy;
 
-        public AmeisenBot(string botDataPath, string accountName, AmeisenBotConfig config, IntPtr mainWindowHandle)
+        /// <summary>
+        /// Initializes a new bot.
+        ///
+        /// Call Start(), Pause(), Resume(), Dispose() to control the bots engine.
+        /// </summary>
+        /// <param name="config">The bot configuration.</param>
+        /// <param name="logfilePath">Logfile path.</param>
+        /// <param name="initialLogLevel">The initial LogLevel of the bots logger.</param>
+        public AmeisenBot(AmeisenBotConfig config, string logfilePath = "", LogLevel initialLogLevel = LogLevel.Verbose)
         {
-            Config = config;
-            AccountName = accountName;
-            BotDataPath = botDataPath;
-            MainWindowHandle = mainWindowHandle;
+            Config = config ?? throw new ArgumentException("config cannot be null", nameof(config));
+            if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading", nameof(config)); }
+
+            DataFolder = Path.GetDirectoryName(config.Path);
+            AccountName = Path.GetFileName(DataFolder);
+
+            if (string.IsNullOrWhiteSpace(logfilePath)) { logfilePath = Path.Combine(DataFolder, "log/"); }
+
+            AmeisenLogger.I.ChangeLogFolder(logfilePath);
+            AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
+            AmeisenLogger.I.Start();
+
+            AmeisenLogger.I.Log("AmeisenBot", $"AmeisenBot ({Assembly.GetExecutingAssembly().GetName().Version}) starting", LogLevel.Master);
+            AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {AccountName}", LogLevel.Master);
+            AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {DataFolder}", LogLevel.Verbose);
 
             ExecutionMsStopwatch = new();
 
-            if (!Directory.Exists(BotDataPath))
-            {
-                Directory.CreateDirectory(BotDataPath);
-            }
-
-            SetupLogging(botDataPath, accountName);
-
-            AmeisenLogger.I.Log("AmeisenBot", $"AmeisenBot ({Assembly.GetExecutingAssembly().GetName().Version}) starting", LogLevel.Master);
-            AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {accountName}", LogLevel.Master);
-            AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {botDataPath}", LogLevel.Verbose);
-
             WowInterface = new();
 
-            WowInterface.Globals = new();
             WowInterface.OffsetList = new OffsetList335a();
+            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
+
+            WowInterface.Globals = new();
             WowInterface.XMemory = new();
-            WowInterface.Db = LocalAmeisenBotDb.FromJson(WowInterface, Path.Combine(BotDataPath, AccountName, "db.json"));
+
+            string dbPath = Path.Combine(DataFolder, "db.json");
+            AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
+            WowInterface.Db = LocalAmeisenBotDb.FromJson(WowInterface, dbPath);
+
             WowInterface.Personality = new();
-            WowInterface.ChatManager = new(Config, Path.Combine(BotDataPath, AccountName));
+            WowInterface.ChatManager = new(Config, DataFolder);
             WowInterface.CombatLogParser = new(WowInterface);
             WowInterface.HookManager = new HookManager(WowInterface, Config);
             WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
-            WowInterface.CharacterManager = new CharacterManager(Config, WowInterface);
+            WowInterface.CharacterManager = new CharacterManager(WowInterface);
             WowInterface.EventHookManager = new(WowInterface);
             WowInterface.JobEngine = new(WowInterface, Config);
             WowInterface.DungeonEngine = new DungeonEngine(WowInterface);
@@ -96,39 +109,51 @@ namespace AmeisenBotX.Core
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new AMovementEngine(WowInterface, Config);
 
-            StateMachine = new(BotDataPath, Config, WowInterface);
-            StateMachine.GetState<StateStartWow>().OnWoWStarted += AmeisenBot_OnWoWStarted;
+            StateMachine = new(DataFolder, Config, WowInterface);
+            StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
+            {
+                if (Config.SaveWowWindowPosition)
+                {
+                    LoadWowWindowPosition();
+                }
+            };
 
             WowInterface.QuestEngine = new(WowInterface, Config, StateMachine);
             WowInterface.GrindingEngine = new(WowInterface, Config, StateMachine);
 
-            RconScreenshotEvent = new(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
-
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
+            AmeisenLogger.I.Log("AmeisenBot", "Finished setting up WowInterface", LogLevel.Verbose);
 
             if (Config.RconEnabled)
             {
-                WowInterface.ObjectManager.OnObjectUpdateComplete += ObjectManager_OnObjectUpdateComplete;
+                AmeisenLogger.I.Log("AmeisenBot", "Setting up RconClient", LogLevel.Verbose);
+                RconScreenshotEvent = new(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
+                SetupRconClient();
             }
 
+            AmeisenLogger.I.Log("AmeisenBot", "Setting CombatClasses", LogLevel.Verbose);
             InitCombatClasses();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Setting BattlegroundEngines", LogLevel.Verbose);
             InitBattlegroundEngines();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Setting JobProfiles", LogLevel.Verbose);
             InitJobProfiles();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Setting QuestProfiles", LogLevel.Verbose);
             InitQuestProfiles();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Setting GrindingProfiles", LogLevel.Verbose);
             InitGrindingProfiles();
 
+            AmeisenLogger.I.Log("AmeisenBot", "Loading Profiles", LogLevel.Verbose);
             LoadProfiles();
         }
 
-        public delegate void CombatClassCompilationStatus(bool succeeded, string heading, string message);
-
-        public event CombatClassCompilationStatus OnCombatClassCompilationStatusChanged;
+        public event Action<bool, string, string> OnCombatClassCompilationStatusChanged;
 
         public string AccountName { get; }
 
         public IEnumerable<IBattlegroundEngine> BattlegroundEngines { get; private set; }
-
-        public string BotDataPath { get; }
 
         public IEnumerable<ICombatClass> CombatClasses { get; private set; }
 
@@ -146,6 +171,8 @@ namespace AmeisenBotX.Core
             private set => currentExecutionMs = value;
         }
 
+        public string DataFolder { get; }
+
         public Stopwatch ExecutionMsStopwatch { get; private set; }
 
         public IEnumerable<IGrindingProfile> GrindingProfiles { get; private set; }
@@ -153,8 +180,6 @@ namespace AmeisenBotX.Core
         public bool IsRunning { get; private set; }
 
         public IEnumerable<IJobProfile> JobProfiles { get; private set; }
-
-        public IntPtr MainWindowHandle { get; private set; }
 
         public bool NeedToSetupRconClient { get; set; }
 
@@ -178,68 +203,16 @@ namespace AmeisenBotX.Core
 
         private bool TalentUpdateRunning { get; set; }
 
-        public void Pause()
-        {
-            AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
-            IsRunning = false;
-
-            if (StateMachine.CurrentState.Key != BotState.StartWow
-                && StateMachine.CurrentState.Key != BotState.Login
-                && StateMachine.CurrentState.Key != BotState.LoadingScreen)
-            {
-                StateMachine.SetState(BotState.Idle);
-            }
-        }
-
-        public void ReloadConfig()
-        {
-            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
-            LoadProfiles();
-        }
-
-        public void Resume()
-        {
-            AmeisenLogger.I.Log("AmeisenBot", "Resuming", LogLevel.Debug);
-            IsRunning = true;
-            stateMachineTimerBusy = 0;
-        }
-
-        public void Start()
-        {
-            AmeisenLogger.I.Log("AmeisenBot", "Starting", LogLevel.Debug);
-
-            if (Config.RconEnabled)
-            {
-                AmeisenLogger.I.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
-                RconClientTimer = new(RconClientTimerTick, null, 0, (int)Config.RconTickMs);
-            }
-
-            SubscribeToWowEvents();
-
-            if (Config.SaveBotWindowPosition)
-            {
-                LoadWindowPosition(Config.BotWindowRect, MainWindowHandle);
-            }
-
-            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
-            stateMachineTimerBusy = 0;
-            IsRunning = true;
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
-        }
-
-        public void Stop()
+        /// <summary>
+        /// Use this method to destroy the bots instance
+        /// </summary>
+        public void Dispose()
         {
             AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
 
             if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
             {
                 SaveWowWindowPosition();
-            }
-
-            if (Config.SaveBotWindowPosition)
-            {
-                SaveBotWindowPosition();
             }
 
             StateMachine.ShouldExit = true;
@@ -277,44 +250,76 @@ namespace AmeisenBotX.Core
             WowInterface.HookManager.Unhook();
             WowInterface.XMemory.Dispose();
 
-            WowInterface.Db.Save(Path.Combine(BotDataPath, AccountName, "db.json"));
+            WowInterface.Db.Save(Path.Combine(DataFolder, "db.json"));
 
             AmeisenLogger.I.Log("AmeisenBot", $"Exiting AmeisenBot", LogLevel.Debug);
             AmeisenLogger.I.Stop();
         }
 
+        /// <summary>
+        /// Pauses the bots engine, nothing will be executed, call Resume() to resume the engine.
+        /// </summary>
+        public void Pause()
+        {
+            AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
+            IsRunning = false;
+
+            if (StateMachine.CurrentState.Key != BotState.StartWow
+                && StateMachine.CurrentState.Key != BotState.Login
+                && StateMachine.CurrentState.Key != BotState.LoadingScreen)
+            {
+                StateMachine.SetState(BotState.Idle);
+            }
+        }
+
+        /// <summary>
+        /// Reloads the bots config
+        /// </summary>
+        /// <param name="newConfig">New config to load</param>
+        public void ReloadConfig(AmeisenBotConfig newConfig)
+        {
+            Config = newConfig;
+            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
+            LoadProfiles();
+        }
+
+        /// <summary>
+        /// Resumes the bots engine, call Pause() to pause the engine.
+        /// </summary>
+        public void Resume()
+        {
+            AmeisenLogger.I.Log("AmeisenBot", "Resuming", LogLevel.Debug);
+            IsRunning = true;
+            stateMachineTimerBusy = 0;
+        }
+
+        /// <summary>
+        /// Starts the bots engine, only call this once, use Pause() and 
+        /// Resume() to control the execution of the engine afterwards
+        /// </summary>
+        public void Start()
+        {
+            AmeisenLogger.I.Log("AmeisenBot", "Starting", LogLevel.Debug);
+
+            if (Config.RconEnabled)
+            {
+                AmeisenLogger.I.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
+                RconClientTimer = new(RconClientTimerTick, null, 0, (int)Config.RconTickMs);
+            }
+
+            SubscribeToWowEvents();
+
+            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
+            stateMachineTimerBusy = 0;
+            IsRunning = true;
+
+            AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
+        }
+
         private static T LoadClassByName<T>(IEnumerable<T> profiles, string profileName)
         {
-            AmeisenLogger.I.Log("AmeisenBot", $"Loading {nameof(T),-24} {profileName}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("AmeisenBot", $"Loading {typeof(T).Name,-24} {profileName}", LogLevel.Verbose);
             return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static void LoadWindowPosition(Rect rect, IntPtr windowHandle)
-        {
-            if (windowHandle != IntPtr.Zero && rect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
-            {
-                XMemory.SetWindowPosition(windowHandle, rect);
-                AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {rect}", LogLevel.Verbose);
-            }
-            else
-            {
-                AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {windowHandle} to {rect}", LogLevel.Warning);
-            }
-        }
-
-        private static void SetupLogging(string botDataPath, string accountName)
-        {
-            AmeisenLogger.I.ChangeLogFolder(Path.Combine(botDataPath, accountName, "log/"));
-            AmeisenLogger.I.ActiveLogLevel = LogLevel.Verbose;
-            AmeisenLogger.I.Start();
-        }
-
-        private void AmeisenBot_OnWoWStarted()
-        {
-            if (Config.SaveWowWindowPosition)
-            {
-                LoadWowWindowPosition();
-            }
         }
 
         private ICombatClass CompileCustomCombatClass()
@@ -447,12 +452,12 @@ namespace AmeisenBotX.Core
 
         private void LoadCustomCombatClass()
         {
-            AmeisenLogger.I.Log("AmeisenBot", $"Loading custom CombatClass: {Config.CustomCombatClassFile}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("AmeisenBot", $"Loading custom CombatClass: {Config.CustomCombatClassFile}", LogLevel.Debug);
 
             if (Config.CustomCombatClassFile.Length == 0
                 || !File.Exists(Config.CustomCombatClassFile))
             {
-                AmeisenLogger.I.Log("AmeisenBot", "Loading default CombatClass", LogLevel.Warning);
+                AmeisenLogger.I.Log("AmeisenBot", "Loading default CombatClass", LogLevel.Debug);
                 WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
             }
             else
@@ -461,11 +466,11 @@ namespace AmeisenBotX.Core
                 {
                     WowInterface.CombatClass = CompileCustomCombatClass();
                     OnCombatClassCompilationStatusChanged?.Invoke(true, string.Empty, string.Empty);
-                    AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass successful", LogLevel.Warning);
+                    AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass successful", LogLevel.Debug);
                 }
                 catch (Exception e)
                 {
-                    AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass failed:\n{e}", LogLevel.Warning);
+                    AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass failed:\n{e}", LogLevel.Error);
                     OnCombatClassCompilationStatusChanged?.Invoke(false, e.GetType().Name, e.ToString());
                     WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
                 }
@@ -500,16 +505,15 @@ namespace AmeisenBotX.Core
         {
             if (Config.SaveWowWindowPosition && !Config.AutoPositionWow)
             {
-                LoadWindowPosition(Config.WowWindowRect, WowInterface.XMemory.Process.MainWindowHandle);
-            }
-        }
-
-        private void ObjectManager_OnObjectUpdateComplete(IEnumerable<WowObject> wowObjects)
-        {
-            if (!NeedToSetupRconClient && WowInterface.Player != null)
-            {
-                NeedToSetupRconClient = true;
-                WowInterface.RconClient = new(Config.RconServerAddress, WowInterface.Player.Name, WowInterface.Player.Race.ToString(), WowInterface.Player.Gender.ToString(), WowInterface.Player.Class.ToString(), WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps", Config.RconServerImage, Config.RconServerGuid);
+                if (WowInterface.XMemory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                {
+                    XMemory.SetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle, Config.WowWindowRect);
+                    AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {Config.WowWindowRect}", LogLevel.Verbose);
+                }
+                else
+                {
+                    AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {WowInterface.XMemory.Process.MainWindowHandle} to {Config.WowWindowRect}", LogLevel.Warning);
+                }
             }
         }
 
@@ -795,18 +799,6 @@ namespace AmeisenBotX.Core
             }
         }
 
-        private void SaveBotWindowPosition()
-        {
-            try
-            {
-                Config.BotWindowRect = XMemory.GetWindowPosition(MainWindowHandle);
-            }
-            catch (Exception e)
-            {
-                AmeisenLogger.I.Log("AmeisenBot", $"Failed to save bot window position:\n{e}", LogLevel.Error);
-            }
-        }
-
         private void SaveWowWindowPosition()
         {
             if (!Config.AutoPositionWow)
@@ -820,6 +812,28 @@ namespace AmeisenBotX.Core
                     AmeisenLogger.I.Log("AmeisenBot", $"Failed to save wow window position:\n{e}", LogLevel.Error);
                 }
             }
+        }
+
+        private void SetupRconClient()
+        {
+            WowInterface.ObjectManager.OnObjectUpdateComplete += delegate
+            {
+                if (!NeedToSetupRconClient && WowInterface.Player != null)
+                {
+                    NeedToSetupRconClient = true;
+                    WowInterface.RconClient = new
+                    (
+                        Config.RconServerAddress,
+                        WowInterface.Player.Name,
+                        WowInterface.Player.Race.ToString(),
+                        WowInterface.Player.Gender.ToString(),
+                        WowInterface.Player.Class.ToString(),
+                        WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps",
+                        Config.RconServerImage,
+                        Config.RconServerGuid
+                    );
+                }
+            };
         }
 
         private void StateMachineTimerTick(object state)
@@ -849,14 +863,12 @@ namespace AmeisenBotX.Core
             EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
 
             // Request Events
-            // -------------- >
             WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
             WowInterface.EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             WowInterface.EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
             WowInterface.EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
 
             // Loot/Item Events
-            // ---------------- >
             WowInterface.EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
             WowInterface.EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
             WowInterface.EventHookManager.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
@@ -867,21 +879,17 @@ namespace AmeisenBotX.Core
             // WowInterface.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
             // Merchant Events
-            // --------------- >
             // WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
-            // ---------- >
             WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
             WowInterface.EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
 
             // Dungeon Events
-            // -------------- >
             WowInterface.EventHookManager.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
             WowInterface.EventHookManager.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
 
             // Quest Events
-            // ------------ >
             WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
             WowInterface.EventHookManager.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
             WowInterface.EventHookManager.Subscribe("QUEST_GREETING", OnQuestGreeting);
@@ -890,11 +898,9 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
 
             // Trading Events
-            // -------------- >
             WowInterface.EventHookManager.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
             // Chat Events
-            // ----------- >
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_ADDON", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.ADDON, t, a));
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_CHANNEL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.CHANNEL, t, a));
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.EMOTE, t, a));
@@ -922,7 +928,6 @@ namespace AmeisenBotX.Core
             WowInterface.EventHookManager.Subscribe("CHAT_MSG_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.YELL, t, a));
 
             // Misc Events
-            // ----------- >
             WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
         }

@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         {
             List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
             places.AddRange(WowInterface.ObjectManager.GetAoeSpells(position)
-                .Where(e=> WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)?.Type == WowObjectType.Unit)
+                .Where(e => WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)?.Type == WowObjectType.Unit)
                 .Select(e => (e.Position, e.Radius)));
 
             if (places.Any())

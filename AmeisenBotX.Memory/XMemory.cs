@@ -163,6 +163,8 @@ namespace AmeisenBotX.Memory
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
+
             CloseHandle(MainThreadHandle);
             CloseHandle(ProcessHandle);
 

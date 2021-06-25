@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -156,6 +157,9 @@ namespace AmeisenBotX.Core
         public bool OnlySupportMaster { get; set; } = false;
 
         public string Password { get; set; } = string.Empty;
+
+        [JsonIgnore]
+        public string Path { get; set; } = string.Empty;
 
         public string PathToWowExe { get; set; } = string.Empty;
 

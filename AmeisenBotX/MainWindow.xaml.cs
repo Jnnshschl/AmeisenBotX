@@ -31,8 +31,6 @@ namespace AmeisenBotX
         {
             InitializeComponent();
 
-            Config = LoadConfig();
-
             CurrentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
             CurrentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
             DarkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
@@ -50,12 +48,6 @@ namespace AmeisenBotX
 
             RenderState = true;
         }
-
-        public AmeisenBotConfig Config { get; private set; }
-
-        public string ConfigPath { get; private set; }
-
-        public WindowInteropHelper InteropHelper { get; private set; }
 
         public bool IsAutoPositionSetup { get; private set; }
 
@@ -86,6 +78,8 @@ namespace AmeisenBotX
         private InfoWindow InfoWindow { get; set; }
 
         private TimegatedEvent LabelUpdateEvent { get; }
+
+        private IntPtr MainWindowHandle { get; set; }
 
         private MapWindow MapWindow { get; set; }
 
@@ -133,6 +127,27 @@ namespace AmeisenBotX
             return size;
         }
 
+        private static bool TryLoadConfig(string configPath, out AmeisenBotConfig config)
+        {
+            if (!string.IsNullOrWhiteSpace(configPath))
+            {
+                if (File.Exists(configPath))
+                {
+                    config = JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(configPath));
+                }
+                else
+                {
+                    config = new();
+                }
+
+                config.Path = configPath;
+                return true;
+            }
+
+            config = null;
+            return false;
+        }
+
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
             AmeisenBot.WowInterface.Db.Clear();
@@ -140,14 +155,13 @@ namespace AmeisenBotX
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
         {
-            ConfigEditorWindow configWindow = new(DataPath, AmeisenBot, Config, Path.GetFileName(Path.GetDirectoryName(ConfigPath)));
+            ConfigEditorWindow configWindow = new(DataPath, AmeisenBot, AmeisenBot.Config, AmeisenBot.AccountName);
             configWindow.ShowDialog();
 
             if (configWindow.SaveConfig)
             {
-                AmeisenBot.Config = configWindow.Config;
-                AmeisenBot.ReloadConfig();
-                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(configWindow.Config, Formatting.Indented));
+                AmeisenBot.ReloadConfig(configWindow.Config);
+                File.WriteAllText(AmeisenBot.Config.Path, JsonConvert.SerializeObject(configWindow.Config, Formatting.Indented));
             }
         }
 
@@ -197,7 +211,7 @@ namespace AmeisenBotX
                 if (((IStateConfigWindow)selectedWindow).ShouldSave)
                 {
                     AmeisenBot.Config = ((IStateConfigWindow)selectedWindow).Config;
-                    AmeisenBot.ReloadConfig();
+                    AmeisenBot.ReloadConfig(((IStateConfigWindow)selectedWindow).Config);
                     SaveConfig();
                 }
             }
@@ -248,73 +262,11 @@ namespace AmeisenBotX
             }
         }
 
-        private AmeisenBotConfig LoadConfig()
-        {
-            if (Directory.Exists(DataPath))
-            {
-                Directory.CreateDirectory(DataPath);
-            }
-
-            // check for older data folder
-            string oldDataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
-
-            if (Directory.Exists(oldDataPath))
-            {
-                MessageBox.Show("You need to move the content of your \"\\\\data\\\\\" folder to \"%AppData%\\\\Roaming\\\\AmeisenbotX\\\\profiles\\\\\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-
-            LoadConfigWindow loadConfigWindow = new(DataPath);
-            loadConfigWindow.ShowDialog();
-
-            if (loadConfigWindow.ConfigToLoad.Length > 0)
-            {
-                AmeisenBotConfig config;
-                if (File.Exists(loadConfigWindow.ConfigToLoad))
-                {
-                    config = JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(loadConfigWindow.ConfigToLoad));
-                }
-                else
-                {
-                    config = new();
-                }
-
-                ConfigPath = loadConfigWindow.ConfigToLoad;
-                return config;
-            }
-            else
-            {
-                Close();
-            }
-
-            return null;
-        }
-
-        private void MainWindow_OnWoWStarted()
-        {
-            if (Config.AutoPositionWow)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    AmeisenBot.WowInterface.XMemory.SetupAutoPosition
-                    (
-                        InteropHelper.EnsureHandle(),
-                        (int)(wowRect.Margin.Left * M11 + 1),
-                        (int)(wowRect.Margin.Top * M22 + 1),
-                        (int)(wowRect.ActualWidth * M11),
-                        (int)(wowRect.ActualHeight * M22)
-                    );
-                });
-
-                IsAutoPositionSetup = true;
-            }
-        }
-
         private void OnObjectUpdateComplete(IEnumerable<WowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
                 // Notification Symbol
-                // ------------------- >
                 if (NotificationEvent.Run())
                 {
                     if (!PendingNotification)
@@ -356,7 +308,6 @@ namespace AmeisenBotX
                 }
 
                 // Update the main view
-                // -------------------- >
                 WowPlayer player = AmeisenBot.WowInterface.Player;
 
                 switch (player.Class)
@@ -403,14 +354,12 @@ namespace AmeisenBotX
                 }
 
                 // Bottom labels
-                // ------------- >
                 if (LabelUpdateEvent.Run())
                 {
                     UpdateBottomLabels();
                 }
 
                 // Overlay drawing
-                // --------------- >
                 if (DrawOverlay)
                 {
                     Overlay ??= new(AmeisenBot.WowInterface.XMemory);
@@ -424,14 +373,6 @@ namespace AmeisenBotX
                     Overlay.Clear();
                     NeedToClearOverlay = false;
                 }
-            });
-        }
-
-        private void OnStateMachineStateChange()
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}";
             });
         }
 
@@ -464,20 +405,35 @@ namespace AmeisenBotX
             }
         }
 
+        private void SaveBotWindowPosition()
+        {
+            if (AmeisenBot != null && AmeisenBot.Config != null && AmeisenBot.Config.SaveBotWindowPosition)
+            {
+                try
+                {
+                    AmeisenBot.Config.BotWindowRect = XMemory.GetWindowPosition(MainWindowHandle);
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.I.Log("AmeisenBot", $"Failed to save bot window position:\n{e}", LogLevel.Error);
+                }
+            }
+        }
+
         private void SaveConfig()
         {
-            if (Config != null
-                && !string.IsNullOrEmpty(ConfigPath)
-                && Directory.Exists(Path.GetDirectoryName(ConfigPath)))
+            if (AmeisenBot != null
+                && AmeisenBot.Config != null
+                && !string.IsNullOrWhiteSpace(AmeisenBot.Config.Path)
+                && Directory.Exists(AmeisenBot.DataFolder))
             {
-                File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(AmeisenBot.Config, Formatting.Indented));
+                File.WriteAllText(AmeisenBot.Config.Path, JsonConvert.SerializeObject(AmeisenBot.Config, Formatting.Indented));
             }
         }
 
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
             // Generic labels
-            // ------------- >
             labelPlayerName.Content = AmeisenBot.WowInterface.Player.Name;
 
             labelMapName.Content = AmeisenBot.WowInterface.ObjectManager.MapId.ToString();
@@ -499,13 +455,11 @@ namespace AmeisenBotX
             labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.ToString();
 
             // Class specific labels
-            // --------------------- >
             progressbarSecondary.Maximum = maxSecondary;
             progressbarSecondary.Value = secondary;
             labelCurrentSecondary.Content = BotUtils.BigValueToString(secondary);
 
             // Colors
-            // ------ >
             progressbarHealth.Foreground = primaryBrush;
             progressbarSecondary.Foreground = secondaryBrush;
             labelCurrentClass.Foreground = primaryBrush;
@@ -514,11 +468,9 @@ namespace AmeisenBotX
         private void UpdateBottomLabels()
         {
             // Object count label
-            // ------------------ >
             labelCurrentObjectCount.Content = AmeisenBot.WowInterface.ObjectManager.ObjectCount.ToString(CultureInfo.InvariantCulture).PadLeft(4);
 
             // Tick time label
-            // --------------- >
             float executionMs = AmeisenBot.CurrentExecutionMs;
 
             if (float.IsNaN(executionMs) || float.IsInfinity(executionMs))
@@ -528,7 +480,7 @@ namespace AmeisenBotX
 
             labelCurrentTickTime.Content = executionMs.ToString(CultureInfo.InvariantCulture).PadLeft(4);
 
-            if (executionMs <= Config.StateMachineTickMs)
+            if (executionMs <= AmeisenBot.Config.StateMachineTickMs)
             {
                 labelCurrentTickTime.Foreground = CurrentTickTimeGoodBrush;
             }
@@ -539,10 +491,9 @@ namespace AmeisenBotX
             }
 
             // HookCall label
-            // -------------- >
             labelHookCallCount.Content = AmeisenBot.WowInterface.HookManager.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
 
-            if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.Player.IsInCombat ? (ulong)Config.MaxFpsCombat : (ulong)Config.MaxFps))
+            if (AmeisenBot.WowInterface.HookManager.HookCallCount <= (AmeisenBot.WowInterface.Player.IsInCombat ? (ulong)AmeisenBot.Config.MaxFpsCombat : (ulong)AmeisenBot.Config.MaxFps))
             {
                 labelHookCallCount.Foreground = CurrentTickTimeGoodBrush;
             }
@@ -553,15 +504,16 @@ namespace AmeisenBotX
             }
 
             // RPM/WPM labels
-            // -------------- >
             labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(5);
             labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(3);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            SaveBotWindowPosition();
+
             Overlay?.Exit();
-            AmeisenBot?.Stop();
+            AmeisenBot?.Dispose();
 
             InfoWindow?.Close();
             MapWindow?.Close();
@@ -581,14 +533,18 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Init GUI stuff
-            // -------------- >
-            InteropHelper = new(this);
+            // check for older data folder that users need to migrate to the new location
+            string oldDataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
 
-            PresentationSource presentationSource = PresentationSource.FromVisual(this);
-            M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
-            M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
+            if (Directory.Exists(oldDataPath))
+            {
+                MessageBox.Show("You need to move the content of your \"\\\\data\\\\\" folder to \"%AppData%\\\\Roaming\\\\AmeisenbotX\\\\profiles\\\\\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
 
+            // Init GUI related stuff
+            MainWindowHandle = new WindowInteropHelper(this).EnsureHandle(); // obtain a window handle (HWND) to out current WPF window
+
+            // load the state overrides
             comboboxStateOverride.Items.Add(BotState.Idle);
             comboboxStateOverride.Items.Add(BotState.Attacking);
             comboboxStateOverride.Items.Add(BotState.Grinding);
@@ -597,34 +553,94 @@ namespace AmeisenBotX
 
             comboboxStateOverride.SelectedIndex = 0;
 
+            // display the PID, maybe remove this when not debugging
             labelPID.Content = $"PID: {Environment.ProcessId}";
 
-            if (Config.Autopilot)
-            {
-                buttonToggleAutopilot.Foreground = CurrentTickTimeGoodBrush;
-            }
-
+            // create our data folder, default will be placed at "%APPDATA%/AmeisenBotX/..."
             if (!Directory.Exists(DataPath))
             {
                 Directory.CreateDirectory(DataPath);
             }
 
-            // Init the bot
-            // ------------ >
-            AmeisenBot = new(DataPath, Path.GetFileName(Path.GetDirectoryName(ConfigPath)), Config, InteropHelper.EnsureHandle());
+            // show the load config window first
+            LoadConfigWindow loadConfigWindow = new(DataPath);
+            loadConfigWindow.ShowDialog();
 
-            AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
-            AmeisenBot.StateMachine.OnStateMachineStateChanged += OnStateMachineStateChange;
-            AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += MainWindow_OnWoWStarted;
+            // exit if the user selected no config
+            if (string.IsNullOrWhiteSpace(loadConfigWindow.ConfigToLoad)) { Close(); }
 
-            StateConfigWindows = new()
+            // init the bots engine
+            if (File.Exists(loadConfigWindow.ConfigToLoad) && TryLoadConfig(loadConfigWindow.ConfigToLoad, out AmeisenBotConfig config))
             {
-                { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
-            };
+                AmeisenBot = new(config);
 
-            AmeisenBot.Start();
+                // events used to update our GUI
+                AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += OnObjectUpdateComplete;
+                AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
+                {
+                    Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
+                };
+
+                // handle the autoposition function where the wow window gets "absorbed" by the bots window
+                if (AmeisenBot.Config.AutoPositionWow)
+                {
+                    // this is used to measure the size of wow's window
+                    PresentationSource presentationSource = PresentationSource.FromVisual(this);
+                    M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
+                    M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
+
+                    AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            AmeisenBot.WowInterface.XMemory.SetupAutoPosition
+                            (
+                                MainWindowHandle,
+                                (int)(wowRect.Margin.Left * M11 + 1),
+                                (int)(wowRect.Margin.Top * M22 + 1),
+                                (int)(wowRect.ActualWidth * M11),
+                                (int)(wowRect.ActualHeight * M22)
+                            );
+                        });
+
+                        IsAutoPositionSetup = true;
+                    };
+                }
+
+                AmeisenBot.Start();
+
+                // init misc GUI related stuff
+                StateConfigWindows = new()
+                {
+                    { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                    { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                    { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                };
+
+                if (AmeisenBot.Config.Autopilot)
+                {
+                    buttonToggleAutopilot.Foreground = CurrentTickTimeGoodBrush;
+                }
+
+                // load our old window position
+                if (AmeisenBot.Config.SaveBotWindowPosition)
+                {
+                    if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                    {
+                        XMemory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
+                        AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {AmeisenBot.Config.BotWindowRect}", LogLevel.Verbose);
+                    }
+                    else
+                    {
+                        AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {MainWindowHandle} to {AmeisenBot.Config.BotWindowRect}", LogLevel.Warning);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show($"Check your config, maybe it contains some invalid stuff.\n\n{loadConfigWindow.ConfigToLoad}", "Failed to load Config", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
