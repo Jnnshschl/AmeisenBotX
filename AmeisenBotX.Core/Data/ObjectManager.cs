@@ -258,15 +258,6 @@ namespace AmeisenBotX.Core.Data
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowUnit> GetNearQuestgiverNpcs(Vector3 position, float distance)
-        {
-            lock (queryLock)
-            {
-                return wowObjects.OfType<WowUnit>().Where(e => e.IsQuestgiver && e.Position.GetDistance(position) < distance);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
         {
             lock (queryLock)
@@ -291,7 +282,7 @@ namespace AmeisenBotX.Core.Data
             if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectType), out WowObjectType type)
                 && WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
-                WowObject obj = type == wowObjects[i]?.Type ? wowObjects[i] : type switch
+                WowObject obj = type switch
                 {
                     WowObjectType.Container => new WowContainer(ptr, type, descriptorAddress),
                     WowObjectType.Corpse => new WowCorpse(ptr, type, descriptorAddress),
@@ -303,37 +294,40 @@ namespace AmeisenBotX.Core.Data
                     _ => new WowObject(ptr, type, descriptorAddress),
                 };
 
-                obj.Update(WowInterface);
-
-                if (obj != null && (type == WowObjectType.Unit || type == WowObjectType.Player))
+                if (obj != null)
                 {
-                    if (obj.Guid == PlayerGuid)
+                    obj.Update(WowInterface);
+
+                    if (type == WowObjectType.Unit || type == WowObjectType.Player)
                     {
-                        PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer);
-
-                        if (!PlayerGuidIsVehicle)
+                        if (obj.Guid == PlayerGuid)
                         {
-                            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
+                            PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer);
+
+                            if (!PlayerGuidIsVehicle)
                             {
-                                ((WowPlayer)obj).ComboPoints = comboPoints;
-                            }
+                                if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
+                                {
+                                    ((WowPlayer)obj).ComboPoints = comboPoints;
+                                }
 
-                            Player = (WowPlayer)obj;
-                            Vehicle = null;
+                                Player = (WowPlayer)obj;
+                                Vehicle = null;
+                            }
+                            else
+                            {
+                                Vehicle = (WowUnit)obj;
+                            }
                         }
-                        else
-                        {
-                            Vehicle = (WowUnit)obj;
-                        }
+
+                        if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
+                        if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
+                        if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
+                        if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
                     }
 
-                    if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
-                    if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
-                    if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
-                    if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
+                    wowObjects[i] = obj;
                 }
-
-                wowObjects[i] = obj;
             }
         }
 
@@ -394,15 +388,17 @@ namespace AmeisenBotX.Core.Data
                 WowInterface.XMemory.Read(IntPtr.Add(currentObjectManager, (int)WowInterface.OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
 
                 int c = 0;
+                Array.Clear(wowObjectPointers, 0, MAX_OBJECT_COUNT);
 
                 for (; (int)activeObjectBaseAddress > 0 && c < MAX_OBJECT_COUNT; ++c)
                 {
                     wowObjectPointers[c] = activeObjectBaseAddress;
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.NextObject), out activeObjectBaseAddress);
+                    ProcessObject(c);
                 }
 
                 ObjectCount = c;
-                Parallel.For(0, c, x => ProcessObject(x));
+                // Parallel.For(0, c, x => ProcessObject(x));
 
                 if (PlayerGuidIsVehicle)
                 {
