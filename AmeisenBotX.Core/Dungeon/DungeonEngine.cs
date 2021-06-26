@@ -163,6 +163,7 @@ namespace AmeisenBotX.Core.Dungeon
                 WowMapId.UtgardeKeep => new UtgardeKeepProfile(),
                 WowMapId.AzjolNerub => new AzjolNerubProfile(),
                 WowMapId.TheForgeOfSouls => new ForgeOfSoulsProfile(),
+                WowMapId.PitOfSaron => new PitOfSaronProfile(),
 
                 _ => null
             };

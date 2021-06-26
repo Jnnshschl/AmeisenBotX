@@ -18,7 +18,8 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         private readonly List<IStaticDeathRoute> StaticDeathRoutes = new()
         {
-            new ForgeOfSoulsDeathRoute()
+            new ForgeOfSoulsDeathRoute(),
+            new PitOfSaronDeathRoute()
         };
 
         private ulong playerToFollowGuid = 0;

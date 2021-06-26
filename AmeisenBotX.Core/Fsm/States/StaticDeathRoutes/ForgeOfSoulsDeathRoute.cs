@@ -4,11 +4,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
 {
-    public class ForgeOfSoulsDeathRoute : IStaticDeathRoute
+    public class ForgeOfSoulsDeathRoute : StaticPathDeathRoute
     {
-        private int CurrentNode { get; set; } = 0;
-
-        private List<Vector3> Path { get; } = new()
+        protected override List<Vector3> Path { get; } = new()
         {
             new(6447, 2061, 564),
             new(6446, 2078, 562),
@@ -78,31 +76,5 @@ namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
             new(5674, 2000, 798),
             new(5678, 1997, 798),
         };
-
-        public Vector3 GetNextPoint(Vector3 playerPosition)
-        {
-            if (CurrentNode < Path.Count)
-            {
-                if (playerPosition.GetDistance(Path[CurrentNode]) < 3.0f)
-                {
-                    ++CurrentNode;
-                    return GetNextPoint(playerPosition);
-                }
-
-                return Path[CurrentNode];
-            }
-
-            return new(0, 0, 0);
-        }
-
-        public void Init()
-        {
-            CurrentNode = 0;
-        }
-
-        public bool IsUseable(WowMapId mapId, Vector3 start, Vector3 end)
-        {
-            return mapId == WowMapId.Northrend && ((start.GetDistance(Path[0]) < 10.0f && end.GetDistance(Path[^1]) < 10.0f) || end.GetDistance(new(5670, 2003, -100000)) < 16.0f);
-        }
     }
 }

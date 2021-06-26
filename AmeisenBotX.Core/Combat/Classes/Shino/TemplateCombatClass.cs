@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
             }
         }
 
-        public override bool IsTargetAttackable(WowUnit target)
+        public bool IsTargetAttackable(WowUnit target)
         {
             Spell openingSpell = GetOpeningSpell();
             float posOffset = 0.5f;

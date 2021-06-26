@@ -635,11 +635,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             }
         }
 
-        public virtual bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
-        }
-
         public virtual void OutOfCombatExecute()
         {
             if ((WowInterface.Player.HasBuffByName("Food") && WowInterface.Player.HealthPercentage < 100.0)

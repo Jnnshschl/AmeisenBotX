@@ -33,21 +33,23 @@ namespace AmeisenBotX.Core.Common
 
         internal static bool IsDungeonMap(this WowMapId map)
         {
+            // classic dungeon
             return map == WowMapId.RagefireChasm
                 || map == WowMapId.WailingCaverns
                 || map == WowMapId.Deadmines
                 || map == WowMapId.ShadowfangKeep
                 || map == WowMapId.StormwindStockade
-
+                // tbc dungeons
                 || map == WowMapId.HellfireRamparts
                 || map == WowMapId.TheBloodFurnace
                 || map == WowMapId.TheSlavePens
                 || map == WowMapId.TheUnderbog
                 || map == WowMapId.TheSteamvault
-
+                // wotlk dungeons
                 || map == WowMapId.UtgardeKeep
                 || map == WowMapId.AzjolNerub
-                || map == WowMapId.TheForgeOfSouls;
+                || map == WowMapId.TheForgeOfSouls
+                || map == WowMapId.PitOfSaron;
         }
     }
 }
