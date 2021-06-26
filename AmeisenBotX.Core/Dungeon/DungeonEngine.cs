@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Dungeon
                         new Selector
                         (
                             "AreAllPlayersPresent",
-                            () => AreAllPlayersPresent(18.0f, 11.0f),
+                            () => AreAllPlayersPresent(20.0f, 14.0f),
                             new Selector
                             (
                                 "IsAnyoneEating",
@@ -78,39 +78,38 @@ namespace AmeisenBotX.Core.Dungeon
             );
         }
 
-        public AmeisenBotBehaviorTree BehaviorTree { get; }
-
-        public Queue<DungeonNode> CurrentNodes { get; private set; }
-
-        public Vector3 DeathEntrancePosition { get; private set; }
-
-        public Vector3 DeathPosition { get; private set; }
-
-        public bool IDied { get; private set; }
-
-        public bool IsWaitingForGroup { get; private set; }
-
-        public Vector3 LeaderFollowOffset { get; set; }
-
+        ///<inheritdoc cref="IDungeonEngine.Nodes"/>
         public List<DungeonNode> Nodes => CurrentNodes?.ToList();
 
+        ///<inheritdoc cref="IDungeonEngine.Profile"/>
         public IDungeonProfile Profile { get; private set; }
 
-        public double Progress { get; private set; }
+        private AmeisenBotBehaviorTree BehaviorTree { get; }
 
-        public Selector RootSelector { get; }
+        private Queue<DungeonNode> CurrentNodes { get; set; }
 
-        public int TotalNodes { get; private set; }
+        private Vector3 DeathPosition { get; set; }
 
         private TimegatedEvent ExitDungeonEvent { get; set; }
 
+        private bool IDied { get; set; }
+
+        private bool IsWaitingForGroup { get; set; }
+
+        private Vector3 LeaderFollowOffset { get; set; }
+
+        private double Progress { get; set; }
+
+        private Selector RootSelector { get; }
+
         private WowInterface WowInterface { get; }
 
+        ///<inheritdoc cref="IDungeonEngine.Enter"/>
         public void Enter()
         {
-            Reset();
-
+            Profile = null;
             Random rnd = new();
+
             LeaderFollowOffset = new()
             {
                 X = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
@@ -119,6 +118,7 @@ namespace AmeisenBotX.Core.Dungeon
             };
         }
 
+        ///<inheritdoc cref="IDungeonEngine.Execute"/>
         public void Execute()
         {
             if (Profile != null)
@@ -131,38 +131,19 @@ namespace AmeisenBotX.Core.Dungeon
             }
         }
 
+        ///<inheritdoc cref="IDungeonEngine.Exit"/>
         public void Exit()
         {
         }
 
-        public void LoadProfile(IDungeonProfile profile)
-        {
-            Profile = profile;
-
-            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
-            int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
-
-            for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
-            {
-                CurrentNodes.Enqueue(profile.Nodes[i]);
-            }
-
-            WowInterface.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
-            TotalNodes = CurrentNodes.Count;
-        }
-
+        ///<inheritdoc cref="IDungeonEngine.OnDeath"/>
         public void OnDeath()
         {
             IDied = true;
             DeathPosition = WowInterface.Player.Position;
-            DeathEntrancePosition = Profile.WorldEntry;
         }
 
-        public void Reset()
-        {
-            Profile = null;
-        }
-
+        ///<inheritdoc cref="IDungeonEngine.TryGetProfileByMapId(WowMapId)"/>
         public IDungeonProfile TryGetProfileByMapId(WowMapId mapId)
         {
             return mapId switch
@@ -240,6 +221,21 @@ namespace AmeisenBotX.Core.Dungeon
             }
 
             return status;
+        }
+
+        private void LoadProfile(IDungeonProfile profile)
+        {
+            Profile = profile;
+
+            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
+            int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
+
+            for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
+            {
+                CurrentNodes.Enqueue(profile.Nodes[i]);
+            }
+
+            WowInterface.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
         }
 
         private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5, MovementAction movementAction = MovementAction.Move)

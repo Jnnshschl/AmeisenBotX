@@ -254,7 +254,7 @@ namespace AmeisenBotX.Core.Data
         bool RefreshIsWorldLoaded();
 
         /// <summary>
-        /// Get all objects from the wow process.
+        /// Get/Update all objects from the wow process.
         /// </summary>
         void UpdateWowObjects();
     }

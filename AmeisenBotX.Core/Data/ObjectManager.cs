@@ -44,60 +44,88 @@ namespace AmeisenBotX.Core.Data
             WowInterface.HookManager.OnGameInfoPush += HookManagerOnGameInfoPush;
         }
 
+        ///<inheritdoc cref="IObjectManager.OnObjectUpdateComplete"/>
         public event Action<IEnumerable<WowObject>> OnObjectUpdateComplete;
 
+        ///<inheritdoc cref="IObjectManager.Camera"/>
         public RawCameraInfo Camera { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.GameState"/>
         public string GameState { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.IsTargetInLineOfSight"/>
         public bool IsTargetInLineOfSight { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.IsWorldLoaded"/>
         public bool IsWorldLoaded { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.LastTarget"/>
         public WowUnit LastTarget { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.LastTargetGuid"/>
         public ulong LastTargetGuid { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.MapId"/>
         public WowMapId MapId { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.MeanGroupPosition"/>
         public Vector3 MeanGroupPosition { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.ObjectCount"/>
         public int ObjectCount { get; set; }
 
+        ///<inheritdoc cref="IObjectManager.Partyleader"/>
         public WowUnit Partyleader { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PartyleaderGuid"/>
         public ulong PartyleaderGuid { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PartymemberGuids"/>
         public IEnumerable<ulong> PartymemberGuids { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.Partymembers"/>
         public IEnumerable<WowUnit> Partymembers { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PartyPetGuids"/>
         public IEnumerable<ulong> PartyPetGuids { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PartyPets"/>
         public IEnumerable<WowUnit> PartyPets { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.Pet"/>
         public WowUnit Pet { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PetGuid"/>
         public ulong PetGuid { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.Player"/>
         public WowPlayer Player { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PlayerBase"/>
         public IntPtr PlayerBase { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.PlayerGuid"/>
         public ulong PlayerGuid { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.Target"/>
         public WowUnit Target { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.TargetGuid"/>
         public ulong TargetGuid { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.Vehicle"/>
         public WowUnit Vehicle { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.WowObjects"/>
         public IEnumerable<WowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
 
+        ///<inheritdoc cref="IObjectManager.ZoneId"/>
         public int ZoneId { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.ZoneName"/>
         public string ZoneName { get; private set; }
 
+        ///<inheritdoc cref="IObjectManager.ZoneSubName"/>
         public string ZoneSubName { get; private set; }
 
         private AmeisenBotConfig Config { get; }
@@ -110,6 +138,7 @@ namespace AmeisenBotX.Core.Data
 
         private WowInterface WowInterface { get; }
 
+        ///<inheritdoc cref="IObjectManager.GetAoeSpells(Vector3, bool, float)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
         {
@@ -118,6 +147,7 @@ namespace AmeisenBotX.Core.Data
                     && (!onlyEnemy || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
         }
 
+        ///<inheritdoc cref="IObjectManager.GetClosestWowGameobjectByDisplayId(IEnumerable{int})"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WowGameobject GetClosestWowGameobjectByDisplayId(IEnumerable<int> displayIds)
         {
@@ -130,6 +160,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetClosestWowUnitByDisplayId(IEnumerable{int}, bool)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WowUnit GetClosestWowUnitByDisplayId(IEnumerable<int> displayIds, bool onlyQuestgiver = true)
         {
@@ -142,6 +173,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetClosestWowUnitByNpcId(IEnumerable{int}, bool)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public WowUnit GetClosestWowUnitByNpcId(IEnumerable<int> npcIds, bool onlyQuestgiver = true)
         {
@@ -154,18 +186,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithGroup<T>(Vector3 position, float distance) where T : WowUnit
-        {
-            lock (queryLock)
-            {
-                return GetNearEnemies<T>(position, distance)
-                    .Where(e => e.IsInCombat
-                        && (WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid)
-                        || WowInterface.ObjectManager.PartyPetGuids.Contains(e.TargetGuid)));
-            }
-        }
-
+        ///<inheritdoc cref="IObjectManager.GetEnemiesInCombatWithParty{T}(Vector3, float)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance) where T : WowUnit
         {
@@ -176,6 +197,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetEnemiesInPath{T}(IEnumerable{Vector3}, float)"/>
         public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) where T : WowUnit
         {
             foreach (Vector3 pathPosition in path)
@@ -191,6 +213,7 @@ namespace AmeisenBotX.Core.Data
             return Array.Empty<T>();
         }
 
+        ///<inheritdoc cref="IObjectManager.GetEnemiesTargetingPartymembers{T}(Vector3, float)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) where T : WowUnit
         {
@@ -201,6 +224,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.MeanGroupPosition"/>
         public Vector3 GetMeanGroupPosition(bool includeSelf = false)
         {
             Vector3 meanGroupPosition = new();
@@ -218,6 +242,7 @@ namespace AmeisenBotX.Core.Data
             return meanGroupPosition / count;
         }
 
+        ///<inheritdoc cref="IObjectManager.GetNearEnemies{T}(Vector3, float)"/>
         public IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) where T : WowUnit
         {
             lock (queryLock)
@@ -231,6 +256,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetNearFriends{T}(Vector3, float)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance) where T : WowUnit
         {
@@ -244,6 +270,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetNearPartymembers{T}(Vector3, float)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) where T : WowUnit
         {
@@ -257,6 +284,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetWowObjectByGuid{T}(ulong)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
         {
@@ -266,6 +294,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        ///<inheritdoc cref="IObjectManager.GetWowUnitByName{T}(string, StringComparison)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetWowUnitByName<T>(string name, StringComparison stringComparison = StringComparison.Ordinal) where T : WowUnit
         {
@@ -275,62 +304,7 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
-        public void ProcessObject(int i)
-        {
-            IntPtr ptr = wowObjectPointers[i];
-
-            if (WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectType), out WowObjectType type)
-                && WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
-            {
-                WowObject obj = type switch
-                {
-                    WowObjectType.Container => new WowContainer(ptr, type, descriptorAddress),
-                    WowObjectType.Corpse => new WowCorpse(ptr, type, descriptorAddress),
-                    WowObjectType.Item => new WowItem(ptr, type, descriptorAddress),
-                    WowObjectType.Dynobject => new WowDynobject(ptr, type, descriptorAddress),
-                    WowObjectType.Gameobject => new WowGameobject(ptr, type, descriptorAddress),
-                    WowObjectType.Player => new WowPlayer(ptr, type, descriptorAddress),
-                    WowObjectType.Unit => new WowUnit(ptr, type, descriptorAddress),
-                    _ => new WowObject(ptr, type, descriptorAddress),
-                };
-
-                if (obj != null)
-                {
-                    obj.Update(WowInterface);
-
-                    if (type == WowObjectType.Unit || type == WowObjectType.Player)
-                    {
-                        if (obj.Guid == PlayerGuid)
-                        {
-                            PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer);
-
-                            if (!PlayerGuidIsVehicle)
-                            {
-                                if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
-                                {
-                                    ((WowPlayer)obj).ComboPoints = comboPoints;
-                                }
-
-                                Player = (WowPlayer)obj;
-                                Vehicle = null;
-                            }
-                            else
-                            {
-                                Vehicle = (WowUnit)obj;
-                            }
-                        }
-
-                        if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
-                        if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
-                        if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
-                        if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
-                    }
-
-                    wowObjects[i] = obj;
-                }
-            }
-        }
-
+        ///<inheritdoc cref="IObjectManager.RefreshIsWorldLoaded"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RefreshIsWorldLoaded()
         {
@@ -343,6 +317,7 @@ namespace AmeisenBotX.Core.Data
             return false;
         }
 
+        ///<inheritdoc cref="IObjectManager.UpdateWowObjects"/>
         public void UpdateWowObjects()
         {
             IsWorldLoaded = UpdateGlobalVar<int>(WowInterface.OffsetList.IsWorldLoaded) == 1;
@@ -394,11 +369,10 @@ namespace AmeisenBotX.Core.Data
                 {
                     wowObjectPointers[c] = activeObjectBaseAddress;
                     WowInterface.XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)WowInterface.OffsetList.NextObject), out activeObjectBaseAddress);
-                    ProcessObject(c);
                 }
 
                 ObjectCount = c;
-                // Parallel.For(0, c, x => ProcessObject(x));
+                Parallel.For(0, c, x => ProcessObject(x));
 
                 if (PlayerGuidIsVehicle)
                 {
@@ -439,6 +413,9 @@ namespace AmeisenBotX.Core.Data
             OnObjectUpdateComplete?.Invoke(wowObjects);
         }
 
+        /// <summary>
+        /// Saves all interesting points in the db, for example herbs, ores and mailboxes.
+        /// </summary>
         private void CachePois()
         {
             IEnumerable<WowGameobject> wowGameobjects = wowObjects.OfType<WowGameobject>();
@@ -524,6 +501,10 @@ namespace AmeisenBotX.Core.Data
             }
         }
 
+        /// <summary>
+        /// Process the pushed game info that we receive from the EndScene hook.
+        /// </summary>
+        /// <param name="gameInfo"></param>
         private void HookManagerOnGameInfoPush(GameInfo gameInfo)
         {
             if (Player != null)
@@ -532,6 +513,65 @@ namespace AmeisenBotX.Core.Data
             }
 
             IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
+        }
+
+        /// <summary>
+        /// Process a wow object pointer into a full object. Object will be placed
+        /// in "wowObjects", pointers will be taken from "wowObjectPointers".
+        /// </summary>
+        /// <param name="i">Index of the object</param>
+        private void ProcessObject(int i)
+        {
+            IntPtr ptr = wowObjectPointers[i];
+
+            if (ptr != IntPtr.Zero
+                && WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectType), out WowObjectType type)
+                && WowInterface.XMemory.Read(IntPtr.Add(ptr, (int)WowInterface.OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
+            {
+                WowObject obj = type switch
+                {
+                    WowObjectType.Container => new WowContainer(ptr, type, descriptorAddress),
+                    WowObjectType.Corpse => new WowCorpse(ptr, type, descriptorAddress),
+                    WowObjectType.Item => new WowItem(ptr, type, descriptorAddress),
+                    WowObjectType.Dynobject => new WowDynobject(ptr, type, descriptorAddress),
+                    WowObjectType.Gameobject => new WowGameobject(ptr, type, descriptorAddress),
+                    WowObjectType.Player => new WowPlayer(ptr, type, descriptorAddress),
+                    WowObjectType.Unit => new WowUnit(ptr, type, descriptorAddress),
+                    _ => new WowObject(ptr, type, descriptorAddress),
+                };
+
+                obj.Update(WowInterface);
+
+                if (type == WowObjectType.Unit || type == WowObjectType.Player)
+                {
+                    if (obj.Guid == PlayerGuid)
+                    {
+                        PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer);
+
+                        if (!PlayerGuidIsVehicle)
+                        {
+                            if (WowInterface.XMemory.Read(WowInterface.OffsetList.ComboPoints, out byte comboPoints))
+                            {
+                                ((WowPlayer)obj).ComboPoints = comboPoints;
+                            }
+
+                            Player = (WowPlayer)obj;
+                            Vehicle = null;
+                        }
+                        else
+                        {
+                            Vehicle = (WowUnit)obj;
+                        }
+                    }
+
+                    if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
+                    if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
+                    if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
+                    if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
+                }
+
+                wowObjects[i] = obj;
+            }
         }
 
         private ulong ReadLeaderGuid()

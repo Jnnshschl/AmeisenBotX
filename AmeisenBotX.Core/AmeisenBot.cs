@@ -294,7 +294,7 @@ namespace AmeisenBotX.Core
         }
 
         /// <summary>
-        /// Starts the bots engine, only call this once, use Pause() and 
+        /// Starts the bots engine, only call this once, use Pause() and
         /// Resume() to control the execution of the engine afterwards
         /// </summary>
         public void Start()

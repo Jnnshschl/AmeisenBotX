@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     if (StateMachine.LastDiedMap.IsDungeonMap())
                     {
                         // when we died in a dungeon, we need to return to its portal
-                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.DeathEntrancePosition;
+                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.Profile.WorldEntry;
                     }
                     else
                     {

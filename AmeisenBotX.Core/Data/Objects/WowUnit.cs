@@ -206,14 +206,14 @@ namespace AmeisenBotX.Core.Data.Objects
             return Auras != null && Auras.Any(e => e.Name.Equals(auraName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public bool IsFriendyTo(WowInterface wowInterface, WowPlayer player)
+        public bool IsFriendyTo(WowInterface wowInterface, WowUnit unit)
         {
-            return wowInterface.HookManager.WowGetUnitReaction(this, player) == WowUnitReaction.Friendly;
+            return wowInterface.HookManager.WowGetUnitReaction(this, unit) == WowUnitReaction.Friendly;
         }
 
-        public bool IsHostileTo(WowInterface wowInterface, WowPlayer player)
+        public bool IsHostileTo(WowInterface wowInterface, WowUnit unit)
         {
-            return wowInterface.HookManager.WowGetUnitReaction(this, player) == WowUnitReaction.Hostile;
+            return wowInterface.HookManager.WowGetUnitReaction(this, unit) == WowUnitReaction.Hostile;
         }
 
         public bool IsInMeleeRange(WowUnit wowUnit)
@@ -221,9 +221,9 @@ namespace AmeisenBotX.Core.Data.Objects
             return wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
         }
 
-        public bool IsNeutralTo(WowInterface wowInterface, WowPlayer player)
+        public bool IsNeutralTo(WowInterface wowInterface, WowUnit unit)
         {
-            return wowInterface.HookManager.WowGetUnitReaction(this, player) == WowUnitReaction.Neutral;
+            return wowInterface.HookManager.WowGetUnitReaction(this, unit) == WowUnitReaction.Neutral;
         }
 
         public override string ToString()

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
-using AmeisenBotX.BehaviorTree.Interfaces;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
@@ -22,72 +21,73 @@ namespace AmeisenBotX.Core.Fsm.States
             new ForgeOfSoulsDeathRoute()
         };
 
+        private ulong playerToFollowGuid = 0;
+
         public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            Blackboard = new(wowInterface);
-
             DungeonSelector = new
             (
-                (b) => Config.DungeonUsePartyMode,
-                new Selector<GhostBlackboard>
+                () => Config.DungeonUsePartyMode,
+                new Selector
                 (
-                    (b) => WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
-                    new Leaf<GhostBlackboard>(RunToDungeonProfileEntry),
-                    new Selector<GhostBlackboard>
+                    () => WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
+                    new Leaf(RunToDungeonProfileEntry),
+                    new Selector
                     (
-                        (b) => IsUnitToFollowNear(out b.playerToFollowGuid),
-                        new Leaf<GhostBlackboard>(FollowNearestUnit),
-                        new Leaf<GhostBlackboard>(RunToCorpsePositionAndSearchForPortals)
+                        () => IsUnitToFollowNear(out playerToFollowGuid),
+                        new Leaf(FollowNearestUnit),
+                        new Leaf(RunToCorpsePositionAndSearchForPortals)
                     )
                 ),
-                new Selector<GhostBlackboard>
+                new Selector
                 (
-                    (b) => WowInterface.DungeonEngine.DeathEntrancePosition != default,
-                    new Leaf<GhostBlackboard>(RunToDungeonEntry),
-                    new Leaf<GhostBlackboard>(RunToCorpsePositionAndSearchForPortals)
+                    () => WowInterface.DungeonEngine.Profile.WorldEntry != default,
+                    new Leaf(RunToDungeonEntry),
+                    new Leaf(RunToCorpsePositionAndSearchForPortals)
                 )
             );
 
             BehaviorTree = new
             (
-                new Selector<GhostBlackboard>
+                new Selector
                 (
-                    (b) => WowInterface.ObjectManager.MapId.IsBattlegroundMap(),
-                    new Leaf<GhostBlackboard>((b) =>
+                    () => WowInterface.ObjectManager.MapId.IsBattlegroundMap(),
+                    new Leaf(() =>
                     {
                         WowInterface.MovementEngine.StopMovement();
                         return BehaviorTreeStatus.Ongoing;
                     }),
-                    new Selector<GhostBlackboard>
+                    new Selector
                     (
-                        (b) => UseStaticPaths(b),
-                        new Leaf<GhostBlackboard>(FollowStaticPath),
-                        new Selector<GhostBlackboard>
+                        () => CanUseStaticPaths(),
+                        new Leaf(FollowStaticPath),
+                        new Selector
                         (
-                            (b) => StateMachine.LastDiedMap.IsDungeonMap(),
+                            () => StateMachine.LastDiedMap.IsDungeonMap(),
                             DungeonSelector,
-                            new Leaf<GhostBlackboard>(RunToCorpseAndRetrieveIt)
+                            new Leaf(RunToCorpseAndRetrieveIt)
                         )
                     )
-                ),
-                Blackboard,
-                TimeSpan.FromSeconds(1)
+                )
             );
         }
 
-        public bool NeedToEnterPortal { get; private set; }
+        private AmeisenBotBehaviorTree BehaviorTree { get; }
 
-        public TimegatedEvent PortalSearchEvent { get; private set; }
+        private Vector3 CorpsePosition { get; set; }
 
-        private AmeisenBotBehaviorTree<GhostBlackboard> BehaviorTree { get; }
+        private Selector DungeonSelector { get; }
 
-        private GhostBlackboard Blackboard { get; set; }
+        private bool HasSearchedStaticRoutes { get; set; }
 
-        private Selector<GhostBlackboard> DungeonSelector { get; }
+        private IEnumerable<WowGameobject> NearPortals { get; set; }
+
+        private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
+
+        private IStaticDeathRoute StaticRoute { get; set; }
 
         public override void Enter()
         {
-            Blackboard = new(WowInterface);
         }
 
         public override void Execute()
@@ -98,20 +98,61 @@ namespace AmeisenBotX.Core.Fsm.States
                 return;
             }
 
+            NearPortals = WowInterface.ObjectManager.WowObjects
+                .OfType<WowGameobject>()
+                .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
+                         || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
+
+            if (WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))
+            {
+                CorpsePosition = corpsePosition;
+            }
+
             BehaviorTree.Tick();
         }
 
         public override void Leave()
         {
             WowInterface.Player.IsGhost = false;
-            NeedToEnterPortal = false;
-            Blackboard.HasSearchedStaticRoutes = false;
-            Blackboard.StaticRoute = null;
+            HasSearchedStaticRoutes = false;
+            StaticRoute = null;
         }
 
-        private BehaviorTreeStatus FollowNearestUnit(GhostBlackboard blackboard)
+        /// <summary>
+        /// This method searches for static death routes, this is needed when pathfinding
+        /// cannot find a good route from the graveyard to th dungeon entry. For example
+        /// the ICC dungeons are only reachable by flying, its easier to use static routes.
+        /// </summary>
+        /// <returns>True when a static path can be used, false if not</returns>
+        private bool CanUseStaticPaths()
         {
-            WowPlayer player = blackboard.PlayerToFollow;
+            if (!HasSearchedStaticRoutes)
+            {
+                HasSearchedStaticRoutes = true;
+
+                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, WowInterface.DungeonEngine.Profile.WorldEntry));
+
+                if (staticRoute != null)
+                {
+                    StaticRoute = staticRoute;
+                }
+                else
+                {
+                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, CorpsePosition));
+
+                    if (staticRoute != null)
+                    {
+                        StaticRoute = staticRoute;
+                    }
+                }
+            }
+
+            return StaticRoute != null;
+        }
+
+        private BehaviorTreeStatus FollowNearestUnit()
+        {
+            WowPlayer player = PlayerToFollow;
 
             if (WowInterface.Player.Position.GetDistance(player.Position) > Config.MinFollowDistance)
             {
@@ -121,12 +162,38 @@ namespace AmeisenBotX.Core.Fsm.States
             return BehaviorTreeStatus.Ongoing;
         }
 
-        private bool IsUnitOutOfRange(WowPlayer playerToFollow)
+        private BehaviorTreeStatus FollowStaticPath()
         {
-            double distance = playerToFollow.Position.GetDistance(WowInterface.Player.Position);
+            Vector3 nextPosition = StaticRoute.GetNextPoint(WowInterface.Player.Position);
+
+            if (nextPosition != Vector3.Zero)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, nextPosition);
+                return BehaviorTreeStatus.Ongoing;
+            }
+            else
+            {
+                // we should be in the dungeon now
+                return BehaviorTreeStatus.Ongoing;
+            }
+        }
+
+        /// <summary>
+        /// Check wether the unit is out of range based on the config entries "MinFollowDistance" and "MaxFollowDistance".
+        /// </summary>
+        /// <param name="player">Player to check</param>
+        /// <returns></returns>
+        private bool IsUnitOutOfRange(WowPlayer player)
+        {
+            double distance = player.Position.GetDistance(WowInterface.Player.Position);
             return distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance;
         }
 
+        /// <summary>
+        /// This method tries to find anyone that we can follow based on the config entries set.
+        /// </summary>
+        /// <param name="guid">Guid of the found entity</param>
+        /// <returns>True when a valid unit has been found, false if not</returns>
         private bool IsUnitToFollowNear(out ulong guid)
         {
             IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
@@ -184,11 +251,11 @@ namespace AmeisenBotX.Core.Fsm.States
             }
         }
 
-        private BehaviorTreeStatus RunToCorpseAndRetrieveIt(GhostBlackboard blackboard)
+        private BehaviorTreeStatus RunToCorpseAndRetrieveIt()
         {
-            if (WowInterface.Player.Position.GetDistance(blackboard.CorpsePosition) > Config.GhostResurrectThreshold)
+            if (WowInterface.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, blackboard.CorpsePosition);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CorpsePosition);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -198,108 +265,35 @@ namespace AmeisenBotX.Core.Fsm.States
             }
         }
 
-        private BehaviorTreeStatus RunToCorpsePositionAndSearchForPortals(GhostBlackboard blackboard)
+        private BehaviorTreeStatus RunToCorpsePositionAndSearchForPortals()
         {
-            Vector3 upliftedPosition = blackboard.CorpsePosition;
+            // we need to uplift the corpse to ground level because
+            // blizz decided its good to place the corpse -100000m
+            // below the dungeon entry when a player dies inside
+            Vector3 upliftedPosition = CorpsePosition;
+
+            // TODO: get real ground level from maps
             upliftedPosition.Z = 0f;
-            return RunToAndExecute(upliftedPosition, () => RunToNearestPortal(blackboard));
+
+            return RunToAndExecute(upliftedPosition, () => RunToNearestPortal());
         }
 
-        private bool UseStaticPaths(GhostBlackboard blackboard)
+        private BehaviorTreeStatus RunToDungeonEntry()
         {
-            // search for static death routes
-            if (!blackboard.HasSearchedStaticRoutes)
-            {
-                blackboard.HasSearchedStaticRoutes = true;
-
-                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, WowInterface.DungeonEngine.DeathEntrancePosition));
-
-                if (staticRoute != null)
-                {
-                    blackboard.StaticRoute = staticRoute;
-                }
-                else
-                {
-                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, blackboard.CorpsePosition));
-
-                    if (staticRoute != null)
-                    {
-                        blackboard.StaticRoute = staticRoute;
-                    }
-                }
-            }
-
-            return blackboard.StaticRoute != null;
+            return RunToAndExecute(WowInterface.DungeonEngine.Profile.WorldEntry, () => RunToNearestPortal());
         }
 
-        private BehaviorTreeStatus FollowStaticPath(GhostBlackboard blackboard)
-        {
-            Vector3 nextPosition = blackboard.StaticRoute.GetNextPoint(WowInterface.Player.Position);
-
-            if (nextPosition != Vector3.Zero)
-            {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, nextPosition);
-                return BehaviorTreeStatus.Ongoing;
-            }
-            else
-            {
-                // we should be in the dungeon now
-                return BehaviorTreeStatus.Ongoing;
-            }
-        }
-
-        private BehaviorTreeStatus RunToDungeonEntry(GhostBlackboard blackboard)
-        {
-
-            return RunToAndExecute(WowInterface.DungeonEngine.DeathEntrancePosition, () => RunToNearestPortal(blackboard));
-        }
-
-        private BehaviorTreeStatus RunToDungeonProfileEntry(GhostBlackboard blackboard)
+        private BehaviorTreeStatus RunToDungeonProfileEntry()
         {
             Vector3 position = WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap).WorldEntry;
-            return RunToAndExecute(position, () => RunToNearestPortal(blackboard));
+            return RunToAndExecute(position, () => RunToNearestPortal());
         }
 
-        private void RunToNearestPortal(GhostBlackboard blackboard)
+        private void RunToNearestPortal()
         {
-            if (blackboard.NearPortals.Any())
+            if (NearPortals.Any())
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.Player.Position, blackboard.NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).First().Position, 4f));
-            }
-        }
-
-        private class GhostBlackboard : IBlackboard
-        {
-            public ulong playerToFollowGuid = 0;
-
-            public GhostBlackboard(WowInterface wowInterface)
-            {
-                WowInterface = wowInterface;
-            }
-
-            public bool HasSearchedStaticRoutes { get; set; }
-
-            public IStaticDeathRoute StaticRoute { get; set; }
-
-            public Vector3 CorpsePosition { get; private set; }
-
-            public IEnumerable<WowGameobject> NearPortals { get; private set; }
-
-            public WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
-
-            private WowInterface WowInterface { get; }
-
-            public void Update()
-            {
-                NearPortals = WowInterface.ObjectManager.WowObjects
-                    .OfType<WowGameobject>()
-                    .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
-                             || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
-
-                if (WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))
-                {
-                    CorpsePosition = corpsePosition;
-                }
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.Player.Position, NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).First().Position, 4f));
             }
         }
     }

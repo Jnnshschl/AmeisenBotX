@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     .FirstOrDefault();
 
                 // Kill enemies in the path
-                if (WowUnit != null && !WowInterface.CombatClass.IsTargetAttackable(WowUnit))
+                if (WowUnit != null && !WowInterface.Player.IsHostileTo(WowInterface, WowUnit))
                 {
                     var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
                     WowInterface.Player.Position, WowUnit.Position);
