@@ -1,18 +1,14 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
 {
     public abstract class StaticPathDeathRoute : IStaticDeathRoute
     {
-        private int CurrentNode { get; set; } = 0;
-
         protected abstract List<Vector3> Path { get; }
+
+        private int CurrentNode { get; set; } = 0;
 
         public Vector3 GetNextPoint(Vector3 playerPosition)
         {
