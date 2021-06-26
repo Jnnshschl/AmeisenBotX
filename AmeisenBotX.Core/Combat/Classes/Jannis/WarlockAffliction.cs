@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(TargetManagerDps))
+            if (SelectTarget(TargetProviderDps))
             {
                 if (PetManager.Tick()) { return; }
 

@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(TargetManagerDps))
+            if (SelectTarget(TargetProviderDps))
             {
                 double distanceToTarget = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
 

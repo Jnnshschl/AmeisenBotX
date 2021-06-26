@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (SelectTarget(TargetManagerTank))
+            if (SelectTarget(TargetProviderTank))
             {
                 if ((WowInterface.Player.IsFleeing
                     || WowInterface.Player.IsDazed

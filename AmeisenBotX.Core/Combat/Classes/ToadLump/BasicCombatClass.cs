@@ -474,11 +474,11 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         public InterruptManager TargetInterruptManager { get; private set; }
 
-        public TargetManager TargetManagerDps { get; private set; }
+        public ITargetProvider TargetManagerDps { get; private set; }
 
-        public TargetManager TargetManagerHeal { get; private set; }
+        public ITargetProvider TargetManagerHeal { get; private set; }
 
-        public TargetManager TargetManagerTank { get; private set; }
+        public ITargetProvider TargetManagerTank { get; private set; }
 
         public abstract bool UseAutoAttacks { get; }
 
@@ -695,9 +695,9 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
             return false;
         }
 
-        protected bool SelectTarget(TargetManager targetManager)
+        protected bool SelectTarget(ITargetProvider targetProvider)
         {
-            if (targetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
+            if (targetProvider.Get(out IEnumerable<WowUnit> targetToTarget))
             {
                 WowUnit closestUnit = targetToTarget.OrderBy(value => value.Position.GetDistance(WowInterface.Player.Position)).First();
                 ulong guid = closestUnit.Guid;

@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
             }
-            else if (SelectTarget(TargetManagerDps))
+            else if (SelectTarget(TargetProviderDps))
             {
                 if ((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
                     && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
@@ -150,7 +150,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
             {
                 WowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.HasBuffByName(beaconOfLightSpell));
 

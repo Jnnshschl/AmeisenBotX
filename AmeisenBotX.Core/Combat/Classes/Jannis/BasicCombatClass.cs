@@ -428,9 +428,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             CooldownManager = new(WowInterface.CharacterManager.SpellBook.Spells);
             RessurrectionTargets = new();
 
-            TargetManagerDps = new(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerTank = new(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerHeal = new(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetProviderDps = new TargetManager(new DpsTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetProviderTank = new TargetManager(new TankTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
+            TargetProviderHeal = new TargetManager(new HealTargetSelectionLogic(WowInterface), TimeSpan.FromMilliseconds(250));
 
             MyAuraManager = new(WowInterface);
             TargetAuraManager = new(WowInterface);
@@ -444,7 +444,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public string Author { get; } = "Jannis";
 
-        public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetManagerDps.BlacklistedTargets; set => TargetManagerDps.BlacklistedTargets = value; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetProviderDps.BlacklistedTargets; set => TargetProviderDps.BlacklistedTargets = value; }
 
         public Dictionary<string, dynamic> C { get; set; }
 
@@ -474,7 +474,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public AuraManager MyAuraManager { get; private set; }
 
-        public IEnumerable<int> PriorityTargetDisplayIds { get => TargetManagerDps.PriorityTargets; set => TargetManagerDps.PriorityTargets = value; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get => TargetProviderDps.PriorityTargets; set => TargetProviderDps.PriorityTargets = value; }
 
         public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
 
@@ -484,11 +484,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public AuraManager TargetAuraManager { get; private set; }
 
-        public TargetManager TargetManagerDps { get; private set; }
+        public ITargetProvider TargetProviderDps { get; private set; }
 
-        public TargetManager TargetManagerHeal { get; private set; }
+        public ITargetProvider TargetProviderHeal { get; private set; }
 
-        public TargetManager TargetManagerTank { get; private set; }
+        public ITargetProvider TargetProviderTank { get; private set; }
 
         public abstract bool UseAutoAttacks { get; }
 
@@ -550,7 +550,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 && WowInterface.DungeonEngine.Profile.PriorityUnits != null
                 && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
             {
-                TargetManagerDps.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits;
+                TargetProviderDps.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits;
             }
 
             // Autoattacks
@@ -725,9 +725,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             return distance >= spell.MinRange && distance <= spell.MaxRange - 1.0;
         }
 
-        protected bool SelectTarget(TargetManager targetManager)
+        protected bool SelectTarget(ITargetProvider targetProvider)
         {
-            if (targetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
+            if (targetProvider.Get(out IEnumerable<WowUnit> targetToTarget))
             {
                 if (targetToTarget != null && targetToTarget.Any())
                 {

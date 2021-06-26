@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Utils
 {
-    public class TargetManager
+    public class TargetManager : ITargetProvider
     {
         public TargetManager(BasicTargetSelectionLogic targetSelectionLogic, TimeSpan minTargetSwitchTime)
         {
@@ -19,11 +19,11 @@ namespace AmeisenBotX.Core.Utils
 
         public IEnumerable<int> PriorityTargets { get => TargetSelectionLogic.PriorityTargets; set => TargetSelectionLogic.PriorityTargets = value; }
 
-        public BasicTargetSelectionLogic TargetSelectionLogic { get; }
+        private BasicTargetSelectionLogic TargetSelectionLogic { get; }
 
         private TimegatedEvent TargetSwitchEvent { get; set; }
 
-        public bool GetUnitToTarget(out IEnumerable<WowUnit> possibleTargets)
+        public bool Get(out IEnumerable<WowUnit> possibleTargets)
         {
             if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out possibleTargets))
             {

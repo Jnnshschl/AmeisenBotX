@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             WowInterface = wowInterface;
             ObjectManager = wowInterface.ObjectManager;
             HookManager = wowInterface.HookManager;
-            TargetManager = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
+            TargetProvider = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
 
         public string Author => "Kamel";
@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public bool TargetInLineOfSight { get; set; }
 
-        public TargetManager TargetManager { get; internal set; }
+        public ITargetProvider TargetProvider { get; internal set; }
 
         public string Version => "1.0";
 
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void HandleAttacking(WowUnit target)
         {
-            if (TargetManager.GetUnitToTarget(out IEnumerable<WowUnit> targetToTarget))
+            if (TargetProvider.Get(out IEnumerable<WowUnit> targetToTarget))
             {
                 ulong guid = targetToTarget.First().Guid;
 

@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 return;
             }
 
-            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.Player.ManaPercentage > 50) && SelectTarget(TargetManagerDps))
+            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.Player.ManaPercentage > 50) && SelectTarget(TargetProviderDps))
             {
                 if (WowInterface.Target.HasBuffByName(shadowWordPainSpell)
                     && TryCastSpell(shadowWordPainSpell, WowInterface.TargetGuid, true))
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
             {
                 WowUnit target = unitsToHeal.First();
 

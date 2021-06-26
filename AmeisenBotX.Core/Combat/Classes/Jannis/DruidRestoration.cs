@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if (SelectTarget(TargetManagerDps))
+                if (SelectTarget(TargetProviderDps))
                 {
                     if (!WowInterface.Target.HasBuffByName(moonfireSpell)
                         && TryCastSpell(moonfireSpell, WowInterface.TargetGuid, true))
@@ -161,7 +161,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetManagerHeal.GetUnitToTarget(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
             {
                 if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 3
                     && TryCastSpell(tranquilitySpell, 0, true))
