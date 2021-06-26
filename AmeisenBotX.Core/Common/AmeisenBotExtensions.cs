@@ -46,7 +46,8 @@ namespace AmeisenBotX.Core.Common
                 || map == WowMapId.TheSteamvault
 
                 || map == WowMapId.UtgardeKeep
-                || map == WowMapId.AzjolNerub;
+                || map == WowMapId.AzjolNerub
+                || map == WowMapId.TheForgeOfSouls;
         }
     }
 }

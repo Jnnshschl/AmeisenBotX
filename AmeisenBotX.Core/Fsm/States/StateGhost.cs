@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Fsm.States.StaticDeathRoutes;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
@@ -16,6 +17,11 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateGhost : BasicState
     {
+        private readonly List<IStaticDeathRoute> StaticDeathRoutes = new()
+        {
+            new ForgeOfSoulsDeathRoute()
+        };
+
         public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
             Blackboard = new(wowInterface);
@@ -54,9 +60,14 @@ namespace AmeisenBotX.Core.Fsm.States
                     }),
                     new Selector<GhostBlackboard>
                     (
-                        (b) => StateMachine.LastDiedMap.IsDungeonMap(),
-                        DungeonSelector,
-                        new Leaf<GhostBlackboard>(RunToCorpseAndRetrieveIt)
+                        (b) => UseStaticPaths(b),
+                        new Leaf<GhostBlackboard>(FollowStaticPath),
+                        new Selector<GhostBlackboard>
+                        (
+                            (b) => StateMachine.LastDiedMap.IsDungeonMap(),
+                            DungeonSelector,
+                            new Leaf<GhostBlackboard>(RunToCorpseAndRetrieveIt)
+                        )
                     )
                 ),
                 Blackboard,
@@ -94,6 +105,8 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             WowInterface.Player.IsGhost = false;
             NeedToEnterPortal = false;
+            Blackboard.HasSearchedStaticRoutes = false;
+            Blackboard.StaticRoute = null;
         }
 
         private BehaviorTreeStatus FollowNearestUnit(GhostBlackboard blackboard)
@@ -192,8 +205,52 @@ namespace AmeisenBotX.Core.Fsm.States
             return RunToAndExecute(upliftedPosition, () => RunToNearestPortal(blackboard));
         }
 
+        private bool UseStaticPaths(GhostBlackboard blackboard)
+        {
+            // search for static death routes
+            if (!blackboard.HasSearchedStaticRoutes)
+            {
+                blackboard.HasSearchedStaticRoutes = true;
+
+                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, WowInterface.DungeonEngine.DeathEntrancePosition));
+
+                if (staticRoute != null)
+                {
+                    blackboard.StaticRoute = staticRoute;
+                }
+                else
+                {
+                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, blackboard.CorpsePosition));
+
+                    if (staticRoute != null)
+                    {
+                        blackboard.StaticRoute = staticRoute;
+                    }
+                }
+            }
+
+            return blackboard.StaticRoute != null;
+        }
+
+        private BehaviorTreeStatus FollowStaticPath(GhostBlackboard blackboard)
+        {
+            Vector3 nextPosition = blackboard.StaticRoute.GetNextPoint(WowInterface.Player.Position);
+
+            if (nextPosition != Vector3.Zero)
+            {
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, nextPosition);
+                return BehaviorTreeStatus.Ongoing;
+            }
+            else
+            {
+                // we should be in the dungeon now
+                return BehaviorTreeStatus.Ongoing;
+            }
+        }
+
         private BehaviorTreeStatus RunToDungeonEntry(GhostBlackboard blackboard)
         {
+
             return RunToAndExecute(WowInterface.DungeonEngine.DeathEntrancePosition, () => RunToNearestPortal(blackboard));
         }
 
@@ -219,6 +276,10 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 WowInterface = wowInterface;
             }
+
+            public bool HasSearchedStaticRoutes { get; set; }
+
+            public IStaticDeathRoute StaticRoute { get; set; }
 
             public Vector3 CorpsePosition { get; private set; }
 

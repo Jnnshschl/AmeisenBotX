@@ -51,8 +51,14 @@ namespace AmeisenBotX.Core.Dungeon
                         new Selector
                         (
                             "AreAllPlayersPresent",
-                            () => AreAllPlayersPresent(48.0f),
-                            new Leaf("FollowNodePath", () => FollowNodePath()),
+                            () => AreAllPlayersPresent(18.0f, 11.0f),
+                            new Selector
+                            (
+                                "IsAnyoneEating",
+                                () => WowInterface.ObjectManager.Partymembers.Any(e => e.HasBuffByName("Food") || e.HasBuffByName("Drink")),
+                                new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; }),
+                                new Leaf("FollowNodePath", () => FollowNodePath())
+                            ),
                             new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; })
                         ),
                         new Selector
@@ -68,7 +74,6 @@ namespace AmeisenBotX.Core.Dungeon
 
             BehaviorTree = new
             (
-                "DungeonBehaviorTree",
                 RootSelector
             );
         }
@@ -82,6 +87,8 @@ namespace AmeisenBotX.Core.Dungeon
         public Vector3 DeathPosition { get; private set; }
 
         public bool IDied { get; private set; }
+
+        public bool IsWaitingForGroup { get; private set; }
 
         public Vector3 LeaderFollowOffset { get; set; }
 
@@ -132,10 +139,10 @@ namespace AmeisenBotX.Core.Dungeon
         {
             Profile = profile;
 
-            // DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
-            // int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
+            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
+            int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
 
-            for (int i = 0; i < profile.Nodes.Count; ++i)
+            for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
             {
                 CurrentNodes.Enqueue(profile.Nodes[i]);
             }
@@ -174,16 +181,36 @@ namespace AmeisenBotX.Core.Dungeon
 
                 WowMapId.UtgardeKeep => new UtgardeKeepProfile(),
                 WowMapId.AzjolNerub => new AzjolNerubProfile(),
+                WowMapId.TheForgeOfSouls => new ForgeOfSoulsProfile(),
 
                 _ => null
             };
         }
 
-        private bool AreAllPlayersPresent(float distance)
+        private bool AreAllPlayersPresent(float distance, float distanceToStartRunning)
         {
-            return !WowInterface.ObjectManager.Partymembers.Any()
-                || WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.Player.Position, distance)
-                   .Count(e => !e.IsDead) >= WowInterface.ObjectManager.Partymembers.Count() - 1;
+            if (!WowInterface.ObjectManager.Partymembers.Any())
+            {
+                return true;
+            }
+
+            if (IsWaitingForGroup)
+            {
+                distance = distanceToStartRunning;
+            }
+
+            int nearPlayers = WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.Player.Position, distance).Count(e => !e.IsDead);
+
+            if (nearPlayers >= WowInterface.ObjectManager.Partymembers.Count() - 1)
+            {
+                IsWaitingForGroup = false;
+                return true;
+            }
+            else
+            {
+                IsWaitingForGroup = true;
+                return false;
+            }
         }
 
         private BehaviorTreeStatus ExitDungeon()
