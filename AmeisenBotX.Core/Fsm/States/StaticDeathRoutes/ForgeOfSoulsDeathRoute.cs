@@ -1,11 +1,12 @@
-﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
 {
     public class ForgeOfSoulsDeathRoute : StaticPathDeathRoute
     {
+        protected override Vector3 DeathPoint { get; } = new(5670, 2003, -100000);
+
         protected override List<Vector3> Path { get; } = new()
         {
             new(6447, 2061, 564),

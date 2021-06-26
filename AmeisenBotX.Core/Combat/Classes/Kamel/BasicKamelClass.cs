@@ -31,9 +31,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         #endregion Race Spells
 
-
-
         #region Shaman
+
         public const string ancestralSpiritSpell = "Ancestral Spirit";
 
         #endregion Shaman

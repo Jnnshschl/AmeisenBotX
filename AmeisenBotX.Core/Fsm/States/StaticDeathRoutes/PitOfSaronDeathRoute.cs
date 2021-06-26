@@ -5,6 +5,8 @@ namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
 {
     public class PitOfSaronDeathRoute : StaticPathDeathRoute
     {
+        protected override Vector3 DeathPoint { get; } = new(5592, 2010, 514);
+
         protected override List<Vector3> Path { get; } = new()
         {
             new(6447, 2061, 564),
@@ -87,6 +89,7 @@ namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
             new(5616, 2031, 799),
             new(5605, 2022, 798),
             new(5596, 2014, 798),
+            new(5587, 2005, 798),
         };
     }
 }

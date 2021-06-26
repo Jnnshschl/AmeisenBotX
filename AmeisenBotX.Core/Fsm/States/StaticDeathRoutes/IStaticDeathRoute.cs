@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
     {
         Vector3 GetNextPoint(Vector3 playerPosition);
 
-        void Init();
+        void Init(Vector3 playerPosition);
 
         bool IsUseable(WowMapId mapId, Vector3 start, Vector3 end);
     }

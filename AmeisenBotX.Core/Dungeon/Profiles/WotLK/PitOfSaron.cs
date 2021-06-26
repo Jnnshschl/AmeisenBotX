@@ -276,7 +276,7 @@ namespace AmeisenBotX.Core.Dungeon.Profiles.WotLK
 
         public int RequiredLevel { get; } = 80;
 
-        public Vector3 WorldEntry { get; } = new(5675, 1997, 798);
+        public Vector3 WorldEntry { get; } = new(5587, 2005, 798);
 
         public WowMapId WorldEntryMapId { get; } = WowMapId.Northrend;
     }

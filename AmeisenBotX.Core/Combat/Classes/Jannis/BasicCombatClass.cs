@@ -498,11 +498,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public abstract WowClass WowClass { get; }
 
+        protected DateTime LastSpellCast { get; private set; }
+
         protected WowInterface WowInterface { get; }
 
         private AmeisenBotFsm StateMachine { get; }
-
-        protected DateTime LastSpellCast { get; private set; }
 
         public virtual void AttackTarget()
         {

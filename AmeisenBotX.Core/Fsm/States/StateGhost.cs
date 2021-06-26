@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            DungeonSelector = new
+            Selector dungeonSelector = new
             (
                 () => Config.DungeonUsePartyMode,
                 new Selector
@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Fsm.States
                         new Selector
                         (
                             () => StateMachine.LastDiedMap.IsDungeonMap(),
-                            DungeonSelector,
+                            dungeonSelector,
                             new Leaf(RunToCorpseAndRetrieveIt)
                         )
                     )
@@ -77,9 +77,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private Vector3 CorpsePosition { get; set; }
 
-        private Selector DungeonSelector { get; }
-
-        private bool HasSearchedStaticRoutes { get; set; }
+        private bool SearchedStaticRoutes { get; set; }
 
         private IEnumerable<WowGameobject> NearPortals { get; set; }
 
@@ -115,7 +113,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Leave()
         {
             WowInterface.Player.IsGhost = false;
-            HasSearchedStaticRoutes = false;
+            SearchedStaticRoutes = false;
             StaticRoute = null;
         }
 
@@ -127,15 +125,17 @@ namespace AmeisenBotX.Core.Fsm.States
         /// <returns>True when a static path can be used, false if not</returns>
         private bool CanUseStaticPaths()
         {
-            if (!HasSearchedStaticRoutes)
+            if (!SearchedStaticRoutes)
             {
-                HasSearchedStaticRoutes = true;
+                SearchedStaticRoutes = true;
 
-                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, WowInterface.DungeonEngine.Profile.WorldEntry));
+                Vector3 endPosition = WowInterface.DungeonEngine.Profile != null ? WowInterface.DungeonEngine.Profile.WorldEntry : CorpsePosition;
+                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, endPosition));
 
                 if (staticRoute != null)
                 {
                     StaticRoute = staticRoute;
+                    StaticRoute.Init(WowInterface.Player.Position);
                 }
                 else
                 {
@@ -144,6 +144,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     if (staticRoute != null)
                     {
                         StaticRoute = staticRoute;
+                        StaticRoute.Init(WowInterface.Player.Position);
                     }
                 }
             }
@@ -153,11 +154,9 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus FollowNearestUnit()
         {
-            WowPlayer player = PlayerToFollow;
-
-            if (WowInterface.Player.Position.GetDistance(player.Position) > Config.MinFollowDistance)
+            if (WowInterface.Player.Position.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, player.Position);
+                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, PlayerToFollow.Position);
             }
 
             return BehaviorTreeStatus.Ongoing;

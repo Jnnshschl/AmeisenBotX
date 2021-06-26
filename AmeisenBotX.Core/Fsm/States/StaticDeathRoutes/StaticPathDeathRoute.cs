@@ -1,11 +1,14 @@
 ﻿using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
 {
     public abstract class StaticPathDeathRoute : IStaticDeathRoute
     {
+        protected abstract Vector3 DeathPoint { get; }
+
         protected abstract List<Vector3> Path { get; }
 
         private int CurrentNode { get; set; } = 0;
@@ -22,18 +25,22 @@ namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
 
                 return Path[CurrentNode];
             }
+            else
+            {
+                CurrentNode = 0;
+            }
 
             return new(0, 0, 0);
         }
 
-        public void Init()
+        public void Init(Vector3 playerPosition)
         {
-            CurrentNode = 0;
+            CurrentNode = Path.IndexOf(Path.OrderBy(e=>e.GetDistance(playerPosition)).First());
         }
 
         public bool IsUseable(WowMapId mapId, Vector3 start, Vector3 end)
         {
-            return mapId == WowMapId.Northrend && ((start.GetDistance(Path[0]) < 10.0f && end.GetDistance(Path[^1]) < 10.0f) || end.GetDistance(new(5670, 2003, -100000)) < 16.0f);
+            return mapId == WowMapId.Northrend && ((start.GetDistance(Path[0]) < 4.0f && end.GetDistance(Path[^1]) < 4.0f) || end.GetDistance(DeathPoint) < 5.0f);
         }
     }
 }
