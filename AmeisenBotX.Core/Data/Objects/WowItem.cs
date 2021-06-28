@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Data.Objects
         {
             base.Update(wowInterface);
 
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem objPtr))
+            if (wowInterface.XMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem objPtr))
             {
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;

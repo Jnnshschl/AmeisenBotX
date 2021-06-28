@@ -69,10 +69,6 @@ namespace AmeisenBotX.Core.Fsm
 
         public BotState LastState { get; protected set; }
 
-        public TimegatedEvent MovementEvent { get; set; }
-
-        public string PlayerName { get; internal set; }
-
         public bool ShouldExit { get; set; }
 
         public BotState StateOverride { get; set; }

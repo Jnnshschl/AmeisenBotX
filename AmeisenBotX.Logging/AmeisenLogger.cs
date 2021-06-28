@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -23,7 +22,7 @@ namespace AmeisenBotX.Logging
             LogBuilder = new();
 
             LogFileWriter = new(1000);
-            LogFileWriter.Elapsed += LogFileWriter_Elapsed;
+            LogFileWriter.Elapsed += LogFileWriterTick;
 
             Enabled = true;
             ActiveLogLevel = LogLevel.Debug;
@@ -99,13 +98,10 @@ namespace AmeisenBotX.Logging
 
         public void Log(string tag, string log, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName] string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
-            Task.Run(() =>
+            if (logLevel <= ActiveLogLevel)
             {
-                if (logLevel <= ActiveLogLevel)
-                {
-                    LogBuilder.Enqueue(new(logLevel, $"{$"[{tag}]",-24} {log}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
-                }
-            });
+                LogBuilder.Enqueue(new(logLevel, $"{$"[{tag}]",-24} {log}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
+            }
         }
 
         public void Start()
@@ -118,10 +114,10 @@ namespace AmeisenBotX.Logging
         {
             Enabled = false;
             LogFileWriter.Enabled = false;
-            LogFileWriter_Elapsed(null, null);
+            LogFileWriterTick(null, null);
         }
 
-        private void LogFileWriter_Elapsed(object sender, ElapsedEventArgs e)
+        private void LogFileWriterTick(object sender, ElapsedEventArgs e)
         {
             // only start one timer tick at a time
             if (Interlocked.CompareExchange(ref timerBusy, 1, 0) == 1)

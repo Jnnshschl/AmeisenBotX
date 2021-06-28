@@ -43,8 +43,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public IdleActionManager IdleActionManager { get; set; }
 
-        public int QuestgiverGossipOptionCount { get; set; }
-
         private TimegatedEvent BagSlotCheckEvent { get; }
 
         private TimegatedEvent EatCheckEvent { get; }
@@ -68,11 +66,6 @@ namespace AmeisenBotX.Core.Fsm.States
                 if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
                 {
                     FirstStart = false;
-
-                    if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.PlayerName, Encoding.ASCII, out string playerName))
-                    {
-                        StateMachine.PlayerName = playerName;
-                    }
 
                     if (!WowInterface.EventHookManager.IsActive)
                     {

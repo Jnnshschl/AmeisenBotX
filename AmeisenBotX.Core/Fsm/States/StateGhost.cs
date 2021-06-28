@@ -77,11 +77,11 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private Vector3 CorpsePosition { get; set; }
 
-        private bool SearchedStaticRoutes { get; set; }
-
         private IEnumerable<WowGameobject> NearPortals { get; set; }
 
         private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
+
+        private bool SearchedStaticRoutes { get; set; }
 
         private IStaticDeathRoute StaticRoute { get; set; }
 
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                          || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
 
-            if (WowInterface.XMemory.ReadStruct(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))
+            if (WowInterface.XMemory.Read(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))
             {
                 CorpsePosition = corpsePosition;
             }

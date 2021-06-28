@@ -32,20 +32,6 @@ namespace AmeisenBotX.Test
         }
 
         [TestMethod]
-        public void CapitalizeTest()
-        {
-            string s = "lool";
-            Assert.AreEqual("Lool", BotUtils.Capitalize(s));
-        }
-
-        [TestMethod]
-        public void CleanStringTest()
-        {
-            string s = "lool\n\rhehexd";
-            Assert.AreEqual("loolhehexd", BotUtils.CleanString(s));
-        }
-
-        [TestMethod]
         public void FastRandomStringOnlyLettersTest()
         {
             List<char> numbers = new() { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
@@ -66,15 +52,6 @@ namespace AmeisenBotX.Test
         }
 
         [TestMethod]
-        public void GenerateUniqueStringTest()
-        {
-            for (int i = 1; i < 12; ++i)
-            {
-                Assert.IsTrue(BotUtils.GenerateUniqueString(i).Length > 0);
-            }
-        }
-
-        [TestMethod]
         public void IsValidJsonTest()
         {
             string valid = "{ \"test\":\"lool\" }";
@@ -89,25 +66,6 @@ namespace AmeisenBotX.Test
             Assert.IsTrue(BotUtils.IsValidJson(validA));
             Assert.IsFalse(BotUtils.IsValidJson(invalidA));
         }
-
-        // [TestMethod]
-        // public void MoveAheadTest()
-        // {
-        //     Vector3 pos = new Vector3(0, 1, 0);
-        //     Vector3 pos2 = new Vector3(0, 2, 0);
-        //
-        //     Vector3 aheadPos = BotUtils.MoveAhead(pos, pos2, 1);
-        //     Assert.AreEqual(new Vector3(0, 3, 0), aheadPos);
-        //
-        //     aheadPos = BotUtils.MoveAhead(pos, pos2, -1);
-        //     Assert.AreEqual(new Vector3(0, 1, 0), aheadPos);
-        //
-        //     aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), 1);
-        //     Assert.AreEqual(new Vector3(0, 2, 0), aheadPos);
-        //
-        //     aheadPos = BotUtils.MoveAhead(pos, (float)(Math.PI / 2.0), -1);
-        //     Assert.AreEqual(new Vector3(0, 0, 0), aheadPos);
-        // }
 
         [TestMethod]
         public void ObfuscateLuaTest()

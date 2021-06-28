@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes
         /// <inheritdoc cref="IStaticDeathRoute.Init(Vector3)"/>
         public void Init(Vector3 playerPosition)
         {
-            CurrentNode = Path.IndexOf(Path.OrderBy(e=>e.GetDistance(playerPosition)).First());
+            CurrentNode = Path.IndexOf(Path.OrderBy(e => e.GetDistance(playerPosition)).First());
         }
 
         /// <inheritdoc cref="IStaticDeathRoute.IsUseable(WowMapId, Vector3, Vector3)"/>

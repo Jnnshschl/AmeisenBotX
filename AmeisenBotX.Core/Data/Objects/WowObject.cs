@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public virtual void Update(WowInterface wowInterface)
         {
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress, out RawWowObject objPtr))
+            if (wowInterface.XMemory.Read(DescriptorAddress, out RawWowObject objPtr))
             {
                 EntryId = objPtr.EntryId;
                 Guid = objPtr.Guid;

@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
             Name = string.Empty;
 
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
+            if (wowInterface.XMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
             {
                 Class = (WowClass)(objPtr.Class);
                 CombatReach = objPtr.CombatReach;
@@ -280,7 +280,7 @@ namespace AmeisenBotX.Core.Data.Objects
             Auras = wowInterface.HookManager.WowGetUnitAuras(this, out int auraCount);
             AuraCount = auraCount;
 
-            if (wowInterface.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowUnitPosition), out Vector3 position))
+            if (wowInterface.XMemory.Read(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowUnitPosition), out Vector3 position))
             {
                 Position = position;
             }

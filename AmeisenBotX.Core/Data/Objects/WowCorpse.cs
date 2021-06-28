@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Data.Objects
         {
             base.Update(wowInterface);
 
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse objPtr))
+            if (wowInterface.XMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse objPtr))
             {
                 DisplayId = objPtr.DisplayId;
                 Owner = objPtr.Owner;

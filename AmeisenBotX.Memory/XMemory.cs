@@ -29,8 +29,6 @@ namespace AmeisenBotX.Memory
             Fasm = new();
         }
 
-        public int AllocationCount => MemoryAllocations.Count;
-
         public StringBuilder Fasm { get; private set; }
 
         public IntPtr MainThreadHandle { get; private set; }
@@ -41,6 +39,9 @@ namespace AmeisenBotX.Memory
 
         public IntPtr ProcessHandle { get; private set; }
 
+        /// <summary>
+        /// Get the amount of ReadProcessMemory calls since last time.
+        /// </summary>
         public ulong RpmCallCount
         {
             get
@@ -54,6 +55,9 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Get the amount of WriteProcessMemory calls since last time.
+        /// </summary>
         public ulong WpmCallCount
         {
             get
@@ -80,6 +84,11 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Returns the client window rect of the given window.
+        /// </summary>
+        /// <param name="windowHandle">Window handle</param>
+        /// <returns>The size of the client area of the window.</returns>
         public static Rect GetClientSize(IntPtr windowHandle)
         {
             Rect rect = new();
@@ -87,12 +96,21 @@ namespace AmeisenBotX.Memory
             return rect;
         }
 
+        /// <summary>
+        /// Get the current focused window handle.
+        /// </summary>
+        /// <returns>Window handle</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr GetForegroundWindow()
         {
             return Win32Imports.GetForegroundWindow();
         }
 
+        /// <summary>
+        /// Returns the position of the supplied window.
+        /// </summary>
+        /// <param name="windowHandle">Window handle</param>
+        /// <returns>Window position</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rect GetWindowPosition(IntPtr windowHandle)
         {
@@ -101,12 +119,22 @@ namespace AmeisenBotX.Memory
             return rect;
         }
 
+        /// <summary>
+        /// Focus the specified window.
+        /// </summary>
+        /// <param name="windowHandle">Window handle</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetForegroundWindow(IntPtr windowHandle)
         {
             Win32Imports.SetForegroundWindow(windowHandle);
         }
 
+        /// <summary>
+        /// Set the position of a window.
+        /// </summary>
+        /// <param name="windowHandle">Window handle</param>
+        /// <param name="rect">Position</param>
+        /// <param name="resizeWindow">Should we resize the window?</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
@@ -120,6 +148,13 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Start a process but dont focus its window.
+        /// </summary>
+        /// <param name="processCmd">Command to run</param>
+        /// <param name="processHandle">The native process handle of the started process</param>
+        /// <param name="threadHandle">The native thread handle of the started process</param>
+        /// <returns>Process object</returns>
         public static Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
         {
             StartupInfo startupInfo = new()
@@ -143,6 +178,12 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Allocate memory in the process.
+        /// </summary>
+        /// <param name="size">Allocation size in bytes</param>
+        /// <param name="address">Address of the allocation</param>
+        /// <returns>True if allocation was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllocateMemory(uint size, out IntPtr address)
         {
@@ -161,6 +202,9 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Disposes XMemory and frees all memory allocated by it.
+        /// </summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
@@ -171,6 +215,12 @@ namespace AmeisenBotX.Memory
             FreeAllMemory();
         }
 
+        /// <summary>
+        /// Injects the current Fasm buffer and clears it.
+        /// </summary>
+        /// <param name="address">Address where the fasm will be injected</param>
+        /// <param name="patchMemProtection">Whether we need to patch memory protection or nor. Useful when memory is write protected.</param>
+        /// <returns>True when the injection was successful</returns>
         public bool FasmInject(IntPtr address, bool patchMemProtection = false)
         {
             lock (fasmLock)
@@ -211,6 +261,9 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Frees all allocated memory in the process.
+        /// </summary>
         public void FreeAllMemory()
         {
             List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
@@ -219,8 +272,15 @@ namespace AmeisenBotX.Memory
             {
                 FreeMemory(memAllocs[i]);
             }
+
+            MemoryAllocations.Clear();
         }
 
+        /// <summary>
+        /// Free a memory allocation.
+        /// </summary>
+        /// <param name="address">Address of the allocation</param>
+        /// <returns>True if freeing was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool FreeMemory(IntPtr address)
         {
@@ -237,9 +297,16 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        public bool Init(Process wowProcess, IntPtr processHandle, IntPtr mainThreadHandle)
+        /// <summary>
+        /// Initializes XMemory. Recommended to use StartProcessNoActivate(), it will provide all variables needed.
+        /// </summary>
+        /// <param name="process">NET process class</param>
+        /// <param name="processHandle">Native process handle</param>
+        /// <param name="mainThreadHandle">Native thread handle</param>
+        /// <returns>True if everything was set up correctly, false if not</returns>
+        public bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
         {
-            Process = wowProcess;
+            Process = process;
 
             if (Process == null || Process.HasExited)
             {
@@ -263,12 +330,26 @@ namespace AmeisenBotX.Memory
             return true;
         }
 
+        /// <summary>
+        /// Change the memory protection of an area.
+        /// </summary>
+        /// <param name="address">Address to change</param>
+        /// <param name="size">Size of the area</param>
+        /// <param name="memoryProtection">New Protection</param>
+        /// <param name="oldMemoryProtection">Old protection</param>
+        /// <returns>True if it was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MemoryProtect(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection)
         {
             return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
         }
 
+        /// <summary>
+        /// Change and area of memory, by unprotecting it temporarily.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="address">Address to apply the patch</param>
+        /// <param name="data">Data of the patch</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
         {
@@ -281,17 +362,13 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Read<T>(IntPtr address, T* value) where T : unmanaged
-        {
-            if (RpmGateWay(address, value, sizeof(T)))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
+        /// <summary>
+        /// Read an unmanaged type from the processes memory.
+        /// </summary>
+        /// <typeparam name="T">Type to read, can be any unmanaged type</typeparam>
+        /// <param name="address">Address to read from</param>
+        /// <param name="value">Value</param>
+        /// <returns>True if reading was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Read<T>(IntPtr address, out T value) where T : unmanaged
         {
@@ -310,6 +387,13 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
+        /// <summary>
+        /// Read bytes from the processes memory.
+        /// </summary>
+        /// <param name="address">Address to read from</param>
+        /// <param name="size">Size of the byte array to read</param>
+        /// <param name="bytes">Bytes</param>
+        /// <returns>True if reading was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
         {
@@ -328,6 +412,14 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
+        /// <summary>
+        /// Read a string from the processes memory.
+        /// </summary>
+        /// <param name="address">Address to read from</param>
+        /// <param name="encoding">Encoding to use</param>
+        /// <param name="value">String</param>
+        /// <param name="lenght">May lenght of the string</param>
+        /// <returns>True if reading was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
         {
@@ -353,51 +445,35 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReadStruct<T>(IntPtr address, T* value) where T : unmanaged
-        {
-            if (RpmGateWay(address, value, sizeof(T)))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReadStruct<T>(IntPtr address, out T value) where T : unmanaged
-        {
-            int size = sizeof(T);
-
-            fixed (byte* pBuffer = stackalloc byte[size])
-            {
-                if (RpmGateWay(address, pBuffer, size))
-                {
-                    value = *(T*)pBuffer;
-                    return true;
-                }
-            }
-
-            value = default;
-            return false;
-        }
-
+        /// <summary>
+        /// Modifies the position of our parent window. See SetupAutoPosition() for more information.
+        /// </summary>
+        /// <param name="offsetX">Offset of the parent window</param>
+        /// <param name="offsetY">Offset of the parent window</param>
+        /// <param name="width">Width of the window</param>
+        /// <param name="height">Height of the window</param>
         public void ResizeParentWindow(int offsetX, int offsetY, int width, int height)
         {
-            if (Process == null)
-            {
-                return;
-            }
-
             SetWindowPos(Process.MainWindowHandle, IntPtr.Zero, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
+        /// <summary>
+        /// Resumes the main thread of the process.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
             NtResumeThread(MainThreadHandle, out _);
         }
 
+        /// <summary>
+        /// Makes the processes main window a parent of the supplied main window handle.
+        /// </summary>
+        /// <param name="mainWindowHandle">Master window</param>
+        /// <param name="offsetX">Offset of the parent window</param>
+        /// <param name="offsetY">Offset of the parent window</param>
+        /// <param name="width">Width of the window</param>
+        /// <param name="height">Height of the window</param>
         public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
         {
             if (Process.MainWindowHandle != IntPtr.Zero && mainWindowHandle != IntPtr.Zero)
@@ -411,18 +487,34 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Suspend the main thread of the process.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
             NtSuspendThread(MainThreadHandle, out _);
         }
 
+        /// <summary>
+        /// Write an unmanaged value to the processes memory.
+        /// </summary>
+        /// <typeparam name="T">Type to write, can be any unmanaged type.</typeparam>
+        /// <param name="address">Address to write to</param>
+        /// <param name="value">Value to write</param>
+        /// <returns>True if successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Write<T>(IntPtr address, T value) where T : unmanaged
         {
             return WpmGateWay(address, &value, sizeof(T));
         }
 
+        /// <summary>
+        /// Write bytes to the processes memory.
+        /// </summary>
+        /// <param name="address">Address to write to</param>
+        /// <param name="bytes">Bytes to write</param>
+        /// <returns>True if successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WriteBytes(IntPtr address, byte[] bytes)
         {
@@ -432,6 +524,12 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        /// <summary>
+        /// Set a memory region to 0.
+        /// </summary>
+        /// <param name="address">Address of the memory</param>
+        /// <param name="size">Size of the area</param>
+        /// <returns>True if successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ZeroMemory(IntPtr address, int size)
         {

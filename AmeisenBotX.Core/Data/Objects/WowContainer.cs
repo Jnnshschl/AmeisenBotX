@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Data.Objects
         {
             base.Update(wowInterface);
 
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer objPtr))
+            if (wowInterface.XMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer objPtr))
             {
                 SlotCount = objPtr.SlotCount;
             }

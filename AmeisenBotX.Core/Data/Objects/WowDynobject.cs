@@ -27,8 +27,8 @@ namespace AmeisenBotX.Core.Data.Objects
         {
             base.Update(wowInterface);
 
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject objPtr)
-                && wowInterface.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowDynobjectPosition), out Vector3 position))
+            if (wowInterface.XMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject objPtr)
+                && wowInterface.XMemory.Read(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowDynobjectPosition), out Vector3 position))
             {
                 Caster = objPtr.Caster;
                 Radius = objPtr.Radius;

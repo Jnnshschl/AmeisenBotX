@@ -36,8 +36,8 @@ namespace AmeisenBotX.Core.Data.Objects
         {
             base.Update(wowInterface);
 
-            if (wowInterface.XMemory.ReadStruct(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject objPtr)
-                && wowInterface.XMemory.ReadStruct(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowGameobjectPosition), out Vector3 position))
+            if (wowInterface.XMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject objPtr)
+                && wowInterface.XMemory.Read(IntPtr.Add(BaseAddress, (int)wowInterface.OffsetList.WowGameobjectPosition), out Vector3 position))
             {
                 GameobjectType = (WowGameobjectType)objPtr.GameobjectBytes1;
                 CreatedBy = objPtr.CreatedBy;
