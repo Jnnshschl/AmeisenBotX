@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Objects;
-using System;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
+using System;
 
 namespace AmeisenBotX.Core.Data.Objects
 {

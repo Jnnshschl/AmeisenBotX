@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -180,7 +180,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         TryCastSpell(beastialWrathSpell, WowInterface.Target.Guid, true);
                         TryCastSpell(rapidFireSpell, 0);
 
-                        if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Target.Position, 16.0f).Count() > 2
+                        if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Target.Position, 16.0f).Count() > 2
                             && TryCastSpell(multiShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;

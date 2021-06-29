@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Grinding.Objects;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Cache.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,8 +54,8 @@ namespace AmeisenBotX.Core.Grinding
         public void Execute()
         {
             if (WowInterface.CharacterManager.Equipment.Items.Any(e => e.Value.MaxDurability > 0
-            && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
-            && WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, PoiType.Repair, WowInterface.Player.Position, 4096.0f, out IEnumerable<Vector3> repairNpcs))
+                && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
+                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, PoiType.Repair, WowInterface.Player.Position, 4096.0f, out IEnumerable<Vector3> repairNpcs))
             {
                 GoToNpcAndRepair(repairNpcs);
                 return;
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Grinding
 
             double distanceToSpot = GrindingSpot.Position.GetDistance(WowInterface.Player.Position);
 
-            IEnumerable<WowUnit> nearUnits = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, GrindingSpot.Position, GrindingSpot.Radius)
+            IEnumerable<WowUnit> nearUnits = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, GrindingSpot.Position, GrindingSpot.Radius)
                 .Where(e => e.Level >= GrindingSpot.MinLevel
                          && e.Level <= GrindingSpot.MaxLevel
                          && !Blacklist.Contains(e.Guid)

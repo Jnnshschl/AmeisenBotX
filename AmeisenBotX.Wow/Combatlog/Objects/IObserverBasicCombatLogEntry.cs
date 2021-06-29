@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.CombatLog.Objects
+﻿namespace AmeisenBotX.Wow.Combatlog.Objects
 {
     public interface IObserverBasicCombatLogEntry
     {

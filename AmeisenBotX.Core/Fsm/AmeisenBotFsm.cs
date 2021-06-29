@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,12 +88,10 @@ namespace AmeisenBotX.Core.Fsm
         public void Execute()
         {
             // Override states
-            // --------------->
             if (CurrentState.Key != BotState.None
                 && CurrentState.Key != BotState.StartWow)
             {
                 // Handle Wow crash
-                // ---------------- >
                 if ((WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
                     && SetState(BotState.None))
                 {
@@ -106,6 +104,8 @@ namespace AmeisenBotX.Core.Fsm
                     WowInterface.EventHookManager.Stop();
                     return;
                 }
+
+                WowInterface.NewWowInterface.Tick();
 
                 AntiAfkEvent.Run();
 
@@ -123,8 +123,6 @@ namespace AmeisenBotX.Core.Fsm
                     }
                     else
                     {
-                        // WowInterface.ObjectManager.UpdateWowObjects();
-
                         if (WowInterface.Player != null)
                         {
                             WowInterface.MovementEngine.Execute();
@@ -154,7 +152,7 @@ namespace AmeisenBotX.Core.Fsm
                                 && !WowInterface.Globals.IgnoreCombat
                                 && !(Config.IgnoreCombatWhileMounted && WowInterface.Player.IsMounted)
                                 && (WowInterface.Globals.ForceCombat || WowInterface.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                || WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 100.0f).Any()))
+                                || WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 100.0f).Any()))
                             {
                                 if (SetState(BotState.Attacking, true))
                                 {

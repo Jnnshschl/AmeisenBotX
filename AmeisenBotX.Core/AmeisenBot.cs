@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Battleground.einTyp;
 using AmeisenBotX.Core.Battleground.Jannis;
@@ -7,16 +8,13 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Combat.Classes;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Db;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group;
-using AmeisenBotX.Core.Hook;
+using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
@@ -32,6 +30,9 @@ using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
+using AmeisenBotX.Wow.Cache;
+using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -46,9 +47,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Timer = System.Threading.Timer;
-using AmeisenBotX.Wow335a;
-using AmeisenBotX.Core.Hook.Modules;
-using AmeisenBotX.Common.Math;
 
 namespace AmeisenBotX.Core
 {
@@ -96,7 +94,7 @@ namespace AmeisenBotX.Core
 
             string dbPath = Path.Combine(DataFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
-            WowInterface.Db = LocalAmeisenBotDb.FromJson(WowInterface, dbPath);
+            WowInterface.Db = LocalAmeisenBotDb.FromJson(dbPath);
 
             WowInterface.Personality = new();
             WowInterface.ChatManager = new(Config, DataFolder);
@@ -251,7 +249,7 @@ namespace AmeisenBotX.Core
         {
             get
             {
-                float avgTickTime = MathF.Round(currentExecutionMs / (float)CurrentExecutionCount, 2);
+                float avgTickTime = MathF.Round(currentExecutionMs / CurrentExecutionCount, 2);
                 CurrentExecutionCount = 0;
                 return avgTickTime;
             }
@@ -914,7 +912,7 @@ namespace AmeisenBotX.Core
                     WowInterface.RconClient = new
                     (
                         Config.RconServerAddress,
-                        WowInterface.Player.Name,
+                        WowInterface.Db.GetUnitName(WowInterface.Player, out string name) ? name : "unknown",
                         WowInterface.Player.Race.ToString(),
                         WowInterface.Player.Gender.ToString(),
                         WowInterface.Player.Class.ToString(),

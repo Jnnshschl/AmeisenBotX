@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
-using AmeisenBotX.Core.Data.Db.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;

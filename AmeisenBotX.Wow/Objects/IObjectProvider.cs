@@ -24,6 +24,8 @@ namespace AmeisenBotX.Wow.Objects
 
         WowMapId MapId { get; }
 
+        Vector3 MeanGroupPosition { get; }
+
         int ObjectCount { get; set; }
 
         WowUnit Partyleader { get; }
@@ -53,14 +55,13 @@ namespace AmeisenBotX.Wow.Objects
         string ZoneName { get; }
 
         string ZoneSubName { get; }
-        Vector3 MeanGroupPosition { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowDynobject> GetAoeSpells(INewWowInterface i, Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
+        public IEnumerable<WowDynobject> GetAoeSpells(Func<WowUnit, WowUnit, WowUnitReaction> pred, Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
         {
             return WowObjects.OfType<WowDynobject>()
                 .Where(e => e.Position.GetDistance(position) < e.Radius + extends
-                && (!onlyEnemy || i.GetReaction(Player.BaseAddress, GetWowObjectByGuid<WowUnit>(e.Caster).BaseAddress) != WowUnitReaction.Friendly));
+                && (!onlyEnemy || pred(Player, GetWowObjectByGuid<WowUnit>(e.Caster)) != WowUnitReaction.Friendly));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -91,18 +92,18 @@ namespace AmeisenBotX.Wow.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(INewWowInterface i, Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Func<WowUnit, WowUnit, WowUnitReaction> pred, Vector3 position, float distance) where T : WowUnit
         {
-            return GetNearEnemies<T>(i, position, distance)
+            return GetNearEnemies<T>(pred, position, distance)
                 .Where(e => e.IsInCombat && (e.IsTaggedByMe || e.TargetGuid == Player.Guid || Partymembers.Any(e => e.Guid == e.Guid)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInPath<T>(INewWowInterface i, IEnumerable<Vector3> path, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInPath<T>(Func<WowUnit, WowUnit, WowUnitReaction> pred, IEnumerable<Vector3> path, float distance) where T : WowUnit
         {
             foreach (Vector3 pathPosition in path)
             {
-                IEnumerable<T> nearEnemies = GetNearEnemies<T>(i, pathPosition, distance);
+                IEnumerable<T> nearEnemies = GetNearEnemies<T>(pred, pathPosition, distance);
 
                 if (nearEnemies.Any())
                 {
@@ -114,29 +115,29 @@ namespace AmeisenBotX.Wow.Objects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(INewWowInterface i, Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Func<WowUnit, WowUnit, WowUnitReaction> pred, Vector3 position, float distance) where T : WowUnit
         {
-            return GetNearEnemies<T>(i, position, distance)
+            return GetNearEnemies<T>(pred, position, distance)
                 .Where(e => e.IsInCombat && (PartymemberGuids.Contains(e.TargetGuid) || PartyPetGuids.Contains(e.TargetGuid)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearEnemies<T>(INewWowInterface i, Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetNearEnemies<T>(Func<WowUnit, WowUnit, WowUnitReaction> pred, Vector3 position, float distance) where T : WowUnit
         {
             return WowObjects.OfType<T>()
                 .Where(e => !e.IsDead
                      && !e.IsNotAttackable
-                     && i.GetReaction(Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile
+                     && pred(Player, e) == WowUnitReaction.Hostile
                      && e.Position.GetDistance(position) < distance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearFriends<T>(INewWowInterface i, Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetNearFriends<T>(Func<WowUnit, WowUnit, WowUnitReaction> pred, Vector3 position, float distance) where T : WowUnit
         {
             return WowObjects.OfType<T>()
                 .Where(e => !e.IsDead
                          && !e.IsNotAttackable
-                         && i.GetReaction(Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Friendly
+                         && pred(Player, e) == WowUnitReaction.Friendly
                          && e.Position.GetDistance(position) < distance);
         }
 
@@ -154,12 +155,6 @@ namespace AmeisenBotX.Wow.Objects
         public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
         {
             return WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetWowUnitByName<T>(string name, StringComparison stringComparison = StringComparison.Ordinal) where T : WowUnit
-        {
-            return WowObjects.OfType<T>().FirstOrDefault(e => e.Name.Equals(name, stringComparison));
         }
     }
 }

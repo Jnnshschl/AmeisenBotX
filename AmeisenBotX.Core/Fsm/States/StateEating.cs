@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Core.Fsm.Enums;
+﻿using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
@@ -128,8 +128,8 @@ namespace AmeisenBotX.Core.Fsm.States
 
         internal bool NeedToEat()
         {
-            return ((WowInterface.Objects.Partyleader.Guid == 0
-                        || WowInterface.Player.Position.GetDistance(WowInterface.Objects.MeanGroupPosition) < 30.0f)
+            return WowInterface.Objects.Partyleader != null
+                && ((WowInterface.Objects.Partyleader.Guid == 0 || WowInterface.Player.Position.GetDistance(WowInterface.Objects.MeanGroupPosition) < 30.0f)
                     && (WowInterface.Player.HealthPercentage < Config.EatUntilPercent
                              && WowInterface.Player.HealthPercentage < 95.0
                              && WowInterface.Player.ManaPercentage < Config.DrinkUntilPercent

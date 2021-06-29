@@ -5,7 +5,6 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -15,6 +14,7 @@ using AmeisenBotX.Core.Utils.Aura;
 using AmeisenBotX.Core.Utils.TargetSelection;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -587,7 +587,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 return;
             }
 
-            if (InterruptManager.Tick(WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, IsMelee ? 5.0f : 30.0f)))
+            if (InterruptManager.Tick(WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, IsMelee ? 5.0f : 30.0f)))
             {
                 return;
             }
@@ -692,19 +692,22 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (groupPlayers.Any())
                 {
-                    WowPlayer player = groupPlayers.FirstOrDefault(e => !RessurrectionTargets.ContainsKey(e.Name) || RessurrectionTargets[e.Name] < DateTime.Now);
+                    WowPlayer player = groupPlayers.FirstOrDefault(e => WowInterface.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name) || RessurrectionTargets[name] < DateTime.Now);
 
                     if (player != null)
                     {
-                        if (!RessurrectionTargets.ContainsKey(player.Name))
+                        if (WowInterface.Db.GetUnitName(player, out string name))
                         {
-                            RessurrectionTargets.Add(player.Name, DateTime.Now + TimeSpan.FromSeconds(10));
-                            return TryCastSpell(spellName, player.Guid, true);
-                        }
+                            if (!RessurrectionTargets.ContainsKey(name))
+                            {
+                                RessurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
+                                return TryCastSpell(spellName, player.Guid, true);
+                            }
 
-                        if (RessurrectionTargets[player.Name] < DateTime.Now)
-                        {
-                            return TryCastSpell(spellName, player.Guid, true);
+                            if (RessurrectionTargets[name] < DateTime.Now)
+                            {
+                                return TryCastSpell(spellName, player.Guid, true);
+                            }
                         }
                     }
 
@@ -996,7 +999,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     if (castSuccessful == 1)
                     {
-                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.Target?.Name}\"", LogLevel.Verbose);
+                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.Target?.Guid}\"", LogLevel.Verbose);
                         IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }

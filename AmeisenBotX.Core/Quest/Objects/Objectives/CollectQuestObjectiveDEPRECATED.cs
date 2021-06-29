@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => Math.Round((double)CurrentItemAmount / (double)WantedItemAmount * 100.0, 1);
+        public double Progress => Math.Round(CurrentItemAmount / (double)WantedItemAmount * 100.0, 1);
 
         private int CurrentItemAmount => WowInterface.CharacterManager.Inventory.Items.Count(e => e.Id == ItemId);
 

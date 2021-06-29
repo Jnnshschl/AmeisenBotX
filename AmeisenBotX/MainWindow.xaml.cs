@@ -434,7 +434,7 @@ namespace AmeisenBotX
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
             // Generic labels
-            labelPlayerName.Content = AmeisenBot.WowInterface.Player.Name;
+            labelPlayerName.Content = AmeisenBot.WowInterface.Db.GetUnitName(AmeisenBot.WowInterface.Player, out string name) ? name : "unknown";
 
             labelMapName.Content = AmeisenBot.WowInterface.Objects.MapId.ToString();
             labelZoneName.Content = AmeisenBot.WowInterface.Objects.ZoneName;

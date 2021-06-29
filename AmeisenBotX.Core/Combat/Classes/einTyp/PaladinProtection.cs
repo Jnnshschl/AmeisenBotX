@@ -1,10 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -439,7 +438,7 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
                 return false;
             }
 
-            List<WowUnit> wowUnits = WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Neutral).ToList();
+            List<WowUnit> wowUnits = WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Friendly && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int areaToLookAt = grinding ? 100 : 50;
             bool inCombat = (target == null || target.IsDead || target.Health < 1) ? false : target.IsInCombat;

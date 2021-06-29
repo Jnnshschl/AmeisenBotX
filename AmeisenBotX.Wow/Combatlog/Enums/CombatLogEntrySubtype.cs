@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.CombatLog.Enums
+﻿namespace AmeisenBotX.Wow.Combatlog.Enums
 {
     public enum CombatLogEntrySubtype
     {

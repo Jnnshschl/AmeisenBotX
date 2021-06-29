@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (WowInterface.Target != null
                 && !WowInterface.Target.IsDead
                 && !WowInterface.Target.IsNotAttackable
-                && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) != WowUnitReaction.Friendly)
+                && WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) != WowUnitReaction.Friendly)
             {
                 WowUnit = WowInterface.Target;
             }

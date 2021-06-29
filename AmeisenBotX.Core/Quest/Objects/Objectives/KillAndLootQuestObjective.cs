@@ -1,17 +1,17 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Data.CombatLog.Enums;
-using AmeisenBotX.Core.Data.CombatLog.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Combatlog.Enums;
+using AmeisenBotX.Wow.Combatlog.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
-    public class KillAndLootQuestObjective : IQuestObjective, IObserverBasicCombatLogEntry
+    public class KillAndLootQuestObjective : IQuestObjective
     {
         public KillAndLootQuestObjective(WowInterface wowInterface, List<int> npcIds, int collectOrKillAmount, int questItemId, List<List<Vector3>> areas)
         {
@@ -97,21 +97,21 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 WowUnit = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && NpcIds.Contains(WowGuid.ToNpcId(e.Guid)) && !e.IsNotAttackable
-                                && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly)
+                                && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .Take(3)
                     .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.Objects.MapId, WowInterface.Player.Position, e.Position))
                     .FirstOrDefault();
 
                 // Kill enemies in the path
-                if (WowUnit != null && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowUnit.BaseAddress) == WowUnitReaction.Hostile)
+                if (WowUnit != null && WowInterface.Db.GetReaction(WowInterface.Player, WowUnit) == WowUnitReaction.Hostile)
                 {
                     IEnumerable<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.Objects.MapId,
                     WowInterface.Player.Position, WowUnit.Position);
 
                     if (path != null)
                     {
-                        IEnumerable<WowUnit> nearEnemies = WowInterface.Objects.GetEnemiesInPath<WowUnit>(WowInterface.NewWowInterface, path, 10.0f);
+                        IEnumerable<WowUnit> nearEnemies = WowInterface.Objects.GetEnemiesInPath<WowUnit>(WowInterface.Db.GetReaction, path, 10.0f);
 
                         if (nearEnemies.Any())
                         {

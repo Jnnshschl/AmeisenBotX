@@ -121,11 +121,11 @@ namespace AmeisenBotX.Wow335a.Objects
         ///<inheritdoc cref="IObjectManager.ZoneSubName"/>
         public string ZoneSubName { get; private set; }
 
+        private IOffsetList OffsetList { get; }
+
         private bool PlayerGuidIsVehicle { get; set; }
 
         private XMemory XMemory { get; }
-
-        private IOffsetList OffsetList { get; }
 
         ///<inheritdoc cref="IObjectManager.RefreshIsWorldLoaded"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -223,6 +223,11 @@ namespace AmeisenBotX.Wow335a.Objects
 
             OnObjectUpdateComplete?.Invoke(wowObjects);
         }
+
+        private static Func<int, string> SpellNamePredicate = (int spellId) =>
+        {
+            return 
+        };
 
         /// <summary>
         /// Process a wow object pointer into a full object. Object will be placed

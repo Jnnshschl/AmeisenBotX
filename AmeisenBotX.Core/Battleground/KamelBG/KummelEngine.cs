@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 else
                 {
                     FlagState = PICKED_UP;
-                    if (hasFlag || WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, FlagCarrier.BaseAddress) == WowUnitReaction.Friendly || WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, FlagCarrier.BaseAddress) == WowUnitReaction.Neutral)
+                    if (hasFlag || WowInterface.Db.GetReaction(WowInterface.Player, FlagCarrier) == WowUnitReaction.Friendly || WowInterface.Db.GetReaction(WowInterface.Player, FlagCarrier) == WowUnitReaction.Neutral)
                     {
                         FlagState |= OWN_TEAM_FLAG;
                         WowInterface.NewWowInterface.LuaSendChatMessage("/y We got it!");

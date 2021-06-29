@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 
-namespace AmeisenBotX.Core.Data.Db.Structs
+namespace AmeisenBotX.Wow.Cache.Structs
 {
     public struct StaticMailbox : ILikeUnit
     {

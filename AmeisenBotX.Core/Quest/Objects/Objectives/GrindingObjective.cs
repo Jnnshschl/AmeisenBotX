@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,8 +45,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 WowUnit = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
-                    .Where(e => !e.IsDead && !e.IsNotAttackable
-                                && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly)
+                    .Where(e => !e.IsDead && !e.IsNotAttackable && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 

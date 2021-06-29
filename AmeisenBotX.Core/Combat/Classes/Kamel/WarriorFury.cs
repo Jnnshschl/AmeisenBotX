@@ -3,8 +3,8 @@ using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,27 +13,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     internal class WarriorFury : BasicKamelClass
     {
-        private const string ShootSpell = "Shoot";
-
         private const string battleShoutSpell = "Battle Shout";
-
         private const string battleStanceSpell = "Battle Stance";
-
         private const string berserkerRageSpell = "Berserker Rage";
-
         private const string berserkerStanceSpell = "Berserker Stance";
-
         private const string bloodrageSpell = "Bloodrage";
 
         //Spells
         private const string bloodthirstSpell = "Bloodthirst";
 
         private const string chargeSpell = "Charge";
-
         private const string cleaveSpell = "Cleave";
-
         private const string commandingShoutSpell = "Commanding Shout";
-
         private const string deathWishSpell = "Death Wish";
 
         //Stances
@@ -46,7 +37,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string heroicFurySpell = "Heroic Fury";
         private const string heroicStrikeSpell = "Heroic Strike";
         private const string heroicThrowSpell = "Heroic Throw";
-        private const string ShatteringThrowSpell = "Shattering Throw";
         private const string interceptSpell = "Intercept";
         private const string intimidatingShoutSpell = "Intimidating Shout";
         private const string pummelSpell = "Pummel";
@@ -56,6 +46,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         //Buffs||Defensive||Enrage
         private const string retaliationSpell = "Retaliation";
 
+        private const string ShatteringThrowSpell = "Shattering Throw";
+        private const string ShootSpell = "Shoot";
         private const string slamSpell = "Slam";
         private const string victoryRushSpell = "Victory Rush";
         private const string whirlwindSpell = "Whirlwind";
@@ -102,11 +94,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             RendEvent = new(TimeSpan.FromSeconds(6));
             ExecuteEvent = new(TimeSpan.FromSeconds(1));
         }
-        //Time event
-        public TimegatedEvent RendEvent { get; private set; }
-        public TimegatedEvent ExecuteEvent { get; private set; }
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
-        public TimegatedEvent VictoryRushEvent { get; private set; }
 
         public override string Author => "Lukas";
 
@@ -116,11 +103,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Displayname => "Warrior Fury Final";
 
+        public TimegatedEvent ExecuteEvent { get; private set; }
+
         public override bool HandlesMovement => false;
+
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
 
         public override bool IsMelee => true;
 
         public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES, WowWeaponType.STAVES, WowWeaponType.DAGGERS });
+
+        //Time event
+        public TimegatedEvent RendEvent { get; private set; }
 
         public override WowRole Role => WowRole.Dps;
 
@@ -164,6 +158,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Version => "3.0";
 
+        public TimegatedEvent VictoryRushEvent { get; private set; }
+
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Warrior;
@@ -179,13 +175,49 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             StartAttack();
         }
 
+        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
+        {
+            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(stance))
+            {
+                stance = "Battle Stance";
+            }
+
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                if (WowInterface.Target != null)
+                {
+                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                    if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                    {
+                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                        {
+                            if (!WowInterface.Player.HasBuffByName(stance))
+                            {
+                                WowInterface.NewWowInterface.LuaCastSpell(stance);
+                                return true;
+                            }
+                            else
+                            {
+                                WowInterface.NewWowInterface.LuaCastSpell(spellName);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void StartAttack()
         {
             if (WowInterface.Target.Guid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
+                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
                 {
                     WowInterface.NewWowInterface.WowClearTarget();
                     return;
@@ -281,7 +313,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    IEnumerable<WowUnit> unitsNearPlayer = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 5);
+                    IEnumerable<WowUnit> unitsNearPlayer = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 5);
 
                     if (unitsNearPlayer != null)
                     {
@@ -354,41 +386,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 Targetselection();
             }
-        }
-        private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
-        {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(stance))
-            {
-                stance = "Battle Stance";
-            }
-
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                if (WowInterface.Target != null)
-                {
-                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                    if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
-                    {
-                        if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                        {
-                            if (!WowInterface.Player.HasBuffByName(stance))
-                            {
-                                WowInterface.NewWowInterface.LuaCastSpell(stance);
-                                return true;
-                            }
-                            else
-                            {
-                                WowInterface.NewWowInterface.LuaCastSpell(spellName);
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
         }
     }
 }

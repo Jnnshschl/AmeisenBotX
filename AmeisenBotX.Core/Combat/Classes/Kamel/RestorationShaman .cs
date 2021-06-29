@@ -2,8 +2,8 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     internal class RestorationShaman : BasicKamelClass
     {
-
         private const string Bloodlust = "Bloodlust";
 
         private const string CalloftheElementsSpell = "Call of the Elements";
@@ -191,6 +190,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             StartHeal();
         }
 
+        private void Shield()
+        {
+            if (!WowInterface.Player.HasBuffByName("Water Shield") && CustomCastSpellMana(watershieldSpell))
+            {
+                return;
+            }
+        }
+
         private void StartHeal()
         {
             // List<WowUnit> partyMemberToHeal = WowInterface.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
@@ -309,8 +316,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
                 if (TargetSelectEvent.Run())
                 {
-                    WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 30)
-                    .Where(e => e.IsInCombat && !e.IsNotAttackable && e.IsCasting && e.Name != "The Lich King" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
+                    WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 30)
+                    .Where(e => e.IsInCombat && !e.IsNotAttackable && e.IsCasting && WowInterface.Db.GetUnitName(WowInterface.Target, out string name) && name != "The Lich King" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
@@ -341,14 +348,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         //}
                     }
                 }
-            }
-        }
-
-        private void Shield()
-        {
-            if (!WowInterface.Player.HasBuffByName("Water Shield") && CustomCastSpellMana(watershieldSpell))
-            {
-                return;
             }
         }
     }

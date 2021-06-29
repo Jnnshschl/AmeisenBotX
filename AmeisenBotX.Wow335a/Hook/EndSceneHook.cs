@@ -6,7 +6,6 @@ using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -89,7 +88,7 @@ namespace AmeisenBotX.Wow335a.Hook
         private IntPtr GameInfoExecutedAddress { get; set; }
 
         /// <summary>
-        /// Integer tha will be set to 1 when we want to 
+        /// Integer tha will be set to 1 when we want to
         /// execute the LOS check.
         /// </summary>
         private IntPtr GameInfoExecuteLosCheckAddress { get; set; }
@@ -115,6 +114,8 @@ namespace AmeisenBotX.Wow335a.Hook
         /// code to be executed. Will be set to 0 when done.
         /// </summary>
         private IntPtr IntShouldExecute { get; set; }
+
+        private IOffsetList OffsetList { get; }
 
         /// <summary>
         /// Used to save the old render flags of wow.
@@ -155,8 +156,6 @@ namespace AmeisenBotX.Wow335a.Hook
         private IntPtr WowEndSceneAddress { get; set; }
 
         private XMemory XMemory { get; }
-
-        private IOffsetList OffsetList { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BotOverrideWorldLoadedCheck(bool status)
@@ -925,11 +924,11 @@ namespace AmeisenBotX.Wow335a.Hook
             if (rollType == 1)
             {
                 // first we need to check whether we can roll a need on this, otherwise the bot might not roll at all
-                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, 2) end");
+                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {rollType}) else RollOnLoot({rollId}, 2) end");
             }
             else
             {
-                LuaDoString($"RollOnLoot({rollId}, {(int)rollType})");
+                LuaDoString($"RollOnLoot({rollId}, {rollType})");
             }
         }
 
@@ -1257,71 +1256,12 @@ namespace AmeisenBotX.Wow335a.Hook
             return runes;
         }
 
-        public IEnumerable<RawWowAura> WowGetUnitAuras(IntPtr unitBase, out int auraCount)
-        {
-            if (XMemory.Read(IntPtr.Add(unitBase, (int)OffsetList.AuraCount1), out int auraCount1))
-            {
-                if (auraCount1 == -1)
-                {
-                    if (XMemory.Read(IntPtr.Add(unitBase, (int)OffsetList.AuraCount2), out int auraCount2)
-                        && auraCount2 > 0
-                        && XMemory.Read(IntPtr.Add(unitBase, (int)OffsetList.AuraTable2), out IntPtr auraTable))
-                    {
-                        auraCount = auraCount2;
-                        return ReadAuraTable(auraTable, auraCount2);
-                    }
-                    else
-                    {
-                        auraCount = 0;
-                    }
-                }
-                else
-                {
-                    auraCount = auraCount1;
-                    return ReadAuraTable(IntPtr.Add(unitBase, (int)OffsetList.AuraTable1), auraCount1);
-                }
-            }
-            else
-            {
-                auraCount = 0;
-            }
-
-            return Array.Empty<RawWowAura>();
-        }
-
         public int WowGetUnitReaction(IntPtr a, IntPtr b)
         {
-            // if (wowUnitA == null || wowUnitB == null)
-            // {
-            //     return reaction;
-            // }
-
-            // if (wowUnitA.FactionTemplate == wowUnitB.FactionTemplate)
-            // {
-            //     return WowUnitReaction.Friendly;
-            // }
-
-            // if (WowInterface.Db.TryGetReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, out WowUnitReaction cachedReaction))
-            // {
-            //     return cachedReaction;
-            // }
-
-            // if (wowUnitA.Health == 0 || wowUnitB.Health == 0 || wowUnitA.Guid == 0 || wowUnitB.Guid == 0)
-            // {
-            //     return reaction;
-            // }
-
-            // AmeisenLogger.I.Log("HookManager", $"Getting Reaction of {wowUnitA} and {wowUnitB}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("HookManager", $"Getting Reaction of {a} and {b}", LogLevel.Verbose);
 
             byte[] returnBytes = WowCallObjectFunction(a, OffsetList.FunctionUnitGetReaction, new() { b }, true);
-
-            if (returnBytes?.Length > 0)
-            {
-                return BitConverter.ToInt32(returnBytes, 0);
-                // WowInterface.Db.CacheReaction(wowUnitA.FactionTemplate, wowUnitB.FactionTemplate, reaction);
-            }
-
-            return 2;
+            return returnBytes?.Length > 0 ? BitConverter.ToInt32(returnBytes, 0) : 2;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1525,10 +1465,10 @@ namespace AmeisenBotX.Wow335a.Hook
                 // {
                 //     Vector3 playerPosition = WowInterface.Player.Position;
                 //     playerPosition.Z += 1.5f;
-                // 
+                //
                 //     Vector3 targetPosition = WowInterface.Target.Position;
                 //     targetPosition.Z += 1.5f;
-                // 
+                //
                 //     if (XMemory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
                 //     {
                 //         // run the los check if we have a target
@@ -1690,31 +1630,6 @@ namespace AmeisenBotX.Wow335a.Hook
         private string LuaGetCVar(string CVar)
         {
             return WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetCVar(\"{CVar}\");"), out string s) ? s : string.Empty;
-        }
-
-        private unsafe IEnumerable<RawWowAura> ReadAuraTable(IntPtr buffBase, int auraCount)
-        {
-            List<RawWowAura> auras = new();
-
-            if (auraCount > 40)
-            {
-                return auras;
-            }
-
-            for (int i = 0; i < auraCount; ++i)
-            {
-                XMemory.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
-
-                // if (!WowInterface.Db.TryGetSpellName(rawWowAura.SpellId, out string name))
-                // {
-                //     name = WowInterface.HookManager.LuaGetSpellNameById(rawWowAura.SpellId);
-                //     WowInterface.Db.CacheSpellName(rawWowAura.SpellId, name);
-                // }
-
-                auras.Add(rawWowAura);
-            }
-
-            return auras;
         }
 
         private void SaveOriginalFunctionBytes(IntPtr address)

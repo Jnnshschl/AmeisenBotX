@@ -196,7 +196,7 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 WowUnit[] playersToTry =
                 {
-                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => p.Name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
+                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => WowInterface.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
                     Config.FollowGroupLeader ? WowInterface.Objects.Partyleader : null,
                     Config.FollowGroupMembers ? WowInterface.Objects.Partymembers.FirstOrDefault() : null
                 };

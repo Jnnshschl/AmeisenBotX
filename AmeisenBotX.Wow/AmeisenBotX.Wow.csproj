@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AmeisenBotX.Common\AmeisenBotX.Common.csproj" />
+    <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj" />
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj" />
   </ItemGroup>
 

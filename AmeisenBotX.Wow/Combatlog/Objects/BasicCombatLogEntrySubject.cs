@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Data.CombatLog.Objects
+namespace AmeisenBotX.Wow.Combatlog.Objects
 {
     public class BasicCombatLogEntrySubject : ISubjectBasicCombatLogEntry
     {

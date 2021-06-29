@@ -11,39 +11,52 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     internal class ShamanEnhancement : BasicKamelClass
     {
-        //Shield
-        private const string lightningShieldSpell = "Lightning Shield";
+        private const string earthbindTotem = "Earthbind Totem";
 
-        //Weapon Enhancement
-        private const string windfuryBuff = "Windfury";
+        private const string earthElementalTotem = "Earth Elemental Totem";
+
+        private const string earthShockSpell = "Earth Shock";
+
+        private const string feralSpiritSpell = "Feral Spirit";
+
+        //Totem
+        private const string fireElementalTotem = "Fire Elemental Totem";
+
+        private const string flameShockSpell = "Flame Shock";
+
         private const string flametongueBuff = "Flametongue";
+
         private const string flametongueSpell = "Flametongue Weapon";
-        private const string windfurySpell = "Windfury Weapon";
+
+        private const string frostShockSpell = "Frost Shock";
+
+        private const string groundingTotem = "Grounding Totem";
 
         //Heal Spells
         private const string healingWaveSpell = "Healing Wave";
 
-        //Totem
-        private const string fireElementalTotem = "Fire Elemental Totem";
-        private const string earthElementalTotem = "Earth Elemental Totem";
-        private const string groundingTotem = "Grounding Totem";
-        private const string earthbindTotem = "Earthbind Totem";
+        private const string lavaLashSpell = "Lava Lash";
 
         //Attack Spells
         private const string lightningBoltSpell = "Lightning Bolt";
-        private const string lavaLashSpell = "Lava Lash";
-        private const string stormstrikeSpell = "Stormstrike";
-        private const string flameShockSpell = "Flame Shock";
-        private const string frostShockSpell = "Frost Shock";
-        private const string earthShockSpell = "Earth Shock";
-        private const string feralSpiritSpell = "Feral Spirit";
 
-        //Stunns|Interrupting
-        private const string windShearSpell = "Wind Shear";
+        //Shield
+        private const string lightningShieldSpell = "Lightning Shield";
+
         private const string purgeSpell = "Purge";
 
         //Buff
         private const string shamanisticRageSpell = "Shamanistic Rage";
+
+        private const string stormstrikeSpell = "Stormstrike";
+
+        //Weapon Enhancement
+        private const string windfuryBuff = "Windfury";
+
+        private const string windfurySpell = "Windfury Weapon";
+
+        //Stunns|Interrupting
+        private const string windShearSpell = "Wind Shear";
 
         public ShamanEnhancement(WowInterface wowInterface) : base()
         {
@@ -57,7 +70,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             spellCoolDown.Add(flametongueBuff, DateTime.Now);
             spellCoolDown.Add(flametongueSpell, DateTime.Now);
             spellCoolDown.Add(windfurySpell, DateTime.Now);
-            
+
             //Heal Spells
             spellCoolDown.Add(healingWaveSpell, DateTime.Now);
 
@@ -87,9 +100,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             EnhancementEvent = new(TimeSpan.FromSeconds(2));
             PurgeEvent = new(TimeSpan.FromSeconds(1));
         }
-        //Event
-        public TimegatedEvent EnhancementEvent { get; private set; }
-        public TimegatedEvent PurgeEvent { get; private set; }
 
         public override string Author => "Lukas";
 
@@ -99,11 +109,16 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Displayname => "Shaman Enhancement";
 
+        //Event
+        public TimegatedEvent EnhancementEvent { get; private set; }
+
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => true;
 
         public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.TWOHANDED_AXES, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_SWORDS });
+
+        public TimegatedEvent PurgeEvent { get; private set; }
 
         public override WowRole Role => WowRole.Dps;
 
@@ -165,13 +180,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             StartAttack();
         }
 
+        private void Shield()
+        {
+            if (!WowInterface.Player.HasBuffByName("Lightning Shield") && CustomCastSpellMana(lightningShieldSpell))
+            {
+                return;
+            }
+        }
+
         private void StartAttack()
         {
             if (WowInterface.Target.Guid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
+                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
                 {
                     WowInterface.NewWowInterface.WowClearTarget();
                     return;
@@ -192,7 +215,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     if (WowInterface.Target.IsCasting && CustomCastSpellMana(windShearSpell))
                     {
                         return;
-                    }           
+                    }
                     if (PurgeEvent.Run() &&
                         (WowInterface.Target.HasBuffByName("Mana Shield")
                       || WowInterface.Target.HasBuffByName("Power Word: Shield")
@@ -201,31 +224,31 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                       || WowInterface.Target.HasBuffByName("Earth Shield")) && CustomCastSpellMana(purgeSpell))
                     {
                         return;
-                    }    
+                    }
                     if (totemItemCheck() && CustomCastSpellMana(fireElementalTotem))
                     {
                         return;
-                    }     
+                    }
                     if (totemItemCheck() && CustomCastSpellMana(earthElementalTotem))
                     {
                         return;
-                    }          
+                    }
                     if (CustomCastSpellMana(lavaLashSpell))
                     {
                         return;
-                    }              
+                    }
                     if (CustomCastSpellMana(stormstrikeSpell))
                     {
                         return;
-                    }         
+                    }
                     if (CustomCastSpellMana(feralSpiritSpell))
                     {
                         return;
-                    }    
+                    }
                     if (!WowInterface.Target.HasBuffByName("Flame Shock") && CustomCastSpellMana(flameShockSpell))
                     {
                         return;
-                    }          
+                    }
                     if (CustomCastSpellMana(frostShockSpell))
                     {
                         return;
@@ -238,13 +261,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             }
         }
 
-        private void Shield()
-        {
-            if (!WowInterface.Player.HasBuffByName("Lightning Shield") && CustomCastSpellMana(lightningShieldSpell))
-            {
-                return;
-            }
-        }
         private void WeaponEnhancement()
         {
             if (EnhancementEvent.Run())

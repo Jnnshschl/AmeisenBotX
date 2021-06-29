@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {

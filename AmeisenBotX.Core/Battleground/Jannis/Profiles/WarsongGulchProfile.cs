@@ -3,9 +3,9 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private bool AmINearOwnFlagCarrier(CtfBlackboard blackboard)
         {
-            return WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, blackboard.MyTeamFlagCarrier.Position, 48.0f).Any(e => !e.IsDead);
+            return WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, blackboard.MyTeamFlagCarrier.Position, 48.0f).Any(e => !e.IsDead);
         }
 
         private bool AmIOneOfTheClosestToOwnFlagCarrier(CtfBlackboard blackboard, int memberCount)
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus AttackNearWeakestEnemy(CtfBlackboard blackboard)
         {
-            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
             else
             {
-                WowUnit nearEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
+                WowUnit nearEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
@@ -266,8 +266,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 return false;
             }
 
-            int friends = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 18.0f).Count();
-            int enemies = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 18.0f).Count();
+            int friends = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 18.0f).Count();
+            int enemies = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 18.0f).Count();
 
             return enemies > 0 && friends >= enemies;
         }
@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus FleeFromComingEnemies(CtfBlackboard blackboard)
         {
-            WowUnit nearestEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
+            WowUnit nearestEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
 
             if (nearestEnemy != null)
             {
@@ -394,7 +394,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
             else
             {
-                WowUnit nearEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
+                WowUnit nearEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {

@@ -1,12 +1,8 @@
-﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AmeisenBotX.Core.Fsm.States
 {
@@ -14,7 +10,7 @@ namespace AmeisenBotX.Core.Fsm.States
     {
         public StateLogin(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
         {
-            LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));            
+            LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
         private TimegatedEvent LoginAttemptEvent { get; set; }

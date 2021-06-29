@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         ~TracelineJumpHookModule()
         {
-            if(CommandAddress != IntPtr.Zero) { XMemory.FreeMemory(CommandAddress); }
+            if (CommandAddress != IntPtr.Zero) { XMemory.FreeMemory(CommandAddress); }
             if (DataAddress != IntPtr.Zero) { XMemory.FreeMemory(DataAddress); }
             if (ExecuteAddress != IntPtr.Zero) { XMemory.FreeMemory(ExecuteAddress); }
         }

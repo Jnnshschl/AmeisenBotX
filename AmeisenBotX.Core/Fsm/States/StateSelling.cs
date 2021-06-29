@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.Routines;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 .Where(e => e.GetType() != typeof(WowPlayer)
                     && !e.IsDead
                     && e.IsVendor
-                    && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Hostile
+                    && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Hostile
                     && e.Position.GetDistance(WowInterface.Player.Position) < Config.RepairNpcSearchRadius)
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();

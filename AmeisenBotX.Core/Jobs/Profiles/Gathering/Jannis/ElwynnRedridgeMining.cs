@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Jobs.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis

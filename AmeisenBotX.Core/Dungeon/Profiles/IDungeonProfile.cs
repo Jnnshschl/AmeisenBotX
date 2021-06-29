@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Dungeon.Enums;
 using AmeisenBotX.Core.Dungeon.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Jobs.Profiles

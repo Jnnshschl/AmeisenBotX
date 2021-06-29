@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
-using AmeisenBotX.Memory;
-using AmeisenBotX.Common.Offsets;
 
 namespace AmeisenBotX.Core.Data.Objects
 {

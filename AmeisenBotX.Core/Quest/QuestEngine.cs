@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Profiles;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Quest
             {
                 // do i need to recover my hp
                 if (WowInterface.Player.HealthPercentage < Config.EatUntilPercent
-                    && WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 60.0f).Any())
+                    && WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 60.0f).Any())
                 {
                     // wait or eat something
                     if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -304,8 +304,8 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         private WowUnit GetEnemyFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Neutral && !e.IsDead && e.Guid != WowInterface.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
-            
+            List<WowUnit> flagCarrierList = WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Friendly && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Neutral && !e.IsDead && e.Guid != WowInterface.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
+
             if (flagCarrierList.Count > 0)
             {
                 return flagCarrierList[0];
@@ -352,7 +352,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         private WowUnit GetTeamFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Friendly || WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != WowInterface.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
+            List<WowUnit> flagCarrierList = WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => (WowInterface.Db.GetReaction(WowInterface.Player, e) == WowUnitReaction.Friendly || WowInterface.Db.GetReaction(WowInterface.Player, e) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != WowInterface.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
             {
                 return flagCarrierList[0];
@@ -370,7 +370,7 @@ namespace AmeisenBotX.Core.Battleground.einTyp
 
         private bool isEnemyClose()
         {
-            return WowInterface.Objects.WowObjects.OfType<WowUnit>() != null && WowInterface.Objects.WowObjects.OfType<WowUnit>().Any(e => WowInterface.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Neutral);
+            return WowInterface.Objects.WowObjects.OfType<WowUnit>() != null && WowInterface.Objects.WowObjects.OfType<WowUnit>().Any(e => WowInterface.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Friendly && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Neutral);
         }
 
         private bool IsGateOpen()

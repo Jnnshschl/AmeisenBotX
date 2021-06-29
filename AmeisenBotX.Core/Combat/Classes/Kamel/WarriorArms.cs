@@ -3,8 +3,8 @@ using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -107,7 +107,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Displayname => "Warrior Arms Beta";
 
+        public TimegatedEvent ExecuteEvent { get; private set; }
+
         public override bool HandlesMovement => false;
+
+        public TimegatedEvent HeroicStrikeEvent { get; private set; }
 
         public override bool IsMelee => true;
 
@@ -162,13 +166,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public override string Version => "1.0";
 
+        public TimegatedEvent VictoryRushEvent { get; private set; }
+
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Warrior;
-
-        public TimegatedEvent HeroicStrikeEvent { get; private set; }
-        public TimegatedEvent VictoryRushEvent { get; private set; }
-        public TimegatedEvent ExecuteEvent { get; private set; }
 
         public override void ExecuteCC()
         {
@@ -181,11 +183,39 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             StartAttack();
         }
 
+        private bool CustomCastSpell(string spellName, string stance = "Battle Stance")
+        {
+            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            {
+                double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+
+                if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                {
+                    if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
+                    {
+                        if (!WowInterface.Player.HasBuffByName(stance))
+                        {
+                            WowInterface.NewWowInterface.LuaCastSpell(stance);
+                            return true;
+                        }
+                        else
+                        {
+                            WowInterface.NewWowInterface.LuaCastSpell(spellName);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void StartAttack()
         {
             if (WowInterface.Target.Guid != 0 && WowInterface.Target != null)
             {
-                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
+                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
                 {
                     WowInterface.NewWowInterface.WowClearTarget();
                     return;
@@ -298,33 +328,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 Targetselection();
             }
-        }
-        private bool CustomCastSpell(string spellName, string stance = "Battle Stance")
-        {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
-            {
-                double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-
-                if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
-                {
-                    if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
-                    {
-                        if (!WowInterface.Player.HasBuffByName(stance))
-                        {
-                            WowInterface.NewWowInterface.LuaCastSpell(stance);
-                            return true;
-                        }
-                        else
-                        {
-                            WowInterface.NewWowInterface.LuaCastSpell(spellName);
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
         }
     }
 }

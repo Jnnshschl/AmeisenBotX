@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
+﻿using AmeisenBotX.Wow.Combatlog.Enums;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace AmeisenBotX.Core.Data.CombatLog.Objects
+namespace AmeisenBotX.Wow.Combatlog.Objects
 {
     [Serializable]
     public class BasicCombatLogEntry

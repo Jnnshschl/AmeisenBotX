@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.Db.Enums
+﻿namespace AmeisenBotX.Wow.Cache.Enums
 {
     public enum PoiType
     {

@@ -12,6 +12,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             WowInterface = wowInterface;
         }
+
         public override string Author => "Lukas";
 
         public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
@@ -81,13 +82,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             Targetselection();
             StartAttack();
         }
+
         private void StartAttack()
         {
             if (WowInterface.Target.Guid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
+                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
                 {
                     WowInterface.NewWowInterface.WowClearTarget();
                     return;

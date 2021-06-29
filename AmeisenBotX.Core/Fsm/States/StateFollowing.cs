@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow));
+                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => WowInterface.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow));
 
                     if (player != null)
                     {

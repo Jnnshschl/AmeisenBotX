@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Core.Data.Db.Structs;
+﻿using AmeisenBotX.Wow.Cache.Structs;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Db.Objects
+namespace AmeisenBotX.Wow.Cache.Objects
 {
     internal class StaticDB
     {

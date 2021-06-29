@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Movement.Enums;
@@ -8,6 +7,7 @@ using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
 using AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon;
 using AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls;
 using AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (!(WowInterface.Globals.ForceCombat
                 || WowInterface.Player.IsInCombat
                 || StateMachine.IsAnyPartymemberInCombat()
-                || WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 100.0f).Any()))
+                || WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;

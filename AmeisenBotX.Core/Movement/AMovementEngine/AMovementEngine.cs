@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -225,7 +225,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
             List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
-            places.AddRange(WowInterface.Objects.GetAoeSpells(WowInterface.NewWowInterface, position)
+            places.AddRange(WowInterface.Objects.GetAoeSpells(WowInterface.Db.GetReaction, position)
                 .Where(e => WowInterface.Objects.GetWowObjectByGuid<WowUnit>(e.Caster)?.Type == WowObjectType.Unit)
                 .Select(e => (e.Position, e.Radius)));
 

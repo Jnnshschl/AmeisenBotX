@@ -1,21 +1,25 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
-using AmeisenBotX.Memory;
-using AmeisenBotX.Common.Offsets;
 
 namespace AmeisenBotX.Core.Data.Objects
 {
     public class WowUnit : WowObject
     {
-        public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
+        public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress, Func<int, string> spellNamePred) : base(baseAddress, type, descriptorAddress)
         {
+            SpellNamePred = spellNamePred;
         }
+
+        protected Func<int, string> SpellNamePred { get; }
 
         public int AuraCount { get; set; }
 
@@ -169,8 +173,6 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public int MaxRuneenergy { get; set; }
 
-        public string Name { get; set; }
-
         public BitVector32 NpcFlags { get; set; }
 
         public WowPowertype PowerType { get; set; }
@@ -197,6 +199,11 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public BitVector32 UnitFlagsDynamic { get; set; }
 
+        public static bool IsValidUnit(WowUnit unit)
+        {
+            return unit != null && !unit.IsNotAttackable;
+        }
+
         public bool HasBuffById(int spellId)
         {
             return Auras != null && Auras.Any(e => e.SpellId == spellId);
@@ -212,25 +219,35 @@ namespace AmeisenBotX.Core.Data.Objects
             return wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
         }
 
+        public virtual string ReadName(XMemory xMemory, IOffsetList offsetList)
+        {
+            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitName1), out IntPtr objName)
+                && xMemory.Read(IntPtr.Add(objName, (int)offsetList.WowUnitName2), out objName)
+                && xMemory.ReadString(objName, Encoding.UTF8, out string name))
+            {
+                return name;
+            }
+
+            return "unknown";
+        }
+
         public override string ToString()
         {
-            return $"Unit: [{Guid}] {Name} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
+            return $"Unit: {Guid} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
         }
 
         public override void Update(XMemory xMemory, IOffsetList offsetList)
         {
             base.Update(xMemory, offsetList);
 
-            Name = string.Empty;
-
             if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
             {
-                Class = (WowClass)(objPtr.Class);
+                Class = (WowClass)objPtr.Class;
                 CombatReach = objPtr.CombatReach;
                 DisplayId = objPtr.DisplayId;
                 Energy = objPtr.Power4;
                 FactionTemplate = objPtr.FactionTemplate;
-                Gender = (WowGender)(objPtr.Gender);
+                Gender = (WowGender)objPtr.Gender;
                 Health = objPtr.Health;
                 Level = objPtr.Level;
                 Mana = objPtr.Power1;
@@ -240,8 +257,8 @@ namespace AmeisenBotX.Core.Data.Objects
                 MaxRage = objPtr.MaxPower2 / 10;
                 MaxRuneenergy = objPtr.MaxPower7 / 10;
                 NpcFlags = objPtr.NpcFlags;
-                PowerType = (WowPowertype)(objPtr.PowerType);
-                Race = (WowRace)(objPtr.Race);
+                PowerType = (WowPowertype)objPtr.PowerType;
+                Race = (WowRace)objPtr.Race;
                 Rage = objPtr.Power2 / 10;
                 Runeenergy = objPtr.Power7 / 10;
                 SummonedByGuid = objPtr.SummonedBy;
@@ -257,14 +274,8 @@ namespace AmeisenBotX.Core.Data.Objects
                 RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
             }
 
-            if (Type == WowObjectType.Unit)
-            {
-                // dont read the name for players
-                Name = ReadUnitName(xMemory, offsetList);
-            }
-
-            // Auras = wowInterface.HookManager.WowGetUnitAuras(this, out int auraCount);
-            // AuraCount = auraCount;
+            Auras = GetUnitAuras(xMemory, offsetList, BaseAddress, out int auraCount);
+            AuraCount = auraCount;
 
             if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitPosition), out Vector3 position))
             {
@@ -292,31 +303,54 @@ namespace AmeisenBotX.Core.Data.Objects
             }
         }
 
-        private string ReadUnitName(XMemory xMemory, IOffsetList offsetList)
+        public IEnumerable<WowAura> GetUnitAuras(XMemory xMemory, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
-            // if (wowInterface.Db.TryGetUnitName(Guid, out string cachedName))
-            // {
-            //     return cachedName;
-            // }
-
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitName1), out IntPtr objName)
-                && xMemory.Read(IntPtr.Add(objName, (int)offsetList.WowUnitName2), out objName)
-                && xMemory.ReadString(objName, Encoding.UTF8, out string name))
+            if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
             {
-                // if (name.Length > 0)
-                // {
-                //     wowInterface.Db.CacheName(Guid, name);
-                // }
-
-                return name;
+                if (auraCount1 == -1)
+                {
+                    if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount2), out int auraCount2)
+                        && auraCount2 > 0
+                        && xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraTable2), out IntPtr auraTable))
+                    {
+                        auraCount = auraCount2;
+                        return ReadAuraTable(xMemory, auraTable, auraCount2);
+                    }
+                    else
+                    {
+                        auraCount = 0;
+                    }
+                }
+                else
+                {
+                    auraCount = auraCount1;
+                    return ReadAuraTable(xMemory, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
+                }
+            }
+            else
+            {
+                auraCount = 0;
             }
 
-            return "unknown";
+            return Array.Empty<WowAura>();
         }
 
-        public static bool IsValidUnit(WowUnit unit)
+        private unsafe IEnumerable<WowAura> ReadAuraTable(XMemory xMemory, IntPtr buffBase, int auraCount)
         {
-            return unit != null && !unit.IsNotAttackable;
+            List<WowAura> auras = new();
+
+            if (auraCount > 40)
+            {
+                return auras;
+            }
+
+            for (int i = 0; i < auraCount; ++i)
+            {
+                xMemory.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
+                auras.Add(new(rawWowAura, SpellNamePred(rawWowAura.SpellId)));
+            }
+
+            return auras;
         }
     }
 }

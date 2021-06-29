@@ -2,11 +2,11 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.CombatClasses.Shino;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                System.Collections.Generic.IEnumerable<WowUnit> nearbyTargets = WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 64.0f);
+                System.Collections.Generic.IEnumerable<WowUnit> nearbyTargets = WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 64.0f);
                 if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {

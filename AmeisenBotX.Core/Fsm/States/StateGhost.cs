@@ -4,11 +4,11 @@ using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.StaticDeathRoutes;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    WowPlayer specificPlayer = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+                    WowPlayer specificPlayer = wowPlayers.FirstOrDefault(p => WowInterface.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
 
                     if (specificPlayer != null)
                     {
@@ -215,7 +215,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 // check the group/raid leader
                 if (guid == 0 && Config.FollowGroupLeader)
                 {
-                    WowPlayer groupLeader = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+                    WowPlayer groupLeader = wowPlayers.FirstOrDefault(p => WowInterface.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
 
                     if (groupLeader != null)
                     {
@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 // check the group members
                 if (guid == 0 && Config.FollowGroupMembers)
                 {
-                    WowPlayer groupMember = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+                    WowPlayer groupMember = wowPlayers.FirstOrDefault(p => WowInterface.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
 
                     if (groupMember != null)
                     {

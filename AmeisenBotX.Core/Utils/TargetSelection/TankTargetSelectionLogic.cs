@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                         {
                             WowUnit targetUnit = WowInterface.Objects.GetWowObjectByGuid<WowUnit>(unit.TargetGuid);
 
-                            if (targetUnit != null && WowInterface.NewWowInterface.GetReaction(targetUnit.BaseAddress, WowInterface.Player.BaseAddress) != WowUnitReaction.Friendly)
+                            if (targetUnit != null && WowInterface.Db.GetReaction(targetUnit, WowInterface.Player) != WowUnitReaction.Friendly)
                             {
                                 if (!targets.ContainsKey(targetUnit))
                                 {

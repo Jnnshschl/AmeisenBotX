@@ -3,8 +3,8 @@ using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -159,109 +159,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             StartAttack();
         }
 
-        private void StartAttack()
-        {
-            // WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
-
-            if (WowInterface.Target.Guid != 0)
-            {
-                if (WowInterface.Target.Guid != WowInterface.Player.Guid)
-                {
-                    TargetselectionTank();
-                }
-
-                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
-                {
-                    WowInterface.NewWowInterface.WowClearTarget();
-                    return;
-                }
-
-                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
-                {
-                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
-                    {
-                        WowInterface.NewWowInterface.LuaStartAutoAttack();
-                    }
-
-                    if ((WowInterface.Player.IsConfused || WowInterface.Player.IsSilenced || WowInterface.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
-                    {
-                        return;
-                    }
-
-                    if (CustomCastSpell(AvengingWrathSpell))
-                    {
-                        return;
-                    }
-
-                    if (WowInterface.Player.ManaPercentage <= 20 && CustomCastSpell(DivinePleaSpell))
-                    {
-                        return;
-                    }
-
-                    if (ShieldEvent.Run() && CustomCastSpell(SacredShieldSpell))
-                    {
-                        return;
-                    }
-
-                    if (WowInterface.Player.HealthPercentage <= 15 && CustomCastSpell(layonHandsSpell))
-                    {
-                        return;
-                    }
-                    if (WowInterface.Player.HealthPercentage <= 25 && CustomCastSpell(holyLightSpell))
-                    {
-                        return;
-                    }
-                    if (WowInterface.Player.HealthPercentage <= 50 && CustomCastSpell(divineProtectionSpell))
-                    {
-                        return;
-                    }
-                    if (WowInterface.Target.HealthPercentage <= 20 && CustomCastSpell(hammerofWrathSpell))
-                    {
-                        return;
-                    }
-                    if ((WowInterface.Target.HealthPercentage <= 20 || WowInterface.Player.HealthPercentage <= 30 || WowInterface.Target.IsCasting) && CustomCastSpell(hammerofJusticeSpell))
-                    {
-                        return;
-                    }
-                    if (WowInterface.Target.Name != "Anub'Rekhan" && CustomCastSpell(handofReckoningSpell))
-                    {
-                        return;
-                    }
-                    if (CustomCastSpell(avengersShieldSpell))
-                    {
-                        return;
-                    }
-                    if (CustomCastSpell(consecrationSpell))
-                    {
-                        return;
-                    }
-                    if (CustomCastSpell(judgementofLightSpell))
-                    {
-                        return;
-                    }
-                    if (CustomCastSpell(holyShieldSpell))
-                    {
-                        return;
-                    }
-                    if (CustomCastSpell(exorcismSpell))
-                    {
-                        return;
-                    }
-                }
-                else//Range
-                {
-                    if (CustomCastSpell(avengersShieldSpell))
-                    {
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                TargetselectionTank();
-            }
-        }
-
         private void BuffManager()
         {
             if (TargetSelectEvent.Run())
@@ -330,6 +227,109 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             }
 
             return false;
+        }
+
+        private void StartAttack()
+        {
+            // WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+
+            if (WowInterface.Target.Guid != 0)
+            {
+                if (WowInterface.Target.Guid != WowInterface.Player.Guid)
+                {
+                    TargetselectionTank();
+                }
+
+                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                {
+                    WowInterface.NewWowInterface.WowClearTarget();
+                    return;
+                }
+
+                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                {
+                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    {
+                        WowInterface.NewWowInterface.LuaStartAutoAttack();
+                    }
+
+                    if ((WowInterface.Player.IsConfused || WowInterface.Player.IsSilenced || WowInterface.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
+                    {
+                        return;
+                    }
+
+                    if (CustomCastSpell(AvengingWrathSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.Player.ManaPercentage <= 20 && CustomCastSpell(DivinePleaSpell))
+                    {
+                        return;
+                    }
+
+                    if (ShieldEvent.Run() && CustomCastSpell(SacredShieldSpell))
+                    {
+                        return;
+                    }
+
+                    if (WowInterface.Player.HealthPercentage <= 15 && CustomCastSpell(layonHandsSpell))
+                    {
+                        return;
+                    }
+                    if (WowInterface.Player.HealthPercentage <= 25 && CustomCastSpell(holyLightSpell))
+                    {
+                        return;
+                    }
+                    if (WowInterface.Player.HealthPercentage <= 50 && CustomCastSpell(divineProtectionSpell))
+                    {
+                        return;
+                    }
+                    if (WowInterface.Target.HealthPercentage <= 20 && CustomCastSpell(hammerofWrathSpell))
+                    {
+                        return;
+                    }
+                    if ((WowInterface.Target.HealthPercentage <= 20 || WowInterface.Player.HealthPercentage <= 30 || WowInterface.Target.IsCasting) && CustomCastSpell(hammerofJusticeSpell))
+                    {
+                        return;
+                    }
+                    if (WowInterface.Db.GetUnitName(WowInterface.Target, out string name) && name != "Anub'Rekhan" && CustomCastSpell(handofReckoningSpell))
+                    {
+                        return;
+                    }
+                    if (CustomCastSpell(avengersShieldSpell))
+                    {
+                        return;
+                    }
+                    if (CustomCastSpell(consecrationSpell))
+                    {
+                        return;
+                    }
+                    if (CustomCastSpell(judgementofLightSpell))
+                    {
+                        return;
+                    }
+                    if (CustomCastSpell(holyShieldSpell))
+                    {
+                        return;
+                    }
+                    if (CustomCastSpell(exorcismSpell))
+                    {
+                        return;
+                    }
+                }
+                else//Range
+                {
+                    if (CustomCastSpell(avengersShieldSpell))
+                    {
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                TargetselectionTank();
+            }
         }
     }
 }

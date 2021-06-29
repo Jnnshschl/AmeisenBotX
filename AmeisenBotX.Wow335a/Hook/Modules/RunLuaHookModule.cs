@@ -29,9 +29,9 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         private string Lua { get; }
 
-        private string VarName { get; }
-
         private IOffsetList OffsetList { get; }
+
+        private string VarName { get; }
 
         public override IntPtr GetDataPointer()
         {

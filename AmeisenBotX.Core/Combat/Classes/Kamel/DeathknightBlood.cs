@@ -1,13 +1,10 @@
-﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Utils;
 using AmeisenBotX.Core.Utils.TargetSelection;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

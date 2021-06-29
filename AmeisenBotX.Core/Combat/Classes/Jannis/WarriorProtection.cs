@@ -2,10 +2,10 @@
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         // do not return, hehe xd
                     }
 
-                    int nearEnemies = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 10.0f).Count();
+                    int nearEnemies = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 10.0f).Count();
 
                     if ((nearEnemies > 2 || WowInterface.Player.Rage > 40)
                         && TryCastSpellWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.Target.Guid, true))

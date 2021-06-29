@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.Routines;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
                     && !e.IsDead
                     && e.IsRepairVendor
-                    && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Hostile
+                    && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Hostile
                     && e.Position.GetDistance(WowInterface.Player.Position) < Config.RepairNpcSearchRadius);
 
             return unit != null;
@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Fsm.States
         internal bool NeedToRepair()
         {
             return WowInterface.CharacterManager.Equipment.Items
-                       .Any(e => e.Value.MaxDurability > 0 && ((double)e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
+                       .Any(e => e.Value.MaxDurability > 0 && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
                    && IsRepairNpcNear(out _);
         }
 

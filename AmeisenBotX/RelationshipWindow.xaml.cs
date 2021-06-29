@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Personality.Objects;
 using AmeisenBotX.Views;
 using System.Collections.Generic;
 using System.Windows;

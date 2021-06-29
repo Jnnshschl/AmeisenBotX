@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -156,9 +156,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         }
                         else if (FlagNode != null)
                         {
-                            IEnumerable<WowPlayer> enemiesNearFlag = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, FlagNode.Position, 40);
-                            IEnumerable<WowPlayer> friendsNearFlag = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.NewWowInterface, FlagNode.Position, 40);
-                            IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 20);
+                            IEnumerable<WowPlayer> enemiesNearFlag = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, FlagNode.Position, 40);
+                            IEnumerable<WowPlayer> friendsNearFlag = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.Db.GetReaction, FlagNode.Position, 40);
+                            IEnumerable<WowPlayer> friendsNearPlayer = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 20);
 
                             if (enemiesNearFlag != null)
                             {

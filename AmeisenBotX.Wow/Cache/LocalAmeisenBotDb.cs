@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Data.CombatLog.Enums;
-using AmeisenBotX.Core.Data.CombatLog.Objects;
-using AmeisenBotX.Core.Data.Db.Enums;
+using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Personality.Enums;
-using AmeisenBotX.Core.Personality.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Cache.Enums;
+using AmeisenBotX.Wow.Combatlog.Enums;
+using AmeisenBotX.Wow.Combatlog.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -16,14 +16,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace AmeisenBotX.Core.Data.Db
+namespace AmeisenBotX.Wow.Cache
 {
     public class LocalAmeisenBotDb : IAmeisenBotDb
     {
-        public LocalAmeisenBotDb(WowInterface wowInterface)
+        public LocalAmeisenBotDb()
         {
-            WowInterface = wowInterface;
-
             CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
 
@@ -42,19 +40,15 @@ namespace AmeisenBotX.Core.Data.Db
 
         public ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> OreNodes { get; private set; }
 
-        public ConcurrentDictionary<ulong, Relationship> PlayerRelationships { get; private set; }
-
         public ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> PointsOfInterest { get; private set; }
 
         public ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>> Reactions { get; private set; }
 
         public ConcurrentDictionary<int, string> SpellNames { get; private set; }
 
-        public WowInterface WowInterface { get; }
-
         private Timer CleanupTimer { get; }
 
-        public static LocalAmeisenBotDb FromJson(WowInterface wowInterface, string dbFile)
+        public static LocalAmeisenBotDb FromJson(string dbFile)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -74,86 +68,7 @@ namespace AmeisenBotX.Core.Data.Db
                 }
             }
 
-            LocalAmeisenBotDb db = new LocalAmeisenBotDb(wowInterface);
-            db.Clear();
-
-            return db;
-        }
-
-        public void AddPlayerRelationship(WowPlayer player, RelationshipLevel initialRelationship = RelationshipLevel.Neutral)
-        {
-            if (!IsPlayerKnown(player))
-            {
-                PlayerRelationships.TryAdd(player.Guid, new Relationship()
-                {
-                    Score = (float)initialRelationship,
-                    FirstSeen = DateTime.Now,
-                    FirstSeenMapId = WowInterface.Objects.MapId,
-                    FirstSeenPosition = player.Position
-                });
-            }
-
-            PlayerRelationships[player.Guid].Poll(WowInterface, player);
-        }
-
-        public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
-        {
-            return BlacklistNodes;
-        }
-
-        public IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries()
-        {
-            return CombatLogEntries;
-        }
-
-        public IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes()
-        {
-            return HerbNodes;
-        }
-
-        public IReadOnlyDictionary<ulong, string> AllNames()
-        {
-            return Names;
-        }
-
-        public IReadOnlyDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> AllOreNodes()
-        {
-            return OreNodes;
-        }
-
-        public IReadOnlyDictionary<ulong, Relationship> AllPlayerRelationships()
-        {
-            return PlayerRelationships;
-        }
-
-        public IReadOnlyDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest()
-        {
-            return PointsOfInterest;
-        }
-
-        public IReadOnlyDictionary<int, Dictionary<int, WowUnitReaction>> AllReactions()
-        {
-            return Reactions;
-        }
-
-        public IReadOnlyDictionary<int, string> AllSpellNames()
-        {
-            return SpellNames;
-        }
-
-        public void CacheBlacklistPosition(int mapId, Vector3 node)
-        {
-            if (!TryGetBlacklistPosition(mapId, node, 8, out _))
-            {
-                if (!BlacklistNodes.ContainsKey(mapId))
-                {
-                    BlacklistNodes.TryAdd(mapId, new List<Vector3>() { node });
-                }
-                else if (!BlacklistNodes[mapId].Contains(node))
-                {
-                    BlacklistNodes[mapId].Add(node);
-                }
-            }
+            return new();
         }
 
         public void CacheCombatLogEntry(KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key, BasicCombatLogEntry entry)
@@ -185,18 +100,6 @@ namespace AmeisenBotX.Core.Data.Db
             else if (!HerbNodes[mapId][displayId].Any(e => e == position))
             {
                 HerbNodes[mapId][displayId].Add(position);
-            }
-        }
-
-        public void CacheName(ulong guid, string name)
-        {
-            if (!Names.ContainsKey(guid))
-            {
-                Names.TryAdd(guid, name);
-            }
-            else
-            {
-                Names[guid] = name;
             }
         }
 
@@ -266,7 +169,6 @@ namespace AmeisenBotX.Core.Data.Db
             PointsOfInterest = new ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>>();
             OreNodes = new ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>>();
             HerbNodes = new ConcurrentDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>>();
-            PlayerRelationships = new ConcurrentDictionary<ulong, Relationship>();
         }
 
         public BasicCombatLogEntrySubject GetCombatLogSubject()
@@ -274,9 +176,33 @@ namespace AmeisenBotX.Core.Data.Db
             return CombatLogSubject;
         }
 
-        public bool IsPlayerKnown(WowPlayer player)
+        public WowUnitReaction GetReaction(Func<IntPtr, IntPtr, WowUnitReaction> pred, WowUnit a, WowUnit b)
         {
-            return PlayerRelationships.ContainsKey(player.Guid);
+            if (Reactions.ContainsKey(a.FactionTemplate) && Reactions[a.FactionTemplate].ContainsKey(b.FactionTemplate))
+            {
+                return Reactions[a.FactionTemplate][b.FactionTemplate];
+            }
+            else
+            {
+                WowUnitReaction reaction = pred(a.BaseAddress, b.BaseAddress);
+                CacheReaction(a.FactionTemplate, b.FactionTemplate, reaction);
+                return reaction;
+            }
+        }
+
+        public bool GetUnitName(XMemory xMemory, IOffsetList offsetList, WowUnit unit, out string name)
+        {
+            if (Names.ContainsKey(unit.Guid))
+            {
+                name = Names[unit.Guid];
+                return true;
+            }
+            else
+            {
+                name = unit.ReadName(xMemory, offsetList);
+                Names.TryAdd(unit.Guid, name);
+                return true;
+            }
         }
 
         public void Save(string dbFile)
@@ -308,18 +234,6 @@ namespace AmeisenBotX.Core.Data.Db
             return false;
         }
 
-        public bool TryGetPlayerRelationship(WowPlayer player, out Relationship relationship)
-        {
-            if (PlayerRelationships.ContainsKey(player.Guid))
-            {
-                relationship = PlayerRelationships[player.Guid];
-                return true;
-            }
-
-            relationship = default;
-            return false;
-        }
-
         public bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes)
         {
             KeyValuePair<WowMapId, PoiType> KeyValuePair = new KeyValuePair<WowMapId, PoiType>(mapId, poiType);
@@ -335,19 +249,6 @@ namespace AmeisenBotX.Core.Data.Db
             return false;
         }
 
-        public bool TryGetReaction(int a, int b, out WowUnitReaction reaction)
-        {
-            if (Reactions.ContainsKey(a)
-                && Reactions[a].ContainsKey(b))
-            {
-                reaction = Reactions[a][b];
-                return true;
-            }
-
-            reaction = WowUnitReaction.Unknown;
-            return false;
-        }
-
         public bool TryGetSpellName(int spellId, out string name)
         {
             if (SpellNames.ContainsKey(spellId))
@@ -358,26 +259,6 @@ namespace AmeisenBotX.Core.Data.Db
 
             name = string.Empty;
             return false;
-        }
-
-        public bool TryGetUnitName(ulong guid, out string name)
-        {
-            if (Names.ContainsKey(guid))
-            {
-                name = Names[guid];
-                return true;
-            }
-
-            name = string.Empty;
-            return false;
-        }
-
-        public void UpdatePlayerRelationship(WowPlayer player)
-        {
-            if (IsPlayerKnown(player))
-            {
-                PlayerRelationships[player.Guid].Poll(WowInterface, player);
-            }
         }
 
         private void CleanupTimerTick(object state)

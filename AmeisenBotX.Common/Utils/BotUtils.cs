@@ -68,7 +68,7 @@ namespace AmeisenBotX.Common.Utils
             }
 
             return false;
-        }        
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 MoveAhead(Vector3 origin, Vector3 targetPosition, float offset)

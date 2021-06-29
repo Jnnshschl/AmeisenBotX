@@ -4,9 +4,9 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,7 +158,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         //Change target if target to far away
         public void ChangeTargetToAttack()
         {
-            IEnumerable<WowPlayer> PlayerNearPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 15);
+            IEnumerable<WowPlayer> PlayerNearPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 15);
 
             WowUnit target = WowInterface.Target;
             if (target == null)
@@ -334,8 +334,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 50)
-                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && (e.IsPvpFlagged && WowInterface.NewWowInterface.GetReaction(e.BaseAddress, WowInterface.Player.BaseAddress) != WowUnitReaction.Friendly) || (e.IsInCombat)) || (e.IsInCombat && e.Name != "The Lich King" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
+                WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 50)
+                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && (e.IsPvpFlagged && WowInterface.Db.GetReaction(e, WowInterface.Player) != WowUnitReaction.Friendly) || (e.IsInCombat)) || (e.IsInCombat && WowInterface.Db.GetUnitName(e, out string name) && name != "The Lich King" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();//&& e.Type(Player)
 
@@ -359,8 +359,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTargetToTank = WowInterface.Objects.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 60)
-                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name != "The Lich King" && e.Name != "Anub'Rekhan" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
+                WowUnit nearTargetToTank = WowInterface.Objects.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 60)
+                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && WowInterface.Db.GetUnitName(WowInterface.Target, out string name) && name != "The Lich King" && name != "Anub'Rekhan" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
 
@@ -379,7 +379,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 }
                 else
                 {
-                    WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 80)
+                    WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 80)
                     .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type == WowObjectType.Player)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();//&& e.Type(Player)

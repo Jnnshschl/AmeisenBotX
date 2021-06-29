@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                 && !wowUnit.IsNotAttackable
                 && wowUnit.IsInCombat
                 && !IsBlacklisted(wowUnit)
-                && WowInterface.NewWowInterface.GetReaction(wowUnit.BaseAddress, WowInterface.Player.BaseAddress) == WowUnitReaction.Hostile
+                && WowInterface.Db.GetReaction(wowUnit, WowInterface.Player) == WowUnitReaction.Hostile
                 && wowUnit.DistanceTo(WowInterface.Player) < 80.0f;
         }
     }

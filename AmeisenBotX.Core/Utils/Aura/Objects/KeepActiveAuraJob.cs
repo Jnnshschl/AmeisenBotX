@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Fsm.Utils.Auras.Objects
 
         public bool Run(IEnumerable<WowAura> auras)
         {
-            return !auras.Any(e => e.Name.Equals(Name, StringComparison.OrdinalIgnoreCase)) && Action();
+            return auras != null && !auras.Any(e => e.Name.Equals(Name, StringComparison.OrdinalIgnoreCase)) && Action();
         }
     }
 }

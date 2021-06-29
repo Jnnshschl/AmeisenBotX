@@ -15,14 +15,15 @@ namespace AmeisenBotX.Wow
     {
         ulong HookCallCount { get; }
 
+        bool IsWoWHooked { get; }
+
         IObjectProvider Objects { get; }
 
         WowUnit Player { get; }
-        bool IsWoWHooked { get; }
+
+        void BotOverrideWorldLoadedCheck(bool enabled);
 
         bool Dispose();
-
-        WowUnitReaction GetReaction(IntPtr a, IntPtr b);
 
         void LuaAbandonQuestsNotIn(IEnumerable<string> enumerable);
 
@@ -39,11 +40,11 @@ namespace AmeisenBotX.Wow
         void LuaAcceptSummon();
 
         bool LuaAutoLootEnabled();
-        bool LuaUiIsVisible(params string[] v);
+
         void LuaCallCompanion(int index);
 
         void LuaCastSpell(string spellName, bool castOnSelf = false);
-        string[] LuaGetGossipTypes();
+
         void LuaCastSpellById(int spellId);
 
         void LuaClickUiElement(string v);
@@ -69,6 +70,8 @@ namespace AmeisenBotX.Wow
         string LuaGetEquipmentItems();
 
         int LuaGetFreeBagSlotCount();
+
+        string[] LuaGetGossipTypes();
 
         string LuaGetInventoryItems();
 
@@ -134,6 +137,8 @@ namespace AmeisenBotX.Wow
 
         void LuaStartAutoAttack();
 
+        bool LuaUiIsVisible(params string[] v);
+
         void LuaUseContainerItem(int bagId, int bagSlot);
 
         void LuaUseInventoryItem(WowEquipmentSlot equipmentSlot);
@@ -153,6 +158,8 @@ namespace AmeisenBotX.Wow
         bool WowExecuteLuaAndRead((string, string) p, out string result);
 
         void WowFacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position);
+
+        WowUnitReaction WowGetReaction(IntPtr a, IntPtr b);
 
         Dictionary<int, int> WowGetRunesReady();
 
@@ -175,6 +182,5 @@ namespace AmeisenBotX.Wow
         void WowTargetGuid(ulong guid);
 
         void WowUnitRightClick(IntPtr unitBase);
-        void BotOverrideWorldLoadedCheck(bool enabled);
     }
 }

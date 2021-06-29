@@ -1,10 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Combat.Classes.Jannis;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,7 +86,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
         {
             WowUnit currentTarget = WowInterface.Target;
             IEnumerable<WowUnit> nearAttackingEnemies = WowInterface.Objects
-                .GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 64.0f)
+                .GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 64.0f)
                 .Where(e => !e.IsDead && !e.IsNotAttackable)
                 .OrderBy(e => e.Auras.All(aura => aura.Name != polymorphSpell));
 
@@ -98,7 +97,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
                        nearAttackingEnemies.Where(e => e.Auras.All(aura => aura.Name != polymorphSpell)).Any(e => e.Guid != currentTarget.Guid))
                    || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
                    || !WowUnit.IsValidUnit(WowInterface.Target)
-                   || WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, currentTarget.BaseAddress) == WowUnitReaction.Friendly))
+                   || WowInterface.Db.GetReaction(WowInterface.Player, currentTarget) == WowUnitReaction.Friendly))
             {
                 currentTarget = null;
                 target = null;

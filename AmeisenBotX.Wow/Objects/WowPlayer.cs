@@ -1,12 +1,13 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.SubStructs;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AmeisenBotX.Common.Offsets;
-using AmeisenBotX.Memory;
 
 namespace AmeisenBotX.Core.Data.Objects
 {
@@ -15,7 +16,7 @@ namespace AmeisenBotX.Core.Data.Objects
         private VisibleItemEnchantment[] itemEnchantments;
         private QuestlogEntry[] questlogEntries;
 
-        public WowPlayer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
+        public WowPlayer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress, Func<int, string> spellNamePred) : base(baseAddress, type, descriptorAddress, spellNamePred)
         {
         }
 
@@ -59,9 +60,44 @@ namespace AmeisenBotX.Core.Data.Objects
                 || Race == WowRace.Troll;
         }
 
+        public override string ReadName(XMemory xMemory, IOffsetList offsetList)
+        {
+            xMemory.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameMask), out uint nameMask);
+            xMemory.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameBase), out uint nameBase);
+
+            uint shortGuid = (uint)Guid & 0xfffffff;
+            uint offset = 12 * (nameMask & shortGuid);
+
+            xMemory.Read(new(nameBase + offset + 8), out uint current);
+            xMemory.Read(new(nameBase + offset), out offset);
+
+            if ((current & 0x1) == 0x1)
+            {
+                return string.Empty;
+            }
+
+            xMemory.Read(new(current), out uint testGuid);
+
+            while (testGuid != shortGuid)
+            {
+                xMemory.Read(new(current + offset + 4), out current);
+
+                if ((current & 0x1) == 0x1)
+                {
+                    return string.Empty;
+                }
+
+                xMemory.Read(new(current), out testGuid);
+            }
+
+            xMemory.ReadString(new(current + (int)offsetList.NameString), Encoding.UTF8, out string name, 16);
+
+            return name;
+        }
+
         public override string ToString()
         {
-            return $"Player: [{Guid}] {Name} lvl. {Level}";
+            return $"Player: {Guid} lvl. {Level}";
         }
 
         public override void Update(XMemory xMemory, IOffsetList offsetList)
@@ -73,7 +109,7 @@ namespace AmeisenBotX.Core.Data.Objects
                 Xp = objPtr.Xp;
                 NextLevelXp = objPtr.NextLevelXp;
                 XpPercentage = BotMath.Percentage(Xp, NextLevelXp);
-                Name = ReadPlayerName(xMemory, offsetList);
+                // Name = ReadPlayerName(xMemory, offsetList);
 
                 questlogEntries = new QuestlogEntry[]
                 {
@@ -145,51 +181,6 @@ namespace AmeisenBotX.Core.Data.Objects
             }
 
             IsGhost = HasBuffById(8326);
-        }
-
-        private string ReadPlayerName(XMemory xMemory, IOffsetList offsetList)
-        {
-            // if (wowInterface.Db.TryGetUnitName(Guid, out string cachedName))
-            // {
-            //     return cachedName;
-            // }
-
-            xMemory.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameMask), out uint nameMask);
-            xMemory.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameBase), out uint nameBase);
-
-            uint shortGuid = (uint)Guid & 0xfffffff;
-            uint offset = 12 * (nameMask & shortGuid);
-
-            xMemory.Read(new(nameBase + offset + 8), out uint current);
-            xMemory.Read(new(nameBase + offset), out offset);
-
-            if ((current & 0x1) == 0x1)
-            {
-                return string.Empty;
-            }
-
-            xMemory.Read(new(current), out uint testGuid);
-
-            while (testGuid != shortGuid)
-            {
-                xMemory.Read(new(current + offset + 4), out current);
-
-                if ((current & 0x1) == 0x1)
-                {
-                    return string.Empty;
-                }
-
-                xMemory.Read(new(current), out testGuid);
-            }
-
-            xMemory.ReadString(new(current + (int)offsetList.NameString), Encoding.UTF8, out string name, 16);
-
-            // if (name.Length > 0)
-            // {
-            //     wowInterface.Db.CacheName(Guid, name);
-            // }
-
-            return name;
         }
     }
 }
