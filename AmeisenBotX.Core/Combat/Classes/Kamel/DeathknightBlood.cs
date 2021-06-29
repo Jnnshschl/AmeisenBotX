@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook;
 using AmeisenBotX.Core.Movement.Enums;
@@ -19,8 +19,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public DeathknightBlood(WowInterface wowInterface)
         {
             WowInterface = wowInterface;
-            ObjectManager = wowInterface.ObjectManager;
-            HookManager = wowInterface.HookManager;
             TargetProvider = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
 
@@ -60,10 +58,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public WowClass WowClass => WowClass.Deathknight;
 
-        private IHookManager HookManager { get; }
-
-        private IObjectManager ObjectManager { get; }
-
         private WowInterface WowInterface { get; }
 
         public void AttackTarget()
@@ -76,9 +70,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
             if (WowInterface.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowUnitRightClick(target);
+                WowInterface.NewWowInterface.WowUnitRightClick(target.BaseAddress);
             }
             else
             {
@@ -88,14 +82,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public void Execute()
         {
-            ulong targetGuid = ObjectManager.TargetGuid;
-            WowUnit target = ObjectManager.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
+            ulong targetGuid = WowInterface.Objects.Target.Guid;
+            WowUnit target = WowInterface.Objects.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
             if (target != null)
             {
                 // make sure we're auto attacking
-                if (!ObjectManager.Player.IsAutoAttacking)
+                if (!WowInterface.Objects.Player.IsAutoAttacking)
                 {
-                    HookManager.LuaStartAutoAttack();
+                    WowInterface.NewWowInterface.LuaStartAutoAttack();
                 }
 
                 HandleAttacking(target);
@@ -117,90 +111,90 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 ulong guid = targetToTarget.First().Guid;
 
-                if (ObjectManager.Player.TargetGuid != guid)
+                if (WowInterface.Objects.Player.TargetGuid != guid)
                 {
-                    HookManager.WowTargetGuid(guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(guid);
                 }
             }
 
-            if (ObjectManager.Target == null
-                || ObjectManager.Target.IsDead
-                || !BotUtils.IsValidUnit(ObjectManager.Target))
+            if (WowInterface.Objects.Target == null
+                || WowInterface.Objects.Target.IsDead
+                || !WowUnit.IsValidUnit(WowInterface.Objects.Target))
             {
                 return;
             }
 
-            double playerRunePower = ObjectManager.Player.Runeenergy;
-            double distanceToTarget = ObjectManager.Player.Position.GetDistance(target.Position);
+            double playerRunePower = WowInterface.Objects.Player.Runeenergy;
+            double distanceToTarget = WowInterface.Objects.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100;
-            double playerHealthPercent = (ObjectManager.Player.Health / (double)ObjectManager.Player.MaxHealth) * 100.0;
-            (string, int) targetCastingInfo = HookManager.LuaGetUnitCastingInfo(WowLuaUnit.Target);
-            //List<string> myBuffs = HookManager.GetBuffs(WowLuaUnit.Player.ToString());
+            double playerHealthPercent = (WowInterface.Objects.Player.Health / (double)WowInterface.Objects.Player.MaxHealth) * 100.0;
+            (string, int) targetCastingInfo = WowInterface.NewWowInterface.LuaGetUnitCastingInfo(WowLuaUnit.Target);
+            //List<string> myBuffs = WowInterface.NewWowInterface.GetBuffs(WowLuaUnit.Player.ToString());
             //myBuffs.Any(e => e.Equals("Chains of Ice"))
 
-            if (HookManager.LuaGetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
+            if (WowInterface.NewWowInterface.LuaGetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
             {
-                HookManager.LuaCastSpell("Death Grip");
+                WowInterface.NewWowInterface.LuaCastSpell("Death Grip");
                 return;
             }
             if (target.IsFleeing && distanceToTarget <= 30)
             {
-                HookManager.LuaCastSpell("Chains of Ice");
+                WowInterface.NewWowInterface.LuaCastSpell("Chains of Ice");
                 return;
             }
 
-            if (HookManager.LuaGetSpellCooldown("Army of the Dead") <= 0 &&
+            if (WowInterface.NewWowInterface.LuaGetSpellCooldown("Army of the Dead") <= 0 &&
                 IsOneOfAllRunesReady())
             {
-                HookManager.LuaCastSpell("Army of the Dead");
+                WowInterface.NewWowInterface.LuaCastSpell("Army of the Dead");
                 return;
             }
 
-            List<WowUnit> unitsNearPlayer = ObjectManager.WowObjects
+            List<WowUnit> unitsNearPlayer = WowInterface.Objects.WowObjects
                 .OfType<WowUnit>()
-                .Where(e => e.Position.GetDistance(ObjectManager.Player.Position) <= 10)
+                .Where(e => e.Position.GetDistance(WowInterface.Objects.Player.Position) <= 10)
                 .ToList();
 
             if (unitsNearPlayer.Count > 2 &&
-                HookManager.LuaGetSpellCooldown("Blood Boil") <= 0 &&
-                HookManager.WowIsRuneReady(0) ||
-                HookManager.WowIsRuneReady(1))
+                WowInterface.NewWowInterface.LuaGetSpellCooldown("Blood Boil") <= 0 &&
+                WowInterface.NewWowInterface.WowIsRuneReady(0) ||
+                WowInterface.NewWowInterface.WowIsRuneReady(1))
             {
-                HookManager.LuaCastSpell("Blood Boil");
+                WowInterface.NewWowInterface.LuaCastSpell("Blood Boil");
                 return;
             }
 
-            List<WowUnit> unitsNearTarget = ObjectManager.WowObjects
+            List<WowUnit> unitsNearTarget = WowInterface.Objects.WowObjects
                 .OfType<WowUnit>()
                 .Where(e => e.Position.GetDistance(target.Position) <= 30)
                 .ToList();
 
             if (unitsNearTarget.Count > 2 &&
-                HookManager.LuaGetSpellCooldown("Death and Decay") <= 0 &&
+                WowInterface.NewWowInterface.LuaGetSpellCooldown("Death and Decay") <= 0 &&
                 IsOneOfAllRunesReady())
             {
-                HookManager.LuaCastSpell("Death and Decay");
-                HookManager.WowClickOnTerrain(target.Position);
+                WowInterface.NewWowInterface.LuaCastSpell("Death and Decay");
+                WowInterface.NewWowInterface.WowClickOnTerrain(target.Position);
                 return;
             }
 
-            if (HookManager.LuaGetSpellCooldown("Icy Touch") <= 0 &&
-                HookManager.WowIsRuneReady(2) ||
-                HookManager.WowIsRuneReady(3))
+            if (WowInterface.NewWowInterface.LuaGetSpellCooldown("Icy Touch") <= 0 &&
+                WowInterface.NewWowInterface.WowIsRuneReady(2) ||
+                WowInterface.NewWowInterface.WowIsRuneReady(3))
             {
-                HookManager.LuaCastSpell("Icy Touch");
+                WowInterface.NewWowInterface.LuaCastSpell("Icy Touch");
                 return;
             }
         }
 
         private bool IsOneOfAllRunesReady()
         {
-            return HookManager.WowIsRuneReady(0)
-                       || HookManager.WowIsRuneReady(1)
-                       && HookManager.WowIsRuneReady(2)
-                       || HookManager.WowIsRuneReady(3)
-                       && HookManager.WowIsRuneReady(4)
-                       || HookManager.WowIsRuneReady(5);
+            return WowInterface.NewWowInterface.WowIsRuneReady(0)
+                       || WowInterface.NewWowInterface.WowIsRuneReady(1)
+                       && WowInterface.NewWowInterface.WowIsRuneReady(2)
+                       || WowInterface.NewWowInterface.WowIsRuneReady(3)
+                       && WowInterface.NewWowInterface.WowIsRuneReady(4)
+                       || WowInterface.NewWowInterface.WowIsRuneReady(5);
         }
     }
 }

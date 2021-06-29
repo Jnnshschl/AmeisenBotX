@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Db.Enums;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,7 @@ namespace AmeisenBotX
 
         private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot.WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
+            if (AmeisenBot.WowInterface.NewWowInterface.WowExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
             {
                 textboxLuaResult.Text = result;
             }
@@ -58,7 +58,7 @@ namespace AmeisenBotX
 
         private void ButtonLuaExecute_Copy_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.HookManager.LuaDoString(textboxLuaCode.Text);
+            AmeisenBot.WowInterface.NewWowInterface.LuaDoString(textboxLuaCode.Text);
         }
 
         private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
@@ -148,7 +148,7 @@ namespace AmeisenBotX
 
                 List<(WowObject, double)> wowObjects = new();
 
-                foreach (WowObject x in AmeisenBot.WowInterface.ObjectManager.WowObjects)
+                foreach (WowObject x in AmeisenBot.WowInterface.Objects.WowObjects)
                 {
                     if (x == null)
                     {

@@ -1,11 +1,11 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Jobs
 
             if (SellActionsNeeded > 0)
             {
-                WowGameobject mailboxNode = WowInterface.ObjectManager.WowObjects
+                WowGameobject mailboxNode = WowInterface.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
                             && x.Position.GetDistance(WowInterface.Player.Position) < 15)
@@ -123,8 +123,8 @@ namespace AmeisenBotX.Core.Jobs
 
                         if (MailSentEvent.Run())
                         {
-                            WowInterface.HookManager.WowObjectRightClick(mailboxNode);
-                            WowInterface.HookManager.LuaDoString("MailFrameTab2:Click();");
+                            WowInterface.NewWowInterface.WowObjectRightClick(mailboxNode.BaseAddress);
+                            WowInterface.NewWowInterface.LuaDoString("MailFrameTab2:Click();");
 
                             int usedItems = 0;
                             foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items)
@@ -134,13 +134,13 @@ namespace AmeisenBotX.Core.Jobs
                                     continue;
                                 }
 
-                                WowInterface.HookManager.LuaUseContainerItem(item.BagId, item.BagSlot);
+                                WowInterface.NewWowInterface.LuaUseContainerItem(item.BagId, item.BagSlot);
                                 ++usedItems;
                             }
 
                             if (usedItems > 0)
                             {
-                                WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
+                                WowInterface.NewWowInterface.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
                                 --SellActionsNeeded;
                             }
                             else
@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.Jobs
                 // search for nodes
                 int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
 
-                WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
+                WowGameobject nearestNode = WowInterface.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
                              && Enum.IsDefined(typeof(WowOreId), e.DisplayId)
@@ -225,13 +225,13 @@ namespace AmeisenBotX.Core.Jobs
             {
                 // move to the node
                 double distanceToNode = WowInterface.Player.Position.GetDistance(SelectedPosition);
-                WowGameobject node = WowInterface.ObjectManager.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
+                WowGameobject node = WowInterface.Objects.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
 
                 if (distanceToNode < 3)
                 {
                     if (WowInterface.Player.IsMounted)
                     {
-                        WowInterface.HookManager.LuaDismissCompanion();
+                        WowInterface.NewWowInterface.LuaDismissCompanion();
                         return;
                     }
 
@@ -242,11 +242,11 @@ namespace AmeisenBotX.Core.Jobs
                         if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
                         {
-                            WowInterface.HookManager.LuaLootEveryThing();
+                            WowInterface.NewWowInterface.LuaLootEveryThing();
                         }
                         else
                         {
-                            WowInterface.HookManager.WowObjectRightClick(node);
+                            WowInterface.NewWowInterface.WowObjectRightClick(node.BaseAddress);
                         }
                     }
 

@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
@@ -29,14 +29,14 @@ namespace AmeisenBotX.Core.Fsm.Routines
                 {
                     // equip item and sell the other after
                     itemToSell = itemToReplace;
-                    wowInterface.HookManager.LuaEquipItem(item, itemToReplace);
+                    wowInterface.NewWowInterface.LuaEquipItem(item.Name/*, itemToReplace*/);
                 }
 
                 if (itemToSell != null
-                    && (wowInterface.ObjectManager.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
+                    && (wowInterface.Objects.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
                 {
-                    wowInterface.HookManager.LuaUseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
-                    wowInterface.HookManager.LuaCofirmStaticPopup();
+                    wowInterface.NewWowInterface.LuaUseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
+                    wowInterface.NewWowInterface.LuaCofirmStaticPopup();
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Jobs.Profiles;
 using System.Collections.Generic;

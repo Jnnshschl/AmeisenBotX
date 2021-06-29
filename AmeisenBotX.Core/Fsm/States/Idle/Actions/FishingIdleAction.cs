@@ -1,10 +1,9 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +55,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                     && (WowInterface.CharacterManager.Inventory.Items.OfType<WowWeapon>().Any(e => e.WeaponType == WowWeaponType.FISHING_POLES)
                         || IsFishingRodEquipped())
                     // do i know any fishing spot around here
-                    && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois);
+                    && WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois);
 
             if (status)
             {
@@ -71,7 +70,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             if ((CurrentSpot == default || SpotSelected + SpotDuration <= DateTime.UtcNow)
                 && !WowInterface.Player.IsCasting
-                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois))
+                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois))
             {
                 CurrentSpot = pois.ElementAt(Rnd.Next(0, pois.Count() - 1));
                 SpotSelected = DateTime.UtcNow;
@@ -85,7 +84,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSpot);
                     return;
                 }
-                else if (WowInterface.HookManager.WowIsClickToMoveActive())
+                else if (WowInterface.NewWowInterface.WowIsClickToMoveActive())
                 {
                     WowInterface.MovementEngine.StopMovement();
                     return;
@@ -93,7 +92,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                 if (!BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, CurrentSpot))
                 {
-                    WowInterface.HookManager.WowFacePosition(WowInterface.Player, CurrentSpot);
+                    WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, CurrentSpot);
                     return;
                 }
             }
@@ -105,11 +104,11 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                 if (fishingRod != null)
                 {
-                    WowInterface.HookManager.LuaEquipItem(fishingRod);
+                    WowInterface.NewWowInterface.LuaEquipItem(fishingRod.Name);
                 }
             }
 
-            WowGameobject fishingBobber = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+            WowGameobject fishingBobber = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                 .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == WowInterface.Player.Guid);
 
             if (!Started)
@@ -129,12 +128,12 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (!WowInterface.Player.IsCasting || fishingBobber == null)
             {
-                WowInterface.HookManager.LuaCastSpell("Fishing");
+                WowInterface.NewWowInterface.LuaCastSpell("Fishing");
             }
             else if (fishingBobber.Flags[(int)WowGameobjectFlags.DoesNotDespawn])
             {
-                WowInterface.HookManager.WowObjectRightClick(fishingBobber);
-                WowInterface.HookManager.LuaLootEveryThing();
+                WowInterface.NewWowInterface.WowObjectRightClick(fishingBobber.BaseAddress);
+                WowInterface.NewWowInterface.LuaLootEveryThing();
             }
         }
 

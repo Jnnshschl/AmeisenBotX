@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.Raw;
+﻿using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

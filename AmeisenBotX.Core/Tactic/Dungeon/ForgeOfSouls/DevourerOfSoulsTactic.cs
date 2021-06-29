@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DevourerOfSoulsDisplayId, false);
+            WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position,DevourerOfSoulsDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -55,10 +55,10 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == WowRole.Tank)
                 {
-                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
+                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.Objects.MeanGroupPosition, MidPosition), 8.0f);
                     float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
 
-                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.Player.Guid)
                     {
                         if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {

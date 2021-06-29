@@ -1,10 +1,10 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -120,7 +120,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public abstract TalentTree Talents { get; }
 
-        public bool TargetInLineOfSight => WowInterface.ObjectManager.IsTargetInLineOfSight;
+        public bool TargetInLineOfSight => WowInterface.Objects.IsTargetInLineOfSight;
 
         public TimegatedEvent TargetSelectEvent { get; private set; }
 
@@ -145,9 +145,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
             if (WowInterface.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowUnitRightClick(target);
+                WowInterface.NewWowInterface.WowUnitRightClick(target.BaseAddress);
             }
             else
             {
@@ -158,16 +158,16 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         //Change target if target to far away
         public void ChangeTargetToAttack()
         {
-            IEnumerable<WowPlayer> PlayerNearPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 15);
+            IEnumerable<WowPlayer> PlayerNearPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 15);
 
             WowUnit target = WowInterface.Target;
             if (target == null)
             {
                 return;
             }
-            if (PlayerNearPlayer.Count() >= 1 && WowInterface.ObjectManager.Target.HealthPercentage >= 60 && WowInterface.Player.Position.GetDistance(target.Position) >= 20)
+            if (PlayerNearPlayer.Count() >= 1 && WowInterface.Objects.Target.HealthPercentage >= 60 && WowInterface.Player.Position.GetDistance(target.Position) >= 20)
             {
-                WowInterface.HookManager.WowClearTarget();
+                WowInterface.NewWowInterface.WowClearTarget();
                 return;
             }
         }
@@ -182,7 +182,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     if (slot == WowEquipmentSlot.INVSLOT_MAINHAND)
                     {
-                        WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                        WowItem item = WowInterface.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                         if (item != null
                             && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
@@ -193,7 +193,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     }
                     else if (slot == WowEquipmentSlot.INVSLOT_OFFHAND)
                     {
-                        WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().LastOrDefault(e => e.EntryId == itemId);
+                        WowItem item = WowInterface.Objects.WowObjects.OfType<WowItem>().LastOrDefault(e => e.EntryId == itemId);
 
                         if (item != null
                             && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
@@ -223,20 +223,20 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            WowInterface.NewWowInterface.LuaCastSpell(spellName);
                             return true;
                         }
                     }
                 }
                 else
                 {
-                    WowInterface.HookManager.WowTargetGuid(WowInterface.PlayerGuid);
+                    WowInterface.NewWowInterface.WowTargetGuid(WowInterface.Player.Guid);
 
                     Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
 
                     if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
                     {
-                        WowInterface.HookManager.LuaCastSpell(spellName);
+                        WowInterface.NewWowInterface.LuaCastSpell(spellName);
                         return true;
                     }
                 }
@@ -257,7 +257,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 if (IsSpellReady(EveryManforHimselfSpell))
                 {
-                    WowInterface.HookManager.LuaCastSpell(EveryManforHimselfSpell);
+                    WowInterface.NewWowInterface.LuaCastSpell(EveryManforHimselfSpell);
                 }
             }
 
@@ -266,7 +266,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             {
                 if (IsSpellReady(StoneformSpell))
                 {
-                    WowInterface.HookManager.LuaCastSpell(StoneformSpell);
+                    WowInterface.NewWowInterface.LuaCastSpell(StoneformSpell);
                 }
             }
 
@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
                 if (healthItem != null)
                 {
-                    WowInterface.HookManager.LuaUseItemByName(healthItem.Name);
+                    WowInterface.NewWowInterface.LuaUseItemByName(healthItem.Name);
                 }
             }
 
@@ -289,7 +289,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
                 if (manaItem != null)
                 {
-                    WowInterface.HookManager.LuaUseItemByName(manaItem.Name);
+                    WowInterface.NewWowInterface.LuaUseItemByName(manaItem.Name);
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (DateTime.Now > spellCoolDown[spellName])
             {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.HookManager.LuaGetSpellCooldown(spellName));
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(WowInterface.NewWowInterface.LuaGetSpellCooldown(spellName));
                 return true;
             }
 
@@ -316,7 +316,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public void revivePartyMember(string reviveSpellName)
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+            List<WowUnit> partyMemberToHeal = new List<WowUnit>(WowInterface.Objects.Partymembers)
             {
                 WowInterface.Player
             };
@@ -325,7 +325,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
             if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
             {
-                WowInterface.HookManager.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                WowInterface.NewWowInterface.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 CustomCastSpellMana(reviveSpellName);
             }
         }
@@ -334,14 +334,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 50)
-                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && (e.IsPvpFlagged && !e.IsFriendyTo(WowInterface, WowInterface.Player)) || (e.IsInCombat)) || (e.IsInCombat && e.Name != "The Lich King" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
+                WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 50)
+                .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && (e.IsPvpFlagged && WowInterface.NewWowInterface.GetReaction(e.BaseAddress, WowInterface.Player.BaseAddress) != WowUnitReaction.Friendly) || (e.IsInCombat)) || (e.IsInCombat && e.Name != "The Lich King" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();//&& e.Type(Player)
 
                 if (nearTarget != null)
                 {
-                    WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(nearTarget.Guid);
 
                     if (!TargetInLineOfSight)
                     {
@@ -359,14 +359,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTargetToTank = WowInterface.ObjectManager.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.Player.Position, 60)
-                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name != "The Lich King" && e.Name != "Anub'Rekhan" && !(WowInterface.ObjectManager.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
+                WowUnit nearTargetToTank = WowInterface.Objects.GetEnemiesTargetingPartymembers<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 60)
+                .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && e.Name != "The Lich King" && e.Name != "Anub'Rekhan" && !(WowInterface.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
 
                 if (nearTargetToTank != null)
                 {
-                    WowInterface.HookManager.WowTargetGuid(nearTargetToTank.Guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(nearTargetToTank.Guid);
 
                     if (!TargetInLineOfSight)
                     {
@@ -379,14 +379,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 }
                 else
                 {
-                    WowUnit nearTarget = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 80)
+                    WowUnit nearTarget = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 80)
                     .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type == WowObjectType.Player)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();//&& e.Type(Player)
 
                     if (nearTarget != null)
                     {
-                        WowInterface.HookManager.WowTargetGuid(nearTarget.Guid);
+                        WowInterface.NewWowInterface.WowTargetGuid(nearTarget.Guid);
 
                         if (!TargetInLineOfSight)
                         {

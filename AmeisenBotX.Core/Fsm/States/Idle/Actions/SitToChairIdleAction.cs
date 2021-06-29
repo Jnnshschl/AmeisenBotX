@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
@@ -44,12 +44,12 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             // would cause a suspicous loop of running around
             Vector3 originPos = StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit unit, false) ? unit.Position : WowInterface.Player.Position;
 
-            WowGameobject seat = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+            WowGameobject seat = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                 .OrderBy(e => e.Position.GetDistance(originPos))
                 .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Chair
                     // make sure no one sits on the chair besides ourself
-                    && !WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
-                        .Where(e => e.Guid != WowInterface.PlayerGuid)
+                    && !WowInterface.Objects.WowObjects.OfType<WowUnit>()
+                        .Where(e => e.Guid != WowInterface.Player.Guid)
                         .Any(x => e.Position.GetDistance(x.Position) < 0.6f)
                     && e.Position.GetDistance(originPos) < MaxDistance - 0.2f);
 
@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 else
                 {
                     WowInterface.MovementEngine.StopMovement();
-                    WowInterface.HookManager.WowObjectRightClick(CurrentSeat);
+                    WowInterface.NewWowInterface.WowObjectRightClick(CurrentSeat.BaseAddress);
 
                     SatDown = true;
                 }

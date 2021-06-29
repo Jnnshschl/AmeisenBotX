@@ -37,11 +37,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (Finished)
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 return;
             }
 
-            WowGameobject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(ObjectDisplayIds);
+            WowGameobject = WowInterface.Objects.GetClosestWowGameobjectByDisplayId(WowInterface.Player.Position, ObjectDisplayIds);
 
             if (WowGameobject != null)
             {

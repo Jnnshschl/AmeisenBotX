@@ -1,14 +1,14 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Enums;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Common.Enums;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using Newtonsoft.Json;
@@ -215,7 +215,7 @@ namespace AmeisenBotX.Core.Character
                 {
                     if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
                     {
-                        WowInterface.HookManager.LuaEquipItem(container.FirstOrDefault());
+                        WowInterface.NewWowInterface.LuaEquipItem(container.First().Name);
                         break;
                     }
                 }
@@ -255,7 +255,7 @@ namespace AmeisenBotX.Core.Character
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
-                                WowInterface.HookManager.LuaEquipItem(item, itemToReplace);
+                                WowInterface.NewWowInterface.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
                                 Equipment.Update();
                                 break;
                             }
@@ -269,7 +269,7 @@ namespace AmeisenBotX.Core.Character
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
-                            WowInterface.HookManager.LuaEquipItem(itemToEquip);
+                            WowInterface.NewWowInterface.LuaEquipItem(itemToEquip.Name);
                             Equipment.Update();
                         }
                     }
@@ -394,7 +394,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            if (int.TryParse(WowInterface.HookManager.LuaGetMoney(), out int money))
+            if (int.TryParse(WowInterface.NewWowInterface.LuaGetMoney(), out int money))
             {
                 Money = money;
             }
@@ -404,14 +404,14 @@ namespace AmeisenBotX.Core.Character
         {
             try
             {
-                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.HookManager.LuaGetMounts());
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.NewWowInterface.LuaGetMounts());
             }
             catch { }
         }
 
         private void UpdateSkills()
         {
-            Skills = WowInterface.HookManager.LuaGetSkills();
+            Skills = WowInterface.NewWowInterface.LuaGetSkills();
         }
     }
 }

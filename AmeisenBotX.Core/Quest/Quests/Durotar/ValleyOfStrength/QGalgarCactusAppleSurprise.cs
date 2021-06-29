@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
     {
         public QGalgarCactusAppleSurprise(WowInterface wowInterface)
             : base(wowInterface, 4402, "Galgar's Cactus Apple Surprise", 1, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
+                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
+                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

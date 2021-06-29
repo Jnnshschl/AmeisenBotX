@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 
 namespace AmeisenBotX.Core.Data.Db.Structs

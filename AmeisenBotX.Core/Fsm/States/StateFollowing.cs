@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private TimegatedEvent OffsetCheckEvent { get; }
 
-        private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(PlayerToFollowGuid);
+        private WowPlayer PlayerToFollow => WowInterface.Objects.GetWowObjectByGuid<WowPlayer>(PlayerToFollowGuid);
 
         private ulong PlayerToFollowGuid { get; set; }
 
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             // TODO: make this crap less redundant
             // check the specific character
-            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.Objects.WowObjects.OfType<WowPlayer>();
 
             if (wowPlayers.Any())
             {
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 // check the group/raid leader
                 if (PlayerToFollow == null && Config.FollowGroupLeader)
                 {
-                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.ObjectManager.PartyleaderGuid));
+                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => p.Guid == WowInterface.Objects.Partyleader.Guid));
 
                     if (player != null)
                     {
@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 // check the group members
                 if (PlayerToFollow == null && Config.FollowGroupMembers)
                 {
-                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => WowInterface.ObjectManager.PartymemberGuids.Contains(p.Guid)));
+                    WowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => WowInterface.Objects.PartymemberGuids.Contains(p.Guid)));
 
                     if (player != null)
                     {
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (PlayerToFollow == null)
             {
                 // handle nearby portals, if our groupleader enters a portal, we follow
-                WowGameobject nearestPortal = WowInterface.ObjectManager.WowObjects
+                WowGameobject nearestPortal = WowInterface.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                              || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
@@ -159,7 +159,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                         WowInterface.MovementEngine.StopMovement();
-                        WowInterface.HookManager.LuaCallCompanion(mount.Index);
+                        WowInterface.NewWowInterface.LuaCallCompanion(mount.Index);
                     }
                 }
 
@@ -174,7 +174,7 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 if (LosCheckEvent.Run())
                 {
-                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.Player.Position, posToGoTo, 2.0f))
+                    if (WowInterface.NewWowInterface.WowIsInLineOfSight(WowInterface.Player.Position, posToGoTo, 2.0f))
                     {
                         InLos = true;
                     }

@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Battleground.Jannis.Profiles;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Battleground.Jannis
 {
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis
 
         private bool TryLoadProfile()
         {
-            switch (WowInterface.ObjectManager.MapId)
+            switch (WowInterface.Objects.MapId)
             {
                 case WowMapId.WarsongGulch:
                     Profile = new WarsongGulchProfile(WowInterface);

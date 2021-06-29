@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Movement.Enums;
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else
             {
-                WowUnit selectedUnit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                WowUnit selectedUnit = WowInterface.Objects.WowObjects.OfType<WowUnit>()
                     .Where(e => e.IsLootable)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
@@ -78,7 +78,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     //     if (nearbyEnemies.Any())
                     //     {
                     //         var enemy = nearbyEnemies.FirstOrDefault();
-                    //         WowInterface.HookManager.WowTargetGuid(enemy.Guid);
+                    //         WowInterface.NewWowInterface.WowTargetGuid(enemy.Guid);
                     //         WowInterface.CombatClass.AttackTarget();
                     //         return;
                     //     }
@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     if (LastOpenLootTry.Run()
                         && WowInterface.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
                     {
-                        WowInterface.HookManager.WowStopClickToMove();
+                        WowInterface.NewWowInterface.WowStopClickToMove();
                         Loot(selectedUnit);
                         ++LootTryCount;
                     }
@@ -108,15 +108,15 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void Loot(WowUnit unit)
         {
-            WowInterface.HookManager.WowUnitRightClick(unit);
+            WowInterface.NewWowInterface.WowUnitRightClick(unit.BaseAddress);
 
             // if AutoLoot is enabled, the unit will be dequeued after it is looted because it will no longer be IsLootable
             // there is no need to handle the dequeing here
-            if (WowInterface.HookManager.LuaAutoLootEnabled()
+            if (WowInterface.NewWowInterface.LuaAutoLootEnabled()
                   && WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
                   && lootOpen > 0)
             {
-                WowInterface.HookManager.LuaLootEveryThing();
+                WowInterface.NewWowInterface.LuaLootEveryThing();
                 UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
             }
         }

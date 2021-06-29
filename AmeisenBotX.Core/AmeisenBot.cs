@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Battleground.einTyp;
 using AmeisenBotX.Core.Battleground.Jannis;
 using AmeisenBotX.Core.Battleground.KamelBG;
@@ -6,10 +7,9 @@ using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Combat.Classes;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data;
 using AmeisenBotX.Core.Data.Db;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Dungeon;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -46,6 +46,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Timer = System.Threading.Timer;
+using AmeisenBotX.Wow335a;
+using AmeisenBotX.Core.Hook.Modules;
+using AmeisenBotX.Common.Math;
 
 namespace AmeisenBotX.Core
 {
@@ -61,7 +64,7 @@ namespace AmeisenBotX.Core
         /// Call Start(), Pause(), Resume(), Dispose() to control the bots engine.
         /// </summary>
         /// <param name="config">The bot configuration.</param>
-        /// <param name="logfilePath">Logfile path.</param>
+        /// <param name="logfilePath">Logfile folder path, not a file path.</param>
         /// <param name="initialLogLevel">The initial LogLevel of the bots logger.</param>
         public AmeisenBot(AmeisenBotConfig config, string logfilePath = "", LogLevel initialLogLevel = LogLevel.Verbose)
         {
@@ -98,8 +101,8 @@ namespace AmeisenBotX.Core
             WowInterface.Personality = new();
             WowInterface.ChatManager = new(Config, DataFolder);
             WowInterface.CombatLogParser = new(WowInterface);
-            WowInterface.HookManager = new HookManager(WowInterface, Config);
-            WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
+            //WowInterface.NewWowInterface = new HookManager(WowInterface, Config);
+            //WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
             WowInterface.CharacterManager = new CharacterManager(WowInterface);
             WowInterface.EventHookManager = new(WowInterface);
             WowInterface.JobEngine = new(WowInterface, Config);
@@ -108,6 +111,91 @@ namespace AmeisenBotX.Core
             WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             WowInterface.MovementSettings = Config.MovementSettings;
             WowInterface.MovementEngine = new AMovementEngine(WowInterface, Config);
+
+            TracelineJumpHookModule jumpModule = new(null, null, WowInterface.XMemory, WowInterface.OffsetList);
+            jumpModule.Tick = () =>
+            {
+                // update Traceline Jump Check data
+                if (Config.MovementSettings.EnableTracelineJumpCheck && WowInterface.Player != null)
+                {
+                    Vector3 playerPosition = WowInterface.Player.Position;
+                    playerPosition.Z += WowInterface.MovementSettings.ObstacleCheckHeight;
+
+                    Vector3 pos = BotUtils.MoveAhead(playerPosition, WowInterface.Player.Rotation, WowInterface.MovementSettings.ObstacleCheckDistance);
+
+                    WowInterface.XMemory.Write(jumpModule.DataAddress, (1.0f, playerPosition, pos));
+                }
+            };
+
+            string staticPopupsVarName = BotUtils.FastRandomStringOnlyLetters();
+            string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
+            string handlerName = BotUtils.FastRandomStringOnlyLetters();
+            string tableName = BotUtils.FastRandomStringOnlyLetters();
+            string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
+            string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
+
+            WowInterface.EventHookManager.EventHookFrameName = eventHookFrameName;
+
+            string oldPoupString = string.Empty;
+            string oldBattlegroundStatus = string.Empty;
+
+            List<IHookModule> hookModules = new()
+            {
+                // Module to process wows events.
+                new RunLuaHookModule((x) =>
+                {
+                    if (WowInterface.XMemory.ReadString(x, Encoding.UTF8, out string s, 8192))
+                    {
+                        WowInterface.EventHookManager?.OnEventPush(s);
+                    }
+                }, null, WowInterface.XMemory, WowInterface.OffsetList, $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}", eventHookOutput),
+
+                // Module that does a traceline in front of the character
+                // to detect small obstacles that can be jumped over.
+                jumpModule,
+
+                // Modules that monitors the STATIC_POPUP windows.
+                new RunLuaHookModule((x) =>
+                {
+                    if (WowInterface.XMemory.ReadString(x, Encoding.UTF8, out string s, 128))
+                    {
+                        if (!string.IsNullOrWhiteSpace(s))
+                        {
+                            if (!oldPoupString.Equals(s))
+                            {
+                                AmeisenLogger.I.Log("StaticPopups", s);
+                                oldPoupString = s;
+                            }
+                        }
+                        else
+                        {
+                            oldPoupString = string.Empty;
+                        }
+                    }
+                }, null, WowInterface.XMemory, WowInterface.OffsetList, $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end", staticPopupsVarName),
+
+                // Module to monitor the battleground (and queue) status.
+                new RunLuaHookModule((x) =>
+                {
+                    if (WowInterface.XMemory.ReadString(x, Encoding.UTF8, out string s, 128))
+                    {
+                        if (!string.IsNullOrWhiteSpace(s))
+                        {
+                            if (!oldBattlegroundStatus.Equals(s))
+                            {
+                                AmeisenLogger.I.Log("BgStatus", s);
+                                oldBattlegroundStatus = s;
+                            }
+                        }
+                        else
+                        {
+                            oldPoupString = string.Empty;
+                        }
+                    }
+                }, null, WowInterface.XMemory, WowInterface.OffsetList, $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end", battlegroundStatusVarName),
+            };
+
+            WowInterface.NewWowInterface = new WowInterface335a(WowInterface.XMemory, WowInterface.OffsetList, hookModules);
 
             StateMachine = new(Config, WowInterface);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
@@ -227,7 +315,7 @@ namespace AmeisenBotX.Core
 
             if (Config.AutocloseWow || Config.AutoPositionWow)
             {
-                WowInterface.HookManager.LuaDoString("ForceQuit()");
+                WowInterface.NewWowInterface.LuaDoString("ForceQuit()");
 
                 // wait 5 sec for wow to exit, otherwise we kill it
                 TimeSpan timeToWait = TimeSpan.FromSeconds(5);
@@ -247,7 +335,7 @@ namespace AmeisenBotX.Core
                 }
             }
 
-            WowInterface.HookManager.Unhook();
+            WowInterface.NewWowInterface.Dispose();
             WowInterface.XMemory.Dispose();
 
             WowInterface.Db.Save(Path.Combine(DataFolder, "db.json"));
@@ -533,12 +621,12 @@ namespace AmeisenBotX.Core
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.LuaCofirmStaticPopup();
+            WowInterface.NewWowInterface.LuaCofirmStaticPopup();
         }
 
         private void OnConfirmLootRoll(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.LuaCofirmLootRoll();
+            WowInterface.NewWowInterface.LuaCofirmLootRoll();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
@@ -553,7 +641,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.HookManager.LuaClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+                WowInterface.NewWowInterface.LuaClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
             }
         }
 
@@ -561,7 +649,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.HookManager.LuaSetLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : WowRole.Dps);
+                WowInterface.NewWowInterface.LuaSetLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : WowRole.Dps);
             }
         }
 
@@ -569,15 +657,15 @@ namespace AmeisenBotX.Core
         {
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemLink = WowInterface.HookManager.LuaGetLootRollItemLink(rollId);
-                string itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
+                string itemLink = WowInterface.NewWowInterface.LuaGetLootRollItemLink(rollId);
+                string itemJson = WowInterface.NewWowInterface.LuaGetItemJsonByNameOrLink(itemLink);
 
                 WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                 if (item.Name == "0" || item.ItemLink == "0")
                 {
                     // get the item id and try again
-                    itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(
+                    itemJson = WowInterface.NewWowInterface.LuaGetItemJsonByNameOrLink(
                         itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                         .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
 
@@ -588,23 +676,23 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    WowInterface.HookManager.LuaRollOnLoot(rollId, WowRollType.Need);
+                    WowInterface.NewWowInterface.LuaRollOnLoot(rollId, WowRollType.Need);
                     return;
                 }
             }
 
-            WowInterface.HookManager.LuaRollOnLoot(rollId, WowRollType.Pass);
+            WowInterface.NewWowInterface.LuaRollOnLoot(rollId, WowRollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
             if (Config.LootOnlyMoneyAndQuestitems)
             {
-                WowInterface.HookManager.LuaLootMoneyAndQuestItems();
+                WowInterface.NewWowInterface.LuaLootMoneyAndQuestItems();
                 return;
             }
 
-            WowInterface.HookManager.LuaLootEveryThing();
+            WowInterface.NewWowInterface.LuaLootEveryThing();
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
@@ -614,7 +702,7 @@ namespace AmeisenBotX.Core
                 return;
             }
 
-            WowInterface.HookManager.LuaAcceptPartyInvite();
+            WowInterface.NewWowInterface.LuaAcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
@@ -623,7 +711,7 @@ namespace AmeisenBotX.Core
             {
                 if (args.Count == 1 && args[0] == "1")
                 {
-                    WowInterface.HookManager.LuaAcceptBattlegroundInvite();
+                    WowInterface.NewWowInterface.LuaAcceptBattlegroundInvite();
                 }
             }
         }
@@ -632,7 +720,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                WowInterface.HookManager.LuaDoString("ConfirmAcceptQuest();");
+                WowInterface.NewWowInterface.LuaDoString("ConfirmAcceptQuest();");
             }
         }
 
@@ -642,7 +730,7 @@ namespace AmeisenBotX.Core
                 && StateMachine.CurrentState.Key != BotState.Selling
                 && StateMachine.CurrentState.Key != BotState.Repairing)
             {
-                WowInterface.HookManager.LuaAcceptQuests();
+                WowInterface.NewWowInterface.LuaAcceptQuests();
             }
         }
 
@@ -650,31 +738,31 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                WowInterface.HookManager.LuaClickUiElement("QuestFrameCompleteQuestButton");
+                WowInterface.NewWowInterface.LuaClickUiElement("QuestFrameCompleteQuestButton");
             }
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.LuaCofirmReadyCheck(true);
+            WowInterface.NewWowInterface.LuaCofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.LuaAcceptResurrect();
+            WowInterface.NewWowInterface.LuaAcceptResurrect();
         }
 
         private void OnShowQuestFrame(long timestamp, List<string> args)
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                WowInterface.HookManager.LuaDoString("AcceptQuest();");
+                WowInterface.NewWowInterface.LuaDoString("AcceptQuest();");
             }
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.LuaAcceptSummon();
+            WowInterface.NewWowInterface.LuaAcceptSummon();
         }
 
         private void OnTalentPointsChange(long timestamp, List<string> args)
@@ -683,14 +771,14 @@ namespace AmeisenBotX.Core
             {
                 TalentUpdateRunning = true;
                 WowInterface.CharacterManager.TalentManager.Update();
-                WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.HookManager.LuaGetUnspentTalentPoints());
+                WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.NewWowInterface.LuaGetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
         }
 
         private void OnTradeAcceptUpdate(long timestamp, List<string> args)
         {
-            WowInterface.HookManager.LuaDoString("AcceptTrade();");
+            WowInterface.NewWowInterface.LuaDoString("AcceptTrade();");
         }
 
         private void RconClientTimerTick(object state)
@@ -739,7 +827,7 @@ namespace AmeisenBotX.Core
                                 Health = WowInterface.Player.Health,
                                 ItemLevel = (int)Math.Round(WowInterface.CharacterManager.Equipment.AverageItemLevel),
                                 Level = WowInterface.Player.Level,
-                                MapName = WowInterface.ObjectManager.MapId.ToString(),
+                                MapName = WowInterface.Objects.MapId.ToString(),
                                 MaxEnergy = maxResource,
                                 MaxExp = WowInterface.Player.NextLevelXp,
                                 MaxHealth = WowInterface.Player.MaxHealth,
@@ -748,8 +836,8 @@ namespace AmeisenBotX.Core
                                 PosY = WowInterface.Player.Position.Y,
                                 PosZ = WowInterface.Player.Position.Z,
                                 State = StateMachine.CurrentState.Key.ToString(),
-                                SubZoneName = WowInterface.ObjectManager.ZoneSubName,
-                                ZoneName = WowInterface.ObjectManager.ZoneName,
+                                SubZoneName = WowInterface.Objects.ZoneSubName,
+                                ZoneName = WowInterface.Objects.ZoneName,
                             });
 
                             if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
@@ -759,7 +847,9 @@ namespace AmeisenBotX.Core
                                 Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
 
                                 using (Graphics g = Graphics.FromImage(bmp))
+                                {
                                     g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new(rc.Right - rc.Left, rc.Bottom - rc.Top));
+                                }
 
                                 using MemoryStream ms = new();
                                 bmp.Save(ms, ImageFormat.Png);
@@ -816,7 +906,7 @@ namespace AmeisenBotX.Core
 
         private void SetupRconClient()
         {
-            WowInterface.ObjectManager.OnObjectUpdateComplete += delegate
+            WowInterface.Objects.OnObjectUpdateComplete += delegate
             {
                 if (!NeedToSetupRconClient && WowInterface.Player != null)
                 {

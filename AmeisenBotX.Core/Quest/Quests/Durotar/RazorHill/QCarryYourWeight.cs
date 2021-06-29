@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
     {
         public QCarryYourWeight(WowInterface wowInterface)
             : base(wowInterface, 791, "Carry Your Weight", 4, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
+                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
+                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

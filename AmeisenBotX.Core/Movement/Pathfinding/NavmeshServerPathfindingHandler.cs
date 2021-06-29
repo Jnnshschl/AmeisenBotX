@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Movement.Pathfinding.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
@@ -21,7 +22,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding
 
         public double GetPathDistance(int mapId, Vector3 start, Vector3 end)
         {
-            var path = GetPath(mapId, start, end);
+            IEnumerable<Vector3> path = GetPath(mapId, start, end);
             return GetPathDistance(path, start);
         }
 

@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(commandingShoutSpell, () => TryCastSpell(commandingShoutSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(demoralizingShoutSpell, () => TryCastSpell(demoralizingShoutSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(demoralizingShoutSpell, () => TryCastSpell(demoralizingShoutSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         // do not return, hehe xd
                     }
 
-                    int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 10.0f).Count();
+                    int nearEnemies = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 10.0f).Count();
 
                     if ((nearEnemies > 2 || WowInterface.Player.Rage > 40)
                         && TryCastSpellWarrior(thunderClapSpell, defensiveStanceSpell, WowInterface.Target.Guid, true))
@@ -149,8 +149,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         return;
                     }
 
-                    if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
-                        && (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
+                    if (WowInterface.Target.TargetGuid != WowInterface.Player.Guid
+                        && (WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
                             && TryCastSpell(challengingShoutSpell, 0, true))
                         || TryCastSpellWarrior(tauntSpell, defensiveStanceSpell, WowInterface.Target.Guid))
                     {

@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 new Selector<CtfBlackboard>
                 (
                     "AmITheFlagCarrier",
-                    (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.PlayerGuid,
+                    (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.Player.Guid,
                     new Leaf<CtfBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition)),
                     new Selector<CtfBlackboard>
                     (
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 new Selector<CtfBlackboard>
                 (
                     "AmITheFlagCarrier",
-                    (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.PlayerGuid,
+                    (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == WowInterface.Player.Guid,
                     new Selector<CtfBlackboard>
                     (
                         "AmINearOwnBase",
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private bool AmINearOwnFlagCarrier(CtfBlackboard blackboard)
         {
-            return WowInterface.ObjectManager.GetNearEnemies<WowUnit>(blackboard.MyTeamFlagCarrier.Position, 48.0f).Any(e => !e.IsDead);
+            return WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, blackboard.MyTeamFlagCarrier.Position, 48.0f).Any(e => !e.IsDead);
         }
 
         private bool AmIOneOfTheClosestToOwnFlagCarrier(CtfBlackboard blackboard, int memberCount)
@@ -192,19 +192,19 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
 
             // check whether i'm part of the closest x (memberCount) members to the flag carrier
-            int index = WowInterface.ObjectManager.Partymembers
+            int index = WowInterface.Objects.Partymembers
                             .OfType<WowPlayer>()
                             .Where(e => e.Guid != blackboard.MyTeamFlagCarrier.Guid)
                             .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                             .Select((player, id) => new { Player = player, Index = id })
-                            .FirstOrDefault(_ => _.Player.Guid == WowInterface.PlayerGuid)?.Index ?? -1;
+                            .FirstOrDefault(_ => _.Player.Guid == WowInterface.Player.Guid)?.Index ?? -1;
 
             return index > -1 && index <= memberCount;
         }
 
         private BehaviorTreeStatus AttackNearWeakestEnemy(CtfBlackboard blackboard)
         {
-            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -218,7 +218,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 else if (ActionEvent.Run())
                 {
                     WowInterface.Globals.ForceCombat = true;
-                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(weakestPlayer.Guid);
                 }
             }
             else
@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
             else
             {
-                WowUnit nearEnemy = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
+                WowUnit nearEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
@@ -252,7 +252,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     else if (ActionEvent.Run())
                     {
                         WowInterface.Globals.ForceCombat = true;
-                        WowInterface.HookManager.WowTargetGuid(nearEnemy.Guid);
+                        WowInterface.NewWowInterface.WowTargetGuid(nearEnemy.Guid);
                     }
                 }
             }
@@ -261,13 +261,13 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private bool DoWeOutnumberOurEnemies(CtfBlackboard blackboard)
         {
-            if (blackboard.MyTeamFlagCarrier != null && blackboard.MyTeamFlagCarrier.Guid == WowInterface.PlayerGuid)
+            if (blackboard.MyTeamFlagCarrier != null && blackboard.MyTeamFlagCarrier.Guid == WowInterface.Player.Guid)
             {
                 return false;
             }
 
-            int friends = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.Player.Position, 18.0f).Count();
-            int enemies = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 18.0f).Count();
+            int friends = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 18.0f).Count();
+            int enemies = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 18.0f).Count();
 
             return enemies > 0 && friends >= enemies;
         }
@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus FleeFromComingEnemies(CtfBlackboard blackboard)
         {
-            WowUnit nearestEnemy = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
+            WowUnit nearestEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
 
             if (nearestEnemy != null)
             {
@@ -294,7 +294,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private bool IsAnyBuffNearMe(double distance)
         {
-            return WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(new List<int>() { 5991, 5995, 5931 })?.Position.GetDistance(WowInterface.Player.Position) < distance;
+            return WowInterface.Objects.GetClosestWowGameobjectByDisplayId(WowInterface.Player.Position, new List<int>() { 5991, 5995, 5931 })?.Position.GetDistance(WowInterface.Player.Position) < distance;
         }
 
         private bool IsFlagNear()
@@ -306,7 +306,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         {
             if (WowInterface.Player.IsAlliance())
             {
-                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                WowGameobject obj = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                                     .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 411)
                                     .FirstOrDefault();
 
@@ -314,7 +314,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
             else
             {
-                WowGameobject obj = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                WowGameobject obj = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                                     .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 850)
                                     .FirstOrDefault();
 
@@ -340,7 +340,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             else if (ActionEvent.Run())
             {
                 WowInterface.Globals.ForceCombat = true;
-                WowInterface.HookManager.WowTargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
+                WowInterface.NewWowInterface.WowTargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
             return BehaviorTreeStatus.Ongoing;
@@ -364,7 +364,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus MoveToNearestBuff(CtfBlackboard blackboard)
         {
-            WowGameobject buffObject = WowInterface.ObjectManager.GetClosestWowGameobjectByDisplayId(new List<int>() { 5991, 5995, 5931 });
+            WowGameobject buffObject = WowInterface.Objects.GetClosestWowGameobjectByDisplayId(WowInterface.Player.Position, new List<int>() { 5991, 5995, 5931 });
 
             if (buffObject != null
                 && buffObject.Position.GetDistance(WowInterface.Player.Position) > 3.0)
@@ -394,7 +394,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
             else
             {
-                WowUnit nearEnemy = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
+                WowUnit nearEnemy = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
@@ -408,7 +408,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     else if (ActionEvent.Run())
                     {
                         WowInterface.Globals.ForceCombat = true;
-                        WowInterface.HookManager.WowTargetGuid(nearEnemy.Guid);
+                        WowInterface.NewWowInterface.WowTargetGuid(nearEnemy.Guid);
                     }
                 }
             }
@@ -426,7 +426,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                 if (LosCheckEvent.Run())
                 {
-                    if (WowInterface.HookManager.WowIsInLineOfSight(WowInterface.Player.Position, position, 2f))
+                    if (WowInterface.NewWowInterface.WowIsInLineOfSight(WowInterface.Player.Position, position, 2f))
                     {
                         InLos = true;
                     }
@@ -457,7 +457,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
         {
             try
             {
-                if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
+                if (WowInterface.NewWowInterface.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
                 {
                     dynamic bgState = JsonConvert.DeserializeObject(result);
 
@@ -488,8 +488,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                             0f
                         );
 
-                        JBgBlackboard.MyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
-                        JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.MyTeamFlagCarrier = WowInterface.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
                     }
                     else
                     {
@@ -518,11 +518,11 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                             0f
                         );
 
-                        JBgBlackboard.MyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
-                        JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.MyTeamFlagCarrier = WowInterface.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.EnemyTeamFlagCarrier = WowInterface.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
                     }
 
-                    JBgBlackboard.NearFlags = WowInterface.ObjectManager.WowObjects
+                    JBgBlackboard.NearFlags = WowInterface.Objects.WowObjects
                                                   .OfType<WowGameobject>()
                                                   .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)WowGameobjectDisplayId.WsgHordeFlag)
                                                   .ToList();
@@ -545,7 +545,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 }
                 else if (ActionEvent.Run())
                 {
-                    WowInterface.HookManager.WowObjectRightClick(nearestFlag);
+                    WowInterface.NewWowInterface.WowObjectRightClick(nearestFlag.BaseAddress);
                 }
             }
             else

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public PriestHoly(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.Player.Guid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(innerFireSpell, () => TryCastSpell(innerFireSpell, 0, true)));
 
             SpellUsageHealDict = new Dictionary<int, string>()
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if ((WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.Player.HealthPercentage < 75.0)
+            if ((WowInterface.Objects.PartymemberGuids.Any() || WowInterface.Player.HealthPercentage < 75.0)
                 && NeedToHealSomeone())
             {
                 return;
@@ -103,15 +103,15 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 return;
             }
 
-            if ((!WowInterface.ObjectManager.PartymemberGuids.Any() || WowInterface.Player.ManaPercentage > 50) && SelectTarget(TargetProviderDps))
+            if ((!WowInterface.Objects.PartymemberGuids.Any() || WowInterface.Player.ManaPercentage > 50) && SelectTarget(TargetProviderDps))
             {
                 if (WowInterface.Target.HasBuffByName(shadowWordPainSpell)
-                    && TryCastSpell(shadowWordPainSpell, WowInterface.TargetGuid, true))
+                    && TryCastSpell(shadowWordPainSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(smiteSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpell(smiteSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return true;
                 }
 
-                if (target.Guid != WowInterface.PlayerGuid
+                if (target.Guid != WowInterface.Player.Guid
                     && target.HealthPercentage < 70.0
                     && WowInterface.Player.HealthPercentage < 70.0
                     && TryCastSpell(bindingHealSpell, target.Guid, true))

@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Event
 
             // execute the pending lua stuff
             if (PendingLuaToExecute.Count > 0
-                && WowInterface.HookManager.LuaDoString(PendingLuaToExecute.Peek()))
+                && WowInterface.NewWowInterface.LuaDoString(PendingLuaToExecute.Peek()))
             {
                 PendingLuaToExecute.Dequeue();
             }
@@ -122,10 +122,10 @@ namespace AmeisenBotX.Core.Event
 
                 IsActive = false;
 
-                if (WowInterface.HookManager.IsWoWHooked)
+                if (WowInterface.NewWowInterface.IsWoWHooked)
                 {
-                    WowInterface.HookManager.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();");
-                    WowInterface.HookManager.LuaDoString($"{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
+                    WowInterface.NewWowInterface.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();");
+                    WowInterface.NewWowInterface.LuaDoString($"{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
                 }
             }
         }

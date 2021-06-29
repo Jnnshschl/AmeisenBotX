@@ -1,14 +1,15 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Hook.Structs;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -989,7 +990,7 @@ namespace AmeisenBotX.Core.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaSellItemsByQuality(WowItemQuality itemQuality)
         {
-            LuaDoString($"local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c and string.find(c,\"{BotUtils.GetColorByQuality(itemQuality)[1..]}\")then b={{GetItemInfo(c)}}a=a+b[11]UseContainerItem(d,e)end end end");
+            LuaDoString($"local a,b,c=0;for d=0,4 do for e=1,GetContainerNumSlots(d)do c=GetContainerItemLink(d,e)if c and string.find(c,\"{itemQuality.GetColor()[1..]}\")then b={{GetItemInfo(c)}}a=a+b[11]UseContainerItem(d,e)end end end");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1308,7 +1309,7 @@ namespace AmeisenBotX.Core.Hook
             return Array.Empty<WowAura>();
         }
 
-        public WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB)
+        public WowUnitReaction WowGetReaction(WowUnit wowUnitA, WowUnit wowUnitB)
         {
             WowUnitReaction reaction = WowUnitReaction.Unknown;
 
@@ -1334,7 +1335,7 @@ namespace AmeisenBotX.Core.Hook
 
             AmeisenLogger.I.Log("HookManager", $"Getting Reaction of {wowUnitA} and {wowUnitB}", LogLevel.Verbose);
 
-            byte[] returnBytes = WowCallObjectFunction(wowUnitA.BaseAddress, WowInterface.OffsetList.FunctionUnitGetReaction, new() { wowUnitB.BaseAddress }, true);
+            byte[] returnBytes = WowCallObjectFunction(wowUnitA.BaseAddress, WowInterface.OffsetList.FunctionUnitGetReaction, new List<object>() { wowUnitB.BaseAddress }, true);
 
             if (returnBytes?.Length > 0)
             {
@@ -1442,7 +1443,6 @@ namespace AmeisenBotX.Core.Hook
             };
 
             InjectAndExecute(asm, false, out _);
-            WowInterface.ObjectManager.UpdateWowObjects();
         }
 
         public byte WowTraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171)
@@ -1543,7 +1543,7 @@ namespace AmeisenBotX.Core.Hook
             if (WowInterface.XMemory.Read(GameInfoExecutedAddress, out int executedStatus)
                 && executedStatus == 0)
             {
-                if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
+                if (WowInterface.Target.Guid != 0 && WowInterface.Target != null)
                 {
                     Vector3 playerPosition = WowInterface.Player.Position;
                     playerPosition.Z += 1.5f;
@@ -1622,9 +1622,7 @@ namespace AmeisenBotX.Core.Hook
 
         private bool InjectAndExecute(string[] asm, bool readReturnBytes, out byte[] bytes)
         {
-            WowInterface.ObjectManager.RefreshIsWorldLoaded();
-
-            if (!IsWoWHooked || WowInterface.XMemory.Process.HasExited || (!WowInterface.ObjectManager.IsWorldLoaded && !OverrideWorldCheck))
+            if (!IsWoWHooked || WowInterface.XMemory.Process.HasExited)
             {
                 bytes = null;
                 return false;
@@ -1731,7 +1729,7 @@ namespace AmeisenBotX.Core.Hook
 
                 if (!WowInterface.Db.TryGetSpellName(rawWowAura.SpellId, out string name))
                 {
-                    name = WowInterface.HookManager.LuaGetSpellNameById(rawWowAura.SpellId);
+                    name = WowInterface.NewWowInterface.LuaGetSpellNameById(rawWowAura.SpellId);
                     WowInterface.Db.CacheSpellName(rawWowAura.SpellId, name);
                 }
 

@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
 
-        private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.Player.Position) < 80.0);
+        private WowGameobject NearestPortal => WowInterface.Objects.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
 
@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
         {
             if (role == WowRole.Dps)
             {
-                WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
+                WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, DragonDisplayId, false);
                 WowGameobject portal = NearestPortal;
 
                 if (wowUnit != null)
@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
             }
             else if (PortalClickEvent.Run())
             {
-                WowInterface.HookManager.WowObjectRightClick(portal);
+                WowInterface.NewWowInterface.WowObjectRightClick(portal.BaseAddress);
             }
         }
     }

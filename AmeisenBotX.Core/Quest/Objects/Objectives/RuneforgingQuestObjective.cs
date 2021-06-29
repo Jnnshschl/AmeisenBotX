@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using System;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
@@ -30,18 +30,18 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished || WowInterface.Player.IsCasting)
             {
-                WowInterface.HookManager.LuaClickUiElement("TradeSkillFrameCloseButton"); return;
+                WowInterface.NewWowInterface.LuaClickUiElement("TradeSkillFrameCloseButton"); return;
             }
 
             if (EnchantEvent.Run())
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
 
-                WowInterface.HookManager.LuaCastSpell("Runeforging");
-                WowInterface.HookManager.LuaClickUiElement("TradeSkillCreateButton");
-                WowInterface.HookManager.LuaUseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
-                WowInterface.HookManager.LuaClickUiElement("StaticPopup1Button1");
+                WowInterface.NewWowInterface.LuaCastSpell("Runeforging");
+                WowInterface.NewWowInterface.LuaClickUiElement("TradeSkillCreateButton");
+                WowInterface.NewWowInterface.LuaUseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
+                WowInterface.NewWowInterface.LuaClickUiElement("StaticPopup1Button1");
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Battleground;
+﻿using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Core.Battleground;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Combat.Classes;
@@ -20,6 +21,8 @@ using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
+using AmeisenBotX.Wow;
+using AmeisenBotX.Wow.Objects;
 using System.Diagnostics;
 
 namespace AmeisenBotX.Core
@@ -46,17 +49,15 @@ namespace AmeisenBotX.Core
 
         public GrindingEngine GrindingEngine { get; set; }
 
-        public IHookManager HookManager { get; set; }
-
         public JobEngine JobEngine { get; set; }
 
-        public WowUnit LastTarget => ObjectManager.LastTarget;
+        public WowUnit LastTarget => Objects.LastTarget;
 
         public IMovementEngine MovementEngine { get; set; }
 
         public MovementSettings MovementSettings { get; set; }
 
-        public IObjectManager ObjectManager { get; set; }
+        public IObjectProvider Objects => NewWowInterface.Objects;
 
         public IOffsetList OffsetList { get; set; }
 
@@ -64,13 +65,9 @@ namespace AmeisenBotX.Core
 
         public BotPersonality Personality { get; set; }
 
-        public WowUnit Pet => ObjectManager.Pet;
+        public WowUnit Pet => Objects.Pet;
 
-        public ulong PetGuid => ObjectManager.PetGuid;
-
-        public WowPlayer Player => ObjectManager.Player;
-
-        public ulong PlayerGuid => ObjectManager.PlayerGuid;
+        public WowPlayer Player => Objects.Player;
 
         public QuestEngine QuestEngine { get; set; }
 
@@ -78,12 +75,12 @@ namespace AmeisenBotX.Core
 
         public TacticEngine TacticEngine { get; set; }
 
-        public WowUnit Target => ObjectManager.Target;
-
-        public ulong TargetGuid => ObjectManager.TargetGuid;
+        public WowUnit Target => Objects.Target;
 
         public Process WowProcess { get; set; }
 
         public XMemory XMemory { get; set; }
+
+        public INewWowInterface NewWowInterface { get; set; }
     }
 }

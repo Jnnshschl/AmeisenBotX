@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,7 +42,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                 && !wowUnit.IsNotAttackable
                 && wowUnit.IsInCombat
                 && !IsBlacklisted(wowUnit)
-                && !wowUnit.IsFriendyTo(WowInterface, WowInterface.Player)
+                && WowInterface.NewWowInterface.GetReaction(wowUnit.BaseAddress, WowInterface.Player.BaseAddress) == WowUnitReaction.Hostile
                 && wowUnit.DistanceTo(WowInterface.Player) < 80.0f;
         }
     }

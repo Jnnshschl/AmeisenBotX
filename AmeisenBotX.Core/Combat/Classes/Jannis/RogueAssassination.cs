@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 
@@ -96,8 +96,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     }
                 }
 
-                if (TryCastSpellRogue(eviscerateSpell, WowInterface.TargetGuid, true, true, 5)
-                    || TryCastSpellRogue(mutilateSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpellRogue(eviscerateSpell, WowInterface.Target.Guid, true, true, 5)
+                    || TryCastSpellRogue(mutilateSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }

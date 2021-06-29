@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
-            string rawSpells = WowInterface.HookManager.LuaGetSpells();
+            string rawSpells = WowInterface.NewWowInterface.LuaGetSpells();
 
             try
             {

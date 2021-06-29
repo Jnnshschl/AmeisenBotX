@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (WowInterface.Target != null)
                 {
-                    if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                    if (WowInterface.Target.TargetGuid != WowInterface.Player.Guid
                         && TryCastSpell(handOfReckoningSpell, WowInterface.Target.Guid, true))
                     {
                         return;
@@ -128,14 +128,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     if (Use9SecSpell
                         && (((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
-                                && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
+                                && TryCastSpell(judgementOfLightSpell, WowInterface.Target.Guid, true))
                             || TryCastSpell(consecrationSpell, WowInterface.Target.Guid, true)
                             || TryCastSpell(holyShieldSpell, WowInterface.Target.Guid, true)))
                     {
                         Use9SecSpell = false;
                         return;
                     }
-                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, WowInterface.TargetGuid, true)
+                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, WowInterface.Target.Guid, true)
                              || TryCastSpell(hammerOfTheRighteousSpell, WowInterface.Target.Guid, true))
                     {
                         Use9SecSpell = true;

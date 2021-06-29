@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
     {
         public QDisruptTheAttacks(WowInterface wowInterface)
             : base(wowInterface, 871, "Disrupt the Attacks", 9, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
+                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
+                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

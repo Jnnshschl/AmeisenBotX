@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Battleground.KamelBG.Enums;
-using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = WowInterface.ObjectManager.GetNearEnemies<WowPlayer>(WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                 else if (CombatEvent.Run())
                 {
                     WowInterface.Globals.ForceCombat = true;
-                    WowInterface.HookManager.WowTargetGuid(weakestPlayer.Guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(weakestPlayer.Guid);
                 }
             }
             else
@@ -65,9 +65,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             Combat();
 
-            if (WowInterface.ObjectManager.Vehicle == null)
+            if (WowInterface.Objects.Vehicle == null)
             {
-                WowGameobject VehicleNode = WowInterface.ObjectManager.WowObjects
+                WowGameobject VehicleNode = WowInterface.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
                             && x.Position.GetDistance(WowInterface.Player.Position) < 20)
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     {
                         WowInterface.MovementEngine.StopMovement();
 
-                        WowInterface.HookManager.WowObjectRightClick(VehicleNode);
+                        WowInterface.NewWowInterface.WowObjectRightClick(VehicleNode.BaseAddress);
                     }
                 }
             }

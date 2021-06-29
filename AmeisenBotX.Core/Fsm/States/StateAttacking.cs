@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
 using AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon;
 using AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls;
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             if (Config.MaxFps != Config.MaxFpsCombat)
             {
-                WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFpsCombat});SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat})");
+                WowInterface.NewWowInterface.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFpsCombat});SetCVar(\"maxfpsbk\", {Config.MaxFpsCombat})");
             }
 
             LoadTactics();
@@ -42,14 +42,14 @@ namespace AmeisenBotX.Core.Fsm.States
             if (!(WowInterface.Globals.ForceCombat
                 || WowInterface.Player.IsInCombat
                 || StateMachine.IsAnyPartymemberInCombat()
-                || WowInterface.ObjectManager.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
+                || WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
             // we can do nothing until the ObjectManager is initialzed
-            if (WowInterface.ObjectManager != null && WowInterface.Player != null)
+            if (WowInterface.Objects != null && WowInterface.Player != null)
             {
                 bool tacticsMovement = false;
                 bool tacticsAllowAttacking = false;
@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (!tacticsMovement)
                     {
-                        if (WowInterface.TargetGuid == 0 || WowInterface.Target == null)
+                        if (WowInterface.Target.Guid == 0 || WowInterface.Target == null)
                         {
                             if (WowInterface.Globals.ForceCombat)
                             {
@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         if (!WowInterface.Player.IsAutoAttacking)
                         {
-                            WowInterface.HookManager.LuaStartAutoAttack();
+                            WowInterface.NewWowInterface.LuaStartAutoAttack();
                         }
                     }
                     else
@@ -109,7 +109,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (Config.MaxFps != Config.MaxFpsCombat)
             {
                 // set our normal maxfps
-                WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+                WowInterface.NewWowInterface.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
             }
         }
 
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             // handle special movement needs
             if (WowInterface.CombatClass.WalkBehindEnemy
-                && WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                && WowInterface.Target.TargetGuid != WowInterface.Player.Guid
                 || WowInterface.Target.Type == WowObjectType.Player) // prevent spinning
             {
                 // walk behind enemy
@@ -138,9 +138,9 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private bool HandleHealMovement(WowUnit target, Vector3 targetPosition)
         {
-            if (WowInterface.ObjectManager.IsTargetInLineOfSight)
+            if (WowInterface.Objects.IsTargetInLineOfSight)
             {
-                return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.ObjectManager.MeanGroupPosition);
+                return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.Objects.MeanGroupPosition);
             }
             else
             {
@@ -153,26 +153,26 @@ namespace AmeisenBotX.Core.Fsm.States
             // check if we are facing the unit
             if ((WowInterface.CombatClass == null || !WowInterface.CombatClass.HandlesFacing)
                 && target != null
-                && target.Guid != WowInterface.PlayerGuid
+                && target.Guid != WowInterface.Player.Guid
                 && FacingCheck.Run()
-                && !WowInterface.HookManager.WowIsClickToMoveActive()
+                && !WowInterface.NewWowInterface.WowIsClickToMoveActive()
                 && !BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, target.Position))
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
+                WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, target.Position);
             }
 
             // do we need to move
             if (target == null)
             {
                 // just move to our group
-                return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.ObjectManager.MeanGroupPosition);
+                return WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.Objects.MeanGroupPosition);
             }
             else if (WowInterface.CombatClass != null)
             {
                 Vector3 targetPosition = BotUtils.MoveAhead(target.Position, target.Rotation, 0.5f);
                 float distance = WowInterface.Player.Position.GetDistance(target.Position);
 
-                if (distance > DistanceToKeep || !WowInterface.ObjectManager.IsTargetInLineOfSight)
+                if (distance > DistanceToKeep || !WowInterface.Objects.IsTargetInLineOfSight)
                 {
                     switch (WowInterface.CombatClass.Role)
                     {
@@ -207,7 +207,7 @@ namespace AmeisenBotX.Core.Fsm.States
             // handle special movement needs
             if (WowInterface.CombatClass.WalkBehindEnemy
                 && WowInterface.CombatClass.Role == WowRole.Tank
-                && WowInterface.ObjectManager.Partymembers.Any()) // no need to rotate
+                && WowInterface.Objects.Partymembers.Any()) // no need to rotate
             {
                 // rotate the boss away from the group
                 // Vector3 meanGroupPosition = WowInterface.ObjectManager.MeanGroupPosition;
@@ -224,7 +224,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void LoadTactics()
         {
-            if (WowInterface.ObjectManager.MapId == WowMapId.TheForgeOfSouls)
+            if (WowInterface.Objects.MapId == WowMapId.TheForgeOfSouls)
             {
                 if (WowInterface.Player.Position.GetDistance(new(5297, 2506, 686)) < 70.0f)
                 {
@@ -237,20 +237,20 @@ namespace AmeisenBotX.Core.Fsm.States
                     WowInterface.TacticEngine.LoadTactics(new DevourerOfSoulsTactic(WowInterface));
                 }
             }
-            else if (WowInterface.ObjectManager.MapId == WowMapId.PitOfSaron)
+            else if (WowInterface.Objects.MapId == WowMapId.PitOfSaron)
             {
                 if (WowInterface.Player.Position.GetDistance(new(823, 110, 509)) < 150.0f)
                 {
                     WowInterface.TacticEngine.LoadTactics(new IckAndKrickTactic(WowInterface));
                 }
             }
-            else if (WowInterface.ObjectManager.MapId == WowMapId.TheObsidianSanctum)
+            else if (WowInterface.Objects.MapId == WowMapId.TheObsidianSanctum)
             {
                 // Twilight Eggs
                 WowInterface.CombatClass.PriorityTargetDisplayIds = new List<int>() { 27396 };
                 WowInterface.TacticEngine.LoadTactics(new TwilightPortalTactic(WowInterface));
             }
-            else if (WowInterface.ObjectManager.MapId == WowMapId.Naxxramas)
+            else if (WowInterface.Objects.MapId == WowMapId.Naxxramas)
             {
                 if (WowInterface.Player.Position.GetDistance(new(3273, -3476, 287)) < 120.0f)
                 {

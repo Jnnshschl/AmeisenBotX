@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -110,9 +110,9 @@ namespace AmeisenBotX.Core.Fsm
                 AntiAfkEvent.Run();
 
                 if (CurrentState.Key != BotState.Login
-                    && WowInterface.ObjectManager != null)
+                    && WowInterface.Objects != null)
                 {
-                    if (!WowInterface.ObjectManager.RefreshIsWorldLoaded())
+                    if (!WowInterface.Objects.IsWorldLoaded)
                     {
                         if (SetState(BotState.LoadingScreen, true))
                         {
@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Fsm
                     }
                     else
                     {
-                        WowInterface.ObjectManager.UpdateWowObjects();
+                        // WowInterface.ObjectManager.UpdateWowObjects();
 
                         if (WowInterface.Player != null)
                         {
@@ -154,7 +154,7 @@ namespace AmeisenBotX.Core.Fsm
                                 && !WowInterface.Globals.IgnoreCombat
                                 && !(Config.IgnoreCombatWhileMounted && WowInterface.Player.IsMounted)
                                 && (WowInterface.Globals.ForceCombat || WowInterface.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                || WowInterface.ObjectManager.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 100.0f).Any()))
+                                || WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 100.0f).Any()))
                             {
                                 if (SetState(BotState.Attacking, true))
                                 {
@@ -169,7 +169,7 @@ namespace AmeisenBotX.Core.Fsm
                     if (Config.AutoDisableRender && RenderSwitchEvent.Run())
                     {
                         IntPtr foregroundWindow = XMemory.GetForegroundWindow();
-                        WowInterface.HookManager.WowSetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
+                        WowInterface.NewWowInterface.WowSetRenderState(foregroundWindow == WowInterface.XMemory.Process.MainWindowHandle);
                     }
                 }
             }
@@ -212,7 +212,7 @@ namespace AmeisenBotX.Core.Fsm
 
         internal IEnumerable<WowUnit> GetNearLootableUnits()
         {
-            return WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+            return WowInterface.Objects.WowObjects.OfType<WowUnit>()
                        .Where(e => e.IsLootable
                            && !GetState<StateLooting>().UnitsAlreadyLootedList.Contains(e.Guid)
                            && e.Position.GetDistance(WowInterface.Player.Position) < Config.LootUnitsRadius);
@@ -220,8 +220,8 @@ namespace AmeisenBotX.Core.Fsm
 
         internal bool IsAnyPartymemberInCombat()
         {
-            return !Config.OnlySupportMaster && WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>()
-                       .Where(e => WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.Player.Position) < Config.SupportRange)
+            return !Config.OnlySupportMaster && WowInterface.Objects.WowObjects.OfType<WowPlayer>()
+                       .Where(e => WowInterface.Objects.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(WowInterface.Player.Position) < Config.SupportRange)
                        .Any(r => r.IsInCombat);
         }
     }

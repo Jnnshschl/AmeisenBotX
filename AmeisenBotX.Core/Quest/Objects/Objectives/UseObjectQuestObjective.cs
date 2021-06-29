@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished || WowInterface.Player.IsCasting) { return; }
 
-            WowGameobject = WowInterface.ObjectManager.WowObjects
+            WowGameobject = WowInterface.Objects.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => ObjectDisplayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
@@ -59,10 +59,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 {
                     if (UseEvent.Run())
                     {
-                        WowInterface.HookManager.WowStopClickToMove();
+                        WowInterface.NewWowInterface.WowStopClickToMove();
                         WowInterface.MovementEngine.Reset();
 
-                        WowInterface.HookManager.WowObjectRightClick(WowGameobject);
+                        WowInterface.NewWowInterface.WowObjectRightClick(WowGameobject.BaseAddress);
                     }
                 }
                 else

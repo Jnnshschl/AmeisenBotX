@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished) { return; }
 
-            WowGameobject lootableObject = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+            WowGameobject lootableObject = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                 .Where(e => e.DisplayId == ObjectDisplayId)
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
@@ -58,8 +58,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     if (RightClickEvent.Run())
                     {
                         WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.WowStopClickToMove();
-                        WowInterface.HookManager.WowObjectRightClick(lootableObject);
+                        WowInterface.NewWowInterface.WowStopClickToMove();
+                        WowInterface.NewWowInterface.WowObjectRightClick(lootableObject.BaseAddress);
                     }
                 }
             }

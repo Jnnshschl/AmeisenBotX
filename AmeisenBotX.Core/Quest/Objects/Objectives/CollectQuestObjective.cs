@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     return 100.0;
                 }
 
-                var inventoryItem = WowInterface.CharacterManager.Inventory.Items.Find(item => item.Id == ItemId);
+                Character.Inventory.Objects.IWowItem inventoryItem = WowInterface.CharacterManager.Inventory.Items.Find(item => item.Id == ItemId);
                 return inventoryItem != null ? Math.Min(100.0 * ((float)inventoryItem.Count) / ((float)WantedItemAmount), 100.0) : 0.0;
             }
         }
@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished) { return; }
 
-            WowGameobject lootableObject = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+            WowGameobject lootableObject = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                 .Where(e => GameObjectIds.Contains(e.EntryId))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                 .FirstOrDefault();
@@ -70,8 +70,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     if (RightClickEvent.Run())
                     {
                         WowInterface.MovementEngine.Reset();
-                        WowInterface.HookManager.WowStopClickToMove();
-                        WowInterface.HookManager.WowObjectRightClick(lootableObject);
+                        WowInterface.NewWowInterface.WowStopClickToMove();
+                        WowInterface.NewWowInterface.WowObjectRightClick(lootableObject.BaseAddress);
                     }
                 }
             }

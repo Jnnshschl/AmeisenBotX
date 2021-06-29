@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AmeisenBotX.Common.Math;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
@@ -39,8 +40,8 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         public bool IsPlayerNearSearchArea(WowInterface wowInterface)
         {
-            return Areas[CurrentSearchArea].ContainsPosition(wowInterface.ObjectManager.Player.Position)
-                   || Areas[CurrentSearchArea].GetClosestVertexDistance(wowInterface.ObjectManager.Player.Position) <= 20.0;
+            return Areas[CurrentSearchArea].ContainsPosition(wowInterface.Objects.Player.Position)
+                   || Areas[CurrentSearchArea].GetClosestVertexDistance(wowInterface.Objects.Player.Position) <= 20.0;
         }
 
         public void NotifyDetour()
@@ -50,7 +51,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         private Vector3 GetNextPositionInternal(WowInterface wowInterface)
         {
-            Vector3 currentPosition = wowInterface.ObjectManager.Player.Position;
+            Vector3 currentPosition = wowInterface.Objects.Player.Position;
 
             if (Areas[CurrentSearchArea].ContainsPosition(currentPosition))
             {

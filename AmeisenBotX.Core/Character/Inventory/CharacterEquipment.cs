@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
                 if (itemId > 0)
                 {
-                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                    WowItem item = WowInterface.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
                     {
@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            string resultJson = WowInterface.HookManager.LuaGetEquipmentItems();
+            string resultJson = WowInterface.NewWowInterface.LuaGetEquipmentItems();
 
             if (string.IsNullOrWhiteSpace(resultJson))
             {

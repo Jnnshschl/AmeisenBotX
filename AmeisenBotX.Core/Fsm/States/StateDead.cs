@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
                 {
                     SetMapAndPosition = true;
-                    StateMachine.LastDiedMap = WowInterface.ObjectManager.MapId;
+                    StateMachine.LastDiedMap = WowInterface.Objects.MapId;
 
                     if (StateMachine.LastDiedMap.IsDungeonMap())
                     {
@@ -36,9 +36,9 @@ namespace AmeisenBotX.Core.Fsm.States
                     }
                 }
 
-                if (Config.ReleaseSpirit || WowInterface.ObjectManager.MapId.IsBattlegroundMap())
+                if (Config.ReleaseSpirit || WowInterface.Objects.MapId.IsBattlegroundMap())
                 {
-                    WowInterface.HookManager.LuaRepopMe();
+                    WowInterface.NewWowInterface.LuaRepopMe();
                 }
             }
             else if (WowInterface.Player.IsGhost)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Offsets;
+using System;
 
 namespace AmeisenBotX.Core.Offsets
 {

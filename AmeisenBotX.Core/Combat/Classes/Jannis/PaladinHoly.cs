@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -15,10 +15,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public PaladinHoly(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfWisdomSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfVengeanceSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfWisdomSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfVengeanceSpell, WowInterface.Player.Guid, true)));
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (WowInterface.ObjectManager.Partymembers.Any(e => e.Guid != WowInterface.Player.Guid) || WowInterface.Player.HealthPercentage < 65.0)
+            if (WowInterface.Objects.Partymembers.Any(e => e.Guid != WowInterface.Player.Guid) || WowInterface.Player.HealthPercentage < 65.0)
             {
                 if (NeedToHealSomeone())
                 {
@@ -113,12 +113,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             else if (SelectTarget(TargetProviderDps))
             {
                 if ((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
-                    && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
+                    && TryCastSpell(judgementOfLightSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(exorcismSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpell(exorcismSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     && WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) < 3.5
                     && EventAutoAttack.Run())
                 {
-                    WowInterface.HookManager.LuaStartAutoAttack();
+                    WowInterface.NewWowInterface.LuaStartAutoAttack();
                     return;
                 }
                 else

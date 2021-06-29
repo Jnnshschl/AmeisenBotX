@@ -2,7 +2,7 @@
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.CombatClasses.Shino;
@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                var nearbyTargets = WowInterface.ObjectManager.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 64.0f);
+                System.Collections.Generic.IEnumerable<WowUnit> nearbyTargets = WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 64.0f);
                 if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
@@ -126,14 +126,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                 {
                     if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => aura.Name == polymorphSpell)))
                     {
-                        var targetInDistance = nearbyTargets
-                            .Where(e => e.Guid != WowInterface.TargetGuid)
+                        WowUnit targetInDistance = nearbyTargets
+                            .Where(e => e.Guid != WowInterface.Target.Guid)
                             .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                             .FirstOrDefault();
-                        WowInterface.HookManager.WowTargetGuid(targetInDistance.Guid);
+                        WowInterface.NewWowInterface.WowTargetGuid(targetInDistance.Guid);
                         if (TryCastSpell(polymorphSpell, targetInDistance.Guid, true))
                         {
-                            WowInterface.HookManager.WowTargetGuid(target.Guid);
+                            WowInterface.NewWowInterface.WowTargetGuid(target.Guid);
                             LastSheep = DateTime.Now;
                             return;
                         }

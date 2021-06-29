@@ -1,8 +1,9 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Dungeon.Profiles.Classic;
@@ -10,7 +11,6 @@ using AmeisenBotX.Core.Dungeon.Profiles.TBC;
 using AmeisenBotX.Core.Dungeon.Profiles.WotLK;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Dungeon
                     new Selector
                     (
                         "AmITheLeader",
-                        () => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
+                        () => WowInterface.Objects.Partyleader.Guid == WowInterface.Player.Guid || !WowInterface.Objects.PartymemberGuids.Any(),
                         new Selector
                         (
                             "AreAllPlayersPresent",
@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Dungeon
                             new Selector
                             (
                                 "IsAnyoneEating",
-                                () => WowInterface.ObjectManager.Partymembers.Any(e => e.HasBuffByName("Food") || e.HasBuffByName("Drink")),
+                                () => WowInterface.Objects.Partymembers.Any(e => e.HasBuffByName("Food") || e.HasBuffByName("Drink")),
                                 new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; }),
                                 new Leaf("FollowNodePath", () => FollowNodePath())
                             ),
@@ -64,8 +64,8 @@ namespace AmeisenBotX.Core.Dungeon
                         new Selector
                         (
                             "IsDungeonLeaderInRange",
-                            () => WowInterface.ObjectManager.Partyleader != null,
-                            new Leaf("FollowLeader", () => MoveToPosition(WowInterface.ObjectManager.Partyleader.Position + LeaderFollowOffset, 0f, MovementAction.Follow)),
+                            () => WowInterface.Objects.Partyleader != null,
+                            new Leaf("FollowLeader", () => MoveToPosition(WowInterface.Objects.Partyleader.Position + LeaderFollowOffset, 0f, MovementAction.Follow)),
                             new Leaf("WaitForLeaderToArrive", () => { return BehaviorTreeStatus.Success; })
                         )
                     )
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Dungeon
             }
             else
             {
-                LoadProfile(TryGetProfileByMapId(WowInterface.ObjectManager.MapId));
+                LoadProfile(TryGetProfileByMapId(WowInterface.Objects.MapId));
             }
         }
 
@@ -171,7 +171,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool AreAllPlayersPresent(float distance, float distanceToStartRunning)
         {
-            if (!WowInterface.ObjectManager.Partymembers.Any())
+            if (!WowInterface.Objects.Partymembers.Any())
             {
                 return true;
             }
@@ -181,9 +181,9 @@ namespace AmeisenBotX.Core.Dungeon
                 distance = distanceToStartRunning;
             }
 
-            int nearPlayers = WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.Player.Position, distance).Count(e => !e.IsDead);
+            int nearPlayers = WowInterface.Objects.GetNearPartymembers<WowPlayer>(WowInterface.Player.Position, distance).Count(e => !e.IsDead);
 
-            if (nearPlayers >= WowInterface.ObjectManager.Partymembers.Count() - 1)
+            if (nearPlayers >= WowInterface.Objects.Partymembers.Count() - 1)
             {
                 IsWaitingForGroup = false;
                 return true;
@@ -199,9 +199,9 @@ namespace AmeisenBotX.Core.Dungeon
         {
             if (ExitDungeonEvent.Run())
             {
-                if (WowInterface.HookManager.LuaIsInLfgGroup())
+                if (WowInterface.NewWowInterface.LuaIsInLfgGroup())
                 {
-                    WowInterface.HookManager.LuaDoString("LFGTeleport(true);");
+                    WowInterface.NewWowInterface.LuaDoString("LFGTeleport(true);");
                 }
                 else
                 {

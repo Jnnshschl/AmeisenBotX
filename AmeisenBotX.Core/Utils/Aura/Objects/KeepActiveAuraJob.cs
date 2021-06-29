@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects.Raw;
+﻿using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,8 @@ namespace AmeisenBotX.Core.Fsm.Utils.Auras.Objects
         public string Name { get; set; }
 
         public bool Run(IEnumerable<WowAura> auras)
-            => !auras.Any(e => e.Name.Equals(Name, StringComparison.OrdinalIgnoreCase)) && Action();
+        {
+            return !auras.Any(e => e.Name.Equals(Name, StringComparison.OrdinalIgnoreCase)) && Action();
+        }
     }
 }

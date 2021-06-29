@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Character.Inventory
                 return;
             }
 
-            WowInterface.HookManager.LuaDeleteInventoryItemByName(name);
+            WowInterface.NewWowInterface.LuaDeleteInventoryItemByName(name);
         }
 
         public bool HasItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
@@ -58,8 +58,8 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            FreeBagSlots = WowInterface.HookManager.LuaGetFreeBagSlotCount();
-            string resultJson = WowInterface.HookManager.LuaGetInventoryItems();
+            FreeBagSlots = WowInterface.NewWowInterface.LuaGetFreeBagSlotCount();
+            string resultJson = WowInterface.NewWowInterface.LuaGetInventoryItems();
 
             try
             {

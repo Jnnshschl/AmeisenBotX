@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -36,22 +37,22 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (!SearchAreas.IsPlayerNearSearchArea(WowInterface))
             {
-                WowInterface.HookManager.WowClearTarget();
+                WowInterface.NewWowInterface.WowClearTarget();
                 WowUnit = null;
             }
 
             if (!WowInterface.Player.IsInCombat)
             {
-                WowUnit = WowInterface.ObjectManager.WowObjects
+                WowUnit = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && !e.IsNotAttackable
-                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
+                                && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault();
 
                 if (WowUnit != null)
                 {
-                    WowInterface.HookManager.WowTargetGuid(WowUnit.Guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(WowUnit.Guid);
                 }
             }
 

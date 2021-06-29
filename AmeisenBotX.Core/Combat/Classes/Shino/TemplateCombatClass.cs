@@ -1,10 +1,10 @@
-﻿using AmeisenBotX.Core.Character.Spells.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Combat.Classes.Jannis;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
             if (IsTargetAttackable(target))
             {
                 Spell openingSpell = GetOpeningSpell();
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 WowInterface.MovementEngine.StopMovement();
                 WowInterface.MovementEngine.Reset();
                 TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
@@ -61,11 +61,11 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
             return IsInRange(openingSpell, target)
                     && DateTime.Now.Subtract(LastFailedOpener).TotalSeconds > 3
-                    && WowInterface.HookManager.WowIsInLineOfSight(currentPos, target.Position)
-                    && WowInterface.HookManager.WowIsInLineOfSight(posXLeft, target.Position)
-                    && WowInterface.HookManager.WowIsInLineOfSight(posXRight, target.Position)
-                    && WowInterface.HookManager.WowIsInLineOfSight(posYRight, target.Position)
-                    && WowInterface.HookManager.WowIsInLineOfSight(posYLeft, target.Position);
+                    && WowInterface.NewWowInterface.WowIsInLineOfSight(currentPos, target.Position)
+                    && WowInterface.NewWowInterface.WowIsInLineOfSight(posXLeft, target.Position)
+                    && WowInterface.NewWowInterface.WowIsInLineOfSight(posXRight, target.Position)
+                    && WowInterface.NewWowInterface.WowIsInLineOfSight(posYRight, target.Position)
+                    && WowInterface.NewWowInterface.WowIsInLineOfSight(posYLeft, target.Position);
         }
 
         public void OnUIErrorMessage(string message)
@@ -86,8 +86,8 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
         protected bool SelectTarget(out WowUnit target)
         {
             WowUnit currentTarget = WowInterface.Target;
-            IEnumerable<WowUnit> nearAttackingEnemies = WowInterface.ObjectManager
-                .GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Player.Position, 64.0f)
+            IEnumerable<WowUnit> nearAttackingEnemies = WowInterface.Objects
+                .GetEnemiesInCombatWithParty<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 64.0f)
                 .Where(e => !e.IsDead && !e.IsNotAttackable)
                 .OrderBy(e => e.Auras.All(aura => aura.Name != polymorphSpell));
 
@@ -97,8 +97,8 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
                    || (currentTarget.Auras.Any(e => e.Name == polymorphSpell) &&
                        nearAttackingEnemies.Where(e => e.Auras.All(aura => aura.Name != polymorphSpell)).Any(e => e.Guid != currentTarget.Guid))
                    || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
-                   || !BotUtils.IsValidUnit(WowInterface.Target)
-                   || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, currentTarget) == WowUnitReaction.Friendly))
+                   || !WowUnit.IsValidUnit(WowInterface.Target)
+                   || WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, currentTarget.BaseAddress) == WowUnitReaction.Friendly))
             {
                 currentTarget = null;
                 target = null;
@@ -112,9 +112,9 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
             if (nearAttackingEnemies.Any())
             {
-                var potTarget = nearAttackingEnemies.FirstOrDefault();
+                WowUnit potTarget = nearAttackingEnemies.FirstOrDefault();
                 target = potTarget;
-                WowInterface.HookManager.WowTargetGuid(potTarget.Guid);
+                WowInterface.NewWowInterface.WowTargetGuid(potTarget.Guid);
                 return true;
             }
 

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -40,10 +40,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hauntSpell, () => TryCastSpell(hauntSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hauntSpell, () => TryCastSpell(hauntSpell, WowInterface.Target.Guid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Affliction Warlock spec.";
@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         && WowInterface.Player.HealthPercentage > 60
                         && TryCastSpell(lifeTapSpell, 0)
                     || (WowInterface.Player.HealthPercentage < 80
-                        && TryCastSpell(deathCoilSpell, WowInterface.TargetGuid, true)))
+                        && TryCastSpell(deathCoilSpell, WowInterface.Target.Guid, true)))
                 {
                     return;
                 }
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             && ((WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 6.0f
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
                             || (WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 12.0f
-                                && TryCastSpell(fearSpell, WowInterface.TargetGuid, true))))
+                                && TryCastSpell(fearSpell, WowInterface.Target.Guid, true))))
                         {
                             LastFearAttempt = DateTime.UtcNow;
                             return;
@@ -138,20 +138,20 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
                         && WowInterface.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(drainSoulSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
                 }
 
-                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
+                if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Target.Position, 16.0f).Count() > 2
                     && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.TargetGuid, true))
+                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(shadowBoltSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpell(shadowBoltSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }

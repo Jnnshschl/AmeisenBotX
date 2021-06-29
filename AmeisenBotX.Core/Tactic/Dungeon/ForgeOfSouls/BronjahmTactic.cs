@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(BronjahmDisplayId, false);
+            WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, BronjahmDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -54,14 +54,14 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == WowRole.Tank)
                 {
-                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.Player.Guid)
                     {
-                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
+                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.Objects.MeanGroupPosition, MidPosition), 8.0f);
                         float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
 
                         // flee from the corrupted souls target
                         bool needToFlee = wowUnit.CurrentlyChannelingSpellId == 68839
-                            || WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
+                            || WowInterface.Objects.WowObjects.OfType<WowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
 
                         if (needToFlee)
                         {

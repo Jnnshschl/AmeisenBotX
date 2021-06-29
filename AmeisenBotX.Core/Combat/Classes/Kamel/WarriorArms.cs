@@ -1,13 +1,12 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
@@ -184,11 +183,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
+            if (WowInterface.Target.Guid != 0 && WowInterface.Target != null)
             {
-                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.NewWowInterface.WowClearTarget();
                     return;
                 }
 
@@ -196,7 +195,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.HookManager.LuaStartAutoAttack();
+                        WowInterface.NewWowInterface.LuaStartAutoAttack();
                     }
 
                     if (WowInterface.Target.IsCasting && CustomCastSpell(pummelSpell))
@@ -313,12 +312,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     {
                         if (!WowInterface.Player.HasBuffByName(stance))
                         {
-                            WowInterface.HookManager.LuaCastSpell(stance);
+                            WowInterface.NewWowInterface.LuaCastSpell(stance);
                             return true;
                         }
                         else
                         {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            WowInterface.NewWowInterface.LuaCastSpell(spellName);
                             return true;
                         }
                     }

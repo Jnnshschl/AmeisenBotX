@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -13,10 +13,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public DruidFeralBear(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.Player.Guid, true, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(direBearFormSpell, () => TryCastSpell(direBearFormSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleBearSpell, () => TryCastSpell(mangleBearSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleBearSpell, () => TryCastSpell(mangleBearSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                if (WowInterface.Target.TargetGuid != WowInterface.Player.Guid
                     && TryCastSpell(growlSpell, 0, true))
                 {
                     return;
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 10).Count();
+                int nearEnemies = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 10).Count();
 
                 if ((WowInterface.Player.HealthPercentage > 80
                         && TryCastSpell(enrageSpell, 0, true))
@@ -131,9 +131,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     || (WowInterface.Player.HealthPercentage < 75
                         && TryCastSpell(frenziedRegenerationSpell, 0, true))
                     || (nearEnemies > 2 && TryCastSpell(challengingRoarSpell, 0, true))
-                    || TryCastSpell(lacerateSpell, WowInterface.TargetGuid, true)
+                    || TryCastSpell(lacerateSpell, WowInterface.Target.Guid, true)
                     || (nearEnemies > 2 && TryCastSpell(swipeSpell, 0, true))
-                    || TryCastSpell(mangleBearSpell, WowInterface.TargetGuid, true))
+                    || TryCastSpell(mangleBearSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }

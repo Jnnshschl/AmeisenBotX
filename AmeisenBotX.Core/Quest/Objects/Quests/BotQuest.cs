@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Character.Inventory;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using System;
 using System.Collections.Generic;
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
         {
             if (!CheckedIfAccepted)
             {
-                if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
+                if (WowInterface.NewWowInterface.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
                 {
                     Accepted = true;
                 }
@@ -108,12 +108,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else
                     {
-                        WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, true);
+                        WowInterface.NewWowInterface.LuaSelectQuestByNameOrGossipId(Name, GossipId, true);
                         Thread.Sleep(1000);
-                        WowInterface.HookManager.LuaAcceptQuest();
+                        WowInterface.NewWowInterface.LuaAcceptQuest();
                         Thread.Sleep(250);
 
-                        if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
+                        if (WowInterface.NewWowInterface.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
                         {
                             Accepted = true;
                         }
@@ -157,23 +157,24 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                     }
                     else if (ActionEvent.Run())
                     {
-                        WowInterface.HookManager.LuaSelectQuestByNameOrGossipId(Name, GossipId, false);
+                        WowInterface.NewWowInterface.LuaSelectQuestByNameOrGossipId(Name, GossipId, false);
                         Thread.Sleep(1000);
-                        WowInterface.HookManager.LuaCompleteQuest();
+                        WowInterface.NewWowInterface.LuaCompleteQuest();
                         Thread.Sleep(1000);
 
                         bool selectedReward = false;
                         // TODO: This only works for the english locale!
-                        if (WowInterface.HookManager.LuaGetQuestLogIdByTitle(Name, out int questLogId))
+                        if (WowInterface.NewWowInterface.LuaGetQuestLogIdByTitle(Name, out int questLogId))
                         {
-                            WowInterface.HookManager.LuaSelectQuestLogEntry(questLogId);
-                            if (WowInterface.HookManager.LuaGetNumQuestLogChoices(out int numChoices))
+                            WowInterface.NewWowInterface.LuaSelectQuestLogEntry(questLogId);
+
+                            if (WowInterface.NewWowInterface.LuaGetNumQuestLogChoices(out int numChoices))
                             {
                                 for (int i = 1; i <= numChoices; ++i)
                                 {
-                                    if (WowInterface.HookManager.LuaGetQuestLogChoiceItemLink(i, out string itemLink))
+                                    if (WowInterface.NewWowInterface.LuaGetQuestLogChoiceItemLink(i, out string itemLink))
                                     {
-                                        string itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(itemLink);
+                                        string itemJson = WowInterface.NewWowInterface.LuaGetItemJsonByNameOrLink(itemLink);
                                         WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                                         if (item == null)
@@ -184,7 +185,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
                                         if (item.Name == "0" || item.ItemLink == "0")
                                         {
                                             // get the item id and try again
-                                            itemJson = WowInterface.HookManager.LuaGetItemJsonByNameOrLink(
+                                            itemJson = WowInterface.NewWowInterface.LuaGetItemJsonByNameOrLink(
                                                 itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                                                     .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
 
@@ -193,9 +194,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
                                         if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
                                         {
-                                            WowInterface.HookManager.LuaGetQuestReward(i);
-                                            WowInterface.HookManager.LuaGetQuestReward(i);
-                                            WowInterface.HookManager.LuaGetQuestReward(i);
+                                            WowInterface.NewWowInterface.LuaGetQuestReward(i);
+                                            WowInterface.NewWowInterface.LuaGetQuestReward(i);
+                                            WowInterface.NewWowInterface.LuaGetQuestReward(i);
                                             selectedReward = true;
                                             break;
                                         }
@@ -210,7 +211,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
                         if (!selectedReward)
                         {
-                            WowInterface.HookManager.LuaGetQuestReward(1);
+                            WowInterface.NewWowInterface.LuaGetQuestReward(1);
                         }
 
                         Thread.Sleep(250);
@@ -242,11 +243,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
         {
             if (obj.GetType() == typeof(WowGameobject))
             {
-                WowInterface.HookManager.WowObjectRightClick(obj);
+                WowInterface.NewWowInterface.WowObjectRightClick(obj.BaseAddress);
             }
             else if (obj.GetType() == typeof(WowUnit))
             {
-                WowInterface.HookManager.WowUnitRightClick((WowUnit)obj);
+                WowInterface.NewWowInterface.WowUnitRightClick(obj.BaseAddress);
             }
         }
     }

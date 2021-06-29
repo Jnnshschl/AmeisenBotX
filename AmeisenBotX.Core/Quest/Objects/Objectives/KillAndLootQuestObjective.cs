@@ -1,6 +1,7 @@
-﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
@@ -37,10 +38,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     return 100.0;
                 }
 
-                var amount = Killed;
+                int amount = Killed;
                 if (CollectQuestItem)
                 {
-                    var inventoryItem =
+                    Character.Inventory.Objects.IWowItem inventoryItem =
                         WowInterface.CharacterManager.Inventory.Items.Find(item => item.Id == QuestItemId);
                     if (inventoryItem != null)
                     {
@@ -78,7 +79,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void CombatLogChanged(BasicCombatLogEntry entry)
         {
-            var wowUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
+            WowUnit wowUnit = WowInterface.Objects.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
             if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGuid.ToNpcId(entry.DestinationGuid))
                                                             && wowUnit != null && wowUnit.IsTaggedByMe)
             {
@@ -93,24 +94,25 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (!WowInterface.Player.IsInCombat && DateTime.UtcNow.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
             {
                 LastUnitCheck = DateTime.UtcNow;
-                WowUnit = WowInterface.ObjectManager.WowObjects
+                WowUnit = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && NpcIds.Contains(WowGuid.ToNpcId(e.Guid)) && !e.IsNotAttackable
-                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
+                                && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .Take(3)
-                    .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, e.Position))
+                    .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.Objects.MapId, WowInterface.Player.Position, e.Position))
                     .FirstOrDefault();
 
                 // Kill enemies in the path
-                if (WowUnit != null && !WowInterface.Player.IsHostileTo(WowInterface, WowUnit))
+                if (WowUnit != null && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowUnit.BaseAddress) == WowUnitReaction.Hostile)
                 {
-                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
+                    IEnumerable<Vector3> path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.Objects.MapId,
                     WowInterface.Player.Position, WowUnit.Position);
+
                     if (path != null)
                     {
-                        var nearEnemies =
-                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0f);
+                        IEnumerable<WowUnit> nearEnemies = WowInterface.Objects.GetEnemiesInPath<WowUnit>(WowInterface.NewWowInterface, path, 10.0f);
+
                         if (nearEnemies.Any())
                         {
                             WowUnit = nearEnemies.FirstOrDefault();
@@ -120,7 +122,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
                 if (WowUnit != null)
                 {
-                    WowInterface.HookManager.WowTargetGuid(WowUnit.Guid);
+                    WowInterface.NewWowInterface.WowTargetGuid(WowUnit.Guid);
                 }
             }
 

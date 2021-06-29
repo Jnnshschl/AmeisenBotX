@@ -1,11 +1,11 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Data.Objects.Raw;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Hook.Structs;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -315,7 +315,7 @@ namespace AmeisenBotX.Core.Hook
         /// <param name="wowUnitA">Unit a</param>
         /// <param name="wowUnitB">Unit b</param>
         /// <returns>The reaction of unit a to unit b</returns>
-        WowUnitReaction WowGetUnitReaction(WowUnit wowUnitA, WowUnit wowUnitB);
+        WowUnitReaction WowGetReaction(WowUnit wowUnitA, WowUnit wowUnitB);
 
         /// <summary>
         /// Checks the CTM status.

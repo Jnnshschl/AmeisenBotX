@@ -38,11 +38,11 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
             if (Finished)
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 return;
             }
 
-            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(UnitDisplayIds);
+            WowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, UnitDisplayIds);
 
             if (WowUnit != null)
             {

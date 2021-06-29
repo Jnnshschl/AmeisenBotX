@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 AmeisenLogger.I.Log("LoadingScreen", "Returned to login screen");
                 StateMachine.SetState(BotState.Login);
             }
-            else if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
+            else if (WowInterface.Objects.IsWorldLoaded)
             {
                 StateMachine.SetState(BotState.Idle);
             }

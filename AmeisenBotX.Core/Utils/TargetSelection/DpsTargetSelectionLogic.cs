@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
         {
             possibleTargets = null;
 
-            if (WowInterface.TargetGuid == 0 || WowInterface.Target == null)
+            if (WowInterface.Target.Guid == 0 || WowInterface.Target == null)
             {
-                IEnumerable<WowUnit> priorityTargets = WowInterface.ObjectManager.WowObjects
+                IEnumerable<WowUnit> priorityTargets = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => IsValidUnit(e) && IsPriorityTarget(e))
                     .OrderBy(e => e.DistanceTo(WowInterface.Player));
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                     return true;
                 }
 
-                possibleTargets = WowInterface.ObjectManager.WowObjects
+                possibleTargets = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => IsValidUnit(e))
                     .OrderByDescending(e => e.Type)
@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
             }
             else if (!IsValidUnit(WowInterface.Target))
             {
-                WowInterface.HookManager.WowClearTarget();
+                WowInterface.NewWowInterface.WowClearTarget();
                 return true;
             }
 

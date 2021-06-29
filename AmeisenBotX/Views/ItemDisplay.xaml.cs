@@ -38,7 +38,7 @@ namespace AmeisenBotX.Views
 
             labelItemType.Content = $"{WowItem.Type} - {WowItem.Subtype} - iLvl {WowItem.ItemLevel} - {WowItem.Durability}/{WowItem.MaxDurability}";
 
-            labelItemName.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BotUtils.GetColorByQuality(WowItem.ItemQuality)));
+            labelItemName.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(WowItem.ItemQuality.GetColor()));
         }
     }
 }

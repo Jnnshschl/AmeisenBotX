@@ -41,17 +41,17 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished || WowInterface.Player.IsCasting) { return; }
 
-            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(ObjectDisplayIds, QuestgiversOnly);
+            WowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, ObjectDisplayIds, QuestgiversOnly);
 
             if (WowUnit != null)
             {
                 if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
                 {
-                    WowInterface.HookManager.WowStopClickToMove();
+                    WowInterface.NewWowInterface.WowStopClickToMove();
                     WowInterface.MovementEngine.Reset();
                 }
 
-                WowInterface.HookManager.WowUnitRightClick(WowUnit);
+                WowInterface.NewWowInterface.WowUnitRightClick(WowUnit.BaseAddress);
             }
         }
     }

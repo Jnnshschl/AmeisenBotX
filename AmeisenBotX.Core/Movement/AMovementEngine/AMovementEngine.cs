@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
                 position = newPosition;
             }
 
-            path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, position);
+            path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.Objects.MapId, WowInterface.Player.Position, position);
 
             if (path != null && path.Any())
             {
@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         public void StopMovement()
         {
             Reset();
-            WowInterface.HookManager.WowStopClickToMove();
+            WowInterface.NewWowInterface.WowStopClickToMove();
         }
 
         private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
@@ -225,8 +225,8 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
             List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
-            places.AddRange(WowInterface.ObjectManager.GetAoeSpells(position)
-                .Where(e => WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(e.Caster)?.Type == WowObjectType.Unit)
+            places.AddRange(WowInterface.Objects.GetAoeSpells(WowInterface.NewWowInterface, position)
+                .Where(e => WowInterface.Objects.GetWowObjectByGuid<WowUnit>(e.Caster)?.Type == WowObjectType.Unit)
                 .Select(e => (e.Position, e.Radius)));
 
             if (places.Any())
@@ -259,7 +259,7 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
                         // get position behind us
                         Vector3 positionBehind = BotUtils.MoveAhead(WowInterface.Player.Position, WowInterface.Player.Rotation, -WowInterface.MovementSettings.UnstuckDistance);
-                        UnstuckTarget = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, positionBehind, 5.0f);
+                        UnstuckTarget = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.Objects.MapId, positionBehind, 5.0f);
 
                         Reset();
                         SetMovementAction(MovementAction.Move, UnstuckTarget);
@@ -290,13 +290,13 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
             {
                 WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                 PreventMovement(TimeSpan.FromSeconds(1));
-                WowInterface.HookManager.LuaCallCompanion(mount.Index);
+                WowInterface.NewWowInterface.LuaCallCompanion(mount.Index);
             }
         }
 
         private void MoveCharacter(Vector3 positionToGoTo)
         {
-            Vector3 node = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, positionToGoTo);
+            Vector3 node = WowInterface.PathfindingHandler.MoveAlongSurface((int)WowInterface.Objects.MapId, WowInterface.Player.Position, positionToGoTo);
 
             if (node != default)
             {

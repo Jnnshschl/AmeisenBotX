@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.Raw;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+﻿using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Utils.Aura

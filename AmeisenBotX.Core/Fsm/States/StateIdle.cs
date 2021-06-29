@@ -1,14 +1,14 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.Idle;
 using AmeisenBotX.Core.Fsm.States.Idle.Actions;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AmeisenBotX.Core.Fsm.States
 {
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            if (WowInterface.ObjectManager.IsWorldLoaded)
+            if (WowInterface.Objects.IsWorldLoaded)
             {
                 if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
                 {
@@ -72,8 +72,8 @@ namespace AmeisenBotX.Core.Fsm.States
                         WowInterface.EventHookManager.Start();
                     }
 
-                    WowInterface.HookManager.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                    WowInterface.HookManager.WowEnableClickToMove();
+                    WowInterface.NewWowInterface.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+                    WowInterface.NewWowInterface.WowEnableClickToMove();
                 }
 
                 if (RefreshCharacterEvent.Run())
@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // we are in a dungeon
-            if (WowInterface.ObjectManager.MapId.IsDungeonMap()
+            if (WowInterface.Objects.MapId.IsDungeonMap()
                 && !Config.DungeonUsePartyMode)
             {
                 StateMachine.SetState(BotState.Dungeon);
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // do i need to follow someone
-            if ((!Config.Autopilot || WowInterface.ObjectManager.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
+            if ((!Config.Autopilot || WowInterface.Objects.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
             {
                 StateMachine.SetState(BotState.Following);
                 return;
@@ -190,15 +190,15 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public bool IsUnitToFollowThere(out WowUnit playerToFollow, bool ignoreRange = false)
         {
-            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead);
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.Objects.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead);
 
             if (wowPlayers.Any())
             {
                 WowUnit[] playersToTry =
                 {
                     Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => p.Name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
-                    Config.FollowGroupLeader ? WowInterface.ObjectManager.Partyleader : null,
-                    Config.FollowGroupMembers ? WowInterface.ObjectManager.Partymembers.FirstOrDefault() : null
+                    Config.FollowGroupLeader ? WowInterface.Objects.Partyleader : null,
+                    Config.FollowGroupMembers ? WowInterface.Objects.Partymembers.FirstOrDefault() : null
                 };
 
                 for (int i = 0; i < playersToTry.Length; ++i)
@@ -225,13 +225,13 @@ namespace AmeisenBotX.Core.Fsm.States
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 2)
             {
-                WowInterface.HookManager.LuaAcceptBattlegroundInvite();
+                WowInterface.NewWowInterface.LuaAcceptBattlegroundInvite();
             }
         }
 
         private bool HandleAutoQuestMode(WowUnit wowPlayer)
         {
-            WowUnit possibleQuestgiver = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
+            WowUnit possibleQuestgiver = WowInterface.Objects.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
 
             if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
             {
@@ -253,10 +253,10 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         if (!BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, possibleQuestgiver.Position))
                         {
-                            WowInterface.HookManager.WowFacePosition(WowInterface.Player, possibleQuestgiver.Position);
+                            WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, possibleQuestgiver.Position);
                         }
 
-                        WowInterface.HookManager.WowUnitRightClick(possibleQuestgiver);
+                        WowInterface.NewWowInterface.WowUnitRightClick(possibleQuestgiver.BaseAddress);
                         return true;
                     }
                 }

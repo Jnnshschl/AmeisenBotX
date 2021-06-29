@@ -23,11 +23,11 @@
 
         public void Execute()
         {
-            if (Finished || WowInterface.ObjectManager.Vehicle.IsCasting) { return; }
+            if (Finished || WowInterface.Objects.Vehicle.IsCasting) { return; }
 
             WowInterface.MovementEngine.Reset();
-            WowInterface.HookManager.WowStopClickToMove();
-            WowInterface.HookManager.LuaCastSpellById(SpellId);
+            WowInterface.NewWowInterface.WowStopClickToMove();
+            WowInterface.NewWowInterface.LuaCastSpellById(SpellId);
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+            WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, AnubRhekanDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -162,9 +162,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private bool DoTank(out bool handlesMovement, out bool allowAttacking)
         {
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+            WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, AnubRhekanDisplayId, false);
 
-            if (wowUnit != null && wowUnit.TargetGuid == WowInterface.PlayerGuid)
+            if (wowUnit != null && wowUnit.TargetGuid == WowInterface.Player.Guid)
             {
                 if (Configureables["isOffTank"] == true)
                 {

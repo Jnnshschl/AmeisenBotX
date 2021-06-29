@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using System;
 using System.Linq;
@@ -46,18 +46,18 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 return;
             }
 
-            WowGameobject nearCampfire = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                .FirstOrDefault(e => e.DisplayId == (int)WowGameobjectDisplayId.CookingCampfire && WowInterface.ObjectManager.PartymemberGuids.Contains(e.CreatedBy));
+            WowGameobject nearCampfire = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
+                .FirstOrDefault(e => e.DisplayId == (int)WowGameobjectDisplayId.CookingCampfire && WowInterface.Objects.PartymemberGuids.Contains(e.CreatedBy));
 
             if (nearCampfire != null && !SatDown)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.Player, nearCampfire.Position);
-                WowInterface.HookManager.LuaSendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
+                WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, nearCampfire.Position);
+                WowInterface.NewWowInterface.LuaSendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
                 SatDown = true;
             }
             else if (!PlacedCampfire)
             {
-                WowInterface.HookManager.LuaCastSpell("Basic Campfire");
+                WowInterface.NewWowInterface.LuaCastSpell("Basic Campfire");
                 PlacedCampfire = true;
             }
         }

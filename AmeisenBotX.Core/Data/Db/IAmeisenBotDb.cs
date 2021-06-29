@@ -1,11 +1,11 @@
-﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Data.CombatLog.Enums;
 using AmeisenBotX.Core.Data.CombatLog.Objects;
 using AmeisenBotX.Core.Data.Db.Enums;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
 using AmeisenBotX.Core.Personality.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 

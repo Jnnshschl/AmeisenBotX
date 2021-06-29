@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -33,8 +33,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 (aspectOfTheHawkSpell, () => TryCastSpell(aspectOfTheHawkSpell, 0, true))
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(serpentStingSpell, () => TryCastSpell(serpentStingSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(serpentStingSpell, () => TryCastSpell(serpentStingSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -158,42 +158,42 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        TryCastSpell(raptorStrikeSpell, WowInterface.TargetGuid, true);
-                        TryCastSpell(mongooseBiteSpell, WowInterface.TargetGuid, true);
+                        TryCastSpell(raptorStrikeSpell, WowInterface.Target.Guid, true);
+                        TryCastSpell(mongooseBiteSpell, WowInterface.Target.Guid, true);
                     }
                     else if (distanceToTarget < (WowInterface.Target.IsPlayer() ? C["KitingEndDistancePlayer"] : C["KitingEndDistanceUnit"]))
                     {
                         if (!WowInterface.Target.HasBuffByName(concussiveShotSpell)
                             && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
-                            && TryCastSpell(concussiveShotSpell, WowInterface.TargetGuid, true))
+                            && TryCastSpell(concussiveShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;
                         }
 
                         if (WowInterface.Target.HealthPercentage < 20.0
-                            && TryCastSpell(killShotSpell, WowInterface.TargetGuid, true))
+                            && TryCastSpell(killShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;
                         }
 
-                        TryCastSpell(killCommandSpell, WowInterface.TargetGuid, true);
-                        TryCastSpell(beastialWrathSpell, WowInterface.TargetGuid, true);
+                        TryCastSpell(killCommandSpell, WowInterface.Target.Guid, true);
+                        TryCastSpell(beastialWrathSpell, WowInterface.Target.Guid, true);
                         TryCastSpell(rapidFireSpell, 0);
 
-                        if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
-                            && TryCastSpell(multiShotSpell, WowInterface.TargetGuid, true))
+                        if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Target.Position, 16.0f).Count() > 2
+                            && TryCastSpell(multiShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(arcaneShotSpell, WowInterface.TargetGuid, true))
+                        if (TryCastSpell(arcaneShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;
                         }
 
                         // only cast when we are far away and disengage is ready
                         if (distanceToTarget > (WowInterface.Target.IsPlayer() ? C["SteadyShotMinDistancePlayer"] : C["SteadyShotMinDistanceUnit"])
-                            && TryCastSpell(steadyShotSpell, WowInterface.TargetGuid, true))
+                            && TryCastSpell(steadyShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;
                         }
@@ -202,7 +202,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     {
                         if (!WowInterface.Target.HasBuffByName(concussiveShotSpell)
                             && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
-                            && TryCastSpell(concussiveShotSpell, WowInterface.TargetGuid, true))
+                            && TryCastSpell(concussiveShotSpell, WowInterface.Target.Guid, true))
                         {
                             return;
                         }

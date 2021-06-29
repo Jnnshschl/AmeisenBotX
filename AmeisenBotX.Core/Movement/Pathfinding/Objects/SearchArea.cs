@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Math;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -56,7 +57,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
                 return Area[0];
             }
 
-            Vector3 currentPosition = wowInterface.ObjectManager.Player.Position;
+            Vector3 currentPosition = wowInterface.Objects.Player.Position;
 
             // This is not optimal but fairly simple
             // We ask for the path for every vertex.
@@ -68,7 +69,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             foreach (Vector3 vertex in Area)
             {
                 double totalDistance = 0.0;
-                IEnumerable<Vector3> path = wowInterface.PathfindingHandler.GetPath((int)wowInterface.ObjectManager.MapId, currentPosition, vertex);
+                IEnumerable<Vector3> path = wowInterface.PathfindingHandler.GetPath((int)wowInterface.Objects.MapId, currentPosition, vertex);
 
                 if (path != null)
                 {

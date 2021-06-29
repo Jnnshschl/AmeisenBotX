@@ -1,13 +1,14 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.StaticDeathRoutes;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace AmeisenBotX.Core.Fsm.States
             (
                 new Selector
                 (
-                    () => WowInterface.ObjectManager.MapId.IsBattlegroundMap(),
+                    () => WowInterface.Objects.MapId.IsBattlegroundMap(),
                     new Leaf(() =>
                     {
                         WowInterface.MovementEngine.StopMovement();
@@ -79,7 +80,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private IEnumerable<WowGameobject> NearPortals { get; set; }
 
-        private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
+        private WowPlayer PlayerToFollow => WowInterface.Objects.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
 
         private bool SearchedStaticRoutes { get; set; }
 
@@ -97,7 +98,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 return;
             }
 
-            NearPortals = WowInterface.ObjectManager.WowObjects
+            NearPortals = WowInterface.Objects.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                          || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
@@ -130,7 +131,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 SearchedStaticRoutes = true;
 
                 Vector3 endPosition = WowInterface.DungeonEngine.Profile != null ? WowInterface.DungeonEngine.Profile.WorldEntry : CorpsePosition;
-                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, endPosition));
+                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.Objects.MapId, WowInterface.Player.Position, endPosition));
 
                 if (staticRoute != null)
                 {
@@ -139,7 +140,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 }
                 else
                 {
-                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, CorpsePosition));
+                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.Objects.MapId, WowInterface.Player.Position, CorpsePosition));
 
                     if (staticRoute != null)
                     {
@@ -196,7 +197,7 @@ namespace AmeisenBotX.Core.Fsm.States
         /// <returns>True when a valid unit has been found, false if not</returns>
         private bool IsUnitToFollowNear(out ulong guid)
         {
-            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+            IEnumerable<WowPlayer> wowPlayers = WowInterface.Objects.WowObjects.OfType<WowPlayer>();
             guid = 0;
 
             if (wowPlayers.Any())
@@ -260,7 +261,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else
             {
-                WowInterface.HookManager.LuaRetrieveCorpse();
+                WowInterface.NewWowInterface.LuaRetrieveCorpse();
                 return BehaviorTreeStatus.Success;
             }
         }

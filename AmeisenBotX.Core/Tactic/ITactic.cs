@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Tactic

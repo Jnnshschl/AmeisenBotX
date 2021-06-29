@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 
 namespace AmeisenBotX.Core.Combat.Classes.ToadLump
@@ -18,8 +18,8 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { hamstringSpell, () => WowInterface.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.TargetGuid, true) },
-                { rendSpell, () => WowInterface.Target.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.TargetGuid, true) }
+                { hamstringSpell, () => WowInterface.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.Target.Guid, true) },
+                { rendSpell, () => WowInterface.Target.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.Target.Guid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new()

@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using System.Windows.Media;
 
 namespace AmeisenBotX.Utils

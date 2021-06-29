@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => WowInterface.ObjectManager.Vehicle != null && WantedPosition.GetDistance(WowInterface.ObjectManager.Vehicle.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => WowInterface.Objects.Vehicle != null && WantedPosition.GetDistance(WowInterface.Objects.Vehicle.Position) < Distance ? 100.0 : 0.0;
 
         private double Distance { get; }
 
@@ -33,11 +33,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (Finished)
             {
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 return;
             }
 
-            if (WantedPosition.GetDistance2D(WowInterface.ObjectManager.Vehicle.Position) > Distance)
+            if (WantedPosition.GetDistance2D(WowInterface.Objects.Vehicle.Position) > Distance)
             {
                 WowInterface.MovementEngine.SetMovementAction(MovementAction, WantedPosition, 0);
             }

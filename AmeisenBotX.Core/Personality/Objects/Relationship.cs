@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Core.Personality.Enums;
 using System;
 
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Personality.Objects
         public void Poll(WowInterface wowInterface, WowUnit unit)
         {
             LastSeen = DateTime.Now;
-            LastSeenMapId = wowInterface.ObjectManager.MapId;
+            LastSeenMapId = wowInterface.Objects.MapId;
             LastSeenPosition = unit.Position;
         }
     }

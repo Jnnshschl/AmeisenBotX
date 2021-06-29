@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.Raw;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Drawing;
 using Rect = AmeisenBotX.Memory.Win32.Rect;

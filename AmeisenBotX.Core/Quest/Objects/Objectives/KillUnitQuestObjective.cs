@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using System.Collections.Generic;
@@ -43,15 +43,15 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             if (WowInterface.Target != null
                 && !WowInterface.Target.IsDead
                 && !WowInterface.Target.IsNotAttackable
-                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) != WowUnitReaction.Friendly)
+                && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) != WowUnitReaction.Friendly)
             {
                 WowUnit = WowInterface.Target;
             }
             else
             {
-                WowInterface.HookManager.WowClearTarget();
+                WowInterface.NewWowInterface.WowClearTarget();
 
-                WowUnit = WowInterface.ObjectManager.WowObjects
+                WowUnit = WowInterface.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
@@ -63,9 +63,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
                 {
-                    WowInterface.HookManager.WowStopClickToMove();
+                    WowInterface.NewWowInterface.WowStopClickToMove();
                     WowInterface.MovementEngine.Reset();
-                    WowInterface.HookManager.WowUnitRightClick(WowUnit);
+                    WowInterface.NewWowInterface.WowUnitRightClick(WowUnit.BaseAddress);
                 }
                 else
                 {

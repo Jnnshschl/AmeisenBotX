@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
+
 using System.Drawing;
 
 namespace AmeisenBotX.Utils

@@ -1,18 +1,12 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Enums;
-using System;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
-    class RogueAssassination : BasicKamelClass
+    internal class RogueAssassination : BasicKamelClass
     {
         public RogueAssassination(WowInterface wowInterface) : base()
         {
@@ -89,13 +83,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         }
         private void StartAttack()
         {
-            if (WowInterface.TargetGuid != 0)
+            if (WowInterface.Target.Guid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.NewWowInterface.WowClearTarget();
                     return;
                 }
 
@@ -103,7 +97,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.HookManager.LuaStartAutoAttack();
+                        WowInterface.NewWowInterface.LuaStartAutoAttack();
                     }
                 }
             }

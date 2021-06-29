@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             {
                 Finished = true;
                 WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                WowInterface.NewWowInterface.WowStopClickToMove();
                 return;
             }
 

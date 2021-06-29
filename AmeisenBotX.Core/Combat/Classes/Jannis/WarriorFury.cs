@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -17,8 +17,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hamstringSpell, () => WowInterface.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rendSpell, () => WowInterface.Target?.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hamstringSpell, () => WowInterface.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rendSpell, () => WowInterface.Target?.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -118,8 +118,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     {
                         if (HeroicStrikeEvent.Ready && !WowInterface.Player.HasBuffByName(recklessnessSpell))
                         {
-                            if ((WowInterface.Player.Rage > 50 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
-                                || (WowInterface.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.TargetGuid, true)))
+                            if ((WowInterface.Player.Rage > 50 && WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                                || (WowInterface.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.Target.Guid, true)))
                             {
                                 HeroicStrikeEvent.Run();
                                 return;

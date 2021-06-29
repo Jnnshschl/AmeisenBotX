@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.Common\AmeisenBotX.Common.csproj" />
+    <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj" />
+    <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj" />
+    <ProjectReference Include="..\AmeisenBotX.Wow\AmeisenBotX.Wow.csproj" />
+  </ItemGroup>
+
+</Project>

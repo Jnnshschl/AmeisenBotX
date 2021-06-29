@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Utils;
 using System;
 using System.Collections.Generic;
@@ -57,7 +57,7 @@ namespace AmeisenBotX
             OreBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF6F4E37"));
             HerbBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF7BB661"));
 
-            AmeisenBot.WowInterface.ObjectManager.OnObjectUpdateComplete += (IEnumerable<WowObject> wowObjects) => { NeedToUpdateMap = true; };
+            AmeisenBot.WowInterface.Objects.OnObjectUpdateComplete += (IEnumerable<WowObject> wowObjects) => { NeedToUpdateMap = true; };
 
             InitializeComponent();
         }
@@ -375,11 +375,11 @@ namespace AmeisenBotX
                 }
             }
 
-            using MemoryStream memory = new MemoryStream();
+            using MemoryStream memory = new();
             bitmap.Save(memory, ImageFormat.Png);
             memory.Position = 0;
 
-            BitmapImage bitmapImageMap = new BitmapImage();
+            BitmapImage bitmapImageMap = new();
             bitmapImageMap.BeginInit();
             bitmapImageMap.StreamSource = memory;
             bitmapImageMap.CacheOption = BitmapCacheOption.OnLoad;
@@ -449,7 +449,7 @@ namespace AmeisenBotX
 
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
+            IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.Objects.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId));
@@ -464,7 +464,7 @@ namespace AmeisenBotX
 
         private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<WowGameobject> oreNodes = AmeisenBot.WowInterface.ObjectManager.WowObjects
+            List<WowGameobject> oreNodes = AmeisenBot.WowInterface.Objects.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId))
@@ -480,7 +480,7 @@ namespace AmeisenBotX
 
         private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<WowUnit> wowUnits = AmeisenBot.WowInterface.ObjectManager.WowObjects
+            List<WowUnit> wowUnits = AmeisenBot.WowInterface.Objects.WowObjects
                 .OfType<WowUnit>()
                 .ToList();
 
@@ -488,7 +488,7 @@ namespace AmeisenBotX
             {
                 WowUnit unit = wowUnits[i];
 
-                Brush selectedBrush = unit.IsDead ? DeadBrush : (AmeisenBot.WowInterface.HookManager.WowGetUnitReaction(AmeisenBot.WowInterface.Player, unit)) switch
+                Brush selectedBrush = unit.IsDead ? DeadBrush : (AmeisenBot.WowInterface.NewWowInterface.GetReaction(AmeisenBot.WowInterface.Player.BaseAddress, unit.BaseAddress)) switch
                 {
                     WowUnitReaction.HostileGuard => EnemyBrush,
                     WowUnitReaction.Hostile => EnemyBrush,

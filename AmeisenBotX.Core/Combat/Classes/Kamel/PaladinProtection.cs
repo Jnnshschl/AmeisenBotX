@@ -1,11 +1,10 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -162,18 +161,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            //WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+            // WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
 
-            if (WowInterface.TargetGuid != 0)
+            if (WowInterface.Target.Guid != 0)
             {
-                if (WowInterface.TargetGuid != WowInterface.PlayerGuid)
+                if (WowInterface.Target.Guid != WowInterface.Player.Guid)
                 {
                     TargetselectionTank();
                 }
 
-                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, WowInterface.Target.BaseAddress) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.HookManager.WowClearTarget();
+                    WowInterface.NewWowInterface.WowClearTarget();
                     return;
                 }
 
@@ -181,7 +180,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.HookManager.LuaStartAutoAttack();
+                        WowInterface.NewWowInterface.LuaStartAutoAttack();
                     }
 
                     if ((WowInterface.Player.IsConfused || WowInterface.Player.IsSilenced || WowInterface.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
@@ -267,7 +266,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.ObjectManager.Partymembers)
+                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.Objects.Partymembers)
                 {
                     WowInterface.Player
                 };
@@ -278,12 +277,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                 {
                     if (CastBuff.Count > 0)
                     {
-                        if (WowInterface.TargetGuid != CastBuff.FirstOrDefault().Guid)
+                        if (WowInterface.Target.Guid != CastBuff.FirstOrDefault().Guid)
                         {
-                            WowInterface.HookManager.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
+                            WowInterface.NewWowInterface.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
                         }
                     }
-                    if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
+                    if (WowInterface.Target.Guid != 0 && WowInterface.Target != null)
                     {
                         if (!TargetInLineOfSight)
                         {
@@ -323,7 +322,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     {
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            WowInterface.HookManager.LuaCastSpell(spellName);
+                            WowInterface.NewWowInterface.LuaCastSpell(spellName);
                             return true;
                         }
                     }

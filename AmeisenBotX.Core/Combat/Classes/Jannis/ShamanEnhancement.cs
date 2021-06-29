@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(lightningShieldSpell, () => WowInterface.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(waterShieldSpell, () => WowInterface.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -99,14 +99,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (WowInterface.Player.HealthPercentage < 30
                     && WowInterface.Target.Type == WowObjectType.Player
-                    && TryCastSpell(hexSpell, WowInterface.TargetGuid, true))
+                    && TryCastSpell(hexSpell, WowInterface.Target.Guid, true))
                 {
                     HexedTarget = true;
                     return;
                 }
 
                 if (WowInterface.Player.HealthPercentage < 60
-                    && TryCastSpell(healingWaveSpell, WowInterface.PlayerGuid, true))
+                    && TryCastSpell(healingWaveSpell, WowInterface.Player.Guid, true))
                 {
                     return;
                 }
@@ -116,16 +116,16 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     if ((WowInterface.Target.MaxHealth > 10000000
                             && WowInterface.Target.HealthPercentage < 25
                             && TryCastSpell(heroismSpell, 0))
-                        || TryCastSpell(stormstrikeSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(lavaLashSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(earthShockSpell, WowInterface.TargetGuid, true))
+                        || TryCastSpell(stormstrikeSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(lavaLashSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(earthShockSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
 
                     if (WowInterface.Player.HasBuffByName(maelstromWeaponSpell)
                         && WowInterface.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell).StackCount >= 5
-                        && TryCastSpell(lightningBoltSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(lightningBoltSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }

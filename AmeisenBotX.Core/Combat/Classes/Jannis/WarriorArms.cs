@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -17,8 +17,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hamstringSpell, () => WowInterface.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rendSpell, () => WowInterface.Target?.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hamstringSpell, () => WowInterface.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rendSpell, () => WowInterface.Target?.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -117,10 +117,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        if ((WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
-                            || TryCastSpellWarrior(overpowerSpell, battleStanceSpell, WowInterface.TargetGuid, true)
-                            || TryCastSpellWarrior(mortalStrikeSpell, battleStanceSpell, WowInterface.TargetGuid, true)
-                            || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.TargetGuid, true)))
+                        if ((WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
+                            || TryCastSpellWarrior(overpowerSpell, battleStanceSpell, WowInterface.Target.Guid, true)
+                            || TryCastSpellWarrior(mortalStrikeSpell, battleStanceSpell, WowInterface.Target.Guid, true)
+                            || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.Target.Guid, true)))
                         {
                             return;
                         }

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -95,12 +95,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             if (SelectTarget(TargetProviderDps))
             {
                 if (WowInterface.Target.HasBuffByName(flameShockSpell)
-                    && TryCastSpell(flameShockSpell, WowInterface.TargetGuid, true))
+                    && TryCastSpell(flameShockSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(lightningBoltSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpell(lightningBoltSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowInterface.HookManager.WowTargetGuid(unitsToHeal.First().Guid);
+                WowInterface.NewWowInterface.WowTargetGuid(unitsToHeal.First().Guid);
 
                 if (WowInterface.Target != null)
                 {
@@ -137,14 +137,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     }
 
                     if (unitsToHeal.Count() > 4
-                        && TryCastSpell(chainHealSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(chainHealSpell, WowInterface.Target.Guid, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 6
                         && (TryCastSpell(naturesSwiftnessSpell, 0, true)
-                        || TryCastSpell(tidalForceSpell, WowInterface.TargetGuid, true)))
+                        || TryCastSpell(tidalForceSpell, WowInterface.Target.Guid, true)))
                     {
                         return true;
                     }
@@ -154,7 +154,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (TryCastSpell(keyValuePair.Value, WowInterface.TargetGuid, true))
+                        if (TryCastSpell(keyValuePair.Value, WowInterface.Target.Guid, true))
                         {
                             return true;
                         }

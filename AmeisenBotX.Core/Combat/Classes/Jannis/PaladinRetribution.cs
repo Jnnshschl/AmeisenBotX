@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 
@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public PaladinRetribution(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, WowInterface.Player.Guid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(retributionAuraSpell, () => TryCastSpell(retributionAuraSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
 
@@ -89,15 +89,15 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             if (SelectTarget(TargetProviderDps))
             {
                 if ((WowInterface.Player.HealthPercentage < 20.0
-                        && TryCastSpell(layOnHandsSpell, WowInterface.PlayerGuid))
+                        && TryCastSpell(layOnHandsSpell, WowInterface.Player.Guid))
                     || (WowInterface.Player.HealthPercentage < 60.0
-                        && TryCastSpell(holyLightSpell, WowInterface.PlayerGuid, true)))
+                        && TryCastSpell(holyLightSpell, WowInterface.Player.Guid, true)))
                 {
                     return;
                 }
 
                 if (((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
-                        && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(judgementOfLightSpell, WowInterface.Target.Guid, true))
                     || TryCastSpell(avengingWrathSpell, 0, true)
                     || (WowInterface.Player.ManaPercentage < 80.0
                         && TryCastSpell(divinePleaSpell, 0, true)))
@@ -108,12 +108,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 if (WowInterface.Target != null)
                 {
                     if ((WowInterface.Player.HealthPercentage < 20.0
-                            && TryCastSpell(hammerOfWrathSpell, WowInterface.TargetGuid, true))
-                        || TryCastSpell(crusaderStrikeSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(divineStormSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(consecrationSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(exorcismSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(holyWrathSpell, WowInterface.TargetGuid, true))
+                            && TryCastSpell(hammerOfWrathSpell, WowInterface.Target.Guid, true))
+                        || TryCastSpell(crusaderStrikeSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(divineStormSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(consecrationSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(exorcismSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(holyWrathSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }

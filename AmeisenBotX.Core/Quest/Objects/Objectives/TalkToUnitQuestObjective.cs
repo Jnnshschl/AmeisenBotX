@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using System;
@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         {
             if (Finished || WowInterface.Player.IsCasting) { return; }
 
-            WowUnit = WowInterface.ObjectManager.WowObjects
+            WowUnit = WowInterface.Objects.WowObjects
                 .OfType<WowUnit>()
                 .Where(e => e.IsGossip && !e.IsDead && DisplayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
@@ -65,10 +65,10 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                 {
                     if (TalkEvent.Run())
                     {
-                        WowInterface.HookManager.WowStopClickToMove();
+                        WowInterface.NewWowInterface.WowStopClickToMove();
                         WowInterface.MovementEngine.Reset();
 
-                        WowInterface.HookManager.WowUnitRightClick(WowUnit);
+                        WowInterface.NewWowInterface.WowUnitRightClick(WowUnit.BaseAddress);
 
                         ++Counter;
                         if (Counter > GossipIds.Count)
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                             Counter = 1;
                         }
 
-                        WowInterface.HookManager.LuaSelectGossipOption(GossipIds[Counter - 1]);
+                        WowInterface.NewWowInterface.LuaSelectGossipOption(GossipIds[Counter - 1]);
                     }
                 }
                 else

@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (!WowInterface.ObjectManager.MapId.IsDungeonMap())
+            if (!WowInterface.Objects.MapId.IsDungeonMap())
             {
                 StateMachine.SetState(BotState.Idle);
                 return;

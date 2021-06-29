@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
 using System;
 
 namespace AmeisenBotX.Core.Utils
@@ -34,25 +34,25 @@ namespace AmeisenBotX.Core.Utils
 
         public bool Tick()
         {
-            if (WowInterface.ObjectManager.Pet != null)
+            if (WowInterface.Objects.Pet != null)
             {
                 if (CastCallPet != null
-                    && ((WowInterface.ObjectManager.Pet.Guid == 0 && CastCallPet.Invoke())
+                    && ((WowInterface.Objects.Pet.Guid == 0 && CastCallPet.Invoke())
                     || CastRevivePet != null
-                    && WowInterface.ObjectManager.Pet != null
-                    && (WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead) && CastRevivePet()))
+                    && WowInterface.Objects.Pet != null
+                    && (WowInterface.Objects.Pet.Health == 0 || WowInterface.Objects.Pet.IsDead) && CastRevivePet()))
                 {
                     return true;
                 }
 
-                if (WowInterface.ObjectManager.Pet == null || WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead)
+                if (WowInterface.Objects.Pet == null || WowInterface.Objects.Pet.Health == 0 || WowInterface.Objects.Pet.IsDead)
                 {
                     return true;
                 }
 
                 if (CastMendPet != null
                     && DateTime.UtcNow - LastMendPetUsed > HealPetCooldown
-                    && WowInterface.ObjectManager.Pet.HealthPercentage < 80.0
+                    && WowInterface.Objects.Pet.HealthPercentage < 80.0
                     && CastMendPet.Invoke())
                 {
                     LastMendPetUsed = DateTime.UtcNow;

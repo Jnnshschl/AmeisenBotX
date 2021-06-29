@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -357,7 +357,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 force = new(0, 0, 0);
 
-            if (WowInterface.Db.TryGetBlacklistPosition((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, maxDistance, out IEnumerable<Vector3> nodes))
+            if (WowInterface.Db.TryGetBlacklistPosition((int)WowInterface.Objects.MapId, WowInterface.Player.Position, maxDistance, out IEnumerable<Vector3> nodes))
             {
                 force += Flee(nodes.First(), 0.5f);
             }
@@ -376,7 +376,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             // we need to know every objects position and distance
             // to later apply a force pushing us back from it that
             // is relational to the objects distance.
-            IEnumerable<T> objects = WowInterface.ObjectManager.WowObjects.OfType<T>();
+            IEnumerable<T> objects = WowInterface.Objects.WowObjects.OfType<T>();
 
             for (int i = 0; i < objects.Count(); ++i)
             {

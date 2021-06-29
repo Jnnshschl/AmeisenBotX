@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 
@@ -11,13 +11,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public DruidFeralCat(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.Player.Guid, true, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(catFormSpell, () => TryCastSpell(catFormSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(savageRoarSpell, () => TryCastSpellRogue(savageRoarSpell, WowInterface.TargetGuid, true, true, 1)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(savageRoarSpell, () => TryCastSpellRogue(savageRoarSpell, WowInterface.Target.Guid, true, true, 1)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(ripSpell, () => WowInterface.Player.ComboPoints == 5 && TryCastSpellRogue(ripSpell, WowInterface.TargetGuid, true, true, 5)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rakeSpell, () => TryCastSpell(rakeSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleCatSpell, () => TryCastSpell(mangleCatSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(ripSpell, () => WowInterface.Player.ComboPoints == 5 && TryCastSpellRogue(ripSpell, WowInterface.Target.Guid, true, true, 5)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rakeSpell, () => TryCastSpell(rakeSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleCatSpell, () => TryCastSpell(mangleCatSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {

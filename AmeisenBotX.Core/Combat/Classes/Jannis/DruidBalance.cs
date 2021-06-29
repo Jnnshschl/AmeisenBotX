@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -16,10 +16,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(moonkinFormSpell, () => TryCastSpell(moonkinFormSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(thornsSpell, () => TryCastSpell(thornsSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.Player.Guid, true, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, WowInterface.Target.Guid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                 if (distance < 12.0
                     && WowInterface.Target.HasBuffByName(entanglingRootsSpell)
-                    && TryCastSpellDk(entanglingRootsSpell, WowInterface.TargetGuid, false, false, true))
+                    && TryCastSpellDk(entanglingRootsSpell, WowInterface.Target.Guid, false, false, true))
                 {
                     return;
                 }
@@ -129,18 +129,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     || (WowInterface.Player.HealthPercentage < 70
                         && TryCastSpell(barkskinSpell, 0, true))
                     || (LunarEclipse
-                        && TryCastSpell(starfireSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(starfireSpell, WowInterface.Target.Guid, true))
                     || (SolarEclipse
-                        && TryCastSpell(wrathSpell, WowInterface.TargetGuid, true))
-                    || (WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                        && TryCastSpell(starfallSpell, WowInterface.TargetGuid, true)))
+                        && TryCastSpell(wrathSpell, WowInterface.Target.Guid, true))
+                    || (WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && WowInterface.Player.Position.GetDistance(e.Position) < 35).Count() < 4
+                        && TryCastSpell(starfallSpell, WowInterface.Target.Guid, true)))
                 {
                     return;
                 }
 
                 if (TryCastSpell(forceOfNatureSpell, 0, true))
                 {
-                    WowInterface.HookManager.WowClickOnTerrain(WowInterface.Player.Position);
+                    WowInterface.NewWowInterface.WowClickOnTerrain(WowInterface.Player.Position);
                 }
             }
         }

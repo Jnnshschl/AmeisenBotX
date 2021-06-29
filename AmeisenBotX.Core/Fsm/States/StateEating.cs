@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using System;
 using System.Linq;
@@ -36,8 +36,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (WowInterface.Player.HealthPercentage >= 95.0
                         && WowInterface.Player.ManaPercentage >= 95.0
-                        && (WowInterface.ObjectManager.PartyleaderGuid == 0
-                            || WowInterface.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f))
+                        && (WowInterface.Objects.Partyleader.Guid == 0
+                            || WowInterface.Player.Position.GetDistance(WowInterface.Objects.MeanGroupPosition) < 30.0f))
                     {
                         // exit if we are near full hp and power
                         StateMachine.SetState(BotState.Idle);
@@ -49,8 +49,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 else if (CurrentlyEating.Length > 0 && WowInterface.Player.HasBuffByName("Food"))
                 {
                     if (WowInterface.Player.HealthPercentage >= 95.0
-                        && (WowInterface.ObjectManager.PartyleaderGuid == 0
-                            || WowInterface.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f))
+                        && (WowInterface.Objects.Partyleader.Guid == 0
+                            || WowInterface.Player.Position.GetDistance(WowInterface.Objects.MeanGroupPosition) < 30.0f))
                     {
                         // exit if we are near full hp
                         StateMachine.SetState(BotState.Idle);
@@ -62,8 +62,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 else if (CurrentlyDrinking.Length > 0 && WowInterface.Player.HasBuffByName("Drink"))
                 {
                     if (WowInterface.Player.ManaPercentage >= 95.0
-                        && (WowInterface.ObjectManager.PartyleaderGuid == 0
-                            || WowInterface.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f))
+                        && (WowInterface.Objects.Partyleader.Guid == 0
+                            || WowInterface.Player.Position.GetDistance(WowInterface.Objects.MeanGroupPosition) < 30.0f))
                     {
                         // exit if we are near full power
                         StateMachine.SetState(BotState.Idle);
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 }
 
                 string itemName = WowInterface.CharacterManager.Inventory.Items.First(e => Enum.IsDefined(t, e.Id)).Name;
-                WowInterface.HookManager.LuaUseItemByName(itemName);
+                WowInterface.NewWowInterface.LuaUseItemByName(itemName);
                 WowInterface.MovementEngine.StopMovement();
 
                 if (t == typeof(WowRefreshment))
@@ -128,8 +128,8 @@ namespace AmeisenBotX.Core.Fsm.States
 
         internal bool NeedToEat()
         {
-            return ((WowInterface.ObjectManager.PartyleaderGuid == 0
-                        || WowInterface.Player.Position.GetDistance(WowInterface.ObjectManager.MeanGroupPosition) < 30.0f)
+            return ((WowInterface.Objects.Partyleader.Guid == 0
+                        || WowInterface.Player.Position.GetDistance(WowInterface.Objects.MeanGroupPosition) < 30.0f)
                     && (WowInterface.Player.HealthPercentage < Config.EatUntilPercent
                              && WowInterface.Player.HealthPercentage < 95.0
                              && WowInterface.Player.ManaPercentage < Config.DrinkUntilPercent

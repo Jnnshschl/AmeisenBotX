@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -16,8 +16,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public DruidRestoration(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(treeOfLifeSpell, () => WowInterface.ObjectManager.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(treeOfLifeSpell, () => WowInterface.Objects.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.Player.Guid, true)));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
@@ -112,7 +112,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 return;
             }
 
-            if (WowInterface.ObjectManager.Partymembers.Any(e => !e.IsDead))
+            if (WowInterface.Objects.Partymembers.Any(e => !e.IsDead))
             {
                 if (NeedToHealSomeone())
                 {
@@ -130,17 +130,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 if (SelectTarget(TargetProviderDps))
                 {
                     if (!WowInterface.Target.HasBuffByName(moonfireSpell)
-                        && TryCastSpell(moonfireSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(moonfireSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(starfireSpell, WowInterface.TargetGuid, true))
+                    if (TryCastSpell(starfireSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(wrathSpell, WowInterface.TargetGuid, true))
+                    if (TryCastSpell(wrathSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }

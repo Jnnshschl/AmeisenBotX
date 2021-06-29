@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -40,9 +40,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.Target.Guid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Demonology Warlock spec.";
@@ -116,11 +116,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         && WowInterface.Player.HealthPercentage > 60.0
                         && TryCastSpell(lifeTapSpell, 0)
                     || (WowInterface.Player.HealthPercentage < 80.0
-                        && TryCastSpell(deathCoilSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(deathCoilSpell, WowInterface.Target.Guid, true))
                     || (WowInterface.Player.HealthPercentage < 50.0
-                        && TryCastSpell(drainLifeSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(drainLifeSpell, WowInterface.Target.Guid, true))
                     || TryCastSpell(metamorphosisSpell, 0)
-                    || (WowInterface.ObjectManager.Pet?.Health > 0 && TryCastSpell(demonicEmpowermentSpell, 0)))
+                    || (WowInterface.Objects.Pet?.Health > 0 && TryCastSpell(demonicEmpowermentSpell, 0)))
                 {
                     return;
                 }
@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             && ((WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 6.0f
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
                             || (WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 12.0f
-                                && TryCastSpell(fearSpell, WowInterface.TargetGuid, true))))
+                                && TryCastSpell(fearSpell, WowInterface.Target.Guid, true))))
                         {
                             LastFearAttempt = DateTime.UtcNow;
                             return;
@@ -142,15 +142,15 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5.0
                         && WowInterface.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, WowInterface.TargetGuid, true))
+                        && TryCastSpell(drainSoulSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }
                 }
 
-                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
+                if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.NewWowInterface, WowInterface.Target.Position, 16.0f).Count() > 2
                     && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.TargetGuid, true))
+                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
@@ -158,19 +158,19 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 bool hasDecimation = WowInterface.Player.HasBuffByName(decimationSpell);
                 bool hasMoltenCore = WowInterface.Player.HasBuffByName(moltenCoreSpell);
 
-                if (hasDecimation && hasMoltenCore && TryCastSpell(soulfireSpell, WowInterface.TargetGuid, true))
+                if (hasDecimation && hasMoltenCore && TryCastSpell(soulfireSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
-                else if (hasDecimation && TryCastSpell(soulfireSpell, WowInterface.TargetGuid, true))
+                else if (hasDecimation && TryCastSpell(soulfireSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
-                else if (hasMoltenCore && TryCastSpell(incinerateSpell, WowInterface.TargetGuid, true))
+                else if (hasMoltenCore && TryCastSpell(incinerateSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }
-                else if (TryCastSpell(shadowBoltSpell, WowInterface.TargetGuid, true))
+                else if (TryCastSpell(shadowBoltSpell, WowInterface.Target.Guid, true))
                 {
                     return;
                 }

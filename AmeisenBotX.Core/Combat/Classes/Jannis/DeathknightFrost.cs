@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 
@@ -14,8 +14,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(frostPresenceSpell, () => TryCastSpellDk(frostPresenceSpell, 0)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(hornOfWinterSpell, () => TryCastSpellDk(hornOfWinterSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.TargetGuid, false, false, false, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.TargetGuid, false, false, false, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(frostFeverSpell, () => TryCastSpellDk(icyTouchSpell, WowInterface.Target.Guid, false, false, false, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bloodPlagueSpell, () => TryCastSpellDk(plagueStrikeSpell, WowInterface.Target.Guid, false, false, false, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -89,21 +89,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
-                   && TryCastSpellDk(darkCommandSpell, WowInterface.TargetGuid))
+                if (WowInterface.Target.TargetGuid != WowInterface.Player.Guid
+                   && TryCastSpellDk(darkCommandSpell, WowInterface.Target.Guid))
                 {
                     return;
                 }
 
                 if (!WowInterface.Target.HasBuffByName(chainsOfIceSpell)
                     && WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) > 2.0
-                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.TargetGuid, false, false, true))
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.Target.Guid, false, false, true))
                 {
                     return;
                 }
 
                 if (WowInterface.Target.HasBuffByName(chainsOfIceSpell)
-                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.TargetGuid, false, false, true))
+                    && TryCastSpellDk(chainsOfIceSpell, WowInterface.Target.Guid, false, false, true))
                 {
                     return;
                 }
@@ -116,11 +116,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 if ((WowInterface.Player.HealthPercentage < 60
                         && TryCastSpellDk(iceboundFortitudeSpell, 0, true))
                     || TryCastSpellDk(unbreakableArmorSpell, 0, false, false, true)
-                    || TryCastSpellDk(obliterateSpell, WowInterface.TargetGuid, false, false, true, true)
-                    || TryCastSpellDk(bloodStrikeSpell, WowInterface.TargetGuid, false, true)
-                    || TryCastSpellDk(deathCoilSpell, WowInterface.TargetGuid, true)
+                    || TryCastSpellDk(obliterateSpell, WowInterface.Target.Guid, false, false, true, true)
+                    || TryCastSpellDk(bloodStrikeSpell, WowInterface.Target.Guid, false, true)
+                    || TryCastSpellDk(deathCoilSpell, WowInterface.Target.Guid, true)
                     || (WowInterface.Player.Runeenergy > 60
-                        && TryCastSpellDk(runeStrikeSpell, WowInterface.TargetGuid)))
+                        && TryCastSpellDk(runeStrikeSpell, WowInterface.Target.Guid)))
                 {
                     return;
                 }

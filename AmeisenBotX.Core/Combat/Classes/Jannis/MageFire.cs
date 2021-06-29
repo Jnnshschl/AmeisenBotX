@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 
@@ -11,14 +11,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public MageFire(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.Player.Guid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(moltenArmorSpell, () => TryCastSpell(moltenArmorSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(scorchSpell, () => TryCastSpell(scorchSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(livingBombSpell, () => TryCastSpell(livingBombSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(scorchSpell, () => TryCastSpell(scorchSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(livingBombSpell, () => TryCastSpell(livingBombSpell, WowInterface.Target.Guid, true)));
 
-            // TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.TargetGuid, true);
+            // TargetAuraManager.DispellBuffs = () => WowInterface.NewWowInterface.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.Target.Guid, true);
 
             InterruptManager.InterruptSpells = new()
             {
@@ -91,13 +91,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (WowInterface.Target != null)
                 {
-                    if (TryCastSpell(mirrorImageSpell, WowInterface.TargetGuid, true)
+                    if (TryCastSpell(mirrorImageSpell, WowInterface.Target.Guid, true)
                         || (WowInterface.Player.HealthPercentage < 16
                             && TryCastSpell(iceBlockSpell, 0, true))
-                        || (WowInterface.Player.HasBuffByName(hotstreakSpell.ToLowerInvariant()) && TryCastSpell(pyroblastSpell, WowInterface.TargetGuid, true))
+                        || (WowInterface.Player.HasBuffByName(hotstreakSpell.ToLowerInvariant()) && TryCastSpell(pyroblastSpell, WowInterface.Target.Guid, true))
                         || (WowInterface.Player.ManaPercentage < 40
-                            && TryCastSpell(evocationSpell, WowInterface.TargetGuid, true))
-                        || TryCastSpell(fireballSpell, WowInterface.TargetGuid, true))
+                            && TryCastSpell(evocationSpell, WowInterface.Target.Guid, true))
+                        || TryCastSpell(fireballSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }

@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundFinished, out int bgFinished)
                 && bgFinished == 1)
             {
-                WowInterface.HookManager.LuaLeaveBattleground();
+                WowInterface.NewWowInterface.LuaLeaveBattleground();
                 return;
             }
 

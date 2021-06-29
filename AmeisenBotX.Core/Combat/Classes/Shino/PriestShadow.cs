@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.CombatClasses.Shino;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -15,14 +15,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
     {
         public PriestShadow(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowformSpell, () => TryCastSpell(shadowformSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricEmbraceSpell, () => TryCastSpell(vampiricEmbraceSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowformSpell, () => TryCastSpell(shadowformSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricEmbraceSpell, () => TryCastSpell(vampiricEmbraceSpell, WowInterface.Player.Guid, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(devouringPlagueSpell, () => TryCastSpell(devouringPlagueSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowWordPainSpell, () => TryCastSpell(shadowWordPainSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mindBlastSpell, () => TryCastSpell(mindBlastSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(devouringPlagueSpell, () => TryCastSpell(devouringPlagueSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(shadowWordPainSpell, () => TryCastSpell(shadowWordPainSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mindBlastSpell, () => TryCastSpell(mindBlastSpell, WowInterface.Target.Guid, true)));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
             }
 
             if (WowInterface.Player.ManaPercentage < 90
-                && TryCastSpell(shadowfiendSpell, WowInterface.TargetGuid))
+                && TryCastSpell(shadowfiendSpell, WowInterface.Target.Guid))
             {
                 return;
             }
@@ -118,24 +118,24 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
             }
 
             if (WowInterface.Player.HealthPercentage < 70
-                && TryCastSpell(flashHealSpell, WowInterface.TargetGuid, true))
+                && TryCastSpell(flashHealSpell, WowInterface.Target.Guid, true))
             {
                 return;
             }
 
             if (WowInterface.Player.ManaPercentage >= 50
-                && TryCastSpell(berserkingSpell, WowInterface.TargetGuid))
+                && TryCastSpell(berserkingSpell, WowInterface.Target.Guid))
             {
                 return;
             }
 
             if (!WowInterface.Player.IsCasting
-                && TryCastSpell(mindFlaySpell, WowInterface.TargetGuid, true))
+                && TryCastSpell(mindFlaySpell, WowInterface.Target.Guid, true))
             {
                 return;
             }
 
-            if (TryCastSpell(smiteSpell, WowInterface.TargetGuid, true))
+            if (TryCastSpell(smiteSpell, WowInterface.Target.Guid, true))
             {
                 return;
             }

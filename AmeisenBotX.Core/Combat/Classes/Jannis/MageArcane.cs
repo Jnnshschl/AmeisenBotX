@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using System;
@@ -12,11 +12,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
     {
         public MageArcane(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.Player.Guid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(mageArmorSpell, () => TryCastSpell(mageArmorSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
 
-            // TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.TargetGuid, true);
+            // TargetAuraManager.DispellBuffs = () => WowInterface.NewWowInterface.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.Target.Guid, true);
 
             InterruptManager.InterruptSpells = new()
             {
@@ -99,11 +99,11 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             && TryCastSpell(iceBlockSpell, 0))
                         || (WowInterface.Player.ManaPercentage < 40
                             && TryCastSpell(evocationSpell, 0, true))
-                        || TryCastSpell(mirrorImageSpell, WowInterface.TargetGuid, true)
-                        || (WowInterface.Player.HasBuffByName(missileBarrageSpell) && TryCastSpell(arcaneMissilesSpell, WowInterface.TargetGuid, true))
-                        || TryCastSpell(arcaneBarrageSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(arcaneBlastSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(fireballSpell, WowInterface.TargetGuid, true))
+                        || TryCastSpell(mirrorImageSpell, WowInterface.Target.Guid, true)
+                        || (WowInterface.Player.HasBuffByName(missileBarrageSpell) && TryCastSpell(arcaneMissilesSpell, WowInterface.Target.Guid, true))
+                        || TryCastSpell(arcaneBarrageSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(arcaneBlastSpell, WowInterface.Target.Guid, true)
+                        || TryCastSpell(fireballSpell, WowInterface.Target.Guid, true))
                     {
                         return;
                     }

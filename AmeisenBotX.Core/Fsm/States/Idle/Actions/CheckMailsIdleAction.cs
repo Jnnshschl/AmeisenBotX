@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             MailboxCheckTime = default;
             OriginPosition = WowInterface.Player.Position;
 
-            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Mailbox, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> mailboxes))
+            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.Mailbox, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> mailboxes))
             {
                 CurrentMailbox = mailboxes.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First();
                 return true;
@@ -67,13 +67,13 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 {
                     WowInterface.MovementEngine.StopMovement();
 
-                    WowGameobject mailbox = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                    WowGameobject mailbox = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
                         .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Mailbox && e.Position.GetDistance(CurrentMailbox) < 1.0f);
 
                     if (mailbox != null)
                     {
-                        WowInterface.HookManager.WowObjectRightClick(mailbox);
-                        WowInterface.HookManager.LuaDoString("for i=1,GetInboxNumItems()do AutoLootMailItem(i)end");
+                        WowInterface.NewWowInterface.WowObjectRightClick(mailbox.BaseAddress);
+                        WowInterface.NewWowInterface.LuaDoString("for i=1,GetInboxNumItems()do AutoLootMailItem(i)end");
                     }
 
                     CheckedMails = true;

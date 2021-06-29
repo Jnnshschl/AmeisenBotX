@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(IckDisplayId, false);
+            WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, IckDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                     ChasingActivated = DateTime.UtcNow;
                     return true;
                 }
-                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.PlayerGuid && wowUnit.Position.GetDistance(WowInterface.Player.Position) < 7.0f)
+                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.Player.Guid && wowUnit.Position.GetDistance(WowInterface.Player.Position) < 7.0f)
                 {
                     WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, wowUnit.Position);
 
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                     return true;
                 }
 
-                WowUnit unitOrb = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                WowUnit unitOrb = WowInterface.Objects.WowObjects.OfType<WowUnit>()
                     .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
                     .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.Player.Position) < 3.0f);
 
@@ -71,9 +71,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
                 if (role == WowRole.Tank)
                 {
-                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
+                    if (wowUnit.TargetGuid == WowInterface.Player.Guid)
                     {
-                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
+                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.Objects.MeanGroupPosition, MidPosition), 8.0f);
                         float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
 
                         if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)

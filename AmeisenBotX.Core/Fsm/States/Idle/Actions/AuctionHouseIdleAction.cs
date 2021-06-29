@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,9 +45,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             AuctioneerTalkTime = default;
             OriginPosition = WowInterface.Player.Position;
 
-            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Auctioneer, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> auctioneers))
+            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.Auctioneer, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> auctioneers))
             {
-                CurrentAuctioneer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.ObjectManager.MapId, auctioneers.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First(), 2.5f);
+                CurrentAuctioneer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.Objects.MapId, auctioneers.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First(), 2.5f);
                 return true;
             }
 
@@ -66,13 +66,13 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 {
                     WowInterface.MovementEngine.StopMovement();
 
-                    WowUnit auctioneer = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+                    WowUnit auctioneer = WowInterface.Objects.WowObjects.OfType<WowUnit>()
                         .FirstOrDefault(e => e.IsAuctioneer && e.Position.GetDistance(CurrentAuctioneer) < 1.0f);
 
                     if (auctioneer != null)
                     {
-                        WowInterface.HookManager.WowFacePosition(WowInterface.Player, auctioneer.Position);
-                        WowInterface.HookManager.WowUnitRightClick(auctioneer);
+                        WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, auctioneer.Position);
+                        WowInterface.NewWowInterface.WowUnitRightClick(auctioneer.BaseAddress);
                     }
 
                     TalkedToAuctioneer = true;

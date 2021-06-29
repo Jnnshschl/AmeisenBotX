@@ -62,24 +62,24 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public void Execute()
         {
-            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.ObjectManager.GetNearFriends<WowPlayer>(WowInterface.Player.Position, 24.0f)
-                .Where(e => e.Guid != WowInterface.PlayerGuid && WowInterface.ObjectManager.PartymemberGuids.Contains(e.Guid));
+            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.NewWowInterface, WowInterface.Player.Position, 24.0f)
+                .Where(e => e.Guid != WowInterface.Player.Guid && WowInterface.Objects.PartymemberGuids.Contains(e.Guid));
 
             if (friendsAroundMe.Any() && Rnd.NextDouble() > 0.5)
             {
                 WowPlayer player = friendsAroundMe.ElementAt(Rnd.Next(0, friendsAroundMe.Count()));
 
-                if (WowInterface.TargetGuid != player.Guid)
+                if (WowInterface.Target.Guid != player.Guid)
                 {
-                    WowInterface.HookManager.WowTargetGuid(player.Guid);
-                    WowInterface.HookManager.WowFacePosition(WowInterface.Player, player.Position);
+                    WowInterface.NewWowInterface.WowTargetGuid(player.Guid);
+                    WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, player.Position);
                 }
 
-                WowInterface.HookManager.LuaSendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");
+                WowInterface.NewWowInterface.LuaSendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");
             }
             else
             {
-                WowInterface.HookManager.LuaSendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
+                WowInterface.NewWowInterface.LuaSendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
             }
         }
     }

@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.Routines;
@@ -68,11 +68,11 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public bool IsRepairNpcNear(out WowUnit unit)
         {
-            unit = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>()
+            unit = WowInterface.Objects.WowObjects.OfType<WowUnit>()
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
                     && !e.IsDead
                     && e.IsRepairVendor
-                    && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Hostile
+                    && WowInterface.NewWowInterface.GetReaction(WowInterface.Player.BaseAddress, e.BaseAddress) != WowUnitReaction.Hostile
                     && e.Position.GetDistance(WowInterface.Player.Position) < Config.RepairNpcSearchRadius);
 
             return unit != null;
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (Config.AutoRepair && WowInterface.Target.IsRepairVendor)
             {
-                WowInterface.HookManager.LuaRepairAllItems();
+                WowInterface.NewWowInterface.LuaRepairAllItems();
             }
 
             if (Config.AutoSell)
