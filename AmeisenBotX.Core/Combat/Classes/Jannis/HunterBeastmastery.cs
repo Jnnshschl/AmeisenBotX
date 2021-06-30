@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,26 +15,26 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class HunterBeastmastery : BasicCombatClass
     {
-        public HunterBeastmastery(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public HunterBeastmastery(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
             PetManager = new
             (
-                WowInterface,
+                Bot,
                 TimeSpan.FromSeconds(5),
                 () => TryCastSpell(mendPetSpell, 0, true),
                 () => TryCastSpell(callPetSpell, 0),
                 () => TryCastSpell(revivePetSpell, 0)
             );
 
-            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(new List<(string, Func<bool>)>()
+            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
             {
-                (aspectOfTheViperSpell, () => WowInterface.Player.ManaPercentage < 25.0 && TryCastSpell(aspectOfTheViperSpell, 0, true)),
-                (aspectOfTheDragonhawkSpell, () => (!wowInterface.CharacterManager.SpellBook.IsSpellKnown(aspectOfTheViperSpell) || WowInterface.Player.ManaPercentage > 80.0) && TryCastSpell(aspectOfTheDragonhawkSpell, 0, true)),
+                (aspectOfTheViperSpell, () => Bot.Player.ManaPercentage < 25.0 && TryCastSpell(aspectOfTheViperSpell, 0, true)),
+                (aspectOfTheDragonhawkSpell, () => (!bot.Character.SpellBook.IsSpellKnown(aspectOfTheViperSpell) || Bot.Player.ManaPercentage > 80.0) && TryCastSpell(aspectOfTheDragonhawkSpell, 0, true)),
                 (aspectOfTheHawkSpell, () => TryCastSpell(aspectOfTheHawkSpell, 0, true))
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(serpentStingSpell, () => TryCastSpell(serpentStingSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, serpentStingSpell, () => TryCastSpell(serpentStingSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -127,17 +127,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    float distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
+                    float distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
-                    if (WowInterface.Player.HealthPercentage < 15.0
+                    if (Bot.Player.HealthPercentage < 15.0
                         && TryCastSpell(feignDeathSpell, 0))
                     {
                         return;
                     }
 
-                    if (distanceToTarget < (WowInterface.Target.IsPlayer() ? C["KitingStartDistancePlayer"] : C["KitingStartDistanceUnit"]))
+                    if (distanceToTarget < (Bot.Target.IsPlayer() ? C["KitingStartDistancePlayer"] : C["KitingStartDistanceUnit"]))
                     {
                         if (ReadyToDisengage
                             && TryCastSpell(disengageSpell, 0, true))
@@ -152,63 +152,63 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        if (WowInterface.Player.HealthPercentage < 30.0
+                        if (Bot.Player.HealthPercentage < 30.0
                             && TryCastSpell(deterrenceSpell, 0, true))
                         {
                             return;
                         }
 
-                        TryCastSpell(raptorStrikeSpell, WowInterface.TargetGuid, true);
-                        TryCastSpell(mongooseBiteSpell, WowInterface.TargetGuid, true);
+                        TryCastSpell(raptorStrikeSpell, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(mongooseBiteSpell, Bot.Wow.TargetGuid, true);
                     }
-                    else if (distanceToTarget < (WowInterface.Target.IsPlayer() ? C["KitingEndDistancePlayer"] : C["KitingEndDistanceUnit"]))
+                    else if (distanceToTarget < (Bot.Target.IsPlayer() ? C["KitingEndDistancePlayer"] : C["KitingEndDistanceUnit"]))
                     {
-                        if (!WowInterface.Target.HasBuffByName(concussiveShotSpell)
-                            && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
-                            && TryCastSpell(concussiveShotSpell, WowInterface.TargetGuid, true))
+                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == concussiveShotSpell)
+                            && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
+                            && TryCastSpell(concussiveShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (WowInterface.Target.HealthPercentage < 20.0
-                            && TryCastSpell(killShotSpell, WowInterface.TargetGuid, true))
+                        if (Bot.Target.HealthPercentage < 20.0
+                            && TryCastSpell(killShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        TryCastSpell(killCommandSpell, WowInterface.TargetGuid, true);
-                        TryCastSpell(beastialWrathSpell, WowInterface.TargetGuid, true);
+                        TryCastSpell(killCommandSpell, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(beastialWrathSpell, Bot.Wow.TargetGuid, true);
                         TryCastSpell(rapidFireSpell, 0);
 
-                        if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
-                            && TryCastSpell(multiShotSpell, WowInterface.TargetGuid, true))
+                        if (Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Target.Position, 16.0f).Count() > 2
+                            && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(arcaneShotSpell, WowInterface.TargetGuid, true))
+                        if (TryCastSpell(arcaneShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
                         // only cast when we are far away and disengage is ready
-                        if (distanceToTarget > (WowInterface.Target.IsPlayer() ? C["SteadyShotMinDistancePlayer"] : C["SteadyShotMinDistanceUnit"])
-                            && TryCastSpell(steadyShotSpell, WowInterface.TargetGuid, true))
+                        if (distanceToTarget > (Bot.Target.IsPlayer() ? C["SteadyShotMinDistancePlayer"] : C["SteadyShotMinDistanceUnit"])
+                            && TryCastSpell(steadyShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
                     }
-                    else if (distanceToTarget < (WowInterface.Target.IsPlayer() ? C["ChaseDistancePlayer"] : C["ChaseDistanceUnit"]))
+                    else if (distanceToTarget < (Bot.Target.IsPlayer() ? C["ChaseDistancePlayer"] : C["ChaseDistanceUnit"]))
                     {
-                        if (!WowInterface.Target.HasBuffByName(concussiveShotSpell)
-                            && !WowInterface.Target.HasBuffByName("Frost Trap Aura")
-                            && TryCastSpell(concussiveShotSpell, WowInterface.TargetGuid, true))
+                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == concussiveShotSpell)
+                            && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
+                            && TryCastSpell(concussiveShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
                         // move to position
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.Target.Position, WowInterface.Target.Rotation);
+                        Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position, Bot.Target.Rotation);
                         return;
                     }
 
@@ -217,23 +217,23 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     {
                         if (RunningAway)
                         {
-                            if (distanceToTarget < (WowInterface.Target.IsPlayer() ? C["KitingEndDistancePlayer"] : C["KitingEndDistanceUnit"]))
+                            if (distanceToTarget < (Bot.Target.IsPlayer() ? C["KitingEndDistancePlayer"] : C["KitingEndDistanceUnit"]))
                             {
-                                WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, WowInterface.Target.Position, WowInterface.Target.Rotation);
+                                Bot.Movement.SetMovementAction(MovementAction.Flee, Bot.Target.Position, Bot.Target.Rotation);
                             }
                             else
                             {
                                 RunningAway = false;
                             }
                         }
-                        else if (distanceToTarget < (WowInterface.Target.IsPlayer() ? C["KitingStartDistancePlayer"] : C["KitingStartDistanceUnit"]))
+                        else if (distanceToTarget < (Bot.Target.IsPlayer() ? C["KitingStartDistancePlayer"] : C["KitingStartDistanceUnit"]))
                         {
                             RunningAway = true;
                         }
                     }
                     else
                     {
-                        WowInterface.MovementEngine.Reset();
+                        Bot.Movement.Reset();
                     }
                 }
             }

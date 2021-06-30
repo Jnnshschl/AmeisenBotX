@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Dungeon.Enums;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Jobs.Profiles;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Dungeon.Profiles.TBC

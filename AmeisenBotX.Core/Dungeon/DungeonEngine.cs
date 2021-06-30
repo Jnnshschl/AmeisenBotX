@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Dungeon.Objects;
 using AmeisenBotX.Core.Dungeon.Profiles.Classic;
@@ -10,7 +10,7 @@ using AmeisenBotX.Core.Dungeon.Profiles.TBC;
 using AmeisenBotX.Core.Dungeon.Profiles.WotLK;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +19,9 @@ namespace AmeisenBotX.Core.Dungeon
 {
     public class DungeonEngine : IDungeonEngine
     {
-        public DungeonEngine(WowInterface wowInterface)
+        public DungeonEngine(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             CurrentNodes = new();
             ExitDungeonEvent = new(TimeSpan.FromMilliseconds(1000));
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Dungeon
                     new Selector
                     (
                         "AmITheLeader",
-                        () => WowInterface.ObjectManager.PartyleaderGuid == WowInterface.PlayerGuid || !WowInterface.ObjectManager.PartymemberGuids.Any(),
+                        () => Bot.Objects.Partyleader.Guid == Bot.Wow.PlayerGuid || !Bot.Objects.PartymemberGuids.Any(),
                         new Selector
                         (
                             "AreAllPlayersPresent",
@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Dungeon
                             new Selector
                             (
                                 "IsAnyoneEating",
-                                () => WowInterface.ObjectManager.Partymembers.Any(e => e.HasBuffByName("Food") || e.HasBuffByName("Drink")),
+                                () => Bot.Objects.Partymembers.Any(e => e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") || e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink")),
                                 new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; }),
                                 new Leaf("FollowNodePath", () => FollowNodePath())
                             ),
@@ -64,8 +64,8 @@ namespace AmeisenBotX.Core.Dungeon
                         new Selector
                         (
                             "IsDungeonLeaderInRange",
-                            () => WowInterface.ObjectManager.Partyleader != null,
-                            new Leaf("FollowLeader", () => MoveToPosition(WowInterface.ObjectManager.Partyleader.Position + LeaderFollowOffset, 0f, MovementAction.Follow)),
+                            () => Bot.Objects.Partyleader != null,
+                            new Leaf("FollowLeader", () => MoveToPosition(Bot.Objects.Partyleader.Position + LeaderFollowOffset, 0f, MovementAction.Follow)),
                             new Leaf("WaitForLeaderToArrive", () => { return BehaviorTreeStatus.Success; })
                         )
                     )
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private Selector RootSelector { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         ///<inheritdoc cref="IDungeonEngine.Enter"/>
         public void Enter()
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Dungeon
             }
             else
             {
-                LoadProfile(TryGetProfileByMapId(WowInterface.ObjectManager.MapId));
+                LoadProfile(TryGetProfileByMapId(Bot.Objects.MapId));
             }
         }
 
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Dungeon
         public void OnDeath()
         {
             IDied = true;
-            DeathPosition = WowInterface.Player.Position;
+            DeathPosition = Bot.Player.Position;
         }
 
         ///<inheritdoc cref="IDungeonEngine.TryGetProfileByMapId(WowMapId)"/>
@@ -171,7 +171,7 @@ namespace AmeisenBotX.Core.Dungeon
 
         private bool AreAllPlayersPresent(float distance, float distanceToStartRunning)
         {
-            if (!WowInterface.ObjectManager.Partymembers.Any())
+            if (!Bot.Objects.Partymembers.Any())
             {
                 return true;
             }
@@ -181,9 +181,9 @@ namespace AmeisenBotX.Core.Dungeon
                 distance = distanceToStartRunning;
             }
 
-            int nearPlayers = WowInterface.ObjectManager.GetNearPartymembers<WowPlayer>(WowInterface.Player.Position, distance).Count(e => !e.IsDead);
+            int nearPlayers = Bot.Objects.GetNearPartymembers<WowPlayer>(Bot.Player.Position, distance).Count(e => !e.IsDead);
 
-            if (nearPlayers >= WowInterface.ObjectManager.Partymembers.Count() - 1)
+            if (nearPlayers >= Bot.Objects.Partymembers.Count() - 1)
             {
                 IsWaitingForGroup = false;
                 return true;
@@ -199,9 +199,9 @@ namespace AmeisenBotX.Core.Dungeon
         {
             if (ExitDungeonEvent.Run())
             {
-                if (WowInterface.HookManager.LuaIsInLfgGroup())
+                if (Bot.Wow.LuaIsInLfgGroup())
                 {
-                    WowInterface.HookManager.LuaDoString("LFGTeleport(true);");
+                    Bot.Wow.LuaDoString("LFGTeleport(true);");
                 }
                 else
                 {
@@ -228,7 +228,7 @@ namespace AmeisenBotX.Core.Dungeon
         {
             Profile = profile;
 
-            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
+            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
             int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
 
             for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
@@ -236,16 +236,16 @@ namespace AmeisenBotX.Core.Dungeon
                 CurrentNodes.Enqueue(profile.Nodes[i]);
             }
 
-            WowInterface.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
+            Bot.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
         }
 
         private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5, MovementAction movementAction = MovementAction.Move)
         {
-            double distance = WowInterface.Player.Position.GetDistance(position);
+            double distance = Bot.Player.Position.GetDistance(position);
 
             if (distance > minDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(movementAction, position);
+                Bot.Movement.SetMovementAction(movementAction, position);
                 return BehaviorTreeStatus.Ongoing;
             }
             else

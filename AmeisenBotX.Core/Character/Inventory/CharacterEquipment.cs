@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +15,9 @@ namespace AmeisenBotX.Core.Character.Inventory
         private readonly object queryLock = new();
         private Dictionary<WowEquipmentSlot, IWowItem> items;
 
-        public CharacterEquipment(WowInterface wowInterface)
+        public CharacterEquipment(IWowInterface wowInterface)
         {
-            WowInterface = wowInterface;
+            Wow = wowInterface;
 
             Items = new();
         }
@@ -42,17 +43,17 @@ namespace AmeisenBotX.Core.Character.Inventory
             }
         }
 
-        private WowInterface WowInterface { get; }
+        private IWowInterface Wow { get; }
 
         public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
-            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            if (Items.ContainsKey(slot))
             {
                 int itemId = Items[slot].Id;
 
                 if (itemId > 0)
                 {
-                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                    WowItem item = Wow.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
                     {
@@ -66,7 +67,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            string resultJson = WowInterface.HookManager.LuaGetEquipmentItems();
+            string resultJson = Wow.LuaGetEquipmentItems();
 
             if (string.IsNullOrWhiteSpace(resultJson))
             {

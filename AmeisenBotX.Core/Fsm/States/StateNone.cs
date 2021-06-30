@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateNone : BasicState
     {
-        public StateNone(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateNone(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 

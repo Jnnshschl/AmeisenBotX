@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
@@ -7,9 +7,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class SitByCampfireIdleAction : IIdleAction
     {
-        public SitByCampfireIdleAction(WowInterface wowInterface)
+        public SitByCampfireIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Rnd = new Random();
         }
 
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 1 * 60 * 1000;
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private bool PlacedCampfire { get; set; }
 
@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             PlacedCampfire = false;
             SatDown = false;
 
-            return WowInterface.CharacterManager.SpellBook.IsSpellKnown("Basic Campfire");
+            return Bot.Character.SpellBook.IsSpellKnown("Basic Campfire");
         }
 
         public void Execute()
@@ -46,18 +46,18 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 return;
             }
 
-            WowGameobject nearCampfire = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
-                .FirstOrDefault(e => e.DisplayId == (int)WowGameobjectDisplayId.CookingCampfire && WowInterface.ObjectManager.PartymemberGuids.Contains(e.CreatedBy));
+            WowGameobject nearCampfire = Bot.Objects.WowObjects.OfType<WowGameobject>()
+                .FirstOrDefault(e => e.DisplayId == (int)WowGameobjectDisplayId.CookingCampfire && Bot.Objects.PartymemberGuids.Contains(e.CreatedBy));
 
             if (nearCampfire != null && !SatDown)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.Player, nearCampfire.Position);
-                WowInterface.HookManager.LuaSendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
+                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, nearCampfire.Position);
+                Bot.Wow.LuaSendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
                 SatDown = true;
             }
             else if (!PlacedCampfire)
             {
-                WowInterface.HookManager.LuaCastSpell("Basic Campfire");
+                Bot.Wow.LuaCastSpell("Basic Campfire");
                 PlacedCampfire = true;
             }
         }

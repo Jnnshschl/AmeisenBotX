@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateLoadingScreen : BasicState
     {
-        public StateLoadingScreen(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateLoadingScreen(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
@@ -18,18 +18,18 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (WowInterface.XMemory.Process == null || WowInterface.XMemory.Process.HasExited)
+            if (Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
             {
                 AmeisenLogger.I.Log("LoadingScreen", "WowProcess exited");
                 StateMachine.SetState(BotState.None);
             }
-            else if (WowInterface.XMemory.ReadString(WowInterface.OffsetList.GameState, Encoding.ASCII, out string glueFrame)
+            else if (Bot.Memory.ReadString(Bot.Offsets.GameState, Encoding.ASCII, out string glueFrame)
                     && glueFrame.Equals("login", StringComparison.OrdinalIgnoreCase))
             {
                 AmeisenLogger.I.Log("LoadingScreen", "Returned to login screen");
                 StateMachine.SetState(BotState.Login);
             }
-            else if (WowInterface.ObjectManager.RefreshIsWorldLoaded())
+            else if (Bot.Objects.IsWorldLoaded)
             {
                 StateMachine.SetState(BotState.Idle);
             }
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Leave()
         {
             AmeisenLogger.I.Log("LoadingScreen", "Exited loading screen");
-            WowInterface.MovementEngine.StopMovement();
+            Bot.Movement.StopMovement();
         }
     }
 }

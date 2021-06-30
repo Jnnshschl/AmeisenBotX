@@ -1,13 +1,13 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Utils;
 using System;
 
 namespace AmeisenBotX.Core.Utils
 {
     public class PetManager
     {
-        public PetManager(WowInterface wowInterface, TimeSpan healPetCooldown, Func<bool> castMendPetFunction, Func<bool> castCallPetFunction, Func<bool> castRevivePetFunction)
+        public PetManager(AmeisenBotInterfaces bot, TimeSpan healPetCooldown, Func<bool> castMendPetFunction, Func<bool> castCallPetFunction, Func<bool> castRevivePetFunction)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             HealPetCooldown = healPetCooldown;
             CastMendPet = castMendPetFunction;
             CastCallPet = castCallPetFunction;
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Utils
 
         public DateTime LastMendPetUsed { get; private set; }
 
-        public WowInterface WowInterface { get; set; }
+        public AmeisenBotInterfaces Bot { get; set; }
 
         private TimegatedEvent CallPetEvent { get; }
 
@@ -34,32 +34,32 @@ namespace AmeisenBotX.Core.Utils
 
         public bool Tick()
         {
-            if (WowInterface.ObjectManager.Pet != null)
+            if (Bot.Objects.Pet != null)
             {
                 if (CastCallPet != null
-                    && ((WowInterface.ObjectManager.Pet.Guid == 0 && CastCallPet.Invoke())
+                    && ((Bot.Objects.Pet.Guid == 0 && CastCallPet.Invoke())
                     || CastRevivePet != null
-                    && WowInterface.ObjectManager.Pet != null
-                    && (WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead) && CastRevivePet()))
+                    && Bot.Objects.Pet != null
+                    && (Bot.Objects.Pet.Health == 0 || Bot.Objects.Pet.IsDead) && CastRevivePet()))
                 {
                     return true;
                 }
 
-                if (WowInterface.ObjectManager.Pet == null || WowInterface.ObjectManager.Pet.Health == 0 || WowInterface.ObjectManager.Pet.IsDead)
+                if (Bot.Objects.Pet == null || Bot.Objects.Pet.Health == 0 || Bot.Objects.Pet.IsDead)
                 {
                     return true;
                 }
 
                 if (CastMendPet != null
                     && DateTime.UtcNow - LastMendPetUsed > HealPetCooldown
-                    && WowInterface.ObjectManager.Pet.HealthPercentage < 80.0
+                    && Bot.Objects.Pet.HealthPercentage < 80.0
                     && CastMendPet.Invoke())
                 {
                     LastMendPetUsed = DateTime.UtcNow;
                     return true;
                 }
             }
-            else if (CastCallPet != null && CallPetEvent.Run() && !WowInterface.Player.IsCasting)
+            else if (CastCallPet != null && CallPetEvent.Run() && !Bot.Player.IsCasting)
             {
                 if (CallReviveToggle)
                 {

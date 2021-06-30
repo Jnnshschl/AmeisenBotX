@@ -1,10 +1,30 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Common
 {
+    /// <summary>
+    /// Collection of extensions to mainly enums at the moment.
+    /// </summary>
     public static class AmeisenBotExtensions
     {
-        internal static bool IsBattlegroundMap(this WowMapId map)
+        public static string GetColor(this WowItemQuality itemQuality)
+        {
+            return itemQuality switch
+            {
+                WowItemQuality.Unique => "#00ccff",
+                WowItemQuality.Poor => "#9d9d9d",
+                WowItemQuality.Common => "#ffffff",
+                WowItemQuality.Uncommon => "#1eff00",
+                WowItemQuality.Rare => "#0070dd",
+                WowItemQuality.Epic => "#a335ee",
+                WowItemQuality.Legendary => "#ff8000",
+                WowItemQuality.Artifact => "#e6cc80",
+                _ => "#ffffff",
+            };
+        }
+
+        public static bool IsBattlegroundMap(this WowMapId map)
         {
             return map == WowMapId.AlteracValley
                 || map == WowMapId.WarsongGulch
@@ -13,7 +33,7 @@ namespace AmeisenBotX.Core.Common
                 || map == WowMapId.StrandOfTheAncients;
         }
 
-        internal static bool IsCapitalCityZone(this WowZoneId zone, bool isAlliance)
+        public static bool IsCapitalCityZone(this WowZoneId zone, bool isAlliance)
         {
             if (isAlliance)
             {
@@ -31,7 +51,7 @@ namespace AmeisenBotX.Core.Common
             }
         }
 
-        internal static bool IsDungeonMap(this WowMapId map)
+        public static bool IsDungeonMap(this WowMapId map)
         {
             // classic dungeon
             return map == WowMapId.RagefireChasm

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Objects.Raw;
+﻿using AmeisenBotX.Wow.Cache;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,18 +8,21 @@ namespace AmeisenBotX.Core.Fsm.Utils.Auras.Objects
 {
     public class KeepBestActiveAuraJob : IAuraJob
     {
-        public KeepBestActiveAuraJob(IEnumerable<(string, Func<bool>)> actions)
+        public KeepBestActiveAuraJob(IAmeisenBotDb db, IEnumerable<(string, Func<bool>)> actions)
         {
+            Db = db;
             Actions = actions;
         }
 
         public IEnumerable<(string, Func<bool>)> Actions { get; set; }
 
-        public bool Run(IEnumerable<WowAura> auras)
+        private IAmeisenBotDb Db { get; }
+
+        public bool Run(IEnumerable<RawWowAura> auras)
         {
             foreach ((string name, Func<bool> actionFunc) in Actions)
             {
-                if (auras.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                if (auras.Any(e => Db.GetSpellName(e.SpellId).Equals(name, StringComparison.OrdinalIgnoreCase)))
                 {
                     return false;
                 }

@@ -3,22 +3,22 @@
 namespace AmeisenBotX.Core.Fsm.States
 {
     /// <summary>
-    /// Basic form of a simple state, containing all common classes (StateMachine, Config, WowInterface) used by the bot.
+    /// Basic form of a simple state, containing all common classes (StateMachine, Config, Bot) used by the bot.
     /// </summary>
     public abstract class BasicState : IState
     {
-        public BasicState(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface)
+        public BasicState(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot)
         {
             StateMachine = stateMachine;
             Config = config;
-            WowInterface = wowInterface;
+            Bot = bot;
         }
 
         internal AmeisenBotConfig Config { get; }
 
         internal AmeisenBotFsm StateMachine { get; }
 
-        internal WowInterface WowInterface { get; }
+        internal AmeisenBotInterfaces Bot { get; }
 
         ///<inheritdoc cref="IState.Enter"/>
         public abstract void Enter();

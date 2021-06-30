@@ -1,22 +1,23 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class MageArcane : BasicCombatClass
     {
-        public MageArcane(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public MageArcane(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(mageArmorSpell, () => TryCastSpell(mageArmorSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, mageArmorSpell, () => TryCastSpell(mageArmorSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
 
-            // TargetAuraManager.DispellBuffs = () => WowInterface.HookManager.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, WowInterface.TargetGuid, true);
+            // TargetAuraManager.DispellBuffs = () => Bot.NewBot.LuaHasUnitStealableBuffs(WowLuaUnit.Target) && TryCastSpell(spellStealSpell, Bot.NewBot.TargetGuid, true);
 
             InterruptManager.InterruptSpells = new()
             {
@@ -93,17 +94,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if ((WowInterface.Player.HealthPercentage < 16
+                    if ((Bot.Player.HealthPercentage < 16
                             && TryCastSpell(iceBlockSpell, 0))
-                        || (WowInterface.Player.ManaPercentage < 40
+                        || (Bot.Player.ManaPercentage < 40
                             && TryCastSpell(evocationSpell, 0, true))
-                        || TryCastSpell(mirrorImageSpell, WowInterface.TargetGuid, true)
-                        || (WowInterface.Player.HasBuffByName(missileBarrageSpell) && TryCastSpell(arcaneMissilesSpell, WowInterface.TargetGuid, true))
-                        || TryCastSpell(arcaneBarrageSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(arcaneBlastSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(fireballSpell, WowInterface.TargetGuid, true))
+                        || TryCastSpell(mirrorImageSpell, Bot.Wow.TargetGuid, true)
+                        || (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == missileBarrageSpell) && TryCastSpell(arcaneMissilesSpell, Bot.Wow.TargetGuid, true))
+                        || TryCastSpell(arcaneBarrageSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(arcaneBlastSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(fireballSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }

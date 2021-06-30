@@ -1,11 +1,11 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
@@ -13,12 +13,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class WarriorFury : BasicCombatClass
     {
-        public WarriorFury(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public WarriorFury(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hamstringSpell, () => WowInterface.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rendSpell, () => WowInterface.Target?.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, hamstringSpell, () => Bot.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, rendSpell, () => Bot.Target?.Type == WowObjectType.Player && Bot.Player.Rage > 75 && TryCastSpell(rendSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -93,14 +93,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
+                    double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
-                    if ((WowInterface.Player.IsDazed
-                        || WowInterface.Player.IsConfused
-                        || WowInterface.Player.IsPossessed
-                        || WowInterface.Player.IsFleeing)
+                    if ((Bot.Player.IsDazed
+                        || Bot.Player.IsConfused
+                        || Bot.Player.IsPossessed
+                        || Bot.Player.IsFleeing)
                         && TryCastSpell(heroicFurySpell, 0))
                     {
                         return;
@@ -108,26 +108,26 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
                     if (distanceToTarget > 4.0)
                     {
-                        if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, WowInterface.Target.Guid, true)
-                            || (TryCastSpell(berserkerRageSpell, WowInterface.Target.Guid, true) && TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, WowInterface.Target.Guid, true)))
+                        if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
+                            || (TryCastSpell(berserkerRageSpell, Bot.Wow.TargetGuid, true) && TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)))
                         {
                             return;
                         }
                     }
                     else
                     {
-                        if (HeroicStrikeEvent.Ready && !WowInterface.Player.HasBuffByName(recklessnessSpell))
+                        if (HeroicStrikeEvent.Ready && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == recklessnessSpell))
                         {
-                            if ((WowInterface.Player.Rage > 50 && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
-                                || (WowInterface.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, WowInterface.TargetGuid, true)))
+                            if ((Bot.Player.Rage > 50 && Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                                || (Bot.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)))
                             {
                                 HeroicStrikeEvent.Run();
                                 return;
                             }
                         }
 
-                        if (TryCastSpellWarrior(bloodthirstSpell, berserkerStanceSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpellWarrior(whirlwindSpell, berserkerStanceSpell, WowInterface.Target.Guid, true))
+                        if (TryCastSpellWarrior(bloodthirstSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpellWarrior(whirlwindSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
@@ -139,8 +139,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        if (WowInterface.Player.HasBuffByName($"{slamSpell}!")
-                           && TryCastSpell(slamSpell, WowInterface.Target.Guid, true))
+                        if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == $"{slamSpell}!")
+                           && TryCastSpell(slamSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
@@ -150,24 +150,24 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        if (TryCastSpell(bloodrageSpell, WowInterface.Target.Guid, true, WowInterface.Player.Health))
+                        if (TryCastSpell(bloodrageSpell, Bot.Wow.TargetGuid, true, Bot.Player.Health))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(recklessnessSpell, WowInterface.Target.Guid, true))
+                        if (TryCastSpell(recklessnessSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(deathWishSpell, WowInterface.Target.Guid, true))
+                        if (TryCastSpell(deathWishSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (WowInterface.Player.Rage > 25
-                           && WowInterface.Target.HealthPercentage < 20
-                           && TryCastSpellWarrior(executeSpell, berserkerStanceSpell, WowInterface.Target.Guid, true))
+                        if (Bot.Player.Rage > 25
+                           && Bot.Target.HealthPercentage < 20
+                           && TryCastSpellWarrior(executeSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }

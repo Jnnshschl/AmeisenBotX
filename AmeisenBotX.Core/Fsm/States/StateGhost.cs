@@ -1,13 +1,14 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.StaticDeathRoutes;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,14 +25,14 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private ulong playerToFollowGuid = 0;
 
-        public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             Selector dungeonSelector = new
             (
                 () => Config.DungeonUsePartyMode,
                 new Selector
                 (
-                    () => WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
+                    () => Bot.Dungeon.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
                     new Leaf(RunToDungeonProfileEntry),
                     new Selector
                     (
@@ -42,7 +43,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 ),
                 new Selector
                 (
-                    () => WowInterface.DungeonEngine.Profile.WorldEntry != default,
+                    () => Bot.Dungeon.Profile.WorldEntry != default,
                     new Leaf(RunToDungeonEntry),
                     new Leaf(RunToCorpsePositionAndSearchForPortals)
                 )
@@ -52,10 +53,10 @@ namespace AmeisenBotX.Core.Fsm.States
             (
                 new Selector
                 (
-                    () => WowInterface.ObjectManager.MapId.IsBattlegroundMap(),
+                    () => Bot.Objects.MapId.IsBattlegroundMap(),
                     new Leaf(() =>
                     {
-                        WowInterface.MovementEngine.StopMovement();
+                        Bot.Movement.StopMovement();
                         return BehaviorTreeStatus.Ongoing;
                     }),
                     new Selector
@@ -79,7 +80,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private IEnumerable<WowGameobject> NearPortals { get; set; }
 
-        private WowPlayer PlayerToFollow => WowInterface.ObjectManager.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
+        private WowPlayer PlayerToFollow => Bot.Objects.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
 
         private bool SearchedStaticRoutes { get; set; }
 
@@ -91,18 +92,18 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (WowInterface.Player.Health > 1)
+            if (Bot.Player.Health > 1)
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
-            NearPortals = WowInterface.ObjectManager.WowObjects
+            NearPortals = Bot.Objects.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                          || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
 
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.CorpsePosition, out Vector3 corpsePosition))
+            if (Bot.Memory.Read(Bot.Offsets.CorpsePosition, out Vector3 corpsePosition))
             {
                 CorpsePosition = corpsePosition;
             }
@@ -112,7 +113,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            WowInterface.Player.IsGhost = false;
+            Bot.Player.IsGhost = false;
             SearchedStaticRoutes = false;
             StaticRoute = null;
         }
@@ -129,22 +130,22 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 SearchedStaticRoutes = true;
 
-                Vector3 endPosition = WowInterface.DungeonEngine.Profile != null ? WowInterface.DungeonEngine.Profile.WorldEntry : CorpsePosition;
-                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, endPosition));
+                Vector3 endPosition = Bot.Dungeon.Profile != null ? Bot.Dungeon.Profile.WorldEntry : CorpsePosition;
+                IStaticDeathRoute staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(Bot.Objects.MapId, Bot.Player.Position, endPosition));
 
                 if (staticRoute != null)
                 {
                     StaticRoute = staticRoute;
-                    StaticRoute.Init(WowInterface.Player.Position);
+                    StaticRoute.Init(Bot.Player.Position);
                 }
                 else
                 {
-                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(WowInterface.ObjectManager.MapId, WowInterface.Player.Position, CorpsePosition));
+                    staticRoute = StaticDeathRoutes.FirstOrDefault(e => e.IsUseable(Bot.Objects.MapId, Bot.Player.Position, CorpsePosition));
 
                     if (staticRoute != null)
                     {
                         StaticRoute = staticRoute;
-                        StaticRoute.Init(WowInterface.Player.Position);
+                        StaticRoute.Init(Bot.Player.Position);
                     }
                 }
             }
@@ -154,9 +155,9 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus FollowNearestUnit()
         {
-            if (WowInterface.Player.Position.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance)
+            if (Bot.Player.Position.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, PlayerToFollow.Position);
+                Bot.Movement.SetMovementAction(MovementAction.Move, PlayerToFollow.Position);
             }
 
             return BehaviorTreeStatus.Ongoing;
@@ -164,11 +165,11 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus FollowStaticPath()
         {
-            Vector3 nextPosition = StaticRoute.GetNextPoint(WowInterface.Player.Position);
+            Vector3 nextPosition = StaticRoute.GetNextPoint(Bot.Player.Position);
 
             if (nextPosition != Vector3.Zero)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.DirectMove, nextPosition);
+                Bot.Movement.SetMovementAction(MovementAction.DirectMove, nextPosition);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -185,7 +186,7 @@ namespace AmeisenBotX.Core.Fsm.States
         /// <returns></returns>
         private bool IsUnitOutOfRange(WowPlayer player)
         {
-            double distance = player.Position.GetDistance(WowInterface.Player.Position);
+            double distance = player.Position.GetDistance(Bot.Player.Position);
             return distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance;
         }
 
@@ -196,14 +197,14 @@ namespace AmeisenBotX.Core.Fsm.States
         /// <returns>True when a valid unit has been found, false if not</returns>
         private bool IsUnitToFollowNear(out ulong guid)
         {
-            IEnumerable<WowPlayer> wowPlayers = WowInterface.ObjectManager.WowObjects.OfType<WowPlayer>();
+            IEnumerable<WowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<WowPlayer>();
             guid = 0;
 
             if (wowPlayers.Any())
             {
                 if (Config.FollowSpecificCharacter)
                 {
-                    WowPlayer specificPlayer = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+                    WowPlayer specificPlayer = wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
 
                     if (specificPlayer != null)
                     {
@@ -214,7 +215,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 // check the group/raid leader
                 if (guid == 0 && Config.FollowGroupLeader)
                 {
-                    WowPlayer groupLeader = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+                    WowPlayer groupLeader = wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
 
                     if (groupLeader != null)
                     {
@@ -225,7 +226,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 // check the group members
                 if (guid == 0 && Config.FollowGroupMembers)
                 {
-                    WowPlayer groupMember = wowPlayers.FirstOrDefault(p => p.Name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
+                    WowPlayer groupMember = wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
 
                     if (groupMember != null)
                     {
@@ -239,9 +240,9 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToAndExecute(Vector3 position, Action action, double distance = 20.0)
         {
-            if (WowInterface.Player.Position.GetDistance(position) > distance)
+            if (Bot.Player.Position.GetDistance(position) > distance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, position);
+                Bot.Movement.SetMovementAction(MovementAction.Move, position);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
@@ -253,14 +254,14 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToCorpseAndRetrieveIt()
         {
-            if (WowInterface.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
+            if (Bot.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CorpsePosition);
+                Bot.Movement.SetMovementAction(MovementAction.Move, CorpsePosition);
                 return BehaviorTreeStatus.Ongoing;
             }
             else
             {
-                WowInterface.HookManager.LuaRetrieveCorpse();
+                Bot.Wow.LuaRetrieveCorpse();
                 return BehaviorTreeStatus.Success;
             }
         }
@@ -280,12 +281,12 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToDungeonEntry()
         {
-            return RunToAndExecute(WowInterface.DungeonEngine.Profile.WorldEntry, () => RunToNearestPortal());
+            return RunToAndExecute(Bot.Dungeon.Profile.WorldEntry, () => RunToNearestPortal());
         }
 
         private BehaviorTreeStatus RunToDungeonProfileEntry()
         {
-            Vector3 position = WowInterface.DungeonEngine.TryGetProfileByMapId(StateMachine.LastDiedMap).WorldEntry;
+            Vector3 position = Bot.Dungeon.TryGetProfileByMapId(StateMachine.LastDiedMap).WorldEntry;
             return RunToAndExecute(position, () => RunToNearestPortal());
         }
 
@@ -293,7 +294,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (NearPortals.Any())
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(WowInterface.Player.Position, NearPortals.OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position)).First().Position, 4f));
+                Bot.Movement.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(Bot.Player.Position, NearPortals.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).First().Position, 4f));
             }
         }
     }

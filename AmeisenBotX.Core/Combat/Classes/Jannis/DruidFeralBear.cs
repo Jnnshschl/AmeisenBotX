@@ -1,22 +1,22 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class DruidFeralBear : BasicCombatClass
     {
-        public DruidFeralBear(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public DruidFeralBear(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(direBearFormSpell, () => TryCastSpell(direBearFormSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, direBearFormSpell, () => TryCastSpell(direBearFormSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleBearSpell, () => TryCastSpell(mangleBearSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, mangleBearSpell, () => TryCastSpell(mangleBearSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -92,21 +92,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
+                double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
                 if (distanceToTarget > 9.0
-                    && TryCastSpell(feralChargeBearSpell, WowInterface.Target.Guid, true))
+                    && TryCastSpell(feralChargeBearSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (WowInterface.Player.HealthPercentage < 40
+                if (Bot.Player.HealthPercentage < 40
                     && TryCastSpell(survivalInstinctsSpell, 0, true))
                 {
                     return;
                 }
 
-                if (WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
+                if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
                     && TryCastSpell(growlSpell, 0, true))
                 {
                     return;
@@ -122,18 +122,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                int nearEnemies = WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 10).Count();
+                int nearEnemies = Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 10).Count();
 
-                if ((WowInterface.Player.HealthPercentage > 80
+                if ((Bot.Player.HealthPercentage > 80
                         && TryCastSpell(enrageSpell, 0, true))
-                    || (WowInterface.Player.HealthPercentage < 70
+                    || (Bot.Player.HealthPercentage < 70
                         && TryCastSpell(barkskinSpell, 0, true))
-                    || (WowInterface.Player.HealthPercentage < 75
+                    || (Bot.Player.HealthPercentage < 75
                         && TryCastSpell(frenziedRegenerationSpell, 0, true))
                     || (nearEnemies > 2 && TryCastSpell(challengingRoarSpell, 0, true))
-                    || TryCastSpell(lacerateSpell, WowInterface.TargetGuid, true)
+                    || TryCastSpell(lacerateSpell, Bot.Wow.TargetGuid, true)
                     || (nearEnemies > 2 && TryCastSpell(swipeSpell, 0, true))
-                    || TryCastSpell(mangleBearSpell, WowInterface.TargetGuid, true))
+                    || TryCastSpell(mangleBearSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -152,14 +152,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealMySelf()
         {
-            if (WowInterface.Player.HealthPercentage < 60
-                && !WowInterface.Player.HasBuffByName(rejuvenationSpell)
+            if (Bot.Player.HealthPercentage < 60
+                && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == rejuvenationSpell)
                 && TryCastSpell(rejuvenationSpell, 0, true))
             {
                 return true;
             }
 
-            if (WowInterface.Player.HealthPercentage < 40
+            if (Bot.Player.HealthPercentage < 40
                 && TryCastSpell(healingTouchSpell, 0, true))
             {
                 return true;

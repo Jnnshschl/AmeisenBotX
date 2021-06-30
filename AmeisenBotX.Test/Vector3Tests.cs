@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Common.Math;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -187,7 +187,7 @@ namespace AmeisenBotX.Test
 
             Assert.AreEqual(a, Vector3.FromArray(y));
 
-            Vector3 c = new Vector3(a);
+            Vector3 c = new(a);
 
             Assert.AreEqual(a, c);
         }

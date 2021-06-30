@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using System;
 
@@ -6,49 +6,49 @@ namespace AmeisenBotX.Core.Fsm.Routines
 {
     public static class SpeakToMerchantRoutine
     {
-        public static bool Run(WowInterface wowInterface, WowUnit selectedUnit)
+        public static bool Run(AmeisenBotInterfaces bot, WowUnit selectedUnit)
         {
-            if (wowInterface == null || selectedUnit == null)
+            if (bot == null || selectedUnit == null)
             {
                 return false;
             }
 
-            if (wowInterface.ObjectManager.TargetGuid != selectedUnit.Guid)
+            if (bot.Objects.Target.Guid != selectedUnit.Guid)
             {
-                wowInterface.HookManager.WowTargetGuid(selectedUnit.Guid);
+                bot.Wow.WowTargetGuid(selectedUnit.Guid);
                 return false;
             }
 
-            if (!BotMath.IsFacing(wowInterface.ObjectManager.Player.Position, wowInterface.ObjectManager.Player.Rotation, selectedUnit.Position))
+            if (!BotMath.IsFacing(bot.Objects.Player.Position, bot.Objects.Player.Rotation, selectedUnit.Position))
             {
-                wowInterface.HookManager.WowFacePosition(wowInterface.ObjectManager.Player, selectedUnit.Position);
+                bot.Wow.WowFacePosition(bot.Objects.Player.BaseAddress, bot.Player.Position, selectedUnit.Position);
             }
 
             if (selectedUnit.IsGossip)
             {
-                if (wowInterface.HookManager.LuaUiIsVisible("GossipFrame"))
+                if (bot.Wow.LuaUiIsVisible("GossipFrame"))
                 {
-                    string[] gossipTypes = wowInterface.HookManager.LuaGetGossipTypes();
+                    string[] gossipTypes = bot.Wow.LuaGetGossipTypes();
 
                     for (int i = 0; i < gossipTypes.Length; ++i)
                     {
                         if (gossipTypes[i].Equals("vendor", StringComparison.OrdinalIgnoreCase)
                             || gossipTypes[i].Equals("repair", StringComparison.OrdinalIgnoreCase))
                         {
-                            wowInterface.HookManager.LuaSelectGossipOption(i + 1);
+                            bot.Wow.LuaSelectGossipOption(i + 1);
                         }
                     }
                 }
 
-                if (!wowInterface.HookManager.LuaUiIsVisible("MerchantFrame"))
+                if (!bot.Wow.LuaUiIsVisible("MerchantFrame"))
                 {
                     return false;
                 }
             }
 
-            if (!wowInterface.HookManager.LuaUiIsVisible("GossipFrame", "MerchantFrame"))
+            if (!bot.Wow.LuaUiIsVisible("GossipFrame", "MerchantFrame"))
             {
-                wowInterface.HookManager.WowUnitRightClick(selectedUnit);
+                bot.Wow.WowUnitRightClick(selectedUnit.BaseAddress);
                 return false;
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using AmeisenBotX.Common.Math;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {

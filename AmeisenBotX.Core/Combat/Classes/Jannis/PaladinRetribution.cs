@@ -1,19 +1,20 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class PaladinRetribution : BasicCombatClass
     {
-        public PaladinRetribution(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public PaladinRetribution(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, WowInterface.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(retributionAuraSpell, () => TryCastSpell(retributionAuraSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, retributionAuraSpell, () => TryCastSpell(retributionAuraSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -88,32 +89,32 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if ((WowInterface.Player.HealthPercentage < 20.0
-                        && TryCastSpell(layOnHandsSpell, WowInterface.PlayerGuid))
-                    || (WowInterface.Player.HealthPercentage < 60.0
-                        && TryCastSpell(holyLightSpell, WowInterface.PlayerGuid, true)))
+                if ((Bot.Player.HealthPercentage < 20.0
+                        && TryCastSpell(layOnHandsSpell, Bot.Wow.PlayerGuid))
+                    || (Bot.Player.HealthPercentage < 60.0
+                        && TryCastSpell(holyLightSpell, Bot.Wow.PlayerGuid, true)))
                 {
                     return;
                 }
 
-                if (((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
-                        && TryCastSpell(judgementOfLightSpell, WowInterface.TargetGuid, true))
+                if (((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
+                        && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
                     || TryCastSpell(avengingWrathSpell, 0, true)
-                    || (WowInterface.Player.ManaPercentage < 80.0
+                    || (Bot.Player.ManaPercentage < 80.0
                         && TryCastSpell(divinePleaSpell, 0, true)))
                 {
                     return;
                 }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if ((WowInterface.Player.HealthPercentage < 20.0
-                            && TryCastSpell(hammerOfWrathSpell, WowInterface.TargetGuid, true))
-                        || TryCastSpell(crusaderStrikeSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(divineStormSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(consecrationSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(exorcismSpell, WowInterface.TargetGuid, true)
-                        || TryCastSpell(holyWrathSpell, WowInterface.TargetGuid, true))
+                    if ((Bot.Player.HealthPercentage < 20.0
+                            && TryCastSpell(hammerOfWrathSpell, Bot.Wow.TargetGuid, true))
+                        || TryCastSpell(crusaderStrikeSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(divineStormSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(consecrationSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(exorcismSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(holyWrathSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }

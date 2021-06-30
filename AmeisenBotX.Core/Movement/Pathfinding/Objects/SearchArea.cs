@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Math;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,14 +50,14 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             return inside;
         }
 
-        public Vector3 GetClosestEntry(WowInterface wowInterface)
+        public Vector3 GetClosestEntry(AmeisenBotInterfaces bot)
         {
             if (Area.Count == 1)
             {
                 return Area[0];
             }
 
-            Vector3 currentPosition = wowInterface.ObjectManager.Player.Position;
+            Vector3 currentPosition = bot.Objects.Player.Position;
 
             // This is not optimal but fairly simple
             // We ask for the path for every vertex.
@@ -68,7 +69,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             foreach (Vector3 vertex in Area)
             {
                 double totalDistance = 0.0;
-                IEnumerable<Vector3> path = wowInterface.PathfindingHandler.GetPath((int)wowInterface.ObjectManager.MapId, currentPosition, vertex);
+                IEnumerable<Vector3> path = bot.PathfindingHandler.GetPath((int)bot.Objects.MapId, currentPosition, vertex);
 
                 if (path != null)
                 {

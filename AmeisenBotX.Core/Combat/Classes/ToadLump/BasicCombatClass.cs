@@ -1,10 +1,10 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -14,6 +14,7 @@ using AmeisenBotX.Core.Utils.Aura;
 using AmeisenBotX.Core.Utils.TargetSelection;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -403,9 +404,9 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         };
 
-        protected BasicCombatClass(WowInterface wowInterface, AmeisenBotFsm stateMachine)
+        protected BasicCombatClass(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             StateMachine = stateMachine;
 
             C = new Dictionary<string, dynamic>()
@@ -414,17 +415,17 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
                 { "HealingItemManaThreshold", 30.0 }
             };
 
-            CooldownManager = new CooldownManager(WowInterface.CharacterManager.SpellBook.Spells);
+            CooldownManager = new CooldownManager(Bot.Character.SpellBook.Spells);
             RessurrectionTargets = new Dictionary<string, DateTime>();
 
-            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));
-            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(wowInterface), TimeSpan.FromMilliseconds(250));
+            TargetManagerDps = new TargetManager(new DpsTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));
+            TargetManagerTank = new TargetManager(new TankTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));
+            TargetManagerHeal = new TargetManager(new HealTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));
 
-            MyAuraManager = new AuraManager(wowInterface);
-            TargetAuraManager = new AuraManager(wowInterface);
+            MyAuraManager = new AuraManager(bot);
+            TargetAuraManager = new AuraManager(bot);
 
-            GroupAuraManager = new GroupAuraManager(wowInterface);
+            GroupAuraManager = new GroupAuraManager(bot);
 
             TargetInterruptManager = new InterruptManager();
 
@@ -488,81 +489,81 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         public abstract WowClass WowClass { get; }
 
-        protected WowInterface WowInterface { get; }
+        protected AmeisenBotInterfaces Bot { get; }
 
         private AmeisenBotFsm StateMachine { get; }
 
         public void AttackTarget()
         {
-            WowUnit target = WowInterface.Target;
+            WowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
             }
 
-            if (WowInterface.Player.Position.GetDistance(target.Position) <= 3.0)
+            if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                WowInterface.HookManager.WowStopClickToMove();
-                WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowUnitRightClick(target);
+                Bot.Wow.WowStopClickToMove();
+                Bot.Movement.Reset();
+                Bot.Wow.WowUnitRightClick(target.BaseAddress);
             }
             else
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, target.Position);
+                Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
             }
         }
 
         public virtual void Execute()
         {
-            if (WowInterface.Player.IsCasting)
+            if (Bot.Player.IsCasting)
             {
-                if (!WowInterface.ObjectManager.IsTargetInLineOfSight)
+                if (!Bot.Objects.IsTargetInLineOfSight)
                 {
-                    WowInterface.HookManager.LuaSpellStopCasting();
+                    Bot.Wow.LuaSpellStopCasting();
                 }
 
                 return;
             }
 
-            if (WowInterface.Target != null && EventCheckFacing.Run())
+            if (Bot.Target != null && EventCheckFacing.Run())
             {
-                CheckFacing(WowInterface.Target);
+                CheckFacing(Bot.Target);
             }
 
             // Update Priority Units
             // --------------------------- >
 
             if (StateMachine.CurrentState.Key == BotState.Dungeon
-                && WowInterface.DungeonEngine != null
-                && WowInterface.DungeonEngine.Profile.PriorityUnits != null
-                && WowInterface.DungeonEngine.Profile.PriorityUnits.Count > 0)
+                && Bot.Dungeon != null
+                && Bot.Dungeon.Profile.PriorityUnits != null
+                && Bot.Dungeon.Profile.PriorityUnits.Count > 0)
             {
-                TargetManagerDps.PriorityTargets = WowInterface.DungeonEngine.Profile.PriorityUnits;
+                TargetManagerDps.PriorityTargets = Bot.Dungeon.Profile.PriorityUnits;
             }
 
             // Autoattacks
             // --------------------------- >
             if (UseAutoAttacks)
             {
-                IsWanding = WowInterface.CharacterManager.SpellBook.IsSpellKnown("Shoot")
-                    && WowInterface.CharacterManager.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED)
+                IsWanding = Bot.Character.SpellBook.IsSpellKnown("Shoot")
+                    && Bot.Character.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED)
                     && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
-                    && (IsWanding || TryCastSpell("Shoot", WowInterface.TargetGuid));
+                    && (IsWanding || TryCastSpell("Shoot", Bot.Wow.TargetGuid));
 
                 if (!IsWanding
                     && EventAutoAttack.Run()
-                    && !WowInterface.Player.IsAutoAttacking
-                    && WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                    && !Bot.Player.IsAutoAttacking
+                    && Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    WowInterface.HookManager.LuaStartAutoAttack();
+                    Bot.Wow.LuaStartAutoAttack();
                 }
             }
 
             // Buffs, Debuffs, Interrupts
             // --------------------------- >
 
-            if (TargetAuraManager.Tick(WowInterface.Target.Auras)
-                || TargetInterruptManager.Tick(WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, IsMelee ? 5.0f : 30.0f).ToList()))
+            if (TargetAuraManager.Tick(Bot.Target.Auras)
+                || TargetInterruptManager.Tick(Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, IsMelee ? 5.0f : 30.0f).ToList()))
             {
                 return;
             }
@@ -570,42 +571,42 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
             // Useable items, potions, etc.
             // ---------------------------- >
 
-            if (WowInterface.Player.HealthPercentage < C["HealingItemHealthThreshold"])
+            if (Bot.Player.HealthPercentage < C["HealingItemHealthThreshold"])
             {
-                IWowItem healthItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+                IWowItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
                 if (healthItem != null)
                 {
-                    WowInterface.HookManager.LuaUseItemByName(healthItem.Name);
+                    Bot.Wow.LuaUseItemByName(healthItem.Name);
                 }
             }
 
-            if (WowInterface.Player.ManaPercentage < C["HealingItemManaThreshold"])
+            if (Bot.Player.ManaPercentage < C["HealingItemManaThreshold"])
             {
-                IWowItem manaItem = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
+                IWowItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 
                 if (manaItem != null)
                 {
-                    WowInterface.HookManager.LuaUseItemByName(manaItem.Name);
+                    Bot.Wow.LuaUseItemByName(manaItem.Name);
                 }
             }
 
             // Race abilities
             // -------------- >
 
-            if (WowInterface.Player.Race == WowRace.Human
-                && (WowInterface.Player.IsDazed
-                    || WowInterface.Player.IsFleeing
-                    || WowInterface.Player.IsInfluenced
-                    || WowInterface.Player.IsPossessed)
+            if (Bot.Player.Race == WowRace.Human
+                && (Bot.Player.IsDazed
+                    || Bot.Player.IsFleeing
+                    || Bot.Player.IsInfluenced
+                    || Bot.Player.IsPossessed)
                 && TryCastSpell("Every Man for Himself", 0))
             {
                 return;
             }
 
-            if (WowInterface.Player.HealthPercentage < 50.0
-                && ((WowInterface.Player.Race == WowRace.Draenei && TryCastSpell("Gift of the Naaru", 0))
-                    || (WowInterface.Player.Race == WowRace.Dwarf && TryCastSpell("Stoneform", 0))))
+            if (Bot.Player.HealthPercentage < 50.0
+                && ((Bot.Player.Race == WowRace.Draenei && TryCastSpell("Gift of the Naaru", 0))
+                    || (Bot.Player.Race == WowRace.Dwarf && TryCastSpell("Stoneform", 0))))
             {
                 return;
             }
@@ -618,13 +619,13 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         public virtual void OutOfCombatExecute()
         {
-            if ((WowInterface.Player.HasBuffByName("Food") && WowInterface.Player.HealthPercentage < 100.0)
-                || (WowInterface.Player.HasBuffByName("Drink") && WowInterface.Player.ManaPercentage < 100.0))
+            if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") && Bot.Player.HealthPercentage < 100.0)
+                || (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink") && Bot.Player.ManaPercentage < 100.0))
             {
                 return;
             }
 
-            if (MyAuraManager.Tick(WowInterface.Player.Auras)
+            if (MyAuraManager.Tick(Bot.Player.Auras)
                 || GroupAuraManager.Tick())
             {
                 return;
@@ -638,13 +639,13 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
         {
-            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            if (Bot.Character.Equipment.Items.ContainsKey(slot))
             {
-                int itemId = WowInterface.CharacterManager.Equipment.Items[slot].Id;
+                int itemId = Bot.Character.Equipment.Items[slot].Id;
 
                 if (itemId > 0)
                 {
-                    WowItem item = WowInterface.ObjectManager.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                    WowItem item = Bot.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null
                         && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName, StringComparison.OrdinalIgnoreCase))
@@ -660,31 +661,34 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         protected bool HandleDeadPartymembers(string spellName)
         {
-            Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+            Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
             if (spell != null
                 && !CooldownManager.IsSpellOnCooldown(spellName)
-                && spell.Costs < WowInterface.Player.Mana)
+                && spell.Costs < Bot.Player.Mana)
             {
-                IEnumerable<WowPlayer> groupPlayers = WowInterface.ObjectManager.Partymembers
+                IEnumerable<WowPlayer> groupPlayers = Bot.Objects.Partymembers
                     .OfType<WowPlayer>()
                     .Where(e => e.IsDead);
 
                 if (groupPlayers.Any())
                 {
-                    WowPlayer player = groupPlayers.FirstOrDefault(e => !RessurrectionTargets.ContainsKey(e.Name) || RessurrectionTargets[e.Name] < DateTime.UtcNow);
+                    WowPlayer player = groupPlayers.FirstOrDefault(e => Bot.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name) || RessurrectionTargets[name] < DateTime.Now);
 
                     if (player != null)
                     {
-                        if (!RessurrectionTargets.ContainsKey(player.Name))
+                        if (Bot.Db.GetUnitName(player, out string name))
                         {
-                            RessurrectionTargets.Add(player.Name, DateTime.UtcNow + TimeSpan.FromSeconds(10));
-                            return TryCastSpell(spellName, player.Guid, true);
-                        }
+                            if (!RessurrectionTargets.ContainsKey(name))
+                            {
+                                RessurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
+                                return TryCastSpell(spellName, player.Guid, true);
+                            }
 
-                        if (RessurrectionTargets[player.Name] < DateTime.UtcNow)
-                        {
-                            return TryCastSpell(spellName, player.Guid, true);
+                            if (RessurrectionTargets[name] < DateTime.Now)
+                            {
+                                return TryCastSpell(spellName, player.Guid, true);
+                            }
                         }
                     }
 
@@ -699,19 +703,19 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
         {
             if (targetProvider.Get(out IEnumerable<WowUnit> targetToTarget))
             {
-                WowUnit closestUnit = targetToTarget.OrderBy(value => value.Position.GetDistance(WowInterface.Player.Position)).First();
+                WowUnit closestUnit = targetToTarget.OrderBy(value => value.Position.GetDistance(Bot.Player.Position)).First();
                 ulong guid = closestUnit.Guid;
 
-                if (WowInterface.Player.TargetGuid != guid)
+                if (Bot.Player.TargetGuid != guid)
                 {
-                    WowInterface.HookManager.WowTargetGuid(guid);
-                    WowInterface.ObjectManager.UpdateWowObjects();
+                    Bot.Wow.WowTargetGuid(guid);
+                    Bot.Objects.Player.Update(Bot.Memory, Bot.Offsets);
                 }
             }
 
-            return WowInterface.Target != null
-                && BotUtils.IsValidUnit(WowInterface.Target)
-                && !WowInterface.Target.IsDead;
+            return Bot.Target != null
+                && WowUnit.IsValidUnit(Bot.Target)
+                && !Bot.Target.IsDead;
         }
 
         protected bool TryCastAoeSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
@@ -720,7 +724,7 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
             {
                 if (GetValidTarget(guid, out WowUnit target, out bool _))
                 {
-                    WowInterface.HookManager.WowClickOnTerrain(target.Position);
+                    Bot.Wow.WowClickOnTerrain(target.Position);
                     return true;
                 }
             }
@@ -734,7 +738,7 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
             {
                 if (GetValidTarget(guid, out WowUnit target, out bool _))
                 {
-                    WowInterface.HookManager.WowClickOnTerrain(target.Position);
+                    Bot.Wow.WowClickOnTerrain(target.Position);
                     return true;
                 }
             }
@@ -744,23 +748,23 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != WowInterface.Player.Guid) && !WowInterface.ObjectManager.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
                 if (currentResourceAmount == 0)
                 {
-                    currentResourceAmount = WowInterface.Player.Class switch
+                    currentResourceAmount = Bot.Player.Class switch
                     {
-                        WowClass.Deathknight => WowInterface.Player.Runeenergy,
-                        WowClass.Rogue => WowInterface.Player.Energy,
-                        WowClass.Warrior => WowInterface.Player.Rage,
-                        _ => WowInterface.Player.Mana,
+                        WowClass.Deathknight => Bot.Player.Runeenergy,
+                        WowClass.Rogue => Bot.Player.Energy,
+                        WowClass.Warrior => Bot.Player.Rage,
+                        _ => Bot.Player.Mana,
                     };
                 }
 
                 bool isTargetMyself = guid == 0;
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
@@ -769,13 +773,13 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.WowTargetGuid(guid);
+                        Bot.Wow.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -788,31 +792,31 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         protected bool TryCastSpellDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != WowInterface.Player.Guid) && !WowInterface.ObjectManager.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
                 bool isTargetMyself = guid == 0;
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
-                Dictionary<WowRuneType, int> runes = WowInterface.HookManager.WowGetRunesReady();
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
+                Dictionary<int, int> runes = Bot.Wow.WowGetRunesReady();
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
-                    && (!needsRuneenergy || spell.Costs < WowInterface.Player.Runeenergy)
-                    && (!needsBloodrune || (runes[WowRuneType.Blood] > 0 || runes[WowRuneType.Death] > 0))
-                    && (!needsFrostrune || (runes[WowRuneType.Frost] > 0 || runes[WowRuneType.Death] > 0))
-                    && (!needsUnholyrune || (runes[WowRuneType.Unholy] > 0 || runes[WowRuneType.Death] > 0))
+                    && (!needsRuneenergy || spell.Costs < Bot.Player.Runeenergy)
+                    && (!needsBloodrune || (runes[(int)WowRuneType.Blood] > 0 || runes[(int)WowRuneType.Death] > 0))
+                    && (!needsFrostrune || (runes[(int)WowRuneType.Frost] > 0 || runes[(int)WowRuneType.Death] > 0))
+                    && (!needsUnholyrune || (runes[(int)WowRuneType.Unholy] > 0 || runes[(int)WowRuneType.Death] > 0))
                     && (target == null || IsInRange(spell, target)))
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.WowTargetGuid(guid);
+                        Bot.Wow.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -825,28 +829,28 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         protected bool TryCastSpellRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != WowInterface.Player.Guid) && !WowInterface.ObjectManager.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
                 bool isTargetMyself = guid == 0;
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
-                    && (!needsEnergy || spell.Costs < WowInterface.Player.Energy)
-                    && (!needsCombopoints || WowInterface.Player.ComboPoints >= requiredCombopoints)
+                    && (!needsEnergy || spell.Costs < Bot.Player.Energy)
+                    && (!needsCombopoints || Bot.Player.ComboPoints >= requiredCombopoints)
                     && (target == null || IsInRange(spell, target)))
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.WowTargetGuid(guid);
+                        Bot.Wow.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -859,25 +863,25 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         protected bool TryCastSpellWarrior(string spellName, string requiredStance, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != WowInterface.Player.Guid) && !WowInterface.ObjectManager.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
             {
                 if (currentResourceAmount == 0)
                 {
-                    currentResourceAmount = WowInterface.Player.Rage;
+                    currentResourceAmount = Bot.Player.Rage;
                 }
 
                 bool isTargetMyself = guid == 0;
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
                     && (!needsResource || spell.Costs < currentResourceAmount)
                     && (target == null || IsInRange(spell, target)))
                 {
-                    if (!WowInterface.Player.HasBuffByName(requiredStance)
-                        && WowInterface.CharacterManager.SpellBook.IsSpellKnown(requiredStance)
+                    if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == requiredStance)
+                        && Bot.Character.SpellBook.IsSpellKnown(requiredStance)
                         && !CooldownManager.IsSpellOnCooldown(requiredStance))
                     {
                         CastSpell(requiredStance, true);
@@ -885,13 +889,13 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        WowInterface.HookManager.WowTargetGuid(guid);
+                        Bot.Wow.WowTargetGuid(guid);
                     }
 
                     if (spell.CastTime > 0)
                     {
                         // stop pending movement if we cast something
-                        WowInterface.MovementEngine.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
                         CheckFacing(target);
                     }
 
@@ -905,16 +909,25 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
         private bool CastSpell(string spellName, bool castOnSelf)
         {
             // spits out stuff like this "1;300" (1 or 0 whether the cast was successful or not);(the cooldown in ms)
-            if (WowInterface.HookManager.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
+            if (Bot.Wow.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
             {
-                if (result.Length < 3) return false;
+                if (result.Length < 3)
+                {
+                    return false;
+                }
 
                 string[] parts = result.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
-                if (parts.Length < 2) return false;
+                if (parts.Length < 2)
+                {
+                    return false;
+                }
 
                 // replace comma with dot in the cooldown
-                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase)) parts[1] = parts[1].Replace(',', '.');
+                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase))
+                {
+                    parts[1] = parts[1].Replace(',', '.');
+                }
 
                 if (int.TryParse(parts[0], out int castSuccessful)
                     && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double cooldown))
@@ -924,7 +937,7 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
                     if (castSuccessful == 1)
                     {
-                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{WowInterface.Target?.Name}\"", LogLevel.Verbose);
+                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{Bot.Target?.Guid}\"", LogLevel.Verbose);
                         IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }
@@ -941,13 +954,13 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
         private void CheckFacing(WowUnit target)
         {
-            if (target == null || target.Guid == WowInterface.PlayerGuid)
+            if (target == null || target.Guid == Bot.Wow.PlayerGuid)
             {
                 return;
             }
 
-            float facingAngle = BotMath.GetFacingAngle(WowInterface.Player.Position, target.Position);
-            float angleDiff = facingAngle - WowInterface.Player.Rotation;
+            float facingAngle = BotMath.GetFacingAngle(Bot.Player.Position, target.Position);
+            float angleDiff = facingAngle - Bot.Player.Rotation;
 
             if (angleDiff < 0)
             {
@@ -961,7 +974,7 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             if (angleDiff > 1.0)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.Player, target.Position);
+                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
             }
         }
 
@@ -969,19 +982,19 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
         {
             if (guid == 0)
             {
-                target = WowInterface.Player;
+                target = Bot.Player;
                 needToSwitchTargets = false;
                 return true;
             }
-            else if (guid == WowInterface.TargetGuid)
+            else if (guid == Bot.Wow.TargetGuid)
             {
-                target = WowInterface.Target;
+                target = Bot.Target;
                 needToSwitchTargets = false;
                 return true;
             }
             else
             {
-                target = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(guid);
+                target = Bot.Objects.GetWowObjectByGuid<WowUnit>(guid);
                 needToSwitchTargets = true;
                 return target != null;
             }
@@ -991,10 +1004,10 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
         {
             if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
             {
-                return WowInterface.Player.IsInMeleeRange(wowUnit);
+                return Bot.Player.IsInMeleeRange(wowUnit);
             }
 
-            double distance = WowInterface.Player.Position.GetDistance(wowUnit.Position);
+            double distance = Bot.Player.Position.GetDistance(wowUnit.Position);
             return distance >= spell.MinRange && distance <= spell.MaxRange;
         }
     }

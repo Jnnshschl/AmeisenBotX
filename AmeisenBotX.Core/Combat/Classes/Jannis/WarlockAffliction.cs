@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Core.Utils;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,36 +14,36 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class WarlockAffliction : BasicCombatClass
     {
-        public WarlockAffliction(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public WarlockAffliction(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
             PetManager = new PetManager
             (
-                WowInterface,
+                Bot,
                 TimeSpan.FromSeconds(1),
                 null,
-                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelhunterSpell)
-                       && WowInterface.CharacterManager.Inventory.HasItemByName("Soul Shard")
+                () => (Bot.Character.SpellBook.IsSpellKnown(summonFelhunterSpell)
+                       && Bot.Character.Inventory.HasItemByName("Soul Shard")
                        && TryCastSpell(summonFelhunterSpell, 0))
-                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell)
+                   || (Bot.Character.SpellBook.IsSpellKnown(summonImpSpell)
                        && TryCastSpell(summonImpSpell, 0)),
-                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelhunterSpell)
-                       && WowInterface.CharacterManager.Inventory.HasItemByName("Soul Shard")
+                () => (Bot.Character.SpellBook.IsSpellKnown(summonFelhunterSpell)
+                       && Bot.Character.Inventory.HasItemByName("Soul Shard")
                        && TryCastSpell(summonFelhunterSpell, 0))
-                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell)
+                   || (Bot.Character.SpellBook.IsSpellKnown(summonImpSpell)
                        && TryCastSpell(summonImpSpell, 0))
             );
 
-            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(new List<(string, Func<bool>)>()
+            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
             {
                 (felArmorSpell, () => TryCastSpell(felArmorSpell, 0, true)),
                 (demonArmorSpell, () => TryCastSpell(demonArmorSpell, 0, true)),
                 (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hauntSpell, () => TryCastSpell(hauntSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, corruptionSpell, () => Bot.Target != null && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, hauntSpell, () => TryCastSpell(hauntSpell, Bot.Wow.TargetGuid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Affliction Warlock spec.";
@@ -112,46 +112,46 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (WowInterface.Player.ManaPercentage < 90
-                        && WowInterface.Player.HealthPercentage > 60
+                if (Bot.Player.ManaPercentage < 90
+                        && Bot.Player.HealthPercentage > 60
                         && TryCastSpell(lifeTapSpell, 0)
-                    || (WowInterface.Player.HealthPercentage < 80
-                        && TryCastSpell(deathCoilSpell, WowInterface.TargetGuid, true)))
+                    || (Bot.Player.HealthPercentage < 80
+                        && TryCastSpell(deathCoilSpell, Bot.Wow.TargetGuid, true)))
                 {
                     return;
                 }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if (WowInterface.Target.GetType() == typeof(WowPlayer))
+                    if (Bot.Target.GetType() == typeof(WowPlayer))
                     {
                         if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
-                            && ((WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 6.0f
+                            && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
-                            || (WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 12.0f
-                                && TryCastSpell(fearSpell, WowInterface.TargetGuid, true))))
+                            || (Bot.Player.Position.GetDistance(Bot.Target.Position) < 12.0f
+                                && TryCastSpell(fearSpell, Bot.Wow.TargetGuid, true))))
                         {
                             LastFearAttempt = DateTime.UtcNow;
                             return;
                         }
                     }
 
-                    if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
-                        && WowInterface.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, WowInterface.TargetGuid, true))
+                    if (Bot.Character.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
+                        && Bot.Target.HealthPercentage < 25.0
+                        && TryCastSpell(drainSoulSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
                 }
 
-                if (WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Target.Position, 16.0f).Count() > 2
-                    && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.TargetGuid, true))
+                if (Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Target.Position, 16.0f).Count() > 2
+                    && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell)
+                    && TryCastSpell(seedOfCorruptionSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(shadowBoltSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpell(shadowBoltSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }

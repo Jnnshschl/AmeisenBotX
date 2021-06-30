@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
 {
     internal class QEncroachment : BotQuest
     {
-        public QEncroachment(WowInterface wowInterface)
-            : base(wowInterface, 837, "Encroachment", 6, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+        public QEncroachment(AmeisenBotInterfaces bot)
+            : base(bot, 837, "Encroachment", 6, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3111 }, 4, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3111 }, 4, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(82.96f, -4643.34f, 37.46f),
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
                                 new Vector3(111.28f, -4446.82f, 38.88f),
                             },
                         }),
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3112 }, 4, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3112 }, 4, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(60.08f, -4298.42f, 64.12f),
@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
                                 new Vector3(124.53f, -4582.72f, 63.72f),
                             },
                         }),
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3113 }, 4, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3113 }, 4, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(483.50f, -4148.08f, 24.82f),
@@ -93,7 +93,7 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.RazorHill
                                 new Vector3(439.98f, -4229.21f, 25.41f),
                             },
                         }),
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3114 }, 4, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3114 }, 4, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(495.71f, -4196.06f, 24.16f),

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Movement.Pathfinding.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Movement.Pathfinding.Enums;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects

@@ -1,9 +1,10 @@
-﻿using AmeisenBotX.Core.Data.CombatLog.Enums;
-using AmeisenBotX.Core.Data.CombatLog.Objects;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Combatlog.Enums;
+using AmeisenBotX.Wow.Combatlog.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public class KillAndLootQuestObjective : IQuestObjective, IObserverBasicCombatLogEntry
     {
-        public KillAndLootQuestObjective(WowInterface wowInterface, List<int> npcIds, int collectOrKillAmount, int questItemId, List<List<Vector3>> areas)
+        public KillAndLootQuestObjective(AmeisenBotInterfaces bot, List<int> npcIds, int collectOrKillAmount, int questItemId, List<List<Vector3>> areas)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             NpcIds = npcIds;
             CollectOrKillAmount = collectOrKillAmount;
             QuestItemId = questItemId;
@@ -22,7 +23,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
             if (!CollectQuestItem)
             {
-                wowInterface.Db.GetCombatLogSubject().Register(this);
+                bot.Db.GetCombatLogSubject().Register(this);
             }
         }
 
@@ -37,11 +38,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                     return 100.0;
                 }
 
-                var amount = Killed;
+                int amount = Killed;
                 if (CollectQuestItem)
                 {
-                    var inventoryItem =
-                        WowInterface.CharacterManager.Inventory.Items.Find(item => item.Id == QuestItemId);
+                    Character.Inventory.Objects.IWowItem inventoryItem =
+                        Bot.Character.Inventory.Items.Find(item => item.Id == QuestItemId);
                     if (inventoryItem != null)
                     {
                         amount = inventoryItem.Count;
@@ -72,13 +73,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private SearchAreaEnsamble SearchAreas { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 
         public void CombatLogChanged(BasicCombatLogEntry entry)
         {
-            var wowUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
+            WowUnit wowUnit = Bot.Objects.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
             if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGuid.ToNpcId(entry.DestinationGuid))
                                                             && wowUnit != null && wowUnit.IsTaggedByMe)
             {
@@ -88,29 +89,30 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            if (!WowInterface.Player.IsInCombat && DateTime.UtcNow.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
+            if (!Bot.Player.IsInCombat && DateTime.UtcNow.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
             {
                 LastUnitCheck = DateTime.UtcNow;
-                WowUnit = WowInterface.ObjectManager.WowObjects
+                WowUnit = Bot.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && NpcIds.Contains(WowGuid.ToNpcId(e.Guid)) && !e.IsNotAttackable
-                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                                && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)
+                    .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .Take(3)
-                    .OrderBy(e => WowInterface.PathfindingHandler.GetPathDistance((int)WowInterface.ObjectManager.MapId, WowInterface.Player.Position, e.Position))
+                    .OrderBy(e => Bot.PathfindingHandler.GetPathDistance((int)Bot.Objects.MapId, Bot.Player.Position, e.Position))
                     .FirstOrDefault();
 
                 // Kill enemies in the path
-                if (WowUnit != null && !WowInterface.Player.IsHostileTo(WowInterface, WowUnit))
+                if (WowUnit != null && Bot.Db.GetReaction(Bot.Player, WowUnit) == WowUnitReaction.Hostile)
                 {
-                    var path = WowInterface.PathfindingHandler.GetPath((int)WowInterface.ObjectManager.MapId,
-                    WowInterface.Player.Position, WowUnit.Position);
+                    IEnumerable<Vector3> path = Bot.PathfindingHandler.GetPath((int)Bot.Objects.MapId,
+                    Bot.Player.Position, WowUnit.Position);
+
                     if (path != null)
                     {
-                        var nearEnemies =
-                            WowInterface.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0f);
+                        IEnumerable<WowUnit> nearEnemies = Bot.Objects.GetEnemiesInPath<WowUnit>(Bot.Db.GetReaction, path, 10.0f);
+
                         if (nearEnemies.Any())
                         {
                             WowUnit = nearEnemies.FirstOrDefault();
@@ -120,19 +122,19 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
                 if (WowUnit != null)
                 {
-                    WowInterface.HookManager.WowTargetGuid(WowUnit.Guid);
+                    Bot.Wow.WowTargetGuid(WowUnit.Guid);
                 }
             }
 
             if (WowUnit != null)
             {
                 SearchAreas.NotifyDetour();
-                WowInterface.CombatClass.AttackTarget();
+                Bot.CombatClass.AttackTarget();
             }
-            else if (WowInterface.Player.Position.GetDistance(CurrentSpot) < 3.0f || SearchAreas.HasAbortedPath() || WowInterface.MovementEngine.Status == MovementAction.None)
+            else if (Bot.Player.Position.GetDistance(CurrentSpot) < 3.0f || SearchAreas.HasAbortedPath() || Bot.Movement.Status == MovementAction.None)
             {
-                CurrentSpot = SearchAreas.GetNextPosition(WowInterface);
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSpot);
+                CurrentSpot = SearchAreas.GetNextPosition(Bot);
+                Bot.Movement.SetMovementAction(MovementAction.Move, CurrentSpot);
             }
         }
     }

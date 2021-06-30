@@ -10,75 +10,75 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
     internal class X5Horde1To80Profile : IQuestProfile
     {
-        public X5Horde1To80Profile(WowInterface wowInterface)
+        public X5Horde1To80Profile(AmeisenBotInterfaces bot)
         {
             Quests = new Queue<List<IBotQuest>>();
             Quests.Enqueue(new List<IBotQuest>() {
-                new QYourPlaceInTheWorld(wowInterface)
+                new QYourPlaceInTheWorld(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QCuttingTeeth(wowInterface)
+                new QCuttingTeeth(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QStingOfTheScorpid(wowInterface),
-                new QVileFamiliars(wowInterface),
-                new QGalgarCactusAppleSurprise(wowInterface)
+                new QStingOfTheScorpid(bot),
+                new QVileFamiliars(bot),
+                new QGalgarCactusAppleSurprise(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QSarkoth(wowInterface)
+                new QSarkoth(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QSarkoth2(wowInterface)
+                new QSarkoth2(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QAPeonBurden(wowInterface)
+                new QAPeonBurden(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QVanquishTheBetrayers(wowInterface),
-                new QCarryYourWeight(wowInterface)
+                new QVanquishTheBetrayers(bot),
+                new QCarryYourWeight(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QEncroachment(wowInterface)
+                new QEncroachment(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QConscriptOfTheHorde(wowInterface)
+                new QConscriptOfTheHorde(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QCrossroadsConscription(wowInterface)
+                new QCrossroadsConscription(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QDisruptTheAttacks(wowInterface)
+                new QDisruptTheAttacks(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTheDisruptionEnds(wowInterface),
-                new QSuppliesForTheCrossroads(wowInterface),
+                new QTheDisruptionEnds(bot),
+                new QSuppliesForTheCrossroads(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QPlainstriderMenace(wowInterface),
-                new QRaptorThieves(wowInterface),
+                new QPlainstriderMenace(bot),
+                new QRaptorThieves(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QSouthseaFreebooters(wowInterface),
+                new QSouthseaFreebooters(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTheZhevra(wowInterface),
+                new QTheZhevra(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QProwlersOfTheBarrens(wowInterface),
+                new QProwlersOfTheBarrens(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QHarpyRaiders(wowInterface),
-                new QCentaurBracers(wowInterface),
+                new QHarpyRaiders(bot),
+                new QCentaurBracers(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QKolkarLeaders(wowInterface),
-                new QHarpyLieutenants(wowInterface),
+                new QKolkarLeaders(bot),
+                new QHarpyLieutenants(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QSerenaBloodfeather(wowInterface),
+                new QSerenaBloodfeather(bot),
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QLetterToJinZil(wowInterface),
+                new QLetterToJinZil(bot),
             });
         }
 

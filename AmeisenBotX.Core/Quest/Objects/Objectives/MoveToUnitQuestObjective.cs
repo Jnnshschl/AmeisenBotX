@@ -7,29 +7,29 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
 {
     public class MoveToUnitQuestObjective : IQuestObjective
     {
-        public MoveToUnitQuestObjective(WowInterface wowInterface, int unitDisplayId, double distance)
+        public MoveToUnitQuestObjective(AmeisenBotInterfaces bot, int unitDisplayId, double distance)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             UnitDisplayIds = new List<int>() { unitDisplayId };
             Distance = distance;
         }
 
-        public MoveToUnitQuestObjective(WowInterface wowInterface, List<int> unitDisplayIds, double distance)
+        public MoveToUnitQuestObjective(AmeisenBotInterfaces bot, List<int> unitDisplayIds, double distance)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             UnitDisplayIds = unitDisplayIds;
             Distance = distance;
         }
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => WowUnit != null && WowUnit.Position.GetDistance(WowInterface.Player.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => WowUnit != null && WowUnit.Position.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
         private double Distance { get; }
 
         private List<int> UnitDisplayIds { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 
@@ -37,18 +37,18 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
         {
             if (Finished)
             {
-                WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                Bot.Movement.Reset();
+                Bot.Wow.WowStopClickToMove();
                 return;
             }
 
-            WowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(UnitDisplayIds);
+            WowUnit = Bot.Objects.GetClosestWowUnitByDisplayId(Bot.Player.Position, UnitDisplayIds);
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistance2D(WowInterface.Player.Position) > Distance)
+                if (WowUnit.Position.GetDistance2D(Bot.Player.Position) > Distance)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, WowUnit.Position);
                 }
             }
         }

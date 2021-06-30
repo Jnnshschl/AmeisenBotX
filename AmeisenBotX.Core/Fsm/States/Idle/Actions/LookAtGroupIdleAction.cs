@@ -7,9 +7,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class LookAtGroupIdleAction : IIdleAction
     {
-        public LookAtGroupIdleAction(WowInterface wowInterface)
+        public LookAtGroupIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Rnd = new Random();
         }
 
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 0;
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private IEnumerable<WowUnit> NearPartymembers { get; set; }
 
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool Enter()
         {
-            NearPartymembers = WowInterface.ObjectManager.Partymembers.Where(e => e.Guid != WowInterface.PlayerGuid && e.Position.GetDistance(WowInterface.Player.Position) < 16.0f);
+            NearPartymembers = Bot.Objects.Partymembers.Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Position.GetDistance(Bot.Player.Position) < 16.0f);
             return NearPartymembers.Any();
         }
 
@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (randomPartymember != null)
             {
-                WowInterface.HookManager.WowFacePosition(WowInterface.Player, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
+                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
             }
         }
     }

@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QTheZhevra : BotQuest
     {
-        public QTheZhevra(WowInterface wowInterface)
-            : base(wowInterface, 845, "The Zhevra", 10, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+        public QTheZhevra(AmeisenBotInterfaces bot)
+            : base(bot, 845, "The Zhevra", 10, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3242,3426,3466,5831 }, 4, 5086, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3242,3426,3466,5831 }, 4, 5086, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-2920.79f, -1940.51f, 92.13f),

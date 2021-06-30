@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AmeisenBotX.Common.Math;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 {
@@ -21,11 +22,11 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
 
         private Vector3 LastSearchPosition { get; set; } = Vector3.Zero;
 
-        public Vector3 GetNextPosition(WowInterface wowInterface)
+        public Vector3 GetNextPosition(AmeisenBotInterfaces bot)
         {
             if (!AbortedPath || LastSearchPosition == Vector3.Zero)
             {
-                LastSearchPosition = GetNextPositionInternal(wowInterface);
+                LastSearchPosition = GetNextPositionInternal(bot);
             }
 
             AbortedPath = false;
@@ -37,10 +38,10 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             return AbortedPath;
         }
 
-        public bool IsPlayerNearSearchArea(WowInterface wowInterface)
+        public bool IsPlayerNearSearchArea(AmeisenBotInterfaces bot)
         {
-            return Areas[CurrentSearchArea].ContainsPosition(wowInterface.ObjectManager.Player.Position)
-                   || Areas[CurrentSearchArea].GetClosestVertexDistance(wowInterface.ObjectManager.Player.Position) <= 20.0;
+            return Areas[CurrentSearchArea].ContainsPosition(bot.Objects.Player.Position)
+                   || Areas[CurrentSearchArea].GetClosestVertexDistance(bot.Objects.Player.Position) <= 20.0;
         }
 
         public void NotifyDetour()
@@ -48,9 +49,9 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
             AbortedPath = true;
         }
 
-        private Vector3 GetNextPositionInternal(WowInterface wowInterface)
+        private Vector3 GetNextPositionInternal(AmeisenBotInterfaces bot)
         {
-            Vector3 currentPosition = wowInterface.ObjectManager.Player.Position;
+            Vector3 currentPosition = bot.Objects.Player.Position;
 
             if (Areas[CurrentSearchArea].ContainsPosition(currentPosition))
             {
@@ -64,7 +65,7 @@ namespace AmeisenBotX.Core.Movement.Pathfinding.Objects
                 return position;
             }
 
-            return Areas[CurrentSearchArea].GetClosestEntry(wowInterface);
+            return Areas[CurrentSearchArea].GetClosestEntry(bot);
         }
     }
 }

@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
     internal class QVileFamiliars : BotQuest
     {
-        public QVileFamiliars(WowInterface wowInterface)
-            : base(wowInterface, 792, "Vile Familiars", 2, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
+        public QVileFamiliars(AmeisenBotInterfaces bot)
+            : base(bot, 792, "Vile Familiars", 2, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3101 }, 8, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3101 }, 8, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-117.28f, -4217.52f, 54.48f),

@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QTanarisGrindToLevel44 : GrindingBotQuest
     {
-        public QTanarisGrindToLevel44(WowInterface wowInterface)
+        public QTanarisGrindToLevel44(AmeisenBotInterfaces bot)
             : base("TanarisGrindToLevel44",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 44, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 44, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-7304.35f, -4604.55f, 8.49f),

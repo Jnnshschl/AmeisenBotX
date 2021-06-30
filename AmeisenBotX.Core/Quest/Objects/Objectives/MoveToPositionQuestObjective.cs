@@ -1,13 +1,13 @@
-﻿using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Movement.Enums;
 
 namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public class MoveToPositionQuestObjective : IQuestObjective
     {
-        public MoveToPositionQuestObjective(WowInterface wowInterface, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move)
+        public MoveToPositionQuestObjective(AmeisenBotInterfaces bot, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             WantedPosition = position;
             Distance = distance;
             MovementAction = movementAction;
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public bool Finished { get; set; }
 
-        public double Progress => WantedPosition.GetDistance(WowInterface.Player.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => WantedPosition.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
         private double Distance { get; }
 
@@ -23,21 +23,21 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private Vector3 WantedPosition { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
             if (Finished || Progress == 100.0)
             {
                 Finished = true;
-                WowInterface.MovementEngine.Reset();
-                WowInterface.HookManager.WowStopClickToMove();
+                Bot.Movement.Reset();
+                Bot.Wow.WowStopClickToMove();
                 return;
             }
 
-            if (WantedPosition.GetDistance2D(WowInterface.Player.Position) > Distance)
+            if (WantedPosition.GetDistance2D(Bot.Player.Position) > Distance)
             {
-                WowInterface.MovementEngine.SetMovementAction(MovementAction, WantedPosition);
+                Bot.Movement.SetMovementAction(MovementAction, WantedPosition);
             }
         }
     }

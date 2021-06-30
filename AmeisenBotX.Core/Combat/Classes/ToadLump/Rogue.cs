@@ -1,14 +1,14 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 {
     public class Rogue : BasicCombatClass
     {
-        public Rogue(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public Rogue(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
             /*
             MyAuraManager.BuffsToKeepActive = new Dictionary<string, CastFunction>()
@@ -18,8 +18,8 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             TargetAuraManager.DebuffsToKeepActive = new Dictionary<string, CastFunction>()
             {
-                { hamstringSpell, () => WowInterface.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.TargetGuid, true) },
-                { rendSpell, () => WowInterface.Target.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.TargetGuid, true) }
+                { hamstringSpell, () => Bot.Target.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, Bot.NewBot.TargetGuid, true) },
+                { rendSpell, () => Bot.Target.Type == WowObjectType.Player && Bot.Player.Rage > 75 && TryCastSpell(rendSpell, Bot.NewBot.TargetGuid, true) }
             };
 
             TargetInterruptManager.InterruptSpells = new()
@@ -96,14 +96,14 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
 
             if (SelectTarget(TargetManagerDps))
             {
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
+                    double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
-                    if ((WowInterface.Player.IsDazed
-                        || WowInterface.Player.IsConfused
-                        || WowInterface.Player.IsPossessed
-                        || WowInterface.Player.IsFleeing)
+                    if ((Bot.Player.IsDazed
+                        || Bot.Player.IsConfused
+                        || Bot.Player.IsPossessed
+                        || Bot.Player.IsFleeing)
                         && TryCastSpell(heroicFurySpell, 0))
                     {
                         return;
@@ -115,11 +115,11 @@ namespace AmeisenBotX.Core.Combat.Classes.ToadLump
                     }
                     else
                     {
-                        if (TryCastSpellRogue(eviscerateSpell, WowInterface.Target.Guid, needsEnergy: true, needsCombopoints: true, requiredCombopoints: 5))
+                        if (TryCastSpellRogue(eviscerateSpell, Bot.Wow.TargetGuid, needsEnergy: true, needsCombopoints: true, requiredCombopoints: 5))
                         {
                             return;
                         }
-                        if (TryCastSpellRogue(sinisterStrikeSpell, WowInterface.Target.Guid, needsEnergy: true))
+                        if (TryCastSpellRogue(sinisterStrikeSpell, Bot.Wow.TargetGuid, needsEnergy: true))
                         {
                             return;
                         }

@@ -1,12 +1,12 @@
-﻿using AmeisenBotX.Core.Character.Comparators;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Character.Spells;
 using AmeisenBotX.Core.Character.Talents;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Character

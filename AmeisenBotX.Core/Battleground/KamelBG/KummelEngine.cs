@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,12 +31,12 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private Vector3 startPosition;
 
-        public KummelEngine(WowInterface wowInterface)
+        public KummelEngine(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
-            wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
-            wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
-            wowInterface.EventHookManager.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnFlagAlliance);
+            Bot = bot;
+            bot.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
+            bot.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
+            bot.Events.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnFlagAlliance);
         }
 
         public string Author => "Kamel";
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public string Name => "Kummel Engine";
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Enter()
         {
@@ -55,8 +55,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public void Execute()
         {
-            WowInterface.CombatClass.OutOfCombatExecute();
-            if (WowInterface.Player.IsCasting)
+            Bot.CombatClass.OutOfCombatExecute();
+            if (Bot.Player.IsCasting)
             {
                 return;
             }
@@ -64,9 +64,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             if (hasStateChanged)
             {
                 hasStateChanged = false;
-                //hasFlag = WowInterface.HookManager.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("flag") || e.Contains("Flag"));
-                hasFlag = WowInterface.Player.Auras != null && WowInterface.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
-                FlagCarrier = hasFlag ? WowInterface.Player : GetFlagCarrier();
+                //hasFlag = Bot.NewBot.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("flag") || e.Contains("Flag"));
+                hasFlag = Bot.Player.Auras != null && Bot.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
+                FlagCarrier = hasFlag ? Bot.Player : GetFlagCarrier();
                 if (FlagCarrier == null)
                 {
                     FlagObject = GetFlagObject();
@@ -77,20 +77,20 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     else
                     {
                         FlagState = 0;
-                        WowInterface.HookManager.LuaSendChatMessage("/y The flag just lies around! Let's take it!");
+                        Bot.Wow.LuaSendChatMessage("/y The flag just lies around! Let's take it!");
                     }
                 }
                 else
                 {
                     FlagState = PICKED_UP;
-                    if (hasFlag || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, FlagCarrier) == WowUnitReaction.Friendly || WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, FlagCarrier) == WowUnitReaction.Neutral)
+                    if (hasFlag || Bot.Db.GetReaction(Bot.Player, FlagCarrier) == WowUnitReaction.Friendly || Bot.Db.GetReaction(Bot.Player, FlagCarrier) == WowUnitReaction.Neutral)
                     {
                         FlagState |= OWN_TEAM_FLAG;
-                        WowInterface.HookManager.LuaSendChatMessage("/y We got it!");
+                        Bot.Wow.LuaSendChatMessage("/y We got it!");
                     }
                     else
                     {
-                        WowInterface.HookManager.LuaSendChatMessage("/y They've got the flag!");
+                        Bot.Wow.LuaSendChatMessage("/y They've got the flag!");
                     }
                 }
             }
@@ -106,10 +106,10 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         WowObject ownFlag = GetFlagObject();
                         if (ownFlag != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
-                            if (WowInterface.Player.Position.GetDistance(ownFlag.Position) < 3.5f)
+                            Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
+                            if (Bot.Player.Position.GetDistance(ownFlag.Position) < 3.5f)
                             {
-                                WowInterface.HookManager.WowObjectRightClick(FlagObject);
+                                Bot.Wow.WowObjectRightClick(FlagObject.BaseAddress);
                             }
                         }
                         else
@@ -117,11 +117,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                             WowUnit enemyFlagCarrier = GetFlagCarrier();
                             if (enemyFlagCarrier != null)
                             {
-                                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, enemyFlagCarrier.Position);
+                                Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, enemyFlagCarrier.Position);
                             }
                             else if (startPosition != default)
                             {
-                                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ausgangAlly);
+                                Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, ausgangAlly);
                             }
                         }
                     }
@@ -130,11 +130,11 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                         FlagCarrier = GetFlagCarrier();
                         if (FlagCarrier != null)
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, FlagCarrier.Position);
+                            Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, FlagCarrier.Position);
                         }
                         else
                         {
-                            WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, baseHord);
+                            Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, baseHord);
                         }
                     }
                 }
@@ -144,26 +144,26 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
                     FlagCarrier = GetFlagCarrier();
                     if (FlagCarrier != null)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, FlagCarrier.Position);
+                        Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, FlagCarrier.Position);
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, baseHord);
+                        Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, baseHord);
                     }
                 }
             }
             else if (FlagObject != null)
             {
                 // flag lies on the ground
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, FlagObject.Position);
-                if (WowInterface.Player.Position.GetDistance(FlagObject.Position) < 3.5f) // limit the executions
+                Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, FlagObject.Position);
+                if (Bot.Player.Position.GetDistance(FlagObject.Position) < 3.5f) // limit the executions
                 {
-                    WowInterface.HookManager.WowObjectRightClick(FlagObject);
+                    Bot.Wow.WowObjectRightClick(FlagObject.BaseAddress);
                 }
             }
             else if (startPosition != default)
             {
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, ausgangHord);
+                Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, ausgangHord);
             }
         }
 
@@ -173,7 +173,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private WowUnit GetFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = WowInterface.ObjectManager.WowObjects.OfType<WowUnit>().Where(e => e.Guid != WowInterface.Player.Guid && e.Auras != null && e.Auras.Any(en => en.Name.Contains("Flag") || en.Name.Contains("flag"))).ToList();
+            List<WowUnit> flagCarrierList = Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
             {
                 return flagCarrierList[0];
@@ -186,8 +186,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         private WowObject GetFlagObject()
         {
-            WowGameobjectDisplayId targetFlag = hasFlag ? (WowInterface.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (WowInterface.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
-            List<WowGameobject> flagObjectList = WowInterface.ObjectManager.WowObjects
+            WowGameobjectDisplayId targetFlag = hasFlag ? (Bot.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (Bot.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
+            List<WowGameobject> flagObjectList = Bot.Objects.WowObjects
                 .OfType<WowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(WowGameobjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameobjectDisplayId)x.DisplayId).ToList();
@@ -206,7 +206,7 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             hasStateChanged = true;
             if (startPosition == default)
             {
-                startPosition = WowInterface.Player.Position;
+                startPosition = Bot.Player.Position;
             }
         }
     }

@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Jobs.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Jobs.Profiles.Gathering

@@ -1,13 +1,13 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Jobs.Enums;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +16,11 @@ namespace AmeisenBotX.Core.Jobs
 {
     public class JobEngine
     {
-        public JobEngine(WowInterface wowInterface, AmeisenBotConfig config)
+        public JobEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             AmeisenLogger.I.Log("JobEngine", $"Initializing", LogLevel.Verbose);
 
-            WowInterface = wowInterface;
+            Bot = bot;
             Config = config;
 
             MiningEvent = new(TimeSpan.FromSeconds(1));
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Jobs
 
         private int SellActionsNeeded { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Enter()
         {
@@ -85,62 +85,62 @@ namespace AmeisenBotX.Core.Jobs
 
         private void ExecuteMining(IMiningProfile miningProfile)
         {
-            if (WowInterface.Player.IsCasting)
+            if (Bot.Player.IsCasting)
             {
                 return;
             }
 
             if (CheckForPathRecovering)
             {
-                Vector3 closestNode = miningProfile.Path.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First();
+                Vector3 closestNode = miningProfile.Path.OrderBy(e => e.GetDistance(Bot.Player.Position)).First();
                 CurrentNodeCounter = miningProfile.Path.IndexOf(closestNode) + 1;
                 CheckForPathRecovering = false;
                 NodeTryCounter = 0;
             }
 
-            if (WowInterface.CharacterManager.Inventory.FreeBagSlots < 3 && SellActionsNeeded == 0)
+            if (Bot.Character.Inventory.FreeBagSlots < 3 && SellActionsNeeded == 0)
             {
-                SellActionsNeeded = (int)Math.Ceiling(WowInterface.CharacterManager.Inventory.Items.Count / 12.0); // 12 items per mail
+                SellActionsNeeded = (int)Math.Ceiling(Bot.Character.Inventory.Items.Count / 12.0); // 12 items per mail
                 CheckForPathRecovering = true;
             }
 
             if (SellActionsNeeded > 0)
             {
-                WowGameobject mailboxNode = WowInterface.ObjectManager.WowObjects
+                WowGameobject mailboxNode = Bot.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
-                            && x.Position.GetDistance(WowInterface.Player.Position) < 15)
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
+                            && x.Position.GetDistance(Bot.Player.Position) < 15)
+                    .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();
 
                 if (mailboxNode != null)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, mailboxNode.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, mailboxNode.Position);
 
-                    if (WowInterface.Player.Position.GetDistance(mailboxNode.Position) <= 4)
+                    if (Bot.Player.Position.GetDistance(mailboxNode.Position) <= 4)
                     {
-                        WowInterface.MovementEngine.StopMovement();
+                        Bot.Movement.StopMovement();
 
                         if (MailSentEvent.Run())
                         {
-                            WowInterface.HookManager.WowObjectRightClick(mailboxNode);
-                            WowInterface.HookManager.LuaDoString("MailFrameTab2:Click();");
+                            Bot.Wow.WowObjectRightClick(mailboxNode.BaseAddress);
+                            Bot.Wow.LuaDoString("MailFrameTab2:Click();");
 
                             int usedItems = 0;
-                            foreach (IWowItem item in WowInterface.CharacterManager.Inventory.Items)
+                            foreach (IWowItem item in Bot.Character.Inventory.Items)
                             {
                                 if (Config.ItemSellBlacklist.Contains(item.Name) || item.Name.Contains("Mining Pick", StringComparison.OrdinalIgnoreCase))
                                 {
                                     continue;
                                 }
 
-                                WowInterface.HookManager.LuaUseContainerItem(item.BagId, item.BagSlot);
+                                Bot.Wow.LuaUseContainerItem(item.BagId, item.BagSlot);
                                 ++usedItems;
                             }
 
                             if (usedItems > 0)
                             {
-                                WowInterface.HookManager.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
+                                Bot.Wow.LuaDoString($"SendMail('{Config.JobEngineMailReceiver}', '{Config.JobEngineMailHeader}', '{Config.JobEngineMailText}')");
                                 --SellActionsNeeded;
                             }
                             else
@@ -151,13 +151,13 @@ namespace AmeisenBotX.Core.Jobs
                     }
                     else
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, mailboxNode.Position);
+                        Bot.Movement.SetMovementAction(MovementAction.Move, mailboxNode.Position);
                     }
                 }
                 else
                 {
-                    Vector3 currentNode = miningProfile.MailboxNodes.OrderBy(x => x.GetDistance(WowInterface.Player.Position)).FirstOrDefault();
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                    Vector3 currentNode = miningProfile.MailboxNodes.OrderBy(x => x.GetDistance(Bot.Player.Position)).FirstOrDefault();
+                    Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
                 }
 
                 return;
@@ -166,9 +166,9 @@ namespace AmeisenBotX.Core.Jobs
             if (SelectedPosition == default)
             {
                 // search for nodes
-                int miningSkill = WowInterface.CharacterManager.Skills.ContainsKey("Mining") ? WowInterface.CharacterManager.Skills["Mining"].Item1 : 0;
+                int miningSkill = Bot.Character.Skills.ContainsKey("Mining") ? Bot.Character.Skills["Mining"].Item1 : 0;
 
-                WowGameobject nearestNode = WowInterface.ObjectManager.WowObjects
+                WowGameobject nearestNode = Bot.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
                              && Enum.IsDefined(typeof(WowOreId), e.DisplayId)
@@ -188,7 +188,7 @@ namespace AmeisenBotX.Core.Jobs
                              || (((WowOreId)e.DisplayId) == WowOreId.Khorium && miningSkill >= 375)
                              || (((WowOreId)e.DisplayId) == WowOreId.Saronite && miningSkill >= 400)
                              || (((WowOreId)e.DisplayId) == WowOreId.Titanium && miningSkill >= 450)))
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
+                    .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();
 
                 if (nearestNode != null)
@@ -203,9 +203,9 @@ namespace AmeisenBotX.Core.Jobs
                     GeneratedPathToNode = false;
 
                     Vector3 currentNode = miningProfile.Path[CurrentNodeCounter];
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
 
-                    if (WowInterface.Player.Position.GetDistance(currentNode) < 3.0f)
+                    if (Bot.Player.Position.GetDistance(currentNode) < 3.0f)
                     {
                         ++CurrentNodeCounter;
 
@@ -224,29 +224,29 @@ namespace AmeisenBotX.Core.Jobs
             else
             {
                 // move to the node
-                double distanceToNode = WowInterface.Player.Position.GetDistance(SelectedPosition);
-                WowGameobject node = WowInterface.ObjectManager.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
+                double distanceToNode = Bot.Player.Position.GetDistance(SelectedPosition);
+                WowGameobject node = Bot.Objects.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
 
                 if (distanceToNode < 3)
                 {
-                    if (WowInterface.Player.IsMounted)
+                    if (Bot.Player.IsMounted)
                     {
-                        WowInterface.HookManager.LuaDismissCompanion();
+                        Bot.Wow.LuaDismissCompanion();
                         return;
                     }
 
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
 
                     if (MiningEvent.Run()) // limit the executions
                     {
-                        if (WowInterface.XMemory.Read(WowInterface.OffsetList.LootWindowOpen, out byte lootOpen)
+                        if (Bot.Memory.Read(Bot.Offsets.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
                         {
-                            WowInterface.HookManager.LuaLootEveryThing();
+                            Bot.Wow.LuaLootEveryThing();
                         }
                         else
                         {
-                            WowInterface.HookManager.WowObjectRightClick(node);
+                            Bot.Wow.WowObjectRightClick(node.BaseAddress);
                         }
                     }
 
@@ -263,7 +263,7 @@ namespace AmeisenBotX.Core.Jobs
                 {
                     if (GeneratedPathToNode && BlacklistEvent.Run())
                     {
-                        if (!WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, node.Position))
+                        if (!Bot.Movement.SetMovementAction(MovementAction.Move, node.Position))
                         {
                             if (NodeTryCounter > 2)
                             {

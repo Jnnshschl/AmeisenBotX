@@ -1,7 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,61 +10,60 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     internal class GrindingObjective : IQuestObjective
     {
-        public GrindingObjective(WowInterface wowInterface, int targetLevel, List<List<Vector3>> grindingAreas)
+        public GrindingObjective(AmeisenBotInterfaces bot, int targetLevel, List<List<Vector3>> grindingAreas)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             WantedLevel = targetLevel;
             SearchAreas = new SearchAreaEnsamble(grindingAreas);
         }
 
         public Vector3 CurrentNode { get; set; }
 
-        public bool Finished => WowInterface.Player.Level >= WantedLevel;
+        public bool Finished => Bot.Player.Level >= WantedLevel;
 
-        public double Progress => 100.0 * (WowInterface.Player.Level + WowInterface.Player.XpPercentage / 100.0) / WantedLevel;
+        public double Progress => 100.0 * (Bot.Player.Level + Bot.Player.XpPercentage / 100.0) / WantedLevel;
 
         private SearchAreaEnsamble SearchAreas { get; }
 
         private int WantedLevel { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            if (!SearchAreas.IsPlayerNearSearchArea(WowInterface))
+            if (!SearchAreas.IsPlayerNearSearchArea(Bot))
             {
-                WowInterface.HookManager.WowClearTarget();
+                Bot.Wow.WowClearTarget();
                 WowUnit = null;
             }
 
-            if (!WowInterface.Player.IsInCombat)
+            if (!Bot.Player.IsInCombat)
             {
-                WowUnit = WowInterface.ObjectManager.WowObjects
+                WowUnit = Bot.Objects.WowObjects
                     .OfType<WowUnit>()
-                    .Where(e => !e.IsDead && !e.IsNotAttackable
-                                && WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, e) != WowUnitReaction.Friendly)
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                    .Where(e => !e.IsDead && !e.IsNotAttackable && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)
+                    .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();
 
                 if (WowUnit != null)
                 {
-                    WowInterface.HookManager.WowTargetGuid(WowUnit.Guid);
+                    Bot.Wow.WowTargetGuid(WowUnit.Guid);
                 }
             }
 
             if (WowUnit != null)
             {
                 SearchAreas.NotifyDetour();
-                WowInterface.CombatClass.AttackTarget();
+                Bot.CombatClass.AttackTarget();
             }
-            else if (WowInterface.Player.Position.GetDistance(CurrentNode) < 3.5f || SearchAreas.HasAbortedPath())
+            else if (Bot.Player.Position.GetDistance(CurrentNode) < 3.5f || SearchAreas.HasAbortedPath())
             {
-                CurrentNode = SearchAreas.GetNextPosition(WowInterface);
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentNode);
+                CurrentNode = SearchAreas.GetNextPosition(Bot);
+                Bot.Movement.SetMovementAction(MovementAction.Move, CurrentNode);
             }
         }
     }

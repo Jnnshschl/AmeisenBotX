@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QDesolaceGrindToLevel35 : GrindingBotQuest
     {
-        public QDesolaceGrindToLevel35(WowInterface wowInterface)
+        public QDesolaceGrindToLevel35(AmeisenBotInterfaces bot)
             : base("DesolaceGrindToLevel35",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 35, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 35, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-711.86f, 1155.10f, 90.73f),

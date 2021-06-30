@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ namespace AmeisenBotX.Core.Utils.Aura
 {
     public class GroupAuraManager
     {
-        public GroupAuraManager(WowInterface wowInterface)
+        public GroupAuraManager(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             SpellsToKeepActiveOnParty = new();
             RemoveBadAurasSpells = new();
             LastBuffed = new();
@@ -25,17 +25,17 @@ namespace AmeisenBotX.Core.Utils.Aura
 
         private Dictionary<ulong, TimegatedEvent> LastBuffed { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool Tick()
         {
             if (SpellsToKeepActiveOnParty?.Count > 0)
             {
-                foreach (WowUnit wowUnit in WowInterface.ObjectManager.Partymembers.Where(e => e.Guid != WowInterface.PlayerGuid && !e.IsDead))
+                foreach (WowUnit wowUnit in Bot.Objects.Partymembers.Where(e => e.Guid != Bot.Wow.PlayerGuid && !e.IsDead))
                 {
                     foreach ((string, CastSpellOnUnit) auraCombo in SpellsToKeepActiveOnParty)
                     {
-                        if (!wowUnit.HasBuffByName(auraCombo.Item1))
+                        if (!wowUnit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == auraCombo.Item1))
                         {
                             if (!LastBuffed.ContainsKey(wowUnit.Guid))
                             {
@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Utils.Aura
             // TODO: recognize bad spells and dispell them
             // if (RemoveBadAurasSpells?.Count > 0)
             // {
-            //     foreach (WowUnit wowUnit in WowInterface.ObjectManager.Partymembers)
+            //     foreach (WowUnit wowUnit in Bot.ObjectManager.Partymembers)
             //     {
             //         foreach (WowAura wowAura in wowUnit.Auras.Where(e => e.IsHarmful))
             //         {

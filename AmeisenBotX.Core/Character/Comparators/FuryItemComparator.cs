@@ -6,12 +6,12 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class FuryItemComparator : IItemComparator
     {
-        public FuryItemComparator(WowInterface wowInterface)
+        public FuryItemComparator(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
         }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool IsBetter(IWowItem current, IWowItem item)
         {
@@ -80,9 +80,9 @@ namespace AmeisenBotX.Core.Character.Comparators
             {
                 // also 2nd weapons
                 if (item.GetType() == typeof(WowWeapon)
-                    && (WowInterface.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_AXES)
-                    || (WowInterface.CharacterManager.SpellBook.IsSpellKnown("Titan's Grip")
-                    && WowInterface.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_AXES))))
+                    && (Bot.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_AXES)
+                    || (Bot.Character.SpellBook.IsSpellKnown("Titan's Grip")
+                    && Bot.Player.IsAlliance() ? ((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_SWORDS) : ((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_AXES))))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_DAMAGE_PER_SECOND_SHORT", out string dpsString)
                         && double.TryParse(dpsString, NumberStyles.Any, CultureInfo.InvariantCulture, out double dps))

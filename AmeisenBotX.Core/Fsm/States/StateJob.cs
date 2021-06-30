@@ -2,25 +2,25 @@
 {
     public class StateJob : BasicState
     {
-        public StateJob(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateJob(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
         public override void Enter()
         {
-            WowInterface.JobEngine.Enter();
-            WowInterface.Globals.IgnoreMountDistance = true;
+            Bot.Jobs.Enter();
+            Bot.Globals.IgnoreMountDistance = true;
         }
 
         public override void Execute()
         {
-            WowInterface.JobEngine.Execute();
+            Bot.Jobs.Execute();
         }
 
         public override void Leave()
         {
-            WowInterface.Globals.IgnoreMountDistance = false;
-            WowInterface.JobEngine.Reset();
+            Bot.Globals.IgnoreMountDistance = false;
+            Bot.Jobs.Reset();
         }
     }
 }

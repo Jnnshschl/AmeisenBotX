@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QSouthseaFreebooters : BotQuest
     {
-        public QSouthseaFreebooters(WowInterface wowInterface)
-            : base(wowInterface, 887, "Southsea Freebooters", 9, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
+        public QSouthseaFreebooters(AmeisenBotInterfaces bot)
+            : base(bot, 887, "Southsea Freebooters", 9, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3381 }, 12, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3381 }, 12, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-1742.90f, -3730.12f, 13.76f),
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                                 new Vector3(-1316.59f, -3819.80f, 18.28f),
                             },
                         }),
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3382 }, 6, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3382 }, 6, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-1731.59f, -3715.31f, 16.97f),

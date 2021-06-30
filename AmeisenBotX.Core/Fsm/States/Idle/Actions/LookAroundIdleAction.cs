@@ -4,9 +4,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class LookAroundIdleAction : IIdleAction
     {
-        public LookAroundIdleAction(WowInterface wowInterface)
+        public LookAroundIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Rnd = new Random();
         }
 
@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 0;
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private Random Rnd { get; }
 
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public void Execute()
         {
             float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 5.0f);
-            WowInterface.HookManager.WowSetFacing(WowInterface.Player, WowInterface.Player.Rotation + modificationFactor);
+            Bot.Wow.WowSetFacing(Bot.Player.BaseAddress, Bot.Player.Rotation + modificationFactor);
         }
     }
 }

@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QProwlersOfTheBarrens : BotQuest
     {
-        public QProwlersOfTheBarrens(WowInterface wowInterface)
-            : base(wowInterface, 903, "Prowlers of the Barrens", 10, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+        public QProwlersOfTheBarrens(AmeisenBotInterfaces bot)
+            : base(bot, 903, "Prowlers of the Barrens", 10, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3425 }, 7, 5096, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3425 }, 7, 5096, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(1081.71f, -3481.79f, 78.82f),

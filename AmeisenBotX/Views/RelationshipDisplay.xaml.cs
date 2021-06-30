@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Personality.Objects;
+using AmeisenBotX.Core.Data.Objects;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,9 +14,9 @@ namespace AmeisenBotX.Views
         private const int MIN_REL = -4;
         private readonly float relationshipToScale = (MAX_MARGIN - MIN_MARGIN) / (MAX_REL - MIN_REL);
 
-        public RelationshipDisplay(WowInterface wowInterface, ulong guid, Relationship relationship)
+        public RelationshipDisplay(AmeisenBotInterfaces wowInterface, ulong guid, int relationship)
         {
-            WowInterface = wowInterface;
+            Bot = wowInterface;
             Guid = guid;
             Relationship = relationship;
 
@@ -25,13 +25,13 @@ namespace AmeisenBotX.Views
 
         private ulong Guid { get; }
 
-        private Relationship Relationship { get; }
+        private int Relationship { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
-        public void Update(ulong guid, Relationship relationship)
+        public void Update(ulong guid, int relationship)
         {
-            if (WowInterface.Db.TryGetUnitName(guid, out string name))
+            if (Bot.Db.GetUnitName(Bot.Objects.GetWowObjectByGuid<WowUnit>(guid), out string name))
             {
                 labelName.Content = name;
             }
@@ -39,12 +39,6 @@ namespace AmeisenBotX.Views
             {
                 labelName.Content = "unknown";
             }
-
-            labelStatus.Content = relationship.Level;
-            labelLastSeen.Content = relationship.LastSeen;
-
-            double leftMargin = MIN_MARGIN + ((Math.Min(Math.Max(relationship.Score, MIN_REL), MAX_REL) + Math.Abs(MIN_REL)) * relationshipToScale);
-            rectIndicator.Margin = new(leftMargin, rectIndicator.Margin.Top, rectIndicator.Margin.Right, rectIndicator.Margin.Bottom);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

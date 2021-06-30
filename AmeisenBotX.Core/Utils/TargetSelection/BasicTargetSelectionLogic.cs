@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,16 +7,16 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 {
     public abstract class BasicTargetSelectionLogic
     {
-        public BasicTargetSelectionLogic(WowInterface wowInterface)
+        public BasicTargetSelectionLogic(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
         }
 
         public IEnumerable<int> BlacklistedTargets { get; set; }
 
         public IEnumerable<int> PriorityTargets { get; set; }
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         public void Reset()
         {
@@ -41,8 +42,8 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                 && !wowUnit.IsNotAttackable
                 && wowUnit.IsInCombat
                 && !IsBlacklisted(wowUnit)
-                && !wowUnit.IsFriendyTo(WowInterface, WowInterface.Player)
-                && wowUnit.DistanceTo(WowInterface.Player) < 80.0f;
+                && Bot.Db.GetReaction(wowUnit, Bot.Player) == WowUnitReaction.Hostile
+                && wowUnit.DistanceTo(Bot.Player) < 80.0f;
         }
     }
 }

@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
     internal class QCuttingTeeth : BotQuest
     {
-        public QCuttingTeeth(WowInterface wowInterface)
-            : base(wowInterface, 788, "Cutting Teeth", 1, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
+        public QCuttingTeeth(AmeisenBotInterfaces bot)
+            : base(bot, 788, "Cutting Teeth", 1, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3098 }, 8, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3098 }, 8, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-486.28f, -4144.73f, 54.75f),

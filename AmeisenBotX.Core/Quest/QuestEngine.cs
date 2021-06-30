@@ -1,10 +1,10 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using AmeisenBotX.Core.Quest.Profiles;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +13,9 @@ namespace AmeisenBotX.Core.Quest
 {
     public class QuestEngine
     {
-        public QuestEngine(WowInterface wowInterface, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
+        public QuestEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Config = config;
             StateMachine = stateMachine;
 
@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Quest
 
         private AmeisenBotFsm StateMachine { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
@@ -48,14 +48,14 @@ namespace AmeisenBotX.Core.Quest
 
             if (!UpdatedCompletedQuests)
             {
-                if (WowInterface.EventHookManager.EventDictionary.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
+                if (Bot.Events.EventDictionary.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
                 {
-                    WowInterface.EventHookManager.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
+                    Bot.Events.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
                 }
 
                 if (QueryCompletedQuestsEvent.Run())
                 {
-                    WowInterface.HookManager.LuaQueryQuestsCompleted();
+                    Bot.Wow.LuaQueryQuestsCompleted();
                 }
 
                 return;
@@ -64,11 +64,11 @@ namespace AmeisenBotX.Core.Quest
             if (Profile.Quests.Count > 0)
             {
                 // do i need to recover my hp
-                if (WowInterface.Player.HealthPercentage < Config.EatUntilPercent
-                    && WowInterface.ObjectManager.GetNearEnemies<WowUnit>(WowInterface.Player.Position, 60.0f).Any())
+                if (Bot.Player.HealthPercentage < Config.EatUntilPercent
+                    && Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 60.0f).Any())
                 {
                     // wait or eat something
-                    if (WowInterface.CharacterManager.HasItemTypeInBag<WowFood>() || WowInterface.CharacterManager.HasItemTypeInBag<WowRefreshment>())
+                    if (Bot.Character.HasItemTypeInBag<WowFood>() || Bot.Character.HasItemTypeInBag<WowRefreshment>())
                     {
                         StateMachine.SetState(BotState.Eating);
                         return;
@@ -78,9 +78,9 @@ namespace AmeisenBotX.Core.Quest
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
 
                 // drop all quest that are not selected
-                if (WowInterface.Player.QuestlogEntries.Count() == 25 && DateTime.UtcNow.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
+                if (Bot.Player.QuestlogEntries.Count() == 25 && DateTime.UtcNow.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
                 {
-                    WowInterface.HookManager.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
+                    Bot.Wow.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
                     LastAbandonQuestTime = DateTime.UtcNow;
                 }
 
@@ -139,10 +139,10 @@ namespace AmeisenBotX.Core.Quest
 
         private void OnGetQuestsCompleted(long timestamp, List<string> args)
         {
-            WowInterface.QuestEngine.CompletedQuests.Clear();
-            WowInterface.QuestEngine.CompletedQuests.AddRange(WowInterface.HookManager.LuaGetCompletedQuests());
+            Bot.Quest.CompletedQuests.Clear();
+            Bot.Quest.CompletedQuests.AddRange(Bot.Wow.LuaGetCompletedQuests());
 
-            WowInterface.QuestEngine.UpdatedCompletedQuests = true;
+            Bot.Quest.UpdatedCompletedQuests = true;
         }
     }
 }

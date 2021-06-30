@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QHarpyLieutenants : BotQuest
     {
-        public QHarpyLieutenants(WowInterface wowInterface)
-            : base(wowInterface, 875, "Harpy Lieutenants", 12, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
+        public QHarpyLieutenants(AmeisenBotInterfaces bot)
+            : base(bot, 875, "Harpy Lieutenants", 12, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3278 }, 6, 5065, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3278 }, 6, 5065, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(518.00f, -1151.54f, 92.04f),

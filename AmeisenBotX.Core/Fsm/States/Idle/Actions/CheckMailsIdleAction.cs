@@ -1,7 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Cache.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class CheckMailsIdleAction : IIdleAction
     {
-        public CheckMailsIdleAction(WowInterface wowInterface)
+        public CheckMailsIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Rnd = new Random();
         }
 
@@ -38,17 +39,17 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         private Random Rnd { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool Enter()
         {
             CheckedMails = false;
             MailboxCheckTime = default;
-            OriginPosition = WowInterface.Player.Position;
+            OriginPosition = Bot.Player.Position;
 
-            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.ObjectManager.MapId, Data.Db.Enums.PoiType.Mailbox, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> mailboxes))
+            if (Bot.Db.TryGetPointsOfInterest(Bot.Objects.MapId, PoiType.Mailbox, Bot.Player.Position, 256.0f, out IEnumerable<Vector3> mailboxes))
             {
-                CurrentMailbox = mailboxes.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First();
+                CurrentMailbox = mailboxes.OrderBy(e => e.GetDistance(Bot.Player.Position)).First();
                 return true;
             }
 
@@ -59,21 +60,21 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             if (!CheckedMails)
             {
-                if (CurrentMailbox.GetDistance(WowInterface.Player.Position) > 3.5f)
+                if (CurrentMailbox.GetDistance(Bot.Player.Position) > 3.5f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentMailbox);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, CurrentMailbox);
                 }
                 else
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
 
-                    WowGameobject mailbox = WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>()
+                    WowGameobject mailbox = Bot.Objects.WowObjects.OfType<WowGameobject>()
                         .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Mailbox && e.Position.GetDistance(CurrentMailbox) < 1.0f);
 
                     if (mailbox != null)
                     {
-                        WowInterface.HookManager.WowObjectRightClick(mailbox);
-                        WowInterface.HookManager.LuaDoString("for i=1,GetInboxNumItems()do AutoLootMailItem(i)end");
+                        Bot.Wow.WowObjectRightClick(mailbox.BaseAddress);
+                        Bot.Wow.LuaDoString("for i=1,GetInboxNumItems()do AutoLootMailItem(i)end");
                     }
 
                     CheckedMails = true;
@@ -84,11 +85,11 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             {
                 if (CurrentMailbox.GetDistance(OriginPosition) > 8.0f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, OriginPosition);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, OriginPosition);
                 }
                 else
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
                     ReturnedToOrigin = true;
                 }
             }

@@ -1,23 +1,24 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class DruidFeralCat : BasicCombatClass
     {
-        public DruidFeralCat(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public DruidFeralCat(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, WowInterface.PlayerGuid, true, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(catFormSpell, () => TryCastSpell(catFormSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(savageRoarSpell, () => TryCastSpellRogue(savageRoarSpell, WowInterface.TargetGuid, true, true, 1)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, catFormSpell, () => TryCastSpell(catFormSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, savageRoarSpell, () => TryCastSpellRogue(savageRoarSpell, Bot.Wow.TargetGuid, true, true, 1)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(ripSpell, () => WowInterface.Player.ComboPoints == 5 && TryCastSpellRogue(ripSpell, WowInterface.TargetGuid, true, true, 5)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rakeSpell, () => TryCastSpell(rakeSpell, WowInterface.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(mangleCatSpell, () => TryCastSpell(mangleCatSpell, WowInterface.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, ripSpell, () => Bot.Player.ComboPoints == 5 && TryCastSpellRogue(ripSpell, Bot.Wow.TargetGuid, true, true, 5)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, rakeSpell, () => TryCastSpell(rakeSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, mangleCatSpell, () => TryCastSpell(mangleCatSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -91,10 +92,10 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                double distanceToTarget = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
+                double distanceToTarget = Bot.Player.Position.GetDistance(Bot.Target.Position);
 
                 if (distanceToTarget > 9.0
-                    && TryCastSpell(feralChargeBearSpell, WowInterface.Target.Guid, true))
+                    && TryCastSpell(feralChargeBearSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -105,7 +106,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if (WowInterface.Player.HealthPercentage < 40
+                if (Bot.Player.HealthPercentage < 40
                     && TryCastSpell(survivalInstinctsSpell, 0, true))
                 {
                     return;
@@ -121,17 +122,17 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if ((WowInterface.Player.EnergyPercentage > 70
+                if ((Bot.Player.EnergyPercentage > 70
                         && TryCastSpell(berserkSpell, 0))
-                    || (WowInterface.Player.Energy < 30
+                    || (Bot.Player.Energy < 30
                         && TryCastSpell(tigersFurySpell, 0))
-                    || (WowInterface.Player.HealthPercentage < 70
+                    || (Bot.Player.HealthPercentage < 70
                         && TryCastSpell(barkskinSpell, 0, true))
-                    || (WowInterface.Player.HealthPercentage < 35
+                    || (Bot.Player.HealthPercentage < 35
                         && TryCastSpell(survivalInstinctsSpell, 0, true))
-                    || (WowInterface.Player.ComboPoints == 5
-                        && TryCastSpellRogue(ferociousBiteSpell, WowInterface.Target.Guid, true, true, 5))
-                    || TryCastSpell(shredSpell, WowInterface.Target.Guid, true))
+                    || (Bot.Player.ComboPoints == 5
+                        && TryCastSpellRogue(ferociousBiteSpell, Bot.Wow.TargetGuid, true, true, 5))
+                    || TryCastSpell(shredSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -150,14 +151,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         private bool NeedToHealMySelf()
         {
-            if (WowInterface.Player.HealthPercentage < 60
-                && !WowInterface.Player.HasBuffByName(rejuvenationSpell)
+            if (Bot.Player.HealthPercentage < 60
+                && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == rejuvenationSpell)
                 && TryCastSpell(rejuvenationSpell, 0, true))
             {
                 return true;
             }
 
-            if (WowInterface.Player.HealthPercentage < 40
+            if (Bot.Player.HealthPercentage < 40
                 && TryCastSpell(healingTouchSpell, 0, true))
             {
                 return true;

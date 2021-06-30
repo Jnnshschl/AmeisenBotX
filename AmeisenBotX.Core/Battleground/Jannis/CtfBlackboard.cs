@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.BehaviorTree.Interfaces;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
 using System;
 using System.Collections.Generic;
 

@@ -1,23 +1,18 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Enums;
-using System;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
-    class RogueAssassination : BasicKamelClass
+    internal class RogueAssassination : BasicKamelClass
     {
-        public RogueAssassination(WowInterface wowInterface) : base()
+        public RogueAssassination(AmeisenBotInterfaces bot) : base()
         {
-            WowInterface = wowInterface;
+            Bot = bot;
         }
+
         public override string Author => "Lukas";
 
         public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
@@ -87,23 +82,24 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
             Targetselection();
             StartAttack();
         }
+
         private void StartAttack()
         {
-            if (WowInterface.TargetGuid != 0)
+            if (Bot.Wow.TargetGuid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.HookManager.WowGetUnitReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.HookManager.WowClearTarget();
+                    Bot.Wow.WowClearTarget();
                     return;
                 }
 
-                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                if (Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.HookManager.LuaStartAutoAttack();
+                        Bot.Wow.LuaStartAutoAttack();
                     }
                 }
             }

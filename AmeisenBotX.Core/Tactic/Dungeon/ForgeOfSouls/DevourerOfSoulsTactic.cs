@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -10,9 +10,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 {
     public class DevourerOfSoulsTactic : ITactic
     {
-        public DevourerOfSoulsTactic(WowInterface wowInterface)
+        public DevourerOfSoulsTactic(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             Configureables = new()
             {
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
         public Dictionary<string, dynamic> Configureables { get; private set; }
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private static List<int> DevourerOfSoulsDisplayId { get; } = new List<int> { 30148, 30149, 30150 };
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DevourerOfSoulsDisplayId, false);
+            WowUnit wowUnit = Bot.Objects.GetClosestWowUnitByDisplayId(Bot.Player.Position, DevourerOfSoulsDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -41,11 +41,11 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
                 {
                     // make sure we avoid the lazer
                     // we only care about being on the reight side of him because the lazer spins clockwise
-                    float angleDiff = BotMath.GetAngleDiff(wowUnit.Position, wowUnit.Rotation, WowInterface.Player.Position);
+                    float angleDiff = BotMath.GetAngleDiff(wowUnit.Position, wowUnit.Rotation, Bot.Player.Position);
 
                     if (angleDiff < 0.5f)
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, BotMath.CalculatePositionAround(wowUnit.Position, wowUnit.Rotation, MathF.PI, isMelee ? 5.0f : 22.0f));
+                        Bot.Movement.SetMovementAction(MovementAction.Move, BotMath.CalculatePositionAround(wowUnit.Position, wowUnit.Rotation, MathF.PI, isMelee ? 5.0f : 22.0f));
 
                         preventMovement = true;
                         allowAttacking = false;
@@ -55,15 +55,15 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == WowRole.Tank)
                 {
-                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.ObjectManager.MeanGroupPosition, MidPosition), 8.0f);
-                    float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
+                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(Bot.Objects.MeanGroupPosition, MidPosition), 8.0f);
+                    float distanceToMid = Bot.Player.Position.GetDistance(modifiedCenterPosition);
 
-                    if (wowUnit.TargetGuid == WowInterface.PlayerGuid)
+                    if (wowUnit.TargetGuid == Bot.Wow.PlayerGuid)
                     {
-                        if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)
+                        if (distanceToMid > 5.0f && Bot.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
-                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
+                            Bot.Movement.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
 
                             preventMovement = true;
                             allowAttacking = false;

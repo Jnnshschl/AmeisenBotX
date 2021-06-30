@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+﻿using AmeisenBotX.Common.Math;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Fsm.States.StaticDeathRoutes

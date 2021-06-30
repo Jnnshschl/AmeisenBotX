@@ -2,7 +2,7 @@
 {
     public class StateGrinding : BasicState
     {
-        public StateGrinding(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateGrinding(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
@@ -12,12 +12,12 @@
 
         public override void Execute()
         {
-            WowInterface.GrindingEngine.Execute();
+            Bot.Grinding.Execute();
         }
 
         public override void Leave()
         {
-            WowInterface.GrindingEngine.Exit();
+            Bot.Grinding.Exit();
         }
     }
 }

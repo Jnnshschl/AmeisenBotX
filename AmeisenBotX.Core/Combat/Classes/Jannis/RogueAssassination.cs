@@ -1,18 +1,18 @@
 ﻿using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Talents.Objects;
-using AmeisenBotX.Core.Data.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class RogueAssassination : BasicCombatClass
     {
-        public RogueAssassination(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public RogueAssassination(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sliceAndDiceSpell, () => TryCastSpellRogue(sliceAndDiceSpell, 0, true, true, 1)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(coldBloodSpell, () => TryCastSpellRogue(coldBloodSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sliceAndDiceSpell, () => TryCastSpellRogue(sliceAndDiceSpell, 0, true, true, 1)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, coldBloodSpell, () => TryCastSpellRogue(coldBloodSpell, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -81,23 +81,23 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if ((WowInterface.Player.HealthPercentage < 20
+                if ((Bot.Player.HealthPercentage < 20
                         && TryCastSpellRogue(cloakOfShadowsSpell, 0, true)))
                 {
                     return;
                 }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if ((WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) > 16
+                    if ((Bot.Target.Position.GetDistance(Bot.Player.Position) > 16
                             && TryCastSpellRogue(sprintSpell, 0, true)))
                     {
                         return;
                     }
                 }
 
-                if (TryCastSpellRogue(eviscerateSpell, WowInterface.TargetGuid, true, true, 5)
-                    || TryCastSpellRogue(mutilateSpell, WowInterface.TargetGuid, true))
+                if (TryCastSpellRogue(eviscerateSpell, Bot.Wow.TargetGuid, true, true, 5)
+                    || TryCastSpellRogue(mutilateSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }

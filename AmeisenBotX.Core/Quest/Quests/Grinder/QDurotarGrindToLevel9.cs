@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QDurotarGrindToLevel9 : GrindingBotQuest
     {
-        public QDurotarGrindToLevel9(WowInterface wowInterface)
+        public QDurotarGrindToLevel9(AmeisenBotInterfaces bot)
             : base("DurotarGrindToLevel9",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 9, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 9, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-220.08f, -4908.83f, 26.92f),

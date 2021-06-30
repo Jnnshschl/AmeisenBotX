@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Data.Enums;
-using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 {
     public class TankTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public TankTargetSelectionLogic(WowInterface wowInterface) : base(wowInterface)
+        public TankTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
         {
         }
 
@@ -15,24 +15,24 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
         {
             possibleTargets = null;
 
-            if (WowInterface.Target != null
-                && WowInterface.TargetGuid != 0)
+            if (Bot.Target != null
+                && Bot.Wow.TargetGuid != 0)
             {
-                if (!IsValidUnit(WowInterface.Target))
+                if (!IsValidUnit(Bot.Target))
                 {
-                    WowInterface.HookManager.WowClearTarget();
+                    Bot.Wow.WowClearTarget();
                     return true;
                 }
 
-                if (WowInterface.Target.Type != WowObjectType.Player
-                    && WowInterface.Target.TargetGuid != WowInterface.PlayerGuid
-                    && WowInterface.ObjectManager.PartymemberGuids.Contains(WowInterface.Target.TargetGuid))
+                if (Bot.Target.Type != WowObjectType.Player
+                    && Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
+                    && Bot.Objects.PartymemberGuids.Contains(Bot.Target.TargetGuid))
                 {
                     return true;
                 }
             }
 
-            IEnumerable<WowUnit> unitsAroundMe = WowInterface.ObjectManager.WowObjects
+            IEnumerable<WowUnit> unitsAroundMe = Bot.Objects.WowObjects
                 .OfType<WowUnit>()
                 .Where(e => IsValidUnit(e))
                 .OrderByDescending(e => e.Type)
@@ -40,8 +40,8 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 
             IEnumerable<WowUnit> targetsINeedToTank = unitsAroundMe
                 .Where(e => e.Type != WowObjectType.Player
-                         && e.TargetGuid != WowInterface.Player.Guid
-                         && WowInterface.ObjectManager.PartymemberGuids.Contains(e.TargetGuid));
+                         && e.TargetGuid != Bot.Wow.PlayerGuid
+                         && Bot.Objects.PartymemberGuids.Contains(e.TargetGuid));
 
             if (targetsINeedToTank.Any())
             {
@@ -50,17 +50,17 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
             }
             else
             {
-                if (WowInterface.ObjectManager.Partymembers.Any())
+                if (Bot.Objects.Partymembers.Any())
                 {
                     Dictionary<WowUnit, int> targets = new();
 
-                    foreach (WowUnit unit in WowInterface.ObjectManager.Partymembers)
+                    foreach (WowUnit unit in Bot.Objects.Partymembers)
                     {
                         if (unit.TargetGuid > 0)
                         {
-                            WowUnit targetUnit = WowInterface.ObjectManager.GetWowObjectByGuid<WowUnit>(unit.TargetGuid);
+                            WowUnit targetUnit = Bot.Objects.GetWowObjectByGuid<WowUnit>(unit.TargetGuid);
 
-                            if (targetUnit != null && WowInterface.HookManager.WowGetUnitReaction(targetUnit, WowInterface.Player) != WowUnitReaction.Friendly)
+                            if (targetUnit != null && Bot.Db.GetReaction(targetUnit, Bot.Player) != WowUnitReaction.Friendly)
                             {
                                 if (!targets.ContainsKey(targetUnit))
                                 {

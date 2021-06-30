@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Data.Enums;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 {
     public class TwilightPortalTactic : ITactic
     {
-        public TwilightPortalTactic(WowInterface wowInterface)
+        public TwilightPortalTactic(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             PortalClickEvent = new(TimeSpan.FromSeconds(1));
 
             Configureables = new()
@@ -24,22 +24,22 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
 
-        private WowGameobject NearestPortal => WowInterface.ObjectManager.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(WowInterface.Player.Position) < 80.0);
+        private WowGameobject NearestPortal => Bot.Objects.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(Bot.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
             if (role == WowRole.Dps)
             {
-                WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(DragonDisplayId, false);
+                WowUnit wowUnit = Bot.Objects.GetClosestWowUnitByDisplayId(Bot.Player.Position, DragonDisplayId, false);
                 WowGameobject portal = NearestPortal;
 
                 if (wowUnit != null)
                 {
-                    if (portal != null && WowInterface.Player.HealthPercentage > 80.0)
+                    if (portal != null && Bot.Player.HealthPercentage > 80.0)
                     {
                         preventMovement = true;
                         allowAttacking = false;
@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
                         return true;
                     }
                 }
-                else if (portal != null && WowInterface.Player.HealthPercentage < 25.0)
+                else if (portal != null && Bot.Player.HealthPercentage < 25.0)
                 {
                     preventMovement = true;
                     allowAttacking = false;
@@ -67,13 +67,13 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private void UsePortal(WowGameobject portal)
         {
-            if (!WowInterface.Player.IsInRange(portal, 3.0f))
+            if (!Bot.Player.IsInRange(portal, 3.0f))
             {
-                WowInterface.MovementEngine.SetMovementAction(Movement.Enums.MovementAction.Move, portal.Position);
+                Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, portal.Position);
             }
             else if (PortalClickEvent.Run())
             {
-                WowInterface.HookManager.WowObjectRightClick(portal);
+                Bot.Wow.WowObjectRightClick(portal.BaseAddress);
             }
         }
     }

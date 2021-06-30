@@ -2,18 +2,18 @@
 {
     public class StateQuesting : BasicState
     {
-        public StateQuesting(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateQuesting(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
         public override void Enter()
         {
-            WowInterface.QuestEngine.Start();
+            Bot.Quest.Start();
         }
 
         public override void Execute()
         {
-            WowInterface.QuestEngine.Execute();
+            Bot.Quest.Execute();
         }
 
         public override void Leave()

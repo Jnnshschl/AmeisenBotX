@@ -1,4 +1,4 @@
-using AmeisenBotX.Core.Movement.Pathfinding.Objects;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Quest.Objects.Quests;
 using System.Collections.Generic;
@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.OutpostStonetalon
 {
     internal class QCentaurBracers : BotQuest
     {
-        public QCentaurBracers(WowInterface wowInterface)
-            : base(wowInterface, 855, "Centaur Bracers", 9, 1,
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3389 }), new Vector3(-307.14f, -1971.95f, 96.48f)),
-                () => (wowInterface.ObjectManager.GetClosestWowUnitByNpcId(new List<int> { 3389 }), new Vector3(-307.14f, -1971.95f, 96.48f)),
+        public QCentaurBracers(AmeisenBotInterfaces bot)
+            : base(bot, 855, "Centaur Bracers", 9, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3389 }), new Vector3(-307.14f, -1971.95f, 96.48f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3389 }), new Vector3(-307.14f, -1971.95f, 96.48f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3272,3273,3274,3275,3397,5837,5838,5841,9523,9524,3394,3395,3396,9456 }, 15, 5030, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3272,3273,3274,3275,3397,5837,5838,5841,9523,9524,3394,3395,3396,9456 }, 15, 5030, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-1478.94f, -3013.48f, 91.79f),
