@@ -84,6 +84,7 @@ namespace AmeisenBotX.Core
 
             ExecutionMsStopwatch = new();
 
+            // start initializing the wow interface
             Bot = new();
             Bot.Offsets = new OffsetList335a();
             Bot.Globals = new();
@@ -96,6 +97,7 @@ namespace AmeisenBotX.Core
             Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.MovementSettings = Config.MovementSettings;
 
+            // module is initialized out here because it needs to write to its own data address
             TracelineJumpHookModule jumpModule = new(null, null, Bot.Memory, Bot.Offsets);
             jumpModule.Tick = () =>
             {
@@ -111,6 +113,7 @@ namespace AmeisenBotX.Core
                 }
             };
 
+            // lua variable names for the event hook
             string staticPopupsVarName = BotUtils.FastRandomStringOnlyLetters();
             string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
             string handlerName = BotUtils.FastRandomStringOnlyLetters();
@@ -123,25 +126,28 @@ namespace AmeisenBotX.Core
 
             List<IHookModule> hookModules = new()
             {
-                // Module to process wows events.
-                new RunLuaHookModule((x) =>
-                {
-                    if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 8192))
-                    {
-                        Bot.Events?.OnEventPush(s);
-                    }
-                }, null, Bot.Memory, Bot.Offsets, $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}", eventHookOutput),
-
-                // Module that does a traceline in front of the character
+                // module that does a traceline in front of the character
                 // to detect small obstacles that can be jumped over.
                 jumpModule,
 
-                // Modules that monitors the STATIC_POPUP windows.
-                new RunLuaHookModule((x) =>
-                {
-                    if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128))
+                // module to process wows events.
+                new RunLuaHookModule
+                (
+                    (x) => { if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 8192) && !string.IsNullOrWhiteSpace(s)) { Bot.Events?.OnEventPush(s); } },
+                    null,
+                    Bot.Memory,
+                    Bot.Offsets,
+                    $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}",
+                    eventHookOutput
+                ),
+
+                // module that monitors the STATIC_POPUP windows.
+                new RunLuaHookModule
+                (
+                    (x) =>
                     {
-                        if (!string.IsNullOrWhiteSpace(s))
+                        if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128)
+                            && !string.IsNullOrWhiteSpace(s))
                         {
                             if (!oldPoupString.Equals(s))
                             {
@@ -153,15 +159,21 @@ namespace AmeisenBotX.Core
                         {
                             oldPoupString = string.Empty;
                         }
-                    }
-                }, null, Bot.Memory, Bot.Offsets, $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end", staticPopupsVarName),
+                    },
+                    null,
+                    Bot.Memory,
+                    Bot.Offsets,
+                    $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end",
+                    staticPopupsVarName
+                ),
 
-                // Module to monitor the battleground (and queue) status.
-                new RunLuaHookModule((x) =>
-                {
-                    if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128))
+                // module to monitor the battleground (and queue) status.
+                new RunLuaHookModule
+                (
+                    (x) =>
                     {
-                        if (!string.IsNullOrWhiteSpace(s))
+                        if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128)
+                            && !string.IsNullOrWhiteSpace(s))
                         {
                             if (!oldBattlegroundStatus.Equals(s))
                             {
@@ -173,8 +185,13 @@ namespace AmeisenBotX.Core
                         {
                             oldPoupString = string.Empty;
                         }
-                    }
-                }, null, Bot.Memory, Bot.Offsets, $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end", battlegroundStatusVarName),
+                    },
+                    null,
+                    Bot.Memory,
+                    Bot.Offsets,
+                    $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
+                    battlegroundStatusVarName
+                ),
             };
 
             Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules);
@@ -190,8 +207,9 @@ namespace AmeisenBotX.Core
             Bot.Dungeon = new DungeonEngine(Bot);
             Bot.Jobs = new(Bot, Config);
             Bot.Movement = new AMovementEngine(Bot, Config);
-
-            // Wow interface setup done
+            Bot.Quest = new(Bot, Config, StateMachine);
+            Bot.Grinding = new(Bot, Config, StateMachine);
+            // wow interface setup done
 
             AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Offsets.GetType()}", LogLevel.Master);
 
@@ -204,10 +222,25 @@ namespace AmeisenBotX.Core
                 }
             };
 
-            Bot.Quest = new(Bot, Config, StateMachine);
-            Bot.Grinding = new(Bot, Config, StateMachine);
-
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
+
+            AmeisenLogger.I.Log("AmeisenBot", "Loading CombatClasses", LogLevel.Verbose);
+            InitCombatClasses();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Loading BattlegroundEngines", LogLevel.Verbose);
+            InitBattlegroundEngines();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Loading JobProfiles", LogLevel.Verbose);
+            InitJobProfiles();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Loading QuestProfiles", LogLevel.Verbose);
+            InitQuestProfiles();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Loading GrindingProfiles", LogLevel.Verbose);
+            InitGrindingProfiles();
+
+            AmeisenLogger.I.Log("AmeisenBot", "Loading Profiles", LogLevel.Verbose);
+            LoadProfiles();
 
             if (Config.RconEnabled)
             {
@@ -215,24 +248,6 @@ namespace AmeisenBotX.Core
                 RconScreenshotEvent = new(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
                 SetupRconClient();
             }
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setting CombatClasses", LogLevel.Verbose);
-            InitCombatClasses();
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setting BattlegroundEngines", LogLevel.Verbose);
-            InitBattlegroundEngines();
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setting JobProfiles", LogLevel.Verbose);
-            InitJobProfiles();
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setting QuestProfiles", LogLevel.Verbose);
-            InitQuestProfiles();
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setting GrindingProfiles", LogLevel.Verbose);
-            InitGrindingProfiles();
-
-            AmeisenLogger.I.Log("AmeisenBot", "Loading Profiles", LogLevel.Verbose);
-            LoadProfiles();
         }
 
         public event Action<bool, string, string> OnCombatClassCompilationStatusChanged;

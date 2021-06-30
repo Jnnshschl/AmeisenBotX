@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -37,88 +38,88 @@ namespace AmeisenBotX.Wow335a.Objects
             PartyPets = new List<WowUnit>();
         }
 
-        ///<inheritdoc cref="IObjectManager.OnObjectUpdateComplete"/>
+        ///<inheritdoc cref="IObjectProvider.OnObjectUpdateComplete"/>
         public event Action<IEnumerable<WowObject>> OnObjectUpdateComplete;
 
-        ///<inheritdoc cref="IObjectManager.Camera"/>
+        ///<inheritdoc cref="IObjectProvider.Camera"/>
         public RawCameraInfo Camera { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.GameState"/>
+        ///<inheritdoc cref="IObjectProvider.GameState"/>
         public string GameState { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.IsTargetInLineOfSight"/>
+        ///<inheritdoc cref="IObjectProvider.IsTargetInLineOfSight"/>
         public bool IsTargetInLineOfSight { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.IsWorldLoaded"/>
+        ///<inheritdoc cref="IObjectProvider.IsWorldLoaded"/>
         public bool IsWorldLoaded { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.LastTarget"/>
+        ///<inheritdoc cref="IObjectProvider.LastTarget"/>
         public WowUnit LastTarget { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.LastTargetGuid"/>
+        ///<inheritdoc cref="IObjectProvider.LastTargetGuid"/>
         public ulong LastTargetGuid { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.MapId"/>
+        ///<inheritdoc cref="IObjectProvider.MapId"/>
         public WowMapId MapId { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.MeanGroupPosition"/>
+        ///<inheritdoc cref="IObjectProvider.MeanGroupPosition"/>
         public Vector3 MeanGroupPosition { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.ObjectCount"/>
+        ///<inheritdoc cref="IObjectProvider.ObjectCount"/>
         public int ObjectCount { get; set; }
 
-        ///<inheritdoc cref="IObjectManager.Partyleader"/>
+        ///<inheritdoc cref="IObjectProvider.Partyleader"/>
         public WowUnit Partyleader { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PartyleaderGuid"/>
+        ///<inheritdoc cref="IObjectProvider.PartyleaderGuid"/>
         public ulong PartyleaderGuid { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PartymemberGuids"/>
+        ///<inheritdoc cref="IObjectProvider.PartymemberGuids"/>
         public IEnumerable<ulong> PartymemberGuids { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.Partymembers"/>
+        ///<inheritdoc cref="IObjectProvider.Partymembers"/>
         public IEnumerable<WowUnit> Partymembers { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PartyPetGuids"/>
+        ///<inheritdoc cref="IObjectProvider.PartyPetGuids"/>
         public IEnumerable<ulong> PartyPetGuids { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PartyPets"/>
+        ///<inheritdoc cref="IObjectProvider.PartyPets"/>
         public IEnumerable<WowUnit> PartyPets { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.Pet"/>
+        ///<inheritdoc cref="IObjectProvider.Pet"/>
         public WowUnit Pet { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PetGuid"/>
+        ///<inheritdoc cref="IObjectProvider.PetGuid"/>
         public ulong PetGuid { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.Player"/>
+        ///<inheritdoc cref="IObjectProvider.Player"/>
         public WowPlayer Player { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PlayerBase"/>
+        ///<inheritdoc cref="IObjectProvider.PlayerBase"/>
         public IntPtr PlayerBase { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.PlayerGuid"/>
+        ///<inheritdoc cref="IObjectProvider.PlayerGuid"/>
         public ulong PlayerGuid { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.Target"/>
+        ///<inheritdoc cref="IObjectProvider.Target"/>
         public WowUnit Target { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.TargetGuid"/>
+        ///<inheritdoc cref="IObjectProvider.TargetGuid"/>
         public ulong TargetGuid { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.Vehicle"/>
+        ///<inheritdoc cref="IObjectProvider.Vehicle"/>
         public WowUnit Vehicle { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.WowObjects"/>
+        ///<inheritdoc cref="IObjectProvider.WowObjects"/>
         public IEnumerable<WowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
 
-        ///<inheritdoc cref="IObjectManager.ZoneId"/>
+        ///<inheritdoc cref="IObjectProvider.ZoneId"/>
         public int ZoneId { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.ZoneName"/>
+        ///<inheritdoc cref="IObjectProvider.ZoneName"/>
         public string ZoneName { get; private set; }
 
-        ///<inheritdoc cref="IObjectManager.ZoneSubName"/>
+        ///<inheritdoc cref="IObjectProvider.ZoneSubName"/>
         public string ZoneSubName { get; private set; }
 
         private IOffsetList OffsetList { get; }
@@ -127,7 +128,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private XMemory XMemory { get; }
 
-        ///<inheritdoc cref="IObjectManager.RefreshIsWorldLoaded"/>
+        ///<inheritdoc cref="IObjectProvider.RefreshIsWorldLoaded"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RefreshIsWorldLoaded()
         {
@@ -140,7 +141,21 @@ namespace AmeisenBotX.Wow335a.Objects
             return false;
         }
 
-        ///<inheritdoc cref="IObjectManager.UpdateWowObjects"/>
+        /// <summary>
+        /// Process the pushed game info that we receive from the EndScene hook.
+        /// </summary>
+        /// <param name="gameInfo"></param>
+        public void HookManagerOnGameInfoPush(GameInfo gameInfo)
+        {
+            if (Player != null)
+            {
+                Player.IsOutdoors = gameInfo.isOutdoors;
+            }
+
+            IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
+        }
+
+        ///<inheritdoc cref="IObjectProvider.UpdateWowObjects"/>
         public void UpdateWowObjects()
         {
             IsWorldLoaded = UpdateGlobalVar<int>(OffsetList.IsWorldLoaded) == 1;

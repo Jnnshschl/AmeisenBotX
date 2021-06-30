@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Fsm.Routines
                 return false;
             }
 
-            if (bot.Objects.Target.Guid != selectedUnit.Guid)
+            if (bot.Wow.TargetGuid != selectedUnit.Guid)
             {
                 bot.Wow.WowTargetGuid(selectedUnit.Guid);
                 return false;

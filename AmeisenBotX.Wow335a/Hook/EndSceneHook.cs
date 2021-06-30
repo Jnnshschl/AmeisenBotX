@@ -6,6 +6,8 @@ using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Wow335a.Objects;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -26,16 +28,17 @@ namespace AmeisenBotX.Wow335a.Hook
 
         private ulong hookCalls;
 
-        public EndSceneHook(XMemory xMemory, IOffsetList offsetList)
+        public EndSceneHook(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager)
         {
             XMemory = xMemory;
             OffsetList = offsetList;
+            ObjectManager = objectManager;
             OriginalFunctionBytes = new();
         }
 
         public event Action<GameInfo> OnGameInfoPush;
 
-        public string EventHookFrameName { get; set; }
+        private ObjectManager ObjectManager { get; }
 
         public ulong HookCallCount
         {
@@ -1461,20 +1464,20 @@ namespace AmeisenBotX.Wow335a.Hook
             if (XMemory.Read(GameInfoExecutedAddress, out int executedStatus)
                 && executedStatus == 0)
             {
-                // if (WowInterface.TargetGuid != 0 && WowInterface.Target != null)
-                // {
-                //     Vector3 playerPosition = WowInterface.Player.Position;
-                //     playerPosition.Z += 1.5f;
-                //
-                //     Vector3 targetPosition = WowInterface.Target.Position;
-                //     targetPosition.Z += 1.5f;
-                //
-                //     if (XMemory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
-                //     {
-                //         // run the los check if we have a target
-                //         XMemory.Write(GameInfoExecuteLosCheckAddress, 1);
-                //     }
-                // }
+                if (ObjectManager.TargetGuid != 0 && ObjectManager.Target != null)
+                {
+                    Vector3 playerPosition = ObjectManager.Player.Position;
+                    playerPosition.Z += 1.5f;
+
+                    Vector3 targetPosition = ObjectManager.Target.Position;
+                    targetPosition.Z += 1.5f;
+
+                    if (XMemory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
+                    {
+                        // run the los check if we have a target
+                        XMemory.Write(GameInfoExecuteLosCheckAddress, 1);
+                    }
+                }
 
                 // run the gameinfo update
                 XMemory.Write(GameInfoExecuteAddress, 1);
@@ -1485,7 +1488,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 if (XMemory.Read(GameInfoAddress, out GameInfo gameInfo))
                 {
                     OnGameInfoPush?.Invoke(gameInfo);
-                    // AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update: {JsonConvert.SerializeObject(gameInfo)}");
+                    AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update: {JsonConvert.SerializeObject(gameInfo)}");
                 }
 
                 XMemory.Write(GameInfoExecutedAddress, 0);
@@ -1494,32 +1497,6 @@ namespace AmeisenBotX.Wow335a.Hook
                 {
                     module.OnDataUpdate?.Invoke(module.GetDataPointer());
                 }
-
-                //// process events
-                //if (XMemory.ReadString(MEventHook.GetDataPointer(), Encoding.UTF8, out string s, 8192))
-                //{
-                //    OnEventPush?.Invoke(s);
-                //}
-                //
-                //// process static popups
-                //if (XMemory.ReadString(MStaticPopups.GetDataPointer(), Encoding.UTF8, out string staticPopupData, 256))
-                //{
-                //    foreach (string d in staticPopupData.Split(";", StringSplitOptions.RemoveEmptyEntries))
-                //    {
-                //        string[] x = d.Split(":");
-                //        OnStaticPopupsPush?.Invoke(int.Parse(x[0]), x[1]);
-                //    }
-                //}
-                //
-                //// process battleground status
-                //if (XMemory.ReadString(MBattlegroundStatus.GetDataPointer(), Encoding.UTF8, out string battlegroundStatusData, 256))
-                //{
-                //    foreach (string d in battlegroundStatusData.Split(";", StringSplitOptions.RemoveEmptyEntries))
-                //    {
-                //        string[] x = d.Split(":");
-                //        OnBattlegroundStatusPush?.Invoke(int.Parse(x[0]), x[1], x[0]);
-                //    }
-                //}
             }
         }
 

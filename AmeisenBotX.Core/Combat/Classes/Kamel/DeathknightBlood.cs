@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public void Execute()
         {
-            ulong targetGuid = Bot.Objects.Target.Guid;
+            ulong targetGuid = Bot.Wow.TargetGuid;
             WowUnit target = Bot.Objects.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
             if (target != null)
             {

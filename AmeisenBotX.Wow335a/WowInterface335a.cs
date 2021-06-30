@@ -23,8 +23,10 @@ namespace AmeisenBotX.Wow335a
         {
             HookModules = hookModules;
 
-            Hook = new(xMemory, offsetList);
             ObjectManager = new(xMemory, offsetList);
+            Hook = new(xMemory, offsetList, ObjectManager);
+
+            Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
         public ulong HookCallCount => Hook.HookCallCount;
