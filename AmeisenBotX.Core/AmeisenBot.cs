@@ -256,6 +256,8 @@ namespace AmeisenBotX.Core
 
         public IEnumerable<IBattlegroundEngine> BattlegroundEngines { get; private set; }
 
+        public AmeisenBotInterfaces Bot { get; set; }
+
         public IEnumerable<ICombatClass> CombatClasses { get; private set; }
 
         public AmeisenBotConfig Config { get; set; }
@@ -289,8 +291,6 @@ namespace AmeisenBotX.Core
         public TimegatedEvent RconScreenshotEvent { get; }
 
         public AmeisenBotFsm StateMachine { get; set; }
-
-        public AmeisenBotInterfaces Bot { get; set; }
 
         private TimegatedEvent BagUpdateEvent { get; set; }
 

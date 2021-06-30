@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool AutopilotOnly => false;
 
+        public AmeisenBotInterfaces Bot { get; }
+
         public List<string> Emotes { get; }
 
         public List<string> EmotesWithInteraction { get; }
@@ -50,8 +52,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public int MinCooldown => 8 * 60 * 1000;
 
         public int MinDuration => 0;
-
-        public AmeisenBotInterfaces Bot { get; }
 
         private Random Rnd { get; }
 

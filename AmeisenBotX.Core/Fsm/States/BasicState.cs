@@ -14,11 +14,11 @@ namespace AmeisenBotX.Core.Fsm.States
             Bot = bot;
         }
 
+        internal AmeisenBotInterfaces Bot { get; }
+
         internal AmeisenBotConfig Config { get; }
 
         internal AmeisenBotFsm StateMachine { get; }
-
-        internal AmeisenBotInterfaces Bot { get; }
 
         ///<inheritdoc cref="IState.Enter"/>
         public abstract void Enter();

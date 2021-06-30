@@ -25,13 +25,12 @@ namespace AmeisenBotX.Wow335a
 
             ObjectManager = new(xMemory, offsetList);
             Hook = new(xMemory, offsetList, ObjectManager);
-
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
         public ulong HookCallCount => Hook.HookCallCount;
 
-        public bool IsWoWHooked => Hook.IsWoWHooked;
+        public bool IsReady => Hook.IsWoWHooked;
 
         public IObjectProvider Objects => ObjectManager;
 
@@ -43,11 +42,9 @@ namespace AmeisenBotX.Wow335a
 
         private ObjectManager ObjectManager { get; }
 
-        public void BotOverrideWorldLoadedCheck(bool enabled) => Hook.BotOverrideWorldLoadedCheck(enabled);
-
-        public bool Dispose()
+        public void Dispose()
         {
-            return true;
+            Hook.Unhook();
         }
 
         public void LuaAbandonQuestsNotIn(IEnumerable<string> quests) => Hook.LuaAbandonQuestsNotIn(quests);
@@ -104,7 +101,7 @@ namespace AmeisenBotX.Wow335a
 
         public string LuaGetLootRollItemLink(int rollId) => Hook.LuaGetLootRollItemLink(rollId);
 
-        public ReadOnlySpan<char> LuaGetMoney() => Hook.LuaGetMoney();
+        public string LuaGetMoney() => Hook.LuaGetMoney();
 
         public string LuaGetMounts() => Hook.LuaGetMounts();
 
@@ -174,6 +171,8 @@ namespace AmeisenBotX.Wow335a
         {
             return Hook.Hook(7, HookModules);
         }
+
+        public void SetWorldLoadedCheck(bool enabled) => Hook.BotOverrideWorldLoadedCheck(enabled);
 
         public void Tick()
         {

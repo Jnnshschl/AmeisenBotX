@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            if (!Bot.Wow.IsWoWHooked)
+            if (!Bot.Wow.IsReady)
             {
                 if (!Bot.Wow.Setup())
                 {
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 }
             }
 
-            Bot.Wow.BotOverrideWorldLoadedCheck(true);
+            Bot.Wow.SetWorldLoadedCheck(true);
         }
 
         public override void Execute()
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else
             {
-                Bot.Wow.BotOverrideWorldLoadedCheck(false);
+                Bot.Wow.SetWorldLoadedCheck(false);
                 StateMachine.SetState(BotState.Idle);
             }
         }

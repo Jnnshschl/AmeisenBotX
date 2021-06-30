@@ -71,9 +71,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Quests
 
         public bool Returned { get; set; }
 
-        private bool CheckedIfAccepted { get; set; } = false;
-
         private AmeisenBotInterfaces Bot { get; }
+
+        private bool CheckedIfAccepted { get; set; } = false;
 
         public void AcceptQuest()
         {

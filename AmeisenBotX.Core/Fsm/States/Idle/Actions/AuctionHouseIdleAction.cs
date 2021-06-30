@@ -28,6 +28,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         private DateTime AuctioneerTalkTime { get; set; }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private Vector3 CurrentAuctioneer { get; set; }
 
         private Vector3 OriginPosition { get; set; }
@@ -37,8 +39,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         private Random Rnd { get; }
 
         private bool TalkedToAuctioneer { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public bool Enter()
         {

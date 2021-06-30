@@ -12,9 +12,9 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
 {
     public class PaladinProtection : ICombatClass
     {
+        private readonly AmeisenBotInterfaces Bot;
         private readonly string[] runningEmotes = { "/question", "/talk" };
         private readonly string[] standingEmotes = { "/bow" };
-        private readonly AmeisenBotInterfaces Bot;
         private bool computeNewRoute = false;
         private double distanceToTarget = 0;
         private bool multipleTargets = false;

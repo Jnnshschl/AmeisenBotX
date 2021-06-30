@@ -23,11 +23,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => 100.0 * (Bot.Player.Level + Bot.Player.XpPercentage / 100.0) / WantedLevel;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private SearchAreaEnsamble SearchAreas { get; }
 
         private int WantedLevel { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 

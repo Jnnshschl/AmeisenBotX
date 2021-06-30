@@ -16,6 +16,8 @@ namespace AmeisenBotX.Core.Utils
             CallPetEvent = new(TimeSpan.FromSeconds(8));
         }
 
+        public AmeisenBotInterfaces Bot { get; set; }
+
         public Func<bool> CastCallPet { get; set; }
 
         public Func<bool> CastMendPet { get; set; }
@@ -25,8 +27,6 @@ namespace AmeisenBotX.Core.Utils
         public TimeSpan HealPetCooldown { get; set; }
 
         public DateTime LastMendPetUsed { get; private set; }
-
-        public AmeisenBotInterfaces Bot { get; set; }
 
         private TimegatedEvent CallPetEvent { get; }
 

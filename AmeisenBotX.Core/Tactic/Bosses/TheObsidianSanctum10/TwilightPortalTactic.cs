@@ -24,11 +24,11 @@ namespace AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon
 
         private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private WowGameobject NearestPortal => Bot.Objects.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(Bot.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {

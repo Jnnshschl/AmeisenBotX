@@ -33,6 +33,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private UseObjectQuestObjectiveCondition Condition { get; }
 
         private List<int> ObjectDisplayIds { get; }
@@ -40,8 +42,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private TimegatedEvent UseEvent { get; }
 
         private WowGameobject WowGameobject { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

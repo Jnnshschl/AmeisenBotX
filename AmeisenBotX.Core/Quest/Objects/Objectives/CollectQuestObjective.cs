@@ -38,6 +38,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             }
         }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private int CurrentItemAmount => Bot.Character.Inventory.Items.Count(e => e.Id == ItemId);
 
         private List<int> GameObjectIds { get; }
@@ -47,8 +49,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private TimegatedEvent RightClickEvent { get; }
 
         private int WantedItemAmount { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

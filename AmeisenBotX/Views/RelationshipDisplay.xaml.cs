@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Objects;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,11 +22,11 @@ namespace AmeisenBotX.Views
             InitializeComponent();
         }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private ulong Guid { get; }
 
         private int Relationship { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Update(ulong guid, int relationship)
         {

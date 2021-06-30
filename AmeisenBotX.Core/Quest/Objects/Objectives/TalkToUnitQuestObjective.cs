@@ -35,6 +35,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private TalkToUnitQuestObjectiveCondition Condition { get; }
 
         private int Counter { get; set; }
@@ -44,8 +46,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private List<int> GossipIds { get; }
 
         private TimegatedEvent TalkEvent { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 

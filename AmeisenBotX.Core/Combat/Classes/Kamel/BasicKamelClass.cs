@@ -98,6 +98,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
+        public AmeisenBotInterfaces Bot { get; internal set; }
+
         public abstract Dictionary<string, dynamic> C { get; set; }
 
         public abstract string Description { get; }
@@ -131,8 +133,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         public abstract bool WalkBehindEnemy { get; }
 
         public abstract WowClass WowClass { get; }
-
-        public AmeisenBotInterfaces Bot { get; internal set; }
 
         //follow the target
         public void AttackTarget()

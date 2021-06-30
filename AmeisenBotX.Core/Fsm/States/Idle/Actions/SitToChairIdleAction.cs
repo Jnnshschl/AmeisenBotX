@@ -17,6 +17,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool AutopilotOnly => false;
 
+        public AmeisenBotInterfaces Bot { get; }
+
         public int MaxCooldown => 16 * 1000;
 
         public int MaxDuration => 90 * 1000;
@@ -24,8 +26,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public int MinCooldown => 6 * 1000;
 
         public int MinDuration => 25 * 1000;
-
-        public AmeisenBotInterfaces Bot { get; }
 
         private WowGameobject CurrentSeat { get; set; }
 

@@ -128,19 +128,6 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private XMemory XMemory { get; }
 
-        ///<inheritdoc cref="IObjectProvider.RefreshIsWorldLoaded"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool RefreshIsWorldLoaded()
-        {
-            if (XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
-            {
-                IsWorldLoaded = isWorldLoaded == 1;
-                return IsWorldLoaded;
-            }
-
-            return false;
-        }
-
         /// <summary>
         /// Process the pushed game info that we receive from the EndScene hook.
         /// </summary>
@@ -153,6 +140,19 @@ namespace AmeisenBotX.Wow335a.Objects
             }
 
             IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
+        }
+
+        ///<inheritdoc cref="IObjectProvider.RefreshIsWorldLoaded"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool RefreshIsWorldLoaded()
+        {
+            if (XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            {
+                IsWorldLoaded = isWorldLoaded == 1;
+                return IsWorldLoaded;
+            }
+
+            return false;
         }
 
         ///<inheritdoc cref="IObjectProvider.UpdateWowObjects"/>

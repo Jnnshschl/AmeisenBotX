@@ -7,7 +7,6 @@ using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -260,6 +259,20 @@ namespace AmeisenBotX.Wow.Cache
             }
         }
 
+        public string GetSpellName(int spellId)
+        {
+            if (SpellNames.ContainsKey(spellId))
+            {
+                return SpellNames[spellId];
+            }
+            else
+            {
+                string name = GetSpellnameFunc(spellId);
+                CacheSpellName(spellId, name);
+                return name;
+            }
+        }
+
         public bool GetUnitName(WowUnit unit, out string name)
         {
             if (Names.ContainsKey(unit.Guid))
@@ -317,20 +330,6 @@ namespace AmeisenBotX.Wow.Cache
 
             nodes = null;
             return false;
-        }
-
-        public string GetSpellName(int spellId)
-        {
-            if (SpellNames.ContainsKey(spellId))
-            {
-                return SpellNames[spellId];
-            }
-            else
-            {
-                string name = GetSpellnameFunc(spellId);
-                CacheSpellName(spellId, name);
-                return name;
-            }
         }
 
         private void CleanupTimerTick(object state)

@@ -18,11 +18,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private UseItemQuestObjectiveCondition Condition { get; }
 
         private int ItemId { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

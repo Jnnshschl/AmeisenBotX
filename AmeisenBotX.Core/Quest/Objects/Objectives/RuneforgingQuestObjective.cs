@@ -20,11 +20,11 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private EnchantItemQuestObjectiveCondition Condition { get; }
 
         private TimegatedEvent EnchantEvent { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

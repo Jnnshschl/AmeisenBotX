@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Event
 
                 IsActive = false;
 
-                if (Wow.IsWoWHooked)
+                if (Wow.IsReady)
                 {
                     Wow.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
                 }

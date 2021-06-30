@@ -17,13 +17,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => WantedPosition.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private double Distance { get; }
 
         private MovementAction MovementAction { get; }
 
         private Vector3 WantedPosition { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

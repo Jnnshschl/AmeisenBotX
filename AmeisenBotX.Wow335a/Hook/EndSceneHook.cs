@@ -38,8 +38,6 @@ namespace AmeisenBotX.Wow335a.Hook
 
         public event Action<GameInfo> OnGameInfoPush;
 
-        private ObjectManager ObjectManager { get; }
-
         public ulong HookCallCount
         {
             get
@@ -117,6 +115,8 @@ namespace AmeisenBotX.Wow335a.Hook
         /// code to be executed. Will be set to 0 when done.
         /// </summary>
         private IntPtr IntShouldExecute { get; set; }
+
+        private ObjectManager ObjectManager { get; }
 
         private IOffsetList OffsetList { get; }
 

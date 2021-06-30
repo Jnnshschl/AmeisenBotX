@@ -21,6 +21,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool AutopilotOnly => true;
 
+        public AmeisenBotInterfaces Bot { get; }
+
         public DateTime CooldownStart { get; set; }
 
         public Vector3 CurrentSpot { get; set; }
@@ -40,8 +42,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public DateTime SpotSelected { get; set; }
 
         public bool Started { get; set; }
-
-        public AmeisenBotInterfaces Bot { get; }
 
         private Random Rnd { get; }
 

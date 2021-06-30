@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
 
         public Vector3 UnstuckTarget { get; private set; }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private AmeisenBotConfig Config { get; }
 
         private TimegatedEvent DistanceMovedCheckEvent { get; }
@@ -66,8 +68,6 @@ namespace AmeisenBotX.Core.Movement.AMovementEngine
         private TimegatedEvent RefreshPathEvent { get; }
 
         private bool TriedToMountUp { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void AvoidPlace(Vector3 position, float radius, TimeSpan timeSpan)
         {

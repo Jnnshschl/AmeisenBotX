@@ -39,6 +39,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             new(1166, 1203, -56)    // Stable
         };
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private TimegatedEvent CaptureFlagEvent { get; }
 
         private TimegatedEvent CombatEvent { get; }
@@ -48,8 +50,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         private bool faction { get; set; }
 
         private string FactionFlagState { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Combat()
         {

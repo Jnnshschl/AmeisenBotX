@@ -58,11 +58,11 @@ namespace AmeisenBotX.Core.Character
 
         public TalentManager TalentManager { get; }
 
-        private XMemory XMemory { get; }
+        private IOffsetList Offsets { get; }
 
         private IWowInterface Wow { get; }
 
-        private IOffsetList Offsets { get; }
+        private XMemory XMemory { get; }
 
         public void AntiAfk()
         {

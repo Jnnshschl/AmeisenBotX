@@ -29,6 +29,8 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
 
         private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private Vector3 ImpaleDodgePos { get; set; }
 
         private bool LocustSwarmActive => (LocustSwarmActivated + TimeSpan.FromSeconds(20)) > DateTime.UtcNow;
@@ -70,8 +72,6 @@ namespace AmeisenBotX.Core.Tactic.Bosses.Naxxramas10
         private Vector3 TankingSpotB { get; } = new Vector3(3222, -3464, 287);
 
         private bool TankIsKiting { get; set; } = false;
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {

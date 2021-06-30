@@ -27,13 +27,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private UseUnitQuestObjectiveCondition Condition { get; }
 
         private List<int> ObjectDisplayIds { get; }
 
         private bool QuestgiversOnly { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 

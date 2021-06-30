@@ -15,6 +15,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool AutopilotOnly => false;
 
+        public AmeisenBotInterfaces Bot { get; }
+
         public int MaxCooldown => 11 * 1000;
 
         public int MaxDuration => 0;
@@ -22,8 +24,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public int MinCooldown => 5 * 1000;
 
         public int MinDuration => 0;
-
-        public AmeisenBotInterfaces Bot { get; }
 
         private IEnumerable<WowUnit> NearPartymembers { get; set; }
 

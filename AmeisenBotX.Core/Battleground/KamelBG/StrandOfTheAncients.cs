@@ -20,6 +20,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 
         public string Author => "Lukas";
 
+        public AmeisenBotInterfaces Bot { get; }
+
         public string Description => "Strand of the Ancients";
 
         public string Name => "Strand of the Ancients";
@@ -28,8 +30,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             new(1403, 69, 30)
         };
-
-        public AmeisenBotInterfaces Bot { get; }
 
         private TimegatedEvent CombatEvent { get; }
 

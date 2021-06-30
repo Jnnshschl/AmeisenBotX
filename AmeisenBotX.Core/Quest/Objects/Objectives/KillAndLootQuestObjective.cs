@@ -57,6 +57,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             }
         }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private int CollectOrKillAmount { get; }
 
         private bool CollectQuestItem => QuestItemId > 0;
@@ -72,8 +74,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private int QuestItemId { get; }
 
         private SearchAreaEnsamble SearchAreas { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 

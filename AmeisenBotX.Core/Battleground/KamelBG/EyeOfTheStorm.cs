@@ -38,6 +38,8 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             new Vector3(2176, 1570, 1159)//Flag
         };
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private TimegatedEvent CaptureFlagEvent { get; }
 
         private TimegatedEvent CombatEvent { get; }
@@ -45,8 +47,6 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         private int CurrentNodeCounter { get; set; }
 
         private string factionFlagState { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Combat()
         {

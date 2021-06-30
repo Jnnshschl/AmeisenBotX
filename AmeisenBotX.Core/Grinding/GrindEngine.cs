@@ -35,6 +35,8 @@ namespace AmeisenBotX.Core.Grinding
 
         private int BlacklistCounter { get; set; }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private AmeisenBotConfig Config { get; }
 
         private int CurrentSpotIndex { get; set; }
@@ -48,8 +50,6 @@ namespace AmeisenBotX.Core.Grinding
         private bool TargetInLos { get; set; }
 
         private TimegatedEvent TargetInLosEvent { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

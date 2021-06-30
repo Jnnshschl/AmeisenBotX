@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 
         public IEnumerable<int> BlacklistedTargets { get; set; }
 
-        public IEnumerable<int> PriorityTargets { get; set; }
-
         public AmeisenBotInterfaces Bot { get; }
+
+        public IEnumerable<int> PriorityTargets { get; set; }
 
         public void Reset()
         {

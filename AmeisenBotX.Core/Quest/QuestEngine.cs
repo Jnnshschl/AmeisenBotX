@@ -29,6 +29,8 @@ namespace AmeisenBotX.Core.Quest
 
         public bool UpdatedCompletedQuests { get; set; }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private AmeisenBotConfig Config { get; }
 
         private DateTime LastAbandonQuestTime { get; set; } = DateTime.UtcNow;
@@ -36,8 +38,6 @@ namespace AmeisenBotX.Core.Quest
         private TimegatedEvent QueryCompletedQuestsEvent { get; }
 
         private AmeisenBotFsm StateMachine { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

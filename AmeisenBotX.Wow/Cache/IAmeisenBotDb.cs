@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -44,6 +43,8 @@ namespace AmeisenBotX.Wow.Cache
 
         WowUnitReaction GetReaction(WowUnit a, WowUnit b);
 
+        string GetSpellName(int spellId);
+
         bool GetUnitName(WowUnit unit, out string name);
 
         void Save(string dbFile);
@@ -51,7 +52,5 @@ namespace AmeisenBotX.Wow.Cache
         bool TryGetBlacklistPosition(int mapId, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes);
 
         bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes);
-
-        string GetSpellName(int spellId);
     }
 }

@@ -27,6 +27,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 2 * 60 * 1000;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private bool CheckedMails { get; set; }
 
         private Vector3 CurrentMailbox { get; set; }
@@ -38,8 +40,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         private bool ReturnedToOrigin { get; set; }
 
         private Random Rnd { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public bool Enter()
         {

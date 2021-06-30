@@ -499,9 +499,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
         public abstract WowClass WowClass { get; }
 
-        protected DateTime LastSpellCast { get; private set; }
-
         protected AmeisenBotInterfaces Bot { get; }
+
+        protected DateTime LastSpellCast { get; private set; }
 
         private AmeisenBotFsm StateMachine { get; }
 

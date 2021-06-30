@@ -40,6 +40,8 @@ namespace AmeisenBotX.Core.Jobs
 
         private TimegatedEvent BlacklistEvent { get; }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private bool CheckForPathRecovering { get; set; }
 
         private int CurrentNodeCounter { get; set; }
@@ -55,8 +57,6 @@ namespace AmeisenBotX.Core.Jobs
         private Vector3 SelectedPosition { get; set; }
 
         private int SellActionsNeeded { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Enter()
         {

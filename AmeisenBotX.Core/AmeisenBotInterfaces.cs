@@ -19,7 +19,6 @@ using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Combatlog;
 using AmeisenBotX.Wow.Objects;
-using System.Diagnostics;
 
 namespace AmeisenBotX.Core
 {
@@ -49,11 +48,11 @@ namespace AmeisenBotX.Core
 
         public WowUnit LastTarget => Objects.LastTarget;
 
+        public XMemory Memory { get; set; }
+
         public IMovementEngine Movement { get; set; }
 
         public MovementSettings MovementSettings { get; set; }
-
-        public IWowInterface Wow { get; set; }
 
         public IObjectProvider Objects => Wow.Objects;
 
@@ -73,6 +72,6 @@ namespace AmeisenBotX.Core
 
         public WowUnit Target => Objects.Target;
 
-        public XMemory Memory { get; set; }
+        public IWowInterface Wow { get; set; }
     }
 }

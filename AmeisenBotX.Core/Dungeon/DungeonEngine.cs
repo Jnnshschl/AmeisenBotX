@@ -86,6 +86,8 @@ namespace AmeisenBotX.Core.Dungeon
 
         private AmeisenBotBehaviorTree BehaviorTree { get; }
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private Queue<DungeonNode> CurrentNodes { get; set; }
 
         private Vector3 DeathPosition { get; set; }
@@ -101,8 +103,6 @@ namespace AmeisenBotX.Core.Dungeon
         private double Progress { get; set; }
 
         private Selector RootSelector { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         ///<inheritdoc cref="IDungeonEngine.Enter"/>
         public void Enter()

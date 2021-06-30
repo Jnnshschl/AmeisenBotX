@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -201,10 +200,42 @@ namespace AmeisenBotX.Core.Data.Objects
             return unit != null && !unit.IsNotAttackable;
         }
 
+        public IEnumerable<RawWowAura> GetUnitAuras(XMemory xMemory, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
+        {
+            if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
+            {
+                if (auraCount1 == -1)
+                {
+                    if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount2), out int auraCount2)
+                        && auraCount2 > 0
+                        && xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraTable2), out IntPtr auraTable))
+                    {
+                        auraCount = auraCount2;
+                        return ReadAuraTable(xMemory, auraTable, auraCount2);
+                    }
+                    else
+                    {
+                        auraCount = 0;
+                    }
+                }
+                else
+                {
+                    auraCount = auraCount1;
+                    return ReadAuraTable(xMemory, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
+                }
+            }
+            else
+            {
+                auraCount = 0;
+            }
+
+            return Array.Empty<RawWowAura>();
+        }
+
         public bool HasBuffById(int spellId)
         {
             return Auras != null && Auras.Any(e => e.SpellId == spellId);
-        }        
+        }
 
         public bool IsInMeleeRange(WowUnit wowUnit)
         {
@@ -293,38 +324,6 @@ namespace AmeisenBotX.Core.Data.Objects
             {
                 CurrentlyChannelingSpellId = channelingId;
             }
-        }
-
-        public IEnumerable<RawWowAura> GetUnitAuras(XMemory xMemory, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
-        {
-            if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
-            {
-                if (auraCount1 == -1)
-                {
-                    if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount2), out int auraCount2)
-                        && auraCount2 > 0
-                        && xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraTable2), out IntPtr auraTable))
-                    {
-                        auraCount = auraCount2;
-                        return ReadAuraTable(xMemory, auraTable, auraCount2);
-                    }
-                    else
-                    {
-                        auraCount = 0;
-                    }
-                }
-                else
-                {
-                    auraCount = auraCount1;
-                    return ReadAuraTable(xMemory, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
-                }
-            }
-            else
-            {
-                auraCount = 0;
-            }
-
-            return Array.Empty<RawWowAura>();
         }
 
         private unsafe IEnumerable<RawWowAura> ReadAuraTable(XMemory xMemory, IntPtr buffBase, int auraCount)

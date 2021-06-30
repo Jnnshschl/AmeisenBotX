@@ -18,6 +18,8 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Bot.Objects.Vehicle != null && WantedPosition.GetDistance(Bot.Objects.Vehicle.Position) < Distance ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private double Distance { get; }
 
         private bool ForceDirectMove { get; }
@@ -25,8 +27,6 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
         private MovementAction MovementAction { get; }
 
         private Vector3 WantedPosition { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

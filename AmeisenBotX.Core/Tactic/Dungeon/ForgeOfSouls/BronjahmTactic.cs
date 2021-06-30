@@ -22,9 +22,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls
 
         public static Vector3 MidPosition { get; } = new Vector3(5297, 2506, 686);
 
-        public Dictionary<string, dynamic> Configureables { get; private set; }
-
         public AmeisenBotInterfaces Bot { get; }
+
+        public Dictionary<string, dynamic> Configureables { get; private set; }
 
         private static List<int> BronjahmDisplayId { get; } = new List<int> { 30226 };
 

@@ -24,13 +24,13 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => WowGameobject != null && WowGameobject.Position.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private double Distance { get; }
 
         private List<int> ObjectDisplayIds { get; }
 
         private WowGameobject WowGameobject { get; set; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

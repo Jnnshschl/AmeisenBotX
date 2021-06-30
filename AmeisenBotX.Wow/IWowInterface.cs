@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -13,15 +12,52 @@ namespace AmeisenBotX.Wow
     /// </summary>
     public interface IWowInterface
     {
+        /// <summary>
+        /// Used for the HookCall display in the bots main window.
+        /// Use this to display cost intensive calls to the user.
+        /// The name Hookcall originates from EndScene hook calls.
+        /// </summary>
         ulong HookCallCount { get; }
 
-        bool IsWoWHooked { get; }
+        /// <summary>
+        /// Get the status of the wow interface, true if its useable, false if not.
+        /// </summary>
+        bool IsReady { get; }
 
+        /// <summary>
+        /// Shortcut to get the last targets guid.
+        /// </summary>
+        public ulong LastTargetGuid => Objects.LastTarget != null ? Objects.LastTarget.Guid : 0ul;
+
+        /// <summary>
+        /// Use this to interact with wow's objects, units, players and more.
+        /// </summary>
         IObjectProvider Objects { get; }
 
-        void BotOverrideWorldLoadedCheck(bool enabled);
+        /// <summary>
+        /// Shortcut to get the current partyleaders guid.
+        /// </summary>
+        public ulong PartyleaderGuid => Objects.Partyleader != null ? Objects.Partyleader.Guid : 0ul;
 
-        bool Dispose();
+        /// <summary>
+        /// Shortcut to get the current pets guid.
+        /// </summary>
+        public ulong PetGuid => Objects.Pet != null ? Objects.Pet.Guid : 0ul;
+
+        /// <summary>
+        /// Shortcut to get the current players guid.
+        /// </summary>
+        public ulong PlayerGuid => Objects.Player != null ? Objects.Player.Guid : 0ul;
+
+        /// <summary>
+        /// Shortcut to get the current targets guid.
+        /// </summary>
+        public ulong TargetGuid => Objects.Target != null ? Objects.Target.Guid : 0ul;
+
+        /// <summary>
+        /// Dispose the wow interface making it realese and unhook all resources.
+        /// </summary>
+        void Dispose();
 
         void LuaAbandonQuestsNotIn(IEnumerable<string> enumerable);
 
@@ -45,11 +81,11 @@ namespace AmeisenBotX.Wow
 
         void LuaCastSpellById(int spellId);
 
-        void LuaClickUiElement(string v);
+        void LuaClickUiElement(string elementName);
 
         void LuaCofirmLootRoll();
 
-        void LuaCofirmReadyCheck(bool v);
+        void LuaCofirmReadyCheck(bool isReady);
 
         void LuaCofirmStaticPopup();
 
@@ -59,7 +95,7 @@ namespace AmeisenBotX.Wow
 
         void LuaDismissCompanion();
 
-        bool LuaDoString(string v);
+        bool LuaDoString(string lua);
 
         void LuaEquipItem(string itemName, int slot = -1);
 
@@ -77,7 +113,7 @@ namespace AmeisenBotX.Wow
 
         string LuaGetLootRollItemLink(int rollId);
 
-        ReadOnlySpan<char> LuaGetMoney();
+        string LuaGetMoney();
 
         string LuaGetMounts();
 
@@ -121,13 +157,13 @@ namespace AmeisenBotX.Wow
 
         void LuaRollOnLoot(int rollId, WowRollType need);
 
-        void LuaSelectGossipOption(int v);
+        void LuaSelectGossipOption(int i);
 
-        void LuaSelectQuestByNameOrGossipId(string name, int gossipId, bool v);
+        void LuaSelectQuestByNameOrGossipId(string name, int gossipId, bool isAvailable);
 
         void LuaSelectQuestLogEntry(int questLogId);
 
-        void LuaSendChatMessage(string v);
+        void LuaSendChatMessage(string msg);
 
         void LuaSetLfgRole(WowRole wowRole);
 
@@ -135,7 +171,7 @@ namespace AmeisenBotX.Wow
 
         void LuaStartAutoAttack();
 
-        bool LuaUiIsVisible(params string[] v);
+        bool LuaUiIsVisible(params string[] elementName);
 
         void LuaUseContainerItem(int bagId, int bagSlot);
 
@@ -143,8 +179,25 @@ namespace AmeisenBotX.Wow
 
         void LuaUseItemByName(string name);
 
+        /// <summary>
+        /// Init the wow interface.
+        /// </summary>
+        /// <returns>True if everything went well, false if not</returns>
         bool Setup();
 
+        /// <summary>
+        /// Use this to diable the is world loaded check that is used to
+        /// prevent the execution of assembly code during loading screens.
+        /// Used to disable the check in the login process as the world
+        /// is not loaded in the main menu.
+        /// </summary>
+        /// <param name="enabled">Status of the check (true = on | false = off)</param>
+        void SetWorldLoadedCheck(bool enabled);
+
+        /// <summary>
+        /// Poll this on a regular basis to keep the stuff up to date.
+        /// Updates objects, gameinfo and more.
+        /// </summary>
         void Tick();
 
         void WowClearTarget();
@@ -153,7 +206,7 @@ namespace AmeisenBotX.Wow
 
         void WowEnableClickToMove();
 
-        bool WowExecuteLuaAndRead((string, string) p, out string result);
+        bool WowExecuteLuaAndRead((string, string) commandVariableCombo, out string result);
 
         void WowFacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position);
 
@@ -163,7 +216,7 @@ namespace AmeisenBotX.Wow
 
         bool WowIsClickToMoveActive();
 
-        bool WowIsInLineOfSight(Vector3 position1, Vector3 position2, float heightAdjust = 1.5f);
+        bool WowIsInLineOfSight(Vector3 a, Vector3 b, float heightAdjust = 1.5f);
 
         bool WowIsRuneReady(int id);
 
@@ -180,13 +233,5 @@ namespace AmeisenBotX.Wow
         void WowTargetGuid(ulong guid);
 
         void WowUnitRightClick(IntPtr unitBase);
-
-        public ulong PlayerGuid => Objects.Player != null ? Objects.Player.Guid : 0ul;
-
-        public ulong TargetGuid => Objects.Target != null ? Objects.Target.Guid : 0ul;
-
-        public ulong PetGuid => Objects.Pet != null ? Objects.Pet.Guid : 0ul;
-
-        public ulong PartyleaderGuid => Objects.Partyleader != null ? Objects.Partyleader.Guid : 0ul;
     }
 }

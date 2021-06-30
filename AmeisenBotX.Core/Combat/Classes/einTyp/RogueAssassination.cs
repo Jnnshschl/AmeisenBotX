@@ -12,10 +12,10 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
 {
     public class RogueAssassination : ICombatClass
     {
+        private readonly AmeisenBotInterfaces Bot;
         private readonly bool hasTargetMoved = false;
         private readonly RogueAssassinSpells spells;
         private readonly string[] standingEmotes = { "/bored" };
-        private readonly AmeisenBotInterfaces Bot;
         private bool computeNewRoute = false;
 
         private double distanceToBehindTarget = 0;
@@ -383,6 +383,8 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
             private static readonly string ThrowAttack = "Throw";
             private static readonly string Vanish = "Vanish";
 
+            private readonly AmeisenBotInterfaces Bot;
+
             private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
             {
                 { Garrote, DateTime.Now },
@@ -403,7 +405,6 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
                 { Kick, DateTime.Now }
             };
 
-            private readonly AmeisenBotInterfaces Bot;
             private bool askedForHeal = false;
 
             private bool askedForHelp = false;

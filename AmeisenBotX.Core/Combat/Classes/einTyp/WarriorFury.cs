@@ -12,10 +12,10 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
 {
     public class WarriorFury : ICombatClass
     {
+        private readonly AmeisenBotInterfaces Bot;
         private readonly string[] runningEmotes = { "/train", "/cackle", "/silly" };
         private readonly WarriorFurySpells spells;
         private readonly string[] standingEmotes = { "/shimmy", "/dance", "/twiddle", "/highfive" };
-        private readonly AmeisenBotInterfaces Bot;
         private bool computeNewRoute = false;
         private double distanceToTarget = 0;
 
@@ -340,6 +340,8 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
             private static readonly string Slam = "Slam";
             private static readonly string Whirlwind = "Whirlwind";
 
+            private readonly AmeisenBotInterfaces Bot;
+
             private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
             {
                 { BattleShout, DateTime.Now },
@@ -362,7 +364,6 @@ namespace AmeisenBotX.Core.Combat.Classes.einTyp
                 { HeroicStrike, DateTime.Now }
             };
 
-            private readonly AmeisenBotInterfaces Bot;
             private bool askedForHeal = false;
             private bool askedForHelp = false;
 

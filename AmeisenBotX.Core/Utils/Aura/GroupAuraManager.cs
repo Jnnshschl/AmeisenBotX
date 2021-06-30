@@ -23,9 +23,9 @@ namespace AmeisenBotX.Core.Utils.Aura
 
         public List<(string, CastSpellOnUnit)> SpellsToKeepActiveOnParty { get; private set; }
 
-        private Dictionary<ulong, TimegatedEvent> LastBuffed { get; }
-
         private AmeisenBotInterfaces Bot { get; }
+
+        private Dictionary<ulong, TimegatedEvent> LastBuffed { get; }
 
         public bool Tick()
         {

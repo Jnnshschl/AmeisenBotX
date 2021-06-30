@@ -25,11 +25,11 @@ namespace AmeisenBotX.Core.Quest.Units.Unitives
 
         public double Progress => WowUnit != null && WowUnit.Position.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private double Distance { get; }
 
         private List<int> UnitDisplayIds { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 

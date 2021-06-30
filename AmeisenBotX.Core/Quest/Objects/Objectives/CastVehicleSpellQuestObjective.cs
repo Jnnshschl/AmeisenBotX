@@ -15,11 +15,11 @@
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
+        private AmeisenBotInterfaces Bot { get; }
+
         private CastVehicleSpellQuestObjectiveCondition Condition { get; }
 
         private int SpellId { get; }
-
-        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {

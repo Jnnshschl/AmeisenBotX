@@ -29,9 +29,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
         private static List<int> IckDisplayId { get; } = new List<int> { 30347 };
 
-        private bool ChasingActive => (ChasingActivated + TimeSpan.FromSeconds(14)) > DateTime.UtcNow;
-
         private AmeisenBotInterfaces Bot { get; }
+
+        private bool ChasingActive => (ChasingActivated + TimeSpan.FromSeconds(14)) > DateTime.UtcNow;
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {

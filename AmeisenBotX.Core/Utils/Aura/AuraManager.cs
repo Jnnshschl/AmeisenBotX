@@ -12,9 +12,9 @@ namespace AmeisenBotX.Core.Utils.Aura
             Jobs = new();
         }
 
-        public List<IAuraJob> Jobs { get; set; }
-
         public AmeisenBotInterfaces Bot { get; }
+
+        public List<IAuraJob> Jobs { get; set; }
 
         public bool Tick(IEnumerable<RawWowAura> auras)
         {
