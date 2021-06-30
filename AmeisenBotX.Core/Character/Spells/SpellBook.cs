@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Spells.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,9 @@ namespace AmeisenBotX.Core.Character.Spells
 {
     public class SpellBook
     {
-        public SpellBook(AmeisenBotInterfaces bot)
+        public SpellBook(IWowInterface wowInterface)
         {
-            Bot = bot;
+            Wow = wowInterface;
 
             Spells = new();
 
@@ -30,7 +31,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public List<Spell> Spells { get; private set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private IWowInterface Wow { get; }
 
         public Spell GetSpellByName(string spellname)
         {
@@ -44,7 +45,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
-            string rawSpells = Bot.Wow.LuaGetSpells();
+            string rawSpells = Wow.LuaGetSpells();
 
             try
             {

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Character.Talents.Objects;
+using AmeisenBotX.Wow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,14 @@ namespace AmeisenBotX.Core.Character.Talents
 {
     public class TalentManager
     {
-        public TalentManager(AmeisenBotInterfaces bot)
+        public TalentManager(IWowInterface wowInterface)
         {
-            Bot = bot;
+            Wow = wowInterface;
         }
 
         public TalentTree TalentTree { get; set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private IWowInterface Wow { get; }
 
         public void SelectTalents(TalentTree wantedTalents, int talentPoints)
         {
@@ -41,7 +42,7 @@ namespace AmeisenBotX.Core.Character.Talents
 
         public void Update()
         {
-            TalentTree = new(Bot.Wow.LuaGetTalents());
+            TalentTree = new(Wow.LuaGetTalents());
         }
 
         private static bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree, out List<(int, int, int)> talentsToSpend)
@@ -93,7 +94,7 @@ namespace AmeisenBotX.Core.Character.Talents
 
             sb.Append("LearnPreviewTalents();");
 
-            Bot.Wow.LuaDoString(sb.ToString());
+            Wow.LuaDoString(sb.ToString());
         }
     }
 }

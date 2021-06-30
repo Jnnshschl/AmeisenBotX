@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,9 @@ namespace AmeisenBotX.Core.Character.Inventory
         private readonly object queryLock = new();
         private List<IWowItem> items;
 
-        public CharacterInventory(AmeisenBotInterfaces bot)
+        public CharacterInventory(IWowInterface wowInterface)
         {
-            Bot = bot;
+            Wow = wowInterface;
             Items = new();
         }
 
@@ -39,7 +40,7 @@ namespace AmeisenBotX.Core.Character.Inventory
             }
         }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private IWowInterface Wow { get; }
 
         public void DestroyItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
         {
@@ -48,7 +49,7 @@ namespace AmeisenBotX.Core.Character.Inventory
                 return;
             }
 
-            Bot.Wow.LuaDeleteInventoryItemByName(name);
+            Wow.LuaDeleteInventoryItemByName(name);
         }
 
         public bool HasItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
@@ -58,8 +59,8 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            FreeBagSlots = Bot.Wow.LuaGetFreeBagSlotCount();
-            string resultJson = Bot.Wow.LuaGetInventoryItems();
+            FreeBagSlots = Wow.LuaGetFreeBagSlotCount();
+            string resultJson = Wow.LuaGetInventoryItems();
 
             try
             {

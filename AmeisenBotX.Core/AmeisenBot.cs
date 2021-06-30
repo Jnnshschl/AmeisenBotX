@@ -20,7 +20,6 @@ using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
 using AmeisenBotX.Core.Movement.AMovementEngine;
 using AmeisenBotX.Core.Movement.Pathfinding;
-using AmeisenBotX.Core.Offsets;
 using AmeisenBotX.Core.Quest.Profiles;
 using AmeisenBotX.Core.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
@@ -33,6 +32,7 @@ using AmeisenBotX.RconClient.Messages;
 using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
+using AmeisenBotX.Wow335a.Offsets;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -85,27 +85,16 @@ namespace AmeisenBotX.Core
             ExecutionMsStopwatch = new();
 
             Bot = new();
-
             Bot.Offsets = new OffsetList335a();
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Offsets.GetType()}", LogLevel.Master);
-
             Bot.Globals = new();
             Bot.Memory = new();
-
             Bot.Chat = new(Config, DataFolder);
             Bot.Chat = new(Config, DataFolder);
             Bot.Chat = new(Config, DataFolder);
             Bot.CombatLog = new(Bot.Db);
-            //Bot.NewBot = new HookManager(Bot, Config);
-            //Bot.ObjectManager = new ObjectManager(Bot, Config);
-            Bot.Character = new CharacterManager(Bot);
-            Bot.Events = new(Bot);
-            Bot.Jobs = new(Bot, Config);
-            Bot.Dungeon = new DungeonEngine(Bot);
             Bot.Tactic = new();
             Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.MovementSettings = Config.MovementSettings;
-            Bot.Movement = new AMovementEngine(Bot, Config);
 
             TracelineJumpHookModule jumpModule = new(null, null, Bot.Memory, Bot.Offsets);
             jumpModule.Tick = () =>
@@ -128,8 +117,6 @@ namespace AmeisenBotX.Core
             string tableName = BotUtils.FastRandomStringOnlyLetters();
             string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
             string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
-
-            Bot.Events.EventHookFrameName = eventHookFrameName;
 
             string oldPoupString = string.Empty;
             string oldBattlegroundStatus = string.Empty;
@@ -191,10 +178,22 @@ namespace AmeisenBotX.Core
             };
 
             Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules);
+            Bot.Events = new(Bot.Wow);
+            Bot.Events.EventHookFrameName = eventHookFrameName;
+            Bot.Character = new CharacterManager(Bot.Wow, Bot.Memory, Bot.Offsets);
 
             string dbPath = Path.Combine(DataFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
             Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Memory, Bot.Offsets, Bot.Wow.LuaGetSpellNameById, Bot.Wow.WowGetReaction);
+
+            // setup all instances that use the whole Bot class last
+            Bot.Dungeon = new DungeonEngine(Bot);
+            Bot.Jobs = new(Bot, Config);
+            Bot.Movement = new AMovementEngine(Bot, Config);
+
+            // Wow interface setup done
+
+            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Offsets.GetType()}", LogLevel.Master);
 
             StateMachine = new(Config, Bot);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>

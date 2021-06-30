@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Enums;
 using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Character.Comparators;
 using AmeisenBotX.Core.Character.Inventory;
@@ -10,6 +11,8 @@ using AmeisenBotX.Core.Character.Talents;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Memory;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -21,14 +24,16 @@ namespace AmeisenBotX.Core.Character
 {
     public class CharacterManager : ICharacterManager
     {
-        public CharacterManager(AmeisenBotInterfaces bot)
+        public CharacterManager(IWowInterface wowInterface, XMemory xMemory, IOffsetList offsetList)
         {
-            Bot = bot;
+            Wow = wowInterface;
+            XMemory = xMemory;
+            Offsets = offsetList;
 
-            Inventory = new(Bot);
-            Equipment = new(Bot);
-            SpellBook = new(Bot);
-            TalentManager = new(Bot);
+            Inventory = new(Wow);
+            Equipment = new(Wow);
+            SpellBook = new(Wow);
+            TalentManager = new(Wow);
             ItemComparator = new ItemLevelComparator();
             Skills = new();
 
@@ -53,11 +58,15 @@ namespace AmeisenBotX.Core.Character
 
         public TalentManager TalentManager { get; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private XMemory XMemory { get; }
+
+        private IWowInterface Wow { get; }
+
+        private IOffsetList Offsets { get; }
 
         public void AntiAfk()
         {
-            Bot.Memory.Write(Bot.Offsets.TickCount, Environment.TickCount);
+            XMemory.Write(Offsets.TickCount, Environment.TickCount);
         }
 
         public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
@@ -69,16 +78,16 @@ namespace AmeisenBotX.Core.Character
                 return;
             }
 
-            Bot.Memory.Write(Bot.Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            Bot.Memory.Write(Bot.Offsets.ClickToMoveDistance, distance);
+            XMemory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            XMemory.Write(Offsets.ClickToMoveDistance, distance);
 
             if (guid > 0)
             {
-                Bot.Memory.Write(Bot.Offsets.ClickToMoveGuid, guid);
+                XMemory.Write(Offsets.ClickToMoveGuid, guid);
             }
 
-            Bot.Memory.Write(Bot.Offsets.ClickToMoveAction, clickToMoveType);
-            Bot.Memory.Write(Bot.Offsets.ClickToMoveX, pos);
+            XMemory.Write(Offsets.ClickToMoveAction, clickToMoveType);
+            XMemory.Write(Offsets.ClickToMoveX, pos);
         }
 
         public Dictionary<int, int> GetConsumeables()
@@ -181,7 +190,7 @@ namespace AmeisenBotX.Core.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(Bot.Memory.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
@@ -215,7 +224,7 @@ namespace AmeisenBotX.Core.Character
                 {
                     if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
                     {
-                        Bot.Wow.LuaEquipItem(container.First().Name);
+                        Wow.LuaEquipItem(container.First().Name);
                         break;
                     }
                 }
@@ -255,7 +264,7 @@ namespace AmeisenBotX.Core.Character
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
-                                Bot.Wow.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
+                                Wow.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
                                 Equipment.Update();
                                 break;
                             }
@@ -269,7 +278,7 @@ namespace AmeisenBotX.Core.Character
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
-                            Bot.Wow.LuaEquipItem(itemToEquip.Name);
+                            Wow.LuaEquipItem(itemToEquip.Name);
                             Equipment.Update();
                         }
                     }
@@ -394,7 +403,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            if (int.TryParse(Bot.Wow.LuaGetMoney(), out int money))
+            if (int.TryParse(Wow.LuaGetMoney(), out int money))
             {
                 Money = money;
             }
@@ -404,14 +413,14 @@ namespace AmeisenBotX.Core.Character
         {
             try
             {
-                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(Bot.Wow.LuaGetMounts());
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(Wow.LuaGetMounts());
             }
             catch { }
         }
 
         private void UpdateSkills()
         {
-            Skills = Bot.Wow.LuaGetSkills();
+            Skills = Wow.LuaGetSkills();
         }
     }
 }

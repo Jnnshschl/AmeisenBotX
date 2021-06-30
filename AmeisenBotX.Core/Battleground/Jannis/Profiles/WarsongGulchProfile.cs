@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     new Selector<CtfBlackboard>
                     (
                         "AmINearOwnBase",
-                        (b) => Bot.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0,
+                        (b) => Bot.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0f,
                         new Leaf<CtfBlackboard>("MoveToHidingSpot", (b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
                         new Leaf<CtfBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
                     ),
@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                      new Selector<CtfBlackboard>
                      (
                          "IsAnyBuffNearMe",
-                         (b) => IsAnyBuffNearMe(16.0),
+                         (b) => IsAnyBuffNearMe(16.0f),
                          new Leaf<CtfBlackboard>("MoveToNearestBuff", MoveToNearestBuff),
                          new Selector<CtfBlackboard>
                          (
@@ -208,8 +208,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (weakestPlayer != null)
             {
-                double distance = weakestPlayer.Position.GetDistance(Bot.Player.Position);
-                double threshold = Bot.CombatClass.IsMelee ? 3.0 : 28.0;
+                float distance = weakestPlayer.Position.GetDistance(Bot.Player.Position);
+                float threshold = Bot.CombatClass.IsMelee ? 3.0f : 28.0f;
 
                 if (distance > threshold)
                 {
@@ -243,9 +243,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                 if (nearEnemy != null)
                 {
-                    double distanceToEnemy = Bot.Player.Position.GetDistance(nearEnemy.Position);
+                    float distanceToEnemy = Bot.Player.Position.GetDistance(nearEnemy.Position);
 
-                    if (distanceToEnemy > 2.0)
+                    if (distanceToEnemy > 2.0f)
                     {
                         Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
@@ -292,7 +292,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
             }
         }
 
-        private bool IsAnyBuffNearMe(double distance)
+        private bool IsAnyBuffNearMe(float distance)
         {
             return Bot.Objects.GetClosestWowGameobjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 })?.Position.GetDistance(Bot.Player.Position) < distance;
         }
@@ -330,8 +330,8 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 return BehaviorTreeStatus.Success;
             }
 
-            double distance = Bot.Player.Position.GetDistance(JBgBlackboard.EnemyTeamFlagCarrier.Position);
-            double threshold = Bot.CombatClass.IsMelee ? 3.0 : 28.0;
+            float distance = Bot.Player.Position.GetDistance(JBgBlackboard.EnemyTeamFlagCarrier.Position);
+            float threshold = Bot.CombatClass.IsMelee ? 3.0f : 28.0f;
 
             if (distance > threshold && !Bot.Player.IsCasting)
             {
@@ -348,9 +348,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus MoveToEnemyBaseAndGetFlag(CtfBlackboard blackboard)
         {
-            double distance = Bot.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
+            float distance = Bot.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
 
-            if (distance > 2.0)
+            if (distance > 2.0f)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, WsgDataset.EnemyBasePosition);
             }
@@ -386,9 +386,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                 return BehaviorTreeStatus.Failed;
             }
 
-            double distance = Bot.Player.Position.GetDistance(JBgBlackboard.MyTeamFlagCarrier.Position);
+            float distance = Bot.Player.Position.GetDistance(JBgBlackboard.MyTeamFlagCarrier.Position);
 
-            if (distance > 4.0)
+            if (distance > 4.0f)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, JBgBlackboard.MyTeamFlagCarrier.Position);
             }
@@ -422,11 +422,11 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
             if (distance > minDistance)
             {
-                double zDiff = position.Z - Bot.Player.Position.Z;
+                float zDiff = position.Z - Bot.Player.Position.Z;
 
                 if (LosCheckEvent.Run())
                 {
-                    if (Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, position, 2f))
+                    if (Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, position, 2.0f))
                     {
                         InLos = true;
                     }
@@ -476,15 +476,15 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                         JBgBlackboard.MyTeamFlagPos = new
                         (
-                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
+                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
                             0f
                         );
 
                         JBgBlackboard.EnemyTeamFlagPos = new
                         (
-                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
+                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
                             0f
                         );
 
@@ -506,15 +506,15 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
 
                         JBgBlackboard.MyTeamFlagPos = new
                         (
-                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
+                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
                             0f
                         );
 
                         JBgBlackboard.EnemyTeamFlagPos = new
                         (
-                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
-                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100f,
+                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
+                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
                             0f
                         );
 
@@ -523,9 +523,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis.Profiles
                     }
 
                     JBgBlackboard.NearFlags = Bot.Objects.WowObjects
-                                                  .OfType<WowGameobject>()
-                                                  .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)WowGameobjectDisplayId.WsgHordeFlag)
-                                                  .ToList();
+                                                 .OfType<WowGameobject>()
+                                                 .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)WowGameobjectDisplayId.WsgHordeFlag)
+                                                 .ToList();
                 }
             }
             catch { }

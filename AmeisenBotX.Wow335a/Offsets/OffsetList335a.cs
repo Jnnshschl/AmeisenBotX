@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Offsets;
 using System;
 
-namespace AmeisenBotX.Core.Offsets
+namespace AmeisenBotX.Wow335a.Offsets
 {
     public class OffsetList335a : IOffsetList
     {
